@@ -35,7 +35,8 @@ Our approach will likely combine Value and Risk scores ([example](https://kvinog
   * (+) # downloads: based on data from package managers, OSE analysis, etc.
 * Manual Highlights
   * (+) Qualified funding requests
-  * (+) Endorsements from OSE donors 
+  * (+) Endorsements from OSE donors
+  * (+) Open community nominations
 
 #### Risk of the Project
 
