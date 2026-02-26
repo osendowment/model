@@ -16,6 +16,8 @@ Work is currently happening in the following places:
 
 ## High-level Overview
 
+All recipient projects will be under an [OSI-approved license](https://opensource.org/licenses).
+
 ### Ecosystems
 
 We aim to focus our support on the core of open-source ecosystems — like ~1% of packages accounting for 99% of downloads and dependencies. Our model shall be a data-driven approximation of the global usage of the open-source supply chain, helping to detect its most critical but underfunded elements.
