@@ -3,4 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 .cache/
+.DS_Store
+.pytest_cache/
 data/
+.claude/settings.local.json

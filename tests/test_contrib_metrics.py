@@ -1,15 +1,14 @@
-"""Tests for contrib_metrics module."""
+"""Tests for contributor metrics modules."""
 
 import datetime
 from unittest.mock import MagicMock, patch, AsyncMock
 
 import pytest
 
-from src.contrib_metrics import (
-    Contributor, DateRange, _sanitize, calculate_bus_factor, parse_repo,
-    fetch_contributor_stats, _fetch_stats_once, _Deferred, _NoStats, _AsyncRateLimiter,
-    concentration_risk_class,
-)
+from src.github.models import Contributor, DateRange
+from src.github.contributors import _sanitize, calculate_bus_factor, parse_repo
+from src.github.api import fetch_contributor_stats, _fetch_stats_once, _Deferred, _NoStats, _AsyncRateLimiter
+from src.risk import concentration_risk_class
 
 
 class TestParseRepo:
@@ -33,10 +32,7 @@ class TestParseRepo:
 class TestCalculateBusFactor:
     @staticmethod
     def _make_stats(contributions: list[tuple[str, int, int]]) -> list[dict]:
-        """Helper: list of (login, commits, lines) -> GitHub stats format.
-
-        Commits are used as the primary metric (base='commits' default).
-        """
+        """Helper: list of (login, commits, lines) -> GitHub stats format."""
         return [
             {
                 "author": {"login": login},
@@ -59,7 +55,6 @@ class TestCalculateBusFactor:
             ("charlie", 100, 500),
         ])
         bf, contribs, _ = calculate_bus_factor(stats)
-        # Each has 33.3%, need 2 to cross 50%
         assert bf == 2
 
     def test_dominant_contributor(self):
@@ -73,7 +68,6 @@ class TestCalculateBusFactor:
         assert contribs[0].login == "alice"
 
     def test_gradual_distribution(self):
-        # 40%, 30%, 20%, 10%
         stats = self._make_stats([
             ("a", 40, 400),
             ("b", 30, 300),
@@ -81,7 +75,6 @@ class TestCalculateBusFactor:
             ("d", 10, 100),
         ])
         bf, contribs, _ = calculate_bus_factor(stats)
-        # a=40%, a+b=70% -> bus factor 2
         assert bf == 2
 
     def test_empty_stats(self):
@@ -98,11 +91,9 @@ class TestCalculateBusFactor:
             ("d", 10, 100),
         ])
         bf, _, _ = calculate_bus_factor(stats, threshold=0.89)
-        # a=40, a+b=70, a+b+c=90 -> 3
         assert bf == 3
 
     def test_locs_base(self):
-        """base='locs' uses lines_changed for percentages."""
         stats = self._make_stats([
             ("alice", 10, 1000),
             ("bob", 10, 200),
@@ -114,7 +105,6 @@ class TestCalculateBusFactor:
         assert contribs[1].lines_changed == 200
 
     def test_zero_commits(self):
-        # Zero commits → truly empty
         stats = [
             {"author": {"login": "alice"}, "total": 0, "weeks": [{"a": 0, "d": 0, "c": 0}]},
             {"author": {"login": "bob"}, "total": 0, "weeks": [{"a": 0, "d": 0, "c": 0}]},
@@ -128,8 +118,6 @@ class TestCalculateBusFactor:
         assert contribs[0].login == "alice"
 
     def test_year_filter(self):
-        """Weeks outside the target year are excluded."""
-
         jan_2024 = int(datetime.datetime(2024, 1, 15, tzinfo=datetime.timezone.utc).timestamp())
         jun_2023 = int(datetime.datetime(2023, 6, 15, tzinfo=datetime.timezone.utc).timestamp())
         stats = [
@@ -142,24 +130,19 @@ class TestCalculateBusFactor:
                 ],
             }
         ]
-        # All time
         bf_all, contribs_all, _ = calculate_bus_factor(stats)
         assert contribs_all[0].commits == 15
         assert contribs_all[0].lines_changed == 850
 
-        # 2024 only
         bf_2024, contribs_2024, _ = calculate_bus_factor(stats, year=2024)
         assert contribs_2024[0].commits == 10
         assert contribs_2024[0].lines_changed == 600
 
-        # 2023 only
         _, contribs_2023, _ = calculate_bus_factor(stats, year=2023)
         assert contribs_2023[0].commits == 5
         assert contribs_2023[0].lines_changed == 250
 
     def test_year_filter_excludes_inactive(self):
-        """Contributors with zero activity in target year are excluded."""
-
         ts_2024 = int(datetime.datetime(2024, 6, 1, tzinfo=datetime.timezone.utc).timestamp())
         ts_2023 = int(datetime.datetime(2023, 6, 1, tzinfo=datetime.timezone.utc).timestamp())
         stats = [
@@ -171,8 +154,6 @@ class TestCalculateBusFactor:
         assert contribs[0].login == "alice"
 
     def test_year_range(self):
-        """Year range includes all years between start and end."""
-
         ts_2022 = int(datetime.datetime(2022, 6, 1, tzinfo=datetime.timezone.utc).timestamp())
         ts_2023 = int(datetime.datetime(2023, 6, 1, tzinfo=datetime.timezone.utc).timestamp())
         ts_2024 = int(datetime.datetime(2024, 6, 1, tzinfo=datetime.timezone.utc).timestamp())
@@ -189,20 +170,15 @@ class TestCalculateBusFactor:
                 ],
             }
         ]
-        # 2023-2024 range
         _, contribs, _ = calculate_bus_factor(stats, year=2023, year_end=2024)
         assert contribs[0].lines_changed == 500
         assert contribs[0].commits == 20
 
-        # 2022-2025 (all)
         _, contribs, _ = calculate_bus_factor(stats, year=2022, year_end=2025)
         assert contribs[0].lines_changed == 1000
 
     def test_week_start_in_year(self):
-        """Only weeks starting within the target year are included."""
-        # A week starting Dec 29, 2023 (Sunday) spans into Jan 4, 2024
         dec_29_2023 = int(datetime.datetime(2023, 12, 29, tzinfo=datetime.timezone.utc).timestamp())
-        # A week starting Jan 5, 2024
         jan_5_2024 = int(datetime.datetime(2024, 1, 5, tzinfo=datetime.timezone.utc).timestamp())
         stats = [
             {
@@ -214,12 +190,10 @@ class TestCalculateBusFactor:
                 ],
             }
         ]
-        # Year 2024: only the Jan 5 week (starts in 2024)
         _, contribs, _ = calculate_bus_factor(stats, year=2024)
         assert contribs[0].commits == 10
         assert contribs[0].lines_changed == 200
 
-        # Year 2023: only the Dec 29 week (starts in 2023, ends in 2024 — OK)
         _, contribs, _ = calculate_bus_factor(stats, year=2023)
         assert contribs[0].commits == 5
         assert contribs[0].lines_changed == 100
@@ -228,7 +202,6 @@ class TestCalculateBusFactor:
 class TestHHI:
     @staticmethod
     def _make_stats(contributions: list[tuple[str, int]]) -> list[dict]:
-        """Helper: list of (login, commits) -> GitHub stats format."""
         return [
             {
                 "author": {"login": login},
@@ -246,17 +219,14 @@ class TestHHI:
     def test_equal_two(self):
         stats = self._make_stats([("alice", 50), ("bob", 50)])
         _, _, hhi = calculate_bus_factor(stats)
-        # 0.5^2 + 0.5^2 = 0.5
         assert hhi == pytest.approx(0.5)
 
     def test_equal_four(self):
         stats = self._make_stats([("a", 25), ("b", 25), ("c", 25), ("d", 25)])
         _, _, hhi = calculate_bus_factor(stats)
-        # 4 * 0.25^2 = 0.25
         assert hhi == pytest.approx(0.25)
 
     def test_skewed(self):
-        # 90/10 split → 0.81 + 0.01 = 0.82
         stats = self._make_stats([("alice", 90), ("bob", 10)])
         _, _, hhi = calculate_bus_factor(stats)
         assert hhi == pytest.approx(0.82)
@@ -303,7 +273,6 @@ class TestDateRange:
         assert dr.label == ""
 
     def test_date_range_filter(self):
-        """DateRange filters API weeks by date."""
         ts_jan = int(datetime.datetime(2024, 1, 15, tzinfo=datetime.timezone.utc).timestamp())
         ts_jul = int(datetime.datetime(2024, 7, 15, tzinfo=datetime.timezone.utc).timestamp())
         ts_dec = int(datetime.datetime(2024, 12, 15, tzinfo=datetime.timezone.utc).timestamp())
@@ -318,10 +287,9 @@ class TestDateRange:
                 ],
             }
         ]
-        # Filter to H2 2024
         dr = DateRange.from_dates("2024-06-01", "2024-12-31")
         _, contribs, _ = calculate_bus_factor(stats, date_range=dr)
-        assert contribs[0].lines_changed == 500  # jul + dec
+        assert contribs[0].lines_changed == 500
         assert contribs[0].commits == 20
 
 
@@ -378,12 +346,9 @@ class TestConcentrationRiskClass:
 
 
 class TestFetchContributorStats:
-    """Tests for sync fetch_contributor_stats — HTTP 204 and retry behavior."""
-
-    @patch("src.contrib_metrics._session")
-    @patch("src.contrib_metrics.time.sleep")
+    @patch("src.github.api._session")
+    @patch("src.github.api.time.sleep")
     def test_204_retries_then_succeeds(self, mock_sleep, mock_session):
-        """204 responses are retried, and data is returned when 200 arrives."""
         resp_204 = MagicMock(status_code=204)
         resp_200 = MagicMock(status_code=200)
         resp_200.json.return_value = [{"author": {"login": "alice"}, "total": 10, "weeks": []}]
@@ -396,10 +361,9 @@ class TestFetchContributorStats:
         assert mock_session.get.call_count == 3
         assert mock_sleep.call_count == 2
 
-    @patch("src.contrib_metrics._session")
-    @patch("src.contrib_metrics.time.sleep")
+    @patch("src.github.api._session")
+    @patch("src.github.api.time.sleep")
     def test_202_and_204_mixed(self, mock_sleep, mock_session):
-        """Mix of 202 and 204 responses all retry correctly."""
         resp_202 = MagicMock(status_code=202)
         resp_204 = MagicMock(status_code=204)
         resp_200 = MagicMock(status_code=200)
@@ -411,10 +375,9 @@ class TestFetchContributorStats:
         assert len(result) == 1
         assert mock_session.get.call_count == 4
 
-    @patch("src.contrib_metrics._session")
-    @patch("src.contrib_metrics.time.sleep")
+    @patch("src.github.api._session")
+    @patch("src.github.api.time.sleep")
     def test_exhausted_retries_returns_empty(self, mock_sleep, mock_session):
-        """Sync version returns [] when retries are exhausted."""
         resp_204 = MagicMock(status_code=204)
         mock_session.get.return_value = resp_204
 
@@ -423,9 +386,8 @@ class TestFetchContributorStats:
         assert result == []
         assert mock_session.get.call_count == 3
 
-    @patch("src.contrib_metrics._session")
+    @patch("src.github.api._session")
     def test_200_empty_returns_empty(self, mock_session):
-        """200 with empty body returns [] immediately (no retries)."""
         resp_200 = MagicMock(status_code=200)
         resp_200.json.return_value = []
         mock_session.get.return_value = resp_200
@@ -437,8 +399,6 @@ class TestFetchContributorStats:
 
 
 class TestFetchStatsOnce:
-    """Tests for async _fetch_stats_once — single-attempt fetch with _Deferred."""
-
     @staticmethod
     def _make_resp(status, data=None):
         r = AsyncMock()
@@ -451,7 +411,6 @@ class TestFetchStatsOnce:
 
     @pytest.mark.asyncio
     async def test_200_returns_data(self):
-        """200 with data returns the stats list."""
         mock_limiter = AsyncMock(spec=_AsyncRateLimiter)
         data = [{"author": {"login": "alice"}, "total": 10, "weeks": []}]
         mock_limiter.get = AsyncMock(return_value=self._make_resp(200, data))
@@ -463,7 +422,6 @@ class TestFetchStatsOnce:
 
     @pytest.mark.asyncio
     async def test_202_raises_deferred(self):
-        """202 raises _Deferred for retry in next round."""
         mock_limiter = AsyncMock(spec=_AsyncRateLimiter)
         mock_limiter.get = AsyncMock(return_value=self._make_resp(202))
         mock_session = AsyncMock(spec=["get"])
@@ -473,7 +431,6 @@ class TestFetchStatsOnce:
 
     @pytest.mark.asyncio
     async def test_204_raises_deferred(self):
-        """204 raises _Deferred for retry in next round."""
         mock_limiter = AsyncMock(spec=_AsyncRateLimiter)
         mock_limiter.get = AsyncMock(return_value=self._make_resp(204))
         mock_session = AsyncMock(spec=["get"])
@@ -483,7 +440,6 @@ class TestFetchStatsOnce:
 
     @pytest.mark.asyncio
     async def test_200_empty_raises_no_stats(self):
-        """200 with empty data raises _NoStats (not _Deferred — don't retry)."""
         mock_limiter = AsyncMock(spec=_AsyncRateLimiter)
         mock_limiter.get = AsyncMock(return_value=self._make_resp(200, []))
         mock_session = AsyncMock(spec=["get"])
@@ -493,7 +449,6 @@ class TestFetchStatsOnce:
 
     @pytest.mark.asyncio
     async def test_404_raises_runtime_error(self):
-        """404 raises RuntimeError (not retryable)."""
         mock_limiter = AsyncMock(spec=_AsyncRateLimiter)
         mock_limiter.get = AsyncMock(return_value=self._make_resp(404))
         mock_session = AsyncMock(spec=["get"])
@@ -503,27 +458,19 @@ class TestFetchStatsOnce:
 
     @pytest.mark.asyncio
     async def test_no_stats_repo_like_googlesql(self):
-        """Repos with no valid commits (like google/googlesql) return 202 then 200 with empty body.
-
-        First call: 202 (computing) → _Deferred.
-        Second call: 200 with [] (genuinely empty) → _NoStats (stop retrying).
-        """
         mock_limiter = AsyncMock(spec=_AsyncRateLimiter)
         mock_session = AsyncMock(spec=["get"])
 
-        # Round 1: 202 → deferred
         mock_limiter.get = AsyncMock(return_value=self._make_resp(202))
         with pytest.raises(_Deferred):
             await _fetch_stats_once(mock_session, mock_limiter, "google/googlesql")
 
-        # Round 2: 200 with empty body → no stats, stop retrying
         mock_limiter.get = AsyncMock(return_value=self._make_resp(200, []))
         with pytest.raises(_NoStats):
             await _fetch_stats_once(mock_session, mock_limiter, "google/googlesql")
 
     @pytest.mark.asyncio
     async def test_connection_error_raises_deferred(self):
-        """Connection errors raise _Deferred for retry."""
         import aiohttp
         mock_limiter = AsyncMock(spec=_AsyncRateLimiter)
         mock_limiter.get = AsyncMock(side_effect=aiohttp.ClientError())
