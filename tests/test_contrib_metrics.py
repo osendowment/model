@@ -354,7 +354,7 @@ class TestFetchContributorStats:
         resp_200.json.return_value = [{"author": {"login": "alice"}, "total": 10, "weeks": []}]
         mock_session.get.side_effect = [resp_204, resp_204, resp_200]
 
-        result = fetch_contributor_stats("owner/repo", token="fake-token", retries=5)
+        result = fetch_contributor_stats("owner/repo", retries=5)
 
         assert len(result) == 1
         assert result[0]["author"]["login"] == "alice"
@@ -370,7 +370,7 @@ class TestFetchContributorStats:
         resp_200.json.return_value = [{"author": {"login": "bob"}, "total": 5, "weeks": []}]
         mock_session.get.side_effect = [resp_202, resp_204, resp_202, resp_200]
 
-        result = fetch_contributor_stats("owner/repo", token="fake-token", retries=5)
+        result = fetch_contributor_stats("owner/repo", retries=5)
 
         assert len(result) == 1
         assert mock_session.get.call_count == 4
@@ -381,7 +381,7 @@ class TestFetchContributorStats:
         resp_204 = MagicMock(status_code=204)
         mock_session.get.return_value = resp_204
 
-        result = fetch_contributor_stats("owner/repo", token="fake-token", retries=3)
+        result = fetch_contributor_stats("owner/repo", retries=3)
 
         assert result == []
         assert mock_session.get.call_count == 3
@@ -392,7 +392,7 @@ class TestFetchContributorStats:
         resp_200.json.return_value = []
         mock_session.get.return_value = resp_200
 
-        result = fetch_contributor_stats("owner/repo", token="fake-token", retries=5)
+        result = fetch_contributor_stats("owner/repo", retries=5)
 
         assert result == []
         assert mock_session.get.call_count == 1

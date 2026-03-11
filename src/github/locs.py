@@ -16,13 +16,12 @@ import os
 import time
 
 import aiohttp
-from dotenv import load_dotenv
 from rich.progress import (
     Progress, SpinnerColumn, TextColumn,
     BarColumn, TaskProgressColumn, TimeElapsedColumn,
 )
 
-from src.github.api import GITHUB_API
+from src.github.api import GITHUB_API, get_revolver
 from src.github.display import console, _ETAColumn
 
 log = logging.getLogger(__name__)
@@ -64,26 +63,45 @@ async def _fetch_repo_languages(
     task_id: int | None = None,
     name_width: int = 30,
 ) -> dict[str, int] | None:
-    """Fetch language byte counts for a repo."""
+    """Fetch language byte counts for a repo, using token revolver."""
+    revolver = get_revolver()
     url = f"{GITHUB_API}/repos/{repo}/languages"
+
+    # Wait if all tokens exhausted
+    wait = revolver.wait_time()
+    if wait > 0:
+        if progress and task_id is not None:
+            reset_at = datetime.datetime.now() + datetime.timedelta(seconds=wait)
+            desc = f"[yellow]rate limit, reset {reset_at:%H:%M:%S}[/yellow]"
+            progress.update(task_id, description=desc)
+        log.debug("All tokens exhausted, waiting %.0fs", wait)
+        await asyncio.sleep(wait)
+
+    token = revolver.best_token()
+    headers = {}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
     try:
-        async with session.get(url) as resp:
+        async with session.get(url, headers=headers) as resp:
+            # Update revolver state
+            if token:
+                remaining = resp.headers.get("X-RateLimit-Remaining")
+                reset = resp.headers.get("X-RateLimit-Reset")
+                revolver.update(
+                    token,
+                    int(remaining) if remaining else None,
+                    float(reset) if reset else None,
+                )
+
             if resp.status == 200:
                 return await resp.json()
             if resp.status == 403:
-                # Rate limited — wait for reset
-                reset = resp.headers.get("X-RateLimit-Reset")
-                if reset:
-                    wait = max(float(reset) - time.time() + 0.5, 1)
-                    log.debug("%s: rate limited, waiting %.0fs", repo, wait)
-                    if progress and task_id is not None:
-                        reset_at = datetime.datetime.fromtimestamp(float(reset))
-                        desc = f"[yellow]rate limit, reset {reset_at:%H:%M:%S}[/yellow]"
-                        progress.update(task_id, description=desc)
-                    await asyncio.sleep(wait)
-                    return await _fetch_repo_languages(
-                        session, repo, progress, task_id, name_width,
-                    )
+                # Token exhausted — retry (revolver will pick next best token)
+                log.debug("%s: 403 on token, retrying with next token", repo)
+                return await _fetch_repo_languages(
+                    session, repo, progress, task_id, name_width,
+                )
             log.debug("%s: languages HTTP %d", repo, resp.status)
             return None
     except (aiohttp.ClientError, asyncio.TimeoutError):
@@ -92,7 +110,7 @@ async def _fetch_repo_languages(
 
 async def fetch_locs(
     repos: list[str], repo_sizes: dict[str, int] | None = None,
-    token: str | None = None, output: str = OUTPUT_FILE,
+    output: str = OUTPUT_FILE,
 ) -> tuple[list[dict], int, int, int]:
     """Fetch language stats for multiple repos concurrently.
 
@@ -101,8 +119,6 @@ async def fetch_locs(
     Returns (results, total, added, updated).
     """
     headers = {"Accept": "application/vnd.github+json"}
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
 
     sizes = repo_sizes or {}
     timeout = aiohttp.ClientTimeout(total=30)
@@ -120,6 +136,7 @@ async def fetch_locs(
         TextColumn("[dim]{task.completed}/{task.total}[/]"),
         _ETAColumn(),
         console=console,
+        transient=True,
     )
 
     async with aiohttp.ClientSession(headers=headers, timeout=timeout) as session:
@@ -233,7 +250,7 @@ def _upsert_csv(filepath: str, rows: list[dict]) -> tuple[int, int, int]:
 DEFAULT_TTL_DAYS = 30
 
 
-def _load_repos(filepath: str, top: int | None = None) -> tuple[list[str], dict[str, int]]:
+def _load_repos(filepath: str) -> tuple[list[str], dict[str, int]]:
     """Load repo slugs and sizes from CSV. Returns (repos, {repo: size_kb})."""
     repos = []
     sizes: dict[str, int] = {}
@@ -242,8 +259,6 @@ def _load_repos(filepath: str, top: int | None = None) -> tuple[list[str], dict[
             repos.append(row["repo"])
             if "size" in row and row["size"]:
                 sizes[row["repo"]] = int(row["size"])
-    if top:
-        repos = repos[:top]
     return repos, sizes
 
 
@@ -274,56 +289,51 @@ def main() -> None:
                         help=f"CSV with repos to process (default: {REPOS_FILE})")
     parser.add_argument("--output", default=OUTPUT_FILE,
                         help=f"Output CSV (default: {OUTPUT_FILE})")
-    parser.add_argument("--top", type=int, help="Only process first N repos")
+    parser.add_argument("--limit", type=int, help="Process N random repos")
     parser.add_argument("--ttl", type=int, default=DEFAULT_TTL_DAYS,
                         help=f"Skip repos fetched within N days (default: {DEFAULT_TTL_DAYS}, 0 to force refresh)")
-    parser.add_argument("--token", help="GitHub personal access token")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
-
-    if args.verbose:
-        logging.basicConfig(level=logging.DEBUG)
-
-    load_dotenv()
-    token = args.token or os.environ.get("GITHUB_TOKEN")
 
     if args.repo:
         repos = [args.repo]
         repo_sizes: dict[str, int] = {}
+        total_loaded = 1
         skipped = 0
     else:
-        repos, repo_sizes = _load_repos(args.input, top=args.top)
+        repos, repo_sizes = _load_repos(args.input)
+        total_loaded = len(repos)
         repos, skipped = _filter_by_ttl(repos, args.output, args.ttl)
+        if args.limit and args.limit < len(repos):
+            import random
+            repos = random.sample(repos, args.limit)
 
     if not repos:
         console.print(f"[dim]All repos fresh (TTL {args.ttl}d), nothing to fetch[/dim]")
         return
 
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+
+
     t_start = time.monotonic()
     results, total, added, updated = asyncio.run(
-        fetch_locs(repos, repo_sizes=repo_sizes, token=token, output=args.output)
+        fetch_locs(repos, repo_sizes=repo_sizes, output=args.output)
     )
     elapsed = time.monotonic() - t_start
+    speed = elapsed / len(results) * 1000 if results else 0
 
-    console.print()
     from rich.table import Table
-    summary = Table(show_header=False, padding=(0, 1), box=None)
-    summary.add_column(style="dim")
-    summary.add_column()
-    repos_label = f"[bold]{len(results):,}[/bold] of {len(repos):,}"
-    if skipped:
-        repos_label += f" [dim]({skipped:,} fresh, skipped)[/dim]"
-    summary.add_row("Repos", repos_label)
-    summary.add_row("Time", f"{elapsed:.1f}s")
-    summary.add_row("Output", f"{args.output} ({total:,} total, "
-                     f"[green]{added:,} added[/], [yellow]{updated:,} updated[/])")
-    console.print(summary)
 
     if results and args.repo:
-        # Single repo: language breakdown
+        # Single repo: heading + language breakdown
         r = results[0]
         lang_bytes = r["languages"]
         total_code_bytes = sum(lang_bytes.values())
+
+        console.print()
+        console.print(f"[bold]LOC Estimate for [cyan]{args.repo}[/cyan][/bold]")
+        console.print()
 
         tbl = Table(show_header=True, header_style="bold dim", padding=(0, 1))
         tbl.add_column("Language")
@@ -348,11 +358,15 @@ def main() -> None:
         tbl.add_row("[bold]Total[/bold]", f"[bold]{total_mb_str}[/bold]", "",
                      f"[bold]{total_kloc:,.0f}[/bold]")
 
-        console.print()
         console.print(tbl)
 
     elif results:
-        # Batch: repo summary table
+        # Batch: heading + repo summary table
+        console.print()
+        console.print(f"[bold]LOC Estimation[/bold]  [dim]{len(results):,} repos, "
+                       f"{elapsed:.1f}s ({speed:.0f}ms/repo)[/dim]")
+        console.print()
+
         by_loc = sorted(results, key=lambda r: r["est_locs"], reverse=True)
         show = by_loc[:20]
 
@@ -398,9 +412,21 @@ def main() -> None:
                      f"[bold]{total_mb_str}[/bold]", f"[bold]{total_kloc:,.0f}[/bold]",
                      f"[bold]{total_bpl}[/bold]")
 
-        console.print()
         console.print(tbl)
 
+    console.print()
+    summary = Table(show_header=False, padding=(0, 1), box=None)
+    summary.add_column(style="dim")
+    summary.add_column()
+    summary.add_row("Total repos", f"{total_loaded:,}")
+    if skipped:
+        summary.add_row("Skipped", f"{skipped:,} [dim](fresh, TTL {args.ttl}d)[/dim]")
+    summary.add_row("Target", f"{len(repos):,}")
+    summary.add_row("Processed", f"[bold]{len(results):,}[/bold]")
+    summary.add_row("Time", f"{elapsed:.1f}s [dim]({speed:.0f}ms/repo)[/dim]")
+    summary.add_row("Output", f"{args.output} ({total:,} total, "
+                     f"[green]{added:,} added[/], [yellow]{updated:,} updated[/])")
+    console.print(summary)
     console.print()
 
 

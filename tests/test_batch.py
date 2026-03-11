@@ -207,16 +207,16 @@ class TestLoadReposFromCsv:
         repos = _load_repos_from_csv(filepath)
         assert repos == ["a/b"]
 
-    def test_top_limit(self, tmp_path):
+    def test_loads_all_repos(self, tmp_path):
         filepath = str(tmp_path / "repos.csv")
         self._write_csv(filepath, [
             {"repo": "a/b", "stars": "300"},
             {"repo": "c/d", "stars": "200"},
             {"repo": "e/f", "stars": "100"},
         ])
-        repos = _load_repos_from_csv(filepath, top=2)
-        assert len(repos) == 2
-        assert repos == ["a/b", "c/d"]
+        repos = _load_repos_from_csv(filepath)
+        assert len(repos) == 3
+        assert repos == ["a/b", "c/d", "e/f"]
 
     def test_lowercases_repos(self, tmp_path):
         filepath = str(tmp_path / "repos.csv")

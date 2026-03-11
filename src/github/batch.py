@@ -175,7 +175,7 @@ def _read_existing_periods(filepath: str) -> dict[str, set[str]]:
     return result
 
 
-def _load_repos_from_csv(filepath: str, top: int | None = None) -> list[str]:
+def _load_repos_from_csv(filepath: str) -> list[str]:
     """Load repo slugs from a CSV file (expects 'repo' column).
 
     Skips archived repos if the CSV has an 'archived' column.
@@ -201,8 +201,6 @@ def _load_repos_from_csv(filepath: str, top: int | None = None) -> list[str]:
         console.print(f"[dim]Skipped {skipped_archived} archived repos[/dim]")
     if has_stars:
         entries.sort(key=lambda e: e[1], reverse=True)
-    if top:
-        entries = entries[:top]
     return [repo for repo, _ in entries]
 
 
@@ -211,9 +209,10 @@ def _load_repos_from_csv(filepath: str, top: int | None = None) -> list[str]:
 async def batch_update(
     repos: list[str], year_start: int, year_end: int, output: str,
     threshold: float = THRESHOLD, base: str = "commits",
-    include_bots: bool = False, token: str | None = None,
+    include_bots: bool = False, limit: int | None = None,
 ) -> None:
     """Fetch and update metrics for multiple repos in parallel."""
+    import random
     from src.github.contributors import compute_yearly_breakdown
 
     t_start = time.monotonic()
@@ -232,6 +231,9 @@ async def batch_update(
         else:
             to_fetch.append(repo)
 
+    if limit and limit < len(to_fetch):
+        to_fetch = random.sample(to_fetch, limit)
+
     console.print(f"[bold]Batch update[/bold]: {len(repos)} repos, "
                   f"{len(to_fetch)} to fetch, {skipped} skipped")
     if not to_fetch:
@@ -239,8 +241,6 @@ async def batch_update(
         return
 
     headers = {"Accept": "application/vnd.github+json"}
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
 
     limiter = _AsyncRateLimiter()
     sem = asyncio.Semaphore(10)

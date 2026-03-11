@@ -17,7 +17,6 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from dotenv import load_dotenv
 from rich.progress import (
     Progress, SpinnerColumn, TextColumn,
     BarColumn, TaskProgressColumn, TimeElapsedColumn,
@@ -316,7 +315,7 @@ def fetch_stats_via_git(
 
 
 def run(
-    repo_url: str, token: str | None = None, date_range: DateRange | None = None,
+    repo_url: str, date_range: DateRange | None = None,
     threshold: float = THRESHOLD, base: str = "commits",
     source: str = "github", include_bots: bool = False,
 ) -> RunResult:
@@ -333,13 +332,13 @@ def run(
         stats: list[dict] = []
         try:
             with _spinner("Fetching contributor stats from GitHub API..."):
-                stats = fetch_contributor_stats(repo, token=token)
+                stats = fetch_contributor_stats(repo)
         except RuntimeError:
             pass
         perf.api_fetch = time.monotonic() - t_api_start
 
         with _spinner("Fetching repo info..."):
-            default_branch, size_kb = fetch_repo_info(repo, token=token)
+            default_branch, size_kb = fetch_repo_info(repo)
 
         contributors = fetch_stats_via_git(
             repo, date_range=date_range, api_stats=stats,
@@ -348,7 +347,7 @@ def run(
     else:
         t_api_start = time.monotonic()
         with _spinner("Fetching contributor stats from GitHub API..."):
-            stats = fetch_contributor_stats(repo, token=token)
+            stats = fetch_contributor_stats(repo)
         perf.api_fetch = time.monotonic() - t_api_start
 
         dr = date_range or DateRange()
@@ -372,10 +371,9 @@ def main() -> None:
     parser.add_argument("repo", nargs="?", help="GitHub repo URL or owner/repo slug")
     parser.add_argument("--input", default="data/github/top-repos.csv",
                         help="CSV file with repos to batch update (expects 'repo' column, default: data/github/top-repos.csv)")
-    parser.add_argument("--top", type=int, help="Only process first N repos from --input CSV")
+    parser.add_argument("--limit", type=int, help="Process N random repos from --input CSV")
     parser.add_argument("--base", choices=["commits", "locs"], default="commits",
                         help="Metric for bus factor (default: commits)")
-    parser.add_argument("--token", help="GitHub personal access token")
     parser.add_argument("--threshold", type=float, default=THRESHOLD, help="Ownership threshold (default 0.5)")
     parser.add_argument("--years", type=int, nargs=2, metavar=("START", "END"),
                         help="Year range (default: first activity–now for single repo, 2021–2025 for batch)")
@@ -386,25 +384,23 @@ def main() -> None:
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
-    if args.top and args.repo:
-        parser.error("--top requires batch mode (no repo argument)")
+    if args.limit and args.repo:
+        parser.error("--limit requires batch mode (no repo argument)")
 
     if args.verbose:
         logging.getLogger("src.github").setLevel(logging.DEBUG)
         logging.getLogger("urllib3").setLevel(logging.WARNING)
 
-    load_dotenv()
-    token = args.token or os.environ.get("GITHUB_TOKEN")
-
     # Batch mode (default when no repo argument given)
     if not args.repo:
         years = args.years or [2021, 2025]
         output = args.output or "data/github/repo-contrib-metrics.csv"
-        repos = _load_repos_from_csv(args.input, top=args.top)
+        repos = _load_repos_from_csv(args.input)
         asyncio.run(batch_update(
             repos, years[0], years[1], output,
             threshold=args.threshold, base=args.base,
-            include_bots=args.include_bots, token=token,
+            include_bots=args.include_bots,
+            limit=args.limit,
         ))
         return
 
@@ -412,7 +408,7 @@ def main() -> None:
     t_start = time.monotonic()
 
     with _spinner("Fetching contributor stats from GitHub API..."):
-        stats = fetch_contributor_stats(repo, token=token)
+        stats = fetch_contributor_stats(repo)
     api_time = time.monotonic() - t_start
 
     # Determine year range: explicit --years, or auto-detect from first activity

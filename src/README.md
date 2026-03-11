@@ -7,7 +7,7 @@ GitHub API modules for repo search and contributor analysis.
 | Module | Purpose |
 |--------|---------|
 | `models.py` | Data types — Contributor, RunResult, DateRange, bot detection |
-| `api.py` | GitHub API interaction — sync + async fetch, rate limiting |
+| `api.py` | GitHub API interaction — token revolver, rate limiting, sync + async fetch |
 | `contributors.py` | Core algorithms, git clone analysis, and CLI entry point |
 | `display.py` | Rich terminal output — tables, spinners, formatting |
 | `batch.py` | Async batch processing + CSV I/O |
@@ -26,8 +26,8 @@ uv run python -m src.github.contributors facebook/react --years 2021 2025
 # Batch — reads top-repos.csv, writes repo-contrib-metrics.csv
 uv run python -m src.github.contributors
 
-# First 10 repos only
-uv run python -m src.github.contributors --top 10
+# Random sample of 10 repos
+uv run python -m src.github.contributors --limit 10
 ```
 
 ### Repo Search
@@ -36,9 +36,18 @@ uv run python -m src.github.contributors --top 10
 # Search by language and star count
 uv run python -m src.github.search --language Python --min-stars 10000
 
-# Multiple languages, custom output
-uv run python -m src.github.search --language C "C++" --min-stars 1000 \
-    --output data/github/c-repos.csv
+# Multiple languages in one run
+uv run python -m src.github.search --language C "C++" --min-stars 1000
+```
+
+Update all target ecosystems (1K+ stars):
+
+```bash
+uv run python -m src.github.search --language Python --min-stars 1000
+uv run python -m src.github.search --language JavaScript --min-stars 1000
+uv run python -m src.github.search --language TypeScript --min-stars 1000
+uv run python -m src.github.search --language Rust --min-stars 1000
+uv run python -m src.github.search --language C "C++" --min-stars 1000
 ```
 
 ## eligibility.py
@@ -56,7 +65,7 @@ uv run python -m src.eligibility
 uv run python -m src.github.locs curl/curl
 
 # Batch — reads top-repos.csv, writes locs.csv
-uv run python -m src.github.locs --top 100
+uv run python -m src.github.locs --limit 100
 
 # Force refresh (ignore TTL cache)
 uv run python -m src.github.locs --ttl 0

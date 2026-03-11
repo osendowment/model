@@ -18,7 +18,6 @@ import time
 import logging
 
 import aiohttp
-from dotenv import load_dotenv
 from rich.progress import Progress, TaskID
 
 from src.github.display import (
@@ -28,10 +27,7 @@ from src.github.display import (
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-load_dotenv()
-TOKEN = os.getenv("GITHUB_TOKEN")
-if not TOKEN:
-    raise RuntimeError("GITHUB_TOKEN not found")
+from src.github.api import get_revolver
 
 API_URL = "https://api.github.com/search/repositories"
 FIELDS = [
@@ -388,8 +384,12 @@ async def search(languages: list[str], min_stars: int, output: str) -> None:
     cache = _load_counts_cache()
     cached_before = len(cache)
 
+    revolver = get_revolver()
+    token = revolver.best_token()
+    if not token:
+        raise RuntimeError("No GitHub tokens found. Set GITHUB_TOKENS in .env")
     headers = {
-        "Authorization": f"token {TOKEN}",
+        "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
 
