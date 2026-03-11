@@ -151,6 +151,17 @@ def calculate_bus_factor(
     return _compute_bus_factor(contributors, threshold=threshold, base=base, include_bots=include_bots)
 
 
+def _cumulative_loc(stats: list[dict], up_to: datetime.date) -> int:
+    """Compute total repo LOC (additions - deletions) from all weeks up to a date."""
+    total = 0
+    cutoff = DateRange(until=up_to)
+    for entry in stats:
+        for w in entry.get("weeks", []):
+            if _week_in_range(w, cutoff):
+                total += w.get("a", 0) - w.get("d", 0)
+    return total
+
+
 def compute_yearly_breakdown(
     stats: list[dict], year_start: int, year_end: int,
     threshold: float = THRESHOLD, base: str = "commits",
@@ -165,16 +176,18 @@ def compute_yearly_breakdown(
         dr = DateRange.from_years(y)
         contribs, fw, lw = _parse_api_stats(stats, date_range=dr)
         bf, sorted_c, hhi = _compute_bus_factor(contribs, threshold=threshold, base=base, include_bots=include_bots)
+        loc = _cumulative_loc(stats, datetime.date(y, 12, 31))
         year_results.append((str(y), RunResult(
             bus_factor=bf, contributors=sorted_c, hhi=hhi, perf=PerfStats(),
-            first_week=fw, last_week=lw,
+            first_week=fw, last_week=lw, total_loc=loc,
         )))
 
     contribs, fw, lw = _parse_api_stats(stats, date_range=total_dr)
     bf, sorted_c, hhi = _compute_bus_factor(contribs, threshold=threshold, base=base, include_bots=include_bots)
+    loc = _cumulative_loc(stats, datetime.date(year_end, 12, 31))
     year_results.append((f"{year_start}-{year_end}", RunResult(
         bus_factor=bf, contributors=sorted_c, hhi=hhi, perf=PerfStats(),
-        first_week=fw, last_week=lw,
+        first_week=fw, last_week=lw, total_loc=loc,
     )))
 
     return year_results

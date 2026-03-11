@@ -74,6 +74,7 @@ def display_yearly_breakdown(
     table.add_column("HHI", justify="right")
     table.add_column("Contribs", justify="right")
     table.add_column("Commits", justify="right")
+    table.add_column("LOC", justify="right")
     table.add_column("First", justify="right")
     table.add_column("Last", justify="right")
 
@@ -86,12 +87,15 @@ def display_yearly_breakdown(
         total_commits = sum(c.commits for c in humans)
         is_total = label == total_label
 
+        loc_str = f"{r.total_loc:,}" if r.total_loc is not None and r.total_loc > 0 else "[dim]–[/dim]"
+
         table.add_row(
             "[bold]Total[/bold]" if is_total else label,
             f"[yellow bold]{r.bus_factor}[/yellow bold]" if r.bus_factor > 0 else "[dim]–[/dim]",
             f"{round(r.hhi * 10000):,}" if r.hhi > 0 else "[dim]–[/dim]",
             _fmt_contribs_label(r.contributors) if humans else "[dim]–[/dim]",
             f"{total_commits:,}" if total_commits else "[dim]–[/dim]",
+            loc_str,
             _fmt_date(r.first_week),
             _fmt_date(r.last_week),
             end_section=(label == year_labels[-1]),

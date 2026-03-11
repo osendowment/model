@@ -75,6 +75,7 @@ class RunResult:
     perf: PerfStats
     first_week: datetime.date | None = None
     last_week: datetime.date | None = None
+    total_loc: int | None = None
 
 
 @dataclass
