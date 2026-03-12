@@ -2,9 +2,19 @@
 name = "bus-factor"
 version = "0.1.0"
 description = "Calculate bus factor for any GitHub repo"
+license = "Apache-2.0"
 requires-python = ">=3.13"
+authors = [
+    { name = "Open Source Endowment Foundation" },
+]
+maintainers = [
+    { name = "Konstantin Vinogradov", email = "konstantin@endowment.dev" },
+    { name = "Vlad-Stefan Harbuz", email = "vlad@vlad.website" },
+    { name = "Jonathan Starr", email = "jon@endowment.dev" },
+]
 dependencies = [
     "aiohttp>=3.13.3",
+    "lizard>=1.21.2",
     "pydantic>=2.11.7",
     "python-dotenv>=1.2.2",
     "requests>=2.32.5",
