@@ -1,5 +1,5 @@
 [project]
-name = "bus-factor"
+name = "osendowment-model"
 version = "0.1.0"
 description = "Value and risk metrics analysis for open-source funding decisions"
 license = "Apache-2.0"
