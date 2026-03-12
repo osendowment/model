@@ -1,7 +1,7 @@
 [project]
 name = "bus-factor"
 version = "0.1.0"
-description = "Calculate bus factor for any GitHub repo"
+description = "Value and risk metrics analysis for open-source funding decisions"
 license = "Apache-2.0"
 requires-python = ">=3.13"
 authors = [
