@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 
 REPOS_FILE = "data/github/top-repos.csv"
 OUTPUT_FILE = "data/github/locs.csv"
-LANG_SIZES_FILE = "data/github/language-loc-sizes.csv"
+LANG_SIZES_FILE = "data/github/language-stats.csv"
 DEFAULT_BPL = 36
 
 

@@ -1,0 +1,59 @@
+language,scc_name,extensions,bytes_per_line,scc
+c,C,"c,ec,pgc",30,true
+c-header,C Header,h,30,true
+c++,C++,"cc,cpp,cxx,c++,pcc,ino",36,true
+c++-header,C++ Header,"hh,hpp,hxx,inl,ipp",36,true
+c#,C#,"cs,csx",40,true
+objective-c,Objective C,m,36,true
+objective-c++,Objective C++,mm,36,true
+java,Java,java,39,true
+kotlin,Kotlin,"kt,kts",39,true
+scala,Scala,"sc,scala",41,true
+javascript,JavaScript,"js,cjs,mjs",32,true
+typescript,TypeScript,"ts,cts,mts",34,true
+jsx,JSX,jsx,32,true
+tsx,TSX,tsx,34,true
+coffeescript,CoffeeScript,coffee,29,true
+python,Python,"py,pyw,pyi",42,true
+ruby,Ruby,rb,36,true
+perl,Perl,"pl,plx,pm",34,true
+php,PHP,php,34,true
+go,Go,go,32,true
+rust,Rust,rs,37,true
+swift,Swift,swift,38,true
+dart,Dart,dart,35,true
+lua,Lua,lua,31,true
+r,R,r,38,true
+julia,Julia,jl,36,true
+haskell,Haskell,hs,34,true
+erlang,Erlang,"erl,hrl",33,true
+elixir,Elixir,"ex,exs",34,true
+clojure,Clojure,"clj,cljc",36,true
+zig,Zig,zig,34,true
+nim,Nim,nim,35,true
+assembly,Assembly,"s,asm",26,true
+d,D,d,35,true
+ocaml,OCaml,"ml,mli",35,true
+fortran-modern,Fortran Modern,"f03,f08,f90,f95",37,true
+fortran-legacy,FORTRAN Legacy,"f,for,ftn,f77",37,true
+groovy,Groovy,"groovy,grt,gtpl,gvy",35,true
+solidity,Solidity,sol,35,true
+gdscript,GDScript,gd,31,true
+vue,Vue,vue,35,true
+shell,Shell,sh,33,false
+powershell,Powershell,ps1,43,false
+html,HTML,"html,htm",41,false
+css,CSS,css,26,false
+scss,SCSS,scss,29,false
+vim-script,Vim Script,vim,33,false
+emacs-lisp,Emacs Lisp,el,37,false
+v,V,v,31,false
+makefile,Makefile,"makefile,mak,mk",31,false
+cmake,CMake,cmake,33,false
+markdown,Markdown,"md,markdown",41,false
+restructuredtext,ReStructuredText,rst,43,false
+yaml,YAML,"yaml,yml",29,false
+json,JSON,json,23,false
+toml,TOML,toml,26,false
+xml,XML,xml,46,false
+sql,SQL,"sql,dml,ddl",56,false

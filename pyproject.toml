@@ -14,7 +14,7 @@ maintainers = [
 ]
 dependencies = [
     "aiohttp>=3.13.3",
-    "lizard>=1.21.2",
+    "httpx[http2]>=0.28.1",
     "pydantic>=2.11.7",
     "python-dotenv>=1.2.2",
     "requests>=2.32.5",
