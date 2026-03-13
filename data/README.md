@@ -8,9 +8,10 @@ All data is derived from public sources (GitHub API, PyPI).
 |------|-------------|
 | [top-repos.csv](github/top-repos.csv) | GitHub repos with 1K+ stars across tracked languages |
 | [repo-contrib-metrics.csv](github/repo-contrib-metrics.csv) | Yearly contributor metrics (bus factor, HHI, contributor count) |
+| [repo-year-sha.csv](github/repo-year-sha.csv) | Commit SHAs per repo per year (coordination file for git-metrics pipeline) |
 | [repo-search-counts.csv](github/repo-search-counts.csv) | Cached search API counts for date range optimization |
 | [locs.csv](github/locs.csv) | Estimated LOC per repo from GitHub /languages endpoint |
-| [language-loc-sizes.csv](github/language-loc-sizes.csv) | Bytes-per-line conversion factors per language |
+| [language-stats.csv](github/language-stats.csv) | Language metadata: scc names, file extensions, bytes-per-line, scc support flag |
 
 ## PyPI
 
