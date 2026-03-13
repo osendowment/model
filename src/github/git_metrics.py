@@ -186,6 +186,22 @@ def _download_tarball(repo: str, dest: str, client: httpx.Client, ref: str = "HE
     return time.monotonic() - t0, size
 
 
+def _run_git(args: list[str], timeout: int, **kwargs) -> subprocess.CompletedProcess:
+    """Run a subprocess, killing the entire process group on timeout."""
+    proc = subprocess.Popen(
+        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        start_new_session=True,  # own process group
+        **kwargs,
+    )
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+        return subprocess.CompletedProcess(args, proc.returncode, stdout, stderr)
+    except subprocess.TimeoutExpired:
+        os.killpg(proc.pid, 9)  # SIGKILL entire group
+        proc.wait()
+        raise
+
+
 def _sparse_clone(repo: str, dest: str, size_kb: int = 0, ref: str | None = None) -> tuple[float, int]:
     """Sparse checkout: clone metadata only, then fetch source code files. Returns (elapsed_s, approx_size_bytes)."""
     url = f"https://github.com/{repo}.git"
@@ -201,27 +217,25 @@ def _sparse_clone(repo: str, dest: str, size_kb: int = 0, ref: str | None = None
             f"git remote add origin '{url}' && "
             f"git sparse-checkout set --no-cone {exts_args}"
         )
-        subprocess.run(
-            ["sh", "-c", init_script], capture_output=True, timeout=10, cwd=dest,
-        )
-        subprocess.run(
+        _run_git(["sh", "-c", init_script], timeout=10, cwd=dest)
+        _run_git(
             ["git", "fetch", "--depth", "1", "--quiet", "--no-tags",
              "--filter=blob:none", "origin", ref],
-            capture_output=True, timeout=clone_timeout, cwd=dest,
+            timeout=clone_timeout, cwd=dest,
         )
-        subprocess.run(
+        _run_git(
             ["git", "checkout", "--quiet", "FETCH_HEAD"],
-            capture_output=True, timeout=clone_timeout, cwd=dest,
+            timeout=clone_timeout, cwd=dest,
         )
     else:
-        subprocess.run(
+        _run_git(
             ["git", "clone", "--depth", "1", "--quiet", "--no-tags",
              "--filter=blob:none", "--sparse", url, dest],
-            capture_output=True, timeout=clone_timeout,
+            timeout=clone_timeout,
         )
-        subprocess.run(
+        _run_git(
             ["git", "sparse-checkout", "set", "--no-cone"] + SOURCE_EXTS,
-            capture_output=True, timeout=clone_timeout, cwd=dest,
+            timeout=clone_timeout, cwd=dest,
         )
     elapsed = time.monotonic() - t0
     size = 0
@@ -235,9 +249,9 @@ def _sparse_clone(repo: str, dest: str, size_kb: int = 0, ref: str | None = None
 
 def _analyze_repo(path: str) -> tuple[int, int, int, int, int]:
     """Run scc on a repo directory. Returns (files, lines, code, uloc, complexity)."""
-    result = subprocess.run(
+    result = _run_git(
         ["scc", "--uloc", "--format", "json", path],
-        capture_output=True, text=True, timeout=120,
+        timeout=120,
     )
     if result.returncode != 0:
         return 0, 0, 0, 0, 0
