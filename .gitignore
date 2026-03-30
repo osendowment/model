@@ -9,5 +9,4 @@ __pycache__/
 data/crates/db-dump.tar.gz
 data/crates/db-dump/
 data/crates/dump-*/
-data/crates/version-downloads/
 data/crates/version-downloads-*.csv
