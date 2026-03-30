@@ -261,9 +261,6 @@ for pkg, dep, _ in all_edges:
 for pkg_lower in universe:
     G.add_node(display_name.get(pkg_lower, pkg_lower))
 
-# Standard PageRank — measures structural importance (how many packages depend on you)
-pr = nx.pagerank(G, alpha=args.alpha)
-
 total_dl = sum(pkg_downloads.get(n, {}).get("avg_downloads", 0) for n in universe) or 1
 # Download-weighted PageRank: personalization biases the random-surfer restart toward highly-downloaded
 # packages, so a package that is both widely depended upon AND widely downloaded ranks higher.
@@ -271,7 +268,7 @@ personalization = {
     node: pkg_downloads.get(node.lower(), {}).get("avg_downloads", 0) / total_dl
     for node in G.nodes
 }
-pr_dl = nx.pagerank(G, alpha=args.alpha, personalization=personalization)
+pr = nx.pagerank(G, alpha=args.alpha, personalization=personalization)
 console.print(f"  {G.number_of_nodes():,} nodes, {G.number_of_edges():,} edges  ({time.perf_counter()-t:.1f}s)")
 
 result_rows = []
@@ -286,23 +283,21 @@ for pkg_lower in universe:
         # "top" flags whether this package crossed the min-avg threshold on its own (vs. pulled in as a dep)
         "top":           pkg_lower in top_pkg_names_lower,
         "pagerank":      round(pr.get(name, 0.0), 8),
-        "pagerank_dl":   round(pr_dl.get(name, 0.0), 8),
     })
 result_rows.sort(key=lambda r: r["pagerank"], reverse=True)
 
-write_csv(RESULTS_CSV, ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank", "pagerank_dl"], result_rows)
+write_csv(RESULTS_CSV, ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank"], result_rows)
 
 table = Table(title="Top 15 by PageRank", show_header=True, header_style="bold dim")
 table.add_column("Package", style="bold")
 table.add_column("GitHub", style="dim")
 table.add_column("PageRank", justify="right")
-table.add_column("PR (dl)", justify="right")
 table.add_column("Avg DL", justify="right")
 table.add_column("Top", justify="center")
 for r in result_rows[:15]:
     table.add_row(
         r["package"], r["github_repo"] or "—",
-        f"{r['pagerank']:.6f}", f"{r['pagerank_dl']:.6f}",
+        f"{r['pagerank']:.6f}",
         f"{r['avg_downloads']:,}" if r["avg_downloads"] else "—",
         "[green]✓[/green]" if r["top"] else "",
     )

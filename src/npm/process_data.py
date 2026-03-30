@@ -260,13 +260,12 @@ def step_results(
     for pkg, dep, _ in tree_edges:
         G.add_edge(pkg, dep)
 
-    pr       = nx.pagerank(G, alpha=ALPHA)
     all_nodes = set(G.nodes())
     total_dl  = sum(compute_avg(raw.get(n, {})) for n in all_nodes)
     personalization = (
         {n: compute_avg(raw.get(n, {})) / total_dl for n in all_nodes} if total_dl > 0 else None
     )
-    pr_dl = nx.pagerank(G, alpha=ALPHA, personalization=personalization)
+    pr = nx.pagerank(G, alpha=ALPHA, personalization=personalization)
 
     rows = []
     for pkg in all_nodes:
@@ -278,11 +277,10 @@ def step_results(
             **{str(yr): yv.get(yr, 0) for yr in YEARS},
             "top":           str(pkg in top_packages),
             "pagerank":      f"{pr.get(pkg, 0.0):.8f}",
-            "pagerank_dl":   f"{pr_dl.get(pkg, 0.0):.8f}",
         })
     rows.sort(key=lambda r: float(r["pagerank"]), reverse=True)
 
-    fields = ["package", "github_repo", "avg_downloads"] + [str(y) for y in YEARS] + ["top", "pagerank", "pagerank_dl"]
+    fields = ["package", "github_repo", "avg_downloads"] + [str(y) for y in YEARS] + ["top", "pagerank"]
     atomic_write(OUT_RESULTS, rows, fields)
 
     tbl = Table(show_header=False, box=None, padding=(0, 2))

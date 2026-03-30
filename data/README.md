@@ -51,8 +51,7 @@ repo mappings     ──►                     ──►  github-repos.csv
 | `avg_downloads` | Average annual downloads |
 | `2021`–`2025` | Downloads for that calendar year |
 | `top` | `True` if the package meets the ≥ 1M threshold |
-| `pagerank` | PageRank score in the dependency graph |
-| `pagerank_dl` | PageRank weighted by download counts |
+| `pagerank` | Download-weighted PageRank in the dependency graph |
 
 ---
 
@@ -110,8 +109,7 @@ repo mappings     ──►                     ──►  github-repos.csv
 | `avg_downloads` | Average annual downloads across 2021–2025 |
 | `2021`–`2025` | Total downloads for that calendar year |
 | `top` | `True` if the package meets the ≥ 1M download threshold |
-| `pagerank` | PageRank score in the dependency graph |
-| `pagerank_dl` | PageRank weighted by download counts |
+| `pagerank` | Download-weighted PageRank in the dependency graph |
 
 ### Data source
 
@@ -275,8 +273,7 @@ Raw input files (in `data/npm/raw/`):
 | `avg_downloads` | Average annual downloads across 2021–2025 |
 | `2021`–`2025` | Total downloads for that calendar year |
 | `top` | `True` if the package meets the ≥ 1M download threshold |
-| `pagerank` | PageRank score in the dependency graph |
-| `pagerank_dl` | PageRank weighted by download counts |
+| `pagerank` | Download-weighted PageRank in the dependency graph |
 
 ### Data source
 
