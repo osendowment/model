@@ -6,7 +6,3 @@ __pycache__/
 .DS_Store
 .pytest_cache/
 .claude/
-data/crates/db-dump.tar.gz
-data/crates/db-dump/
-data/crates/dump-*/
-data/crates/version-downloads-*.csv
