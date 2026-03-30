@@ -9,9 +9,9 @@ Starting from top-package-downloads.csv, each round:
 
 State is persisted after every round — safe to interrupt and resume.
 
-Outputs:
-  data/npm/packages-summary.csv     — all packages with downloads (grows each round)
-  data/npm/package-dependencies.csv — all known dep edges (grows each round)
+Outputs go to data/npm/raw/:
+  data/npm/raw/downloads.csv     — long format, one row per (package, year)
+  data/npm/raw/dependencies.csv  — all known dep edges (grows each round)
 
 Run:
     uv run src/npm/expand_packages.py
@@ -23,8 +23,8 @@ import argparse
 import asyncio
 import csv
 import os
-import shutil
 import time
+from collections import defaultdict
 from datetime import datetime, timezone
 
 import aiohttp
@@ -32,30 +32,54 @@ from rich.console import Console
 from rich.table import Table
 from tqdm import tqdm
 
-TOP_PACKAGES_CSV = "data/npm/top-package-downloads.csv"
-DEPS_CSV         = "data/npm/package-dependencies.csv"
-SUMMARY_CSV      = "data/npm/packages-summary.csv"
-NPM_DOWNLOADS    = "https://api.npmjs.org/downloads/point"
-NPM_REGISTRY     = "https://registry.npmjs.org"
-YEARS            = [2021, 2022, 2023, 2024, 2025]
-BATCH_SIZE       = 128   # npm bulk API limit for unscoped packages
-CONCURRENCY      = 5
-MAX_RETRIES      = 4
-RETRY_BACKOFF    = [5, 15, 30, 60]
-RATE_PER_SEC     = 5.0   # max requests/sec — stay well under npm API limits
-USER_AGENT       = "osendowment-model/1.0 (research; +https://endowment.dev)"
+RAW_DOWNLOADS = "data/npm/raw/downloads.csv"
+RAW_DEPS      = "data/npm/raw/dependencies.csv"
+TOP_PACKAGES  = "data/npm/top-package-downloads.csv"
+NPM_DOWNLOADS = "https://api.npmjs.org/downloads/point"
+NPM_REGISTRY  = "https://registry.npmjs.org"
+YEARS         = [2021, 2022, 2023, 2024, 2025]
+BATCH_SIZE    = 128   # npm bulk API limit for unscoped packages
+CONCURRENCY   = 5
+MAX_RETRIES   = 4
+RETRY_BACKOFF = [5, 15, 30, 60]
+RATE_PER_SEC  = 5.0   # max requests/sec — stay well under npm API limits
+USER_AGENT    = "osendowment-model/1.0 (research; +https://endowment.dev)"
 
 console = Console()
 
 
 # ── I/O helpers ───────────────────────────────────────────────────────────────
 
-def load_summary(path: str) -> dict[str, dict]:
-    """Return {package: row_dict} from packages-summary.csv."""
+def load_raw_downloads(path: str) -> dict[tuple[str, int], dict]:
+    """Return {(package, year): {package, year, downloads, fetched_at}}"""
     if not os.path.exists(path):
         return {}
     with open(path, newline="", encoding="utf-8") as f:
-        return {row["package"]: row for row in csv.DictReader(f)}
+        result = {}
+        for row in csv.DictReader(f):
+            result[(row["package"], int(row["year"]))] = row
+        return result
+
+
+def packages_with_all_years(raw_dl: dict) -> set[str]:
+    """Packages that have data for ALL 5 years."""
+    pkg_years = defaultdict(set)
+    for (pkg, year) in raw_dl:
+        pkg_years[pkg].add(year)
+    return {pkg for pkg, years in pkg_years.items() if set(YEARS) <= years}
+
+
+def write_raw_downloads(path: str, raw_dl: dict[tuple[str, int], dict]) -> None:
+    fields = ["package", "year", "downloads", "fetched_at"]
+    tmp = path + ".tmp"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(tmp, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore",
+                           quoting=csv.QUOTE_ALL)
+        w.writeheader()
+        w.writerows(sorted(raw_dl.values(),
+                           key=lambda r: (r["package"], int(r["year"]))))
+    os.replace(tmp, path)
 
 
 def load_dep_packages(path: str) -> set[str]:
@@ -66,7 +90,7 @@ def load_dep_packages(path: str) -> set[str]:
         return {row["package"] for row in csv.DictReader(f) if row.get("package")}
 
 
-def load_all_deps(path: str) -> set[str]:
+def load_all_dep_names(path: str) -> set[str]:
     """Return set of all dep_name values seen (excludes __none__ placeholders)."""
     if not os.path.exists(path):
         return set()
@@ -77,24 +101,34 @@ def load_all_deps(path: str) -> set[str]:
         }
 
 
-def write_summary(path: str, rows: dict[str, dict]) -> None:
-    fields = ["package", "avg_downloads"] + [str(y) for y in YEARS]
-    tmp = path + ".tmp"
-    with open(tmp, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore",
-                           quoting=csv.QUOTE_ALL)
-        w.writeheader()
-        w.writerows(sorted(rows.values(), key=lambda r: -int(r.get("avg_downloads") or 0)))
-    os.replace(tmp, path)
-
-
 def append_deps(path: str, rows: list[tuple]) -> None:
     is_new = not os.path.exists(path)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "a", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         if is_new:
             w.writerow(["package", "dep_name", "dep_version", "fetched_at"])
         w.writerows(rows)
+
+
+def seed_from_top_packages(top_path: str) -> dict[tuple[str, int], dict]:
+    """Pivot wide top-package-downloads.csv → long format raw_dl dict."""
+    raw_dl: dict[tuple[str, int], dict] = {}
+    seed_at = "2026-03-29 00:00:00.000000"
+    if not os.path.exists(top_path):
+        console.print(f"[yellow]Warning: {top_path} not found, starting empty.[/yellow]")
+        return raw_dl
+    with open(top_path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            pkg = row["package"]
+            for y in YEARS:
+                raw_dl[(pkg, y)] = {
+                    "package": pkg,
+                    "year": y,
+                    "downloads": row.get(str(y), 0) or 0,
+                    "fetched_at": seed_at,
+                }
+    return raw_dl
 
 
 # ── Rate limiter ──────────────────────────────────────────────────────────────
@@ -248,27 +282,34 @@ def main() -> None:
         console.print(f"Limit       : [yellow]{args.limit}[/yellow] (test mode)")
     console.print()
 
-    # Initialise packages-summary.csv from top list if not present
-    if not os.path.exists(SUMMARY_CSV):
-        shutil.copy(TOP_PACKAGES_CSV, SUMMARY_CSV)
-        console.print(f"[dim]Initialised {SUMMARY_CSV} from {TOP_PACKAGES_CSV}[/dim]\n")
+    # Seed raw/downloads.csv from top-package-downloads.csv if not present
+    raw_dl = load_raw_downloads(RAW_DOWNLOADS)
+    if not raw_dl:
+        raw_dl = seed_from_top_packages(TOP_PACKAGES)
+        if raw_dl:
+            write_raw_downloads(RAW_DOWNLOADS, raw_dl)
+            console.print(
+                f"[dim]Seeded {RAW_DOWNLOADS} from {TOP_PACKAGES} "
+                f"({len(packages_with_all_years(raw_dl)):,} packages)[/dim]\n"
+            )
 
     t0 = time.perf_counter()
 
     for round_num in range(1, args.max_rounds + 1):
         console.rule(f"[bold]Round {round_num}")
 
-        summary      = load_summary(SUMMARY_CSV)
-        fetched_deps = load_dep_packages(DEPS_CSV)
-        all_dep_names = load_all_deps(DEPS_CSV)
+        raw_dl        = load_raw_downloads(RAW_DOWNLOADS)
+        known_packages = packages_with_all_years(raw_dl)
+        fetched_deps  = load_dep_packages(RAW_DEPS)
+        all_dep_names = load_all_dep_names(RAW_DEPS)
 
         # Packages that appear as deps but have no download data
-        missing_downloads = all_dep_names - set(summary.keys())
+        missing_downloads = all_dep_names - known_packages
 
-        # Packages in summary whose deps we haven't fetched yet
-        need_deps = set(summary.keys()) - fetched_deps
+        # Packages with full download data whose deps we haven't fetched yet
+        need_deps = known_packages - fetched_deps
 
-        console.print(f"  Known packages     : {len(summary):,}")
+        console.print(f"  Known packages     : {len(known_packages):,}")
         console.print(f"  Deps without data  : {len(missing_downloads):,}")
         console.print(f"  Need dep fetch     : {len(need_deps):,}")
 
@@ -283,20 +324,25 @@ def main() -> None:
                 pkgs = pkgs[:args.limit]
             console.print(f"\n  Fetching downloads for {len(pkgs):,} new packages …")
             t = time.perf_counter()
-            dl_data = asyncio.run(fetch_all_downloads(pkgs, args.concurrency))
+            now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")
 
+            WRITE_EVERY = 20
             new_rows = 0
-            for pkg in pkgs:
-                yearly = [dl_data[pkg].get(y, 0) for y in YEARS]
-                avg = sum(yearly) // len(YEARS)
-                summary[pkg] = {
-                    "package": pkg,
-                    "avg_downloads": avg,
-                    **{str(y): yearly[i] for i, y in enumerate(YEARS)},
-                }
-                new_rows += 1
+            for i in range(0, len(pkgs), WRITE_EVERY):
+                chunk = pkgs[i:i + WRITE_EVERY]
+                dl_data = asyncio.run(fetch_all_downloads(chunk, args.concurrency))
+                for pkg in chunk:
+                    for y in YEARS:
+                        raw_dl[(pkg, y)] = {
+                            "package": pkg,
+                            "year": y,
+                            "downloads": dl_data[pkg].get(y, 0),
+                            "fetched_at": now,
+                        }
+                    new_rows += 1
+                write_raw_downloads(RAW_DOWNLOADS, raw_dl)
+                console.print(f"  [{i + len(chunk):,}/{len(pkgs):,}] saved …", end="\r")
 
-            write_summary(SUMMARY_CSV, summary)
             console.print(f"  Added {new_rows:,} packages  ({time.perf_counter()-t:.1f}s)")
 
         # ── 2. Fetch deps for packages we haven't checked yet ─────────────
@@ -321,16 +367,17 @@ def main() -> None:
                 if not deps:
                     rows_to_append.append((pkg, "__none__", "", now))
 
-            append_deps(DEPS_CSV, rows_to_append)
+            append_deps(RAW_DEPS, rows_to_append)
             console.print(f"  Added {new_edges:,} dep edges  ({time.perf_counter()-t:.1f}s)")
 
         # ── Round summary ──────────────────────────────────────────────────
+        known_packages = packages_with_all_years(raw_dl)
         table = Table(show_header=False, box=None, padding=(0, 2))
         table.add_column(style="dim")
         table.add_column(justify="right")
-        table.add_row("packages-summary.csv", f"{len(summary):,} packages")
-        dep_count = sum(1 for _ in open(DEPS_CSV)) - 1
-        table.add_row("package-dependencies.csv", f"{dep_count:,} rows")
+        table.add_row("downloads.csv", f"{len(known_packages):,} packages")
+        dep_count = sum(1 for _ in open(RAW_DEPS)) - 1 if os.path.exists(RAW_DEPS) else 0
+        table.add_row("dependencies.csv", f"{dep_count:,} rows")
         console.print()
         console.print(table)
 

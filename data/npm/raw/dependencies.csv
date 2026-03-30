@@ -53801,3 +53801,15 @@ accounting,__none__,,2026-03-30 09:48:06.844714
 @ai-sdk/amazon-bedrock,@smithy/util-utf8,^4.0.0,2026-03-30 09:59:22.825284
 @ai-sdk/amazon-bedrock,@ai-sdk/provider-utils,4.0.21,2026-03-30 09:59:22.825284
 @ai-sdk/amazon-bedrock,@smithy/eventstream-codec,^4.0.1,2026-03-30 09:59:22.825284
+@47ng/codec,@stablelib/base64,^1.0.1,2026-03-30 10:44:26.069532
+@47ng/codec,@stablelib/hex,^1.0.1,2026-03-30 10:44:26.069532
+@actions/http-client,tunnel,^0.0.6,2026-03-30 10:44:26.069532
+@actions/http-client,undici,^6.23.0,2026-03-30 10:44:26.069532
+@ai-sdk/anthropic,@ai-sdk/provider,3.0.8,2026-03-30 10:44:26.069532
+@ai-sdk/anthropic,@ai-sdk/provider-utils,4.0.21,2026-03-30 10:44:26.069532
+@ai-sdk/azure,@ai-sdk/openai,3.0.48,2026-03-30 10:44:26.069532
+@ai-sdk/azure,@ai-sdk/provider,3.0.8,2026-03-30 10:44:26.069532
+@ai-sdk/azure,@ai-sdk/provider-utils,4.0.21,2026-03-30 10:44:26.069532
+@ai-sdk/gateway,@vercel/oidc,3.1.0,2026-03-30 10:44:26.069532
+@ai-sdk/gateway,@ai-sdk/provider,3.0.8,2026-03-30 10:44:26.069532
+@ai-sdk/gateway,@ai-sdk/provider-utils,4.0.21,2026-03-30 10:44:26.069532
