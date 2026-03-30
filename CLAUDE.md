@@ -12,10 +12,11 @@
 
 ## Philosophy
 
-- **Simplicity and transparency over performance** — scripts and data pipelines must be easy to read, understand, and audit. A researcher unfamiliar with the codebase should be able to follow exactly what a script does and why.
-- Prefer flat, explicit steps over clever abstractions. If something can be done in a straightforward loop, don't wrap it in a framework.
+- **Performance AND clarity** — scripts must be fast (async I/O, batching, concurrency) but also easy to read and audit. These are not in conflict: optimize with explicit, well-named code rather than clever tricks.
+- A researcher unfamiliar with the codebase should be able to follow exactly what a script does and why — even if it uses async or batching.
 - Data transformations must be traceable — it should always be clear where each output value came from.
-- Avoid premature optimization. Correctness and clarity come first.
+- Prefer flat, explicit steps. Use abstractions only when they make the code *more* readable, not less.
+- Name things clearly. A well-named function or variable is worth more than a comment.
 
 ## Stack
 
