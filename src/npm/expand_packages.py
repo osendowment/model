@@ -30,6 +30,7 @@ from datetime import datetime, timezone
 import aiohttp
 from rich.console import Console
 from rich.table import Table
+from tqdm import tqdm
 
 TOP_PACKAGES_CSV = "data/npm/top-package-downloads.csv"
 DEPS_CSV         = "data/npm/package-dependencies.csv"
@@ -38,9 +39,10 @@ NPM_DOWNLOADS    = "https://api.npmjs.org/downloads/point"
 NPM_REGISTRY     = "https://registry.npmjs.org"
 YEARS            = [2021, 2022, 2023, 2024, 2025]
 BATCH_SIZE       = 128   # npm bulk API limit for unscoped packages
-CONCURRENCY      = 10
-MAX_RETRIES      = 3
-RETRY_BACKOFF    = [2, 5, 15]
+CONCURRENCY      = 5
+MAX_RETRIES      = 4
+RETRY_BACKOFF    = [5, 15, 30, 60]
+RATE_PER_SEC     = 5.0   # max requests/sec — stay well under npm API limits
 USER_AGENT       = "osendowment-model/1.0 (research; +https://endowment.dev)"
 
 console = Console()
@@ -95,6 +97,24 @@ def append_deps(path: str, rows: list[tuple]) -> None:
         w.writerows(rows)
 
 
+# ── Rate limiter ──────────────────────────────────────────────────────────────
+
+class RateLimiter:
+    """Token bucket — limits to `rate` requests per second."""
+    def __init__(self, rate: float):
+        self._rate  = rate
+        self._lock  = asyncio.Lock()
+        self._last  = 0.0
+
+    async def acquire(self) -> None:
+        async with self._lock:
+            now  = asyncio.get_event_loop().time()
+            wait = self._last + 1.0 / self._rate - now
+            if wait > 0:
+                await asyncio.sleep(wait)
+            self._last = asyncio.get_event_loop().time()
+
+
 # ── npm downloads API ─────────────────────────────────────────────────────────
 
 def batches(items, size):
@@ -105,27 +125,30 @@ def batches(items, size):
 async def fetch_downloads_batch(
     session: aiohttp.ClientSession,
     sem: asyncio.Semaphore,
+    rl: RateLimiter,
     year: int,
     pkgs: list[str],
-) -> dict[str, int]:
+) -> tuple[int, dict[str, int]]:
     url = f"{NPM_DOWNLOADS}/{year}-01-01:{year}-12-31/{','.join(pkgs)}"
     async with sem:
         for attempt in range(MAX_RETRIES):
+            await rl.acquire()
             try:
-                async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as r:
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=60)) as r:
                     if r.status == 429:
-                        await asyncio.sleep(RETRY_BACKOFF[min(attempt, 2)])
+                        wait = RETRY_BACKOFF[min(attempt, len(RETRY_BACKOFF) - 1)]
+                        await asyncio.sleep(wait)
                         continue
                     r.raise_for_status()
                     data = await r.json(content_type=None)
                     if "downloads" in data:
-                        return {pkgs[0]: data.get("downloads") or 0}
-                    return {p: (info or {}).get("downloads") or 0
-                            for p, info in data.items()}
+                        return year, {pkgs[0]: data.get("downloads") or 0}
+                    return year, {p: (info or {}).get("downloads") or 0
+                                  for p, info in data.items()}
             except Exception:
                 if attempt < MAX_RETRIES - 1:
-                    await asyncio.sleep(RETRY_BACKOFF[min(attempt, 2)])
-    return {p: 0 for p in pkgs}
+                    await asyncio.sleep(RETRY_BACKOFF[min(attempt, len(RETRY_BACKOFF) - 1)])
+    return year, {p: 0 for p in pkgs}
 
 
 async def fetch_all_downloads(
@@ -143,11 +166,19 @@ async def fetch_all_downloads(
     )
 
     sem = asyncio.Semaphore(concurrency)
+    rl  = RateLimiter(RATE_PER_SEC)
+
     async with aiohttp.ClientSession(headers={"User-Agent": USER_AGENT}) as session:
-        coros = [fetch_downloads_batch(session, sem, y, b) for y, b in all_tasks]
-        for (year, _), res in zip(all_tasks, await asyncio.gather(*coros)):
-            for pkg, count in res.items():
-                result[pkg][year] = count
+        futs = [
+            asyncio.ensure_future(fetch_downloads_batch(session, sem, rl, y, b))
+            for y, b in all_tasks
+        ]
+        with tqdm(total=len(futs), desc="  downloads", unit="req") as bar:
+            for fut in asyncio.as_completed(futs):
+                year, res = await fut
+                for pkg, count in res.items():
+                    result[pkg][year] = count
+                bar.update(1)
 
     return result
 
@@ -157,17 +188,19 @@ async def fetch_all_downloads(
 async def fetch_deps_one(
     session: aiohttp.ClientSession,
     sem: asyncio.Semaphore,
+    rl: RateLimiter,
     package: str,
 ) -> tuple[str, list[tuple[str, str]]]:
     url = f"{NPM_REGISTRY}/{package}/latest"
     async with sem:
         for attempt in range(MAX_RETRIES):
+            await rl.acquire()
             try:
-                async with session.get(url, timeout=aiohttp.ClientTimeout(total=20)) as r:
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as r:
                     if r.status == 404:
                         return package, []
                     if r.status == 429:
-                        await asyncio.sleep(RETRY_BACKOFF[min(attempt, 2)])
+                        await asyncio.sleep(RETRY_BACKOFF[min(attempt, len(RETRY_BACKOFF) - 1)])
                         continue
                     r.raise_for_status()
                     data = await r.json(content_type=None)
@@ -175,7 +208,7 @@ async def fetch_deps_one(
                     return package, deps
             except Exception:
                 if attempt < MAX_RETRIES - 1:
-                    await asyncio.sleep(RETRY_BACKOFF[min(attempt, 2)])
+                    await asyncio.sleep(RETRY_BACKOFF[min(attempt, len(RETRY_BACKOFF) - 1)])
     return package, []
 
 
@@ -184,10 +217,17 @@ async def fetch_all_deps(
     concurrency: int,
 ) -> dict[str, list[tuple[str, str]]]:
     sem = asyncio.Semaphore(concurrency)
+    rl  = RateLimiter(RATE_PER_SEC)
     async with aiohttp.ClientSession(headers={"User-Agent": USER_AGENT}) as session:
-        results = await asyncio.gather(
-            *[fetch_deps_one(session, sem, p) for p in packages]
-        )
+        futs = {
+            asyncio.ensure_future(fetch_deps_one(session, sem, rl, p)): p
+            for p in packages
+        }
+        results = []
+        with tqdm(total=len(futs), desc="  deps", unit="pkg") as bar:
+            for fut in asyncio.as_completed(list(futs)):
+                results.append(await fut)
+                bar.update(1)
     return dict(results)
 
 
@@ -195,13 +235,17 @@ async def fetch_all_deps(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--max-rounds",   type=int, default=20)
-    parser.add_argument("--concurrency",  type=int, default=CONCURRENCY)
+    parser.add_argument("--max-rounds",  type=int, default=20)
+    parser.add_argument("--concurrency", type=int, default=CONCURRENCY)
+    parser.add_argument("--limit",       type=int, default=None,
+                        help="Max packages per step (for testing)")
     args = parser.parse_args()
 
     console.rule("[bold]npm — expand packages")
     console.print(f"Max rounds  : {args.max_rounds}")
     console.print(f"Concurrency : {args.concurrency}")
+    if args.limit:
+        console.print(f"Limit       : [yellow]{args.limit}[/yellow] (test mode)")
     console.print()
 
     # Initialise packages-summary.csv from top list if not present
@@ -235,6 +279,8 @@ def main() -> None:
         # ── 1. Fetch downloads for missing packages ────────────────────────
         if missing_downloads:
             pkgs = sorted(missing_downloads)
+            if args.limit:
+                pkgs = pkgs[:args.limit]
             console.print(f"\n  Fetching downloads for {len(pkgs):,} new packages …")
             t = time.perf_counter()
             dl_data = asyncio.run(fetch_all_downloads(pkgs, args.concurrency))
@@ -256,6 +302,8 @@ def main() -> None:
         # ── 2. Fetch deps for packages we haven't checked yet ─────────────
         if need_deps:
             pkgs = sorted(need_deps)
+            if args.limit:
+                pkgs = pkgs[:args.limit]
             console.print(f"\n  Fetching deps for {len(pkgs):,} packages …")
             t = time.perf_counter()
             deps_data = asyncio.run(fetch_all_deps(pkgs, args.concurrency))
