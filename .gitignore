@@ -11,4 +11,3 @@ data/crates/db-dump/
 data/crates/dump-*/
 data/crates/version-downloads/
 data/crates/version-downloads-*.csv
-data/pypi/bigquery/
