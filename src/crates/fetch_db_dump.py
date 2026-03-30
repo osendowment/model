@@ -56,12 +56,17 @@ console.print()
 
 # ── Skip if already extracted ──────────────────────────────────────────────────
 
-if os.path.isdir(DUMP_DIR):
+all_present = all(os.path.exists(f"{DUMP_DIR}/{f}") for f in EXTRACT_TARGETS)
+if all_present:
     console.print(f"[green]Already extracted[/green]: {DUMP_DIR}/")
     for fname in sorted(EXTRACT_TARGETS):
         size_mb = os.path.getsize(f"{DUMP_DIR}/{fname}") / 1024**2
         console.print(f"  {fname:<40} {size_mb:7.1f} MB")
     raise SystemExit(0)
+
+missing = [f for f in EXTRACT_TARGETS if not os.path.exists(f"{DUMP_DIR}/{f}")]
+if missing:
+    console.print(f"[yellow]Missing files[/yellow]: {missing} — re-downloading dump")
 
 # ── Get file size via HEAD ─────────────────────────────────────────────────────
 
@@ -75,6 +80,7 @@ console.print(f"Size   : [yellow]{total_bytes / 1024**2:.0f} MB[/yellow] compres
 
 # ── Parallel chunked download ──────────────────────────────────────────────────
 
+# Last chunk gets any remainder bytes to ensure full coverage (integer division drops them)
 chunk_size = total_bytes // args.chunks
 ranges = [
     (i * chunk_size, (i + 1) * chunk_size - 1 if i < args.chunks - 1 else total_bytes - 1)
@@ -107,6 +113,7 @@ async def download_all() -> None:
                   f"in [bold]{elapsed:.1f}s[/bold] "
                   f"([yellow]{speed_mb:.1f} MB/s[/yellow])")
 
+    # All chunks are held in memory until here — write them in order to reassemble the file
     console.print("Writing to disk…", end=" ")
     t_write = time.perf_counter()
     with open(DUMP_TAR, "wb") as f:
@@ -125,11 +132,13 @@ t_extract = time.perf_counter()
 total_uncompressed = 0
 with tarfile.open(DUMP_TAR, "r:gz") as tar:
     for member in tar.getmembers():
+        # The dump has a dated top-level dir (e.g. 2025-03-15/data/crates.csv); skip everything else
         if "/data/" not in member.name or not member.isfile():
             continue
-        fname = member.name.split("/data/")[-1]
+        fname = member.name.split("/data/")[-1]  # strip the dated prefix, keep just "crates.csv" etc.
         if fname not in EXTRACT_TARGETS:
             continue
+        # Rewrite member.name so tar.extract places the file flat in DUMP_DIR (no subdirectory)
         member.name = fname
         tar.extract(member, DUMP_DIR, filter="data")
         total_uncompressed += member.size

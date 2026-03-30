@@ -9,8 +9,9 @@ Output: data/crates/version-downloads/YYYY-MM.csv
 Schema: version_id, downloads  (total for that month)
 
 Run:
-    uv run src/crates/collect_downloads.py --year 2025
-    uv run src/crates/collect_downloads.py --year 2025 --concurrency 128
+    uv run src/crates/fetch_version_downloads.py --years 2025
+    uv run src/crates/fetch_version_downloads.py --years 2021 2022 2023 2024 2025
+    uv run src/crates/fetch_version_downloads.py --years 2025 --concurrency 128
 """
 
 import argparse
@@ -33,30 +34,31 @@ CONCURRENCY   = 64
 console = Console()
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--year",        type=int, required=True)
+parser.add_argument("--years",       type=int, nargs="+", required=True, metavar="YEAR")
 parser.add_argument("--concurrency", type=int, default=CONCURRENCY)
 args = parser.parse_args()
 
 os.makedirs(OUT_DIR, exist_ok=True)
-console.rule(f"[bold]crates.io downloads — {args.year}")
+years_str = " ".join(str(y) for y in sorted(args.years))
+console.rule(f"[bold]crates.io downloads — {years_str}")
 
 # ── Fetch archive index ────────────────────────────────────────────────────────
 
 with httpx.Client(follow_redirects=True) as client:
     index = client.get(ARCHIVE_INDEX).json()
 
-# Build: month_str -> list of filenames expected for that month
-# Validation: expected days = calendar days in that month
+# Build: month_str -> list of daily filenames for that month (used to validate completeness later)
 by_month: dict[str, list[str]] = defaultdict(list)
+year_prefixes = {str(y) for y in args.years}
 for entry in index:
     name = entry["name"]          # e.g. "2025-03-15.csv"
-    if name.startswith(str(args.year)):
+    if name[:4] in year_prefixes:
         month = name[:7]          # "2025-03"
         by_month[month].append(name)
 
 months = sorted(by_month)
 if not months:
-    console.print(f"[red]No archive entries found for {args.year}[/red]")
+    console.print(f"[red]No archive entries found for {years_str}[/red]")
     raise SystemExit(1)
 
 console.print(f"Months     : {months[0]} → {months[-1]}  ({len(months)} months)")
@@ -76,13 +78,14 @@ async def fetch_day(
             try:
                 r = await client.get(url, timeout=60)
                 if r.status_code >= 500:
+                    # Server errors are transient; back off and retry rather than failing the month
                     if attempt < 3:
                         await asyncio.sleep(2 ** attempt)
                         continue
                     return name, None
                 r.raise_for_status()
                 pairs = []
-                for line in r.text.splitlines()[1:]:
+                for line in r.text.splitlines()[1:]:  # skip CSV header row
                     if "," in line:
                         vid, dl = line.split(",", 1)
                         pairs.append((int(vid), int(dl)))
@@ -207,7 +210,7 @@ async def run() -> None:
 
             month_elapsed = time.perf_counter() - t_month
 
-            # Validate: all days must succeed
+            # Validate: all days must succeed — a partial month would silently undercount downloads
             if month_failed:
                 console.print(
                     f"  [red]✗ {month}: {len(month_failed)} failed "
@@ -218,7 +221,7 @@ async def run() -> None:
                 summary_rows.append((month, "failed", 0, month_elapsed, month_size))
                 continue
 
-            # Validate: day count matches calendar
+            # Validate: day count matches calendar — guards against gaps in the archive index itself
             year_int, month_int = map(int, month.split("-"))
             expected_days = calendar.monthrange(year_int, month_int)[1]
             if completed_files != expected_days:
@@ -230,7 +233,8 @@ async def run() -> None:
                 summary_rows.append((month, "failed", 0, month_elapsed, month_size))
                 continue
 
-            # Atomic write
+            # Atomic write: write to .tmp first so a crash mid-write never leaves a partial file
+            # that would be treated as complete on re-run
             tmp = out_file + ".tmp"
             with open(tmp, "w", newline="") as f:
                 w = csv.writer(f)
@@ -259,7 +263,7 @@ async def run() -> None:
     year_elapsed = time.perf_counter() - t_year
     console.print()
 
-    table = Table(title=f"{args.year} summary", show_header=True)
+    table = Table(title=f"{years_str} summary", show_header=True)
     table.add_column("Month")
     table.add_column("Status")
     table.add_column("Versions",  justify="right")

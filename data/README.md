@@ -98,11 +98,14 @@ uv run pytest tests/test_npm_downloads.py -v
 
 | File | Description |
 |------|-------------|
-| [top-package-downloads.csv](crates/top-package-downloads.csv) | Rust crates with 1M+ avg annual downloads (2021–2025), ~3K packages |
-| [package-dependencies.csv](crates/package-dependencies.csv) | Crate dependency graph |
-| [package-github-mapping.csv](crates/package-github-mapping.csv) | Crate → GitHub repo mapping |
+| [top-packages.csv](crates/top-packages.csv) | Crates with avg ≥ 1M downloads (2021–2025), ~3K packages |
+| [dependency-tree.csv](crates/dependency-tree.csv) | Full transitive dependency graph rooted at top packages, ~39K edges |
+| [github-repos.csv](crates/github-repos.csv) | GitHub owner/repo for packages in the dep tree, ~5K entries |
+| [results.csv](crates/results.csv) | All packages in the dep tree (~5.2K) with downloads + PageRank |
 
 ### Columns
+
+**top-packages.csv**
 
 | Column | Description |
 |--------|-------------|
@@ -110,38 +113,55 @@ uv run pytest tests/test_npm_downloads.py -v
 | `avg_downloads` | Average annual downloads across 2021–2025 |
 | `2021`–`2025` | Total downloads for that calendar year |
 
+**dependency-tree.csv**
+
+| Column | Description |
+|--------|-------------|
+| `package` | Dependent crate |
+| `dependency` | Dependency crate |
+| `type` | Dependency kind: `normal`, `build`, or `dev` |
+
+**github-repos.csv**
+
+| Column | Description |
+|--------|-------------|
+| `package` | Crate name |
+| `github_repo` | GitHub repository (`owner/repo`) |
+
+**results.csv**
+
+| Column | Description |
+|--------|-------------|
+| `package` | Crate name |
+| `github_repo` | GitHub repository (`owner/repo`) |
+| `avg_downloads` | Average annual downloads across 2021–2025 |
+| `2021`–`2025` | Total downloads for that calendar year |
+| `top` | `True` if the package meets the ≥ 1M download threshold |
+| `pagerank` | PageRank score in the dependency graph |
+| `pagerank_dl` | PageRank weighted by download counts |
+
 ### Data source
 
 Downloads come from two crates.io public sources:
 
-- **DB dump** (`https://static.crates.io/db-dump.tar.gz`) — provides crate/version name mappings
-  (`crates.csv`, `versions.csv`) and dependency graph (`dependencies.csv`).
-  The `version_downloads.csv` in the dump only covers the last ~90 days and is not used for historical data.
+- **DB dump** (`https://static.crates.io/db-dump.tar.gz`) — crate/version name mappings and
+  dependency graph. Extracted to `data/crates/db-dump/`.
 - **Daily archive** (`https://static.crates.io/archive/version-downloads/YYYY-MM-DD.csv`) —
-  per-version download counts going back to 2014. Aggregated into monthly files under
+  per-version download counts. Aggregated into monthly files under
   `data/crates/version-downloads/YYYY-MM.csv`.
 
 ### Collection pipeline
 
 ```bash
-# 1. Download DB dump → data/crates/db-dump/
+# 1. Download + extract DB dump (skips if already done)
 uv run src/crates/fetch_db_dump.py
 
-# 2. Aggregate daily archives into monthly files (repeat for each year)
-for year in 2021 2022 2023 2024 2025; do
-    uv run src/crates/collect_downloads.py --year $year
-done
+# 2. Download monthly download archives (skips already-complete months)
+uv run src/crates/fetch_version_downloads.py --years 2021 2022 2023 2024 2025
 
-# 3. Aggregate monthly files → top-package-downloads.csv
+# 3. Build all output CSVs (~15s on re-run)
 uv run src/crates/process_data.py
-
-# 4. Derived files
-uv run src/crates/generate_github_mapping.py
-uv run src/crates/generate_dependencies.py
 ```
-
-Monthly files are written atomically only after all calendar days for that month are successfully
-fetched. Already-complete months are skipped on re-run.
 
 ## Derived
 

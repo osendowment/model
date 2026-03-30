@@ -16,6 +16,7 @@ dependencies = [
     "aiohttp>=3.13.3",
     "httpx[http2]>=0.28.1",
     "networkx>=3.6.1",
+    "polars>=1.39.3",
     "pydantic>=2.11.7",
     "python-dotenv>=1.2.2",
     "requests>=2.32.5",
