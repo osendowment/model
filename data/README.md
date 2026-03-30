@@ -1,6 +1,6 @@
 # Datasets
 
-All data is derived from public sources (GitHub API, PyPI, npm).
+All data is derived from public sources (GitHub API, PyPI, npm, crates.io).
 
 ## GitHub
 
@@ -21,12 +21,12 @@ All data is derived from public sources (GitHub API, PyPI, npm).
 | [package-dependencies.csv](pypi/package-dependencies.csv) | Package dependency graph |
 | [package-github-mapping.csv](pypi/package-github-mapping.csv) | PyPI package → GitHub repo mapping |
 
-### top-packages.csv columns
+### Columns
 
 | Column | Description |
 |--------|-------------|
 | `package` | PyPI package name |
-| `avg_downloads` | Average annual downloads across all tracked years (mirrors excluded) |
+| `avg_downloads` | Average annual downloads across 2021–2025 (mirrors excluded) |
 | `2021`–`2025` | Total downloads for that calendar year (mirrors excluded) |
 
 ### Data source
@@ -63,14 +63,16 @@ After exporting the query results, filter to `avg_downloads >= 1000000` before c
 
 | File | Description |
 |------|-------------|
-| [top-package-downloads.csv](npm/top-package-downloads.csv) | npm packages with annual download counts (2021–2025), ~17K packages |
+| [top-package-downloads.csv](npm/top-package-downloads.csv) | npm packages with 1M+ avg annual downloads (2021–2025), ~17K packages |
+| [package-dependencies.csv](npm/package-dependencies.csv) | Package dependency graph |
+| [package-github-mapping.csv](npm/package-github-mapping.csv) | npm package → GitHub repo mapping |
 
-### top-packages.csv columns
+### Columns
 
 | Column | Description |
 |--------|-------------|
 | `package` | npm package name |
-| `avg_downloads` | Average annual downloads across all tracked years |
+| `avg_downloads` | Average annual downloads across 2021–2025 |
 | `2021`–`2025` | Total downloads for that calendar year |
 
 ### Data source
@@ -78,7 +80,6 @@ After exporting the query results, filter to `avg_downloads >= 1000000` before c
 Downloads are fetched from the [npm downloads API](https://api.npmjs.org/downloads/point/{start}:{end}/{package}).
 Each year column corresponds to a `point` range query from `{year}-01-01` to `{year}-12-31`.
 
-**Example:**
 ```
 GET https://api.npmjs.org/downloads/point/2024-01-01:2024-12-31/semver
 → {"downloads": 16558352576, "start": "2024-01-01", "end": "2024-12-31", "package": "semver"}
@@ -92,6 +93,55 @@ fetches the live npm API, and asserts the download count matches exactly:
 ```
 uv run pytest tests/test_npm_downloads.py -v
 ```
+
+## Crates (Rust)
+
+| File | Description |
+|------|-------------|
+| [top-package-downloads.csv](crates/top-package-downloads.csv) | Rust crates with 1M+ avg annual downloads (2021–2025), ~3K packages |
+| [package-dependencies.csv](crates/package-dependencies.csv) | Crate dependency graph |
+| [package-github-mapping.csv](crates/package-github-mapping.csv) | Crate → GitHub repo mapping |
+
+### Columns
+
+| Column | Description |
+|--------|-------------|
+| `package` | Crate name |
+| `avg_downloads` | Average annual downloads across 2021–2025 |
+| `2021`–`2025` | Total downloads for that calendar year |
+
+### Data source
+
+Downloads come from two crates.io public sources:
+
+- **DB dump** (`https://static.crates.io/db-dump.tar.gz`) — provides crate/version name mappings
+  (`crates.csv`, `versions.csv`) and dependency graph (`dependencies.csv`).
+  The `version_downloads.csv` in the dump only covers the last ~90 days and is not used for historical data.
+- **Daily archive** (`https://static.crates.io/archive/version-downloads/YYYY-MM-DD.csv`) —
+  per-version download counts going back to 2014. Aggregated into monthly files under
+  `data/crates/version-downloads/YYYY-MM.csv`.
+
+### Collection pipeline
+
+```bash
+# 1. Download DB dump → data/crates/db-dump/
+uv run src/crates/fetch_db_dump.py
+
+# 2. Aggregate daily archives into monthly files (repeat for each year)
+for year in 2021 2022 2023 2024 2025; do
+    uv run src/crates/collect_downloads.py --year $year
+done
+
+# 3. Aggregate monthly files → top-package-downloads.csv
+uv run src/crates/process_data.py
+
+# 4. Derived files
+uv run src/crates/generate_github_mapping.py
+uv run src/crates/generate_dependencies.py
+```
+
+Monthly files are written atomically only after all calendar days for that month are successfully
+fetched. Already-complete months are skipped on re-run.
 
 ## Derived
 

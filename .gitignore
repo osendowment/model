@@ -7,3 +7,7 @@ __pycache__/
 .pytest_cache/
 .claude/
 data/crates/db-dump.tar.gz
+data/crates/db-dump/
+data/crates/dump-*/
+data/crates/version-downloads/
+data/crates/version-downloads-*.csv

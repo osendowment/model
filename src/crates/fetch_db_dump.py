@@ -4,7 +4,13 @@ Download and unpack the crates.io DB dump as fast as possible.
 Strategy: parallel byte-range requests (server supports Accept-Ranges).
 Downloads N chunks concurrently, assembles into final file, then extracts.
 
-  - Skips download+extraction if data/crates/dump-YYYYMMDD/ already exists
+Extracts only:
+  data/crates/db-dump/crates.csv
+  data/crates/db-dump/versions.csv
+  data/crates/db-dump/dependencies.csv
+  data/crates/db-dump/default_versions.csv
+
+  - Skips download+extraction if data/crates/db-dump/ already exists
   - Deletes archive after extraction
   - Prints throughput and timing stats at each step
 
@@ -18,17 +24,22 @@ import asyncio
 import os
 import tarfile
 import time
-from datetime import date
 
 import httpx
 from rich.console import Console
 from rich.table import Table
 
-DUMP_URL = "https://static.crates.io/db-dump.tar.gz"
-DATA_DIR = "data/crates"
-TODAY = date.today().strftime("%Y%m%d")
-DUMP_DIR = f"{DATA_DIR}/dump-{TODAY}"
-DUMP_TAR = f"{DATA_DIR}/db-dump.tar.gz"
+DUMP_URL  = "https://static.crates.io/db-dump.tar.gz"
+DATA_DIR  = "data/crates"
+DUMP_DIR  = f"{DATA_DIR}/db-dump"
+DUMP_TAR  = f"{DATA_DIR}/db-dump.tar.gz"
+
+EXTRACT_TARGETS = {
+    "crates.csv",
+    "versions.csv",
+    "dependencies.csv",
+    "default_versions.csv",
+}
 
 console = Console()
 
@@ -39,18 +50,17 @@ args = parser.parse_args()
 os.makedirs(DATA_DIR, exist_ok=True)
 
 console.rule("[bold]crates.io DB dump fetcher")
-console.print(f"Target : [cyan]{DUMP_DIR}[/cyan]")
+console.print(f"Output : [cyan]{DUMP_DIR}/[/cyan]")
 console.print(f"Chunks : {args.chunks} parallel")
 console.print()
 
 # ── Skip if already extracted ──────────────────────────────────────────────────
 
 if os.path.isdir(DUMP_DIR):
-    files = sorted(os.listdir(DUMP_DIR))
-    console.print(f"[green]Already extracted[/green]: {DUMP_DIR}/ ({len(files)} files)")
-    for f in files:
-        size_mb = os.path.getsize(f"{DUMP_DIR}/{f}") / 1024**2
-        console.print(f"  {f:<45} {size_mb:7.1f} MB")
+    console.print(f"[green]Already extracted[/green]: {DUMP_DIR}/")
+    for fname in sorted(EXTRACT_TARGETS):
+        size_mb = os.path.getsize(f"{DUMP_DIR}/{fname}") / 1024**2
+        console.print(f"  {fname:<40} {size_mb:7.1f} MB")
     raise SystemExit(0)
 
 # ── Get file size via HEAD ─────────────────────────────────────────────────────
@@ -108,18 +118,21 @@ asyncio.run(download_all())
 
 # ── Extract ────────────────────────────────────────────────────────────────────
 
-os.makedirs(DUMP_DIR, exist_ok=True)
 console.print(f"\nExtracting to [cyan]{DUMP_DIR}/[/cyan] …")
+os.makedirs(DUMP_DIR, exist_ok=True)
 
 t_extract = time.perf_counter()
+total_uncompressed = 0
 with tarfile.open(DUMP_TAR, "r:gz") as tar:
-    data_members = [m for m in tar.getmembers() if "/data/" in m.name and m.isfile()]
-    total_uncompressed = sum(m.size for m in data_members)
-
-    for member in data_members:
+    for member in tar.getmembers():
+        if "/data/" not in member.name or not member.isfile():
+            continue
         fname = member.name.split("/data/")[-1]
+        if fname not in EXTRACT_TARGETS:
+            continue
         member.name = fname
         tar.extract(member, DUMP_DIR, filter="data")
+        total_uncompressed += member.size
 
 extract_elapsed = time.perf_counter() - t_extract
 
@@ -130,7 +143,7 @@ table.add_column("File", style="bold")
 table.add_column("Size (MB)", justify="right")
 
 total_mb = 0
-for fname in sorted(os.listdir(DUMP_DIR)):
+for fname in sorted(EXTRACT_TARGETS):
     size_mb = os.path.getsize(f"{DUMP_DIR}/{fname}") / 1024**2
     total_mb += size_mb
     table.add_row(fname, f"{size_mb:.1f}")
