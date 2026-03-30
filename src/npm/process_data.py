@@ -11,7 +11,6 @@ Outputs (all to data/npm/):
 
 import argparse
 import csv
-import logging
 import os
 import time
 from collections import defaultdict, deque
@@ -20,9 +19,6 @@ from datetime import datetime
 import networkx as nx
 from rich.console import Console
 from rich.table import Table
-
-logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
-log = logging.getLogger(__name__)
 
 console = Console()
 
@@ -53,7 +49,6 @@ def atomic_write(path: str, rows: list[dict], fieldnames: list[str]) -> None:
         writer.writeheader()
         writer.writerows(rows)
     os.replace(tmp, path)
-    log.debug("Wrote %d rows → %s", len(rows), path)
 
 
 def load_raw_downloads() -> dict[str, dict[int, int]]:
@@ -66,7 +61,6 @@ def load_raw_downloads() -> dict[str, dict[int, int]]:
             dl = int(row["downloads"]) if row["downloads"] else 0
             if yr in YEARS:
                 data[pkg][yr] = dl
-    log.debug("Loaded raw downloads for %d packages", len(data))
     return data
 
 
@@ -80,7 +74,6 @@ def load_top_package_names() -> dict[str, dict]:
                 "avg_downloads": int(row["avg_downloads"]) if row["avg_downloads"] else 0,
                 **{yr: int(row[str(yr)]) if row.get(str(yr)) else 0 for yr in YEARS},
             }
-    log.debug("Loaded %d top packages", len(top))
     return top
 
 
@@ -90,7 +83,6 @@ def load_raw_deps() -> list[tuple[str, str, str]]:
     with open(RAW_DEPS, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             edges.append((row["package"], row["dep_name"], row["dep_version"]))
-    log.debug("Loaded %d dependency edges", len(edges))
     return edges
 
 
@@ -335,24 +327,62 @@ def step_pagerank(
     console.print(preview)
 
 
+# ── completeness check ────────────────────────────────────────────────────────
+
+def check_gaps(raw: dict[str, dict[int, int]], ignore_gaps: bool) -> None:
+    """Warn (or exit) if dep packages are missing from raw/downloads."""
+    if not os.path.exists(RAW_DEPS):
+        return
+    dep_names: set[str] = set()
+    with open(RAW_DEPS, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            d = row.get("dep_name", "")
+            if d and d != "__none__":
+                dep_names.add(d)
+
+    missing = dep_names - set(raw.keys())
+    total = len(dep_names)
+
+    tbl = Table(show_header=False, box=None, padding=(0, 2))
+    tbl.add_column(style="dim")
+    tbl.add_column(justify="right")
+    tbl.add_row("Dep packages in graph", f"{total:,}")
+    tbl.add_row("Missing download data", f"[yellow]{len(missing):,}[/yellow]" if missing else "[green]0[/green]")
+    tbl.add_row("Coverage", f"{(total - len(missing)) / max(total, 1) * 100:.1f}%")
+    console.print(tbl)
+
+    if missing and not ignore_gaps:
+        console.print(
+            f"\n[red]Data incomplete:[/red] {len(missing):,} dep packages have no download data.\n"
+            f"Run [cyan]uv run src/npm/fetch_npm_data.py[/cyan] to fill gaps, "
+            f"or pass [cyan]--ignore-gaps[/cyan] to proceed anyway."
+        )
+        raise SystemExit(1)
+    if missing and ignore_gaps:
+        console.print(f"[dim]--ignore-gaps: skipping {len(missing):,} packages with no data[/dim]")
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Process raw npm data into analysis-ready files.")
-    parser.add_argument("--summary",  action="store_true", help="Run packages-summary step only")
-    parser.add_argument("--top",      action="store_true", help="Run top-packages step only")
-    parser.add_argument("--deptree",  action="store_true", help="Run dependency-tree step only")
-    parser.add_argument("--github",   action="store_true", help="Run github-repos step only")
-    parser.add_argument("--pagerank", action="store_true", help="Run pagerank/results step only")
+    parser.add_argument("--summary",      action="store_true", help="Run packages-summary step only")
+    parser.add_argument("--top",          action="store_true", help="Run top-packages step only")
+    parser.add_argument("--deptree",      action="store_true", help="Run dependency-tree step only")
+    parser.add_argument("--github",       action="store_true", help="Run github-repos step only")
+    parser.add_argument("--pagerank",     action="store_true", help="Run pagerank/results step only")
+    parser.add_argument("--ignore-gaps",  action="store_true",
+                        help="Skip completeness check and calculate results on available data")
     args = parser.parse_args()
 
     # If no step flags, run everything
     run_all = not any([args.summary, args.top, args.deptree, args.github, args.pagerank])
 
     console.rule("[bold white]npm process_data.py")
-    console.print(f"  Started:  [cyan]{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}[/cyan]")
-    console.print(f"  YEARS:    [cyan]{YEARS}[/cyan]")
-    console.print(f"  ALPHA:    [cyan]{ALPHA}[/cyan]")
+    console.print(f"  Started:     [cyan]{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}[/cyan]")
+    console.print(f"  YEARS:       [cyan]{YEARS}[/cyan]")
+    console.print(f"  ALPHA:       [cyan]{ALPHA}[/cyan]")
+    console.print(f"  ignore-gaps: [cyan]{args.ignore_gaps}[/cyan]")
     console.print()
 
     t_total = time.perf_counter()
@@ -367,6 +397,10 @@ def main() -> None:
     if run_all or args.top or args.deptree or args.pagerank:
         if not raw:
             raw = load_raw_downloads()
+
+    console.rule("[bold]Data completeness")
+    check_gaps(raw, args.ignore_gaps)
+    console.print()
 
     if run_all or args.top:
         top_packages = step_top_packages(raw)

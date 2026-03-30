@@ -1,5 +1,5 @@
 """
-Expand npm package coverage by following dependency edges iteratively.
+Fetch npm download + dependency data, iterating until the graph is complete.
 
 Starting from top-package-downloads.csv, each round:
   1. Find all dependency packages without download data
@@ -7,16 +7,18 @@ Starting from top-package-downloads.csv, each round:
   3. Fetch their runtime dependencies from npm registry
   4. Repeat until no new packages remain
 
-State is persisted after every round — safe to interrupt and resume.
+State is persisted after every 20 packages — safe to interrupt and resume.
+After this completes, run process_data.py to generate derived output files.
 
-Outputs go to data/npm/raw/:
+Outputs (raw data only):
   data/npm/raw/downloads.csv     — long format, one row per (package, year)
   data/npm/raw/dependencies.csv  — all known dep edges (grows each round)
 
 Run:
-    uv run src/npm/expand_packages.py
-    uv run src/npm/expand_packages.py --max-rounds 3
-    uv run src/npm/expand_packages.py --concurrency 20
+    uv run src/npm/fetch_npm_data.py
+    uv run src/npm/fetch_npm_data.py --max-rounds 3
+    uv run src/npm/fetch_npm_data.py --concurrency 20
+    uv run src/npm/fetch_npm_data.py --limit 50   # test mode
 """
 
 import argparse
