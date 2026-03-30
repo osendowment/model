@@ -184,6 +184,9 @@ while frontier:
     for pkg_lower in frontier:
         pkg = display_name.get(pkg_lower, pkg_lower)
         for dep_lower, dep_type in pkg_deps.get(pkg_lower, []):
+            # Skip deps not in PyPI download data (OS packages, GitHub Actions, etc.)
+            if dep_lower not in pkg_downloads:
+                continue
             dep = display_name.get(dep_lower, dep_lower)
             edge = (pkg, dep, dep_type)
             if edge not in seen_edges:
