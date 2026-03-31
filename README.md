@@ -16,37 +16,42 @@ Work is currently happening in this repo and the following places:
 
 ## High-level Overview
 
+### Principles
+
+1. We aim to build a transparent, measurable, and verifiable model that can be iteratively improved by the open-source community and approved by a majority of active OSE donors.
+
+2. It will never be a perfect model, because (1) open-source consumption cannot be measured with 100% precision, and (2) there is no ideal consensus on how to prioritize OSS grants based on measurable inputs alone.
+
 ### Ecosystems
 
-We aim to focus our support on the core of open-source ecosystems — like ~1% of packages accounting for 99% of downloads and dependencies. Our model shall be a data-driven approximation of the global usage of the open-source supply chain, helping to detect its most critical but underfunded elements.
+We aim to focus our support on the core of open-source ecosystems — roughly the ~1% of packages that account for 99% of downloads and dependencies. Our model is a data-driven approximation of global open-source supply chain usage, designed to surface its most critical yet underfunded components.
 
-For us, it is important to drill down dependencies from popular ecosystems like Python and JS/TS to lower-level ecosystems. For instance, Pandas [Python] depends on NumPy [Python], which depends on OpenBLAS [C] ([details](https://codeberg.org/vladh/bindep)). This approach should eventually create a natural priority for low-level infra libraries in C/C++, Fortran, etc.
+It is important to trace dependencies across ecosystem boundaries, not just within them. For instance, Pandas [Python] depends on NumPy [Python], which depends on OpenBLAS [C] ([details](https://codeberg.org/vladh/bindep)). This cross-ecosystem view naturally elevates low-level infrastructure libraries in C/C++, Fortran, and similar languages.
 
 ### Model Development
 
-Besides deciding how to divide grants between ecosystems, we have to prioritize OSS projects within each ecosystem. Our goal is to make this process clear and easy to measure, using both data and human-in-the-loop elements at the start. The model is currently under development, and its ready-to-use version will come from discussions with OSE donors.
+Beyond dividing grants between ecosystems, we need to prioritize individual OSS projects within each one. Our goal is to make this process transparent and quantifiable, combining automated scoring with human judgment, especially in the early stages. The model is under active development; its final form will emerge from discussions with OSE donors.
 
-Our approach will likely combine Value and Risk scores ([example](https://kvinogradov.com/algo-sponsors/)). Here are some possible parts that might be included: a (+) means the metric increases along with the component (if everything else stays the same), and a (-) means the opposite. These components are just for illustration purposes, and our grantmaking process will use a more comprehensive model for prioritization.
+Our approach will likely combine Value and Risk scores ([example](https://kvinogradov.com/algo-sponsors/)). The components below are illustrative: (+) means the metric increases with the component, (–) means it decreases.
 
 **Value for the Ecosystem**
 
 * Usage
-  * (+) # dependents, based on data from package managers, GitHub, OSE analysis, etc.
-  * (+) # downloads: based on data from package managers, OSE analysis, etc.
-* Manual Highlights
+  * (+) Number of dependents, based on data from package managers, GitHub, OSE analysis, etc.
+  * (+) Number of downloads, based on data from package managers, OSE analysis, etc.
+* Manual highlights
   * (+) Qualified funding requests
   * (+) Endorsements from OSE donors
 
-#### Risk of the Project
+**Risk of the Project**
 
-* Complexity & Security
-  * (+) LOCs
+* Complexity & security
+  * (+) Lines of code
   * (+) [OpenSSF score](https://scorecard.dev)
-* Maintainance
+* Maintenance
   * (–) Active developers
   * (–) Bus factor ([example](https://github.com/JetBrains-Research/bus-factor-explorer))
-  * (+) Issued submitted
+  * (+) Issues submitted
 * Funding
-  * (–) # GitHub Sponsors
-  * (–) Known existing funding
+  * (–) GitHub Sponsors and other known funding
   * (+) Funding requests
