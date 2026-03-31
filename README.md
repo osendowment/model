@@ -20,7 +20,7 @@ Work is currently happening in this repo and the following places:
 
 1. We aim to build a transparent, measurable, and verifiable model that can be iteratively improved by the open-source community and approved by a majority of active OSE donors.
 
-2. It will never be a perfect model, because (1) open-source consumption cannot be measured with 100% precision, and (2) there is no ideal consensus on how to prioritize OSS grants based on measurable inputs alone.
+2. It will never be a perfect model, because (1) open-source consumption cannot be measured with 100% precision, and (2) there is no ideal consensus on how to prioritize OSS grants.
 
 ### Ecosystems
 
