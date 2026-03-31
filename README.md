@@ -2,7 +2,7 @@
 
 This is the work-in-progress fund distribution model for the [Open Source Endowment][ose].
 
-Work is currently happening in the following places:
+Work is currently happening in this repo and the following places:
 
 * [bindep][bindep] ([@vladh][vlad.website]) — Strategies for finding binary dependencies
 * [software-finder][software-finder] ([@jring-o][jring-o]) — PyPI to GitHub repository mapper
