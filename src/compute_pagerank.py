@@ -6,14 +6,12 @@ For each ecosystem:
   - Edges  = A → B means "A depends on B" (B gets rank from dependents)
   - Node weight = avg_downloads from top-package-downloads.csv (0 if not in top list)
 
-Two PageRank variants are computed:
-  - pagerank       : standard PageRank (structural importance = how critical a node is)
-  - pagerank_dl    : download-personalized PageRank (biases random walk toward
-                     high-download packages, combining popularity with centrality)
+Download-personalized PageRank is computed: biases random walk toward
+high-download packages, combining popularity with centrality.
 
 Outputs (one per ecosystem):
   data/{ecosystem}/pagerank.csv
-  Columns: package, rank, pagerank, pagerank_dl, avg_downloads, in_top_list
+  Columns: package, rank, pagerank, avg_downloads, in_top_list
 
 Run:
     uv run src/compute_pagerank.py
@@ -91,9 +89,6 @@ def build_and_rank(name: str, cfg: dict, alpha: float) -> list[dict]:
     n_edges = G.number_of_edges()
     console.print(f"    Graph: {n_nodes:,} nodes  {n_edges:,} edges")
 
-    # Standard PageRank
-    pr = nx.pagerank(G, alpha=alpha)
-
     # Download-personalized PageRank
     total_dl = sum(downloads.values()) or 1
     personalization = {pkg: dl / total_dl for pkg, dl in downloads.items()}
@@ -101,7 +96,7 @@ def build_and_rank(name: str, cfg: dict, alpha: float) -> list[dict]:
     for node in G.nodes:
         if node not in personalization:
             personalization[node] = 0.0
-    pr_dl = nx.pagerank(G, alpha=alpha, personalization=personalization)
+    pr = nx.pagerank(G, alpha=alpha, personalization=personalization)
 
     # Build output rows (all nodes in graph)
     rows = []
@@ -109,7 +104,6 @@ def build_and_rank(name: str, cfg: dict, alpha: float) -> list[dict]:
         rows.append({
             "package":      node,
             "pagerank":     pr[node],
-            "pagerank_dl":  pr_dl[node],
             "avg_downloads": downloads.get(node, 0),
             "in_top_list":  node in downloads,
         })
@@ -123,7 +117,7 @@ def build_and_rank(name: str, cfg: dict, alpha: float) -> list[dict]:
 
 
 def write_csv(rows: list[dict], path: str) -> None:
-    fields = ["rank", "package", "pagerank", "pagerank_dl", "avg_downloads", "in_top_list"]
+    fields = ["rank", "package", "pagerank", "avg_downloads", "in_top_list"]
     tmp = path + ".tmp"
     with open(tmp, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields, quoting=csv.QUOTE_ALL)
@@ -137,7 +131,6 @@ def print_top(name: str, rows: list[dict], n: int = 15) -> None:
     table.add_column("Rank", justify="right")
     table.add_column("Package", style="bold")
     table.add_column("PageRank", justify="right")
-    table.add_column("PR (dl)", justify="right")
     table.add_column("Avg DL", justify="right")
 
     for r in rows[:n]:
@@ -145,7 +138,6 @@ def print_top(name: str, rows: list[dict], n: int = 15) -> None:
             str(r["rank"]),
             r["package"],
             f"{r['pagerank']:.6f}",
-            f"{r['pagerank_dl']:.6f}",
             f"{r['avg_downloads']:,}" if r["avg_downloads"] else "—",
         )
     console.print(table)
