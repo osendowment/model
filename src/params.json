@@ -1,0 +1,30 @@
+{
+  "top_selection": {
+    "method": "cumulative_download_share",
+    "threshold_pct": 95,
+    "comment": "A package is 'top' if it falls within the top X% of cumulative download mass in its ecosystem"
+  },
+  "pagerank": {
+    "alpha": 0.85,
+    "comment": "Damping factor for PageRank (0.85 = standard)"
+  },
+  "value_classes": {
+    "A": 0.50,
+    "B": 0.75,
+    "C": 0.90,
+    "comment": "Cumulative PageRank share cutoffs: A <= 50%, B <= 75%, C <= 90%, D > 90%"
+  },
+  "risk_classification": {
+    "concentration": {
+      "A": {"max_bus_factor": 1, "min_hhi": 8000},
+      "B": {"max_bus_factor": 2, "min_hhi": 5000},
+      "C": {"max_bus_factor": 4, "min_hhi": 2500}
+    },
+    "complexity_loc": {
+      "A": 1000000,
+      "B": 100000,
+      "C": 10000
+    }
+  },
+  "years": [2021, 2022, 2023, 2024, 2025]
+}
