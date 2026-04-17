@@ -37,5 +37,5 @@ Our approach combines three stages:
 | Step | Goal | Implemented | Roadmap |
 |------|------|-------------|---------|
 | **[Value](docs/value.md)** | Find most important packages in ecosystems | Download-weighted PageRank for Python (PyPI), Rust (crates), JS/TS (npm), C/C++ (Debian, Homebrew) based on dependency trees, covering 95% downloads in each ecosystem | Community nominations, critical software lists, cross-ecosystem dependencies |
-| **[Eligibility](docs/eligibility.md)** | Filter to fundable projects | OSS license check (63 OSI-approved) | Trademark ownership (corporate vs community) |
+| **[Eligibility](docs/eligibility.md)** | Filter to fundable projects | OSS license check (63 OSI-approved) | Trademark check (corporate vs community), EOL check |
 | **[Risk](docs/risk.md)** | Prioritize risky projects among most valuable | Bus factor and Herfindahl--Hirschman index for contributors, complexity metrics (LOC, etc) using [scc](https://github.com/boyter/scc) | [OpenSSF scorecard](https://scorecard.dev), active maintainers, issue activity, GitHub Sponsors |
