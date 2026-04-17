@@ -18,6 +18,10 @@
 - Prefer flat, explicit steps. Use abstractions only when they make the code *more* readable, not less.
 - Name things clearly. A well-named function or variable is worth more than a comment.
 
+## Git
+
+- **Never push to this repo without explicit user approval in the current message.** Always commit locally and ask before pushing.
+
 ## Stack
 
 - Python with `uv` for package management (`uv run` to execute scripts)
