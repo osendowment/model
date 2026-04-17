@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Determine OSS eligibility for GitHub repos based on license.
 
-Reads data/github/top-repos.csv and upserts data/eligibility.csv with columns:
+Reads data/github/search/top-repos.csv and upserts data/eligibility.csv with columns:
 repo, repo_id, license, is_oss, tm_owner, tm_owner_type, eligibility.
 
 Usage:
@@ -18,7 +18,7 @@ from rich.table import Table
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-REPOS_FILE = DATA_DIR / "github" / "top-repos.csv"
+REPOS_FILE = DATA_DIR / "github" / "search" / "top-repos.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility.csv"
 
 FIELDS = ["repo", "repo_id", "user", "user_id", "user_type", "license", "is_oss", "tm_owner", "tm_owner_type", "eligibility"]
