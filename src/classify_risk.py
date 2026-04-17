@@ -1,32 +1,36 @@
 #!/usr/bin/env python3
-"""Aggregate contributor metrics into risk classifications per repo.
+"""Aggregate contributor + git metrics into risk classifications per repo.
 
-Reads data/github/repo-contrib-metrics.csv and writes data/risk-metrics.csv
-with columns: repo, active_contributors, hhi_commits, bus_factor_commits,
-est_locs, concentration_class, complexity_class.
+Reads data/github/contributors/{bus-factor,hhi,contributors}.csv (2021-2025
+aggregate) and data/github/git/loc.csv (most recent year) and writes
+data/risk-metrics.csv with columns: repo, active_contributors, hhi_commits,
+bus_factor_commits, loc, concentration_class, complexity_class.
 
 Usage:
-    python -m src.risk
+    python -m src.classify_risk
 """
 
 import csv
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
 
+from src.params import CONCENTRATION_THRESHOLDS, COMPLEXITY_LOC_THRESHOLDS
+
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-METRICS_FILE = DATA_DIR / "github" / "repo-contrib-metrics.csv"
-LOCS_FILE = DATA_DIR / "github" / "locs.csv"
+CONTRIB_DIR = DATA_DIR / "github" / "contributors"
+LOC_FILE = DATA_DIR / "github" / "git" / "loc.csv"
 OUTPUT_FILE = DATA_DIR / "risk-metrics.csv"
 AGG_COL = "2021-2025"
+LOC_YEAR = "2025"  # most recent year in git/loc.csv
 
-REPOS_FILE = DATA_DIR / "github" / "top-repos.csv"
+REPOS_FILE = DATA_DIR / "github" / "search" / "top-repos.csv"
 FIELDS = ["repo", "repo_id", "active_contributors", "hhi_commits", "bus_factor_commits",
-          "est_locs", "concentration_class", "complexity_class"]
+          "loc", "concentration_class", "complexity_class"]
 
 
 def concentration_class(bus_factor: int, hhi: int) -> str:
@@ -37,36 +41,36 @@ def concentration_class(bus_factor: int, hhi: int) -> str:
     C (moderate):  BF<=4 and HHI >= 2500 — small team, moderate concentration
     D (healthy):   everything else        — distributed enough
     """
-    if bus_factor == 1 and hhi >= 8000:
+    if bus_factor <= CONCENTRATION_THRESHOLDS["A"]["max_bus_factor"] and hhi >= CONCENTRATION_THRESHOLDS["A"]["min_hhi"]:
         return "A"
-    if bus_factor <= 2 and hhi >= 5000:
+    if bus_factor <= CONCENTRATION_THRESHOLDS["B"]["max_bus_factor"] and hhi >= CONCENTRATION_THRESHOLDS["B"]["min_hhi"]:
         return "B"
-    if bus_factor <= 4 and hhi >= 2500:
+    if bus_factor <= CONCENTRATION_THRESHOLDS["C"]["max_bus_factor"] and hhi >= CONCENTRATION_THRESHOLDS["C"]["min_hhi"]:
         return "C"
     return "D"
 
 
-def complexity_class(est_locs: int | None) -> str:
-    """Classify repo complexity based on estimated lines of code.
+def complexity_class(loc: int | None) -> str:
+    """Classify repo complexity based on scc-counted lines of code.
 
     A (massive):   1M+ LOC   — enormous codebase, high cognitive load
     B (large):     100K–1M   — significant, requires dedicated team
     C (moderate):  10K–100K  — typical project, manageable but non-trivial
     D (small):     <10K LOC  — easy to audit and understand
     """
-    if est_locs is None or est_locs == 0:
+    if loc is None or loc == 0:
         return ""
-    if est_locs >= 1_000_000:
+    if loc >= COMPLEXITY_LOC_THRESHOLDS["A"]:
         return "A"
-    if est_locs >= 100_000:
+    if loc >= COMPLEXITY_LOC_THRESHOLDS["B"]:
         return "B"
-    if est_locs >= 10_000:
+    if loc >= COMPLEXITY_LOC_THRESHOLDS["C"]:
         return "C"
     return "D"
 
 
 def _load_repo_ids() -> dict[str, str]:
-    """Load repo slug → repo_id mapping from top-repos.csv."""
+    """Load repo slug → repo_id mapping from search/top-repos.csv."""
     mapping: dict[str, str] = {}
     if REPOS_FILE.exists():
         with open(REPOS_FILE, encoding="utf-8") as f:
@@ -76,37 +80,46 @@ def _load_repo_ids() -> dict[str, str]:
 
 
 def _load_locs() -> dict[str, int]:
-    """Load repo → est_locs mapping from locs.csv."""
+    """Load repo → loc mapping from git/loc.csv, using the most recent year."""
     mapping: dict[str, int] = {}
-    if LOCS_FILE.exists():
-        with open(LOCS_FILE, encoding="utf-8") as f:
+    if LOC_FILE.exists():
+        with open(LOC_FILE, encoding="utf-8") as f:
             for row in csv.DictReader(f):
-                if row.get("est_locs"):
-                    mapping[row["repo"]] = int(row["est_locs"])
+                val = row.get(LOC_YEAR, "")
+                if val:
+                    mapping[row["repo"]] = int(val)
     return mapping
+
+
+def _load_contrib_metric(filename: str) -> dict[str, str]:
+    """Load {repo: 2021-2025 aggregate value} from a wide per-metric CSV."""
+    path = CONTRIB_DIR / filename
+    out: dict[str, str] = {}
+    if not path.exists():
+        return out
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            val = row.get(AGG_COL, "")
+            if val:
+                out[row["repo"]] = val
+    return out
 
 
 def aggregate() -> tuple[list[dict], int]:
     """Read contributor metrics and return risk-classified rows."""
     repo_ids = _load_repo_ids()
     repo_locs = _load_locs()
-    repo_metrics: dict[str, dict[str, str]] = defaultdict(dict)
 
-    with open(METRICS_FILE, encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            repo = row["github_repo"]
-            metric = row["metric"]
-            value = row.get(AGG_COL, "")
-            if value:
-                repo_metrics[repo][metric] = value
+    bf_by_repo = _load_contrib_metric("bus-factor.csv")
+    hhi_by_repo = _load_contrib_metric("hhi.csv")
+    contribs_by_repo = _load_contrib_metric("contributors.csv")
 
     rows = []
     skipped = 0
-    for repo, metrics in sorted(repo_metrics.items()):
-        bf_str = metrics.get("bus_factor", "")
-        hhi_str = metrics.get("hhi", "")
-        contributors_str = metrics.get("contributors", "")
+    for repo in sorted(set(bf_by_repo) | set(hhi_by_repo) | set(contribs_by_repo)):
+        bf_str = bf_by_repo.get(repo, "")
+        hhi_str = hhi_by_repo.get(repo, "")
+        contributors_str = contribs_by_repo.get(repo, "")
 
         if not bf_str or not hhi_str:
             skipped += 1
@@ -123,7 +136,7 @@ def aggregate() -> tuple[list[dict], int]:
             "active_contributors": contributors,
             "hhi_commits": hhi,
             "bus_factor_commits": bf,
-            "est_locs": locs if locs is not None else "",
+            "loc": locs if locs is not None else "",
             "concentration_class": concentration_class(bf, hhi),
             "complexity_class": complexity_class(locs),
         })

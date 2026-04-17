@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch, AsyncMock
 import pytest
 
 from src.github.models import Contributor, DateRange
-from src.github.contributors import _sanitize, calculate_bus_factor, parse_repo
-from src.github.api import fetch_contributor_stats, _fetch_stats_once, _Deferred, _NoStats, _AsyncRateLimiter
-from src.risk import concentration_class
+from src.github.fetch_contributors_metrics import calculate_bus_factor, parse_repo
+from src.github.github_client import fetch_contributor_stats, _fetch_stats_once, _Deferred, _NoStats, _AsyncRateLimiter
+from src.classify_risk import concentration_class
 
 
 class TestParseRepo:
@@ -293,23 +293,6 @@ class TestDateRange:
         assert contribs[0].commits == 20
 
 
-class TestSanitize:
-    def test_clean_name(self):
-        assert _sanitize("Alice") == "Alice"
-
-    def test_replacement_chars_stripped(self):
-        assert _sanitize("Jos\ufffd Garc\ufffda") == "Jos Garca"
-
-    def test_whitespace_normalized(self):
-        assert _sanitize("  Alice   Bob  ") == "Alice Bob"
-
-    def test_empty_after_strip(self):
-        assert _sanitize("\ufffd\ufffd") == ""
-
-    def test_mixed(self):
-        assert _sanitize("  \ufffdAlice\ufffd  Bob  ") == "Alice Bob"
-
-
 class TestConcentrationRiskClass:
     def test_class_a_bf1_hhi_10000(self):
         assert concentration_class(1, 10000) == "A"
@@ -346,8 +329,8 @@ class TestConcentrationRiskClass:
 
 
 class TestFetchContributorStats:
-    @patch("src.github.api._session")
-    @patch("src.github.api.time.sleep")
+    @patch("src.github.github_client._session")
+    @patch("src.github.github_client.time.sleep")
     def test_204_retries_then_succeeds(self, mock_sleep, mock_session):
         resp_204 = MagicMock(status_code=204)
         resp_200 = MagicMock(status_code=200)
@@ -361,8 +344,8 @@ class TestFetchContributorStats:
         assert mock_session.get.call_count == 3
         assert mock_sleep.call_count == 2
 
-    @patch("src.github.api._session")
-    @patch("src.github.api.time.sleep")
+    @patch("src.github.github_client._session")
+    @patch("src.github.github_client.time.sleep")
     def test_202_and_204_mixed(self, mock_sleep, mock_session):
         resp_202 = MagicMock(status_code=202)
         resp_204 = MagicMock(status_code=204)
@@ -375,8 +358,8 @@ class TestFetchContributorStats:
         assert len(result) == 1
         assert mock_session.get.call_count == 4
 
-    @patch("src.github.api._session")
-    @patch("src.github.api.time.sleep")
+    @patch("src.github.github_client._session")
+    @patch("src.github.github_client.time.sleep")
     def test_exhausted_retries_returns_empty(self, mock_sleep, mock_session):
         resp_204 = MagicMock(status_code=204)
         mock_session.get.return_value = resp_204
@@ -386,7 +369,7 @@ class TestFetchContributorStats:
         assert result == []
         assert mock_session.get.call_count == 3
 
-    @patch("src.github.api._session")
+    @patch("src.github.github_client._session")
     def test_200_empty_returns_empty(self, mock_session):
         resp_200 = MagicMock(status_code=200)
         resp_200.json.return_value = []
