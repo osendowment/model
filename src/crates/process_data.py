@@ -39,9 +39,7 @@ import polars as pl
 from rich.console import Console
 from rich.table import Table
 
-YEARS   = list(range(2021, 2026))
-MIN_AVG = 1_000_000
-ALPHA   = 0.85
+from src.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
 DUMP_DIR    = "data/crates/db-dump"
 MONTHLY_DIR = "data/crates/version-downloads"
@@ -58,15 +56,18 @@ YEAR_COLS = [str(y) for y in YEARS]
 console = Console()
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--min-avg", type=int,   default=MIN_AVG)
-parser.add_argument("--alpha",   type=float, default=ALPHA)
+parser.add_argument("--min-avg", type=int,   default=None)
+parser.add_argument("--alpha",   type=float, default=PAGERANK_ALPHA)
 args = parser.parse_args()
 
 t_total = time.perf_counter()
 console.rule("[bold]crates.io — process data")
 console.print(f"DB dump  : [cyan]{DUMP_DIR}/[/cyan]")
 console.print(f"Monthly  : [cyan]{MONTHLY_DIR}/[/cyan]")
-console.print(f"Years    : {YEARS[0]}–{YEARS[-1]}  |  Min avg: {args.min_avg:,}  |  PR alpha: {args.alpha}")
+if args.min_avg is not None:
+    console.print(f"Years    : {YEARS[0]}–{YEARS[-1]}  |  Min avg: {args.min_avg:,}  |  PR alpha: {args.alpha}")
+else:
+    console.print(f"Years    : {YEARS[0]}–{YEARS[-1]}  |  Top {TOP_THRESHOLD_PCT}% cumulative DL  |  PR alpha: {args.alpha}")
 console.print()
 
 
@@ -174,21 +175,48 @@ for year in YEARS:
 console.rule("[bold]Step 3[/bold] — top-packages.csv")
 
 t = time.perf_counter()
+
+# Compute avg downloads for every crate, sorted descending
+all_avgs: list[tuple[int, str, int]] = []  # (crate_id, name, avg_downloads)
+for cid, name in crate_id_to_name.items():
+    annual = crate_annual.get(cid, {y: 0 for y in YEARS})
+    avg = sum(annual.values()) // len(YEARS)
+    if avg > 0:
+        all_avgs.append((cid, name, avg))
+all_avgs.sort(key=lambda x: x[2], reverse=True)
+
+if args.min_avg is not None:
+    # CLI override: use hard min-avg cutoff
+    min_avg_cutoff = args.min_avg
+else:
+    # Find cutoff at TOP_THRESHOLD_PCT of ecosystem total downloads
+    eco_total = ecosystem_avg_downloads("crates")
+    target = eco_total * TOP_THRESHOLD_PCT / 100
+    cumulative = 0
+    min_avg_cutoff = 0
+    for _, _, avg in all_avgs:
+        cumulative += avg
+        if cumulative >= target:
+            min_avg_cutoff = avg
+            break
+
 top_rows = []
 # top_crate_ids: seed set for the transitive dependency expansion in Step 4
 top_crate_ids: set[int] = set()
-for cid, name in crate_id_to_name.items():
-    annual = crate_annual.get(cid, {y: 0 for y in YEARS})
-    # avg is the simple mean across all years (integer — fractions of a download are meaningless)
-    avg = sum(annual.values()) // len(YEARS)
-    if avg >= args.min_avg:
+for cid, name, avg in all_avgs:
+    if avg >= min_avg_cutoff:
+        annual = crate_annual.get(cid, {y: 0 for y in YEARS})
         top_rows.append({"package": name, "avg_downloads": avg, **{str(y): annual[y] for y in YEARS}})
         top_crate_ids.add(cid)
-top_rows.sort(key=lambda r: r["avg_downloads"], reverse=True)
 # top_package_names: used in Step 6 to flag whether a dep-tree crate is itself a top-downloaded package
 top_package_names: set[str] = {r["package"] for r in top_rows}
 
-write_csv(TOP_CSV, ["package", "avg_downloads"] + YEAR_COLS, top_rows)
+# Add avg_downloads_share (fraction of ecosystem total)
+eco_total = ecosystem_avg_downloads("crates")
+for r in top_rows:
+    r["avg_downloads_share"] = f"{r['avg_downloads'] / eco_total:.8f}" if eco_total else "0"
+
+write_csv(TOP_CSV, ["package", "avg_downloads", "avg_downloads_share"] + YEAR_COLS, top_rows)
 
 table = Table(title="Top 10 crates by avg downloads", show_header=True, header_style="bold dim")
 table.add_column("Package", style="bold")
@@ -323,7 +351,15 @@ for cid in universe_cids:
     })
 result_rows.sort(key=lambda r: r["pagerank"], reverse=True)
 
-write_csv(RESULTS_CSV, ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank"], result_rows)
+# Assign value classes by cumulative pagerank share
+total_pr = sum(r["pagerank"] for r in result_rows)
+cum = 0.0
+for r in result_rows:
+    cum += r["pagerank"]
+    share = cum / total_pr if total_pr > 0 else 1.0
+    r["value_class"] = assign_value_class(share)
+
+write_csv(RESULTS_CSV, ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank", "value_class"], result_rows)
 
 table = Table(title="Top 15 by PageRank", show_header=True, header_style="bold dim")
 table.add_column("Package", style="bold")

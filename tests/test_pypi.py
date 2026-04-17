@@ -215,7 +215,7 @@ def test_github_repos_non_empty():
 
 def test_results_columns():
     cols, _ = _read_csv(RESULTS_CSV)
-    expected = ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank", "pagerank_dl"]
+    expected = ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank", "value_class"]
     assert cols == expected
 
 
@@ -249,7 +249,13 @@ def test_results_pagerank_numeric():
     _, rows = _read_csv(RESULTS_CSV)
     for r in rows:
         float(r["pagerank"])     # should not raise
-        float(r["pagerank_dl"])  # should not raise
+
+
+def test_results_value_class_valid():
+    _, rows = _read_csv(RESULTS_CSV)
+    valid = {"A", "B", "C", "D"}
+    bad = [r for r in rows if r["value_class"] not in valid]
+    assert not bad, f"Invalid value_class: {[r['value_class'] for r in bad[:5]]}"
 
 
 def test_results_sorted_by_pagerank_descending():

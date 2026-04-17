@@ -4,7 +4,7 @@ Process all PyPI data into final output CSVs.
 Steps:
   1  Load package downloads from BigQuery export
   2  Load dependency graph from raw deps
-  3  Build top-packages.csv       — packages with avg ≥ 1M downloads
+  3  Build top-packages.csv       — packages within top N% of cumulative downloads
   4  Build dependency-tree.csv    — full transitive dep tree from top packages
   5  Build github-repos.csv       — owner/repo for every package in dep tree
   6  Build results.csv            — all dep-tree packages with downloads + PageRank
@@ -22,7 +22,7 @@ Outputs:
 
 Run:
     uv run src/pypi/process_data.py
-    uv run src/pypi/process_data.py --min-avg 500000
+    uv run src/pypi/process_data.py --min-avg 500000   # override cumulative threshold
     uv run src/pypi/process_data.py --alpha 0.90
 """
 
@@ -37,9 +37,7 @@ import networkx as nx
 from rich.console import Console
 from rich.table import Table
 
-YEARS   = list(range(2021, 2026))
-MIN_AVG = 1_000_000
-ALPHA   = 0.85
+from src.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
 BQ_CSV      = "data/pypi/bigquery/bq-package-downloads.csv"
 DEPS_CSV    = "data/pypi/raw/package-dependencies.csv"
@@ -56,8 +54,8 @@ YEAR_COLS = [str(y) for y in YEARS]
 console = Console()
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--min-avg", type=int,   default=MIN_AVG)
-parser.add_argument("--alpha",   type=float, default=ALPHA)
+parser.add_argument("--min-avg", type=int,   default=None)
+parser.add_argument("--alpha",   type=float, default=PAGERANK_ALPHA)
 args = parser.parse_args()
 
 t_total = time.perf_counter()
@@ -65,7 +63,8 @@ console.rule("[bold]PyPI — process data")
 console.print(f"BigQuery : [cyan]{BQ_CSV}[/cyan]")
 console.print(f"Deps     : [cyan]{DEPS_CSV}[/cyan]")
 console.print(f"GitHub   : [cyan]{GITHUB_CSV_RAW}[/cyan]")
-console.print(f"Years    : {YEARS[0]}–{YEARS[-1]}  |  Min avg: {args.min_avg:,}  |  PR alpha: {args.alpha}")
+threshold_desc = f"--min-avg {args.min_avg:,}" if args.min_avg else f"top {TOP_THRESHOLD_PCT}% cumulative downloads"
+console.print(f"Years    : {YEARS[0]}–{YEARS[-1]}  |  Top: {threshold_desc}  |  PR alpha: {args.alpha}")
 console.print()
 
 
@@ -139,8 +138,26 @@ top_rows = []
 # top_pkg_names_lower: seed set for transitive dep expansion in Step 4
 top_pkg_names_lower: set[str] = set()
 
+if args.min_avg is not None:
+    # CLI override: use explicit download threshold
+    min_avg_cutoff = args.min_avg
+    console.print(f"  Using --min-avg override: {min_avg_cutoff:,}")
+else:
+    # Compute cutoff from cumulative download share of ecosystem total
+    sorted_pkgs = sorted(pkg_downloads.values(), key=lambda d: d["avg_downloads"], reverse=True)
+    eco_total = ecosystem_avg_downloads("pypi")
+    cum_downloads = 0
+    min_avg_cutoff = 0
+    target = eco_total * TOP_THRESHOLD_PCT / 100.0
+    for d in sorted_pkgs:
+        cum_downloads += d["avg_downloads"]
+        if cum_downloads >= target:
+            min_avg_cutoff = d["avg_downloads"]
+            break
+    console.print(f"  Cumulative {TOP_THRESHOLD_PCT}% threshold → min avg: {min_avg_cutoff:,}")
+
 for name_lower, data in pkg_downloads.items():
-    if data["avg_downloads"] >= args.min_avg:
+    if data["avg_downloads"] >= min_avg_cutoff:
         top_rows.append({
             "package":       data["package"],
             "avg_downloads": data["avg_downloads"],
@@ -150,7 +167,12 @@ for name_lower, data in pkg_downloads.items():
 
 top_rows.sort(key=lambda r: r["avg_downloads"], reverse=True)
 
-write_csv(TOP_CSV, ["package", "avg_downloads"] + YEAR_COLS, top_rows)
+# Add avg_downloads_share (fraction of ecosystem total)
+eco_total = ecosystem_avg_downloads("pypi")
+for r in top_rows:
+    r["avg_downloads_share"] = f"{r['avg_downloads'] / eco_total:.8f}" if eco_total else "0"
+
+write_csv(TOP_CSV, ["package", "avg_downloads", "avg_downloads_share"] + YEAR_COLS, top_rows)
 
 table = Table(title="Top 10 packages by avg downloads", show_header=True, header_style="bold dim")
 table.add_column("Package", style="bold")
@@ -286,7 +308,15 @@ for pkg_lower in universe:
     })
 result_rows.sort(key=lambda r: r["pagerank"], reverse=True)
 
-write_csv(RESULTS_CSV, ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank"], result_rows)
+# Assign value classes by cumulative pagerank share
+total_pr = sum(r["pagerank"] for r in result_rows)
+cum = 0.0
+for r in result_rows:
+    cum += r["pagerank"]
+    share = cum / total_pr if total_pr > 0 else 1.0
+    r["value_class"] = assign_value_class(share)
+
+write_csv(RESULTS_CSV, ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank", "value_class"], result_rows)
 
 table = Table(title="Top 15 by PageRank", show_header=True, header_style="bold dim")
 table.add_column("Package", style="bold")

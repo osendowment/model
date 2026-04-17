@@ -2,7 +2,7 @@
 process_data.py — Build npm analysis outputs from raw data.
 
 Pipeline:
-  1. top-packages.csv    — packages with avg_downloads >= 1M
+  1. top-packages.csv    — packages covering TOP_THRESHOLD_PCT% of total downloads
   2. Iteratively expand dep tree, fetching missing deps from npm registry
   3. Fetch missing downloads for all dep tree nodes
   4. dependency-tree.csv — transitive edges from top packages
@@ -36,11 +36,9 @@ from rich.table import Table
 sys.path.insert(0, os.path.dirname(__file__))
 from fetch_npm_data import fetch_and_save_deps, fetch_and_save_downloads, load_fetched_dep_packages  # noqa: E402
 
-console = Console()
+from src.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
-YEARS       = [2021, 2022, 2023, 2024, 2025]
-ALPHA       = 0.85
-TOP_MIN_AVG = 1_000_000
+console = Console()
 
 RAW_DOWNLOADS = "data/npm/raw/downloads.csv"
 RAW_DEPS      = "data/npm/raw/dependencies.csv"
@@ -49,7 +47,7 @@ OUT_TOP       = "data/npm/top-packages.csv"
 OUT_DEP_TREE  = "data/npm/dependency-tree.csv"
 OUT_GITHUB    = "data/npm/github-repos.csv"
 OUT_RESULTS   = "data/npm/results.csv"
-WIDE_FIELDS   = ["package", "avg_downloads"] + [str(y) for y in YEARS]
+WIDE_FIELDS   = ["package", "avg_downloads", "avg_downloads_share"] + [str(y) for y in YEARS]
 
 
 # ── helpers ────────────────────────────────────────────────────────────────────
@@ -134,17 +132,38 @@ def build_dep_tree(
 
 def step_top_packages(raw: dict[str, dict[int, int]]) -> set[str]:
     console.rule("[bold cyan]Step 1 — top-packages.csv")
-    t0   = time.perf_counter()
-    rows = sorted(
-        [wide_row(pkg, yv) for pkg, yv in raw.items() if compute_avg(yv) >= TOP_MIN_AVG],
+    t0 = time.perf_counter()
+
+    # Build rows for all packages with nonzero avg downloads, sorted descending
+    all_rows = sorted(
+        [wide_row(pkg, yv) for pkg, yv in raw.items() if compute_avg(yv) > 0],
         key=lambda r: r["avg_downloads"], reverse=True,
     )
+
+    # Find cutoff where cumulative downloads reach TOP_THRESHOLD_PCT% of ecosystem total
+    eco_total = ecosystem_avg_downloads("npm")
+    target = eco_total * TOP_THRESHOLD_PCT / 100
+    cum = 0
+    cutoff_idx = len(all_rows)
+    for i, r in enumerate(all_rows):
+        cum += r["avg_downloads"]
+        if cum >= target:
+            cutoff_idx = i + 1
+            break
+
+    rows = all_rows[:cutoff_idx]
+
+    # Add avg_downloads_share (fraction of ecosystem total)
+    for r in rows:
+        r["avg_downloads_share"] = f"{r['avg_downloads'] / eco_total:.8f}" if eco_total else "0"
+
     atomic_write(OUT_TOP, rows, WIDE_FIELDS)
     tbl = Table(show_header=False, box=None, padding=(0, 2))
     tbl.add_column(style="dim")
     tbl.add_column(justify="right")
-    tbl.add_row("Threshold",    f"avg >= {TOP_MIN_AVG:,}")
+    tbl.add_row("Threshold",    f"top {TOP_THRESHOLD_PCT}% of downloads")
     tbl.add_row("Top packages", f"{len(rows):,}")
+    tbl.add_row("Min avg DL",   f"{rows[-1]['avg_downloads']:,}" if rows else "0")
     tbl.add_row("Elapsed",      f"{time.perf_counter() - t0:.2f}s")
     console.print(tbl)
     return {r["package"] for r in rows}
@@ -265,7 +284,7 @@ def step_results(
     personalization = (
         {n: compute_avg(raw.get(n, {})) / total_dl for n in all_nodes} if total_dl > 0 else None
     )
-    pr = nx.pagerank(G, alpha=ALPHA, personalization=personalization)
+    pr = nx.pagerank(G, alpha=PAGERANK_ALPHA, personalization=personalization)
 
     rows = []
     for pkg in all_nodes:
@@ -280,7 +299,15 @@ def step_results(
         })
     rows.sort(key=lambda r: float(r["pagerank"]), reverse=True)
 
-    fields = ["package", "github_repo", "avg_downloads"] + [str(y) for y in YEARS] + ["top", "pagerank"]
+    # Assign value classes by cumulative pagerank share
+    total_pr = sum(float(r["pagerank"]) for r in rows)
+    cum = 0.0
+    for r in rows:
+        cum += float(r["pagerank"])
+        share = cum / total_pr if total_pr > 0 else 1.0
+        r["value_class"] = assign_value_class(share)
+
+    fields = ["package", "github_repo", "avg_downloads"] + [str(y) for y in YEARS] + ["top", "pagerank", "value_class"]
     atomic_write(OUT_RESULTS, rows, fields)
 
     tbl = Table(show_header=False, box=None, padding=(0, 2))
@@ -313,7 +340,7 @@ def main() -> None:
 
     console.rule("[bold white]npm — process_data.py")
     console.print(f"  Started     : [cyan]{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}[/cyan]")
-    console.print(f"  TOP_MIN_AVG : [cyan]{TOP_MIN_AVG:,}[/cyan]")
+    console.print(f"  Top threshold: [cyan]{TOP_THRESHOLD_PCT}% of downloads[/cyan]")
     console.print(f"  ignore-gaps : [cyan]{args.ignore_gaps}[/cyan]")
     console.print()
 
