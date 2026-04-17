@@ -5,7 +5,7 @@ import datetime
 import pytest
 
 from src.github.models import Contributor, DateRange, is_bot
-from src.github.contributors import (
+from src.github.fetch_contributors_metrics import (
     compute_yearly_breakdown,
     _parse_api_stats,
     _compute_bus_factor,

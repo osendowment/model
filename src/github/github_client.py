@@ -121,18 +121,6 @@ def _sync_request(url: str, **kwargs) -> requests.Response:
     return resp
 
 
-def fetch_repo_info(repo: str) -> tuple[str, int]:
-    """Fetch default branch and repo size (KB) from GitHub API."""
-    url = f"{GITHUB_API}/repos/{repo}"
-    resp = _sync_request(url)
-    resp.raise_for_status()
-    data = resp.json()
-    branch = data.get("default_branch", "main")
-    size_kb = data.get("size", 0)
-    log.debug("Default branch for %s: %s, size: %d KB", repo, branch, size_kb)
-    return branch, size_kb
-
-
 def fetch_contributor_stats(
     repo: str, retries: int = 6,
 ) -> list[dict]:

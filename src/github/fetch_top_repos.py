@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """Search GitHub repos by language and min stars, bypassing 1K result cap via created_at cohorts.
 
+Also backfills repo data for high-value ecosystem packages (npm/pypi/crates/cpp classes A+B)
+that aren't yet in top-repos.csv.
+
 Uses async HTTP with serialized rate limiter driven by GitHub's X-RateLimit headers.
-Caches search counts in data/github/repo-search-counts.csv to skip range-building on repeat runs.
+Caches search counts in data/github/search/repo-counts.csv to skip range-building on repeat runs.
 
 Usage:
-    python -m src.github.search --language Python --min-stars 10000
+    python -m src.github.fetch_top_repos --language Python --min-stars 10000
+    python -m src.github.fetch_top_repos --backfill-only
+    python -m src.github.fetch_top_repos --backfill-only --limit 20
 """
 from __future__ import annotations
 
@@ -19,6 +24,7 @@ import logging
 
 import aiohttp
 from rich.progress import Progress, TaskID
+from rich.table import Table
 
 from src.github.display import (
     console, fmt_step_summary, make_search_progress, display_search_summary,
@@ -27,7 +33,7 @@ from src.github.display import (
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-from src.github.api import get_revolver
+from src.github.github_client import get_revolver
 
 API_URL = "https://api.github.com/search/repositories"
 FIELDS = [
@@ -44,9 +50,20 @@ FIELDS = [
     # timestamps
     "created_at", "updated_at", "pushed_at", "fetched_at",
 ]
-COUNTS_FILE = os.path.join(os.path.dirname(__file__), "..", "..", "data", "github", "repo-search-counts.csv")
-REPOS_FILE = os.path.join(os.path.dirname(__file__), "..", "..", "data", "github", "top-repos.csv")
+DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
+COUNTS_FILE = os.path.join(DATA_DIR, "github", "search", "repo-counts.csv")
+REPOS_FILE = os.path.join(DATA_DIR, "github", "search", "top-repos.csv")
 COUNTS_FIELDS = ["language", "min_stars", "date_from", "date_to", "count", "fetched_at"]
+
+REPOS_API_URL = "https://api.github.com/repos"
+
+# Ecosystem result files and their value_class column (None = include all repos)
+ECOSYSTEM_SOURCES = [
+    (os.path.join(DATA_DIR, "npm", "results.csv"), "value_class"),
+    (os.path.join(DATA_DIR, "pypi", "results.csv"), "value_class"),
+    (os.path.join(DATA_DIR, "crates", "results.csv"), "value_class"),
+    (os.path.join(DATA_DIR, "cpp", "packages.csv"), None),  # no value_class — include all
+]
 
 
 class GitHubRateLimiter:
@@ -311,7 +328,7 @@ async def _fetch_range(session: aiohttp.ClientSession, language: str, min_stars:
 
 
 def _upsert_repos(new_repos: dict[str, dict]) -> tuple[int, int, int]:
-    """Upsert repos into data/github/top-repos.csv, keyed by repo_id.
+    """Upsert repos into data/github/search/top-repos.csv, keyed by repo_id.
 
     Returns (total, added, updated).
     """
@@ -374,6 +391,162 @@ def _parse_item(item: dict, fetched_at: str) -> tuple[str, dict]:
         "pushed_at": item.get("pushed_at", ""),
         "fetched_at": fetched_at,
     }
+
+
+def _load_ecosystem_repos(classes: set[str] = {"A", "B"}) -> set[str]:
+    """Load GitHub repo slugs from ecosystem results (AB classes for npm/pypi/crates, all for cpp)."""
+    repos: set[str] = set()
+    for path, vc_col in ECOSYSTEM_SOURCES:
+        if not os.path.exists(path):
+            log.debug("Skipping %s (not found)", path)
+            continue
+        count = 0
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                slug = row.get("github_repo", "").strip()
+                if not slug:
+                    continue
+                if vc_col:
+                    # Filter by value_class
+                    if row.get(vc_col, "").strip() not in classes:
+                        continue
+                repos.add(slug.lower())
+                count += 1
+        source = os.path.basename(os.path.dirname(path))
+        log.debug("Loaded %d repos from %s", count, source)
+    return repos
+
+
+def _load_existing_slugs() -> set[str]:
+    """Load existing repo slugs from top-repos.csv."""
+    slugs: set[str] = set()
+    if os.path.exists(REPOS_FILE):
+        with open(REPOS_FILE, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                slugs.add(row["repo"].strip().lower())
+    return slugs
+
+
+async def _fetch_repo(session: aiohttp.ClientSession, slug: str, fetched_at: str) -> tuple[str, dict] | None:
+    """Fetch a single repo via GET /repos/{owner}/{repo} and parse into a row."""
+    for attempt in range(3):
+        resp = await _limiter.request(session, url=f"{REPOS_API_URL}/{slug}")
+        async with resp:
+            if resp.status == 200:
+                item = await resp.json()
+                return _parse_item(item, fetched_at)
+            if resp.status == 404:
+                log.debug("Repo not found: %s", slug)
+                return None
+            if resp.status == 301:
+                # Repo was renamed/moved — follow redirect
+                new_url = resp.headers.get("Location")
+                if new_url:
+                    resp2 = await _limiter.request(session, url=new_url)
+                    async with resp2:
+                        if resp2.status == 200:
+                            item = await resp2.json()
+                            return _parse_item(item, fetched_at)
+                return None
+            if resp.status == 403:
+                reset = int(resp.headers.get("X-RateLimit-Reset", 0))
+                wait = max(reset - int(time.time()), 2)
+                _limiter.status_text = f"rate limit reset {datetime.datetime.fromtimestamp(reset).strftime('%H:%M:%S')}"
+                await asyncio.sleep(wait)
+                _limiter.status_text = ""
+                continue
+            log.warning("HTTP %d for %s", resp.status, slug)
+            return None
+    return None
+
+
+async def backfill(limit: int | None = None) -> None:
+    """Fetch repo data for ecosystem AB repos not yet in top-repos.csv."""
+    t_start = time.monotonic()
+
+    ecosystem_repos = _load_ecosystem_repos()
+    existing_slugs = _load_existing_slugs()
+    missing = sorted(ecosystem_repos - existing_slugs)
+
+    console.print(f"[bold]Backfill:[/] {len(ecosystem_repos):,} ecosystem AB repos, "
+                  f"{len(existing_slugs):,} in top-repos, [yellow]{len(missing):,} missing[/]")
+
+    if not missing:
+        console.print("[green]Nothing to backfill.[/]")
+        return
+
+    if limit:
+        missing = missing[:limit]
+        console.print(f"  limiting to {limit:,} repos\n")
+    else:
+        console.print()
+
+    revolver = get_revolver()
+    token = revolver.best_token()
+    if not token:
+        raise RuntimeError("No GitHub tokens found. Set GITHUB_TOKENS in .env")
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+
+    fetched_at = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    repos: dict[str, dict] = {}
+    not_found = 0
+
+    async with aiohttp.ClientSession(headers=headers) as session:
+        def _rate_status() -> str:
+            return _limiter.status_text
+
+        progress = make_search_progress(status_fn=_rate_status)
+
+        with progress:
+            task_id = progress.add_task(
+                f"[green]backfill[/] 0 repos", total=len(missing),
+                status_fn=_rate_status,
+            )
+
+            # Process in batches of 20 concurrent requests
+            batch_size = 20
+            for i in range(0, len(missing), batch_size):
+                batch = missing[i:i + batch_size]
+                results = await asyncio.gather(*[
+                    _fetch_repo(session, slug, fetched_at) for slug in batch
+                ])
+                for result in results:
+                    if result:
+                        slug, row = result
+                        repos[slug] = row
+                    else:
+                        not_found += 1
+                    progress.advance(task_id)
+                    progress.update(
+                        task_id,
+                        description=f"[green]backfill[/] {len(repos):,} repos",
+                    )
+
+            elapsed = time.monotonic() - t_start
+            progress.remove_task(task_id)
+            progress.console.print(fmt_step_summary("backfill", len(missing), elapsed))
+
+    if repos:
+        total, added, updated = _upsert_repos(repos)
+        repos_path = os.path.normpath(REPOS_FILE)
+
+        console.print()
+        summary = Table(show_header=False, padding=(0, 1), box=None)
+        summary.add_column(style="dim")
+        summary.add_column()
+        summary.add_row("Fetched", f"[bold]{len(repos):,}[/bold] ({not_found:,} not found)")
+        summary.add_row("Time", f"{time.monotonic() - t_start:.1f}s ({_limiter.requests_made} API calls)")
+        summary.add_row(
+            "top-repos.csv",
+            f"{repos_path} ({total:,} total, "
+            f"[green]{added:,} added[/], [yellow]{updated:,} updated[/])",
+        )
+        console.print(summary)
+    else:
+        console.print(f"\n[yellow]No repos fetched[/] ({not_found:,} not found)")
 
 
 async def search(languages: list[str], min_stars: int, output: str) -> None:
@@ -496,17 +669,30 @@ async def search(languages: list[str], min_stars: int, output: str) -> None:
 
 def main():
     parser = argparse.ArgumentParser(description="Search GitHub repos by language and min stars")
-    parser.add_argument("--language", nargs="+", required=True,
+    parser.add_argument("--language", nargs="+",
                         help="Language filter(s) (e.g. C C++ Rust)")
     parser.add_argument("--min-stars", type=int, default=1000, help="Minimum stars (default: 1000)")
     parser.add_argument("--output", default=None, help="Output CSV path (default: top-repos.csv only)")
+    parser.add_argument("--backfill", action="store_true",
+                        help="After search, also backfill ecosystem AB repos not in top-repos")
+    parser.add_argument("--backfill-only", action="store_true",
+                        help="Skip search, only backfill ecosystem AB repos")
+    parser.add_argument("--limit", type=int, default=None,
+                        help="Limit backfill to N repos (for testing)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
     if args.debug:
         log.setLevel(logging.DEBUG)
 
-    asyncio.run(search(args.language, args.min_stars, args.output))
+    if args.backfill_only:
+        asyncio.run(backfill(limit=args.limit))
+    elif args.language:
+        asyncio.run(search(args.language, args.min_stars, args.output))
+        if args.backfill:
+            asyncio.run(backfill(limit=args.limit))
+    else:
+        parser.error("--language is required unless --backfill-only is used")
 
 
 if __name__ == "__main__":

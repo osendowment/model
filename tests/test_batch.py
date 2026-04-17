@@ -6,7 +6,7 @@ import os
 import pytest
 
 from src.github.models import Contributor, RunResult, PerfStats
-from src.github.batch import (
+from src.github.batch_runner import (
     _build_metrics_extractors,
     _upsert_yearly_csv,
     _upsert_yearly_csv_batch,
@@ -89,96 +89,120 @@ class TestBuildMetricsExtractors:
         assert extractors["commits"](result) == "0"
 
 
+def _read_csv(path):
+    with open(path, encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
 class TestUpsertYearlyCsv:
-    def _read_csv(self, path):
-        with open(path, encoding="utf-8") as f:
-            return list(csv.DictReader(f))
+    def test_creates_split_files(self, tmp_path):
+        dirpath = str(tmp_path)
+        alice = Contributor(login="alice", commits=100, lines_changed=500)
+        alice.is_bot = False
+        import datetime
+        rr = _make_result([alice], bus_factor=1, hhi=1.0)
+        rr.first_week = datetime.date(2024, 3, 1)
+        rr.last_week = datetime.date(2024, 11, 15)
+        year_results = [("2024", rr)]
 
-    def test_creates_new_file(self, tmp_path):
-        filepath = str(tmp_path / "metrics.csv")
-        contribs = _make_contribs([("alice", 100, 500, False)])
-        year_results = [
-            ("2024", _make_result(contribs, bus_factor=1, hhi=1.0)),
-        ]
-        _upsert_yearly_csv(filepath, "owner/repo", year_results, quiet=True)
+        _upsert_yearly_csv(dirpath, "owner/repo", year_results, quiet=True)
 
-        rows = self._read_csv(filepath)
-        assert len(rows) == 7  # 7 metrics
-        assert rows[0]["github_repo"] == "owner/repo"
-        assert rows[0]["metric"] == "bus_factor"
-        assert rows[0]["2024"] == "1"
+        bf_rows = _read_csv(tmp_path / "bus-factor.csv")
+        assert len(bf_rows) == 1
+        assert bf_rows[0]["repo"] == "owner/repo"
+        assert bf_rows[0]["2024"] == "1"
+
+        hhi_rows = _read_csv(tmp_path / "hhi.csv")
+        assert hhi_rows[0]["2024"] == "10000"
+
+        commits_rows = _read_csv(tmp_path / "commits.csv")
+        assert commits_rows[0]["2024"] == "100"
+
+        years_rows = _read_csv(tmp_path / "years.csv")
+        assert years_rows == [{
+            "repo": "owner/repo", "year": "2024",
+            "first_date": "2024-03-01", "last_date": "2024-11-15",
+        }]
 
     def test_updates_existing_repo(self, tmp_path):
-        filepath = str(tmp_path / "metrics.csv")
+        dirpath = str(tmp_path)
         contribs = _make_contribs([("alice", 50, 500, False)])
-
-        # Write both years together (upsert replaces all metrics for the repo)
         contribs2 = _make_contribs([("alice", 80, 800, False), ("bob", 20, 200, False)])
         year_results = [
             ("2023", _make_result(contribs, bus_factor=1, hhi=1.0)),
             ("2024", _make_result(contribs2, bus_factor=1, hhi=0.68)),
         ]
-        _upsert_yearly_csv(filepath, "owner/repo", year_results, quiet=True)
+        _upsert_yearly_csv(dirpath, "owner/repo", year_results, quiet=True)
 
-        rows = self._read_csv(filepath)
-        bf_row = next(r for r in rows if r["metric"] == "bus_factor")
-        assert bf_row["2023"] == "1"
-        assert bf_row["2024"] == "1"
+        bf_rows = _read_csv(tmp_path / "bus-factor.csv")
+        assert bf_rows[0]["2023"] == "1"
+        assert bf_rows[0]["2024"] == "1"
 
     def test_preserves_other_repos(self, tmp_path):
-        filepath = str(tmp_path / "metrics.csv")
+        dirpath = str(tmp_path)
         contribs = _make_contribs([("alice", 100, 500, False)])
 
-        _upsert_yearly_csv(filepath, "repo/a", [("2024", _make_result(contribs))], quiet=True)
-        _upsert_yearly_csv(filepath, "repo/b", [("2024", _make_result(contribs))], quiet=True)
+        _upsert_yearly_csv(dirpath, "repo/a", [("2024", _make_result(contribs))], quiet=True)
+        _upsert_yearly_csv(dirpath, "repo/b", [("2024", _make_result(contribs))], quiet=True)
 
-        rows = self._read_csv(filepath)
-        repos = {r["github_repo"] for r in rows}
-        assert repos == {"repo/a", "repo/b"}
+        bf_rows = _read_csv(tmp_path / "bus-factor.csv")
+        assert {r["repo"] for r in bf_rows} == {"repo/a", "repo/b"}
 
 
 class TestUpsertYearlyCsvBatch:
-    def _read_csv(self, path):
-        with open(path, encoding="utf-8") as f:
-            return list(csv.DictReader(f))
-
     def test_batch_writes_multiple_repos(self, tmp_path):
-        filepath = str(tmp_path / "metrics.csv")
+        dirpath = str(tmp_path)
         contribs = _make_contribs([("alice", 100, 500, False)])
         batch = [
             ("repo/a", [("2024", _make_result(contribs))]),
             ("repo/b", [("2024", _make_result(contribs))]),
         ]
-        _upsert_yearly_csv_batch(filepath, batch)
+        _upsert_yearly_csv_batch(dirpath, batch)
 
-        rows = self._read_csv(filepath)
-        repos = {r["github_repo"] for r in rows}
-        assert repos == {"repo/a", "repo/b"}
+        bf_rows = _read_csv(tmp_path / "bus-factor.csv")
+        assert {r["repo"] for r in bf_rows} == {"repo/a", "repo/b"}
 
     def test_empty_batch_noop(self, tmp_path):
-        filepath = str(tmp_path / "metrics.csv")
-        _upsert_yearly_csv_batch(filepath, [])
-        assert not os.path.exists(filepath)
+        dirpath = str(tmp_path)
+        _upsert_yearly_csv_batch(dirpath, [])
+        assert not os.path.exists(tmp_path / "bus-factor.csv")
+
+    def test_years_file_excludes_aggregate(self, tmp_path):
+        dirpath = str(tmp_path)
+        import datetime
+        contribs = _make_contribs([("alice", 100, 500, False)])
+        single = _make_result(contribs)
+        single.first_week = datetime.date(2024, 1, 1)
+        single.last_week = datetime.date(2024, 12, 31)
+        agg = _make_result(contribs)
+        agg.first_week = datetime.date(2021, 1, 1)
+        agg.last_week = datetime.date(2025, 12, 31)
+        batch = [("repo/a", [("2024", single), ("2021-2025", agg)])]
+        _upsert_yearly_csv_batch(dirpath, batch)
+
+        years_rows = _read_csv(tmp_path / "years.csv")
+        assert [r["year"] for r in years_rows] == ["2024"]
+
+        bf_rows = _read_csv(tmp_path / "bus-factor.csv")
+        assert "2021-2025" in bf_rows[0] and bf_rows[0]["2021-2025"] == "1"
 
 
 class TestReadExistingPeriods:
-    def test_empty_file(self, tmp_path):
-        result = _read_existing_periods(str(tmp_path / "nonexistent.csv"))
-        assert result == {}
+    def test_empty_dir(self, tmp_path):
+        assert _read_existing_periods(str(tmp_path)) == {}
 
     def test_reads_periods(self, tmp_path):
-        filepath = str(tmp_path / "metrics.csv")
+        dirpath = str(tmp_path)
         contribs = _make_contribs([("alice", 100, 500, False)])
         year_results = [
             ("2023", _make_result(contribs, bus_factor=1)),
             ("2024", _make_result(contribs, bus_factor=1)),
         ]
-        _upsert_yearly_csv(filepath, "owner/repo", year_results, quiet=True)
+        _upsert_yearly_csv(dirpath, "owner/repo", year_results, quiet=True)
 
-        periods = _read_existing_periods(filepath)
+        periods = _read_existing_periods(dirpath)
         assert "owner/repo" in periods
-        assert "2023" in periods["owner/repo"]
-        assert "2024" in periods["owner/repo"]
+        assert {"2023", "2024"}.issubset(periods["owner/repo"])
 
 
 class TestLoadReposFromCsv:

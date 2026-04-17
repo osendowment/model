@@ -8,9 +8,9 @@ Strategy:
   - Large repos (≥ 1MB): sparse checkout (fetches only source code files)
 
 Usage:
-    python -m src.github.git_metrics --limit 40
-    python -m src.github.git_metrics --ttl 0         # force refresh
-    python -m src.github.git_metrics --year 2025      # snapshot at end of 2025
+    python -m src.github.fetch_git_metrics --limit 40
+    python -m src.github.fetch_git_metrics --ttl 0         # force refresh
+    python -m src.github.fetch_git_metrics --year 2025      # snapshot at end of 2025
 """
 from __future__ import annotations
 
@@ -40,18 +40,25 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from src.github.api import GITHUB_API, get_revolver
+from src.github.github_client import GITHUB_API, get_revolver
 from src.github.display import _ETAColumn
 
 log = logging.getLogger(__name__)
 console = Console()
 
-REPOS_FILE = "data/github/top-repos.csv"
-LANG_STATS_FILE = "data/github/language-stats.csv"
-OUTPUT_FILE = "data/github/complexity.csv"
-YEARLY_OUTPUT_FILE = "data/github/repo-git-metrics.csv"
-SHA_FILE = "data/github/repo-year-sha.csv"
+REPOS_FILE = "data/github/search/top-repos.csv"
+OUTPUT_FILE = "data/github/git/complexity.csv"
+YEARLY_OUTPUT_DIR = "data/github/git"
+SHA_FILE = "data/github/git/years.csv"
 YEARLY_METRICS = ["files", "loc", "sloc", "uloc", "scc_complexity", "scc_density"]
+YEARLY_METRIC_FILES = {
+    "files":          "files.csv",
+    "loc":            "loc.csv",
+    "sloc":           "sloc.csv",
+    "uloc":           "uloc.csv",
+    "scc_complexity": "scc-complexity.csv",
+    "scc_density":    "scc-density.csv",
+}
 DEFAULT_TTL_DAYS = 90
 AVG_ANNUAL_SALARY = 56_286  # scc default, US average developer salary
 AVG_MONTHLY_SALARY = AVG_ANNUAL_SALARY / 12
@@ -62,29 +69,30 @@ OUTPUT_FIELDS = [
     "cocomo_cost", "fetched_at",
 ]
 
+# Source-code languages scc recognizes — names must match scc's output.
+# Used to filter scc results to real code (skip docs, configs, data files).
+SOURCE_LANGS: set[str] = {
+    "C", "C Header", "C++", "C++ Header", "C#", "Objective C", "Objective C++",
+    "Java", "Kotlin", "Scala", "JavaScript", "TypeScript", "JSX", "TSX",
+    "CoffeeScript", "Python", "Ruby", "Perl", "PHP", "Go", "Rust", "Swift",
+    "Dart", "Lua", "R", "Julia", "Haskell", "Erlang", "Elixir", "Clojure",
+    "Zig", "Nim", "Assembly", "D", "OCaml", "Fortran Modern", "FORTRAN Legacy",
+    "Groovy", "Solidity", "GDScript", "Vue",
+}
 
-def _load_language_stats(filepath: str = LANG_STATS_FILE) -> tuple[set[str], list[str]]:
-    """Load language stats CSV. Returns (scc_lang_names, sparse_ext_patterns).
-
-    scc_lang_names: set of scc language names where scc=true (for filtering scc output)
-    sparse_ext_patterns: list of glob patterns like '*.py' for sparse checkout
-    """
-    scc_langs: set[str] = set()
-    ext_patterns: list[str] = []
-    with open(filepath, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            is_scc = row.get("scc", "").lower() == "true"
-            if is_scc:
-                scc_langs.add(row["scc_name"])
-            for ext in row["extensions"].split(","):
-                ext = ext.strip()
-                if ext:
-                    ext_patterns.append(f"*.{ext}")
-    return scc_langs, ext_patterns
-
-
-# Load at module level — used by _analyze_repo and _sparse_clone
-SOURCE_LANGS, SOURCE_EXTS = _load_language_stats()
+# Glob patterns for sparse-checkout — one per source-file extension.
+SOURCE_EXTS: list[str] = [
+    "*.c", "*.ec", "*.pgc", "*.h", "*.cc", "*.cpp", "*.cxx", "*.c++", "*.pcc",
+    "*.ino", "*.hh", "*.hpp", "*.hxx", "*.inl", "*.ipp", "*.cs", "*.csx",
+    "*.m", "*.mm", "*.java", "*.kt", "*.kts", "*.sc", "*.scala",
+    "*.js", "*.cjs", "*.mjs", "*.ts", "*.cts", "*.mts", "*.jsx", "*.tsx",
+    "*.coffee", "*.py", "*.pyw", "*.pyi", "*.rb", "*.pl", "*.plx", "*.pm",
+    "*.php", "*.go", "*.rs", "*.swift", "*.dart", "*.lua", "*.r", "*.jl",
+    "*.hs", "*.erl", "*.hrl", "*.ex", "*.exs", "*.clj", "*.cljc",
+    "*.zig", "*.nim", "*.s", "*.asm", "*.d", "*.ml", "*.mli",
+    "*.f03", "*.f08", "*.f90", "*.f95", "*.f", "*.for", "*.ftn", "*.f77",
+    "*.groovy", "*.grt", "*.gtpl", "*.gvy", "*.sol", "*.gd", "*.vue",
+]
 
 
 @dataclass
@@ -473,7 +481,7 @@ def _fmt_size(size_bytes: int) -> str:
 
 async def _fetch_commit_shas_multi(
     pairs: list[tuple[str, int]], concurrency: int = 32,
-    sha_data: dict[tuple[str, str], dict[str, str]] | None = None,
+    sha_data: dict[tuple[str, str], str] | None = None,
     sha_file: str = "",
 ) -> dict[tuple[str, int], str]:
     """Fetch last commit SHA before year-end for multiple (repo, year) pairs in one batch.
@@ -519,10 +527,9 @@ async def _fetch_commit_shas_multi(
                             data = await resp.json()
                             if data:
                                 sha = data[0]["sha"]
-                                commit_date = data[0].get("commit", {}).get("committer", {}).get("date", "")
                                 results[(repo, year)] = sha
                                 if sha_data is not None:
-                                    sha_data[(repo, str(year))] = {"sha": sha, "date": commit_date}
+                                    sha_data[(repo, str(year))] = sha
                     except Exception as e:
                         log.debug("Failed to get SHA for %s@%d: %s", repo, year, e)
                     finally:
@@ -541,74 +548,72 @@ async def _fetch_commit_shas_multi(
     return results
 
 
-def _load_yearly_metrics(filepath: str) -> dict[tuple[str, str], dict[str, str]]:
-    """Load existing yearly metrics CSV. Returns {(repo, metric): {year: value}}."""
+def _load_yearly_metrics(dirpath: str) -> dict[tuple[str, str], dict[str, str]]:
+    """Load yearly metrics from split per-metric CSVs. Returns {(repo, metric): {year: value}}."""
     data: dict[tuple[str, str], dict[str, str]] = {}
-    if not os.path.exists(filepath):
-        return data
-    with open(filepath, encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            key = (row["repo"], row["metric"])
-            data[key] = {k: v for k, v in row.items() if k not in ("repo", "metric") and v}
+    for metric, fname in YEARLY_METRIC_FILES.items():
+        path = os.path.join(dirpath, fname)
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            year_cols = [fn for fn in (reader.fieldnames or []) if fn != "repo"]
+            for row in reader:
+                year_vals = {y: row[y] for y in year_cols if row.get(y)}
+                if year_vals:
+                    data[(row["repo"], metric)] = year_vals
     return data
 
 
 def _write_yearly_metrics(
-    filepath: str,
+    dirpath: str,
     data: dict[tuple[str, str], dict[str, str]],
 ) -> None:
-    """Write yearly metrics to wide-format CSV."""
-    # Collect all year columns
-    years: set[str] = set()
-    for year_vals in data.values():
-        years.update(year_vals.keys())
-    year_cols = sorted(years)
+    """Write yearly metrics to split per-metric CSVs (one wide file per metric)."""
+    os.makedirs(dirpath, exist_ok=True)
 
-    os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
-    fieldnames = ["repo", "metric"] + year_cols
-    rows = []
-    for (repo, metric), year_vals in sorted(data.items()):
-        row = {"repo": repo, "metric": metric}
-        row.update(year_vals)
-        rows.append(row)
+    # Group by metric; collect union of year columns across all metrics
+    by_metric: dict[str, dict[str, dict[str, str]]] = {m: {} for m in YEARLY_METRIC_FILES}
+    year_set: set[str] = set()
+    for (repo, metric), year_vals in data.items():
+        if metric not in by_metric:
+            continue
+        by_metric[metric][repo] = year_vals
+        year_set.update(year_vals.keys())
+    year_cols = sorted(year_set)
 
-    with open(filepath, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+    for metric, fname in YEARLY_METRIC_FILES.items():
+        repos_data = by_metric[metric]
+        path = os.path.join(dirpath, fname)
+        with open(path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["repo"] + year_cols)
+            for repo in sorted(repos_data):
+                writer.writerow([repo] + [repos_data[repo].get(y, "") for y in year_cols])
 
 
-def _load_sha_data(filepath: str) -> dict[tuple[str, str], dict[str, str]]:
-    """Load repo-year-sha CSV. Returns {(repo, year_str): {"sha": sha, "date": date}}."""
-    data: dict[tuple[str, str], dict[str, str]] = {}
+def _load_sha_data(filepath: str) -> dict[tuple[str, str], str]:
+    """Load git/years.csv. Returns {(repo, year_str): last_sha}."""
+    data: dict[tuple[str, str], str] = {}
     if not os.path.exists(filepath):
         return data
     with open(filepath, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            data[(row["repo"], row["year"])] = {
-                "sha": row.get("last_commit", ""),
-                "date": row.get("date", ""),
-            }
+            data[(row["repo"], row["year"])] = row.get("last_sha", "")
     return data
 
 
 def _write_sha_data(
     filepath: str,
-    data: dict[tuple[str, str], dict[str, str]],
+    data: dict[tuple[str, str], str],
 ) -> None:
-    """Write repo-year-sha CSV."""
+    """Write git/years.csv."""
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
-    rows = []
-    for (repo, year), vals in sorted(data.items()):
-        rows.append({
-            "repo": repo, "year": year,
-            "last_commit": vals["sha"], "date": vals["date"],
-        })
     with open(filepath, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["repo", "year", "last_commit", "date"])
+        writer = csv.DictWriter(f, fieldnames=["repo", "year", "last_sha"])
         writer.writeheader()
-        writer.writerows(rows)
+        for (repo, year), sha in sorted(data.items()):
+            writer.writerow({"repo": repo, "year": year, "last_sha": sha})
 
 
 def _repos_with_year_data(
@@ -678,9 +683,9 @@ def _year_main(args: argparse.Namespace) -> None:
     for year in years:
         yr = str(year)
         for r in repos_sample:
-            entry = sha_data.get((r, yr))
-            if entry and entry["sha"]:
-                all_shas[(r, year)] = entry["sha"]
+            sha = sha_data.get((r, yr))
+            if sha:
+                all_shas[(r, year)] = sha
 
     needs_analysis = not pairs_to_fetch
     for year in years:
@@ -716,7 +721,7 @@ def _year_main(args: argparse.Namespace) -> None:
             if (repo, year) not in new_shas:
                 no_commit.add((repo, year))
                 yr = str(year)
-                sha_data[(repo, yr)] = {"sha": "", "date": ""}
+                sha_data[(repo, yr)] = ""
                 for metric in YEARLY_METRICS:
                     yearly_data.setdefault((repo, metric), {})[yr] = "0"
 
@@ -976,8 +981,8 @@ def main() -> None:
                         help="Parallel download/analyze workers (default: 32)")
     parser.add_argument("--year", type=int, nargs="+",
                         help="Analyze repos at end-of-year snapshot (e.g. --year 2024 2025)")
-    parser.add_argument("--yearly-output", default=YEARLY_OUTPUT_FILE,
-                        help=f"Yearly metrics CSV (default: {YEARLY_OUTPUT_FILE})")
+    parser.add_argument("--yearly-output", default=YEARLY_OUTPUT_DIR,
+                        help=f"Directory for split per-metric yearly CSVs (default: {YEARLY_OUTPUT_DIR})")
     parser.add_argument("--sha-file", default=SHA_FILE,
                         help=f"SHA coordination CSV (default: {SHA_FILE})")
     parser.add_argument("-v", "--verbose", action="store_true")

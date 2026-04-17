@@ -16,7 +16,7 @@ from rich.progress import (
 from rich.table import Table
 
 from src.github.models import RunResult, THRESHOLD
-from src.github.api import _AsyncRateLimiter, _fetch_stats_once, _Deferred, _NoStats
+from src.github.github_client import _AsyncRateLimiter, _fetch_stats_once, _Deferred, _NoStats
 from src.github.display import console, _ETAColumn, _fmt_date, _fmt_contribs_label
 
 log = logging.getLogger(__name__)
@@ -41,137 +41,150 @@ def _build_metrics_extractors() -> dict[str, object]:
 
 
 # --- CSV I/O ---
+#
+# Contributor metrics are split across multiple CSVs under a single directory:
+#   {dir}/bus-factor.csv   — wide: repo, 2021..2025, 2021-2025
+#   {dir}/hhi.csv          — wide: same shape
+#   {dir}/contributors.csv — wide: same shape
+#   {dir}/bots.csv         — wide: same shape
+#   {dir}/years.csv        — long: repo, year, commits, first_date, last_date
+
+WIDE_FILES = {
+    "bus_factor":   "bus-factor.csv",
+    "hhi":          "hhi.csv",
+    "contributors": "contributors.csv",
+    "bots":         "bots.csv",
+    "commits":      "commits.csv",
+}
+YEARS_FILE = "years.csv"
+YEARS_FIELDS = ["repo", "year", "first_date", "last_date"]
+
+
+def _is_single_year(label: str) -> bool:
+    """A year-range aggregate like '2021-2025' is not a single year."""
+    return label.isdigit()
+
 
 def _upsert_yearly_csv(
-    filepath: str, repo: str, year_results: list[tuple[str, RunResult]],
+    dirpath: str, repo: str, year_results: list[tuple[str, RunResult]],
     quiet: bool = False,
 ) -> None:
-    """Upsert yearly metrics for a repo into a CSV file."""
-    col_labels = [label for label, _ in year_results]
-
-    new_rows: dict[str, dict[str, str]] = {}
-    metrics = _build_metrics_extractors()
-
-    for metric_name, extractor in metrics.items():
-        row_data: dict[str, str] = {"github_repo": repo, "metric": metric_name}
-        for label, r in year_results:
-            row_data[label] = extractor(r)
-        new_rows[metric_name] = row_data
-
-    fieldnames = ["github_repo", "metric"] + col_labels
-
-    existing_rows: list[dict[str, str]] = []
-    if os.path.exists(filepath):
-        with open(filepath, encoding="utf-8") as f:
-            reader = csv_mod.DictReader(f)
-            if reader.fieldnames:
-                for fn in reader.fieldnames:
-                    if fn not in fieldnames:
-                        fieldnames.append(fn)
-            existing_rows = list(reader)
-
-    output_rows: list[dict[str, str]] = []
-    seen_repo = False
-    for row in existing_rows:
-        if row.get("github_repo") == repo:
-            seen_repo = True
-            metric = row.get("metric", "")
-            if metric in new_rows:
-                output_rows.append(new_rows.pop(metric))
-        else:
-            output_rows.append(row)
-
-    for metric_name in metrics:
-        if metric_name in new_rows:
-            output_rows.append(new_rows[metric_name])
-
-    os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
-    with open(filepath, "w", newline="", encoding="utf-8") as f:
-        writer = csv_mod.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
-        writer.writeheader()
-        writer.writerows(output_rows)
-
+    """Upsert yearly metrics for a single repo into the contributors directory."""
+    _upsert_yearly_csv_batch(dirpath, [(repo, year_results)])
     if not quiet:
-        action = "Updated" if seen_repo else "Added"
-        console.print(f"[dim]{action} {repo} in {filepath}[/dim]")
+        console.print(f"[dim]Upserted {repo} in {dirpath}[/dim]")
 
 
 def _upsert_yearly_csv_batch(
-    filepath: str, batch: list[tuple[str, list[tuple[str, RunResult]]]],
+    dirpath: str, batch: list[tuple[str, list[tuple[str, RunResult]]]],
 ) -> None:
-    """Upsert yearly metrics for multiple repos in one CSV read/write cycle."""
+    """Upsert yearly metrics for multiple repos across the split CSVs."""
     if not batch:
         return
 
-    all_col_labels: list[str] = []
-    all_new: dict[str, dict[str, dict[str, str]]] = {}
+    os.makedirs(dirpath, exist_ok=True)
     metrics = _build_metrics_extractors()
 
-    for repo, year_results in batch:
-        col_labels = [label for label, _ in year_results]
-        for lbl in col_labels:
-            if lbl not in all_col_labels:
-                all_col_labels.append(lbl)
-        repo_rows: dict[str, dict[str, str]] = {}
-        for metric_name, extractor in metrics.items():
-            row_data: dict[str, str] = {"github_repo": repo, "metric": metric_name}
-            for label, r in year_results:
-                row_data[label] = extractor(r)
-            repo_rows[metric_name] = row_data
-        all_new[repo] = repo_rows
+    batch_labels: list[str] = []
+    for _, year_results in batch:
+        for label, _ in year_results:
+            if label not in batch_labels:
+                batch_labels.append(label)
 
-    fieldnames = ["github_repo", "metric"] + all_col_labels
+    for metric_name, filename in WIDE_FILES.items():
+        _upsert_wide_file(
+            os.path.join(dirpath, filename),
+            metric_name, metrics[metric_name], batch, batch_labels,
+        )
 
-    existing_rows: list[dict[str, str]] = []
+    _upsert_years_file(os.path.join(dirpath, YEARS_FILE), batch, metrics)
+
+
+def _upsert_wide_file(
+    filepath: str, metric_name: str, extractor,
+    batch: list[tuple[str, list[tuple[str, RunResult]]]],
+    batch_labels: list[str],
+) -> None:
+    """Write one wide per-metric file, upserting rows for repos in the batch."""
+    existing: dict[str, dict[str, str]] = {}
+    existing_labels: list[str] = []
     if os.path.exists(filepath):
         with open(filepath, encoding="utf-8") as f:
             reader = csv_mod.DictReader(f)
-            if reader.fieldnames:
-                for fn in reader.fieldnames:
-                    if fn not in fieldnames:
-                        fieldnames.append(fn)
-            existing_rows = list(reader)
+            existing_labels = [fn for fn in (reader.fieldnames or []) if fn != "repo"]
+            for row in reader:
+                existing[row["repo"]] = dict(row)
 
-    output_rows: list[dict[str, str]] = []
-    seen_repos: set[str] = set()
-    for row in existing_rows:
-        repo = row.get("github_repo", "")
-        if repo in all_new:
-            if repo not in seen_repos:
-                seen_repos.add(repo)
-                for metric_name in metrics:
-                    if metric_name in all_new[repo]:
-                        output_rows.append(all_new[repo][metric_name])
-        else:
-            output_rows.append(row)
+    labels = list(existing_labels)
+    for lbl in batch_labels:
+        if lbl not in labels:
+            labels.append(lbl)
 
-    for repo, repo_rows in all_new.items():
-        if repo not in seen_repos:
-            for metric_name in metrics:
-                if metric_name in repo_rows:
-                    output_rows.append(repo_rows[metric_name])
+    for repo, year_results in batch:
+        values = {label: extractor(r) for label, r in year_results}
+        merged = existing.get(repo, {"repo": repo})
+        merged["repo"] = repo
+        for lbl in labels:
+            if lbl in values:
+                merged[lbl] = values[lbl]
+            elif lbl not in merged:
+                merged[lbl] = ""
+        existing[repo] = merged
 
-    os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
+    fieldnames = ["repo"] + labels
     with open(filepath, "w", newline="", encoding="utf-8") as f:
         writer = csv_mod.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
-        writer.writerows(output_rows)
+        for repo in sorted(existing):
+            writer.writerow(existing[repo])
 
 
-def _read_existing_periods(filepath: str) -> dict[str, set[str]]:
-    """Read CSV and return {repo: set of period labels already collected}."""
+def _upsert_years_file(
+    filepath: str,
+    batch: list[tuple[str, list[tuple[str, RunResult]]]],
+    metrics: dict,
+) -> None:
+    """Write the long years.csv (commits/first_date/last_date per repo-year)."""
+    rows: dict[tuple[str, str], dict[str, str]] = {}
+    if os.path.exists(filepath):
+        with open(filepath, encoding="utf-8") as f:
+            for row in csv_mod.DictReader(f):
+                rows[(row["repo"], row["year"])] = row
+
+    batch_repos = {repo for repo, _ in batch}
+    rows = {k: v for k, v in rows.items() if k[0] not in batch_repos}
+
+    for repo, year_results in batch:
+        for label, r in year_results:
+            if not _is_single_year(label):
+                continue
+            first = metrics["first_date"](r)
+            last = metrics["last_date"](r)
+            if not (first or last):
+                continue
+            rows[(repo, label)] = {
+                "repo": repo, "year": label,
+                "first_date": first, "last_date": last,
+            }
+
+    with open(filepath, "w", newline="", encoding="utf-8") as f:
+        writer = csv_mod.DictWriter(f, fieldnames=YEARS_FIELDS, extrasaction="ignore")
+        writer.writeheader()
+        for key in sorted(rows):
+            writer.writerow(rows[key])
+
+
+def _read_existing_periods(dirpath: str) -> dict[str, set[str]]:
+    """Read bus-factor.csv and return {repo: set of period labels in the file}."""
+    filepath = os.path.join(dirpath, WIDE_FILES["bus_factor"])
     if not os.path.exists(filepath):
         return {}
     result: dict[str, set[str]] = {}
     with open(filepath, encoding="utf-8") as f:
         reader = csv_mod.DictReader(f)
-        period_cols = {fn for fn in (reader.fieldnames or [])
-                       if fn not in ("github_repo", "metric")}
+        period_cols = {fn for fn in (reader.fieldnames or []) if fn != "repo"}
         for row in reader:
-            repo = row.get("github_repo", "")
-            if row.get("metric") != "bus_factor":
-                continue
-            result[repo] = period_cols
+            result[row["repo"]] = period_cols
     return result
 
 
@@ -213,7 +226,7 @@ async def batch_update(
 ) -> None:
     """Fetch and update metrics for multiple repos in parallel."""
     import random
-    from src.github.contributors import compute_yearly_breakdown
+    from src.github.fetch_contributors_metrics import compute_yearly_breakdown
 
     t_start = time.monotonic()
 

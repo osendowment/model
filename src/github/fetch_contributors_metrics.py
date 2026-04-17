@@ -1,44 +1,29 @@
-"""Contributor metrics — bus factor, HHI, contributor parsing, git clone analysis, and CLI.
+"""Contributor metrics — bus factor, HHI, contributor parsing, and CLI.
+
+Uses GitHub's /repos/{repo}/stats/contributors endpoint. Contributors are keyed by
+GitHub login (resolved server-side from commit email), so commits by the same user
+under multiple verified emails collapse into one entry.
 
 Usage:
-    python -m src.github.contributors facebook/react          # all years from first activity
-    python -m src.github.contributors facebook/react --years 2021 2025
-    python -m src.github.contributors                         # batch: top-repos.csv → repo-contrib-metrics.csv
+    python -m src.github.fetch_contributors_metrics facebook/react          # all years from first activity
+    python -m src.github.fetch_contributors_metrics facebook/react --years 2021 2025
+    python -m src.github.fetch_contributors_metrics                         # batch: top-repos.csv → repo-contrib-metrics.csv
 """
 
 import argparse
 import asyncio
 import datetime
 import logging
-import os
 import re
-import subprocess
 import time
-from collections import defaultdict
-from pathlib import Path
-
-from rich.progress import (
-    Progress, SpinnerColumn, TextColumn,
-    BarColumn, TaskProgressColumn, TimeElapsedColumn,
-)
 
 from src.github.models import (
     Contributor, PerfStats, RunResult, DateRange,
-    THRESHOLD, KNOWN_BOTS, is_bot,
+    THRESHOLD, is_bot,
 )
-from src.github.api import fetch_contributor_stats, fetch_repo_info
-from src.github.display import console, _spinner, display_results, display_yearly_breakdown
-from src.github.batch import batch_update, _upsert_yearly_csv, _load_repos_from_csv
-
-log = logging.getLogger(__name__)
-
-CACHE_DIR = Path(__file__).resolve().parent.parent.parent / ".cache"
-
-
-def _sanitize(name: str) -> str:
-    """Sanitize a git author name: strip replacement chars and normalize whitespace."""
-    name = name.replace("\ufffd", "").strip()
-    return " ".join(name.split())
+from src.github.github_client import fetch_contributor_stats
+from src.github.display import _spinner, display_results, display_yearly_breakdown
+from src.github.batch_runner import batch_update, _upsert_yearly_csv, _load_repos_from_csv
 
 
 def parse_repo(url_or_slug: str) -> str:
@@ -192,185 +177,13 @@ def compute_yearly_breakdown(
     return year_results
 
 
-# --- Git clone analysis ---
-
-_SHORTSTAT_RE = re.compile(
-    r"\s*(\d+) files? changed(?:,\s*(\d+) insertions?\(\+\))?(?:,\s*(\d+) deletions?\(-\))?"
-)
-
-
-def _get_or_create_clone(
-    repo: str, default_branch: str,
-) -> tuple[str, bool]:
-    """Get a cached bare clone or create a new one."""
-    clone_url = f"https://github.com/{repo}.git"
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cache_path = str(CACHE_DIR / (repo.replace("/", "-") + ".git"))
-
-    if os.path.isdir(cache_path):
-        log.debug("Updating cached clone at %s", cache_path)
-        subprocess.run(
-            ["git", "-C", cache_path, "fetch", "--quiet", "origin", default_branch],
-            capture_output=True, timeout=120,
-        )
-        return cache_path, True
-
-    log.debug("Creating cached clone at %s", cache_path)
-    subprocess.run(
-        ["git", "clone", "--bare", "--quiet", "--single-branch",
-         "--filter=blob:none", f"--branch={default_branch}", clone_url, cache_path],
-        check=True, capture_output=True, timeout=300,
-    )
-    return cache_path, False
-
-
-def fetch_stats_via_git(
-    repo: str, date_range: DateRange | None = None,
-    api_stats: list[dict] | None = None,
-    default_branch: str = "main",
-    perf: PerfStats | None = None,
-    size_kb: int = 0,
-) -> list[Contributor]:
-    """Clone repo bare and compute contributor stats via git log --shortstat."""
-    dr = date_range or DateRange()
-
-    est_sec = max(1, size_kb / 1024 / 10) if size_kb > 0 else 0
-    size_label = f" (~{size_kb // 1024}MB, ~{est_sec:.0f}s)" if size_kb > 1024 else ""
-
-    with _spinner(f"Cloning repo (bare){size_label}..."):
-        t_clone = time.monotonic()
-        clone_path, is_cached = _get_or_create_clone(repo, default_branch)
-        if perf:
-            perf.git_clone = time.monotonic() - t_clone
-
-    cmd = ["git", "-C", clone_path, "log", "--format=COMMIT:%aN", "--shortstat",
-           f"refs/heads/{default_branch}"]
-    if dr.since:
-        cmd += [f"--after={dr.since.isoformat()}"]
-    if dr.until:
-        day_after = dr.until + datetime.timedelta(days=1)
-        cmd += [f"--before={day_after.isoformat()}"]
-    log.debug("Running: %s", " ".join(cmd))
-
-    t_parse = time.monotonic()
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                            encoding="utf-8", errors="replace")
-
-    author_added: dict[str, int] = defaultdict(int)
-    author_deleted: dict[str, int] = defaultdict(int)
-    author_commits: dict[str, int] = defaultdict(int)
-    current_author = None
-    commit_count = 0
-
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(bar_width=20),
-        TaskProgressColumn(),
-        TimeElapsedColumn(),
-        console=console,
-        transient=True,
-    ) as progress:
-        total_estimate = sum(e.get("total", 0) for e in (api_stats or []))
-        parse_task = progress.add_task(
-            "Analyzing commits...",
-            total=total_estimate if total_estimate > 0 else None,
-        )
-
-        for line in proc.stdout:
-            line = line.rstrip("\n")
-            if line.startswith("COMMIT:"):
-                current_author = _sanitize(line[7:]).lower()
-                author_commits[current_author] += 1
-                commit_count += 1
-                progress.update(parse_task, completed=commit_count,
-                                description=f"Analyzing commits ({commit_count:,})...")
-            else:
-                m = _SHORTSTAT_RE.match(line)
-                if m and current_author:
-                    added = int(m.group(2)) if m.group(2) else 0
-                    deleted = int(m.group(3)) if m.group(3) else 0
-                    author_added[current_author] += added
-                    author_deleted[current_author] += deleted
-
-    proc.wait()
-    if perf:
-        perf.git_parse = time.monotonic() - t_parse
-        perf.commits_analyzed = commit_count
-
-    contributors = []
-    for author in author_commits:
-        added = author_added.get(author, 0)
-        deleted = author_deleted.get(author, 0)
-        contributors.append(Contributor(
-            login=author,
-            lines_changed=added + deleted,
-            commits=author_commits[author],
-            lines_added=added,
-            lines_deleted=deleted,
-        ))
-    log.debug("Git clone: found %d contributors from %d commits",
-              len(contributors), commit_count)
-    return contributors
-
-
-def run(
-    repo_url: str, date_range: DateRange | None = None,
-    threshold: float = THRESHOLD, base: str = "commits",
-    source: str = "github", include_bots: bool = False,
-) -> RunResult:
-    """Main entry point. source='github' uses API; source='git' clones the repo."""
-    repo = parse_repo(repo_url)
-    log.debug("Analyzing %s (base=%s, source=%s)", repo, base, source)
-    perf = PerfStats(source=source)
-    t_start = time.monotonic()
-
-    first_week = last_week = None
-
-    if source == "git":
-        t_api_start = time.monotonic()
-        stats: list[dict] = []
-        try:
-            with _spinner("Fetching contributor stats from GitHub API..."):
-                stats = fetch_contributor_stats(repo)
-        except RuntimeError:
-            pass
-        perf.api_fetch = time.monotonic() - t_api_start
-
-        with _spinner("Fetching repo info..."):
-            default_branch, size_kb = fetch_repo_info(repo)
-
-        contributors = fetch_stats_via_git(
-            repo, date_range=date_range, api_stats=stats,
-            default_branch=default_branch, perf=perf, size_kb=size_kb,
-        )
-    else:
-        t_api_start = time.monotonic()
-        with _spinner("Fetching contributor stats from GitHub API..."):
-            stats = fetch_contributor_stats(repo)
-        perf.api_fetch = time.monotonic() - t_api_start
-
-        dr = date_range or DateRange()
-        contributors, first_week, last_week = _parse_api_stats(stats, date_range=dr)
-        perf.commits_analyzed = sum(c.commits for c in contributors)
-
-    bf, contribs, hhi = _compute_bus_factor(contributors, threshold=threshold, base=base, include_bots=include_bots)
-
-    perf.contributors_found = len(contribs)
-    perf.total = time.monotonic() - t_start
-    return RunResult(
-        bus_factor=bf, contributors=contribs, hhi=hhi, perf=perf,
-        first_week=first_week, last_week=last_week,
-    )
-
-
 # --- CLI ---
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Calculate bus factor for a GitHub repo")
     parser.add_argument("repo", nargs="?", help="GitHub repo URL or owner/repo slug")
-    parser.add_argument("--input", default="data/github/top-repos.csv",
-                        help="CSV file with repos to batch update (expects 'repo' column, default: data/github/top-repos.csv)")
+    parser.add_argument("--input", default="data/github/search/top-repos.csv",
+                        help="CSV file with repos to batch update (expects 'repo' column, default: data/github/search/top-repos.csv)")
     parser.add_argument("--limit", type=int, help="Process N random repos from --input CSV")
     parser.add_argument("--base", choices=["commits", "locs"], default="commits",
                         help="Metric for bus factor (default: commits)")
@@ -378,7 +191,7 @@ def main() -> None:
     parser.add_argument("--years", type=int, nargs=2, metavar=("START", "END"),
                         help="Year range (default: first activity–now for single repo, 2021–2025 for batch)")
     parser.add_argument("--output",
-                        help="CSV file to upsert yearly metrics into (default: repo-contrib-metrics.csv in batch mode)")
+                        help="Directory to upsert per-metric CSVs into (default: data/github/contributors/ in batch mode)")
     parser.add_argument("--include-bots", action="store_true", default=False,
                         help="Include bots as regular contributors in bus factor calculation")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging")
@@ -394,7 +207,7 @@ def main() -> None:
     # Batch mode (default when no repo argument given)
     if not args.repo:
         years = args.years or [2021, 2025]
-        output = args.output or "data/github/repo-contrib-metrics.csv"
+        output = args.output or "data/github/contributors"
         repos = _load_repos_from_csv(args.input)
         asyncio.run(batch_update(
             repos, years[0], years[1], output,
