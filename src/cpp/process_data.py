@@ -13,38 +13,36 @@ same way for every ecosystem.
 
 Inputs:
   data/repology/packages.csv              project ↔ (repo, srcname, binname, visiblename)
-  data/debian/raw/downloads.csv           binary, year, downloads
-  data/debian/raw/dependencies.csv        binary, dep_name
-  data/debian/raw/package-metadata.csv    binary → source, homepage, vcs_browser
-  data/debian/raw/aliases.csv             t64 renames: current ↔ old
-  data/debian/raw/cpp-packages.csv        debtags-identified C/C++ binaries
-  data/homebrew/raw/downloads.csv         formula, year, downloads
+  data/debian/raw/dependencies.csv        binary, dep_name   (raw edges — results.csv
+                                                              drops the unreachable ones)
+  data/debian/raw/package-metadata.csv    binary → source    (for t64 aliases)
+  data/debian/raw/aliases.csv             current ↔ old      (t64 rename map)
+  data/debian/results.csv                 per-source: avg, yearly, is_cpp, github, is_oss_fuzz
   data/homebrew/raw/dependencies.csv      formula, dep_name, dep_type
-  data/homebrew/raw/formulas.csv          formula → language, homepage, source_url
-  data/ossfuzz/projects.csv               OSS-Fuzz C/C++ whitelist (github slugs)
+  data/homebrew/results.csv               per-formula: avg, yearly, is_cpp, github, is_oss_fuzz
 
 Outputs:
   data/cpp/raw/packages.csv               per-project join + aggregated signals
-  data/cpp/top-packages.csv               project, avg_downloads, 2021..2025
-  data/cpp/dependency-tree.csv            project, dependency, type
-  data/cpp/github-repos.csv               project, github_repo
-  data/cpp/results.csv                    project, github_repo, avg, yearly, top, pagerank, value_class
+  data/cpp/top-packages.csv               package, debian_avg_downloads, debian_share,
+                                          homebrew_avg_downloads, homebrew_share
+  data/cpp/dependency-tree.csv            package, dependency, type
+  data/cpp/github-repos.csv               package, github_repo
+  data/cpp/results.csv                    package, github_repo, debian_avg_downloads,
+                                          homebrew_avg_downloads, downloads_score,
+                                          pagerank, value_class
 
 Aggregation rules (per Repology project):
-  downloads  — within ecosystem: MAX across constituent names (e.g. boost1.74 vs
-               1.81 vs 1.83 → same machines, don't double-count). Across
-               ecosystems: SUM (Debian + Homebrew are disjoint populations).
-  deps       — union of project→project edges from both ecosystems (deduped,
-               self-loops dropped)
-  is_cpp     — True if any Debian binary or Homebrew formula rolling up to the
-               project is flagged C/C++
-  github     — first non-empty github slug across all contributing rows
-  oss_fuzz   — github slug matches the OSS-Fuzz whitelist
+  downloads       — within ecosystem: MAX across constituent names (boost1.74 vs
+                    1.81 vs 1.83 → same machines, don't double-count)
+  downloads_score — A × debian_avg + B × homebrew_avg, weights from params.json
+                    (default 1.39:1 balances ecosystem totals)
+  deps            — union of project→project edges from both ecosystems, deduped,
+                    self-loops dropped
+  github          — first non-empty slug from Debian, else Homebrew
 
 Run:
-    uv run src/cpp/process_data.py
-    uv run src/cpp/process_data.py --top-min 10000
-    uv run src/cpp/process_data.py --include-non-cpp
+    uv run -m src.cpp.process_data                    # default TOP_THRESHOLD_PCT
+    uv run -m src.cpp.process_data --top-share 50     # override per-ecosystem cum-dl cap
 """
 
 import argparse
@@ -59,7 +57,11 @@ import networkx as nx
 from rich.console import Console
 from rich.table import Table
 
-from src.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class
+from src.params import (
+    TOP_THRESHOLD_PCT, PAGERANK_ALPHA,
+    DOWNLOADS_SCORE_DEBIAN_WEIGHT, DOWNLOADS_SCORE_HOMEBREW_WEIGHT,
+    assign_value_class,
+)
 
 console = Console()
 
@@ -135,34 +137,25 @@ def extract_github_slug(*urls: str) -> str:
 
 # ── Repology name maps ────────────────────────────────────────────────────────
 
-def load_repology() -> tuple[dict[str, str], dict[str, str], dict[str, dict]]:
-    """Return (debian_name_to_project, homebrew_name_to_project, project_meta).
+def load_repology() -> tuple[dict[str, str], dict[str, str]]:
+    """Return (debian_name → project, homebrew_name → project).
 
-    `debian_name_to_project` indexes srcname/binname/visiblename — any of which
-    our upstream data might carry.  Same for homebrew.
+    Indexes srcname, binname, and visiblename — our upstream data (Debian
+    binary deps, Homebrew formula names) might carry any of the three.
     """
     deb: dict[str, str] = {}
     hb: dict[str, str] = {}
-    meta: dict[str, dict] = defaultdict(lambda: {"categories": set(), "licenses": set()})
-
     with open(REPOLOGY_CSV, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             project = row["project"]
-            repo = row["repo"]
-            target = deb if repo == "debian_13" else hb if repo == "homebrew" else None
+            target = deb if row["repo"] == "debian_13" else hb if row["repo"] == "homebrew" else None
             if target is None:
                 continue
             for k in ("srcname", "binname", "visiblename"):
                 v = (row.get(k) or "").strip()
                 if v:
                     target.setdefault(v, project)
-            for cat in (row.get("categories") or "").split("|"):
-                if cat:
-                    meta[project]["categories"].add(cat)
-            for lic in (row.get("licenses") or "").split("|"):
-                if lic:
-                    meta[project]["licenses"].add(lic)
-    return deb, hb, meta
+    return deb, hb
 
 
 # ── ecosystem signal loaders ──────────────────────────────────────────────────
@@ -178,10 +171,41 @@ def load_debian_aliases() -> dict[str, str]:
         return {row["old"]: row["current"] for row in csv.DictReader(f)}
 
 
-def build_bin_to_source(aliases: dict[str, str]) -> dict[str, str]:
-    """{binary_name: source_name} + alias backfill for pre-t64 historical rows.
+_T64_STRIP_RE = re.compile(r"^(lib[a-z0-9.+-]*?\d+)t64(\b.*)$")
 
-    Read from Debian package-metadata.csv (binaries → sources)."""
+
+def _synthesize_t64_aliases(bin_to_src: dict[str, str]) -> None:
+    """For every `libXYZt64[-suffix]` binary in metadata, register the pre-t64
+    twin `libXYZ[-suffix]` as an alias pointing at the same source. In-place.
+
+    Debian 13's time_t transition renamed thousands of libs (`libssl3` →
+    `libssl3t64`, `libcurl3-gnutls` → `libcurl3t64-gnutls`, …). Our
+    aliases.csv catches some but not all — this fallback infers the rest
+    from the canonical names we already have. Without it, dep edges that
+    still reference old names (pinned in reverse-dependencies we scraped)
+    become orphan `debian:libcurl3-gnutls`-style nodes whose PR mass
+    doesn't flow into the real project.
+    """
+    added = 0
+    for name, source in list(bin_to_src.items()):
+        m = _T64_STRIP_RE.match(name)
+        if not m:
+            continue
+        pre = m.group(1) + m.group(2)
+        if pre not in bin_to_src:
+            bin_to_src[pre] = source
+            added += 1
+    console.print(f"  [dim]synthesized {added:,} t64 aliases[/dim]")
+
+
+def build_bin_to_source(aliases: dict[str, str]) -> dict[str, str]:
+    """{binary_name: source_name} with alias backfill.
+
+    Sources:
+      1. Debian package-metadata.csv (authoritative, post-t64 names)
+      2. aliases.csv explicit old→current map
+      3. synthesized pre-t64 twins for any `libXYZt64...` in (1)
+    """
     bin_to_src: dict[str, str] = {}
     with open(DEBIAN_METADATA, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
@@ -190,41 +214,31 @@ def build_bin_to_source(aliases: dict[str, str]) -> dict[str, str]:
     for old, current in aliases.items():
         if current in bin_to_src:
             bin_to_src.setdefault(old, bin_to_src[current])
+    _synthesize_t64_aliases(bin_to_src)
     return bin_to_src
 
 
-def load_debian_signals() -> dict[str, dict]:
-    """Per-source signals from the already-aggregated debian pipeline output.
-
-    Each row is one Debian source package with avg + yearly installs, C/C++
-    flag, and github slug — exactly the pool we want to rank within.
-    """
+def _load_signals(path: str, key_col: str) -> dict[str, dict]:
+    """Shared reader for the per-ecosystem results files. Key is `source`
+    for Debian and `formula` for Homebrew; the rest of the schema matches."""
     signals: dict[str, dict] = {}
-    with open(DEBIAN_RESULTS, newline="", encoding="utf-8") as f:
+    with open(path, newline="", encoding="utf-8") as f:
         for r in csv.DictReader(f):
-            signals[r["source"]] = {
+            signals[r[key_col]] = {
                 "avg":         _i(r["avg_downloads"]),
-                "yearly":      {str(y): _i(r[str(y)]) for y in YEARS},
                 "is_cpp":      _bool(r["is_cpp"]),
                 "github":      r["github_repo"] or "",
                 "is_oss_fuzz": _bool(r["is_oss_fuzz"]),
             }
     return signals
+
+
+def load_debian_signals() -> dict[str, dict]:
+    return _load_signals(DEBIAN_RESULTS, "source")
 
 
 def load_homebrew_signals() -> dict[str, dict]:
-    """Per-formula signals from the already-aggregated homebrew pipeline output."""
-    signals: dict[str, dict] = {}
-    with open(HOMEBREW_RESULTS, newline="", encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            signals[r["formula"]] = {
-                "avg":         _i(r["avg_downloads"]),
-                "yearly":      {str(y): _i(r[str(y)]) for y in YEARS},
-                "is_cpp":      _bool(r["is_cpp"]),
-                "github":      r["github_repo"] or "",
-                "is_oss_fuzz": _bool(r["is_oss_fuzz"]),
-            }
-    return signals
+    return _load_signals(HOMEBREW_RESULTS, "formula")
 
 
 # ── edges (from raw deps) ─────────────────────────────────────────────────────
@@ -274,6 +288,14 @@ def build_homebrew_edges(hb_map: dict[str, str]) -> list[tuple[str, str]]:
 
 # ── combine ──────────────────────────────────────────────────────────────────
 
+def _first_github(names: list[str], signals: dict[str, dict]) -> str:
+    for n in sorted(names):
+        slug = signals[n]["github"]
+        if slug:
+            return slug
+    return ""
+
+
 def combine(
     deb_signals: dict[str, dict],
     hb_signals: dict[str, dict],
@@ -281,18 +303,16 @@ def combine(
     hb_map: dict[str, str],
     deb_edges: list[tuple[str, str]],
     hb_edges: list[tuple[str, str]],
-    meta: dict[str, dict],
     ossfuzz_slugs: set[str],
 ) -> tuple[list[dict], list[tuple[str, str]]]:
-    """Roll per-source (Debian) and per-formula (Homebrew) signals up to
-    Repology projects, then compute within-ecosystem percentiles.
-
-    Within an ecosystem, the rollup is MAX across constituent names
-    (boost1.74/1.81/1.83 → MAX; same machines, don't double-count).
-    Across ecosystems, per-year totals are summed (Debian + Homebrew are
-    disjoint user populations).
+    """Roll per-source (Debian) + per-formula (Homebrew) signals up to Repology
+    projects. Within an ecosystem we take MAX across constituent names
+    (boost1.74/1.81/1.83 → MAX avg — same machines, don't double-count).
+    Each row carries everything downstream steps need: the two per-ecosystem
+    avgs, the weighted `downloads_score`, provenance lists, and the two
+    internal cumulative-share fields (`debian_dl_p` / `homebrew_dl_p`) that
+    drive top-package selection.
     """
-    # 1. Group sources/formulas by the project they roll up to.
     project_deb_names: dict[str, set[str]] = defaultdict(set)
     project_hb_names:  dict[str, set[str]] = defaultdict(set)
     for source in deb_signals:
@@ -300,11 +320,10 @@ def combine(
     for formula in hb_signals:
         project_hb_names[hb_map.get(formula) or f"homebrew:{formula}"].add(formula)
 
-    # 2. Collapse to project-level MAX avg within each ecosystem (so versioned
-    #    duplicates like boost1.74/1.81/1.83 → boost count once), restricted
-    #    to C/C++ projects with avg > 0. This is the pool we rank and share over
-    #    — doing it at project level means shares sum to ~100% across all
-    #    projects and ~95% within the top-95%-cum-dl slice.
+    # Per-ecosystem C/C++ pool, rolled up to project level.
+    # Denominator for cumulative_shares is the project-level MAX-rolled sum,
+    # so sum(shares) = 100% across all projects and ~95% within the top-95%
+    # cum-dl slice used by step_top.
     def _any_cpp(names: set[str], signals: dict[str, dict]) -> bool:
         return any(signals[n]["is_cpp"] for n in names)
 
@@ -323,8 +342,6 @@ def combine(
     deb_total = sum(deb_project_avg.values()) or 1
     hb_total  = sum(hb_project_avg.values())  or 1
 
-    # 3. Build per-project rows: MAX-aggregated signals within each ecosystem,
-    #    SUM-combined yearly totals across ecosystems.
     all_projects = set(project_deb_names) | set(project_hb_names)
     rows: list[dict] = []
     for project in all_projects:
@@ -333,62 +350,43 @@ def combine(
 
         d_avg = max((deb_signals[n]["avg"] for n in d_names), default=0)
         h_avg = max((hb_signals[n]["avg"] for n in h_names), default=0)
-        d_pct = deb_project_pct.get(project)
-        h_pct = hb_project_pct.get(project)
-
-        yearly = {
-            str(y): (
-                max((deb_signals[n]["yearly"][str(y)] for n in d_names), default=0)
-                + max((hb_signals[n]["yearly"][str(y)] for n in h_names), default=0)
-            )
-            for y in YEARS
-        }
-        is_cpp = any(deb_signals[n]["is_cpp"] for n in d_names) or \
-                 any(hb_signals[n]["is_cpp"] for n in h_names)
-        github = ""
-        for n in sorted(d_names):
-            if deb_signals[n]["github"]:
-                github = deb_signals[n]["github"]
-                break
-        if not github:
-            for n in sorted(h_names):
-                if hb_signals[n]["github"]:
-                    github = hb_signals[n]["github"]
-                    break
+        is_cpp = _any_cpp(d_names, deb_signals) or _any_cpp(h_names, hb_signals)
+        github = _first_github(list(d_names), deb_signals) \
+              or _first_github(list(h_names), hb_signals)
         is_oss_fuzz = (
             (github.lower() in ossfuzz_slugs if github else False)
             or any(deb_signals[n]["is_oss_fuzz"] for n in d_names)
             or any(hb_signals[n]["is_oss_fuzz"] for n in h_names)
         )
 
-        m = meta.get(project, {"categories": set(), "licenses": set()})
         rows.append({
-            "project":           project,
-            "github_repo":       github,
-            "debian_sources":    "|".join(sorted(d_names)),
-            "homebrew_formulas": "|".join(sorted(h_names)),
-            "in_debian":         str(bool(d_names)),
-            "in_homebrew":       str(bool(h_names)),
-            "is_cpp":            str(is_cpp),
-            "is_oss_fuzz":       str(is_oss_fuzz),
-            "debian_dl_avg":     d_avg,
-            "homebrew_dl_avg":   h_avg,
-            "debian_dl_p":       f"{d_pct:.2f}" if d_pct is not None else "",
-            "homebrew_dl_p":     f"{h_pct:.2f}" if h_pct is not None else "",
-            "debian_share":      f"{100 * d_avg / deb_total:.4f}" if d_avg > 0 else "",
-            "homebrew_share":    f"{100 * h_avg / hb_total:.4f}" if h_avg > 0 else "",
-            "categories":        "|".join(sorted(m["categories"])),
-            "licenses":          "|".join(sorted(m["licenses"])),
-            **yearly,
+            "project":                project,
+            "github_repo":            github,
+            "debian_sources":         "|".join(sorted(d_names)),
+            "homebrew_formulas":      "|".join(sorted(h_names)),
+            "debian_avg_downloads":   d_avg,
+            "homebrew_avg_downloads": h_avg,
+            # Weighted combined signal — drives both sorting and PageRank
+            # personalization. Weights configurable via data/params.json.
+            "downloads_score":        int(
+                DOWNLOADS_SCORE_DEBIAN_WEIGHT   * d_avg +
+                DOWNLOADS_SCORE_HOMEBREW_WEIGHT * h_avg
+            ),
+            "is_cpp":                 str(is_cpp),
+            "is_oss_fuzz":            str(is_oss_fuzz),
+            # Internal fields (kept on rows but excluded from raw/packages.csv
+            # via extrasaction="ignore" — they drive the top-package filter and
+            # the share columns in top-packages.csv).
+            "debian_dl_p":            f"{deb_project_pct[project]:.2f}"
+                                      if project in deb_project_pct else "",
+            "homebrew_dl_p":          f"{hb_project_pct[project]:.2f}"
+                                      if project in hb_project_pct else "",
+            "debian_share":           f"{100 * d_avg / deb_total:.4f}" if d_avg > 0 else "",
+            "homebrew_share":         f"{100 * h_avg / hb_total:.4f}" if h_avg > 0 else "",
         })
 
     edges = sorted(set(deb_edges) | set(hb_edges))
     return rows, edges
-
-
-def compute_avg(year_vals: dict[str, int]) -> int:
-    pop = [year_vals[str(y)] for y in YEARS if year_vals.get(str(y), 0) > 0]
-    return int(sum(pop) / len(pop)) if pop else 0
 
 
 def cumulative_shares(name_to_avg: dict[str, int]) -> dict[str, float]:
@@ -427,25 +425,24 @@ def cumulative_shares(name_to_avg: dict[str, int]) -> dict[str, float]:
 
 # ── pipeline steps ────────────────────────────────────────────────────────────
 
+RAW_FIELDS = [
+    "project", "github_repo",
+    "debian_sources", "homebrew_formulas",
+    "debian_avg_downloads", "homebrew_avg_downloads", "downloads_score",
+    "is_cpp", "is_oss_fuzz",
+]
+
+
 def step_packages(rows: list[dict]) -> None:
-    """Write the bridge table — raw inputs joined and aggregated, no ranking."""
+    """Bridge table: every Repology project with its unified per-ecosystem
+    signals, pre-ranking. Used for debugging and for any downstream consumer
+    that wants the full join, not just the top slice or the BFS-reachable set."""
     console.rule("[bold cyan]Step 0 — raw/packages.csv")
     t0 = time.perf_counter()
-    fields = (
-        ["project", "github_repo", "debian_sources", "homebrew_formulas",
-         "in_debian", "in_homebrew", "is_cpp", "is_oss_fuzz",
-         "debian_dl_avg", "homebrew_dl_avg",
-         "debian_dl_p", "homebrew_dl_p",
-         "debian_share", "homebrew_share",
-         "categories", "licenses"]
-        + [str(y) for y in YEARS]
-    )
-    for r in rows:
-        r["_avg"] = compute_avg({str(y): r[str(y)] for y in YEARS})
-    rows.sort(key=lambda r: r["_avg"], reverse=True)
-    atomic_write(OUT_RAW_PACKAGES, rows, fields)
+    rows.sort(key=lambda r: r["downloads_score"], reverse=True)
+    atomic_write(OUT_RAW_PACKAGES, rows, RAW_FIELDS)
 
-    n_both = sum(1 for r in rows if r["in_debian"] == "True" and r["in_homebrew"] == "True")
+    n_both = sum(1 for r in rows if r["debian_sources"] and r["homebrew_formulas"])
     tbl = Table(show_header=False, box=None, padding=(0, 2))
     tbl.add_column(style="dim"); tbl.add_column(justify="right")
     tbl.add_row("Total projects", f"{len(rows):,}")
@@ -454,52 +451,49 @@ def step_packages(rows: list[dict]) -> None:
     console.print(tbl)
 
 
-def _is_top(r: dict, share_cap: float) -> bool:
-    """True if the project lives inside the top-X% cumulative download mass
-    of either ecosystem (smaller _p = higher in the cum-dl distribution)."""
-    for col in ("debian_dl_p", "homebrew_dl_p"):
-        v = r.get(col, "")
-        if v and float(v) <= share_cap:
-            return True
-    return False
+def _qual(p: str, share_cap: float) -> bool:
+    """True iff `p` is a cum-share value inside the top `share_cap`% slice."""
+    return bool(p) and float(p) <= share_cap
 
 
 def _min_or_inf(s: str) -> float:
     return float(s) if s else float("inf")
 
 
-def step_top(rows: list[dict], top_share: float, include_non_cpp: bool) -> set[str]:
+def step_top(rows: list[dict], top_share: float) -> set[str]:
+    """A project qualifies if it lives inside the top-X% cumulative download
+    mass of *either* ecosystem. Writes top-packages.csv in the 5-col schema
+    (package + per-ecosystem avg + per-ecosystem share-of-total)."""
     console.rule("[bold cyan]Step 1 — top-packages.csv")
     t0 = time.perf_counter()
-    candidates = rows if include_non_cpp else [r for r in rows if r["is_cpp"] == "True"]
-    qualifying = [r for r in candidates if _is_top(r, top_share)]
+    candidates = [r for r in rows if r["is_cpp"] == "True"]
+    qualifying = [
+        r for r in candidates
+        if _qual(r["debian_dl_p"], top_share) or _qual(r["homebrew_dl_p"], top_share)
+    ]
     qualifying.sort(key=lambda r: min(_min_or_inf(r["debian_dl_p"]),
                                       _min_or_inf(r["homebrew_dl_p"])))
-
-    def _qual(v: str) -> bool:
-        return bool(v) and float(v) <= top_share
-
-    # Populate each _share column only when the package qualifies in that
-    # ecosystem's top-X%. Otherwise the sum of _share would include the
-    # other ecosystem's long tail and overshoot the target threshold.
     top_rows = [
         {"package":                r["project"],
-         "debian_avg_downloads":   r["debian_dl_avg"],
-         "debian_share":           r["debian_share"]   if _qual(r["debian_dl_p"])   else "",
-         "homebrew_avg_downloads": r["homebrew_dl_avg"],
-         "homebrew_share":         r["homebrew_share"] if _qual(r["homebrew_dl_p"]) else ""}
+         "debian_avg_downloads":   r["debian_avg_downloads"],
+         "debian_share":           r["debian_share"],
+         "homebrew_avg_downloads": r["homebrew_avg_downloads"],
+         "homebrew_share":         r["homebrew_share"]}
         for r in qualifying
     ]
     atomic_write(OUT_TOP, top_rows, TOP_FIELDS)
-    n_both     = sum(1 for r in qualifying if _qual(r["debian_dl_p"]) and _qual(r["homebrew_dl_p"]))
-    n_deb_only = sum(1 for r in qualifying if _qual(r["debian_dl_p"]) and not _qual(r["homebrew_dl_p"]))
-    n_hb_only  = sum(1 for r in qualifying if _qual(r["homebrew_dl_p"]) and not _qual(r["debian_dl_p"]))
+
+    n_both     = sum(1 for r in qualifying if _qual(r["debian_dl_p"], top_share)
+                                          and _qual(r["homebrew_dl_p"], top_share))
+    n_deb_only = sum(1 for r in qualifying if _qual(r["debian_dl_p"], top_share)
+                                          and not _qual(r["homebrew_dl_p"], top_share))
+    n_hb_only  = sum(1 for r in qualifying if _qual(r["homebrew_dl_p"], top_share)
+                                          and not _qual(r["debian_dl_p"], top_share))
 
     tbl = Table(show_header=False, box=None, padding=(0, 2))
     tbl.add_column(style="dim"); tbl.add_column(justify="right")
-    tbl.add_row("Candidates",       f"{len(candidates):,} "
-                                    f"({'all' if include_non_cpp else 'C/C++ only'})")
-    tbl.add_row("Share cap",        f"top {top_share}% of cum dl (_p <= {top_share:.1f})")
+    tbl.add_row("Candidates",       f"{len(candidates):,} (C/C++ only)")
+    tbl.add_row("Share cap",        f"top {top_share}% of cum dl")
     tbl.add_row("Top packages",     f"{len(top_rows):,}")
     tbl.add_row("  in both",        f"{n_both:,}")
     tbl.add_row("  Debian only",    f"{n_deb_only:,}")
@@ -507,7 +501,8 @@ def step_top(rows: list[dict], top_share: float, include_non_cpp: bool) -> set[s
     tbl.add_row("Elapsed",          f"{time.perf_counter() - t0:.2f}s")
     console.print(tbl)
 
-    preview = Table(title="Top 15 (by best cum-dl share across ecosystems)", header_style="bold green")
+    preview = Table(title="Top 15 (by best cum-dl share across ecosystems)",
+                    header_style="bold green")
     preview.add_column("Package")
     preview.add_column("Debian avg", justify="right")
     preview.add_column("Debian %",   justify="right")
@@ -516,9 +511,9 @@ def step_top(rows: list[dict], top_share: float, include_non_cpp: bool) -> set[s
     for r in qualifying[:15]:
         preview.add_row(
             r["project"][:30],
-            f"{r['debian_dl_avg']:,}"   if r["debian_dl_avg"]   else "[dim]—[/dim]",
+            f"{r['debian_avg_downloads']:,}"   if r["debian_avg_downloads"]   else "[dim]—[/dim]",
             r["debian_dl_p"]   or "[dim]—[/dim]",
-            f"{r['homebrew_dl_avg']:,}" if r["homebrew_dl_avg"] else "[dim]—[/dim]",
+            f"{r['homebrew_avg_downloads']:,}" if r["homebrew_avg_downloads"] else "[dim]—[/dim]",
             r["homebrew_dl_p"] or "[dim]—[/dim]",
         )
     console.print(preview)
@@ -581,13 +576,21 @@ def step_github(nodes: set[str], rows: list[dict]) -> dict[str, str]:
     return pkg_to_repo
 
 
+RESULTS_FIELDS = ["package", "github_repo",
+                  "debian_avg_downloads", "homebrew_avg_downloads",
+                  "downloads_score", "pagerank", "value_class"]
+
+
 def step_results(
     tree_edges: list[tuple[str, str]],
     top: set[str],
     rows: list[dict],
     github_repos: dict[str, str],
-    ossfuzz_slugs: set[str],
 ) -> None:
+    """PageRank over the combined dep graph, with install-weighted
+    personalization (downloads_score) anchoring scores to real-world usage.
+    Assigns A/B/C/D value classes via cumulative PR share cutoffs from
+    data/params.json."""
     console.rule("[bold cyan]Step 4 — results.csv (pagerank)")
     t0 = time.perf_counter()
 
@@ -598,28 +601,23 @@ def step_results(
         G.add_node(n)
 
     by_project = {r["project"]: r for r in rows}
-
-    all_nodes = set(G.nodes())
-    total_dl = sum(by_project.get(n, {}).get("_avg", 0) for n in all_nodes)
+    scores = {n: by_project.get(n, {}).get("downloads_score", 0) for n in G.nodes()}
+    total_score = sum(scores.values())
     personalization = (
-        {n: by_project.get(n, {}).get("_avg", 0) / total_dl for n in all_nodes}
-        if total_dl > 0 else None
+        {n: v / total_score for n, v in scores.items()} if total_score > 0 else None
     )
     pr = nx.pagerank(G, alpha=PAGERANK_ALPHA, personalization=personalization)
 
     out_rows: list[dict] = []
-    for n in all_nodes:
+    for n in G.nodes():
         r = by_project.get(n, {})
-        slug = github_repos.get(n, "")
         out_rows.append({
-            "package":       n,
-            "github_repo":   slug,
-            "avg_downloads": r.get("_avg", 0),
-            **{str(y): r.get(str(y), 0) for y in YEARS},
-            "top":           str(n in top),
-            "is_cpp":        r.get("is_cpp", "False"),
-            "is_oss_fuzz":   str(slug.lower() in ossfuzz_slugs) if slug else "False",
-            "pagerank":      f"{pr.get(n, 0.0):.8f}",
+            "package":                n,
+            "github_repo":            github_repos.get(n, ""),
+            "debian_avg_downloads":   r.get("debian_avg_downloads",   0),
+            "homebrew_avg_downloads": r.get("homebrew_avg_downloads", 0),
+            "downloads_score":        scores.get(n, 0),
+            "pagerank":               f"{pr.get(n, 0.0):.8f}",
         })
     out_rows.sort(key=lambda r: float(r["pagerank"]), reverse=True)
 
@@ -630,38 +628,35 @@ def step_results(
         share = cum / total_pr if total_pr > 0 else 1.0
         r["value_class"] = assign_value_class(share)
 
-    fields = (
-        ["package", "github_repo", "avg_downloads"]
-        + [str(y) for y in YEARS]
-        + ["top", "is_cpp", "is_oss_fuzz", "pagerank", "value_class"]
-    )
-    atomic_write(OUT_RESULTS, out_rows, fields)
+    atomic_write(OUT_RESULTS, out_rows, RESULTS_FIELDS)
 
     tbl = Table(show_header=False, box=None, padding=(0, 2))
     tbl.add_column(style="dim"); tbl.add_column(justify="right")
     tbl.add_row("Nodes",            f"{G.number_of_nodes():,}")
     tbl.add_row("Edges",            f"{G.number_of_edges():,}")
-    tbl.add_row("C/C++ nodes",      f"{sum(1 for r in out_rows if r['is_cpp'] == 'True'):,}")
     tbl.add_row("With github",      f"{sum(1 for r in out_rows if r['github_repo']):,}")
-    tbl.add_row("OSS-Fuzz matches", f"{sum(1 for r in out_rows if r['is_oss_fuzz'] == 'True'):,}")
+    tbl.add_row("Score weights",    f"A={DOWNLOADS_SCORE_DEBIAN_WEIGHT} "
+                                    f"B={DOWNLOADS_SCORE_HOMEBREW_WEIGHT}")
     tbl.add_row("Elapsed",          f"{time.perf_counter() - t0:.2f}s")
     console.print(tbl)
 
     preview = Table(title="Top 15 by PageRank (combined C/C++ graph)", header_style="bold green")
     preview.add_column("Package")
     preview.add_column("GitHub")
+    preview.add_column("Deb avg",  justify="right")
+    preview.add_column("Brew avg", justify="right")
+    preview.add_column("Score",    justify="right")
     preview.add_column("PageRank", justify="right")
-    preview.add_column("Avg installs", justify="right")
-    preview.add_column("C/C++", justify="center")
-    preview.add_column("Top?",  justify="center")
+    preview.add_column("VC", justify="center")
     for r in out_rows[:15]:
         preview.add_row(
             r["package"][:30],
             (r["github_repo"] or "[dim]—[/dim]")[:28],
+            f"{r['debian_avg_downloads']:,}"   if r["debian_avg_downloads"]   else "[dim]—[/dim]",
+            f"{r['homebrew_avg_downloads']:,}" if r["homebrew_avg_downloads"] else "[dim]—[/dim]",
+            f"{r['downloads_score']:,}",
             r["pagerank"],
-            f"{r['avg_downloads']:,}",
-            "[green]yes[/green]" if r["is_cpp"] == "True" else "[dim]no[/dim]",
-            "[green]yes[/green]" if r["top"]    == "True" else "[dim]no[/dim]",
+            r["value_class"],
         )
     console.print(preview)
 
@@ -678,53 +673,65 @@ def load_ossfuzz_slugs() -> set[str]:
         }
 
 
+def _enrich_deb_map(deb_map: dict[str, str], bin_to_src: dict[str, str]) -> int:
+    """Add binary → project entries derived from (binary → source → project).
+
+    Catches the case where `data/debian/results.csv` has a 'source' that's
+    really a binary name — happens when a binary's metadata row is missing
+    or for pre-t64 aliases that leaked into raw deps. Without this,
+    `libcurl3-gnutls`, `libxmlsec1-openssl`, etc. stay as orphan `debian:…`
+    nodes instead of rolling up into `curl` / `xmlsec1`. Returns the number
+    of aliases added."""
+    added = 0
+    for binary, source in bin_to_src.items():
+        if binary not in deb_map and source in deb_map:
+            deb_map[binary] = deb_map[source]
+            added += 1
+    return added
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--top-share", type=float, default=TOP_THRESHOLD_PCT,
-                   help="Cumulative-download share cap. A project qualifies for "
-                        "top-packages if its cum-dl share _p <= X in either "
-                        "Debian or Homebrew (default 50 → top half of install mass)")
-    p.add_argument("--include-non-cpp", action="store_true",
-                   help="Don't filter to C/C++ projects (default: C/C++ only)")
+                   help="Cumulative-download share cap for top-packages. "
+                        f"Default {TOP_THRESHOLD_PCT}% from data/params.json.")
     args = p.parse_args()
 
     console.rule("[bold white]cpp — process_data.py")
-    console.print(f"  Started         : [cyan]{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}[/cyan]")
-    console.print(f"  TOP_SHARE       : [cyan]top {args.top_share}% of cum dl (default: {TOP_THRESHOLD_PCT}%)[/cyan]")
-    console.print(f"  Include non-C++ : [cyan]{args.include_non_cpp}[/cyan]\n")
+    console.print(f"  Started   : [cyan]{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}[/cyan]")
+    console.print(f"  Top share : [cyan]top {args.top_share}% of cum dl[/cyan]")
+    console.print(f"  Weights   : [cyan]A={DOWNLOADS_SCORE_DEBIAN_WEIGHT} "
+                  f"B={DOWNLOADS_SCORE_HOMEBREW_WEIGHT}[/cyan]\n")
     t_total = time.perf_counter()
 
-    deb_map, hb_map, meta = load_repology()
-    aliases = load_debian_aliases()
-    bin_to_src = build_bin_to_source(aliases)
+    deb_map, hb_map = load_repology()
+    bin_to_src = build_bin_to_source(load_debian_aliases())
+    n_enriched = _enrich_deb_map(deb_map, bin_to_src)
+    console.print(f"  [dim]enriched deb_map with {n_enriched:,} binary→project aliases[/dim]")
 
-    deb_signals = load_debian_signals()
-    hb_signals  = load_homebrew_signals()
+    deb_signals   = load_debian_signals()
+    hb_signals    = load_homebrew_signals()
+    ossfuzz_slugs = load_ossfuzz_slugs()
 
     console.print(
-        f"  [dim]repology keys: debian={len(deb_map):,}  homebrew={len(hb_map):,}  "
-        f"projects={len(meta):,}[/dim]"
-    )
-    console.print(
-        f"  [dim]debian: sources={len(deb_signals):,}  "
-        f"homebrew: formulas={len(hb_signals):,}  "
+        f"  [dim]repology: debian={len(deb_map):,}  homebrew={len(hb_map):,}  "
+        f"signals: debian_sources={len(deb_signals):,}  "
+        f"homebrew_formulas={len(hb_signals):,}  "
         f"binaries={len(bin_to_src):,}[/dim]\n"
     )
-
-    ossfuzz_slugs = load_ossfuzz_slugs()
 
     deb_edges = build_debian_edges(bin_to_src, deb_map)
     hb_edges  = build_homebrew_edges(hb_map)
     rows, edges = combine(
-        deb_signals, hb_signals, deb_map, hb_map, deb_edges, hb_edges, meta, ossfuzz_slugs
+        deb_signals, hb_signals, deb_map, hb_map, deb_edges, hb_edges, ossfuzz_slugs
     )
 
     step_packages(rows)
-    top = step_top(rows, args.top_share, args.include_non_cpp)
-    tree_edges = step_dep_tree(top, edges)
-    nodes = {n for e in tree_edges for n in e} | top
+    top          = step_top(rows, args.top_share)
+    tree_edges   = step_dep_tree(top, edges)
+    nodes        = {n for e in tree_edges for n in e} | top
     github_repos = step_github(nodes, rows)
-    step_results(tree_edges, top, rows, github_repos, ossfuzz_slugs)
+    step_results(tree_edges, top, rows, github_repos)
 
     console.rule()
     console.print(f"  [bold green]Done[/bold green] — {time.perf_counter() - t_total:.2f}s")

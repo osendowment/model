@@ -32,26 +32,10 @@ It is important to trace dependencies across ecosystem boundaries, not just with
 
 Beyond dividing grants between ecosystems, we need to prioritize individual OSS projects within each one. Our goal is to make this process transparent and quantifiable, combining automated scoring with human judgment, especially in the early stages. The model is under active development; its final form will emerge from discussions with OSE donors.
 
-Our approach will likely combine Value and Risk scores ([example](https://kvinogradov.com/algo-sponsors/)). The components below are illustrative: (+) means the metric increases with the component, (–) means it decreases.
+Our approach combines three stages:
 
-**Value for the Ecosystem**
-
-* Usage
-  * (+) Number of dependents, based on data from package managers, GitHub, OSE analysis, etc.
-  * (+) Number of downloads, based on data from package managers, OSE analysis, etc.
-* Manual highlights
-  * (+) Qualified funding requests
-  * (+) Endorsements from OSE donors
-
-**Risk of the Project**
-
-* Complexity & security
-  * (+) Lines of code
-  * (+) [OpenSSF score](https://scorecard.dev)
-* Maintenance
-  * (–) Active developers
-  * (–) Bus factor ([example](https://github.com/JetBrains-Research/bus-factor-explorer))
-  * (+) Issues submitted
-* Funding
-  * (–) GitHub Sponsors and other known funding
-  * (+) Funding requests
+| Step | Goal | Implemented | Roadmap |
+|------|------|-------------|---------|
+| **[Value](docs/value.md)** | Find most important packages in ecosystems | Download-weighted PageRank for Python (PyPI), Rust (crates), JS/TS (npm), C/C++ (Debian, Homebrew) based on dependency trees, covering 95% downloads in each ecosystem | Community nominations, critical software lists, cross-ecosystem dependencies |
+| **[Eligibility](docs/eligibility.md)** | Filter to fundable projects | OSS license check (63 OSI-approved) | Trademark ownership (corporate vs community) |
+| **[Risk](docs/risk.md)** | Prioritize risky projects among most valuable | Bus factor and Herfindahl--Hirschman index for contributors, complexity metrics (LOC, etc) using [scc](https://github.com/boyter/scc) | [OpenSSF scorecard](https://scorecard.dev), active maintainers, issue activity, GitHub Sponsors |

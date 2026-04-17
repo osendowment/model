@@ -15,6 +15,11 @@ TOP_THRESHOLD_PCT: float = _P["top_selection"]["threshold_pct"]
 # PageRank
 PAGERANK_ALPHA: float = _P["pagerank"]["alpha"]
 
+# Downloads score — linear combination of per-ecosystem avg installs used as
+# the unified importance signal for multi-ecosystem pipelines (e.g. cpp/).
+DOWNLOADS_SCORE_DEBIAN_WEIGHT:   float = _P["downloads_score"]["debian_weight"]
+DOWNLOADS_SCORE_HOMEBREW_WEIGHT: float = _P["downloads_score"]["homebrew_weight"]
+
 # Value class cutoffs (cumulative PageRank share)
 VALUE_CLASS_A: float = _P["value_classes"]["A"]
 VALUE_CLASS_B: float = _P["value_classes"]["B"]

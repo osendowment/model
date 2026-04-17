@@ -8,6 +8,11 @@
     "alpha": 0.85,
     "comment": "Damping factor for PageRank (0.85 = standard)"
   },
+  "downloads_score": {
+    "debian_weight": 1.39,
+    "homebrew_weight": 1.00,
+    "comment": "downloads_score = debian_weight*debian_avg + homebrew_weight*homebrew_avg. Default ratio 1.39:1 is inverse of ecosystem totals (debian ~181.9M vs homebrew ~252.8M annual installs) so a 'typical' package from either ecosystem contributes equally."
+  },
   "value_classes": {
     "A": 0.50,
     "B": 0.75,
