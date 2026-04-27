@@ -175,16 +175,24 @@ def _upsert_years_file(
 
 
 def _read_existing_periods(dirpath: str) -> dict[str, set[str]]:
-    """Read bus-factor.csv and return {repo: set of period labels in the file}."""
+    """Read bus-factor.csv and return {repo: set of period labels populated for that repo}.
+
+    Critically, only counts a period as "filled" if the cell has a non-empty
+    value. Previously this returned the full set of column names for every
+    repo that had a row, which silently skipped re-fetches for repos that
+    had been recorded but produced no data (e.g. GitHub's /stats/contributors
+    202-loop never resolved).
+    """
     filepath = os.path.join(dirpath, WIDE_FILES["bus_factor"])
     if not os.path.exists(filepath):
         return {}
     result: dict[str, set[str]] = {}
     with open(filepath, encoding="utf-8") as f:
         reader = csv_mod.DictReader(f)
-        period_cols = {fn for fn in (reader.fieldnames or []) if fn != "repo"}
+        period_cols = [fn for fn in (reader.fieldnames or []) if fn != "repo"]
         for row in reader:
-            result[row["repo"]] = period_cols
+            filled = {p for p in period_cols if (row.get(p) or "").strip()}
+            result[row["repo"]] = filled
     return result
 
 
