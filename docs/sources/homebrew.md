@@ -15,7 +15,7 @@ No authentication required.
 
 In `data/homebrew/raw/`:
 - `formulas.csv` -- name, tap, desc, license, homepage, source_url, language
-- `dependencies.csv` -- formula, dep_name, dep_type, fetched_at
+- `dependencies.csv` -- formula, dep_name, dep_type, fetched_at. Both `runtime` and `build` types are captured here, but the cpp pipeline filters to `runtime` only when building its dep tree (`src/cpp/process_data.py:277`).
 - `downloads.csv` -- formula, year, downloads
 
 ## Scripts

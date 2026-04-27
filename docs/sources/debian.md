@@ -17,7 +17,7 @@ No authentication required. Wayback snapshots may be sparse for some years.
 
 In `data/debian/raw/`:
 - `downloads.csv` -- binary, year, downloads (from popcon)
-- `dependencies.csv` -- binary, dep_name
+- `dependencies.csv` -- binary, dep_name. **Runtime only**: combines `Depends` + `Pre-Depends` from each binary's stanza. `Build-Depends`, `Recommends`, `Suggests` are intentionally not collected.
 - `package-metadata.csv` -- binary, source, homepage, vcs_browser, section
 - `cpp-packages.csv` -- debtags-identified C/C++ binaries
 - `aliases.csv` -- t64 version renames (current <-> old)
