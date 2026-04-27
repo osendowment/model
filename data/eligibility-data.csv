@@ -351,7 +351,7 @@ acdlite/redux-router,38952298,acdlite,3624098,User,mit,True,False,,,True
 acdlite/redux-rx,38472667,acdlite,3624098,User,,False,False,,,False
 ace-step/ace-step,974040574,ace-step,209436471,Organization,apache-2.0,True,False,,,True
 ace-step/ace-step-1.5,1050131556,ace-step,209436471,Organization,mit,True,False,,,True
-aceakash/string-similarity,27046827,aceakash,1387900,User,mit,True,False,,,True
+aceakash/string-similarity,27046827,aceakash,1387900,User,mit,True,True,,,False
 aceinna/gnss-ins-sim,115900361,aceinna,33765653,Organization,mit,True,False,,,True
 aceinnolab/inkycal,146219350,aceinnolab,133114548,Organization,gpl-3.0,True,False,,,True
 acekyd/made-in-nigeria,85386965,acekyd,4003538,User,,False,False,,,False
@@ -694,7 +694,7 @@ ahmadawais/corona-cli,248479708,ahmadawais,960133,User,mit,True,False,,,True
 ahmadawais/create-guten-block,114870155,ahmadawais,960133,User,mit,True,False,,,True
 ahmadawais/wpgulp,47259754,ahmadawais,960133,User,mit,True,False,,,True
 ahmadnassri/har-schema,63372119,ahmadnassri,183195,User,isc,True,False,,,True
-ahmadnassri/node-har-validator,30582954,ahmadnassri,183195,User,mit,True,False,,,True
+ahmadnassri/node-har-validator,30582954,ahmadnassri,183195,User,mit,True,True,,,False
 ahmedfgad/geneticalgorithmpython,161322880,ahmedfgad,16560492,User,bsd-3-clause,True,False,,,True
 ahmedkhaleel2004/gitdiagram,903700733,ahmedkhaleel2004,111161052,User,mit,True,False,,,True
 ahmedkhlief/apt-hunter,324641073,ahmedkhlief,24752712,User,gpl-3.0,True,False,,,True
@@ -1407,7 +1407,7 @@ ampl/mp,4291925,ampl,3344259,Organization,other,False,False,,,False
 amplication/amplication,262862475,amplication,65107786,Organization,other,False,False,,,False
 amplitude/redux-query,81507373,amplitude,2291562,Organization,other,False,False,,,False
 ampproject/amphtml,41766002,ampproject,14114390,Organization,apache-2.0,True,False,,,True
-ampproject/remapping,201307670,ampproject,14114390,Organization,apache-2.0,True,True,,,False
+ampproject/remapping,201307670,ampproject,14114390,Organization,apache-2.0,True,False,,,True
 ampproject/worker-dom,145039143,ampproject,14114390,Organization,apache-2.0,True,False,,,True
 amqp-node/amqplib,10634962,amqp-node,79077848,Organization,other,False,False,,,False
 amqp-rs/lapin,83697754,amqp-rs,97097975,Organization,mit,True,False,,,True
@@ -1563,7 +1563,7 @@ angular/in-memory-web-api,57238867,angular,139426,Organization,mit,True,False,,,
 angular/material,21399598,angular,139426,Organization,mit,True,False,,,True
 angular/material-start,29152618,angular,139426,Organization,mit,True,False,,,True
 angular/mobile-toolkit,50368366,angular,139426,Organization,mit,True,False,,,True
-angular/protractor,7639232,angular,139426,Organization,mit,True,False,,,True
+angular/protractor,7639232,angular,139426,Organization,mit,True,True,,,False
 angular/quickstart,31702454,angular,139426,Organization,mit,True,False,,,True
 angular/universal,37953959,angular,139426,Organization,mit,True,False,,,True
 angular/universal-starter,44591594,angular,139426,Organization,,False,False,,,False
@@ -2081,7 +2081,7 @@ aria2/aria2,1116542,aria2,13545224,Organization,gpl-2.0,True,False,,,True
 ariafallah/webpacktutorial,51025772,ariafallah,9424976,User,mit,True,False,,,True
 ariakit/ariakit,104133653,ariakit,40200111,Organization,,False,False,,,False
 ariaminaei/renderkid,14141301,ariaminaei,593118,User,mit,True,False,,,True
-ariaminaei/utila,13833448,ariaminaei,593118,User,mit,True,True,,,False
+ariaminaei/utila,13833448,ariaminaei,593118,User,mit,True,False,,,True
 ariebovenberg/whenever,717223794,ariebovenberg,5999858,User,mit,True,False,,,True
 arielf/weight-loss,62973876,arielf,159664,User,other,False,False,,,False
 arielsalminen/remote-preview,6584052,arielsalminen,671836,User,,False,False,,,False
@@ -2358,7 +2358,7 @@ atlassian-api/atlassian-python-api,19530263,atlassian-api,43281909,Organization,
 atlassian-labs/compiled,227810030,atlassian-labs,59180319,Organization,apache-2.0,True,False,,,True
 atlassian/jest-in-case,101966650,atlassian,168166,Organization,mit,True,False,,,True
 atlassian/pragmatic-drag-and-drop,752817250,atlassian,168166,Organization,other,False,False,,,False
-atlassian/react-beautiful-dnd,99761907,atlassian,168166,Organization,other,False,False,,,False
+atlassian/react-beautiful-dnd,99761907,atlassian,168166,Organization,other,False,True,,,False
 atmosphere-nx/atmosphere,117948953,atmosphere-nx,37918415,Organization,gpl-2.0,True,False,,,True
 atom-archive/xray,113402414,atom-archive,13424069,Organization,mit,True,False,,,True
 atom-community/sync-settings,21868533,atom-community,48374659,Organization,mit,True,False,,,True
@@ -2572,7 +2572,7 @@ aws/aws-iot-device-sdk-embedded-c,43013346,aws,2232217,Organization,mit,True,Fal
 aws/aws-lambda-rust-runtime,156752158,aws,2232217,Organization,apache-2.0,True,False,,,True
 aws/aws-sam-cli,92205085,aws,2232217,Organization,apache-2.0,True,False,,,True
 aws/aws-sdk-cpp,35440404,aws,2232217,Organization,apache-2.0,True,False,,,True
-aws/aws-sdk-js,5694513,aws,2232217,Organization,apache-2.0,True,False,,,True
+aws/aws-sdk-js,5694513,aws,2232217,Organization,apache-2.0,True,True,,,False
 aws/aws-sdk-js-crypto-helpers,149673986,aws,2232217,Organization,apache-2.0,True,False,,,True
 aws/aws-sdk-js-v3,87228090,aws,2232217,Organization,apache-2.0,True,False,,,True
 aws/aws-sdk-pandas,172615836,aws,2232217,Organization,apache-2.0,True,False,,,True
@@ -2697,7 +2697,7 @@ azure/azure-sentinel,145183271,azure,6844498,Organization,mit,True,False,,,True
 azure/azurite,122269892,azure,6844498,Organization,mit,True,False,,,True
 azure/fetch-event-source,287992193,azure,6844498,Organization,mit,True,False,,,True
 azure/gpt-rag,659267694,azure,6844498,Organization,mit,True,False,,,True
-azure/msrest-for-python,71186468,azure,6844498,Organization,mit,True,True,,,False
+azure/msrest-for-python,71186468,azure,6844498,Organization,mit,True,False,,,True
 azure/pyrit,730753909,azure,6844498,Organization,mit,True,False,,,True
 azure/review-checklists,414928893,azure,6844498,Organization,mit,True,False,,,True
 azure/stormspotter,258034494,azure,6844498,Organization,mit,True,False,,,True
@@ -2717,9 +2717,9 @@ baaivision/eva,565730722,baaivision,118160626,Organization,mit,True,False,,,True
 baaivision/painter,574615385,baaivision,118160626,Organization,mit,True,False,,,True
 babaohuang/geminiprochat,731462543,babaohuang,559171,User,mit,True,False,,,True
 babel/babel,24560307,babel,9637642,Organization,mit,True,False,,,True
-babel/babel-eslint,31404632,babel,9637642,Organization,mit,True,False,,,True
+babel/babel-eslint,31404632,babel,9637642,Organization,mit,True,True,,,False
 babel/babel-loader,24963784,babel,9637642,Organization,mit,True,False,,,True
-babel/babel-plugin-proposal-private-property-in-object,648700210,babel,9637642,Organization,mit,True,False,,,True
+babel/babel-plugin-proposal-private-property-in-object,648700210,babel,9637642,Organization,mit,True,True,,,False
 babel/babel-polyfills,190579283,babel,9637642,Organization,mit,True,False,,,True
 babel/babel-preset-env,65648767,babel,9637642,Organization,mit,True,False,,,True
 babel/babel-sublime,29109209,babel,9637642,Organization,mit,True,False,,,True
@@ -3205,7 +3205,7 @@ binaryjs/binaryjs,4829739,binaryjs,1905132,Organization,mit,True,False,,,True
 binarymuse/fluxxor,19680412,binarymuse,189606,User,mit,True,False,,,True
 binarymuse/planetary.js,15302531,binarymuse,189606,User,mit,True,False,,,True
 binbyu/reader,149233191,binbyu,16300473,User,,False,False,,,False
-bincode-org/bincode,24130045,bincode-org,67441074,Organization,,False,True,,,False
+bincode-org/bincode,24130045,bincode-org,67441074,Organization,,False,False,,,False
 bindhosts/bindhosts,751913169,bindhosts,195118653,Organization,wtfpl,True,False,,,True
 bindsnet/bindsnet,120948040,bindsnet,39340698,Organization,agpl-3.0,True,False,,,True
 bing-su/adetailer,632823919,bing-su,37621276,User,agpl-3.0,True,False,,,True
@@ -3703,7 +3703,7 @@ brofield/simpleini,13163920,brofield,368178,User,mit,True,False,,,True
 brokensource/depthflow,657910387,brokensource,110147748,Organization,agpl-3.0,True,False,,,True
 brona/iproute2mac,24814763,brona,5365791,User,mit,True,False,,,True
 broofa/mime,534940,broofa,164050,User,mit,True,False,,,True
-broofa/node-int64,1208666,broofa,164050,User,mit,True,True,,,False
+broofa/node-int64,1208666,broofa,164050,User,mit,True,False,,,True
 brookhong/keycastow,100614274,brookhong,288207,User,,False,False,,,False
 brookhong/surfingkeys,41906632,brookhong,288207,User,mit,True,False,,,True
 brookshi/hitchhiker,69206848,brookshi,13607728,User,other,False,False,,,False
@@ -6901,11 +6901,11 @@ domeccleston/sharegpt,574222836,domeccleston,31101792,User,mit,True,False,,,True
 domenic/promises-unwrapping,12286597,domenic,617481,User,,False,False,,,False
 domferr/tilingshell,761864264,domferr,14203981,User,gpl-3.0,True,False,,,True
 dominictarr/event-stream,2242185,dominictarr,259374,User,mit,True,False,,,True
-dominictarr/json-buffer,10176540,dominictarr,259374,User,mit,True,True,,,False
+dominictarr/json-buffer,10176540,dominictarr,259374,User,mit,True,False,,,True
 dominictarr/jsonstream,2442469,dominictarr,259374,User,other,False,False,,,False
 dominictarr/rc,5303431,dominictarr,259374,User,other,False,False,,,False
 dominictarr/scuttlebutt,5183533,dominictarr,259374,User,other,False,False,,,False
-dominictarr/through,4885140,dominictarr,259374,User,other,False,True,,,False
+dominictarr/through,4885140,dominictarr,259374,User,other,False,False,,,False
 dominictobias/react-image-crop,43984013,dominictobias,760314,User,isc,True,False,,,True
 dominikdoom/a1111-sd-webui-tagcomplete,549758909,dominikdoom,34448969,User,mit,True,False,,,True
 dominikwilkowski/cfonts,29108449,dominikwilkowski,1266923,User,gpl-3.0,True,False,,,True
@@ -7145,7 +7145,7 @@ dtolnay/indoc,54252316,dtolnay,1940490,User,apache-2.0,True,False,,,True
 dtolnay/inventory,163008374,dtolnay,1940490,User,apache-2.0,True,False,,,True
 dtolnay/itoa,61962375,dtolnay,1940490,User,apache-2.0,True,False,,,True
 dtolnay/no-panic,143469762,dtolnay,1940490,User,apache-2.0,True,False,,,True
-dtolnay/paste,155652490,dtolnay,1940490,User,apache-2.0,True,True,,,False
+dtolnay/paste,155652490,dtolnay,1940490,User,apache-2.0,True,False,,,True
 dtolnay/proc-macro-workshop,178009373,dtolnay,1940490,User,apache-2.0,True,False,,,True
 dtolnay/proc-macro2,91860126,dtolnay,1940490,User,apache-2.0,True,False,,,True
 dtolnay/quote,67273122,dtolnay,1940490,User,apache-2.0,True,False,,,True
@@ -7962,7 +7962,7 @@ eslint-community/eslint-plugin-security,45323325,eslint-community,94557945,Organ
 eslint-community/eslint-utils,568240379,eslint-community,94557945,Organization,mit,True,False,,,True
 eslint-community/regexpp,571371971,eslint-community,94557945,Organization,mit,True,False,,,True
 eslint-stylistic/eslint-stylistic,690373692,eslint-stylistic,144717797,Organization,mit,True,False,,,True
-eslint/doctrine,4286644,eslint,6019716,Organization,apache-2.0,True,True,,,False
+eslint/doctrine,4286644,eslint,6019716,Organization,apache-2.0,True,False,,,True
 eslint/eslint,11061773,eslint,6019716,Organization,mit,True,False,,,True
 eslint/eslintrc,289083429,eslint,6019716,Organization,mit,True,False,,,True
 eslint/js,27620277,eslint,6019716,Organization,bsd-2-clause,True,False,,,True
@@ -8356,7 +8356,7 @@ facebook/mvfst,128842710,facebook,69631,Organization,mit,True,False,,,True
 facebook/mysql-5.6,9454675,facebook,69631,Organization,other,False,False,,,False
 facebook/openzl,1067353061,facebook,69631,Organization,other,False,False,,,False
 facebook/pathpicker,34887588,facebook,69631,Organization,mit,True,False,,,True
-facebook/prop-types,87597642,facebook,69631,Organization,mit,True,True,,,False
+facebook/prop-types,87597642,facebook,69631,Organization,mit,True,False,,,True
 facebook/prophet,73872834,facebook,69631,Organization,mit,True,False,,,True
 facebook/proxygen,24776728,facebook,69631,Organization,other,False,False,,,False
 facebook/pyrefly,935685654,facebook,69631,Organization,mit,True,False,,,True
@@ -8365,7 +8365,7 @@ facebook/react-native,29028775,facebook,69631,Organization,mit,True,False,,,True
 facebook/react-native-website,109059304,facebook,69631,Organization,mit,True,False,,,True
 facebook/react-strict-dom,760899296,facebook,69631,Organization,mit,True,False,,,True
 facebook/redex,54664770,facebook,69631,Organization,mit,True,False,,,True
-facebook/regenerator,13346571,facebook,69631,Organization,mit,True,True,,,False
+facebook/regenerator,13346571,facebook,69631,Organization,mit,True,False,,,True
 facebook/relay,40508605,facebook,69631,Organization,mit,True,False,,,True
 facebook/rocksdb,6934395,facebook,69631,Organization,gpl-2.0,True,False,,,True
 facebook/sapling,58146669,facebook,69631,Organization,gpl-2.0,True,False,,,True
@@ -8987,7 +8987,7 @@ fisshy/react-scroll,31434220,fisshy,3023875,User,mit,True,False,,,True
 fission-ai/openspec,1032459340,fission-ai,203414896,Organization,mit,True,False,,,True
 fitzgen/bumpalo,158310651,fitzgen,74571,User,apache-2.0,True,False,,,True
 fitzgen/dodrio,159237509,fitzgen,74571,User,mpl-2.0,True,False,,,True
-fitzgen/glob-to-regexp,11461122,fitzgen,74571,User,,False,True,,,False
+fitzgen/glob-to-regexp,11461122,fitzgen,74571,User,,False,False,,,False
 fivdi/onoff,6377918,fivdi,2605378,User,mit,True,False,,,True
 fivesheep/chnroutes,5279985,fivesheep,16363,User,,False,False,,,False
 fix94/nintendont,35291590,fix94,12349638,User,,False,False,,,False
@@ -9069,7 +9069,7 @@ flipperdevices/flipperzero-firmware,284134871,flipperdevices,57576566,Organizati
 flipperdevices/qflipper,367434816,flipperdevices,57576566,Organization,gpl-3.0,True,False,,,True
 flixlix/power-flow-card-plus,618081815,flixlix,61006057,User,,False,False,,,False
 floatdrop/pinkie,35380896,floatdrop,365089,User,mit,True,False,,,True
-floatdrop/require-from-string,39301848,floatdrop,365089,User,mit,True,True,,,False
+floatdrop/require-from-string,39301848,floatdrop,365089,User,mit,True,False,,,True
 floating-ui/floating-ui,54994103,floating-ui,58035617,Organization,mit,True,False,,,True
 floating-ui/react-popper,70210509,floating-ui,58035617,Organization,mit,True,False,,,True
 floating/frame,124593250,floating,598504,User,gpl-3.0,True,False,,,True
@@ -10495,18 +10495,18 @@ googleanalytics/google-analytics-mcp,1020957806,googleanalytics,4327788,Organiza
 googleapis/google-api-nodejs-client,8608480,googleapis,16785467,Organization,apache-2.0,True,False,,,True
 googleapis/google-api-python-client,15749269,googleapis,16785467,Organization,apache-2.0,True,False,,,True
 googleapis/google-auth-library-nodejs,30676220,googleapis,16785467,Organization,apache-2.0,True,False,,,True
-googleapis/google-auth-library-python,69199387,googleapis,16785467,Organization,apache-2.0,True,True,,,False
+googleapis/google-auth-library-python,69199387,googleapis,16785467,Organization,apache-2.0,True,False,,,True
 googleapis/google-cloud-node,19483273,googleapis,16785467,Organization,apache-2.0,True,False,,,True
-googleapis/google-cloud-node-core,1052931509,googleapis,16785467,Organization,apache-2.0,True,True,,,False
+googleapis/google-cloud-node-core,1052931509,googleapis,16785467,Organization,apache-2.0,True,False,,,True
 googleapis/google-cloud-python,16316451,googleapis,16785467,Organization,apache-2.0,True,False,,,True
-googleapis/google-resumable-media-python,88091939,googleapis,16785467,Organization,apache-2.0,True,True,,,False
+googleapis/google-resumable-media-python,88091939,googleapis,16785467,Organization,apache-2.0,True,False,,,True
 googleapis/js-genai,899744532,googleapis,16785467,Organization,apache-2.0,True,False,,,True
-googleapis/proto-plus-python,157577168,googleapis,16785467,Organization,apache-2.0,True,True,,,False
-googleapis/python-bigquery,226992475,googleapis,16785467,Organization,apache-2.0,True,True,,,False
-googleapis/python-cloud-core,226992462,googleapis,16785467,Organization,apache-2.0,True,True,,,False
-googleapis/python-crc32c,159736041,googleapis,16785467,Organization,apache-2.0,True,True,,,False
+googleapis/proto-plus-python,157577168,googleapis,16785467,Organization,apache-2.0,True,False,,,True
+googleapis/python-bigquery,226992475,googleapis,16785467,Organization,apache-2.0,True,False,,,True
+googleapis/python-cloud-core,226992462,googleapis,16785467,Organization,apache-2.0,True,False,,,True
+googleapis/python-crc32c,159736041,googleapis,16785467,Organization,apache-2.0,True,False,,,True
 googleapis/python-genai,899744518,googleapis,16785467,Organization,apache-2.0,True,False,,,True
-googleapis/python-storage,226992639,googleapis,16785467,Organization,apache-2.0,True,True,,,False
+googleapis/python-storage,226992639,googleapis,16785467,Organization,apache-2.0,True,False,,,True
 googleapis/release-please,183499464,googleapis,16785467,Organization,apache-2.0,True,False,,,True
 googleapis/release-please-action,262236530,googleapis,16785467,Organization,apache-2.0,True,False,,,True
 googlearchive/code-prettify,34408310,googlearchive,12502296,Organization,apache-2.0,True,False,,,True
@@ -10534,7 +10534,7 @@ googlechromelabs/chrome-for-testing,632654057,googlechromelabs,31970254,Organiza
 googlechromelabs/clooney,122394858,googlechromelabs,31970254,Organization,apache-2.0,True,False,,,True
 googlechromelabs/comlink,102601749,googlechromelabs,31970254,Organization,apache-2.0,True,False,,,True
 googlechromelabs/container-query-polyfill,427388009,googlechromelabs,31970254,Organization,apache-2.0,True,False,,,True
-googlechromelabs/critters,135479512,googlechromelabs,31970254,Organization,apache-2.0,True,False,,,True
+googlechromelabs/critters,135479512,googlechromelabs,31970254,Organization,apache-2.0,True,True,,,False
 googlechromelabs/dark-mode-toggle,191904180,googlechromelabs,31970254,Organization,apache-2.0,True,False,,,True
 googlechromelabs/idlize,149314402,googlechromelabs,31970254,Organization,apache-2.0,True,False,,,True
 googlechromelabs/jsvu,112520958,googlechromelabs,31970254,Organization,apache-2.0,True,False,,,True
@@ -10619,10 +10619,10 @@ gothinkster/node-express-realworld-example-app,63410856,gothinkster,8601733,Orga
 gothinkster/react-mobx-realworld-example-app,91491386,gothinkster,8601733,Organization,mit,True,False,,,True
 gothinkster/react-redux-realworld-example-app,56101366,gothinkster,8601733,Organization,mit,True,False,,,True
 gothinkster/vue-realworld-example-app,114702034,gothinkster,8601733,Organization,mit,True,False,,,True
-gotwarlost/istanbul,5775917,gotwarlost,1056819,User,other,False,False,,,False
+gotwarlost/istanbul,5775917,gotwarlost,1056819,User,other,False,True,,,False
 gourieff/comfyui-reactor,918106360,gourieff,85128026,User,gpl-3.0,True,False,,,True
 gowtham-darkseid/autopentestx,1106929732,gowtham-darkseid,123238178,User,other,False,False,,,False
-gozala/querystring,1622111,gozala,21236,User,mit,True,False,,,True
+gozala/querystring,1622111,gozala,21236,User,mit,True,True,,,False
 gozargah/marzban,570335310,gozargah,116317706,Organization,agpl-3.0,True,False,,,True
 gozfree/gear-lib,40359871,gozfree,13694393,User,mit,True,False,,,True
 gpac/gpac,19401646,gpac,7303020,Organization,lgpl-2.1,True,False,,,True
@@ -13669,7 +13669,7 @@ jonschlinkert/is-extendable,38225016,jonschlinkert,383994,User,mit,True,False,,,
 jonschlinkert/is-number,24313173,jonschlinkert,383994,User,mit,True,False,,,True
 jonschlinkert/is-plain-object,24306940,jonschlinkert,383994,User,mit,True,False,,,True
 jonschlinkert/is-primitive,24490783,jonschlinkert,383994,User,mit,True,False,,,True
-jonschlinkert/is-windows,38937474,jonschlinkert,383994,User,mit,True,True,,,False
+jonschlinkert/is-windows,38937474,jonschlinkert,383994,User,mit,True,False,,,True
 jonschlinkert/isobject,21342886,jonschlinkert,383994,User,mit,True,False,,,True
 jonschlinkert/kind-of,24491562,jonschlinkert,383994,User,mit,True,False,,,True
 jonschlinkert/map-cache,32450614,jonschlinkert,383994,User,mit,True,False,,,True
@@ -13869,10 +13869,10 @@ jsdf/react-native-htmlview,33224233,jsdf,1232587,User,isc,True,False,,,True
 jsdf/react-native-refreshable-listview,33193963,jsdf,1232587,User,,False,False,,,False
 jsdoc/jsdoc,560495,jsdoc,10699181,Organization,apache-2.0,True,False,,,True
 jsdoc2md/jsdoc-to-markdown,19831645,jsdoc2md,11700076,Organization,mit,True,False,,,True
-jsdom/abab,41579102,jsdom,9271229,Organization,,False,False,,,False
+jsdom/abab,41579102,jsdom,9271229,Organization,,False,True,,,False
 jsdom/cssstyle,4984136,jsdom,9271229,Organization,mit,True,False,,,True
 jsdom/data-urls,113771615,jsdom,9271229,Organization,mit,True,False,,,True
-jsdom/domexception,100222827,jsdom,9271229,Organization,,False,False,,,False
+jsdom/domexception,100222827,jsdom,9271229,Organization,,False,True,,,False
 jsdom/html-encoding-sniffer,71028772,jsdom,9271229,Organization,mit,True,False,,,True
 jsdom/js-symbol-tree,39068410,jsdom,9271229,Organization,mit,True,False,,,True
 jsdom/jsdom,478584,jsdom,9271229,Organization,mit,True,False,,,True
@@ -14890,7 +14890,7 @@ krishnaik06/the-grand-complete-data-science-materials,693492151,krishnaik06,2004
 krisk/fuse,4467228,krisk,565580,User,apache-2.0,True,False,,,True
 kriskowal/asap,11295071,kriskowal,60294,User,mit,True,False,,,True
 kriskowal/gtor,22777776,kriskowal,60294,User,mit,True,False,,,True
-kriskowal/q,887025,kriskowal,60294,User,mit,True,False,,,True
+kriskowal/q,887025,kriskowal,60294,User,mit,True,True,,,False
 krisnova/boopkit,475870202,krisnova,13757818,User,apache-2.0,True,False,,,True
 krispo/angular-nvd3,19229476,krispo,2749842,User,mit,True,False,,,True
 kristerkari/react-native-svg-transformer,143336758,kristerkari,993108,User,mit,True,False,,,True
@@ -15259,8 +15259,8 @@ lda-project/lda,23808489,lda-project,29574507,Organization,mpl-2.0,True,False,,,
 ldapjs/node-ldapjs,2156920,ldapjs,52928261,Organization,mit,True,False,,,True
 ldc-developers/ldc,2174666,ldc-developers,960112,Organization,other,False,False,,,False
 ldcsaa/hp-socket,15257213,ldcsaa,5990337,User,other,False,False,,,False
-lddubeau/saxes,142031691,lddubeau,1963493,User,other,False,True,,,False
-lddubeau/xmlchars,139881982,lddubeau,1963493,User,mit,True,True,,,False
+lddubeau/saxes,142031691,lddubeau,1963493,User,other,False,False,,,False
+lddubeau/xmlchars,139881982,lddubeau,1963493,User,mit,True,False,,,True
 ldionne/dyno,76579661,ldionne,700834,User,bsl-1.0,True,False,,,True
 ldpreload/blacklotus,665649223,ldpreload,95562574,User,,False,False,,,False
 ldqk/masuit.myblogs,140912912,ldqk,20254980,User,mit,True,False,,,True
@@ -19249,7 +19249,7 @@ neuroradiology/insiderecaptcha,27784756,neuroradiology,8550951,User,,False,False
 neutralinojs/neutralinojs,138368259,neutralinojs,36976817,Organization,other,False,False,,,False
 neutree/comtool,97839413,neutree,8625829,User,lgpl-3.0,True,False,,,True
 neutrinojs/neutrino,80793561,neutrinojs,21367267,Organization,mpl-2.0,True,False,,,True
-neutrinojs/webpack-chain,81127405,neutrinojs,21367267,Organization,mpl-2.0,True,False,,,True
+neutrinojs/webpack-chain,81127405,neutrinojs,21367267,Organization,mpl-2.0,True,True,,,False
 neutrinolabs/xrdp,1660127,neutrinolabs,2615587,Organization,apache-2.0,True,False,,,True
 nevamind-ai/memu,1028070615,nevamind-ai,217726889,Organization,other,False,False,,,False
 nevcairiel/lavfilters,10289758,nevcairiel,17890,User,gpl-2.0,True,False,,,True
@@ -21157,7 +21157,7 @@ palantir/blueprint,71939872,palantir,303157,Organization,apache-2.0,True,False,,
 palantir/plottable,16149854,palantir,303157,Organization,mit,True,False,,,True
 palantir/pyspark-style-guide,304342061,palantir,303157,Organization,mit,True,False,,,True
 palantir/python-language-server,78797564,palantir,303157,Organization,mit,True,False,,,True
-palantir/tslint,11672345,palantir,303157,Organization,apache-2.0,True,False,,,True
+palantir/tslint,11672345,palantir,303157,Organization,apache-2.0,True,True,,,False
 palash1992/gem,90606928,palash1992,1177157,User,bsd-3-clause,True,False,,,True
 palashio/libra,254755757,palashio,35114859,User,mit,True,False,,,True
 paldepind/flyd,31337555,paldepind,521604,User,mit,True,False,,,True
@@ -23158,7 +23158,7 @@ raynos/duplexer,5364665,raynos,479538,User,mit,True,False,,,True
 raynos/for-each,6006855,raynos,479538,User,mit,True,False,,,True
 raynos/function-bind,10727014,raynos,479538,User,mit,True,False,,,True
 raynos/mercury,18319723,raynos,479538,User,mit,True,False,,,True
-raynos/xtend,4419184,raynos,479538,User,mit,True,True,,,False
+raynos/xtend,4419184,raynos,479538,User,mit,True,False,,,True
 rayon-rs/either,42479602,rayon-rs,32576850,Organization,apache-2.0,True,False,,,True
 rayon-rs/rayon,24725038,rayon-rs,32576850,Organization,apache-2.0,True,False,,,True
 raysan5/raygui,61231339,raysan5,5766837,User,zlib,True,False,,,True
@@ -23591,9 +23591,9 @@ request/aws-sign,8509348,request,730467,Organization,apache-2.0,True,False,,,Tru
 request/caseless,12804889,request,730467,Organization,apache-2.0,True,False,,,True
 request/forever-agent,8509819,request,730467,Organization,apache-2.0,True,False,,,True
 request/oauth-sign,8509604,request,730467,Organization,apache-2.0,True,False,,,True
-request/request,1283503,request,730467,Organization,apache-2.0,True,False,,,True
-request/request-promise,13330259,request,730467,Organization,isc,True,False,,,True
-request/request-promise-native,58234416,request,730467,Organization,isc,True,False,,,True
+request/request,1283503,request,730467,Organization,apache-2.0,True,True,,,False
+request/request-promise,13330259,request,730467,Organization,isc,True,True,,,False
+request/request-promise-native,58234416,request,730467,Organization,isc,True,True,,,False
 request/tunnel-agent,8509942,request,730467,Organization,apache-2.0,True,False,,,True
 requestly/requestly,75255555,requestly,12287519,Organization,other,False,False,,,False
 requests-cache/requests-cache,4006131,requests-cache,105573137,Organization,bsd-2-clause,True,False,,,True
@@ -24720,7 +24720,7 @@ saschagrunert/webapp.rs,136712523,saschagrunert,695473,User,mit,True,False,,,Tru
 saschawillems/vulkan-gltf-pbr,120181295,saschawillems,10283127,User,mit,True,False,,,True
 sashs/ropper,23515831,sashs,8522003,User,bsd-3-clause,True,False,,,True
 sass/libsass,3319769,sass,317889,Organization,other,False,False,,,False
-sass/node-sass,4128353,sass,317889,Organization,mit,True,False,,,True
+sass/node-sass,4128353,sass,317889,Organization,mit,True,True,,,False
 sass/sass,929845,sass,317889,Organization,mit,True,False,,,True
 sassanix/warracker,941324731,sassanix,39465071,User,agpl-3.0,True,False,,,True
 sassdoc/sassdoc,20962139,sassdoc,8111770,Organization,mit,True,False,,,True
@@ -27104,7 +27104,7 @@ sxyu/pixel-nerf,317389846,sxyu,16251946,User,bsd-2-clause,True,False,,,True
 sxyu/svox2,415694324,sxyu,16251946,User,bsd-2-clause,True,False,,,True
 syan-lin/cyberwaifu,628660547,syan-lin,57340079,User,mit,True,False,,,True
 sybrenjansen/mpire,293576557,sybrenjansen,1677668,User,mit,True,False,,,True
-sybrenstuvel/python-rsa,50107469,sybrenstuvel,1092128,User,other,False,True,,,False
+sybrenstuvel/python-rsa,50107469,sybrenstuvel,1092128,User,other,False,False,,,False
 sycamore-rs/sycamore,344917688,sycamore-rs,83153330,Organization,mit,True,False,,,True
 sygil-dev/sygil-webui,528378201,sygil-dev,112985304,Organization,agpl-3.0,True,False,,,True
 syhyz1990/baiduyun,291240572,syhyz1990,5344173,User,agpl-3.0,True,False,,,True
@@ -30174,7 +30174,7 @@ webodf/viewerjs,9239078,webodf,12464393,Organization,,False,False,,,False
 webonnx/wonnx,401434309,webonnx,99287319,Organization,other,False,False,,,False
 webosbrew/dev-manager-desktop,369537779,webosbrew,76105412,Organization,apache-2.0,True,False,,,True
 webosbrew/webos-homebrew-channel,349449792,webosbrew,76105412,Organization,mit,True,False,,,True
-webpack-contrib/eslint-loader,27577616,webpack-contrib,25012217,Organization,mit,True,False,,,True
+webpack-contrib/eslint-loader,27577616,webpack-contrib,25012217,Organization,mit,True,True,,,False
 webpack-contrib/extract-text-webpack-plugin,16297741,webpack-contrib,25012217,Organization,mit,True,False,,,True
 webpack-contrib/file-loader,4253587,webpack-contrib,25012217,Organization,mit,True,False,,,True
 webpack-contrib/install-webpack-plugin,47086576,webpack-contrib,25012217,Organization,mit,True,False,,,True
@@ -30189,7 +30189,7 @@ webpack/docs,7757937,webpack,2105791,Organization,,False,False,,,False
 webpack/enhanced-resolve,5400204,webpack,2105791,Organization,mit,True,False,,,True
 webpack/html-loader,16207704,webpack,2105791,Organization,mit,True,False,,,True
 webpack/loader-runner,48954065,webpack,2105791,Organization,mit,True,False,,,True
-webpack/loader-utils,6503675,webpack,2105791,Organization,mit,True,True,,,False
+webpack/loader-utils,6503675,webpack,2105791,Organization,mit,True,False,,,True
 webpack/memory-fs,21377503,webpack,2105791,Organization,mit,True,False,,,True
 webpack/mini-css-extract-plugin,123254500,webpack,2105791,Organization,mit,True,False,,,True
 webpack/postcss-loader,24763574,webpack,2105791,Organization,mit,True,False,,,True
@@ -31535,7 +31535,7 @@ zalando/tailor,50101496,zalando,1564818,Organization,mit,True,False,,,True
 zalandoresearch/fashion-mnist,101399935,zalandoresearch,30869512,Organization,mit,True,False,,,True
 zalandoresearch/pytorch-ts,247768523,zalandoresearch,30869512,Organization,mit,True,False,,,True
 zalify/easy-email-editor,351729275,zalify,110989096,Organization,mit,True,False,,,True
-zalmoxisus/redux-devtools-extension,44869078,zalmoxisus,7957859,User,mit,True,False,,,True
+zalmoxisus/redux-devtools-extension,44869078,zalmoxisus,7957859,User,mit,True,True,,,False
 zalmoxisus/remote-redux-devtools,48318543,zalmoxisus,7957859,User,mit,True,False,,,True
 zalo/cascadestudio,281906706,zalo,174475,User,mit,True,False,,,True
 zama-ai/concrete,300205799,zama-ai,57671822,Organization,other,False,False,,,False

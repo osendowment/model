@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 """Determine eligibility for GitHub repos based on OSS license + EOL status.
 
-Reads data/github/search/top-repos.csv (license) and data/eol.csv (archived
-status from check_eol.py), then upserts data/eligibility-data.csv.
+Reads:
+- data/github/search/top-repos.csv — license per GitHub repo
+- data/value-data.csv — package → github_repo + per-package is_eol
+  (aggregated from each ecosystem's data/{eco}/eol.csv by
+  src/unify_value_data.py)
 
-Final eligibility = is_oss AND NOT is_eol. Repos with no entry in eol.csv
-default to is_eol=False (treated as alive).
+A repo's is_eol is derived from its packages in value-data.csv:
+- repo is_eol=True iff it has packages AND every package is is_eol=True
+  (any alive package keeps the repo alive — handles monorepos)
+- repo is_eol=False if it has no packages in value-data.csv (unknown)
+
+Final eligibility = is_oss AND NOT is_eol. Writes data/eligibility-data.csv.
 
 Usage:
     python -m src.eligibility
@@ -22,7 +29,7 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 REPOS_FILE = DATA_DIR / "github" / "search" / "top-repos.csv"
-EOL_FILE = DATA_DIR / "eol.csv"
+VALUE_FILE = DATA_DIR / "value-data.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility-data.csv"
 
 FIELDS = ["repo", "repo_id", "user", "user_id", "user_type", "license", "is_oss", "is_eol", "tm_owner", "tm_owner_type", "eligibility"]
@@ -74,24 +81,31 @@ OSI_APPROVED: set[str] = {
 #   "gfdl-1.3"        — GNU Free Documentation License (not OSI)
 
 
-def load_eol_index() -> dict[str, bool]:
-    """Read eol.csv and return {repo_lowercase: is_eol}. Empty if file missing."""
-    if not EOL_FILE.exists():
+def load_repo_eol_index() -> dict[str, bool]:
+    """Aggregate per-repo is_eol from value-data.csv.
+
+    A repo is EOL only if it has packages mapped to it AND every package
+    is_eol=True. Repos with no packages are absent from the index.
+    """
+    if not VALUE_FILE.exists():
         return {}
-    idx: dict[str, bool] = {}
-    with open(EOL_FILE, encoding="utf-8") as f:
+    by_repo: dict[str, list[bool]] = {}
+    with open(VALUE_FILE, encoding="utf-8") as f:
         for r in csv.DictReader(f):
-            idx[r["repo"].lower()] = r["is_eol"] == "True"
-    return idx
+            repo = r.get("github_repo", "").strip().lower()
+            if not repo:
+                continue
+            by_repo.setdefault(repo, []).append(r.get("is_eol") == "True")
+    return {repo: all(flags) for repo, flags in by_repo.items()}
 
 
 def build_eligibility() -> list[dict]:
-    """Read top-repos.csv + eol.csv and classify each repo's eligibility.
+    """Read top-repos.csv + value-data.csv and classify each repo's eligibility.
 
     # TODO: check if project trademark is owned by a company or corporate nonprofit
     #       — projects with corporate-held trademarks may not be truly community-owned
     """
-    eol_idx = load_eol_index()
+    eol_idx = load_repo_eol_index()
     rows = []
     with open(REPOS_FILE, encoding="utf-8") as f:
         for repo in csv.DictReader(f):
@@ -159,7 +173,7 @@ def main():
                     f"[green]{100 * len(eligible_rows) / total:.1f}%[/green]")
     summary.add_row("[dim]  is_oss[/dim]", f"{len(oss_rows):,}",
                     f"{100 * len(oss_rows) / total:.1f}%")
-    summary.add_row("[red]  is_eol (archived)[/red]", f"[red]{len(eol_rows):,}[/red]",
+    summary.add_row("[red]  is_eol[/red]", f"[red]{len(eol_rows):,}[/red]",
                     f"[red]{100 * len(eol_rows) / total:.1f}%[/red]")
     summary.add_row("[red]Not eligible[/red]", f"[red]{total - len(eligible_rows):,}[/red]",
                     f"[red]{100 * (total - len(eligible_rows)) / total:.1f}%[/red]")
