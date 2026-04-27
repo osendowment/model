@@ -1,0 +1,7 @@
+repo,repo_id,total_commits,total_contributors,bus_factor,hhi,fetched_at
+eemeli/yaml,119439276,1617,34,1,9309,2026-04-27T23:46:37+00:00
+jsdom/xml-name-validator,28553202,29,2,1,7622,2026-04-27T23:46:37+00:00
+motdotla/dotenv,11205780,997,112,1,5880,2026-04-27T23:46:38+00:00
+octokit/openapi-types.ts,304109193,508,14,5,1102,2026-04-27T23:46:39+00:00
+sec-ant/readable-stream,569980966,119,4,1,1984,2026-04-27T23:46:37+00:00
+yuzujs/setimmediate,1981208,118,12,1,4999,2026-04-27T23:46:40+00:00

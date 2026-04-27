@@ -52,8 +52,16 @@ def _week_in_range(week: dict, date_range: DateRange) -> bool:
 def _compute_bus_factor(
     contributors: list[Contributor], threshold: float = THRESHOLD,
     base: str = "commits", include_bots: bool = False,
+    total_override: int | None = None,
 ) -> tuple[int, list[Contributor], float]:
-    """Core bus factor + HHI computation from a list of Contributors."""
+    """Core bus factor + HHI computation from a list of Contributors.
+
+    If `total_override` is provided (and not less than the sum of visible
+    contributions), it's used as the denominator for percent calculations.
+    This matters for repos with >500 contributors where /contributors
+    truncates the long tail — using the exact total commit count from
+    /commits gives accurate BF/HHI even when we can't see every author.
+    """
     for c in contributors:
         c.is_bot = is_bot(c.login) and not include_bots
 
@@ -67,11 +75,16 @@ def _compute_bus_factor(
             c.pct = c.lines_changed / total
         sort_key = lambda c: c.lines_changed
     else:
-        total = sum(c.commits for c in active)
-        if total == 0:
+        sum_visible = sum(c.commits for c in active)
+        if sum_visible == 0:
             return 0, [], 0.0
+        denominator = (
+            total_override
+            if total_override and total_override >= sum_visible
+            else sum_visible
+        )
         for c in active:
-            c.pct = c.commits / total
+            c.pct = c.commits / denominator
         sort_key = lambda c: c.commits
 
     hhi = sum(c.pct ** 2 for c in active)
@@ -149,19 +162,22 @@ def _cumulative_loc(stats: list[dict], up_to: datetime.date) -> int:
 
 def compute_lifetime_metrics(
     contributors_data: list[dict],
+    total_commits: int | None = None,
+    total_contributors: int | None = None,
     label: str = "2021-2025",
     threshold: float = THRESHOLD,
     include_bots: bool = False,
 ) -> list[tuple[str, RunResult]]:
     """Compute BF/HHI from /repos/{owner}/{repo}/contributors output.
 
-    Used as the primary path now that /stats/contributors is unreliable
-    (returns 202 forever for many repos). Trades per-year breakdown for
-    universal coverage: the result is a single (label, RunResult) entry
-    representing lifetime totals, not a per-year breakdown.
+    `total_commits`, when provided, is used as the BF/HHI denominator
+    instead of the sum-of-visible contributions. This matters for repos
+    with >500 contributors — /contributors truncates the long tail, so
+    sum-of-visible underestimates the real total. The exact figure comes
+    from /commits via `_fetch_total_commits`.
 
-    `contributors_data` is the GitHub API response — a list of dicts with
-    `login`, `contributions`, `type` (User/Bot) per contributor.
+    `total_contributors` is recorded on the RunResult for downstream
+    reporting but doesn't affect BF/HHI.
     """
     contributors: list[Contributor] = []
     for c in contributors_data:
@@ -176,11 +192,14 @@ def compute_lifetime_metrics(
             )
         )
     bf, sorted_c, hhi = _compute_bus_factor(
-        contributors, threshold=threshold, base="commits", include_bots=include_bots,
+        contributors, threshold=threshold, base="commits",
+        include_bots=include_bots, total_override=total_commits,
     )
     return [(label, RunResult(
         bus_factor=bf, contributors=sorted_c, hhi=hhi,
         perf=PerfStats(source="contributors-api"),
+        total_commits=total_commits,
+        total_contributors=total_contributors,
     ))]
 
 
@@ -233,6 +252,8 @@ def main() -> None:
                         help="Directory to upsert per-metric CSVs into (default: data/github/contributors/ in batch mode)")
     parser.add_argument("--include-bots", action="store_true", default=False,
                         help="Include bots as regular contributors in bus factor calculation")
+    parser.add_argument("--force", action="store_true",
+                        help="Re-fetch all repos in batch mode, ignoring existing CSV data")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
@@ -253,6 +274,7 @@ def main() -> None:
             threshold=args.threshold, base=args.base,
             include_bots=args.include_bots,
             limit=args.limit,
+            force=args.force,
         ))
         return
 

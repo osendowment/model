@@ -76,6 +76,12 @@ class RunResult:
     first_week: datetime.date | None = None
     last_week: datetime.date | None = None
     total_loc: int | None = None
+    # Exact totals from /commits and /contributors Link-header tricks. When
+    # `total_commits` is set, BF/HHI use it as denominator (more accurate
+    # than sum-of-visible-contributions for repos with >500 contributors,
+    # whose long tail is silently truncated by /contributors).
+    total_commits: int | None = None
+    total_contributors: int | None = None
 
 
 @dataclass

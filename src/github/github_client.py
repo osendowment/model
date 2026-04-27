@@ -290,6 +290,94 @@ def _parse_next_link(link_header: str) -> str | None:
     return None
 
 
+def _parse_last_page(link_header: str) -> int | None:
+    """Extract the page= integer from the rel=\"last\" entry of a Link header.
+
+    GitHub uses this for cheap "total count" lookups: GET /commits?per_page=1
+    returns one item and a Link header whose `rel="last"` URL has page=N
+    where N is the exact total count. Same pattern applies to /contributors.
+    """
+    if not link_header:
+        return None
+    from urllib.parse import urlparse, parse_qs
+    for part in link_header.split(","):
+        part = part.strip()
+        if 'rel="last"' in part:
+            url = part.split(";", 1)[0].strip().lstrip("<").rstrip(">")
+            q = parse_qs(urlparse(url).query)
+            pages = q.get("page", [])
+            if pages:
+                try:
+                    return int(pages[0])
+                except ValueError:
+                    return None
+    return None
+
+
+async def _fetch_total_commits(
+    session: aiohttp.ClientSession, limiter: _AsyncRateLimiter, repo: str,
+) -> int:
+    """Return the total commits on the repo's default branch.
+
+    Single API call: GET /commits?per_page=1 + Link header rel="last" page.
+    Returns 0 for empty repos (HTTP 409). Includes only the default branch.
+    """
+    url = f"{GITHUB_API}/repos/{repo}/commits?per_page=1"
+    try:
+        resp = await limiter.get(session, url)
+    except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+        raise _Deferred() from e
+    async with resp:
+        status = resp.status
+        if status == 200:
+            last = _parse_last_page(resp.headers.get("Link", ""))
+            if last is not None:
+                return last
+            data = await resp.json()
+            return len(data) if isinstance(data, list) else 0
+        if status == 409:
+            return 0
+        if status == 404:
+            raise RuntimeError(f"Repo not found: {repo}")
+        if status == 403:
+            remaining = resp.headers.get("X-RateLimit-Remaining", "?")
+            raise RuntimeError(f"Rate limited ({repo}, remaining: {remaining})")
+        raise RuntimeError(f"{repo}: HTTP {status}")
+
+
+async def _fetch_total_contributors(
+    session: aiohttp.ClientSession, limiter: _AsyncRateLimiter, repo: str,
+) -> int:
+    """Return total distinct contributors (incl. anonymous), via Link header.
+
+    Single API call: GET /contributors?per_page=1&anon=true + Link rel="last".
+    Without `anon=true` GitHub silently caps the list at the first 500 GitHub-
+    linked accounts. With anon, page count reflects every distinct contributor
+    email/login, even ones never linked to a GitHub user.
+    """
+    url = f"{GITHUB_API}/repos/{repo}/contributors?per_page=1&anon=true"
+    try:
+        resp = await limiter.get(session, url)
+    except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+        raise _Deferred() from e
+    async with resp:
+        status = resp.status
+        if status == 204:
+            return 0
+        if status == 200:
+            last = _parse_last_page(resp.headers.get("Link", ""))
+            if last is not None:
+                return last
+            data = await resp.json()
+            return len(data) if isinstance(data, list) else 0
+        if status == 404:
+            raise RuntimeError(f"Repo not found: {repo}")
+        if status == 403:
+            remaining = resp.headers.get("X-RateLimit-Remaining", "?")
+            raise RuntimeError(f"Rate limited ({repo}, remaining: {remaining})")
+        raise RuntimeError(f"{repo}: HTTP {status}")
+
+
 async def _fetch_contributors_paginated(
     session: aiohttp.ClientSession, limiter: _AsyncRateLimiter,
     repo: str, max_pages: int = 10,

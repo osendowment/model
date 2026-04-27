@@ -2,6 +2,7 @@
 
 import asyncio
 import csv as csv_mod
+import datetime
 import logging
 import os
 import time
@@ -19,6 +20,8 @@ from src.github.models import RunResult, THRESHOLD
 from src.github.github_client import (
     _AsyncRateLimiter,
     _fetch_contributors_paginated,
+    _fetch_total_commits,
+    _fetch_total_contributors,
     _Deferred,
 )
 from src.github.display import console, _ETAColumn, _fmt_date, _fmt_contribs_label
@@ -63,6 +66,33 @@ WIDE_FILES = {
 YEARS_FILE = "years.csv"
 YEARS_FIELDS = ["repo", "year", "first_date", "last_date"]
 
+# Per-repo concentration summary written alongside the wide CSVs
+CONCENTRATION_FILE = "data/concentration-data.csv"
+CONCENTRATION_FIELDS = [
+    "repo", "repo_id",
+    "total_commits", "total_contributors",
+    "bus_factor", "hhi", "fetched_at",
+]
+GH_REPOS_FILE = "data/github/repos.csv"
+
+
+def _load_repo_id_map() -> dict[str, str]:
+    """Return {repo_lowercased: numeric_repo_id} from data/github/repos.csv.
+
+    Empty if the file doesn't exist — concentration-data.csv falls back
+    to empty string for repo_id in that case.
+    """
+    if not os.path.exists(GH_REPOS_FILE):
+        return {}
+    out: dict[str, str] = {}
+    with open(GH_REPOS_FILE, encoding="utf-8") as f:
+        for row in csv_mod.DictReader(f):
+            slug = (row.get("repo") or "").strip().lower()
+            rid = (row.get("repo_id") or "").strip()
+            if slug and rid:
+                out[slug] = rid
+    return out
+
 
 def _is_single_year(label: str) -> bool:
     """A year-range aggregate like '2021-2025' is not a single year."""
@@ -102,6 +132,67 @@ def _upsert_yearly_csv_batch(
         )
 
     _upsert_years_file(os.path.join(dirpath, YEARS_FILE), batch, metrics)
+    _upsert_concentration_data(batch, batch_labels)
+
+
+def _upsert_concentration_data(
+    batch: list[tuple[str, list[tuple[str, RunResult]]]],
+    batch_labels: list[str],
+) -> None:
+    """Upsert per-repo concentration summary rows into data/concentration-data.csv.
+
+    One row per repo with the bus-factor "weakest link":
+        repo, repo_id, min_commits, min_contributor, bus_factor, hhi, fetched_at
+
+    `min_contributor` is the login of the contributor with the lowest commit
+    count among the bus-factor-many top contributors — i.e. the marginal
+    person whose departure would still leave the project viable. `min_commits`
+    is their commit count.
+    """
+    if not batch:
+        return
+
+    # Pick the aggregate label (e.g. "2021-2025") to read RunResult from.
+    # If multiple aggregate labels are present we use the first non-single-year.
+    agg_label = next((lbl for lbl in batch_labels if not _is_single_year(lbl)), None)
+    if agg_label is None:
+        return
+
+    repo_ids = _load_repo_id_map()
+    fetched_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+
+    existing: dict[str, dict[str, str]] = {}
+    if os.path.exists(CONCENTRATION_FILE):
+        with open(CONCENTRATION_FILE, encoding="utf-8") as f:
+            for row in csv_mod.DictReader(f):
+                existing[row["repo"]] = row
+
+    for repo, year_results in batch:
+        agg = next((r for label, r in year_results if label == agg_label), None)
+        if agg is None or not agg.contributors:
+            continue
+        humans = [c for c in agg.contributors if not c.is_bot]
+        if not humans or agg.bus_factor == 0:
+            continue
+        existing[repo] = {
+            "repo": repo,
+            "repo_id": repo_ids.get(repo, existing.get(repo, {}).get("repo_id", "")),
+            "total_commits": str(agg.total_commits) if agg.total_commits is not None else "",
+            "total_contributors": (
+                str(agg.total_contributors) if agg.total_contributors is not None else ""
+            ),
+            "bus_factor": str(agg.bus_factor),
+            "hhi": str(round(agg.hhi * 10000)),
+            "fetched_at": fetched_at,
+        }
+
+    os.makedirs(os.path.dirname(CONCENTRATION_FILE) or ".", exist_ok=True)
+    with open(CONCENTRATION_FILE, "w", newline="", encoding="utf-8") as f:
+        writer = csv_mod.DictWriter(f, fieldnames=CONCENTRATION_FIELDS,
+                                    extrasaction="ignore")
+        writer.writeheader()
+        for repo in sorted(existing):
+            writer.writerow(existing[repo])
 
 
 def _upsert_wide_file(
@@ -235,6 +326,7 @@ async def batch_update(
     repos: list[str], year_start: int, year_end: int, output: str,
     threshold: float = THRESHOLD, base: str = "commits",
     include_bots: bool = False, limit: int | None = None,
+    force: bool = False,
 ) -> None:
     """Fetch and update metrics for multiple repos in parallel.
 
@@ -251,7 +343,7 @@ async def batch_update(
 
     t_start = time.monotonic()
 
-    existing = _read_existing_periods(output)
+    existing = _read_existing_periods(output) if not force else {}
     needed_labels = {str(y) for y in range(year_start, year_end + 1)}
     needed_labels.add(f"{year_start}-{year_end}")
 
@@ -293,17 +385,23 @@ async def batch_update(
         error: str = ""
         rounds: int = 1
 
-    async def _try_one(repo: str) -> tuple[str, list[dict] | None, str, float]:
+    async def _try_one(repo: str):
+        """Fetch /contributors + total commit count + total contributor count
+        in parallel for one repo. Returns (repo, data, total_commits,
+        total_contribs, error, elapsed)."""
         async with sem:
             t = time.monotonic()
             try:
-                data = await _fetch_contributors_paginated(session, limiter, repo)
-                return (repo, data, "", time.monotonic() - t)
+                data, total_commits, total_contribs = await asyncio.gather(
+                    _fetch_contributors_paginated(session, limiter, repo),
+                    _fetch_total_commits(session, limiter, repo),
+                    _fetch_total_contributors(session, limiter, repo),
+                )
+                return (repo, data, total_commits, total_contribs, "", time.monotonic() - t)
             except _Deferred:
-                # Transient network/timeout — let the outer round retry.
-                return (repo, None, "", time.monotonic() - t)
+                return (repo, None, None, None, "", time.monotonic() - t)
             except RuntimeError as e:
-                return (repo, None, str(e), time.monotonic() - t)
+                return (repo, None, None, None, str(e), time.monotonic() - t)
 
     results: list[_RepoResult] = []
     repo_api_time: dict[str, float] = defaultdict(float)
@@ -345,7 +443,7 @@ async def batch_update(
                 deferred: list[str] = []
                 coros = [_try_one(repo) for repo in pending_repos]
                 for coro in asyncio.as_completed(coros):
-                    repo, data, error, api_time = await coro
+                    repo, data, total_commits, total_contribs, error, api_time = await coro
                     repo_api_time[repo] += api_time
 
                     if error:
@@ -357,7 +455,9 @@ async def batch_update(
                         continue
                     else:
                         yr = compute_lifetime_metrics(
-                            data, label=total_label,
+                            data, total_commits=total_commits,
+                            total_contributors=total_contribs,
+                            label=total_label,
                             threshold=threshold, include_bots=include_bots,
                         )
                         rr = _RepoResult(repo=repo, year_results=yr,
@@ -385,7 +485,8 @@ async def batch_update(
 
             for repo in pending_repos:
                 yr = compute_lifetime_metrics(
-                    [], label=total_label,
+                    [], total_commits=None, total_contributors=None,
+                    label=total_label,
                     threshold=threshold, include_bots=include_bots,
                 )
                 rr = _RepoResult(repo=repo, year_results=yr,
