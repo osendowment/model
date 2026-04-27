@@ -362,41 +362,58 @@ by `uv run -m src.unify_value_data`.
 ## Per-repo aggregation
 
 `data/value-by-repo.csv` collapses `value-data.csv` from per-package to
-per-repo. Produced by `uv run -m src.aggregate_by_repo`.
+per-repo. Produced by `uv run -m src.aggregate_by_repo`. The same script
+also writes a denormalized `top_eco_pct` column back into
+`data/value-data.csv` so per-package rows carry the importance score of
+their parent repo group.
+
+**Pipeline order**: each ecosystem's `check_eol.py` → `unify_value_data.py`
+→ `aggregate_by_repo.py`. Re-running `unify_value_data.py` overwrites
+`value-data.csv` without `top_eco_pct`; re-run `aggregate_by_repo.py`
+afterwards to restore it.
 
 **Grouping**: rows sharing a non-empty `github_repo` are merged into one
 group; rows with an empty `github_repo` (e.g. cpp packages like `glibc`,
 `gcc`) are kept as their own one-package groups so nothing is dropped.
 Sequential `id` is the unique row identifier.
 
-**Per-ecosystem score**: within each ecosystem, the group's PR is the
+**Per-ecosystem class**: within each ecosystem, the group's PR is the
 **sum** of its packages' PR. Groups (with at least one package in that
-ecosystem) are sorted by that sum desc, and `pr_cum_pct_<eco>` is the
-cumulative share — same math as the package-level value classes, just
-applied to summed-by-group PR. `class_<eco>` is then assigned via the
-existing A/B/C/D cutoffs (≤50%, ≤75%, ≤90%, rest).
+ecosystem) are sorted by that sum desc, the cumulative share is
+computed, and `class_<eco>` is assigned via the same A/B/C/D cutoffs
+as the package-level value pipeline (≤50%, ≤75%, ≤90%, rest). Empty
+when the group has no package in that ecosystem.
 
-**Cross-ecosystem rollup**: `class_total` is the **strongest** per-eco
-class the group has (A < B < C < D). E.g. a repo that is `pypi=A` and
-`cpp=B` rolls up to `class_total=A`.
+A repo's overall strength is `min(class_<eco>)` across non-empty values
+(A < B < C < D). It's not stored as a separate column — easy to derive
+on read.
 
 This avoids comparing PR magnitudes across ecosystems (which aren't
 comparable — each ecosystem's PR mass sums to 1 within its own graph).
-Recomputing PageRank on a repo-level dep graph was considered and skipped
-because cross-ecosystem deps don't exist in our data; the repo graph is
-still four disconnected subgraphs.
+Recomputing PageRank on a repo-level dep graph was considered and
+skipped because cross-ecosystem deps don't exist in our data; the repo
+graph is still four disconnected subgraphs.
+
+### data/value-by-repo.csv
 
 | Column | Description |
 |--------|-------------|
-| `id` | Sequential numeric id (sorted by `class_total`, then `pkgs_total` desc) |
+| `id` | Sequential numeric id (sorted by `top_eco_pct` desc) |
 | `github_repo` | Lowercase `owner/repo` slug; empty for orphans |
-| `packages` | `;`-separated `package (ecosystem)` list |
-| `pkgs_npm`, `pkgs_pypi`, `pkgs_crates`, `pkgs_cpp` | Package count per ecosystem |
-| `pkgs_total` | Sum of the four counts |
-| `pr_cum_pct_<eco>` | Cumulative PR share within ecosystem (0–100), empty if no presence |
-| `class_<eco>` | A/B/C/D from `pr_cum_pct_<eco>`, empty if no presence |
-| `class_total` | Strongest class across ecosystems |
-| `is_eol` | `True` only if every constituent package is `is_eol=True` |
+| `ecosystems` | Comma-separated list of ecosystems where the group has at least one package (e.g. `crates,npm`) |
+| `packages` | Total package count in the group |
+| `top_eco` | Ecosystem where this group is highest-ranked (max PR percentile). `npm` / `pypi` / `crates` / `cpp`. |
+| `top_eco_pkg` | Highest-PR package in `top_eco` (e.g. `@babel/helper-plugin-utils` for babel/babel) |
+| `top_eco_pct` | PR percentile in `top_eco` (`100 − pr_cum_pct`). 0–100, **higher = better**. babel/babel sits at 92.25; tail packages near 0. |
+| `class` | Strongest of the per-ecosystem classes (A < B < C < D) |
+| `class_npm`, `class_pypi`, `class_crates`, `class_cpp` | A/B/C/D from per-ecosystem cumulative PR share; empty if no package in that ecosystem |
+
+### top_eco_pct in value-data.csv
+
+`aggregate_by_repo.py` also adds a `top_eco_pct` column to
+`data/value-data.csv` (denormalized — every package in a group inherits the
+group's `top_eco_pct`). All 202 babel/babel packages share the same value
+(~92.25); orphans carry their own one-package-group's percentile.
 
 ## Current Limitations
 
