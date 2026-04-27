@@ -29,6 +29,20 @@
       "A": 1000000,
       "B": 100000,
       "C": 10000
+    },
+    "issue_debt": {
+      "min_opened_5y": 10,
+      "A": {"max_close_ratio": 0.30, "min_opened_5y": 100},
+      "B": {"max_close_ratio": 0.60, "min_opened_5y": 30},
+      "C": {"max_close_ratio": 0.85, "min_opened_5y": 10},
+      "comment": "min_opened_5y is the master skip threshold — below this we don't classify the repo at all (issue tracker disabled / unused)"
+    },
+    "issue_trend": {
+      "min_total_for_trend": 25,
+      "min_active_years": 3,
+      "improving": 0.05,
+      "deteriorating": -0.05,
+      "comment": "trend_score = (slope_closed - slope_opened) / mean(opened_per_year). >= +0.05 → improving; <= -0.05 → deteriorating; otherwise stable. Empty if total < min_total_for_trend or fewer than min_active_years had any issues opened."
     }
   },
   "years": [2021, 2022, 2023, 2024, 2025]
