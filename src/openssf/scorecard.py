@@ -67,17 +67,39 @@ def _scorecard_bin() -> str:
     return path
 
 
-def _github_token() -> str:
-    token = os.environ.get("GITHUB_AUTH_TOKEN") or os.environ.get("GITHUB_TOKEN")
-    if not token:
+def _github_tokens() -> list[str]:
+    """Load all GitHub tokens for round-robin across concurrent subprocesses.
+
+    Falls back to a single token from GITHUB_AUTH_TOKEN/GITHUB_TOKEN/gh-cli
+    if GITHUB_TOKENS isn't set, so single-token setups still work. The
+    multi-token case is what makes concurrent scorecard runs survive
+    GitHub rate limits — each subprocess gets its own quota."""
+    # Load .env into the process environment first
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass
+
+    tokens_csv = os.environ.get("GITHUB_TOKENS", "").strip()
+    if tokens_csv:
+        tokens = [t.strip() for t in tokens_csv.split(",") if t.strip()]
+        if tokens:
+            return tokens
+
+    single = os.environ.get("GITHUB_AUTH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    if not single:
         import subprocess as _sp
         try:
-            token = _sp.check_output(["gh", "auth", "token"], text=True).strip()
+            single = _sp.check_output(["gh", "auth", "token"], text=True).strip()
         except Exception:
-            pass
-    if not token:
-        raise RuntimeError("No GitHub token found. Set GITHUB_AUTH_TOKEN or run: gh auth login")
-    return token
+            single = None
+    if not single:
+        raise RuntimeError(
+            "No GitHub token found. Set GITHUB_TOKENS (comma-separated, "
+            "preferred for concurrency), GITHUB_AUTH_TOKEN, or run: gh auth login"
+        )
+    return [single]
 
 
 SUBPROCESS_TIMEOUT_S = 300  # 5 min per repo — scorecard internal retries
@@ -127,17 +149,22 @@ async def fetch_all(repos: list[str], concurrency: int = 5) -> dict[str, dict]:
 
     Upserts each result to disk as soon as it completes.
     Returns a mapping of repo -> full scorecard result.
+
+    Tokens are round-robined across calls so concurrent scorecard
+    subprocesses don't all share one rate-limit budget.
     """
-    token = _github_token()
+    tokens = _github_tokens()
+    console.print(f"[dim]Using {len(tokens)} GitHub token(s); concurrency={concurrency}[/dim]")
     semaphore = asyncio.Semaphore(concurrency)
     results: dict[str, dict] = {}
 
     completed = 0
     total = len(repos)
 
-    async def bounded_run(repo: str) -> None:
+    async def bounded_run(repo: str, idx: int) -> None:
         nonlocal completed
         async with semaphore:
+            token = tokens[idx % len(tokens)]
             loop = asyncio.get_running_loop()
             data = await loop.run_in_executor(None, run_scorecard, repo, token)
             results[repo] = data
@@ -161,7 +188,7 @@ async def fetch_all(repos: list[str], concurrency: int = 5) -> dict[str, dict]:
         console=console,
     ) as progress:
         task = progress.add_task("Scanning repos", total=total)
-        await asyncio.gather(*(bounded_run(repo) for repo in repos))
+        await asyncio.gather(*(bounded_run(repo, i) for i, repo in enumerate(repos)))
 
     return results
 
