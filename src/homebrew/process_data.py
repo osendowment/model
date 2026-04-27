@@ -31,7 +31,7 @@ import networkx as nx
 from rich.console import Console
 from rich.table import Table
 
-from src.params import (
+from src.pipeline.params import (
     TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS,
     assign_value_class, ecosystem_avg_downloads,
 )
@@ -42,12 +42,12 @@ RAW_FORMULAS = "data/homebrew/raw/formulas.csv"
 RAW_DEPS = "data/homebrew/raw/dependencies.csv"
 RAW_DOWNLOADS = "data/homebrew/raw/downloads.csv"
 OSSFUZZ_PROJECTS = "data/ossfuzz/projects.csv"
-OUT_TOP = "data/homebrew/top-formulas.csv"
+OUT_TOP = "data/homebrew/top-packages.csv"
 OUT_DEP_TREE = "data/homebrew/dependency-tree.csv"
 OUT_GITHUB = "data/homebrew/github-repos.csv"
 OUT_RESULTS = "data/homebrew/results.csv"
 
-WIDE_FIELDS = ["formula", "avg_downloads"] + [str(y) for y in YEARS]
+WIDE_FIELDS = ["package", "avg_downloads"] + [str(y) for y in YEARS]
 GITHUB_RE = re.compile(r"github\.com/([^/\s#?]+)/([^/\s#?.]+)", re.IGNORECASE)
 
 
@@ -114,7 +114,7 @@ def compute_avg(year_vals: dict[int, int]) -> int:
 
 
 def wide_row(formula: str, year_vals: dict[int, int]) -> dict:
-    return {"formula": formula, "avg_downloads": compute_avg(year_vals),
+    return {"package": formula, "avg_downloads": compute_avg(year_vals),
             **{str(yr): year_vals.get(yr, 0) for yr in YEARS}}
 
 
@@ -187,17 +187,17 @@ def step_top(raw: dict[str, dict[int, int]], formulas: dict[str, dict]) -> set[s
     preview = Table(title="Top 10 by avg installs", header_style="bold green")
     preview.add_column("Formula"); preview.add_column("Avg", justify="right")
     for r in rows[:10]:
-        preview.add_row(r["formula"], f"{r['avg_downloads']:,}")
+        preview.add_row(r["package"], f"{r['avg_downloads']:,}")
     console.print(preview)
-    return {r["formula"] for r in rows}
+    return {r["package"] for r in rows}
 
 
 def step_dep_tree(top: set[str], edges: list[tuple[str, str]]) -> list[tuple[str, str]]:
     console.rule("[bold cyan]Step 2 — dependency-tree.csv")
     t0 = time.perf_counter()
     tree_edges = build_dep_tree(top, edges)
-    rows = [{"formula": p, "dependency": d, "type": "runtime"} for p, d in tree_edges]
-    atomic_write(OUT_DEP_TREE, rows, ["formula", "dependency", "type"])
+    rows = [{"package": p, "dependency": d, "type": "runtime"} for p, d in tree_edges]
+    atomic_write(OUT_DEP_TREE, rows, ["package", "dependency", "type"])
 
     nodes = {n for e in tree_edges for n in e} | top
     tbl = Table(show_header=False, box=None, padding=(0, 2))
@@ -219,10 +219,10 @@ def step_github(nodes: set[str], formulas: dict[str, dict]) -> dict[str, str]:
         if slug:
             pkg_to_repo[n] = slug
     rows = sorted(
-        [{"formula": n, "github_repo": s} for n, s in pkg_to_repo.items()],
-        key=lambda r: r["formula"],
+        [{"package": n, "github_repo": s} for n, s in pkg_to_repo.items()],
+        key=lambda r: r["package"],
     )
-    atomic_write(OUT_GITHUB, rows, ["formula", "github_repo"])
+    atomic_write(OUT_GITHUB, rows, ["package", "github_repo"])
 
     tbl = Table(show_header=False, box=None, padding=(0, 2))
     tbl.add_column(style="dim"); tbl.add_column(justify="right")
@@ -264,7 +264,7 @@ def step_results(
         language = (formulas.get(n) or {}).get("language", "")
         slug = github_repos.get(n, "")
         rows.append({
-            "formula":       n,
+            "package":       n,
             "github_repo":   slug,
             "language":      language,
             "avg_downloads": compute_avg(yv),
@@ -284,7 +284,7 @@ def step_results(
         r["value_class"] = assign_value_class(share)
 
     fields = (
-        ["formula", "github_repo", "language", "avg_downloads"]
+        ["package", "github_repo", "language", "avg_downloads"]
         + [str(y) for y in YEARS]
         + ["top", "is_cpp", "is_oss_fuzz", "pagerank", "value_class"]
     )
@@ -309,7 +309,7 @@ def step_results(
     preview.add_column("Top?", justify="center")
     for r in rows[:15]:
         preview.add_row(
-            r["formula"], r["language"], r["github_repo"] or "[dim]—[/dim]",
+            r["package"], r["language"], r["github_repo"] or "[dim]—[/dim]",
             r["pagerank"], f"{r['avg_downloads']:,}",
             "[green]yes[/green]" if r["top"] == "True" else "[dim]no[/dim]",
         )

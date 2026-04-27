@@ -1,4 +1,4 @@
-"formula","dependency","type"
+"package","dependency","type"
 "mozjpeg","libpng","runtime"
 "glances","certifi","runtime"
 "glances","cryptography","runtime"

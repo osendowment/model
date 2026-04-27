@@ -48,7 +48,7 @@ import networkx as nx
 from rich.console import Console
 from rich.table import Table
 
-from src.params import (
+from src.pipeline.params import (
     TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS,
     assign_value_class, ecosystem_avg_downloads,
 )
@@ -66,7 +66,7 @@ OUT_DEP_TREE = "data/debian/dependency-tree.csv"
 OUT_GITHUB = "data/debian/github-repos.csv"
 OUT_RESULTS = "data/debian/results.csv"
 
-WIDE_FIELDS = ["source", "avg_downloads"] + [str(y) for y in YEARS]
+WIDE_FIELDS = ["package", "avg_downloads"] + [str(y) for y in YEARS]
 GITHUB_RE = re.compile(r"github\.com/([^/\s#?]+)/([^/\s#?.]+)", re.IGNORECASE)
 
 
@@ -118,7 +118,7 @@ def compute_avg(year_vals: dict[int, int]) -> int:
 
 
 def wide_row(source: str, year_vals: dict[int, int]) -> dict:
-    return {"source": source, "avg_downloads": compute_avg(year_vals),
+    return {"package": source, "avg_downloads": compute_avg(year_vals),
             **{str(yr): year_vals.get(yr, 0) for yr in YEARS}}
 
 
@@ -264,17 +264,17 @@ def step_top(raw: dict[str, dict[int, int]], cpp_srcs: set[str]) -> set[str]:
     preview = Table(title="Top 10 sources by avg installs", header_style="bold green")
     preview.add_column("Source"); preview.add_column("Avg", justify="right")
     for r in rows[:10]:
-        preview.add_row(r["source"], f"{r['avg_downloads']:,}")
+        preview.add_row(r["package"], f"{r['avg_downloads']:,}")
     console.print(preview)
-    return {r["source"] for r in rows}
+    return {r["package"] for r in rows}
 
 
 def step_dep_tree(top_sources: set[str], edges: list[tuple[str, str]]) -> list[tuple[str, str]]:
     console.rule("[bold cyan]Step 2 — dependency-tree.csv (per source)")
     t0 = time.perf_counter()
     tree_edges = build_dep_tree(top_sources, edges)
-    rows = [{"source": p, "dependency": d, "type": "declared"} for p, d in tree_edges]
-    atomic_write(OUT_DEP_TREE, rows, ["source", "dependency", "type"])
+    rows = [{"package": p, "dependency": d, "type": "declared"} for p, d in tree_edges]
+    atomic_write(OUT_DEP_TREE, rows, ["package", "dependency", "type"])
 
     nodes = {n for e in tree_edges for n in e} | top_sources
     tbl = Table(show_header=False, box=None, padding=(0, 2))
@@ -291,10 +291,10 @@ def step_github(nodes: set[str], src_gh: dict[str, str]) -> dict[str, str]:
     t0 = time.perf_counter()
     pkg_to_repo = {s: src_gh[s] for s in nodes if s in src_gh}
     rows = sorted(
-        [{"source": s, "github_repo": r} for s, r in pkg_to_repo.items()],
-        key=lambda r: r["source"],
+        [{"package": s, "github_repo": r} for s, r in pkg_to_repo.items()],
+        key=lambda r: r["package"],
     )
-    atomic_write(OUT_GITHUB, rows, ["source", "github_repo"])
+    atomic_write(OUT_GITHUB, rows, ["package", "github_repo"])
 
     tbl = Table(show_header=False, box=None, padding=(0, 2))
     tbl.add_column(style="dim"); tbl.add_column(justify="right")
@@ -335,7 +335,7 @@ def step_results(
         yv = raw.get(src, {})
         slug = github_repos.get(src, "")
         rows.append({
-            "source":        src,
+            "package":       src,
             "github_repo":   slug,
             "avg_downloads": compute_avg(yv),
             **{str(yr): yv.get(yr, 0) for yr in YEARS},
@@ -354,7 +354,7 @@ def step_results(
         r["value_class"] = assign_value_class(share)
 
     fields = (
-        ["source", "github_repo", "avg_downloads"]
+        ["package", "github_repo", "avg_downloads"]
         + [str(y) for y in YEARS]
         + ["top", "is_cpp", "is_oss_fuzz", "pagerank", "value_class"]
     )
@@ -377,7 +377,7 @@ def step_results(
     preview.add_column("Top?",   justify="center")
     for r in rows[:15]:
         preview.add_row(
-            r["source"], r["pagerank"], f"{r['avg_downloads']:,}",
+            r["package"], r["pagerank"], f"{r['avg_downloads']:,}",
             "[green]yes[/green]" if r["is_cpp"] == "True" else "[dim]no[/dim]",
             "[green]yes[/green]" if r["top"]    == "True" else "[dim]no[/dim]",
         )

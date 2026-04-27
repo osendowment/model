@@ -7,7 +7,7 @@ under multiple verified emails collapse into one entry.
 Usage:
     python -m src.github.fetch_contributors_metrics facebook/react          # all years from first activity
     python -m src.github.fetch_contributors_metrics facebook/react --years 2021 2025
-    python -m src.github.fetch_contributors_metrics                         # batch: top-repos.csv → repo-contrib-metrics.csv
+    python -m src.github.fetch_contributors_metrics                         # batch: data/github/ab-repos.csv → contributors/*.csv
 """
 
 import argparse
@@ -23,7 +23,8 @@ from src.github.models import (
 )
 from src.github.github_client import fetch_contributor_stats
 from src.github.display import _spinner, display_results, display_yearly_breakdown
-from src.github.batch_runner import batch_update, _upsert_yearly_csv, _load_repos_from_csv
+from src.github.batch_runner import batch_update, _upsert_yearly_csv
+from src.pipeline.repos import VALUE_FILE, load_ab_slugs
 
 
 def parse_repo(url_or_slug: str) -> str:
@@ -182,8 +183,9 @@ def compute_yearly_breakdown(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Calculate bus factor for a GitHub repo")
     parser.add_argument("repo", nargs="?", help="GitHub repo URL or owner/repo slug")
-    parser.add_argument("--input", default="data/github/search/top-repos.csv",
-                        help="CSV file with repos to batch update (expects 'repo' column, default: data/github/search/top-repos.csv)")
+    parser.add_argument("--input", default=VALUE_FILE,
+                        help=f"value-data CSV (default: {VALUE_FILE} — "
+                             f"loads A/B class repos with non-empty github_repo, skips archived)")
     parser.add_argument("--limit", type=int, help="Process N random repos from --input CSV")
     parser.add_argument("--base", choices=["commits", "locs"], default="commits",
                         help="Metric for bus factor (default: commits)")
@@ -208,7 +210,7 @@ def main() -> None:
     if not args.repo:
         years = args.years or [2021, 2025]
         output = args.output or "data/github/contributors"
-        repos = _load_repos_from_csv(args.input)
+        repos = load_ab_slugs(value_file=args.input)
         asyncio.run(batch_update(
             repos, years[0], years[1], output,
             threshold=args.threshold, base=args.base,

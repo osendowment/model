@@ -37,7 +37,7 @@ import networkx as nx
 from rich.console import Console
 from rich.table import Table
 
-from src.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
+from src.pipeline.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
 BQ_CSV      = "data/pypi/bigquery/bq-package-downloads.csv"
 DEPS_CSV    = "data/pypi/raw/package-dependencies.csv"

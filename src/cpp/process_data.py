@@ -57,7 +57,7 @@ import networkx as nx
 from rich.console import Console
 from rich.table import Table
 
-from src.params import (
+from src.pipeline.params import (
     TOP_THRESHOLD_PCT, PAGERANK_ALPHA,
     DOWNLOADS_SCORE_DEBIAN_WEIGHT, DOWNLOADS_SCORE_HOMEBREW_WEIGHT,
     assign_value_class,
@@ -218,13 +218,15 @@ def build_bin_to_source(aliases: dict[str, str]) -> dict[str, str]:
     return bin_to_src
 
 
-def _load_signals(path: str, key_col: str) -> dict[str, dict]:
-    """Shared reader for the per-ecosystem results files. Key is `source`
-    for Debian and `formula` for Homebrew; the rest of the schema matches."""
+def _load_signals(path: str) -> dict[str, dict]:
+    """Shared reader for the per-ecosystem results files. Both Debian and
+    Homebrew results.csv use `package` as the identifier column (was
+    historically `source` and `formula` respectively — unified for
+    consistency with npm/pypi/crates)."""
     signals: dict[str, dict] = {}
     with open(path, newline="", encoding="utf-8") as f:
         for r in csv.DictReader(f):
-            signals[r[key_col]] = {
+            signals[r["package"]] = {
                 "avg":         _i(r["avg_downloads"]),
                 "is_cpp":      _bool(r["is_cpp"]),
                 "github":      r["github_repo"] or "",
@@ -234,11 +236,11 @@ def _load_signals(path: str, key_col: str) -> dict[str, dict]:
 
 
 def load_debian_signals() -> dict[str, dict]:
-    return _load_signals(DEBIAN_RESULTS, "source")
+    return _load_signals(DEBIAN_RESULTS)
 
 
 def load_homebrew_signals() -> dict[str, dict]:
-    return _load_signals(HOMEBREW_RESULTS, "formula")
+    return _load_signals(HOMEBREW_RESULTS)
 
 
 # ── edges (from raw deps) ─────────────────────────────────────────────────────
@@ -351,6 +353,13 @@ def combine(
         d_avg = max((deb_signals[n]["avg"] for n in d_names), default=0)
         h_avg = max((hb_signals[n]["avg"] for n in h_names), default=0)
         is_cpp = _any_cpp(d_names, deb_signals) or _any_cpp(h_names, hb_signals)
+        # Skip administrative split-binaries with no Repology mapping and no
+        # cpp signal -- e.g. `debian:libc-l10n`, `debian:lib32c-dev`. They
+        # come in via raw deps, get a `debian:<name>` fallback in
+        # _debian_project, and would otherwise sit in cpp/results.csv with
+        # zero downloads but non-zero PR (inherited from being depended-on).
+        if not is_cpp:
+            continue
         github = _first_github(list(d_names), deb_signals) \
               or _first_github(list(h_names), hb_signals)
         is_oss_fuzz = (
@@ -610,7 +619,14 @@ def step_results(
 
     out_rows: list[dict] = []
     for n in G.nodes():
-        r = by_project.get(n, {})
+        # Drop orphan transit nodes that arrived via raw deps but have no
+        # cpp project metadata (e.g. non-cpp dependencies, or
+        # `debian:<split-binary>` fallbacks filtered out in combine()).
+        # Their PR mass stays in the graph for correct scoring of real
+        # projects, but we don't emit them as rows.
+        if n not in by_project:
+            continue
+        r = by_project[n]
         out_rows.append({
             "package":                n,
             "github_repo":            github_repos.get(n, ""),

@@ -46,11 +46,11 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.params import assign_value_class
+from src.pipeline.params import assign_value_class
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "value-data.csv"
 
 ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")

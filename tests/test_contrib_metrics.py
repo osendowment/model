@@ -8,7 +8,7 @@ import pytest
 from src.github.models import Contributor, DateRange
 from src.github.fetch_contributors_metrics import calculate_bus_factor, parse_repo
 from src.github.github_client import fetch_contributor_stats, _fetch_stats_once, _Deferred, _NoStats, _AsyncRateLimiter
-from src.classify_risk import concentration_class
+from src.pipeline.classify_risk import concentration_class
 
 
 class TestParseRepo:

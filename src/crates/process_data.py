@@ -39,7 +39,7 @@ import polars as pl
 from rich.console import Console
 from rich.table import Table
 
-from src.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
+from src.pipeline.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
 DUMP_DIR    = "data/crates/db-dump"
 MONTHLY_DIR = "data/crates/version-downloads"

@@ -42,11 +42,12 @@ from rich.table import Table
 
 from src.github.github_client import GITHUB_API, get_revolver
 from src.github.display import _ETAColumn
+from src.pipeline.repos import load_ab_repos
 
 log = logging.getLogger(__name__)
 console = Console()
 
-REPOS_FILE = "data/github/search/top-repos.csv"
+REPOS_FILE = "data/value-data.csv"  # A/B class subset loaded via src.repos.load_ab_repos
 OUTPUT_FILE = "data/github/git/complexity.csv"
 YEARLY_OUTPUT_DIR = "data/github/git"
 SHA_FILE = "data/github/git/years.csv"
@@ -387,15 +388,15 @@ async def analyze_repos(
 
 
 def _load_repos(filepath: str) -> tuple[list[str], dict[str, int]]:
-    """Load repo slugs and sizes from CSV."""
-    repos = []
-    sizes: dict[str, int] = {}
-    with open(filepath, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            repo = row["repo"]
-            repos.append(repo)
-            if row.get("size"):
-                sizes[repo] = int(row["size"])
+    """Load A/B repos and their sizes from value-data.csv (enriched with top-repos.csv).
+
+    `filepath` is treated as the value-data path. Sizes come from top-repos.csv
+    via the helper; repos missing there get size 0 and fall back to sparse-clone
+    (the tarball threshold is 1MB, so unknown sizes default to safe behavior).
+    """
+    entries = load_ab_repos(value_file=filepath)
+    repos = [e.repo for e in entries]
+    sizes = {e.repo: e.size_kb for e in entries if e.size_kb}
     return repos, sizes
 
 

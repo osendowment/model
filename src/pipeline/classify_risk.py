@@ -17,18 +17,18 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.params import CONCENTRATION_THRESHOLDS, COMPLEXITY_LOC_THRESHOLDS
+from src.pipeline.params import CONCENTRATION_THRESHOLDS, COMPLEXITY_LOC_THRESHOLDS
+from src.pipeline.repos import load_ab_repos
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CONTRIB_DIR = DATA_DIR / "github" / "contributors"
 LOC_FILE = DATA_DIR / "github" / "git" / "loc.csv"
 OUTPUT_FILE = DATA_DIR / "risk-metrics.csv"
 AGG_COL = "2021-2025"
 LOC_YEAR = "2025"  # most recent year in git/loc.csv
 
-REPOS_FILE = DATA_DIR / "github" / "search" / "top-repos.csv"
 FIELDS = ["repo", "repo_id", "active_contributors", "hhi_commits", "bus_factor_commits",
           "loc", "concentration_class", "complexity_class"]
 
@@ -70,13 +70,8 @@ def complexity_class(loc: int | None) -> str:
 
 
 def _load_repo_ids() -> dict[str, str]:
-    """Load repo slug → repo_id mapping from search/top-repos.csv."""
-    mapping: dict[str, str] = {}
-    if REPOS_FILE.exists():
-        with open(REPOS_FILE, encoding="utf-8") as f:
-            for row in csv.DictReader(f):
-                mapping[row["repo"]] = row["repo_id"]
-    return mapping
+    """Load repo slug → repo_id mapping for the A/B universe."""
+    return {e.repo: e.repo_id for e in load_ab_repos() if e.repo_id}
 
 
 def _load_locs() -> dict[str, int]:

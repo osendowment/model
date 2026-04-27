@@ -33,7 +33,7 @@ CONCENTRATION_THRESHOLDS: dict = _P["risk_classification"]["concentration"]
 COMPLEXITY_LOC_THRESHOLDS: dict = _P["risk_classification"]["complexity_loc"]
 
 
-_ECOSYSTEM_DL_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "ecosystem-downloads.csv")
+_ECOSYSTEM_DL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "ecosystem-downloads.csv")
 
 
 def ecosystem_avg_downloads(ecosystem: str) -> int:

@@ -34,7 +34,7 @@ import aiohttp
 from rich.console import Console
 from tqdm.asyncio import tqdm_asyncio
 
-from src.eol_common import display_summary, now_iso, write_eol
+from src.pipeline.eol_common import display_summary, now_iso, write_eol
 
 logging.basicConfig(level="INFO")
 log = logging.getLogger(__name__)

@@ -1,4 +1,4 @@
-"source","dependency","type"
+"package","dependency","type"
 "phonon","gcc-14","declared"
 "phonon","glibc","declared"
 "phonon","libphonon-l10n","declared"

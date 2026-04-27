@@ -36,7 +36,7 @@ from rich.table import Table
 sys.path.insert(0, os.path.dirname(__file__))
 from fetch_npm_data import fetch_and_save_deps, fetch_and_save_downloads, load_fetched_dep_packages  # noqa: E402
 
-from src.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
+from src.pipeline.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
 console = Console()
 
@@ -276,6 +276,10 @@ def step_results(
     console.rule("[bold cyan]Step 6 — results.csv (pagerank)")
     t0 = time.perf_counter()
     G  = nx.DiGraph()
+    # Seed with all top packages so orphans (no declared deps, no inbound deps)
+    # still get a row in results.csv -- dropping them silently would shrink the
+    # value-pipeline funnel below the top-packages count.
+    G.add_nodes_from(top_packages)
     for pkg, dep, _ in tree_edges:
         G.add_edge(pkg, dep)
 

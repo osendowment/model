@@ -1,4 +1,4 @@
-"formula","github_repo"
+"package","github_repo"
 "abseil","abseil/abseil-cpp"
 "act","nektos/act"
 "actionlint","rhysd/actionlint"
