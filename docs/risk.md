@@ -114,9 +114,10 @@ All data comes from [GitHub](sources/github.md):
 |--------|-------------|
 | `repo` | GitHub repo slug (`owner/name`) |
 | `repo_id` | GitHub numeric repo ID |
-| `active_contributors` | Contributors with commits in 2021--2025 |
-| `hhi_commits` | Herfindahl-Hirschman Index (0--10000) |
-| `bus_factor_commits` | Min contributors for 50% of commits |
+| `total_commits` | Lifetime total commits on the default branch (from `/commits` Link header) |
+| `total_contributors` | Lifetime total contributors incl. anonymous (from `/contributors?anon=true` Link header) |
+| `hhi_commits` | Herfindahl-Hirschman Index (0--10000), computed against `total_commits` |
+| `bf_commits` | Min contributors covering 50% of `total_commits` |
 | `concentration_class` | A--D |
 | `loc` | Lines of code (scc, most recent year) |
 | `complexity_class` | A--D |

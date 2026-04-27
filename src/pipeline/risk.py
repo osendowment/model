@@ -20,11 +20,14 @@ Reads:
 
 Writes:
     data/risk-data.csv  with columns:
-        repo, repo_id, active_contributors, hhi_commits, bus_factor_commits,
-        loc, concentration_class, complexity_class,
+        repo, repo_id, total_commits, total_contributors,
+        hhi_commits, bf_commits, concentration_class,
+        loc, complexity_class,
+        openssf_score, security_class,
         issues_opened_5y, issues_closed_5y, issue_close_ratio,
         slope_opened, slope_closed, issue_trend_score,
-        issue_trend, issue_debt_class.
+        issue_trend, issue_debt_class,
+        risk_class.
 
 Usage:
     uv run python -m src.pipeline.risk
@@ -61,7 +64,7 @@ FIELDS = [
     "repo", "repo_id",
     # concentration (lifetime BF/HHI from data/concentration-data.csv)
     "total_commits", "total_contributors",
-    "hhi_commits", "bus_factor_commits", "concentration_class",
+    "hhi_commits", "bf_commits", "concentration_class",
     # complexity
     "loc", "complexity_class",
     # security (OpenSSF Scorecard)
@@ -366,7 +369,7 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
             "total_commits": total_commits_str,
             "total_contributors": total_contribs_str,
             "hhi_commits": hhi if hhi is not None else "",
-            "bus_factor_commits": bf if bf is not None else "",
+            "bf_commits": bf if bf is not None else "",
             "concentration_class": conc_cls,
             "loc": locs if locs is not None else "",
             "complexity_class": comp_cls,
