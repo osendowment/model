@@ -160,11 +160,13 @@ def collect_ecosystem(ecosystem: str, pkg_col: str) -> tuple[list[dict], dict]:
 
     classes = Counter(r["value_class"] for r in rows if r["value_class"])
     with_gh = sum(1 for r in rows if r["github_repo"])
+    with_git = sum(1 for r in rows if r["git_url"])
     eol_count = sum(1 for r in rows if r["is_eol"])
     eol_covered = bool(eol_idx)
 
     ab_rows = [r for r in rows if r["value_class"] in ("A", "B")]
     ab_with_gh = sum(1 for r in ab_rows if r["github_repo"])
+    ab_with_git = sum(1 for r in ab_rows if r["git_url"])
     ab_eol = sum(1 for r in ab_rows if r["is_eol"])
 
     stats = {
@@ -173,11 +175,15 @@ def collect_ecosystem(ecosystem: str, pkg_col: str) -> tuple[list[dict], dict]:
         "deps_unique": after_deps,
         "results": len(rows),
         "with_gh": with_gh,
+        "with_git": with_git,
         "gh_pct": (100.0 * with_gh / len(rows)) if rows else 0.0,
+        "git_pct": (100.0 * with_git / len(rows)) if rows else 0.0,
         "classes": classes,
         "ab_total": len(ab_rows),
         "ab_with_gh": ab_with_gh,
+        "ab_with_git": ab_with_git,
         "ab_gh_pct": (100.0 * ab_with_gh / len(ab_rows)) if ab_rows else 0.0,
+        "ab_git_pct": (100.0 * ab_with_git / len(ab_rows)) if ab_rows else 0.0,
         "eol_covered": eol_covered,
         "eol_count": eol_count,
         "ab_eol": ab_eol,
@@ -278,8 +284,10 @@ def _print_funnel_table(stats_per_eco: list[dict]) -> None:
     table.add_column("Results", justify="right")
     table.add_column("With GH", justify="right")
     table.add_column("GH %", justify="right")
+    table.add_column("With Git", justify="right")
+    table.add_column("Git %", justify="right")
 
-    tot = {"top": 0, "deps_unique": 0, "results": 0, "with_gh": 0}
+    tot = {"top": 0, "deps_unique": 0, "results": 0, "with_gh": 0, "with_git": 0}
     for s in stats_per_eco:
         table.add_row(
             s["ecosystem"],
@@ -288,12 +296,15 @@ def _print_funnel_table(stats_per_eco: list[dict]) -> None:
             f"{s['results']:,}",
             f"{s['with_gh']:,}",
             f"{s['gh_pct']:.0f}%",
+            f"{s['with_git']:,}",
+            f"{s['git_pct']:.0f}%",
         )
         for k in tot:
             tot[k] += s[k]
 
     table.add_section()
     gh_pct = (100.0 * tot["with_gh"] / tot["results"]) if tot["results"] else 0.0
+    git_pct = (100.0 * tot["with_git"] / tot["results"]) if tot["results"] else 0.0
     table.add_row(
         "[bold]Total[/bold]",
         f"[bold]{tot['top']:,}[/bold]",
@@ -301,6 +312,8 @@ def _print_funnel_table(stats_per_eco: list[dict]) -> None:
         f"[bold]{tot['results']:,}[/bold]",
         f"[bold]{tot['with_gh']:,}[/bold]",
         f"[bold]{gh_pct:.0f}%[/bold]",
+        f"[bold]{tot['with_git']:,}[/bold]",
+        f"[bold]{git_pct:.0f}%[/bold]",
     )
     console.print(table)
 
@@ -341,10 +354,12 @@ def _print_class_table(stats_per_eco: list[dict]) -> None:
         table.add_column(cls, justify="right")
     table.add_column("Total", justify="right")
     table.add_column("A+B GH", justify="right")
+    table.add_column("A+B Git", justify="right")
 
     totals = Counter()
     ab_total = 0
     ab_gh = 0
+    ab_git = 0
     for s in stats_per_eco:
         row = [s["ecosystem"]]
         eco_total = sum(s["classes"].values())
@@ -354,18 +369,22 @@ def _print_class_table(stats_per_eco: list[dict]) -> None:
             row.append(f"{n:,}")
         row.append(f"{eco_total:,}")
         row.append(f"{s['ab_gh_pct']:.0f}%")
+        row.append(f"{s['ab_git_pct']:.0f}%")
         ab_total += s["ab_total"]
         ab_gh += s["ab_with_gh"]
+        ab_git += s["ab_with_git"]
         table.add_row(*row)
 
     grand = sum(totals.values())
     grand_ab_gh_pct = (100.0 * ab_gh / ab_total) if ab_total else 0.0
+    grand_ab_git_pct = (100.0 * ab_git / ab_total) if ab_total else 0.0
     table.add_section()
     table.add_row(
         "[bold]Total[/bold]",
         *(f"[bold]{totals[cls]:,}[/bold]" for cls in "ABCD"),
         f"[bold]{grand:,}[/bold]",
         f"[bold]{grand_ab_gh_pct:.0f}%[/bold]",
+        f"[bold]{grand_ab_git_pct:.0f}%[/bold]",
     )
     console.print(table)
 

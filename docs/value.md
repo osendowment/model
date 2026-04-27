@@ -113,19 +113,23 @@ upstream repo at the end. *GH %* counts only github.com; *Git %* also
 counts gitlab, bitbucket, sourcehut, codeberg, and `custom` hosts
 (savannah, sourceware, kernel.org, etc.) -- see [Unified output](#unified-output).
 
-| Ecosystem | Top packages | After dep tree | Results | With GitHub | GH % | Git % |
-|-----------|-------------:|---------------:|--------:|------------:|-----:|------:|
-| npm       | 5,765 | 6,370  | 6,370  | 6,281  | 99% | 99% |
-| PyPI      | 2,460 | 3,139  | 3,139  | 1,728  | 55% | 55% |
-| crates.io | 3,719 | 6,218  | 6,218  | 5,967  | 96% | 99% |
-| C/C++     | 1,643 | 2,648  | 2,648  | 484    | 18% | 24% |
-| **Total** | **13,587** | **18,375** | **18,375** | **14,460** | **79%** | **80%** |
+| Ecosystem | Top packages | After dep tree | Results | With GitHub | GH % | With Git | Git % |
+|-----------|-------------:|---------------:|--------:|------------:|-----:|---------:|------:|
+| npm       | 5,765  | 6,370  | 6,370  | 6,281  | 99% | 6,281  | 99% |
+| PyPI      | 2,460  | 3,139  | 3,139  | 1,728  | 55% | 1,728  | 55% |
+| crates.io | 3,719  | 6,218  | 6,218  | 5,967  | 96% | 6,130  | 99% |
+| C/C++     | 1,643  | 2,648  | 1,882  | 482    | 26% | 770    | 41% |
+| **Total** | **13,587** | **18,375** | **17,609** | **14,458** | **82%** | **14,909** | **85%** |
 
 *Top packages* covers 95% of cumulative downloads. *After dep tree* is
 `|top ∪ transitive deps|` -- the universe analysed for PageRank. *Results*
 keeps every node from that universe (top packages with no edges still get
-a row, with PageRank = 0). PyPI is stuck at 55% because the BigQuery
-extract was github-only at fetch time.
+a row, with PageRank = 0). C/C++'s `Results` is smaller than `After dep
+tree` because the cpp pipeline applies an `is_cpp` filter — language-agnostic
+distro packages get dropped. PyPI is stuck at 55% because the BigQuery
+extract was github-only at fetch time. C/C++ jumps from 26% GitHub to 41%
+Git because non-GitHub upstreams (sourceware, savannah, gitlab.gnome.org,
+etc.) now resolve via per-eco `git.csv`.
 
 ### Value class distribution
 
@@ -136,12 +140,15 @@ Per-ecosystem and combined counts of A/B/C/D classes in `value-data.csv`.
 | npm       | 331 | 748   | 1,183 | 4,108  | 6,370 | 100% | 100% |
 | PyPI      | 54  | 157   | 414   | 2,514  | 3,139 | 76%  | 76%  |
 | crates.io | 49  | 197   | 449   | 5,523  | 6,218 | 99%  | 100% |
-| C/C++     | 11  | 84    | 324   | 2,229  | 2,648 | 27%  | 27%  |
-| **Total** | **445** | **1,186** | **2,370** | **14,374** | **18,375** | **93%** | **93%** |
+| C/C++     | 10  | 82    | 291   | 1,499  | 1,882 | 32%  | 95%  |
+| **Total** | **444** | **1,184** | **2,337** | **13,644** | **17,609** | **93%** | **96%** |
 
 *A+B GH* and *A+B Git* are the share of A and B class packages with a
 known GitHub repo and any Git URL respectively -- the load-bearing tail
-that risk + eligibility downstream both rely on. Non-GitHub upstreams
+that risk + eligibility downstream both rely on. C/C++'s A+B Git jumps
+from 32% to 95% once non-GitHub upstreams are counted (glibc, gcc,
+libunistring, glib, mpfr, etc. live on sourceware / savannah / gitlab
+hosts, not GitHub). Non-GitHub upstreams
 are concentrated in C/D classes, so the A+B numbers barely move.
 
 ## Ecosystems
@@ -378,6 +385,24 @@ subgraphs.
 | `class` | Strongest of the per-ecosystem classes (A < B < C < D) |
 | `class_npm`, `class_pypi`, `class_crates`, `class_cpp` | A/B/C/D from per-ecosystem cumulative PR share; empty if no package in that ecosystem |
 
+### Repo class distribution
+
+After grouping packages by `github_repo` (or as orphans), `value-data.csv`
+collapses 17,609 package rows into 12,842 repo rows.
+
+| | npm | PyPI | crates.io | C/C++ | Strongest |
+|---|---:|---:|---:|---:|---:|
+| A | 144 | 53 | 31 | 10 | **238** |
+| B | 430 | 151 | 102 | 81 | **763** |
+| C | 769 | 389 | 256 | 291 | **1,704** |
+| D | 3,087 | 2,347 | 3,231 | 1,491 | **10,137** |
+
+*Strongest* is the count of repos for which the column is the highest
+class achieved across any of its ecosystems (`class` column in
+`value-data.csv`). 9,691 of the 12,842 rows are github groups; the other
+3,151 are orphan packages (no `github_repo`) kept under sequential ids
+so nothing is dropped.
+
 EOL information is intentionally **not** stored here — it belongs to the
 eligibility pipeline. `src/eligibility.py` joins per-ecosystem
 `data/{eco}/eol.csv` with `data/{eco}/results.csv` directly to compute
@@ -449,15 +474,28 @@ GitHub are present in `value-data.csv` with `github_repo=""` and are
 silently excluded from those analyses.
 
 Examples affected: glibc (sourceware.org), gcc (gcc.gnu.org / Savannah),
+libunistring (savannah), glib (gitlab.gnome.org), mpfr (gitlab.inria.fr),
 curl (curl.se), ImageMagick (own host), many GNU/Apache/X.Org/KDE
-projects, kernel-adjacent code. cpp coverage is only ~21% github-mapped;
-pypi is ~55%; npm is ~99%.
+projects, kernel-adjacent code.
 
-To fix later: broaden to a generic `git_url` (GitLab, Codeberg, Sourcehut,
-sourceware.org, savannah, kde.org, freedesktop.org, etc.) with per-host
-adapters for the equivalent of license/EOL/contributor checks. Until then,
-"alive on a non-GitHub host" looks identical to "no upstream" in our
-output.
+**Status update**: `value-data.csv` now exposes `git_url` alongside
+`github_repo`, so non-GitHub upstreams are no longer silently dropped at
+the value-pipeline level. Coverage:
+
+| Ecosystem | GitHub % | Git % (incl. non-GH) | A+B GitHub % | A+B Git % |
+|---|---:|---:|---:|---:|
+| npm | 99% | 99% | 100% | 100% |
+| PyPI | 55% | 55% | 76% | 76% |
+| crates.io | 96% | 99% | 99% | 100% |
+| C/C++ | 26% | 41% | 32% | **95%** |
+| **Total** | **82%** | **85%** | **93%** | **96%** |
+
+Downstream stages (eligibility, EOL, GitHub contributor metrics) still
+key off `github_repo`, so a non-GitHub-only project (glibc, gcc, etc.)
+still slips out of those analyses even though it's now visible in
+`value-data.csv` with a populated `git_url`. To fully fix: per-host
+adapters for license/EOL/contributor checks against GitLab API, savannah,
+sourceware, etc.
 
 ### No package-level quality gate before results.csv
 
