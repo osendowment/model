@@ -43,6 +43,12 @@
       "improving": 0.05,
       "deteriorating": -0.05,
       "comment": "trend_score = (slope_closed - slope_opened) / mean(opened_per_year). >= +0.05 → improving; <= -0.05 → deteriorating; otherwise stable. Empty if total < min_total_for_trend or fewer than min_active_years had any issues opened."
+    },
+    "security": {
+      "A": 3.0,
+      "B": 5.0,
+      "C": 7.0,
+      "comment": "Buckets the OpenSSF Scorecard score (0-10). A: score ≤ 3 (critical hygiene); B: ≤ 5; C: ≤ 7; D: > 7. Empty when no scorecard available."
     }
   },
   "years": [2021, 2022, 2023, 2024, 2025]

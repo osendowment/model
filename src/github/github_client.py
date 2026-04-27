@@ -122,11 +122,15 @@ def _sync_request(url: str, **kwargs) -> requests.Response:
 
 
 def fetch_contributor_stats(
-    repo: str, retries: int = 6,
+    repo: str, retries: int = 12,
 ) -> list[dict]:
     """Fetch contributor stats from GitHub API. Handles 202/204 (computing) responses.
 
     Returns [] for repos with no contributor stats (e.g. no commits with emails).
+
+    Larger repos can take GitHub minutes to compute the stats response, returning
+    202 until done. With retries=12 and the 30s cap, we wait up to ~3.5 minutes
+    per repo before giving up — enough to catch most 202-resolutions in practice.
     """
     url = f"{GITHUB_API}/repos/{repo}/stats/contributors"
 
@@ -142,7 +146,7 @@ def fetch_contributor_stats(
             return []
 
         if resp.status_code in (202, 204):
-            wait = min(2.0 + attempt * 2, 10.0)
+            wait = min(2.0 + attempt * 3, 30.0)
             log.debug("GitHub is computing stats (%d), retrying in %.1fs...", resp.status_code, wait)
             time.sleep(wait)
             continue

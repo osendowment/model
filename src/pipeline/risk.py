@@ -42,6 +42,7 @@ from src.pipeline.params import (
     COMPLEXITY_LOC_THRESHOLDS,
     ISSUE_DEBT_THRESHOLDS,
     ISSUE_TREND_THRESHOLDS,
+    SECURITY_THRESHOLDS,
     YEARS,
 )
 from src.pipeline.repos import load_eligible_repos
@@ -52,6 +53,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CONTRIB_DIR = DATA_DIR / "github" / "contributors"
 LOC_FILE = DATA_DIR / "github" / "git" / "loc.csv"
 ISSUES_DIR = DATA_DIR / "github" / "issues"
+OPENSSF_FILE = DATA_DIR / "openssf" / "scores.csv"
 OUTPUT_FILE = DATA_DIR / "risk-data.csv"
 AGG_COL = "2021-2025"
 LOC_YEAR = "2025"  # most recent year in git/loc.csv
@@ -62,21 +64,29 @@ FIELDS = [
     "active_contributors", "hhi_commits", "bus_factor_commits", "concentration_class",
     # complexity
     "loc", "complexity_class",
+    # security (OpenSSF Scorecard)
+    "openssf_score", "security_class",
     # issues — debt + trend
     "issues_opened_5y", "issues_closed_5y", "issue_close_ratio",
     "slope_opened", "slope_closed", "issue_trend_score",
     "issue_trend", "issue_debt_class",
+    # rollup (worst across populated dimensions)
+    "risk_class",
 ]
 
+CLASS_RANK = {"A": 0, "B": 1, "C": 2, "D": 3}
 
-def concentration_class(bus_factor: int, hhi: int) -> str:
-    """Classify repo concentration risk as A/B/C/D.
+
+def concentration_class(bus_factor: int | None, hhi: int | None) -> str:
+    """Classify repo concentration risk as A/B/C/D. Empty if either input missing.
 
     A (critical):  BF=1  and HHI >= 8000 — single maintainer, extreme concentration
     B (high risk): BF<=2 and HHI >= 5000 — tiny core, high concentration
     C (moderate):  BF<=4 and HHI >= 2500 — small team, moderate concentration
     D (healthy):   everything else        — distributed enough
     """
+    if bus_factor is None or hhi is None:
+        return ""
     if bus_factor <= CONCENTRATION_THRESHOLDS["A"]["max_bus_factor"] and hhi >= CONCENTRATION_THRESHOLDS["A"]["min_hhi"]:
         return "A"
     if bus_factor <= CONCENTRATION_THRESHOLDS["B"]["max_bus_factor"] and hhi >= CONCENTRATION_THRESHOLDS["B"]["min_hhi"]:
@@ -103,6 +113,39 @@ def complexity_class(loc: int | None) -> str:
     if loc >= COMPLEXITY_LOC_THRESHOLDS["C"]:
         return "C"
     return "D"
+
+
+def security_class(openssf_score: float | None) -> str:
+    """Classify based on the OpenSSF Scorecard score (0-10).
+
+    A (critical):  score <= 3 — severe security hygiene gaps
+    B (high risk): score <= 5
+    C (moderate):  score <= 7
+    D (healthy):   score >  7
+    "":            no scorecard data available
+    """
+    if openssf_score is None:
+        return ""
+    if openssf_score <= SECURITY_THRESHOLDS["A"]:
+        return "A"
+    if openssf_score <= SECURITY_THRESHOLDS["B"]:
+        return "B"
+    if openssf_score <= SECURITY_THRESHOLDS["C"]:
+        return "C"
+    return "D"
+
+
+def rollup_risk_class(*classes: str) -> str:
+    """Cross-dimension rollup: worst (lowest letter) across populated classes.
+
+    A < B < C < D. Empty inputs are ignored. Empty result if no input is populated.
+    A class-A on ANY dimension makes the repo class-A overall — risk is the
+    worst-case across dimensions, not an average.
+    """
+    populated = [c for c in classes if c]
+    if not populated:
+        return ""
+    return min(populated, key=lambda c: CLASS_RANK[c])
 
 
 def issue_debt_class(opened_5y: int, close_ratio: float) -> str:
@@ -192,6 +235,24 @@ def _read_issues_per_year(filename: str) -> dict[str, dict[int, int]]:
     return out
 
 
+def _read_openssf_scores() -> dict[str, float]:
+    """Return {repo_lowercased: score} from data/openssf/scores.csv."""
+    if not OPENSSF_FILE.exists():
+        return {}
+    out: dict[str, float] = {}
+    with open(OPENSSF_FILE, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            repo = (r.get("repo") or "").strip().lower()
+            score = (r.get("score") or "").strip()
+            if not repo or not score:
+                continue
+            try:
+                out[repo] = float(score)
+            except ValueError:
+                continue
+    return out
+
+
 def _load_repo_ids() -> dict[str, str]:
     """Load repo slug → repo_id mapping for **eligible** repos only.
 
@@ -226,15 +287,19 @@ def _load_contrib_metric(filename: str) -> dict[str, str]:
     return out
 
 
-def aggregate() -> tuple[list[dict], int]:
-    """Read contributor + LOC + issue metrics and return risk-classified rows.
+def aggregate() -> tuple[list[dict], dict[str, int]]:
+    """Read all dimensions and return one row per **eligible** repo.
 
-    Iteration is gated by eligibility: only repos in `eligibility-data.csv`
-    with `eligibility=True` get scored, even if contributor metrics exist
-    for other repos (e.g. left over from a wider earlier scope).
+    Iterates over the full eligible universe — a missing dimension just
+    leaves that class column empty rather than dropping the repo. The
+    rollup `risk_class` is the worst class across whatever dimensions
+    we did manage to populate.
+
+    Returns (rows, coverage_counts) where `coverage_counts` reports how
+    many of the eligible repos got each dimension classified.
     """
     repo_ids = _load_repo_ids()
-    eligible = set(repo_ids.keys())
+    eligible = sorted(repo_ids.keys())
     repo_locs = _load_locs()
 
     bf_by_repo = _load_contrib_metric("bus-factor.csv")
@@ -243,23 +308,30 @@ def aggregate() -> tuple[list[dict], int]:
 
     opened_by_repo = _read_issues_per_year("opened.csv")
     closed_by_repo = _read_issues_per_year("closed.csv")
+    openssf_by_repo = _read_openssf_scores()
 
-    rows = []
-    skipped = 0
-    universe = (set(bf_by_repo) | set(hhi_by_repo) | set(contribs_by_repo)) & eligible
-    for repo in sorted(universe):
+    coverage = {
+        "concentration": 0, "complexity": 0, "security": 0,
+        "issue_debt": 0, "issue_trend": 0, "any": 0,
+    }
+    rows: list[dict] = []
+
+    for repo in eligible:
         bf_str = bf_by_repo.get(repo, "")
         hhi_str = hhi_by_repo.get(repo, "")
         contributors_str = contribs_by_repo.get(repo, "")
+        bf = int(bf_str) if bf_str else None
+        hhi = int(hhi_str) if hhi_str else None
+        contributors = int(contributors_str) if contributors_str else ""
 
-        if not bf_str or not hhi_str:
-            skipped += 1
-            continue
+        # Concentration only fires when both BF and HHI are present
+        conc_cls = concentration_class(bf, hhi) if (bf is not None and hhi is not None) else ""
 
-        bf = int(bf_str)
-        hhi = int(hhi_str)
-        contributors = int(contributors_str) if contributors_str else 0
         locs = repo_locs.get(repo)
+        comp_cls = complexity_class(locs)
+
+        score = openssf_by_repo.get(repo)
+        sec_cls = security_class(score)
 
         opened = opened_by_repo.get(repo, {})
         closed = closed_by_repo.get(repo, {})
@@ -267,16 +339,28 @@ def aggregate() -> tuple[list[dict], int]:
         closed_5y = sum(closed.values())
         close_ratio = (closed_5y / opened_5y) if opened_5y > 0 else 0.0
         s_open, s_close, trend_score, trend_label = issue_trend(opened, closed)
+        debt_cls = issue_debt_class(opened_5y, close_ratio)
+
+        risk_cls = rollup_risk_class(conc_cls, comp_cls, sec_cls, debt_cls)
+
+        if conc_cls: coverage["concentration"] += 1
+        if comp_cls: coverage["complexity"] += 1
+        if sec_cls:  coverage["security"] += 1
+        if debt_cls: coverage["issue_debt"] += 1
+        if trend_label: coverage["issue_trend"] += 1
+        if risk_cls: coverage["any"] += 1
 
         rows.append({
             "repo": repo,
             "repo_id": repo_ids.get(repo, ""),
             "active_contributors": contributors,
-            "hhi_commits": hhi,
-            "bus_factor_commits": bf,
-            "concentration_class": concentration_class(bf, hhi),
+            "hhi_commits": hhi if hhi is not None else "",
+            "bus_factor_commits": bf if bf is not None else "",
+            "concentration_class": conc_cls,
             "loc": locs if locs is not None else "",
-            "complexity_class": complexity_class(locs),
+            "complexity_class": comp_cls,
+            "openssf_score": score if score is not None else "",
+            "security_class": sec_cls,
             "issues_opened_5y": opened_5y,
             "issues_closed_5y": closed_5y,
             "issue_close_ratio": (round(close_ratio, 3) if opened_5y >= 1 else ""),
@@ -284,10 +368,11 @@ def aggregate() -> tuple[list[dict], int]:
             "slope_closed": (round(s_close, 2) if opened_5y >= 1 else ""),
             "issue_trend_score": (round(trend_score, 4) if trend_label else ""),
             "issue_trend": trend_label,
-            "issue_debt_class": issue_debt_class(opened_5y, close_ratio),
+            "issue_debt_class": debt_cls,
+            "risk_class": risk_cls,
         })
 
-    return rows, skipped
+    return rows, coverage
 
 
 CONCENTRATION_LABELS = {
@@ -330,6 +415,34 @@ ISSUE_DEBT_CRITERIA = {
     "B": "ratio<0.60, ≥30/5y",
     "C": "ratio<0.85, ≥10/5y",
     "D": "ratio≥0.85",
+}
+
+SECURITY_LABELS = {
+    "A": ("critical", "red"),
+    "B": ("high risk", "yellow"),
+    "C": ("moderate", "cyan"),
+    "D": ("healthy", "green"),
+}
+
+SECURITY_CRITERIA = {
+    "A": "score ≤ 3",
+    "B": "score ≤ 5",
+    "C": "score ≤ 7",
+    "D": "score > 7",
+}
+
+ROLLUP_LABELS = {
+    "A": ("critical", "red"),
+    "B": ("high risk", "yellow"),
+    "C": ("moderate", "cyan"),
+    "D": ("healthy", "green"),
+}
+
+ROLLUP_CRITERIA = {
+    "A": "any dim = A",
+    "B": "any dim ≥ B (no A)",
+    "C": "any dim ≥ C (no A/B)",
+    "D": "all dims = D",
 }
 
 
@@ -391,9 +504,26 @@ def _print_trend_table(rows: list[dict]) -> None:
     console.print(table)
 
 
+def _print_coverage(coverage: dict[str, int], total: int) -> None:
+    """Per-dimension coverage table — how many of the eligible repos got
+    each class column populated."""
+    table = Table(title="[bold]Dimension coverage[/bold] (out of eligible)",
+                  show_header=True, header_style="bold dim", padding=(0, 1))
+    table.add_column("Dimension", style="bold")
+    table.add_column("Classified", justify="right")
+    table.add_column("Coverage", justify="right")
+    for dim in ("concentration", "complexity", "security", "issue_debt", "issue_trend", "any"):
+        n = coverage.get(dim, 0)
+        pct = 100 * n / total if total else 0
+        style = "bold" if dim == "any" else ""
+        table.add_row(f"[{style}]{dim}[/{style}]" if style else dim,
+                      f"{n:,}", f"{pct:.1f}%")
+    console.print(table)
+
+
 def main():
     console.print("[bold]Aggregating risk metrics...[/bold]\n")
-    rows, skipped = aggregate()
+    rows, coverage = aggregate()
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as f:
@@ -401,22 +531,28 @@ def main():
         writer.writeheader()
         writer.writerows(rows)
 
+    total = len(rows)
+    _print_coverage(coverage, total)
+    console.print()
     _print_class_table("Concentration", rows, "concentration_class",
                        CONCENTRATION_LABELS, CONCENTRATION_CRITERIA)
     console.print()
     _print_class_table("Complexity", rows, "complexity_class",
                        COMPLEXITY_LABELS, COMPLEXITY_CRITERIA)
     console.print()
+    _print_class_table("Security (OpenSSF)", rows, "security_class",
+                       SECURITY_LABELS, SECURITY_CRITERIA)
+    console.print()
     _print_class_table("Issue debt", rows, "issue_debt_class",
                        ISSUE_DEBT_LABELS, ISSUE_DEBT_CRITERIA)
     console.print()
     _print_trend_table(rows)
-
-    total = len(rows)
     console.print()
-    if skipped:
-        console.print(f"[dim]{skipped:,} repos skipped (missing BF/HHI)[/dim]")
-    console.print(f"[dim]Written {total:,} repos → {OUTPUT_FILE}[/dim]")
+    _print_class_table("[bold]Risk class[/bold] (worst across dimensions)",
+                       rows, "risk_class",
+                       ROLLUP_LABELS, ROLLUP_CRITERIA)
+
+    console.print(f"\n[dim]Written {total:,} eligible repos → {OUTPUT_FILE}[/dim]")
 
 
 if __name__ == "__main__":
