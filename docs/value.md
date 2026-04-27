@@ -359,6 +359,45 @@ by `uv run -m src.unify_value_data`.
 | `pagerank` | Download-weighted PageRank score |
 | `value_class` | A/B/C/D (see [Value Classes](#value-classes)) |
 
+## Per-repo aggregation
+
+`data/value-by-repo.csv` collapses `value-data.csv` from per-package to
+per-repo. Produced by `uv run -m src.aggregate_by_repo`.
+
+**Grouping**: rows sharing a non-empty `github_repo` are merged into one
+group; rows with an empty `github_repo` (e.g. cpp packages like `glibc`,
+`gcc`) are kept as their own one-package groups so nothing is dropped.
+Sequential `id` is the unique row identifier.
+
+**Per-ecosystem score**: within each ecosystem, the group's PR is the
+**sum** of its packages' PR. Groups (with at least one package in that
+ecosystem) are sorted by that sum desc, and `pr_cum_pct_<eco>` is the
+cumulative share — same math as the package-level value classes, just
+applied to summed-by-group PR. `class_<eco>` is then assigned via the
+existing A/B/C/D cutoffs (≤50%, ≤75%, ≤90%, rest).
+
+**Cross-ecosystem rollup**: `class_total` is the **strongest** per-eco
+class the group has (A < B < C < D). E.g. a repo that is `pypi=A` and
+`cpp=B` rolls up to `class_total=A`.
+
+This avoids comparing PR magnitudes across ecosystems (which aren't
+comparable — each ecosystem's PR mass sums to 1 within its own graph).
+Recomputing PageRank on a repo-level dep graph was considered and skipped
+because cross-ecosystem deps don't exist in our data; the repo graph is
+still four disconnected subgraphs.
+
+| Column | Description |
+|--------|-------------|
+| `id` | Sequential numeric id (sorted by `class_total`, then `pkgs_total` desc) |
+| `github_repo` | Lowercase `owner/repo` slug; empty for orphans |
+| `packages` | `;`-separated `package (ecosystem)` list |
+| `pkgs_npm`, `pkgs_pypi`, `pkgs_crates`, `pkgs_cpp` | Package count per ecosystem |
+| `pkgs_total` | Sum of the four counts |
+| `pr_cum_pct_<eco>` | Cumulative PR share within ecosystem (0–100), empty if no presence |
+| `class_<eco>` | A/B/C/D from `pr_cum_pct_<eco>`, empty if no presence |
+| `class_total` | Strongest class across ecosystems |
+| `is_eol` | `True` only if every constituent package is `is_eol=True` |
+
 ## Current Limitations
 
 Known scope choices and gaps in the current pipeline. Add new entries here
