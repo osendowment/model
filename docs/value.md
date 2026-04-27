@@ -348,33 +348,43 @@ All dep-tree packages with downloads, PageRank, and value class.
 
 ## Unified output
 
-`data/value-data.csv` -- all ecosystems concatenated into one table.
-Produced in two steps: `uv run -m src.unify_value_data` (per-package
-fields) followed by `uv run -m src.aggregate_by_repo` (denormalized
-repo-level fields and final sort by `top_eco_pct` desc).
+`data/value-data.csv` is the canonical per-repo table — one row per GitHub
+repo, plus one row per orphan package (no `github_repo`) so nothing is
+dropped. Produced by `uv run -m src.unify_value_data`, which reads each
+ecosystem's `results.csv` and `eol.csv`, groups packages by repo, computes
+all per-ecosystem and cross-ecosystem aggregates, and writes the file
+sorted by `top_eco_pct` desc (most important repos first).
 
-Per-package columns:
-
-| Column | Description |
-|--------|-------------|
-| `package` | Package name |
-| `ecosystem` | `npm` / `pypi` / `crates` / `cpp` |
-| `github_repo` | Lowercase `owner/repo` slug (empty if unknown) |
-| `pagerank` | Download-weighted PageRank score |
-| `value_class` | A/B/C/D for this **package** (see [Value Classes](#value-classes)) |
-| `is_eol` | `True` if this package's per-ecosystem registry signal indicates EOL (joined from `data/{eco}/eol.csv`) |
-
-Repo-level columns (denormalized — same value across every row of the
-same `github_repo`; orphan rows carry their own one-package group's value):
+Per-ecosystem class is computed by summing the group's package PR within
+the ecosystem, ranking groups by that sum desc, and applying the same
+A/B/C/D cumulative-share cutoffs as the package-level pipeline (≤50%,
+≤75%, ≤90%, rest). The strongest across ecosystems becomes `class`.
+This avoids comparing PR magnitudes across ecosystems (each ecosystem's
+PR mass sums to 1 within its own graph). Recomputing PageRank on a
+repo-level dep graph was considered and skipped because cross-ecosystem
+deps don't exist in our data; the repo graph is still four disconnected
+subgraphs.
 
 | Column | Description |
 |--------|-------------|
-| `top_eco` | Ecosystem where the repo is highest-ranked. `npm` / `pypi` / `crates` / `cpp`. |
-| `top_eco_pkg` | Highest-PR package within `top_eco` (e.g. `@babel/helper-plugin-utils` for babel/babel) |
+| `id` | Sequential numeric id (sorted by `top_eco_pct` desc) |
+| `github_repo` | Lowercase `owner/repo` slug; empty for orphans |
+| `ecosystems` | Comma-separated list of ecosystems where the repo has packages (e.g. `crates,npm`) |
+| `packages` | Total package count in the repo |
+| `top_eco` | Ecosystem where the repo is highest-ranked (max PR percentile). `npm` / `pypi` / `crates` / `cpp`. |
+| `top_eco_pkg` | Highest-PR package in `top_eco` (e.g. `@babel/helper-plugin-utils` for babel/babel) |
 | `top_eco_pct` | PR percentile in `top_eco` (`100 − pr_cum_pct`). 0–100, **higher = better**. babel/babel = 92.25; tail near 0. |
-| `repo_class` | Strongest A/B/C/D across the repo's ecosystems |
-| `repo_packages` | Total package count for the repo |
-| `repo_ecosystems` | Comma-separated list of ecosystems where the repo has packages (e.g. `crates,npm`) |
+| `class` | Strongest of the per-ecosystem classes (A < B < C < D) |
+| `class_npm`, `class_pypi`, `class_crates`, `class_cpp` | A/B/C/D from per-ecosystem cumulative PR share; empty if no package in that ecosystem |
+
+EOL information is intentionally **not** stored here — it belongs to the
+eligibility pipeline. `src/eligibility.py` joins per-ecosystem
+`data/{eco}/eol.csv` with `data/{eco}/results.csv` directly to compute
+per-repo `is_eol`, and writes it to `data/eligibility-data.csv`.
+
+Per-package data isn't preserved here either — see each ecosystem's
+`data/{eco}/results.csv` and `data/{eco}/eol.csv` for the package-level
+rows.
 
 ## Repo-level enrichment of value-data.csv
 

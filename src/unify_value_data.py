@@ -1,46 +1,69 @@
 #!/usr/bin/env python3
-"""Unify per-ecosystem value-pipeline results into a single CSV.
+"""Unify per-ecosystem value-pipeline results into a single per-repo CSV.
 
 Reads `data/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crates,
-cpp) and writes `data/value-data.csv` with one row per (package, ecosystem):
+cpp), groups packages by GitHub repo (or treats packages without a
+`github_repo` as their own one-package groups), and writes
+`data/value-data.csv` with **one row per repo**:
 
-    package, ecosystem, github_repo, pagerank, value_class, is_eol
+    id, github_repo, ecosystems, packages,
+    top_eco, top_eco_pkg, top_eco_pct, class,
+    class_npm, class_pypi, class_crates, class_cpp
 
-`github_repo` is normalised to lowercase `owner/repo`. `is_eol` is joined
-from `data/{ecosystem}/eol.csv` (produced by `src/{eco}/check_eol.py`);
-packages with no EOL row default to `is_eol=False`. cpp is the unified
+`github_repo` is normalised to lowercase `owner/repo`. cpp is the unified
 C/C++ ecosystem (Debian + Homebrew, joined via Repology) -- see
 `src/cpp/process_data.py`.
 
-Also prints the full value-pipeline funnel for each ecosystem and the
-combined totals: # top packages, # after dep-tree expansion, # results,
-class distribution, % GitHub coverage, # EOL.
+Per-ecosystem class is computed by summing each group's package PR within
+the ecosystem, ranking groups by that sum desc, and applying the same
+cumulative-share cutoffs as the package-level value pipeline (≤50% A,
+≤75% B, ≤90% C, rest D). `class` is the strongest of the per-eco classes
+(A < B < C < D). `top_eco_pct = 100 − cumulative_pr_share`, so higher
+means closer to the top of the ecosystem; `top_eco` is the ecosystem with
+the max percentile and `top_eco_pkg` is the highest-PR package in it.
+
+Rows are sorted by `top_eco_pct` desc so the highest-importance repos
+come first.
+
+EOL is intentionally **not** stored here. It's a property of the
+eligibility pipeline (license + EOL); see `src/eligibility.py`, which
+joins per-ecosystem `data/{eco}/eol.csv` with `data/{eco}/results.csv`
+to compute per-repo `is_eol` directly.
 
 Usage:
     uv run -m src.unify_value_data
 """
 
 import csv
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
+
+from src.params import assign_value_class
 
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "value-data.csv"
 
-# Ecosystems and the column that holds the package name in their results.csv.
-ECOSYSTEMS: list[tuple[str, str]] = [
+ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
+CLASS_RANK = {"A": 0, "B": 1, "C": 2, "D": 3}
+
+# Ecosystem name → name of the package-name column in its results.csv
+_ECOSYSTEM_SPECS: list[tuple[str, str]] = [
     ("npm", "package"),
     ("pypi", "package"),
     ("crates", "package"),
     ("cpp", "package"),
 ]
 
-FIELDS = ["package", "ecosystem", "github_repo", "pagerank", "value_class", "is_eol"]
+FIELDS = (
+    ["id", "github_repo", "ecosystems", "packages",
+     "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
+    + [f"class_{e}" for e in ECOSYSTEMS]
+)
 
 
 def _normalise_repo(repo: str) -> str:
@@ -134,6 +157,89 @@ def collect_ecosystem(ecosystem: str, pkg_col: str) -> tuple[list[dict], dict]:
         "ab_eol": ab_eol,
     }
     return rows, stats
+
+
+def _group_key(row: dict) -> str:
+    """github_repo if non-empty; otherwise a synthetic per-package key."""
+    return row["github_repo"] or f"__orphan__:{row['ecosystem']}:{row['package']}"
+
+
+def aggregate_by_repo(all_rows: list[dict]) -> list[dict]:
+    """Collapse per-package rows into one row per repo (or per orphan).
+
+    Implements: per-ecosystem PR sum → cumulative-share ranking → A/B/C/D,
+    plus top_eco / top_eco_pkg / top_eco_pct, the cross-ecosystem
+    `class` (strongest), is_eol (True only if every constituent package
+    is is_eol), and the comma-separated `ecosystems` list.
+    """
+    groups: dict[str, list[dict]] = defaultdict(list)
+    for r in all_rows:
+        groups[_group_key(r)].append(r)
+
+    aggs: list[dict] = []
+    for key, members in groups.items():
+        a: dict = {
+            "group_key": key,
+            "github_repo": members[0]["github_repo"],
+            "packages": len(members),
+        }
+        present_ecos: list[str] = []
+        for eco in ECOSYSTEMS:
+            eco_rows = [m for m in members if m["ecosystem"] == eco]
+            a[f"_pkgs_{eco}"] = len(eco_rows)
+            a[f"_pr_sum_{eco}"] = sum(
+                float(m["pagerank"]) for m in eco_rows if m.get("pagerank")
+            )
+            if eco_rows:
+                present_ecos.append(eco)
+                top_pkg = max(
+                    eco_rows, key=lambda m: float(m.get("pagerank") or 0),
+                )
+                a[f"_top_pkg_{eco}"] = top_pkg["package"]
+        a["ecosystems"] = ",".join(present_ecos)
+        aggs.append(a)
+
+    # Per ecosystem: rank groups by PR sum desc, compute cumulative share, assign class.
+    # `_pr_pct_<eco>` = 100 - cum_share so higher is better; used to pick top_eco.
+    for eco in ECOSYSTEMS:
+        present = [a for a in aggs if a[f"_pkgs_{eco}"] > 0]
+        present.sort(key=lambda a: a[f"_pr_sum_{eco}"], reverse=True)
+        total = sum(a[f"_pr_sum_{eco}"] for a in present)
+        cum = 0.0
+        for a in present:
+            cum += a[f"_pr_sum_{eco}"]
+            cum_pct = (cum / total * 100.0) if total else 0.0
+            a[f"class_{eco}"] = assign_value_class(cum_pct / 100.0)
+            a[f"_pr_pct_{eco}"] = 100.0 - cum_pct
+        for a in aggs:
+            a.setdefault(f"class_{eco}", "")
+
+    # top_eco / top_eco_pkg / top_eco_pct + cross-eco strongest `class`
+    for a in aggs:
+        pcts = {e: a[f"_pr_pct_{e}"] for e in ECOSYSTEMS if f"_pr_pct_{e}" in a}
+        if pcts:
+            top = max(pcts, key=pcts.get)
+            a["top_eco"] = top
+            a["top_eco_pkg"] = a.get(f"_top_pkg_{top}", "")
+            a["top_eco_pct"] = round(pcts[top], 4)
+        else:
+            a["top_eco"] = ""
+            a["top_eco_pkg"] = ""
+            a["top_eco_pct"] = ""
+        present_classes = [a[f"class_{e}"] for e in ECOSYSTEMS if a[f"class_{e}"]]
+        a["class"] = (
+            min(present_classes, key=lambda c: CLASS_RANK[c]) if present_classes else ""
+        )
+
+    # Sort by top_eco_pct desc; ties broken by repo name for stability
+    def sort_key(a: dict) -> tuple:
+        pct = a["top_eco_pct"] if isinstance(a["top_eco_pct"], (int, float)) else -1
+        return (-pct, a["github_repo"] or a["group_key"])
+
+    aggs.sort(key=sort_key)
+    for i, a in enumerate(aggs, 1):
+        a["id"] = i
+    return aggs
 
 
 def _print_funnel_table(stats_per_eco: list[dict]) -> None:
@@ -237,21 +343,42 @@ def _print_class_table(stats_per_eco: list[dict]) -> None:
     console.print(table)
 
 
+def _print_repo_class_table(aggs: list[dict]) -> None:
+    table = Table(title="[bold]Repo class distribution[/bold]",
+                  show_header=True, header_style="bold dim", padding=(0, 1))
+    table.add_column("class")
+    for eco in ECOSYSTEMS:
+        table.add_column(eco, justify="right")
+    table.add_column("strongest", justify="right", style="bold")
+    for cls in ("A", "B", "C", "D"):
+        row = [cls]
+        for eco in ECOSYSTEMS:
+            n = sum(1 for a in aggs if a[f"class_{eco}"] == cls)
+            row.append(f"{n:,}")
+        n_strongest = sum(1 for a in aggs if a["class"] == cls)
+        row.append(f"{n_strongest:,}")
+        table.add_row(*row)
+    console.print(table)
+
+
 def main() -> None:
     console.print("[bold]Unifying value-pipeline results...[/bold]\n")
 
     all_rows: list[dict] = []
     stats_per_eco: list[dict] = []
-    for ecosystem, pkg_col in ECOSYSTEMS:
+    for ecosystem, pkg_col in _ECOSYSTEM_SPECS:
         rows, stats = collect_ecosystem(ecosystem, pkg_col)
         all_rows.extend(rows)
         stats_per_eco.append(stats)
 
+    aggs = aggregate_by_repo(all_rows)
+
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDS, quoting=csv.QUOTE_ALL)
+        writer = csv.DictWriter(f, fieldnames=FIELDS, quoting=csv.QUOTE_ALL,
+                                extrasaction="ignore")
         writer.writeheader()
-        writer.writerows(all_rows)
+        writer.writerows(aggs)
 
     _print_funnel_table(stats_per_eco)
     console.print()
@@ -259,7 +386,15 @@ def main() -> None:
     console.print()
     _print_eol_table(stats_per_eco)
     console.print()
-    console.print(f"[dim]Written {len(all_rows):,} rows → {OUTPUT_FILE}[/dim]")
+    _print_repo_class_table(aggs)
+    console.print()
+    n_grouped = sum(1 for a in aggs if a["github_repo"])
+    n_orphan = len(aggs) - n_grouped
+    console.print(
+        f"[dim]Written {len(aggs):,} repo rows "
+        f"({n_grouped:,} github groups + {n_orphan:,} orphan packages) "
+        f"→ {OUTPUT_FILE}[/dim]"
+    )
 
 
 if __name__ == "__main__":

@@ -3,14 +3,14 @@
 
 Reads:
 - data/github/search/top-repos.csv — license per GitHub repo
-- data/value-data.csv — package → github_repo + per-package is_eol
-  (aggregated from each ecosystem's data/{eco}/eol.csv by
-  src/unify_value_data.py)
+- data/{eco}/results.csv + data/{eco}/eol.csv for each of npm/pypi/crates/cpp
+  — joined to map github_repo → list of constituent packages and their
+  is_eol flags. A repo is is_eol=True iff *every* package mapped to it is
+  is_eol=True (handles monorepos / cross-ecosystem polyglot projects).
 
-A repo's is_eol is derived from its packages in value-data.csv:
-- repo is_eol=True iff it has packages AND every package is is_eol=True
-  (any alive package keeps the repo alive — handles monorepos)
-- repo is_eol=False if it has no packages in value-data.csv (unknown)
+A repo is treated as alive (is_eol=False) if it has no constituent
+packages in any per-eco results.csv (e.g. it's a random GitHub repo not
+in our value pipeline — we have no EOL signal for it).
 
 Final eligibility = is_oss AND NOT is_eol. Writes data/eligibility-data.csv.
 
@@ -29,10 +29,12 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 REPOS_FILE = DATA_DIR / "github" / "search" / "top-repos.csv"
-VALUE_FILE = DATA_DIR / "value-data.csv"
+HOST_FILE = DATA_DIR / "foundations" / "host-by-repo.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility-data.csv"
 
-FIELDS = ["repo", "repo_id", "user", "user_id", "user_type", "license", "is_oss", "is_eol", "tm_owner", "tm_owner_type", "eligibility"]
+ECOSYSTEMS = ("npm", "pypi", "crates", "cpp")
+
+FIELDS = ["repo", "repo_id", "user", "user_id", "user_type", "license", "is_oss", "is_eol", "host", "tm_owner", "tm_owner_type", "eligibility"]
 
 # OSI-approved licenses — GitHub API license keys
 # https://opensource.org/licenses
@@ -82,36 +84,71 @@ OSI_APPROVED: set[str] = {
 
 
 def load_repo_eol_index() -> dict[str, bool]:
-    """Aggregate per-repo is_eol from value-data.csv.
+    """Compute per-repo is_eol from per-ecosystem eol.csv + results.csv.
 
-    A repo is EOL only if it has packages mapped to it AND every package
-    is_eol=True. Repos with no packages are absent from the index.
+    For each ecosystem, joins {package: github_repo} from results.csv with
+    {package: is_eol} from eol.csv. Aggregates across ecosystems: a
+    github_repo is EOL iff every constituent package (across all 4
+    ecosystems) is is_eol=True. Repos with no constituent packages are
+    absent from the index.
     """
-    if not VALUE_FILE.exists():
-        return {}
     by_repo: dict[str, list[bool]] = {}
-    with open(VALUE_FILE, encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            repo = r.get("github_repo", "").strip().lower()
-            if not repo:
-                continue
-            by_repo.setdefault(repo, []).append(r.get("is_eol") == "True")
+    for eco in ECOSYSTEMS:
+        results = DATA_DIR / eco / "results.csv"
+        eol = DATA_DIR / eco / "eol.csv"
+        if not results.exists() or not eol.exists():
+            continue
+        repo_by_pkg: dict[str, str] = {}
+        with open(results, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                pkg = r.get("package", "")
+                slug = (r.get("github_repo") or "").strip().lower()
+                if pkg and slug:
+                    repo_by_pkg[pkg] = slug
+        with open(eol, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                slug = repo_by_pkg.get(r.get("package", ""))
+                if not slug:
+                    continue
+                by_repo.setdefault(slug, []).append(r.get("is_eol") == "True")
     return {repo: all(flags) for repo, flags in by_repo.items()}
 
 
+def load_repo_host_index() -> dict[str, str]:
+    """Load repo → foundation slug from foundations/host-by-repo.csv.
+
+    Produced by `src.foundations.match_repos`. Repos absent from this file
+    (or with empty host) get host="".
+    """
+    if not HOST_FILE.exists():
+        return {}
+    return {
+        r["repo"].strip().lower(): (r.get("host") or "").strip()
+        for r in csv.DictReader(open(HOST_FILE, encoding="utf-8"))
+        if (r.get("host") or "").strip()
+    }
+
+
 def build_eligibility() -> list[dict]:
-    """Read top-repos.csv + value-data.csv and classify each repo's eligibility.
+    """Read top-repos.csv + value-data.csv + host-by-repo.csv and classify each repo.
+
+    `host` is the slug of the FOSS foundation hosting the project (apache,
+    cncf, eclipse, lf, numfocus, sfc) or empty if none — populated by
+    `src.foundations.match_repos`.
 
     # TODO: check if project trademark is owned by a company or corporate nonprofit
     #       — projects with corporate-held trademarks may not be truly community-owned
     """
     eol_idx = load_repo_eol_index()
+    host_idx = load_repo_host_index()
     rows = []
     with open(REPOS_FILE, encoding="utf-8") as f:
         for repo in csv.DictReader(f):
             license_key = repo.get("license", "")
             is_oss = license_key in OSI_APPROVED
-            is_eol = eol_idx.get(repo["repo"].lower(), False)
+            key = repo["repo"].lower()
+            is_eol = eol_idx.get(key, False)
+            host = host_idx.get(key, "")
 
             rows.append({
                 "repo": repo["repo"],
@@ -122,6 +159,7 @@ def build_eligibility() -> list[dict]:
                 "license": license_key,
                 "is_oss": is_oss,
                 "is_eol": is_eol,
+                "host": host,
                 "tm_owner": "",
                 "tm_owner_type": "",
                 "eligibility": is_oss and not is_eol,
@@ -136,8 +174,9 @@ def upsert(new_rows: list[dict]) -> None:
     if OUTPUT_FILE.exists():
         with open(OUTPUT_FILE, encoding="utf-8") as f:
             for row in csv.DictReader(f):
-                # Backfill is_eol for legacy rows that predate the column
+                # Backfill columns that predate later runs
                 row.setdefault("is_eol", "False")
+                row.setdefault("host", "")
                 existing[row["repo_id"]] = row
 
     for row in new_rows:
