@@ -369,6 +369,7 @@ subgraphs.
 |--------|-------------|
 | `id` | Sequential numeric id (sorted by `top_eco_pct` desc) |
 | `github_repo` | Lowercase `owner/repo` slug; empty for orphans |
+| `git_url` | Canonical git URL — GitHub when available, otherwise GitLab / Codeberg / Sourcehut / Bitbucket / custom (sourceware.org, savannah, gitlab.gnome.org, etc.). First non-empty value from per-ecosystem `data/{eco}/git.csv`, picked in priority order. Empty when none of the per-eco files have a git URL for any constituent package. |
 | `ecosystems` | Comma-separated list of ecosystems where the repo has packages (e.g. `crates,npm`) |
 | `packages` | Total package count in the repo |
 | `top_eco` | Ecosystem where the repo is highest-ranked (max PR percentile). `npm` / `pypi` / `crates` / `cpp`. |

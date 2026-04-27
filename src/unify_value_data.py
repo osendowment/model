@@ -60,10 +60,13 @@ _ECOSYSTEM_SPECS: list[tuple[str, str]] = [
 ]
 
 FIELDS = (
-    ["id", "github_repo", "ecosystems", "packages",
+    ["id", "github_repo", "git_url", "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
 )
+
+# Order in which to pick the canonical git URL from a per-eco git.csv row
+GIT_HOST_PRIORITY = ("github", "gitlab", "codeberg", "sourcehut", "bitbucket", "custom")
 
 
 def _normalise_repo(repo: str) -> str:
@@ -102,6 +105,25 @@ def _read_eol_index(path: Path) -> dict[str, bool]:
     return idx
 
 
+def _read_git_index(path: Path) -> dict[str, str]:
+    """Return {package: canonical_git_url} from a per-ecosystem git.csv.
+
+    Picks the first non-empty URL in `GIT_HOST_PRIORITY` order, so a
+    package with both github and gitlab entries resolves to github.
+    """
+    if not path.exists():
+        return {}
+    idx: dict[str, str] = {}
+    with open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            for host in GIT_HOST_PRIORITY:
+                url = (r.get(host) or "").strip()
+                if url:
+                    idx[r["package"]] = url
+                    break
+    return idx
+
+
 def collect_ecosystem(ecosystem: str, pkg_col: str) -> tuple[list[dict], dict]:
     """Read per-ecosystem files, return unified rows and funnel stats."""
     eco_dir = DATA_DIR / ecosystem
@@ -118,6 +140,7 @@ def collect_ecosystem(ecosystem: str, pkg_col: str) -> tuple[list[dict], dict]:
     after_deps = len(top_set | dep_nodes)
     top_count = len(top_set)
     eol_idx = _read_eol_index(eol_path)
+    git_idx = _read_git_index(eco_dir / "git.csv")
 
     rows: list[dict] = []
     with open(results_path, encoding="utf-8") as f:
@@ -127,6 +150,7 @@ def collect_ecosystem(ecosystem: str, pkg_col: str) -> tuple[list[dict], dict]:
                 "package": pkg,
                 "ecosystem": ecosystem,
                 "github_repo": _normalise_repo(r.get("github_repo", "")),
+                "git_url": git_idx.get(pkg, ""),
                 "pagerank": r.get("pagerank", ""),
                 "value_class": r.get("value_class", ""),
                 "is_eol": eol_idx.get(pkg, False),
@@ -181,6 +205,7 @@ def aggregate_by_repo(all_rows: list[dict]) -> list[dict]:
         a: dict = {
             "group_key": key,
             "github_repo": members[0]["github_repo"],
+            "git_url": next((m["git_url"] for m in members if m.get("git_url")), ""),
             "packages": len(members),
         }
         present_ecos: list[str] = []
