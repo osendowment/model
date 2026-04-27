@@ -81,8 +81,21 @@ gcc itself EOL.
 
 `endoflife_date` is an overlay applied on top of the Homebrew check for a
 small whitelist of well-known products (openssl, postgresql, python, ruby,
-php, etc.). A product is EOL only if every release cycle's `eol` date is in
-the past. A cycle with `eol: false` keeps the project alive.
+php, etc.). We model **project-level** EOL, not version-level: a project is
+EOL iff `max(eol date across all cycles) < today`. A cycle with
+`eol: false` (vendor-declared open-ended support) keeps the project alive
+regardless of any past-EOL cycles.
+
+Examples (today = 2026-04-27):
+
+| Product | `max(eol)` | Result |
+|---|---|---|
+| angularjs | 2021-12-31 | ✅ EOL |
+| centos | 2024-06-30 | ✅ EOL |
+| openssl | 2030-04-08 (cycle 3.5) | alive |
+| python | 2030-10-31 (cycle 3.14) | alive |
+| internet-explorer | 2031-10-14 (cycle 11) | alive (MS extended Win10 lifecycle support) |
+| redis | one cycle has `eol: false` | alive |
 
 ### Why not Debian "removed from current stable"?
 
@@ -152,6 +165,7 @@ Final per-repo eligibility table. `eligibility = is_oss AND NOT is_eol`.
 | `license` | License SPDX key |
 | `is_oss` | `True` if the license is OSI-approved |
 | `is_eol` | `True` if every package mapped to this repo (in `value-data.csv`) is EOL. Repos with no packages in `value-data.csv` default to `False`. |
+| `host` | Slug of FOSS foundation hosting the project: `apache`, `cncf`, `eclipse`, `lf`, `numfocus`, `sfc`. Empty if not foundation-hosted. Joined from `data/foundations/host-by-repo.csv` (built by `src.foundations.match_repos`). |
 | `tm_owner` | Trademark owner (TODO) |
 | `tm_owner_type` | Corporate vs community-held (TODO) |
 | `eligibility` | `True` if `is_oss AND NOT is_eol` |

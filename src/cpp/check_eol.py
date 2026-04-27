@@ -155,32 +155,35 @@ def fetch_endoflife(product: str, refresh: bool) -> list[dict] | None:
 
 
 def endoflife_eol(cycles: list[dict], today: date) -> tuple[bool, str]:
-    """Return (is_eol, reason).
+    """Project-level EOL via endoflife.date.
 
-    EOL iff every cycle has an `eol` date in the past. A cycle with
-    `eol: false` keeps the project alive. `eol: true` (date-less) counts
-    as past.
+    Returns (is_eol, reason). EOL iff the **maximum** `eol` date across all
+    cycles is in the past — we model project-level EOL, not version-level,
+    so it's enough that any one cycle still has support life left to keep
+    the project alive.
+
+    A cycle with `eol: false` keeps the project alive (vendor declared an
+    open-ended supported cycle). `eol: true` and other non-date values are
+    ignored.
     """
-    latest_future_eol: str | None = None
+    max_eol: date | None = None
     for c in cycles:
         eol = c.get("eol")
         if eol is False:
-            return False, ""
-        if eol is True:
-            continue
+            return False, "at least one cycle has eol=false"
         if not isinstance(eol, str):
             continue
         try:
             d = date.fromisoformat(eol)
         except ValueError:
             continue
-        if d >= today:
-            if latest_future_eol is None or d.isoformat() > latest_future_eol:
-                latest_future_eol = d.isoformat()
-            return False, ""
-    # No cycle keeps it alive
-    last_cycle = cycles[0] if cycles else {}
-    return True, f"all cycles past EOL; latest tracked cycle {last_cycle.get('cycle')} eol={last_cycle.get('eol')}"
+        if max_eol is None or d > max_eol:
+            max_eol = d
+    if max_eol is None:
+        return False, "no parseable eol dates"
+    if max_eol >= today:
+        return False, f"max eol={max_eol.isoformat()}"
+    return True, f"max eol={max_eol.isoformat()} < today"
 
 
 # ---------- mapping ----------
