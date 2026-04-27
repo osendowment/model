@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
-"""Aggregate value-data.csv per GitHub repo (or per orphan package).
+"""Enrich value-data.csv with repo-level columns (denormalized).
 
-Reads `data/value-data.csv` (one row per package × ecosystem) and writes
-`data/value-by-repo.csv` with columns:
+Reads `data/value-data.csv` (one row per package × ecosystem), groups
+rows by `github_repo` (or treats each row with empty `github_repo` as its
+own one-package group), computes per-group metrics, and writes them back
+into `value-data.csv` so consumers can do all repo-level analysis from a
+single file.
 
-    id              sequential numeric id
-    github_repo     lowercase owner/name (empty for orphan packages)
-    ecosystems      comma-separated list of ecosystems where this group
-                    has at least one package
-    packages        total package count in the group
-    top_eco         the ecosystem where this group is highest-ranked by
-                    PR percentile (= 100 - cum_share). Empty if the group
-                    has no packages with PR data.
-    top_eco_pct     PR percentile in `top_eco` (0–100, higher = better).
-    class_<eco>     A/B/C/D for each of npm/pypi/crates/cpp, empty if
-                    the group has no package in that ecosystem
+New columns added to value-data.csv (denormalized — every package in a
+group inherits the group's value):
 
-Class-per-ecosystem is computed by summing the group's package PR within
-the ecosystem, ranking groups by that sum, and applying the same
-cumulative-share cutoffs as the package-level value pipeline (≤50% A,
-≤75% B, ≤90% C, rest D).
+    top_eco          ecosystem where the repo is highest-ranked by PR
+                     percentile (= 100 − cumulative_pr_share)
+    top_eco_pkg      highest-PR package within `top_eco`
+    top_eco_pct      that percentile (0–100, higher = better)
+    repo_class       strongest of the per-eco repo classes (A < B < C < D)
+    repo_packages    total package count in the repo
+    repo_ecosystems  csv list of ecosystems where the repo has packages
 
-Rows with an empty `github_repo` (e.g. cpp packages like glibc, gcc) are
-kept as their own one-package groups so nothing is dropped.
+Per-ecosystem class is derived by summing each group's package PR within
+the ecosystem, ranking groups, and applying the package pipeline's A/B/C/D
+cumulative-share cutoffs (≤50% A, ≤75% B, ≤90% C, rest D).
+
+Rows are sorted by `top_eco_pct` desc so the highest-importance packages
+come first in `value-data.csv`.
 
 Usage:
     uv run python -m src.aggregate_by_repo
@@ -44,16 +45,15 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 VALUE_FILE = DATA_DIR / "value-data.csv"
-OUTPUT_FILE = DATA_DIR / "value-by-repo.csv"
 
 ECOSYSTEMS = ("npm", "pypi", "crates", "cpp")
 CLASS_RANK = {"A": 0, "B": 1, "C": 2, "D": 3}
 
-FIELDS = (
-    ["id", "github_repo", "ecosystems", "packages",
-     "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
-    + [f"class_{e}" for e in ECOSYSTEMS]
-)
+# Columns added to value-data.csv. Order applied in propagate_to_value_data.
+ENRICHED_COLS = [
+    "top_eco", "top_eco_pkg", "top_eco_pct",
+    "repo_class", "repo_packages", "repo_ecosystems",
+]
 
 
 def group_key(row: dict) -> str:
@@ -143,22 +143,16 @@ def aggregate() -> list[dict]:
     return aggs
 
 
-def write_output(aggs: list[dict]) -> None:
-    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=FIELDS, extrasaction="ignore")
-        w.writeheader()
-        w.writerows(aggs)
-
-
 def propagate_to_value_data(aggs: list[dict]) -> None:
-    """Add top_eco_pct to data/value-data.csv (per-package), keyed by group.
+    """Write repo-level columns into data/value-data.csv (denormalized).
 
-    Every package row gets the `top_eco_pct` of its repo group — so all 202
-    babel/babel packages share the repo's percentile. Orphans (no
-    github_repo) carry their own one-package group's percentile.
+    Every package row inherits its repo group's metrics — so all 202
+    babel/babel packages share the same `top_eco_pct`, `repo_class`, etc.
+    Orphans (no github_repo) carry their own one-package group's values.
+
+    Rows are sorted by `top_eco_pct` desc (most important first).
     """
-    pct_by_group: dict[str, float | str] = {a["group_key"]: a["top_eco_pct"] for a in aggs}
+    by_group: dict[str, dict] = {a["group_key"]: a for a in aggs}
 
     with open(VALUE_FILE, encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -167,14 +161,32 @@ def propagate_to_value_data(aggs: list[dict]) -> None:
 
     for r in rows:
         key = r["github_repo"] or f"__orphan__:{r['ecosystem']}:{r['package']}"
-        r["top_eco_pct"] = pct_by_group.get(key, "")
+        a = by_group.get(key, {})
+        r["top_eco"] = a.get("top_eco", "")
+        r["top_eco_pkg"] = a.get("top_eco_pkg", "")
+        r["top_eco_pct"] = a.get("top_eco_pct", "")
+        r["repo_class"] = a.get("class", "")
+        r["repo_packages"] = a.get("packages", "")
+        r["repo_ecosystems"] = a.get("ecosystems", "")
 
-    # Insert top_eco_pct just before is_eol if present, else append
-    new_fields = [f for f in existing_fields if f != "top_eco_pct"]
-    if "is_eol" in new_fields:
-        new_fields.insert(new_fields.index("is_eol"), "top_eco_pct")
+    # Field order: pre-existing fields minus the enriched ones, then
+    # enriched cols inserted just before is_eol if present.
+    base = [f for f in existing_fields if f not in ENRICHED_COLS]
+    if "is_eol" in base:
+        idx = base.index("is_eol")
+        new_fields = base[:idx] + ENRICHED_COLS + base[idx:]
     else:
-        new_fields.append("top_eco_pct")
+        new_fields = base + ENRICHED_COLS
+
+    # Sort by top_eco_pct desc; rows without a numeric pct sink to the end.
+    def sort_key(r: dict) -> tuple:
+        pct = r.get("top_eco_pct", "")
+        try:
+            return (-float(pct), r["ecosystem"], r["package"])
+        except (TypeError, ValueError):
+            return (1.0, r["ecosystem"], r["package"])
+
+    rows.sort(key=sort_key)
 
     with open(VALUE_FILE, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=new_fields, quoting=csv.QUOTE_ALL,
@@ -227,14 +239,12 @@ def main() -> None:
     console.print(f"[bold]aggregate_by_repo[/bold]  started={started:%Y-%m-%d %H:%M:%S}")
 
     aggs = aggregate()
-    write_output(aggs)
     propagate_to_value_data(aggs)
     display_summary(aggs)
 
-    console.print(f"\n[green]wrote[/green] {OUTPUT_FILE.relative_to(DATA_DIR.parent)}  "
-                  f"({len(aggs):,} rows, {(datetime.now() - started).total_seconds():.1f}s)")
-    console.print(f"[green]updated[/green] {VALUE_FILE.relative_to(DATA_DIR.parent)}  "
-                  f"(added top_eco_pct column)")
+    console.print(f"\n[green]updated[/green] {VALUE_FILE.relative_to(DATA_DIR.parent)}  "
+                  f"({len(aggs):,} repo groups → enriched per-package rows, "
+                  f"{(datetime.now() - started).total_seconds():.1f}s)")
 
 
 if __name__ == "__main__":
