@@ -73,6 +73,7 @@ CONCENTRATION_FIELDS = [
     "total_commits", "total_contributors",
     "bus_factor", "hhi", "fetched_at",
 ]
+CONCENTRATION_TTL_DAYS = 90  # rows older than this get re-fetched
 GH_REPOS_FILE = "data/github/repos.csv"
 
 
@@ -92,6 +93,34 @@ def _load_repo_id_map() -> dict[str, str]:
             if slug and rid:
                 out[slug] = rid
     return out
+
+
+def _recently_fetched_repos(ttl_days: int = CONCENTRATION_TTL_DAYS) -> set[str]:
+    """Return repos in concentration-data.csv whose `fetched_at` is within TTL.
+
+    Used as the freshness skip filter — repos with a fresh row in this file
+    are considered up-to-date and don't need to be re-fetched. Bypassed by
+    `--force` on the CLI.
+    """
+    if not os.path.exists(CONCENTRATION_FILE):
+        return set()
+    cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=ttl_days)
+    fresh: set[str] = set()
+    with open(CONCENTRATION_FILE, encoding="utf-8") as f:
+        for row in csv_mod.DictReader(f):
+            ts_str = (row.get("fetched_at") or "").strip()
+            repo = (row.get("repo") or "").strip()
+            if not ts_str or not repo:
+                continue
+            try:
+                ts = datetime.datetime.fromisoformat(ts_str)
+            except ValueError:
+                continue
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=datetime.timezone.utc)
+            if ts >= cutoff:
+                fresh.add(repo)
+    return fresh
 
 
 def _is_single_year(label: str) -> bool:
@@ -343,19 +372,15 @@ async def batch_update(
 
     t_start = time.monotonic()
 
-    existing = _read_existing_periods(output) if not force else {}
-    needed_labels = {str(y) for y in range(year_start, year_end + 1)}
-    needed_labels.add(f"{year_start}-{year_end}")
-
-    to_fetch: list[str] = []
-    skipped = 0
-    for repo in repos:
-        filled = existing.get(repo, set())
-        missing = needed_labels - filled
-        if not missing:
-            skipped += 1
-        else:
-            to_fetch.append(repo)
+    # Freshness gate: repos with a row in concentration-data.csv that's
+    # younger than CONCENTRATION_TTL_DAYS are considered up-to-date and
+    # skipped. `--force` bypasses this. Repos missing from the file (or
+    # with stale timestamps) are re-fetched. This replaces the older
+    # "any-data-present-in-bus-factor.csv" skip — that one couldn't
+    # distinguish 1-day-old from 1-year-old data.
+    fresh_repos = set() if force else _recently_fetched_repos()
+    to_fetch = [r for r in repos if r not in fresh_repos]
+    skipped = len(repos) - len(to_fetch)
 
     if limit and limit < len(to_fetch):
         to_fetch = random.sample(to_fetch, limit)
