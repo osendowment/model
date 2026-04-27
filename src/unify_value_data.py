@@ -110,6 +110,8 @@ def _read_git_index(path: Path) -> dict[str, str]:
 
     Picks the first non-empty URL in `GIT_HOST_PRIORITY` order, so a
     package with both github and gitlab entries resolves to github.
+    URLs are lowercased so they hash consistently with `github_repo`
+    (also lowercased).
     """
     if not path.exists():
         return {}
@@ -117,7 +119,7 @@ def _read_git_index(path: Path) -> dict[str, str]:
     with open(path, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             for host in GIT_HOST_PRIORITY:
-                url = (r.get(host) or "").strip()
+                url = (r.get(host) or "").strip().lower()
                 if url:
                     idx[r["package"]] = url
                     break
