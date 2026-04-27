@@ -80,23 +80,46 @@ def _github_token() -> str:
     return token
 
 
+SUBPROCESS_TIMEOUT_S = 300  # 5 min per repo — scorecard internal retries
+                            # can otherwise wedge a worker for 7+ minutes
+
+
 def run_scorecard(repo: str, token: str) -> dict:
-    """Run the scorecard CLI for a single repo and return parsed JSON."""
+    """Run the scorecard CLI for a single repo and return parsed JSON.
+
+    Wraps the subprocess in a hard timeout so we don't get stuck on
+    scorecard's internal rate-limit / 504 retry loops (known to spin
+    for 7+ min per call). On timeout or non-zero exit we record an
+    error row and move on.
+    """
     try:
         result = subprocess.run(
             [_scorecard_bin(), "--repo", repo, "--format", "json"],
             capture_output=True,
             text=True,
+            timeout=SUBPROCESS_TIMEOUT_S,
             env={**os.environ, "GITHUB_AUTH_TOKEN": token},
         )
-        if result.returncode != 0:
-            msg = result.stderr.strip()[:500]
-            log.warning("scorecard failed for %s: %s", repo, msg)
-            return {"error": True, "repo": repo, "message": msg}
-        return json.loads(result.stdout)
+    except subprocess.TimeoutExpired:
+        log.warning("scorecard timed out for %s after %ds", repo, SUBPROCESS_TIMEOUT_S)
+        return {"error": True, "repo": repo,
+                "message": f"timed out after {SUBPROCESS_TIMEOUT_S}s"}
     except Exception as exc:
         log.error("scorecard error for %s: %s", repo, exc)
         return {"error": True, "repo": repo, "message": str(exc)}
+
+    if result.returncode != 0:
+        msg = result.stderr.strip()[:500]
+        log.warning("scorecard failed for %s: %s", repo, msg)
+        return {"error": True, "repo": repo, "message": msg}
+    if not result.stdout.strip():
+        log.warning("scorecard returned empty stdout for %s", repo)
+        return {"error": True, "repo": repo, "message": "empty stdout"}
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        log.warning("scorecard returned non-JSON for %s: %s", repo, exc)
+        return {"error": True, "repo": repo, "message": f"non-JSON output: {exc}"}
 
 
 async def fetch_all(repos: list[str], concurrency: int = 5) -> dict[str, dict]:
@@ -109,14 +132,26 @@ async def fetch_all(repos: list[str], concurrency: int = 5) -> dict[str, dict]:
     semaphore = asyncio.Semaphore(concurrency)
     results: dict[str, dict] = {}
 
+    completed = 0
+    total = len(repos)
+
     async def bounded_run(repo: str) -> None:
+        nonlocal completed
         async with semaphore:
             loop = asyncio.get_running_loop()
             data = await loop.run_in_executor(None, run_scorecard, repo, token)
             results[repo] = data
             upsert_json(DEFAULT_DATA_OUTPUT, {repo: data})
             upsert_csv(DEFAULT_CSV_OUTPUT, {repo: data})
+            completed += 1
             progress.advance(task)
+            # Periodic stdout flush so background runs show progress without
+            # depending on rich's TTY-only progress bar
+            if completed % 25 == 0 or completed == total:
+                tag = "ok" if not data.get("error") else "err"
+                console.print(
+                    f"[dim]{completed}/{total} ({tag}: {repo})[/dim]"
+                )
 
     with Progress(
         SpinnerColumn(),
@@ -125,7 +160,7 @@ async def fetch_all(repos: list[str], concurrency: int = 5) -> dict[str, dict]:
         MofNCompleteColumn(),
         console=console,
     ) as progress:
-        task = progress.add_task("Scanning repos", total=len(repos))
+        task = progress.add_task("Scanning repos", total=total)
         await asyncio.gather(*(bounded_run(repo) for repo in repos))
 
     return results
