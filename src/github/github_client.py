@@ -170,40 +170,71 @@ def fetch_contributor_stats(
 
 
 class _AsyncRateLimiter:
-    """Rate limiter for async GitHub API calls, using TokenRevolver for rotation."""
+    """Rate limiter for async GitHub API calls, using TokenRevolver for rotation.
+
+    Token selection is round-robin across the available `GITHUB_TOKENS`,
+    re-picked under a brief lock per call. The actual HTTP request is sent
+    *outside* the lock so N concurrent calls truly run in parallel — each
+    one on a different token. State updates after the response are also
+    locked briefly. Without this, `async with self._lock:` around the full
+    HTTP roundtrip serialised every request behind one token, regardless
+    of concurrency or how many tokens were configured.
+    """
 
     def __init__(self) -> None:
         self._lock = asyncio.Lock()
         self._request_count = 0
         self._revolver = get_revolver()
+        self._rr_idx = 0  # round-robin pointer
+        if self._revolver.token_count >= 1:
+            from rich.console import Console as _C
+            _C().print(
+                f"[dim]Token revolver: {self._revolver.token_count} token(s) "
+                f"available[/dim]"
+            )
+
+    def _pick_token(self) -> str | None:
+        """Round-robin across tokens (caller must hold the lock)."""
+        tokens = self._revolver._tokens
+        if not tokens:
+            return None
+        token = tokens[self._rr_idx % len(tokens)]
+        self._rr_idx += 1
+        return token
 
     async def get(self, session: aiohttp.ClientSession, url: str, **kwargs) -> aiohttp.ClientResponse:
+        # 1. Brief lock: check exhaustion + pick a token round-robin
         async with self._lock:
-            # Check if we need to wait for rate limit reset
             wait = self._revolver.wait_time()
-            if wait > 0:
-                log.info("All tokens exhausted, sleeping %.1fs (%s)", wait, self._revolver.status())
-                await asyncio.sleep(wait)
+            token = None
+            if wait <= 0:
+                token = self._pick_token()
+        if wait > 0:
+            log.info("All tokens exhausted, sleeping %.1fs (%s)", wait, self._revolver.status())
+            await asyncio.sleep(wait)
+            async with self._lock:
+                token = self._pick_token()
 
-            token = self._revolver.best_token()
-            headers = {}
-            if token:
-                headers["Authorization"] = f"Bearer {token}"
+        headers = {}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
 
-            resp = await session.get(url, headers=headers, **kwargs)
+        # 2. HTTP request OUTSIDE the lock — concurrent calls run in parallel,
+        #    each on its own (round-robined) token.
+        resp = await session.get(url, headers=headers, **kwargs)
 
-            # Update rate limit state
-            if token:
-                remaining = resp.headers.get("X-RateLimit-Remaining")
-                reset = resp.headers.get("X-RateLimit-Reset")
+        # 3. Brief lock: update revolver state from response headers.
+        if token:
+            remaining = resp.headers.get("X-RateLimit-Remaining")
+            reset = resp.headers.get("X-RateLimit-Reset")
+            async with self._lock:
                 self._revolver.update(
                     token,
                     int(remaining) if remaining else None,
                     float(reset) if reset else None,
                 )
-
-            self._request_count += 1
-            return resp
+                self._request_count += 1
+        return resp
 
     @property
     def requests_made(self) -> int:
