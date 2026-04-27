@@ -311,7 +311,11 @@ async def batch_update(
             pad = " " * name_width
             task = progress.add_task(f"{pad} ...", total=len(to_fetch))
 
-            FLUSH_EVERY = 50
+            # Flush after every result so partial progress is durable on
+            # disk and visible to readers immediately. The cost is one full
+            # rewrite of each wide CSV per repo; on ~900-row files that's
+            # ~1MB × 6 files per write, dwarfed by the GitHub API wait.
+            FLUSH_EVERY = 1
             pending_flush: list[tuple[str, list[tuple[str, RunResult]]]] = []
             pending_repos = list(to_fetch)
 
@@ -362,6 +366,11 @@ async def batch_update(
                     label = repo[:name_width].ljust(name_width)
                     progress.update(task, completed=len(results),
                                     description=f"{label} ({len(results)}/{len(to_fetch)})")
+                    # Periodic stdout marker so non-TTY (background) runs show progress
+                    if len(results) % 25 == 0 or len(results) == len(to_fetch):
+                        console.print(
+                            f"[dim]{len(results)}/{len(to_fetch)}  ({repo})[/dim]"
+                        )
 
                 pending_repos = deferred
                 if deferred and round_num < MAX_ROUNDS - 1:
