@@ -3,7 +3,7 @@
 
 Reads data/github/contributors/{bus-factor,hhi,contributors}.csv (2021-2025
 aggregate) and data/github/git/loc.csv (most recent year) and writes
-data/risk-metrics.csv with columns: repo, active_contributors, hhi_commits,
+data/risk-data.csv with columns: repo, active_contributors, hhi_commits,
 bus_factor_commits, loc, concentration_class, complexity_class.
 
 Usage:
@@ -25,7 +25,7 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CONTRIB_DIR = DATA_DIR / "github" / "contributors"
 LOC_FILE = DATA_DIR / "github" / "git" / "loc.csv"
-OUTPUT_FILE = DATA_DIR / "risk-metrics.csv"
+OUTPUT_FILE = DATA_DIR / "risk-data.csv"
 AGG_COL = "2021-2025"
 LOC_YEAR = "2025"  # most recent year in git/loc.csv
 

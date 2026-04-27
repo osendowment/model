@@ -63,7 +63,7 @@ All data comes from [GitHub](sources/github.md):
 
 ## Output
 
-### risk-metrics.csv
+### risk-data.csv
 
 | Column | Description |
 |--------|-------------|
