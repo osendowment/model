@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Determine OSS eligibility for GitHub repos based on license.
+"""Determine eligibility for GitHub repos based on OSS license + EOL status.
 
-Reads data/github/search/top-repos.csv and upserts data/eligibility.csv with columns:
-repo, repo_id, license, is_oss, tm_owner, tm_owner_type, eligibility.
+Reads data/github/search/top-repos.csv (license) and data/eol.csv (archived
+status from check_eol.py), then upserts data/eligibility-data.csv.
+
+Final eligibility = is_oss AND NOT is_eol. Repos with no entry in eol.csv
+default to is_eol=False (treated as alive).
 
 Usage:
     python -m src.eligibility
@@ -19,9 +22,10 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 REPOS_FILE = DATA_DIR / "github" / "search" / "top-repos.csv"
-OUTPUT_FILE = DATA_DIR / "eligibility.csv"
+EOL_FILE = DATA_DIR / "eol.csv"
+OUTPUT_FILE = DATA_DIR / "eligibility-data.csv"
 
-FIELDS = ["repo", "repo_id", "user", "user_id", "user_type", "license", "is_oss", "tm_owner", "tm_owner_type", "eligibility"]
+FIELDS = ["repo", "repo_id", "user", "user_id", "user_type", "license", "is_oss", "is_eol", "tm_owner", "tm_owner_type", "eligibility"]
 
 # OSI-approved licenses — GitHub API license keys
 # https://opensource.org/licenses
@@ -70,17 +74,30 @@ OSI_APPROVED: set[str] = {
 #   "gfdl-1.3"        — GNU Free Documentation License (not OSI)
 
 
+def load_eol_index() -> dict[str, bool]:
+    """Read eol.csv and return {repo_lowercase: is_eol}. Empty if file missing."""
+    if not EOL_FILE.exists():
+        return {}
+    idx: dict[str, bool] = {}
+    with open(EOL_FILE, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            idx[r["repo"].lower()] = r["is_eol"] == "True"
+    return idx
+
+
 def build_eligibility() -> list[dict]:
-    """Read top-repos.csv and classify each repo's OSS eligibility.
+    """Read top-repos.csv + eol.csv and classify each repo's eligibility.
 
     # TODO: check if project trademark is owned by a company or corporate nonprofit
     #       — projects with corporate-held trademarks may not be truly community-owned
     """
+    eol_idx = load_eol_index()
     rows = []
     with open(REPOS_FILE, encoding="utf-8") as f:
         for repo in csv.DictReader(f):
             license_key = repo.get("license", "")
             is_oss = license_key in OSI_APPROVED
+            is_eol = eol_idx.get(repo["repo"].lower(), False)
 
             rows.append({
                 "repo": repo["repo"],
@@ -90,20 +107,23 @@ def build_eligibility() -> list[dict]:
                 "user_type": repo.get("user_type", ""),
                 "license": license_key,
                 "is_oss": is_oss,
+                "is_eol": is_eol,
                 "tm_owner": "",
                 "tm_owner_type": "",
-                "eligibility": is_oss,
+                "eligibility": is_oss and not is_eol,
             })
 
     return rows
 
 
 def upsert(new_rows: list[dict]) -> None:
-    """Upsert rows into eligibility.csv, keyed by repo_id."""
+    """Upsert rows into eligibility-data.csv, keyed by repo_id."""
     existing: dict[str, dict] = {}
     if OUTPUT_FILE.exists():
         with open(OUTPUT_FILE, encoding="utf-8") as f:
             for row in csv.DictReader(f):
+                # Backfill is_eol for legacy rows that predate the column
+                row.setdefault("is_eol", "False")
                 existing[row["repo_id"]] = row
 
     for row in new_rows:
@@ -126,6 +146,8 @@ def main():
     total = len(rows)
     oss_rows = [r for r in rows if r["is_oss"]]
     non_oss_rows = [r for r in rows if not r["is_oss"]]
+    eol_rows = [r for r in rows if r["is_eol"]]
+    eligible_rows = [r for r in rows if r["eligibility"]]
 
     # Summary table
     summary = Table(title="[bold]Eligibility Summary[/bold]", show_header=True,
@@ -133,10 +155,14 @@ def main():
     summary.add_column("", style="dim")
     summary.add_column("Repos", justify="right")
     summary.add_column("%", justify="right")
-    summary.add_row("[green]OSS eligible[/green]", f"[green]{len(oss_rows):,}[/green]",
-                    f"[green]{100 * len(oss_rows) / total:.1f}%[/green]")
-    summary.add_row("[red]Not eligible[/red]", f"[red]{len(non_oss_rows):,}[/red]",
-                    f"[red]{100 * len(non_oss_rows) / total:.1f}%[/red]")
+    summary.add_row("[green]Eligible[/green]", f"[green]{len(eligible_rows):,}[/green]",
+                    f"[green]{100 * len(eligible_rows) / total:.1f}%[/green]")
+    summary.add_row("[dim]  is_oss[/dim]", f"{len(oss_rows):,}",
+                    f"{100 * len(oss_rows) / total:.1f}%")
+    summary.add_row("[red]  is_eol (archived)[/red]", f"[red]{len(eol_rows):,}[/red]",
+                    f"[red]{100 * len(eol_rows) / total:.1f}%[/red]")
+    summary.add_row("[red]Not eligible[/red]", f"[red]{total - len(eligible_rows):,}[/red]",
+                    f"[red]{100 * (total - len(eligible_rows)) / total:.1f}%[/red]")
     summary.add_section()
     summary.add_row("[bold]Total repos[/bold]", f"[bold]{total:,}[/bold]", "")
     console.print(summary)

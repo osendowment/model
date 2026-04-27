@@ -45,12 +45,16 @@ without recent commits (e.g. `requests`).
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `src/eligibility.py` | Classify repos by OSS license eligibility | `uv run python -m src.eligibility` |
-| `src/check_eol.py` | Flag archived (EOL) repos | `uv run python -m src.check_eol --class AB --fetch-missing` |
+| `src/check_eol.py` | Flag archived (EOL) repos → `data/eol.csv` | `uv run python -m src.check_eol --class AB --fetch-missing` |
+| `src/eligibility.py` | Join license + EOL → `data/eligibility-data.csv` | `uv run python -m src.eligibility` |
+
+Run `check_eol.py` first; `eligibility.py` reads `eol.csv` to populate `is_eol`.
 
 ## Output
 
-### eligibility.csv
+### eligibility-data.csv
+
+Final eligibility table. `eligibility = is_oss AND NOT is_eol`.
 
 | Column | Description |
 |--------|-------------|
@@ -61,11 +65,15 @@ without recent commits (e.g. `requests`).
 | `user_type` | `User` or `Organization` |
 | `license` | License SPDX key (e.g. `mit`, `apache-2.0`) |
 | `is_oss` | `True` if the license is OSI-approved |
+| `is_eol` | `True` if archived (joined from `eol.csv`); defaults to `False` for repos absent from `eol.csv` |
 | `tm_owner` | Trademark owner (TODO) |
 | `tm_owner_type` | Corporate vs community-held (TODO) |
-| `eligibility` | `True` if repo qualifies for funding |
+| `eligibility` | `True` if `is_oss AND NOT is_eol` |
 
 ### eol.csv
+
+Per-repo EOL details, kept separate from `eligibility-data.csv` so the method
+and check timestamp are auditable.
 
 | Column | Description |
 |--------|-------------|
@@ -75,4 +83,6 @@ without recent commits (e.g. `requests`).
 | `pushed_at` | ISO 8601 timestamp of last push |
 | `days_since_push` | Whole days since `pushed_at` |
 | `is_eol` | `True` if `archived` (the EOL gate) |
+| `eol_method` | EOL signal id — currently `github_archived` |
 | `source` | `top-repos` (cached), `api` (fetched), or `missing` (404) |
+| `eol_checked_at` | ISO 8601 UTC timestamp of when this row's EOL was checked |

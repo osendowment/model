@@ -44,7 +44,12 @@ VALUE_FILE = DATA_DIR / "value-data.csv"
 TOP_REPOS_FILE = DATA_DIR / "github" / "search" / "top-repos.csv"
 OUTPUT_FILE = DATA_DIR / "eol.csv"
 
-FIELDS = ["repo", "value_class", "archived", "pushed_at", "days_since_push", "is_eol", "source"]
+FIELDS = ["repo", "value_class", "archived", "pushed_at", "days_since_push", "is_eol", "eol_method", "source", "eol_checked_at"]
+
+# Identifier for the EOL signal we use. Today: GitHub's `archived` flag.
+# Future signals (npm `deprecated`, PyPI `Development Status :: 7 - Inactive`,
+# crates.io yanked-all-versions, etc.) would each get a distinct method id.
+EOL_METHOD = "github_archived"
 
 GITHUB_API = "https://api.github.com"
 
@@ -122,6 +127,7 @@ def build_eol(rows: list[dict], top_idx: dict[str, dict], fetch_missing: bool) -
     # Cache API fetches across duplicate repos in the value list
     fetched: dict[str, dict | None] = {}
     out: list[dict] = []
+    checked_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
     for row in tqdm(rows, desc="checking eol", unit="pkg"):
         slug = row["repo"].lower()
@@ -143,9 +149,11 @@ def build_eol(rows: list[dict], top_idx: dict[str, dict], fetch_missing: bool) -
             archived = ""
             pushed_at = ""
             source = "missing"
+            method = ""
         else:
             archived = meta.get("archived", "")
             pushed_at = meta.get("pushed_at", "")
+            method = EOL_METHOD
 
         is_archived = archived == "True"
         out.append({
@@ -155,7 +163,9 @@ def build_eol(rows: list[dict], top_idx: dict[str, dict], fetch_missing: bool) -
             "pushed_at": pushed_at,
             "days_since_push": days_since(pushed_at) if pushed_at else "",
             "is_eol": is_archived,
+            "eol_method": method,
             "source": source,
+            "eol_checked_at": checked_at if method else "",
         })
     return out
 
