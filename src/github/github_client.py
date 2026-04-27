@@ -277,3 +277,61 @@ async def _fetch_stats_once(
         if resp.status == 404:
             raise RuntimeError(f"Repo not found: {repo}")
         raise RuntimeError(f"{repo}: HTTP {resp.status}")
+
+
+def _parse_next_link(link_header: str) -> str | None:
+    """Extract the URL marked rel=\"next\" from a GitHub Link header."""
+    if not link_header:
+        return None
+    for part in link_header.split(","):
+        part = part.strip()
+        if part.endswith('; rel="next"'):
+            return part.split(";", 1)[0].strip().lstrip("<").rstrip(">")
+    return None
+
+
+async def _fetch_contributors_paginated(
+    session: aiohttp.ClientSession, limiter: _AsyncRateLimiter,
+    repo: str, max_pages: int = 10,
+) -> list[dict]:
+    """Fetch all contributors via /repos/{owner}/{repo}/contributors.
+
+    Returns the flat list of {login, id, contributions, type, ...} dicts.
+    Unlike /stats/contributors (which suffers from a forever-202 caching
+    pathology for many repos), this endpoint returns immediately for any
+    repo that has at least one commit. GitHub caps the response at the
+    top 500 contributors but that is well above the BF/HHI signal floor.
+
+    Raises:
+        _Deferred: transient network/timeout error (caller may retry).
+        RuntimeError: 4xx/5xx status. 404 == repo deleted/private.
+    """
+    out: list[dict] = []
+    url = f"{GITHUB_API}/repos/{repo}/contributors?per_page=100&anon=false"
+    for _ in range(max_pages):
+        try:
+            resp = await limiter.get(session, url)
+        except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+            raise _Deferred() from e
+        async with resp:
+            status = resp.status
+            if status == 200:
+                page = await resp.json()
+                if not page:
+                    break
+                out.extend(page)
+                nxt = _parse_next_link(resp.headers.get("Link", ""))
+                if not nxt:
+                    break
+                url = nxt
+                continue
+            if status == 204:
+                # Repo is empty (no commits).
+                return []
+            if status == 403:
+                remaining = resp.headers.get("X-RateLimit-Remaining", "?")
+                raise RuntimeError(f"Rate limited ({repo}, remaining: {remaining})")
+            if status == 404:
+                raise RuntimeError(f"Repo not found: {repo}")
+            raise RuntimeError(f"{repo}: HTTP {status}")
+    return out

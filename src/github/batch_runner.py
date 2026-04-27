@@ -16,7 +16,11 @@ from rich.progress import (
 from rich.table import Table
 
 from src.github.models import RunResult, THRESHOLD
-from src.github.github_client import _AsyncRateLimiter, _fetch_stats_once, _Deferred, _NoStats
+from src.github.github_client import (
+    _AsyncRateLimiter,
+    _fetch_contributors_paginated,
+    _Deferred,
+)
 from src.github.display import console, _ETAColumn, _fmt_date, _fmt_contribs_label
 
 log = logging.getLogger(__name__)
@@ -232,9 +236,18 @@ async def batch_update(
     threshold: float = THRESHOLD, base: str = "commits",
     include_bots: bool = False, limit: int | None = None,
 ) -> None:
-    """Fetch and update metrics for multiple repos in parallel."""
+    """Fetch and update metrics for multiple repos in parallel.
+
+    Uses GitHub's /repos/{owner}/{repo}/contributors endpoint (lifetime
+    contribution totals). The historical /stats/contributors path was
+    abandoned because it returns 202 forever for ~90% of repos, leaving
+    contributor metrics empty. The trade-off: per-year breakdown is no
+    longer produced; only the aggregate `year_start-year_end` column is
+    populated. Existing per-year data in the wide CSVs is preserved
+    untouched (write_value_data uses upsert semantics).
+    """
     import random
-    from src.github.fetch_contributors_metrics import compute_yearly_breakdown
+    from src.github.fetch_contributors_metrics import compute_lifetime_metrics
 
     t_start = time.monotonic()
 
@@ -266,8 +279,11 @@ async def batch_update(
     limiter = _AsyncRateLimiter()
     sem = asyncio.Semaphore(10)
     total_label = f"{year_start}-{year_end}"
-    MAX_ROUNDS = 6
-    ROUND_DELAY = 10
+    # /contributors doesn't have the 202-forever pathology, so we don't
+    # need multi-round retries. A single round with a small inner-retry
+    # for transient network errors is sufficient.
+    MAX_ROUNDS = 2
+    ROUND_DELAY = 5
 
     @dataclass
     class _RepoResult:
@@ -277,18 +293,15 @@ async def batch_update(
         error: str = ""
         rounds: int = 1
 
-    _NO_STATS = "__no_stats__"
-
     async def _try_one(repo: str) -> tuple[str, list[dict] | None, str, float]:
         async with sem:
             t = time.monotonic()
             try:
-                data = await _fetch_stats_once(session, limiter, repo)
+                data = await _fetch_contributors_paginated(session, limiter, repo)
                 return (repo, data, "", time.monotonic() - t)
             except _Deferred:
+                # Transient network/timeout — let the outer round retry.
                 return (repo, None, "", time.monotonic() - t)
-            except _NoStats:
-                return (repo, None, _NO_STATS, time.monotonic() - t)
             except RuntimeError as e:
                 return (repo, None, str(e), time.monotonic() - t)
 
@@ -335,25 +348,18 @@ async def batch_update(
                     repo, data, error, api_time = await coro
                     repo_api_time[repo] += api_time
 
-                    if error and error != _NO_STATS:
+                    if error:
                         results.append(_RepoResult(repo=repo, year_results=None,
                                                    elapsed=repo_api_time[repo], error=error,
                                                    rounds=round_num + 1))
-                    elif error == _NO_STATS:
-                        yr = compute_yearly_breakdown([], year_start, year_end,
-                                                       threshold=threshold, base=base,
-                                                       include_bots=include_bots)
-                        rr = _RepoResult(repo=repo, year_results=yr,
-                                         elapsed=repo_api_time[repo], rounds=round_num + 1)
-                        results.append(rr)
-                        pending_flush.append((rr.repo, rr.year_results))
                     elif data is None:
                         deferred.append(repo)
                         continue
                     else:
-                        yr = compute_yearly_breakdown(data, year_start, year_end,
-                                                       threshold=threshold, base=base,
-                                                       include_bots=include_bots)
+                        yr = compute_lifetime_metrics(
+                            data, label=total_label,
+                            threshold=threshold, include_bots=include_bots,
+                        )
                         rr = _RepoResult(repo=repo, year_results=yr,
                                          elapsed=repo_api_time[repo], rounds=round_num + 1)
                         results.append(rr)
@@ -378,14 +384,15 @@ async def batch_update(
                              round_num + 1, len(results), len(deferred))
 
             for repo in pending_repos:
-                yr = compute_yearly_breakdown([], year_start, year_end,
-                                               threshold=threshold, base=base,
-                                               include_bots=include_bots)
+                yr = compute_lifetime_metrics(
+                    [], label=total_label,
+                    threshold=threshold, include_bots=include_bots,
+                )
                 rr = _RepoResult(repo=repo, year_results=yr,
                                  elapsed=repo_api_time[repo], rounds=MAX_ROUNDS)
                 results.append(rr)
                 pending_flush.append((rr.repo, rr.year_results))
-                log.warning("%s: no stats after %d rounds, treating as empty", repo, MAX_ROUNDS)
+                log.warning("%s: no contributors after %d rounds, treating as empty", repo, MAX_ROUNDS)
 
             if pending_flush:
                 _upsert_yearly_csv_batch(output, pending_flush)

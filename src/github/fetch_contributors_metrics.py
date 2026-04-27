@@ -147,6 +147,43 @@ def _cumulative_loc(stats: list[dict], up_to: datetime.date) -> int:
     return total
 
 
+def compute_lifetime_metrics(
+    contributors_data: list[dict],
+    label: str = "2021-2025",
+    threshold: float = THRESHOLD,
+    include_bots: bool = False,
+) -> list[tuple[str, RunResult]]:
+    """Compute BF/HHI from /repos/{owner}/{repo}/contributors output.
+
+    Used as the primary path now that /stats/contributors is unreliable
+    (returns 202 forever for many repos). Trades per-year breakdown for
+    universal coverage: the result is a single (label, RunResult) entry
+    representing lifetime totals, not a per-year breakdown.
+
+    `contributors_data` is the GitHub API response — a list of dicts with
+    `login`, `contributions`, `type` (User/Bot) per contributor.
+    """
+    contributors: list[Contributor] = []
+    for c in contributors_data:
+        login = (c.get("login") or "").lower()
+        is_b = c.get("type") == "Bot" or is_bot(login)
+        contributors.append(
+            Contributor(
+                login=login,
+                lines_changed=0,
+                commits=int(c.get("contributions") or 0),
+                is_bot=is_b,
+            )
+        )
+    bf, sorted_c, hhi = _compute_bus_factor(
+        contributors, threshold=threshold, base="commits", include_bots=include_bots,
+    )
+    return [(label, RunResult(
+        bus_factor=bf, contributors=sorted_c, hhi=hhi,
+        perf=PerfStats(source="contributors-api"),
+    ))]
+
+
 def compute_yearly_breakdown(
     stats: list[dict], year_start: int, year_end: int,
     threshold: float = THRESHOLD, base: str = "commits",
