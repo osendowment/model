@@ -63,15 +63,46 @@ package it produces is EOL (handles monorepos with mixed states).
 | **npm** | latest version's `deprecated` field on the registry | `npm_deprecated` | `registry.npmjs.org` |
 | **pypi** | `Development Status :: 7 - Inactive` Trove classifier | `pypi_inactive` | `pypi.org/pypi/<n>/json` |
 | **crates** | default version is `yanked` | `crates_yanked` | local crates.io DB dump |
-| **cpp** | no signal — placeholder | `unsupported` | — |
-
-cpp is unsupported for now: Debian/Homebrew don't expose explicit
-deprecation flags in our scrape. Future work: extract Homebrew
-`deprecate!`/`disable!` stanzas, or use Repology's `removed` status.
+| **cpp** | every Homebrew formula for the project is `disabled` or `deprecated` | `homebrew_disabled` / `homebrew_deprecated` | `formulae.brew.sh/api/formula.json` (one bulk fetch) |
+| **cpp** (overlay) | every release cycle's `eol` date is in the past | `endoflife_date` | `endoflife.date/api/<product>.json` (curated whitelist of ~20 well-known products) |
 
 `crates_yanked` has low recall — `cargo yank` is meant for buggy versions,
 not deprecation. crates.io has no formal "deprecate" mechanism; the column
 is honest about that.
+
+### cpp signal details
+
+A cpp project has at most one Homebrew "EOL" classification: it's only
+flagged if **every** Homebrew formula mapped to that project (via
+Repology's `repo='homebrew'` rows) is `disabled` or `deprecated`. This
+correctly handles versioned formulas — `gcc` has formulas for `gcc`, `gcc@9`,
+`gcc@10` etc.; the old version-pinned ones being deprecated doesn't make
+gcc itself EOL.
+
+`endoflife_date` is an overlay applied on top of the Homebrew check for a
+small whitelist of well-known products (openssl, postgresql, python, ruby,
+php, etc.). A product is EOL only if every release cycle's `eol` date is in
+the past. A cycle with `eol: false` keeps the project alive.
+
+### Why not Debian "removed from current stable"?
+
+Considered and rejected — high false-positive rate. A package can be absent
+from current Debian stable for many reasons unrelated to EOL:
+
+- **SONAME bumps** (`libpng12-0` removed; `libpng16-16` is current and alive)
+- **python2→3 transitions** (`python-six` removed; `python3-six` alive)
+- **Source-package renames** (`nodejs-legacy` folded into `nodejs`)
+- **Held during release transitions** (in unstable awaiting unblock)
+- **RC-bug or FTBFS removals** — alive upstream, transient Debian state
+- **Section reorgs** (non-free / contrib moves)
+- **Architecture-specific removals** (only dropped for `armhf` etc.)
+- **Hosted entirely outside Debian** (many GNU/sourceware projects)
+
+A cleaner Debian signal would parse `ftp-master.debian.org/removals.txt`
+and filter to entries with `Reason:` containing `RoQA`, `Dead upstream`,
+`Orphaned and abandoned upstream`, or similar — that's an explicit Debian
+FTP-team statement of upstream EOL with very low FP rate. Deferred for now
+since it requires parsing an unstructured log.
 
 ## Scripts
 
