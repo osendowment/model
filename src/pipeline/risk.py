@@ -12,11 +12,11 @@ licensed-OSS, that's EOL, or that 404'd on the GitHub API is excluded
 before any risk metrics are even computed.
 
 Reads:
-    data/eligibility-data.csv                          — input set
-    data/github/contributors/{bus-factor,hhi,contributors}.csv
-                                                        (2021-2025 aggregate)
-    data/github/git/loc.csv                            (most recent year)
-    data/github/issues/{opened,closed}.csv             (5-year wide)
+    data/eligibility-data.csv          — input set (eligible repos only)
+    data/concentration-data.csv        — per-repo BF/HHI/total_commits/total_contributors
+    data/github/git/loc.csv            — most recent year
+    data/github/issues/{opened,closed}.csv  — 5-year wide
+    data/openssf/scores.csv            — Scorecard scores
 
 Writes:
     data/risk-data.csv  with columns:
@@ -50,18 +50,18 @@ from src.pipeline.repos import load_eligible_repos
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-CONTRIB_DIR = DATA_DIR / "github" / "contributors"
+CONCENTRATION_FILE = DATA_DIR / "concentration-data.csv"
 LOC_FILE = DATA_DIR / "github" / "git" / "loc.csv"
 ISSUES_DIR = DATA_DIR / "github" / "issues"
 OPENSSF_FILE = DATA_DIR / "openssf" / "scores.csv"
 OUTPUT_FILE = DATA_DIR / "risk-data.csv"
-AGG_COL = "2021-2025"
 LOC_YEAR = "2025"  # most recent year in git/loc.csv
 
 FIELDS = [
     "repo", "repo_id",
-    # concentration
-    "active_contributors", "hhi_commits", "bus_factor_commits", "concentration_class",
+    # concentration (lifetime BF/HHI from data/concentration-data.csv)
+    "total_commits", "total_contributors",
+    "hhi_commits", "bus_factor_commits", "concentration_class",
     # complexity
     "loc", "complexity_class",
     # security (OpenSSF Scorecard)
@@ -273,17 +273,28 @@ def _load_locs() -> dict[str, int]:
     return mapping
 
 
-def _load_contrib_metric(filename: str) -> dict[str, str]:
-    """Load {repo: 2021-2025 aggregate value} from a wide per-metric CSV."""
-    path = CONTRIB_DIR / filename
-    out: dict[str, str] = {}
-    if not path.exists():
+def _load_concentration_data() -> dict[str, dict[str, str]]:
+    """Load per-repo concentration metrics from data/concentration-data.csv.
+
+    Returns {repo_lowercased: {bus_factor, hhi, total_commits, total_contributors}}.
+    Single source of truth for BF/HHI now that the contributor fetcher uses
+    /contributors lifetime data and writes one row per repo here. The older
+    per-year wide CSVs at data/github/contributors/ are no longer read.
+    """
+    out: dict[str, dict[str, str]] = {}
+    if not CONCENTRATION_FILE.exists():
         return out
-    with open(path, encoding="utf-8") as f:
+    with open(CONCENTRATION_FILE, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            val = row.get(AGG_COL, "")
-            if val:
-                out[row["repo"]] = val
+            repo = (row.get("repo") or "").strip().lower()
+            if not repo:
+                continue
+            out[repo] = {
+                "bus_factor": (row.get("bus_factor") or "").strip(),
+                "hhi": (row.get("hhi") or "").strip(),
+                "total_commits": (row.get("total_commits") or "").strip(),
+                "total_contributors": (row.get("total_contributors") or "").strip(),
+            }
     return out
 
 
@@ -302,9 +313,7 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
     eligible = sorted(repo_ids.keys())
     repo_locs = _load_locs()
 
-    bf_by_repo = _load_contrib_metric("bus-factor.csv")
-    hhi_by_repo = _load_contrib_metric("hhi.csv")
-    contribs_by_repo = _load_contrib_metric("contributors.csv")
+    concentration_by_repo = _load_concentration_data()
 
     opened_by_repo = _read_issues_per_year("opened.csv")
     closed_by_repo = _read_issues_per_year("closed.csv")
@@ -317,12 +326,13 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
     rows: list[dict] = []
 
     for repo in eligible:
-        bf_str = bf_by_repo.get(repo, "")
-        hhi_str = hhi_by_repo.get(repo, "")
-        contributors_str = contribs_by_repo.get(repo, "")
+        conc_row = concentration_by_repo.get(repo, {})
+        bf_str = conc_row.get("bus_factor", "")
+        hhi_str = conc_row.get("hhi", "")
+        total_commits_str = conc_row.get("total_commits", "")
+        total_contribs_str = conc_row.get("total_contributors", "")
         bf = int(bf_str) if bf_str else None
         hhi = int(hhi_str) if hhi_str else None
-        contributors = int(contributors_str) if contributors_str else ""
 
         # Concentration only fires when both BF and HHI are present
         conc_cls = concentration_class(bf, hhi) if (bf is not None and hhi is not None) else ""
@@ -353,7 +363,8 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
         rows.append({
             "repo": repo,
             "repo_id": repo_ids.get(repo, ""),
-            "active_contributors": contributors,
+            "total_commits": total_commits_str,
+            "total_contributors": total_contribs_str,
             "hhi_commits": hhi if hhi is not None else "",
             "bus_factor_commits": bf if bf is not None else "",
             "concentration_class": conc_cls,
