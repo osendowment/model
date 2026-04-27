@@ -14,6 +14,7 @@ maintainers = [
 ]
 dependencies = [
     "aiohttp>=3.13.3",
+    "anthropic>=0.97.0",
     "httpx[http2]>=0.28.1",
     "networkx>=3.6.1",
     "polars>=1.39.3",
@@ -33,6 +34,7 @@ dev = [
     "ruff>=0.11.12",
     "pandas>=3.0.1",
     "tqdm>=4.67.3",
+    "pytest-cov>=7.1.0",
 ]
 
 [tool.ruff]

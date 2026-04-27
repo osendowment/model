@@ -6,12 +6,15 @@ cpp), groups packages by GitHub repo (or treats packages without a
 `github_repo` as their own one-package groups), and writes
 `data/value-data.csv` with **one row per repo**:
 
-    id, github_repo, ecosystems, packages,
+    id, github_repo, git_url, ecosystems, packages,
     top_eco, top_eco_pkg, top_eco_pct, class,
     class_npm, class_pypi, class_crates, class_cpp
 
-`github_repo` is normalised to lowercase `owner/repo`. cpp is the unified
-C/C++ ecosystem (Debian + Homebrew, joined via Repology) -- see
+`github_repo` is normalised to lowercase `owner/repo`. `git_url` is the
+canonical clone URL from `results.csv`'s `git` column (lowercased), which
+already covers GitHub plus GitLab / Codeberg / Sourcehut / Bitbucket /
+custom hosts (sourceware, savannah, etc.). cpp is the unified C/C++
+ecosystem (Debian + Homebrew, joined via Repology) -- see
 `src/cpp/process_data.py`.
 
 Per-ecosystem class is computed by summing each group's package PR within
@@ -34,6 +37,8 @@ Usage:
     uv run -m src.unify_value_data
 """
 
+from __future__ import annotations
+
 import csv
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -51,22 +56,16 @@ OUTPUT_FILE = DATA_DIR / "value-data.csv"
 ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
 CLASS_RANK = {"A": 0, "B": 1, "C": 2, "D": 3}
 
-# Ecosystem name → name of the package-name column in its results.csv
-_ECOSYSTEM_SPECS: list[tuple[str, str]] = [
-    ("npm", "package"),
-    ("pypi", "package"),
-    ("crates", "package"),
-    ("cpp", "package"),
-]
-
 FIELDS = (
     ["id", "github_repo", "git_url", "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
 )
 
-# Order in which to pick the canonical git URL from a per-eco git.csv row
-GIT_HOST_PRIORITY = ("github", "gitlab", "codeberg", "sourcehut", "bitbucket", "custom")
+# Internal scratch keys carried on each aggregate dict during computation.
+# Stripped before writing — DictWriter would `extrasaction="ignore"` them
+# anyway, but explicit removal keeps the test surface clean.
+_INTERNAL_PREFIXES = ("_pkgs_", "_pr_sum_", "_pr_pct_", "_top_pkg_", "group_key")
 
 
 def _normalise_repo(repo: str) -> str:
@@ -74,12 +73,12 @@ def _normalise_repo(repo: str) -> str:
     return repo.strip().lower()
 
 
-def _read_top_packages(path: Path, pkg_col: str) -> set[str]:
-    """Return the set of package names from a top-packages.csv."""
+def _read_top_packages(path: Path) -> set[str]:
+    """Return the set of package names from a top-packages.csv. Empty if missing."""
     if not path.exists():
         return set()
     with open(path, encoding="utf-8") as f:
-        return {row[pkg_col] for row in csv.DictReader(f)}
+        return {row["package"] for row in csv.DictReader(f)}
 
 
 def _read_dep_tree_nodes(path: Path) -> set[str]:
@@ -105,36 +104,20 @@ def _read_eol_index(path: Path) -> dict[str, bool]:
     return idx
 
 
-def _read_git_index(path: Path) -> dict[str, str]:
-    """Return {package: canonical_git_url} from a per-ecosystem git.csv.
+def collect_ecosystem(ecosystem: str, data_dir: Path = DATA_DIR) -> tuple[list[dict], dict]:
+    """Read per-ecosystem files, return per-package rows + funnel stats.
 
-    Picks the first non-empty URL in `GIT_HOST_PRIORITY` order, so a
-    package with both github and gitlab entries resolves to github.
-    URLs are lowercased so they hash consistently with `github_repo`
-    (also lowercased).
+    `git_url` for each row comes directly from `results.csv`'s `git`
+    column (lowercased) — that column is already populated and is the
+    canonical clone URL, so no separate join with `git.csv` is needed.
     """
-    if not path.exists():
-        return {}
-    idx: dict[str, str] = {}
-    with open(path, encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            for host in GIT_HOST_PRIORITY:
-                url = (r.get(host) or "").strip().lower()
-                if url:
-                    idx[r["package"]] = url
-                    break
-    return idx
-
-
-def collect_ecosystem(ecosystem: str, pkg_col: str) -> tuple[list[dict], dict]:
-    """Read per-ecosystem files, return unified rows and funnel stats."""
-    eco_dir = DATA_DIR / ecosystem
+    eco_dir = data_dir / ecosystem
     top_path = eco_dir / "top-packages.csv"
     deps_path = eco_dir / "dependency-tree.csv"
     results_path = eco_dir / "results.csv"
     eol_path = eco_dir / "eol.csv"
 
-    top_set = _read_top_packages(top_path, pkg_col)
+    top_set = _read_top_packages(top_path)
     dep_nodes = _read_dep_tree_nodes(deps_path)
     # "After dep tree" = top packages plus their transitive deps. Some top
     # packages have no declared deps and no inbound deps, so they don't appear
@@ -142,27 +125,26 @@ def collect_ecosystem(ecosystem: str, pkg_col: str) -> tuple[list[dict], dict]:
     after_deps = len(top_set | dep_nodes)
     top_count = len(top_set)
     eol_idx = _read_eol_index(eol_path)
-    git_idx = _read_git_index(eco_dir / "git.csv")
 
     rows: list[dict] = []
-    with open(results_path, encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            pkg = r[pkg_col]
-            rows.append({
-                "package": pkg,
-                "ecosystem": ecosystem,
-                "github_repo": _normalise_repo(r.get("github_repo", "")),
-                "git_url": git_idx.get(pkg, ""),
-                "pagerank": r.get("pagerank", ""),
-                "value_class": r.get("value_class", ""),
-                "is_eol": eol_idx.get(pkg, False),
-            })
+    if results_path.exists():
+        with open(results_path, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                pkg = r["package"]
+                rows.append({
+                    "package": pkg,
+                    "ecosystem": ecosystem,
+                    "github_repo": _normalise_repo(r.get("github_repo", "")),
+                    "git_url": (r.get("git") or "").strip().lower(),
+                    "pagerank": r.get("pagerank", ""),
+                    "value_class": r.get("value_class", ""),
+                    "is_eol": eol_idx.get(pkg, False),
+                })
 
     classes = Counter(r["value_class"] for r in rows if r["value_class"])
     with_gh = sum(1 for r in rows if r["github_repo"])
     with_git = sum(1 for r in rows if r["git_url"])
     eol_count = sum(1 for r in rows if r["is_eol"])
-    eol_covered = bool(eol_idx)
 
     ab_rows = [r for r in rows if r["value_class"] in ("A", "B")]
     ab_with_gh = sum(1 for r in ab_rows if r["github_repo"])
@@ -184,7 +166,7 @@ def collect_ecosystem(ecosystem: str, pkg_col: str) -> tuple[list[dict], dict]:
         "ab_with_git": ab_with_git,
         "ab_gh_pct": (100.0 * ab_with_gh / len(ab_rows)) if ab_rows else 0.0,
         "ab_git_pct": (100.0 * ab_with_git / len(ab_rows)) if ab_rows else 0.0,
-        "eol_covered": eol_covered,
+        "eol_covered": bool(eol_idx),
         "eol_count": eol_count,
         "ab_eol": ab_eol,
     }
@@ -196,13 +178,19 @@ def _group_key(row: dict) -> str:
     return row["github_repo"] or f"__orphan__:{row['ecosystem']}:{row['package']}"
 
 
+def _strip_internals(a: dict) -> dict:
+    """Drop scratch keys before writing."""
+    return {k: v for k, v in a.items() if not any(k.startswith(p) for p in _INTERNAL_PREFIXES)}
+
+
 def aggregate_by_repo(all_rows: list[dict]) -> list[dict]:
     """Collapse per-package rows into one row per repo (or per orphan).
 
-    Implements: per-ecosystem PR sum → cumulative-share ranking → A/B/C/D,
-    plus top_eco / top_eco_pkg / top_eco_pct, the cross-ecosystem
-    `class` (strongest), is_eol (True only if every constituent package
-    is is_eol), and the comma-separated `ecosystems` list.
+    Per-ecosystem PR sum → cumulative-share ranking → A/B/C/D, plus
+    top_eco / top_eco_pkg / top_eco_pct, the cross-ecosystem `class`
+    (strongest), and the comma-separated `ecosystems` list. Rows are
+    sorted by `top_eco_pct` desc; the empty case (no PR data anywhere)
+    sinks to the end.
     """
     groups: dict[str, list[dict]] = defaultdict(list)
     for r in all_rows:
@@ -232,7 +220,7 @@ def aggregate_by_repo(all_rows: list[dict]) -> list[dict]:
         a["ecosystems"] = ",".join(present_ecos)
         aggs.append(a)
 
-    # Per ecosystem: rank groups by PR sum desc, compute cumulative share, assign class.
+    # Per ecosystem: rank by PR sum desc, compute cumulative share, assign class.
     # `_pr_pct_<eco>` = 100 - cum_share so higher is better; used to pick top_eco.
     for eco in ECOSYSTEMS:
         present = [a for a in aggs if a[f"_pkgs_{eco}"] > 0]
@@ -247,57 +235,55 @@ def aggregate_by_repo(all_rows: list[dict]) -> list[dict]:
         for a in aggs:
             a.setdefault(f"class_{eco}", "")
 
-    # top_eco / top_eco_pkg / top_eco_pct + cross-eco strongest `class`
+    # top_eco / top_eco_pkg / top_eco_pct + cross-eco strongest `class`.
+    # Every group has at least one package in some ecosystem (it wouldn't
+    # exist otherwise), so `pcts` and `present_classes` are always non-empty.
+    # Tied percentiles resolve in ECOSYSTEMS order (npm wins ties).
     for a in aggs:
         pcts = {e: a[f"_pr_pct_{e}"] for e in ECOSYSTEMS if f"_pr_pct_{e}" in a}
-        if pcts:
-            top = max(pcts, key=pcts.get)
-            a["top_eco"] = top
-            a["top_eco_pkg"] = a.get(f"_top_pkg_{top}", "")
-            a["top_eco_pct"] = round(pcts[top], 4)
-        else:
-            a["top_eco"] = ""
-            a["top_eco_pkg"] = ""
-            a["top_eco_pct"] = ""
+        top = max(pcts, key=pcts.get)
+        a["top_eco"] = top
+        a["top_eco_pkg"] = a.get(f"_top_pkg_{top}", "")
+        a["top_eco_pct"] = round(pcts[top], 4)
         present_classes = [a[f"class_{e}"] for e in ECOSYSTEMS if a[f"class_{e}"]]
-        a["class"] = (
-            min(present_classes, key=lambda c: CLASS_RANK[c]) if present_classes else ""
-        )
+        a["class"] = min(present_classes, key=lambda c: CLASS_RANK[c])
 
-    # Sort by top_eco_pct desc; ties broken by repo name for stability
-    def sort_key(a: dict) -> tuple:
-        pct = a["top_eco_pct"] if isinstance(a["top_eco_pct"], (int, float)) else -1
-        return (-pct, a["github_repo"] or a["group_key"])
-
-    aggs.sort(key=sort_key)
+    # Sort by top_eco_pct desc. Every group has a numeric percentile (set
+    # above), so no special handling for missing values is needed; ties
+    # broken by repo name for stability.
+    aggs.sort(key=lambda a: (-a["top_eco_pct"], a["github_repo"] or a["group_key"]))
     for i, a in enumerate(aggs, 1):
         a["id"] = i
-    return aggs
+    return [_strip_internals(a) for a in aggs]
 
 
-def _print_funnel_table(stats_per_eco: list[dict]) -> None:
+def write_value_data(aggs: list[dict], path: Path = OUTPUT_FILE) -> None:
+    """Write the per-repo aggregate to a CSV using the canonical schema."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDS, quoting=csv.QUOTE_ALL,
+                                extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(aggs)
+
+
+# ── display helpers ──────────────────────────────────────────────────────────
+# These only build rich tables; they have no logic and are excluded from
+# coverage requirements.
+
+def _print_funnel_table(stats_per_eco: list[dict]) -> None:  # pragma: no cover
     table = Table(title="[bold]Value pipeline funnel[/bold]",
                   show_header=True, header_style="bold dim", padding=(0, 1))
     table.add_column("Ecosystem", style="bold")
-    table.add_column("Top", justify="right")
-    table.add_column("After deps", justify="right")
-    table.add_column("Results", justify="right")
-    table.add_column("With GH", justify="right")
-    table.add_column("GH %", justify="right")
-    table.add_column("With Git", justify="right")
-    table.add_column("Git %", justify="right")
+    for col in ("Top", "After deps", "Results", "With GH", "GH %", "With Git", "Git %"):
+        table.add_column(col, justify="right")
 
     tot = {"top": 0, "deps_unique": 0, "results": 0, "with_gh": 0, "with_git": 0}
     for s in stats_per_eco:
         table.add_row(
-            s["ecosystem"],
-            f"{s['top']:,}",
-            f"{s['deps_unique']:,}",
-            f"{s['results']:,}",
-            f"{s['with_gh']:,}",
-            f"{s['gh_pct']:.0f}%",
-            f"{s['with_git']:,}",
-            f"{s['git_pct']:.0f}%",
+            s["ecosystem"], f"{s['top']:,}", f"{s['deps_unique']:,}",
+            f"{s['results']:,}", f"{s['with_gh']:,}", f"{s['gh_pct']:.0f}%",
+            f"{s['with_git']:,}", f"{s['git_pct']:.0f}%",
         )
         for k in tot:
             tot[k] += s[k]
@@ -307,18 +293,15 @@ def _print_funnel_table(stats_per_eco: list[dict]) -> None:
     git_pct = (100.0 * tot["with_git"] / tot["results"]) if tot["results"] else 0.0
     table.add_row(
         "[bold]Total[/bold]",
-        f"[bold]{tot['top']:,}[/bold]",
-        f"[bold]{tot['deps_unique']:,}[/bold]",
-        f"[bold]{tot['results']:,}[/bold]",
-        f"[bold]{tot['with_gh']:,}[/bold]",
+        f"[bold]{tot['top']:,}[/bold]", f"[bold]{tot['deps_unique']:,}[/bold]",
+        f"[bold]{tot['results']:,}[/bold]", f"[bold]{tot['with_gh']:,}[/bold]",
         f"[bold]{gh_pct:.0f}%[/bold]",
-        f"[bold]{tot['with_git']:,}[/bold]",
-        f"[bold]{git_pct:.0f}%[/bold]",
+        f"[bold]{tot['with_git']:,}[/bold]", f"[bold]{git_pct:.0f}%[/bold]",
     )
     console.print(table)
 
 
-def _print_eol_table(stats_per_eco: list[dict]) -> None:
+def _print_eol_table(stats_per_eco: list[dict]) -> None:  # pragma: no cover
     table = Table(title="[bold]EOL coverage[/bold]",
                   show_header=True, header_style="bold dim", padding=(0, 1))
     table.add_column("Ecosystem", style="bold")
@@ -326,27 +309,22 @@ def _print_eol_table(stats_per_eco: list[dict]) -> None:
     table.add_column("EOL total", justify="right", style="red")
     table.add_column("EOL A+B", justify="right", style="red")
 
-    tot_eol = 0
-    tot_ab_eol = 0
+    tot_eol, tot_ab_eol = 0, 0
     for s in stats_per_eco:
         table.add_row(
             s["ecosystem"],
             "[green]✓[/green]" if s["eol_covered"] else "[dim]–[/dim]",
-            f"{s['eol_count']:,}",
-            f"{s['ab_eol']:,}",
+            f"{s['eol_count']:,}", f"{s['ab_eol']:,}",
         )
         tot_eol += s["eol_count"]
         tot_ab_eol += s["ab_eol"]
     table.add_section()
-    table.add_row(
-        "[bold]Total[/bold]", "",
-        f"[bold]{tot_eol:,}[/bold]",
-        f"[bold]{tot_ab_eol:,}[/bold]",
-    )
+    table.add_row("[bold]Total[/bold]", "",
+                  f"[bold]{tot_eol:,}[/bold]", f"[bold]{tot_ab_eol:,}[/bold]")
     console.print(table)
 
 
-def _print_class_table(stats_per_eco: list[dict]) -> None:
+def _print_class_table(stats_per_eco: list[dict]) -> None:  # pragma: no cover
     table = Table(title="[bold]Value class distribution[/bold]",
                   show_header=True, header_style="bold dim", padding=(0, 1))
     table.add_column("Ecosystem", style="bold")
@@ -357,9 +335,7 @@ def _print_class_table(stats_per_eco: list[dict]) -> None:
     table.add_column("A+B Git", justify="right")
 
     totals = Counter()
-    ab_total = 0
-    ab_gh = 0
-    ab_git = 0
+    ab_total, ab_gh, ab_git = 0, 0, 0
     for s in stats_per_eco:
         row = [s["ecosystem"]]
         eco_total = sum(s["classes"].values())
@@ -389,7 +365,7 @@ def _print_class_table(stats_per_eco: list[dict]) -> None:
     console.print(table)
 
 
-def _print_repo_class_table(aggs: list[dict]) -> None:
+def _print_repo_class_table(aggs: list[dict]) -> None:  # pragma: no cover
     table = Table(title="[bold]Repo class distribution[/bold]",
                   show_header=True, header_style="bold dim", padding=(0, 1))
     table.add_column("class")
@@ -407,24 +383,18 @@ def _print_repo_class_table(aggs: list[dict]) -> None:
     console.print(table)
 
 
-def main() -> None:
+def main() -> None:  # pragma: no cover
     console.print("[bold]Unifying value-pipeline results...[/bold]\n")
 
     all_rows: list[dict] = []
     stats_per_eco: list[dict] = []
-    for ecosystem, pkg_col in _ECOSYSTEM_SPECS:
-        rows, stats = collect_ecosystem(ecosystem, pkg_col)
+    for ecosystem in ECOSYSTEMS:
+        rows, stats = collect_ecosystem(ecosystem)
         all_rows.extend(rows)
         stats_per_eco.append(stats)
 
     aggs = aggregate_by_repo(all_rows)
-
-    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDS, quoting=csv.QUOTE_ALL,
-                                extrasaction="ignore")
-        writer.writeheader()
-        writer.writerows(aggs)
+    write_value_data(aggs)
 
     _print_funnel_table(stats_per_eco)
     console.print()
@@ -443,5 +413,5 @@ def main() -> None:
     )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
