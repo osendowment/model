@@ -103,6 +103,47 @@ Packages sorted by PageRank descending. Cumulative PageRank share determines cla
 | **C** | 75--90% | Useful but not load-bearing |
 | **D** | 90--100% | Long tail |
 
+> See [Current Limitations](#current-limitations) for known scope gaps
+> (cpp runtime-only deps, GitHub-only project identity, etc.).
+
+### Funnel
+
+Packages remaining after each pipeline stage, plus the share with a known
+upstream repo at the end. *GH %* counts only github.com; *Git %* also
+counts gitlab, bitbucket, sourcehut, codeberg, and `custom` hosts
+(savannah, sourceware, kernel.org, etc.) -- see [Unified output](#unified-output).
+
+| Ecosystem | Top packages | After dep tree | Results | With GitHub | GH % | Git % |
+|-----------|-------------:|---------------:|--------:|------------:|-----:|------:|
+| npm       | 5,765 | 6,370  | 6,370  | 6,281  | 99% | 99% |
+| PyPI      | 2,460 | 3,139  | 3,139  | 1,728  | 55% | 55% |
+| crates.io | 3,719 | 6,218  | 6,218  | 5,967  | 96% | 99% |
+| C/C++     | 1,643 | 2,648  | 2,648  | 484    | 18% | 24% |
+| **Total** | **13,587** | **18,375** | **18,375** | **14,460** | **79%** | **80%** |
+
+*Top packages* covers 95% of cumulative downloads. *After dep tree* is
+`|top ∪ transitive deps|` -- the universe analysed for PageRank. *Results*
+keeps every node from that universe (top packages with no edges still get
+a row, with PageRank = 0). PyPI is stuck at 55% because the BigQuery
+extract was github-only at fetch time.
+
+### Value class distribution
+
+Per-ecosystem and combined counts of A/B/C/D classes in `value-data.csv`.
+
+| Ecosystem | A | B | C | D | Total | A+B GH | A+B Git |
+|-----------|--:|--:|--:|--:|------:|-------:|--------:|
+| npm       | 331 | 748   | 1,183 | 4,108  | 6,370 | 100% | 100% |
+| PyPI      | 54  | 157   | 414   | 2,514  | 3,139 | 76%  | 76%  |
+| crates.io | 49  | 197   | 449   | 5,523  | 6,218 | 99%  | 100% |
+| C/C++     | 11  | 84    | 324   | 2,229  | 2,648 | 27%  | 27%  |
+| **Total** | **445** | **1,186** | **2,370** | **14,374** | **18,375** | **93%** | **93%** |
+
+*A+B GH* and *A+B Git* are the share of A and B class packages with a
+known GitHub repo and any Git URL respectively -- the load-bearing tail
+that risk + eligibility downstream both rely on. Non-GitHub upstreams
+are concentrated in C/D classes, so the A+B numbers barely move.
+
 ## Ecosystems
 
 ### npm
@@ -304,3 +345,74 @@ All dep-tree packages with downloads, PageRank, and value class.
 | `top` | `True` if package is in the 95% cumulative set |
 | `pagerank` | Download-weighted PageRank score |
 | `value_class` | A/B/C/D (see [Value Classes](#value-classes)) |
+
+## Unified output
+
+`data/value-data.csv` -- all ecosystems concatenated into one table, produced
+by `uv run -m src.unify_value_data`.
+
+| Column | Description |
+|--------|-------------|
+| `package` | Package name |
+| `ecosystem` | `npm` / `pypi` / `crates` / `cpp` |
+| `github_repo` | Lowercase `owner/repo` slug (empty if unknown) |
+| `pagerank` | Download-weighted PageRank score |
+| `value_class` | A/B/C/D (see [Value Classes](#value-classes)) |
+
+## Current Limitations
+
+Known scope choices and gaps in the current pipeline. Add new entries here
+as they're identified — keeps caveats out of code comments and source-doc
+footnotes.
+
+### cpp dependency tree is runtime-only
+
+Build-time tooling (cmake, pkgconf, autoconf, gettext, etc.), Debian
+`Recommends`/`Suggests`, and Homebrew `build` deps **do not** propagate
+PageRank. The cpp pipeline drops them at two points:
+
+- Debian: `fetch_debian_data.py` only stores `Depends` + `Pre-Depends`.
+- Homebrew: raw deps include both `runtime` and `build`, but
+  `src/cpp/process_data.py` filters to `runtime` only.
+
+Consequence: PageRank reflects who *runs* with whom, not who *builds*
+whom. Critical build infrastructure (cmake, pkgconf) is undervalued
+relative to its real-world load-bearing role. To fix later: extend the
+cpp edge schema to keep the source-side type and add a build-aware PR
+overlay.
+
+### Project identity is GitHub-only
+
+Every downstream stage (eligibility, EOL, risk, GitHub-derived contributor
+metrics) keys off the `github_repo` field. Projects that don't live on
+GitHub are present in `value-data.csv` with `github_repo=""` and are
+silently excluded from those analyses.
+
+Examples affected: glibc (sourceware.org), gcc (gcc.gnu.org / Savannah),
+curl (curl.se), ImageMagick (own host), many GNU/Apache/X.Org/KDE
+projects, kernel-adjacent code. cpp coverage is only ~21% github-mapped;
+pypi is ~55%; npm is ~99%.
+
+To fix later: broaden to a generic `git_url` (GitLab, Codeberg, Sourcehut,
+sourceware.org, savannah, kde.org, freedesktop.org, etc.) with per-host
+adapters for the equivalent of license/EOL/contributor checks. Until then,
+"alive on a non-GitHub host" looks identical to "no upstream" in our
+output.
+
+### No package-level quality gate before results.csv
+
+`results.csv` admits everything in the top 95% cumulative download set
+plus its transitive deps — no license check, no age cutoff, no popularity
+floor, no archive/EOL gate. Quality filtering happens *downstream* in
+`eligibility.py` and `check_eol.py`. This is intentional (keeps the
+value scoring untouched by signal-quality concerns), but means the raw
+value class distribution overstates how many projects we'd actually fund.
+
+### Wayback-derived install stats have gaps
+
+Homebrew and Debian popcon both come via Wayback Machine snapshots, which
+sometimes truncate (1 MB cap) or miss a year entirely. `ecosystem_avg_downloads`
+in `src/params.py` works around this by averaging only over populated years,
+so a missing year doesn't deflate the average — but it does mean year-over-year
+trend lines are noisy, and a few packages get their `avg_downloads` from
+fewer than 5 years of data.
