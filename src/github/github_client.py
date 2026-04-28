@@ -202,7 +202,14 @@ class _AsyncRateLimiter:
         self._rr_idx += 1
         return token
 
-    async def get(self, session: aiohttp.ClientSession, url: str, **kwargs) -> aiohttp.ClientResponse:
+    async def request(self, session: aiohttp.ClientSession, method: str,
+                      url: str, **kwargs) -> aiohttp.ClientResponse:
+        """Same logic as get() but works for any HTTP verb (GET, POST, ...).
+
+        Critical: the HTTP call runs *outside* the lock so N concurrent
+        callers truly fire in parallel each on their own token. The lock
+        only briefly guards token selection and state-update writes.
+        """
         # 1. Brief lock: check exhaustion + pick a token round-robin
         async with self._lock:
             wait = self._revolver.wait_time()
@@ -215,13 +222,13 @@ class _AsyncRateLimiter:
             async with self._lock:
                 token = self._pick_token()
 
-        headers = {}
+        headers = kwargs.pop("headers", {}) or {}
         if token:
-            headers["Authorization"] = f"Bearer {token}"
+            headers = {**headers, "Authorization": f"Bearer {token}"}
 
         # 2. HTTP request OUTSIDE the lock — concurrent calls run in parallel,
         #    each on its own (round-robined) token.
-        resp = await session.get(url, headers=headers, **kwargs)
+        resp = await session.request(method, url, headers=headers, **kwargs)
 
         # 3. Brief lock: update revolver state from response headers.
         if token:
@@ -235,6 +242,12 @@ class _AsyncRateLimiter:
                 )
                 self._request_count += 1
         return resp
+
+    async def get(self, session: aiohttp.ClientSession, url: str, **kwargs) -> aiohttp.ClientResponse:
+        return await self.request(session, "GET", url, **kwargs)
+
+    async def post(self, session: aiohttp.ClientSession, url: str, **kwargs) -> aiohttp.ClientResponse:
+        return await self.request(session, "POST", url, **kwargs)
 
     @property
     def requests_made(self) -> int:
@@ -343,6 +356,33 @@ async def _fetch_total_commits(
             remaining = resp.headers.get("X-RateLimit-Remaining", "?")
             raise RuntimeError(f"Rate limited ({repo}, remaining: {remaining})")
         raise RuntimeError(f"{repo}: HTTP {status}")
+
+
+async def _graphql(
+    session: aiohttp.ClientSession, limiter: _AsyncRateLimiter,
+    query: str, variables: dict | None = None,
+) -> dict:
+    """POST a query to GitHub's GraphQL endpoint via the limiter.
+
+    Uses the token revolver and respects rate limits. Returns the parsed
+    JSON body — caller must handle `errors` field. Raises _Deferred on
+    transient network/timeout errors.
+    """
+    payload = {"query": query, "variables": variables or {}}
+    url = f"{GITHUB_API}/graphql"
+    try:
+        resp = await limiter.post(session, url, json=payload)
+    except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+        raise _Deferred() from e
+    async with resp:
+        if resp.status == 200:
+            return await resp.json()
+        if resp.status == 401:
+            raise RuntimeError("GraphQL 401 — check token scopes (read:user, read:org)")
+        if resp.status == 403:
+            remaining = resp.headers.get("X-RateLimit-Remaining", "?")
+            raise RuntimeError(f"GraphQL rate limited (remaining: {remaining})")
+        raise RuntimeError(f"GraphQL HTTP {resp.status}")
 
 
 async def _fetch_total_contributors(

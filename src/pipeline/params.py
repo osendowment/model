@@ -34,6 +34,7 @@ COMPLEXITY_LOC_THRESHOLDS: dict = _P["risk_classification"]["complexity_loc"]
 ISSUE_DEBT_THRESHOLDS: dict = _P["risk_classification"]["issue_debt"]
 ISSUE_TREND_THRESHOLDS: dict = _P["risk_classification"]["issue_trend"]
 SECURITY_THRESHOLDS: dict = _P["risk_classification"]["security"]
+FUNDING_THRESHOLDS: dict = _P["risk_classification"]["funding"]
 
 
 _ECOSYSTEM_DL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "ecosystem-downloads.csv")

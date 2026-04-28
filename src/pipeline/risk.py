@@ -54,6 +54,7 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CONCENTRATION_FILE = DATA_DIR / "concentration-data.csv"
+FUNDING_FILE = DATA_DIR / "funding-data.csv"
 LOC_FILE = DATA_DIR / "github" / "git" / "loc.csv"
 ISSUES_DIR = DATA_DIR / "github" / "issues"
 OPENSSF_FILE = DATA_DIR / "openssf" / "scores.csv"
@@ -69,6 +70,8 @@ FIELDS = [
     "loc", "complexity_class",
     # security (OpenSSF Scorecard)
     "openssf_score", "security_class",
+    # funding (GitHub Sponsors + FUNDING.yml + funding.json)
+    "github_sponsors", "funding_sources", "funding_class",
     # issues — debt + trend
     "issues_opened_5y", "issues_closed_5y", "issue_close_ratio",
     "slope_opened", "slope_closed", "issue_trend_score",
@@ -276,6 +279,28 @@ def _load_locs() -> dict[str, int]:
     return mapping
 
 
+def _load_funding_data() -> dict[str, dict[str, str]]:
+    """Load per-repo funding signals from data/funding-data.csv.
+
+    Returns {repo_lowercased: {github_sponsors, funding_sources, funding_class}}.
+    Missing repos => empty class downstream.
+    """
+    out: dict[str, dict[str, str]] = {}
+    if not FUNDING_FILE.exists():
+        return out
+    with open(FUNDING_FILE, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            repo = (row.get("repo") or "").strip().lower()
+            if not repo:
+                continue
+            out[repo] = {
+                "github_sponsors": (row.get("github_sponsors") or "").strip(),
+                "funding_sources": (row.get("funding_sources") or "").strip(),
+                "funding_class": (row.get("funding_class") or "").strip(),
+            }
+    return out
+
+
 def _load_concentration_data() -> dict[str, dict[str, str]]:
     """Load per-repo concentration metrics from data/concentration-data.csv.
 
@@ -317,6 +342,7 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
     repo_locs = _load_locs()
 
     concentration_by_repo = _load_concentration_data()
+    funding_by_repo = _load_funding_data()
 
     opened_by_repo = _read_issues_per_year("opened.csv")
     closed_by_repo = _read_issues_per_year("closed.csv")
@@ -324,7 +350,7 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
 
     coverage = {
         "concentration": 0, "complexity": 0, "security": 0,
-        "issue_debt": 0, "issue_trend": 0, "any": 0,
+        "funding": 0, "issue_debt": 0, "issue_trend": 0, "any": 0,
     }
     rows: list[dict] = []
 
@@ -346,6 +372,11 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
         score = openssf_by_repo.get(repo)
         sec_cls = security_class(score)
 
+        funding_row = funding_by_repo.get(repo, {})
+        github_sponsors = funding_row.get("github_sponsors", "")
+        funding_sources = funding_row.get("funding_sources", "")
+        fund_cls = funding_row.get("funding_class", "")
+
         opened = opened_by_repo.get(repo, {})
         closed = closed_by_repo.get(repo, {})
         opened_5y = sum(opened.values())
@@ -354,11 +385,12 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
         s_open, s_close, trend_score, trend_label = issue_trend(opened, closed)
         debt_cls = issue_debt_class(opened_5y, close_ratio)
 
-        risk_cls = rollup_risk_class(conc_cls, comp_cls, sec_cls, debt_cls)
+        risk_cls = rollup_risk_class(conc_cls, comp_cls, sec_cls, fund_cls, debt_cls)
 
         if conc_cls: coverage["concentration"] += 1
         if comp_cls: coverage["complexity"] += 1
         if sec_cls:  coverage["security"] += 1
+        if fund_cls: coverage["funding"] += 1
         if debt_cls: coverage["issue_debt"] += 1
         if trend_label: coverage["issue_trend"] += 1
         if risk_cls: coverage["any"] += 1
@@ -375,6 +407,9 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
             "complexity_class": comp_cls,
             "openssf_score": score if score is not None else "",
             "security_class": sec_cls,
+            "github_sponsors": github_sponsors,
+            "funding_sources": funding_sources,
+            "funding_class": fund_cls,
             "issues_opened_5y": opened_5y,
             "issues_closed_5y": closed_5y,
             "issue_close_ratio": (round(close_ratio, 3) if opened_5y >= 1 else ""),
@@ -443,6 +478,20 @@ SECURITY_CRITERIA = {
     "B": "score ≤ 5",
     "C": "score ≤ 7",
     "D": "score > 7",
+}
+
+FUNDING_LABELS = {
+    "A": ("critical", "red"),
+    "B": ("high risk", "yellow"),
+    "C": ("moderate", "cyan"),
+    "D": ("healthy", "green"),
+}
+
+FUNDING_CRITERIA = {
+    "A": "0 sources, 0 sponsors",
+    "B": "1 src OR ≤5 sponsors",
+    "C": "2-3 src OR 6-50 spr",
+    "D": "≥4 src OR ≥50 spr OR funding.json",
 }
 
 ROLLUP_LABELS = {
@@ -526,7 +575,8 @@ def _print_coverage(coverage: dict[str, int], total: int) -> None:
     table.add_column("Dimension", style="bold")
     table.add_column("Classified", justify="right")
     table.add_column("Coverage", justify="right")
-    for dim in ("concentration", "complexity", "security", "issue_debt", "issue_trend", "any"):
+    for dim in ("concentration", "complexity", "security", "funding",
+                "issue_debt", "issue_trend", "any"):
         n = coverage.get(dim, 0)
         pct = 100 * n / total if total else 0
         style = "bold" if dim == "any" else ""
@@ -556,6 +606,9 @@ def main():
     console.print()
     _print_class_table("Security (OpenSSF)", rows, "security_class",
                        SECURITY_LABELS, SECURITY_CRITERIA)
+    console.print()
+    _print_class_table("Funding", rows, "funding_class",
+                       FUNDING_LABELS, FUNDING_CRITERIA)
     console.print()
     _print_class_table("Issue debt", rows, "issue_debt_class",
                        ISSUE_DEBT_LABELS, ISSUE_DEBT_CRITERIA)
