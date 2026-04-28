@@ -50,7 +50,7 @@ console = Console()
 REPOS_FILE = "data/value-data.csv"  # A/B class subset loaded via src.repos.load_ab_repos
 OUTPUT_FILE = "data/github/git/complexity.csv"
 YEARLY_OUTPUT_DIR = "data/github/git"
-SHA_FILE = "data/github/git/years.csv"
+SHA_FILE = "data/github/git/commits-years.csv"
 YEARLY_METRICS = ["files", "loc", "sloc", "uloc", "scc_complexity", "scc_density"]
 YEARLY_METRIC_FILES = {
     "files":          "files.csv",
@@ -480,24 +480,75 @@ def _fmt_size(size_bytes: int) -> str:
     return f"{size_bytes}B"
 
 
+def _parse_link_last_page(link_header: str) -> int | None:
+    """Extract `page=N` from a Link header's rel="last" entry. None if absent."""
+    if not link_header:
+        return None
+    from urllib.parse import urlparse, parse_qs
+    for part in link_header.split(","):
+        part = part.strip()
+        if 'rel="last"' in part:
+            url = part.split(";", 1)[0].strip().lstrip("<").rstrip(">")
+            q = parse_qs(urlparse(url).query)
+            pages = q.get("page", [])
+            if pages:
+                try:
+                    return int(pages[0])
+                except ValueError:
+                    return None
+    return None
+
+
 async def _fetch_commit_shas_multi(
     pairs: list[tuple[str, int]], concurrency: int = 32,
-    sha_data: dict[tuple[str, str], str] | None = None,
+    sha_data: dict[tuple[str, str], dict[str, str]] | None = None,
     sha_file: str = "",
-) -> dict[tuple[str, int], str]:
-    """Fetch last commit SHA before year-end for multiple (repo, year) pairs in one batch.
+) -> dict[tuple[str, int], dict[str, str]]:
+    """For each (repo, year) pair, fetch first/last commit SHA + total commits IN year.
 
-    Returns {(repo, year): sha}.
-    If sha_data and sha_file are provided, flushes SHAs to CSV every 500 fetches.
+    Per (repo, year):
+      Call A: GET /commits?since=Y-01-01&until=Y+1-01-01&per_page=1
+        → newest commit IN year (first record), commits-in-year (Link rel="last" page)
+      Call B (only if commits > 0): same URL with &page={commits}
+        → oldest commit IN year
+
+    Returns {(repo, year): {"first_sha": str, "last_sha": str, "commits": int}}.
+    Inactive years (no commits) get empty SHAs and commits=0.
+
+    Flushes incrementally to `sha_file` every 500 fetches if both provided.
     """
     revolver = get_revolver()
     sem = asyncio.Semaphore(concurrency)
-    results: dict[tuple[str, int], str] = {}
+    results: dict[tuple[str, int], dict[str, str]] = {}
     total = len(pairs)
     _fetched = 0
+    fetched_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
 
     progress = _make_progress()
     name_width = min(max((len(r) for r, _ in pairs), default=20), 30)
+
+    async def _request(session, url: str) -> tuple[int, list[dict], str]:
+        """Make one authenticated request via the revolver. Returns (status, body, link)."""
+        token = revolver.best_token()
+        headers = {}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        resp = await session.get(url, headers=headers)
+        try:
+            if token:
+                remaining = resp.headers.get("X-RateLimit-Remaining")
+                reset = resp.headers.get("X-RateLimit-Reset")
+                revolver.update(
+                    token,
+                    int(remaining) if remaining else None,
+                    float(reset) if reset else None,
+                )
+            link = resp.headers.get("Link", "")
+            status = resp.status
+            body = await resp.json() if status == 200 else []
+        finally:
+            await resp.release()
+        return status, body, link
 
     async with aiohttp.ClientSession(
         headers={"Accept": "application/vnd.github+json"},
@@ -507,33 +558,37 @@ async def _fetch_commit_shas_multi(
 
             async def _fetch_one(repo: str, year: int) -> None:
                 nonlocal _fetched
+                since = f"{year}-01-01T00:00:00Z"
                 until = f"{year + 1}-01-01T00:00:00Z"
+                base = f"{GITHUB_API}/repos/{repo}/commits?since={since}&until={until}&per_page=1"
+                first_sha, last_sha, commits = "", "", 0
                 async with sem:
-                    token = revolver.best_token()
-                    headers = {}
-                    if token:
-                        headers["Authorization"] = f"Bearer {token}"
-                    url = f"{GITHUB_API}/repos/{repo}/commits?until={until}&per_page=1"
                     try:
-                        resp = await session.get(url, headers=headers)
-                        if token:
-                            remaining = resp.headers.get("X-RateLimit-Remaining")
-                            reset = resp.headers.get("X-RateLimit-Reset")
-                            revolver.update(
-                                token,
-                                int(remaining) if remaining else None,
-                                float(reset) if reset else None,
-                            )
-                        if resp.status == 200:
-                            data = await resp.json()
-                            if data:
-                                sha = data[0]["sha"]
-                                results[(repo, year)] = sha
-                                if sha_data is not None:
-                                    sha_data[(repo, str(year))] = sha
+                        status, body, link = await _request(session, base)
+                        if status == 200 and body:
+                            last_sha = body[0]["sha"]
+                            commits = _parse_link_last_page(link) or len(body)
+                            if commits > 1:
+                                _, body2, _ = await _request(session, f"{base}&page={commits}")
+                                if body2:
+                                    first_sha = body2[0]["sha"]
+                            else:
+                                first_sha = last_sha  # 1 commit → first==last
                     except Exception as e:
-                        log.debug("Failed to get SHA for %s@%d: %s", repo, year, e)
+                        log.debug("Failed to get SHAs for %s@%d: %s", repo, year, e)
                     finally:
+                        results[(repo, year)] = {
+                            "first_sha": first_sha,
+                            "last_sha": last_sha,
+                            "commits": str(commits),
+                        }
+                        if sha_data is not None:
+                            sha_data[(repo, str(year))] = {
+                                "first_sha": first_sha,
+                                "last_sha": last_sha,
+                                "commits": str(commits),
+                                "fetched_at": fetched_at,
+                            }
                         _fetched += 1
                         if sha_data is not None and sha_file and _fetched % 500 == 0:
                             _write_sha_data(sha_file, sha_data)
@@ -542,7 +597,6 @@ async def _fetch_commit_shas_multi(
 
             await asyncio.gather(*[_fetch_one(r, y) for r, y in pairs])
 
-    # Final flush
     if sha_data is not None and sha_file:
         _write_sha_data(sha_file, sha_data)
 
@@ -593,28 +647,67 @@ def _write_yearly_metrics(
                 writer.writerow([repo] + [repos_data[repo].get(y, "") for y in year_cols])
 
 
-def _load_sha_data(filepath: str) -> dict[tuple[str, str], str]:
-    """Load git/years.csv. Returns {(repo, year_str): last_sha}."""
-    data: dict[tuple[str, str], str] = {}
+SHA_FIELDS = ["repo", "year", "first_sha", "last_sha", "commits", "fetched_at"]
+
+
+def _load_sha_data(filepath: str) -> dict[tuple[str, str], dict[str, str]]:
+    """Load git/years.csv → {(repo, year_str): {first_sha, last_sha, commits, fetched_at}}.
+
+    Backward-compatible: if the CSV still has only the old `last_sha` column,
+    we read that and synthesize the new dict with empty first_sha/commits.
+    """
+    data: dict[tuple[str, str], dict[str, str]] = {}
     if not os.path.exists(filepath):
         return data
     with open(filepath, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            data[(row["repo"], row["year"])] = row.get("last_sha", "")
+            key = (row["repo"], row["year"])
+            data[key] = {
+                "first_sha": row.get("first_sha", ""),
+                "last_sha":  row.get("last_sha", ""),
+                "commits":   row.get("commits", ""),
+                "fetched_at": row.get("fetched_at", ""),
+            }
     return data
 
 
 def _write_sha_data(
     filepath: str,
-    data: dict[tuple[str, str], str],
+    data: dict[tuple[str, str], dict[str, str]],
 ) -> None:
-    """Write git/years.csv."""
+    """Write git/years.csv with columns: repo, year, first_sha, last_sha, commits, fetched_at."""
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
     with open(filepath, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["repo", "year", "last_sha"])
+        writer = csv.DictWriter(f, fieldnames=SHA_FIELDS, extrasaction="ignore")
         writer.writeheader()
-        for (repo, year), sha in sorted(data.items()):
-            writer.writerow({"repo": repo, "year": year, "last_sha": sha})
+        for (repo, year), row in sorted(data.items()):
+            writer.writerow({
+                "repo": repo, "year": year,
+                "first_sha": row.get("first_sha", ""),
+                "last_sha":  row.get("last_sha", ""),
+                "commits":   row.get("commits", ""),
+                "fetched_at": row.get("fetched_at", ""),
+            })
+
+
+def resolve_snapshot_sha(
+    sha_data: dict[tuple[str, str], dict[str, str]],
+    repo: str, year: int,
+) -> str:
+    """Find a usable snapshot SHA for `repo` at end of `year`.
+
+    Per the schema, `last_sha` is the last commit IN that year and is empty
+    when the repo had no commits in that year. For LOC / sparse-checkout
+    purposes we still want the most recent codebase state at-or-before
+    year-end — so when last_sha is empty, walk back through earlier years
+    until we find a populated last_sha. Returns "" if no SHA found at all
+    (project hadn't started yet, or empty repo).
+    """
+    for y in range(year, year - 10, -1):  # cap lookback at 10y
+        sha = sha_data.get((repo, str(y)), {}).get("last_sha") or ""
+        if sha:
+            return sha
+    return ""
 
 
 def _repos_with_year_data(
@@ -669,22 +762,25 @@ def _year_main(args: argparse.Namespace) -> None:
         repos_sample = repos_all
 
     yearly_data = _load_yearly_metrics(args.yearly_output)
-    sha_data = _load_sha_data(args.sha_file)
+    sha_data = _load_sha_data(args.sha_file) if not args.force else {}
 
     # --- Step 1: Collect (repo, year) pairs needing SHA fetch vs analysis ---
     pairs_to_fetch: list[tuple[str, int]] = []  # need SHA from API
     for year in years:
         yr = str(year)
         for r in repos_sample:
-            if (r, yr) not in sha_data:
+            if args.force or (r, yr) not in sha_data:
                 pairs_to_fetch.append((r, year))
 
-    # All SHAs already known for requested repos/years (from sha_data)
+    # Resolve a usable snapshot SHA per (repo, year) for sparse-checkout. The
+    # schema records `last_sha` per year as the last commit IN that year and
+    # leaves it empty when the year had no commits — but for LOC analysis we
+    # still want a year-end codebase snapshot, so cascade backward to the most
+    # recent populated year via resolve_snapshot_sha().
     all_shas: dict[tuple[str, int], str] = {}
     for year in years:
-        yr = str(year)
         for r in repos_sample:
-            sha = sha_data.get((r, yr))
+            sha = resolve_snapshot_sha(sha_data, r, year)
             if sha:
                 all_shas[(r, year)] = sha
 
@@ -714,15 +810,25 @@ def _year_main(args: argparse.Namespace) -> None:
             pairs_to_fetch, concurrency=args.concurrency,
             sha_data=sha_data, sha_file=args.sha_file,
         ))
-        all_shas.update(new_shas)
+        # `new_shas` returns {(repo, year): {first_sha, last_sha, commits}}; for
+        # LOC purposes we still need a snapshot SHA, so resolve via cascade.
+        for (repo, year) in new_shas:
+            sha = resolve_snapshot_sha(sha_data, repo, year)
+            if sha:
+                all_shas[(repo, year)] = sha
 
-        # Repos with no commit before year-end → store zeros (repo didn't exist yet)
+        # Repos with no commit IN year AND no prior populated year → mark zero
+        # for yearly metrics (project hadn't started, or empty repo).
         no_commit: set[tuple[str, int]] = set()
         for repo, year in pairs_to_fetch:
-            if (repo, year) not in new_shas:
+            if (repo, year) not in all_shas:
                 no_commit.add((repo, year))
                 yr = str(year)
-                sha_data[(repo, yr)] = ""
+                # Make sure there's a row in sha_data so we don't keep refetching
+                sha_data.setdefault((repo, yr), {
+                    "first_sha": "", "last_sha": "", "commits": "0",
+                    "fetched_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+                })
                 for metric in YEARLY_METRICS:
                     yearly_data.setdefault((repo, metric), {})[yr] = "0"
 
@@ -734,6 +840,11 @@ def _year_main(args: argparse.Namespace) -> None:
     else:
         console.print(f"[dim]All {len(all_shas):,} SHAs already cached[/dim]")
         console.print()
+
+    if args.shas_only:
+        console.print(f"[green]commits-years.csv written → {args.sha_file}[/green]")
+        console.print("[dim]Skipping sparse-checkout + scc (use without --shas-only to continue).[/dim]")
+        return
 
     # --- Step 2: Group unique SHAs by earliest year, deduplicate ---
     sha_year_map: dict[str, list[tuple[str, int]]] = {}  # sha -> all (repo, year) pairs
@@ -984,6 +1095,13 @@ def main() -> None:
                         help="Analyze repos at end-of-year snapshot (e.g. --year 2024 2025)")
     parser.add_argument("--yearly-output", default=YEARLY_OUTPUT_DIR,
                         help=f"Directory for split per-metric yearly CSVs (default: {YEARLY_OUTPUT_DIR})")
+    parser.add_argument("--force", action="store_true",
+                        help="Re-fetch all (repo, year) commit SHAs even if already cached "
+                             "in commits-years.csv")
+    parser.add_argument("--shas-only", action="store_true",
+                        help="Stop after writing commits-years.csv — skip the sparse-checkout + "
+                             "scc analysis. Use for the lightweight refresh that feeds "
+                             "later steps (LOC/complexity, activity classes).")
     parser.add_argument("--sha-file", default=SHA_FILE,
                         help=f"SHA coordination CSV (default: {SHA_FILE})")
     parser.add_argument("-v", "--verbose", action="store_true")
