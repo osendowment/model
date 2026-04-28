@@ -58,11 +58,12 @@ FUNDING_FILE = DATA_DIR / "funding-data.csv"
 LOC_FILE = DATA_DIR / "github" / "git" / "loc.csv"
 ISSUES_DIR = DATA_DIR / "github" / "issues"
 OPENSSF_FILE = DATA_DIR / "openssf" / "scores.csv"
+GH_REPOS_FILE = DATA_DIR / "github" / "repos.csv"
 OUTPUT_FILE = DATA_DIR / "risk-data.csv"
 LOC_YEAR = "2025"  # most recent year in git/loc.csv
 
 FIELDS = [
-    "repo", "repo_id",
+    "repo", "repo_id", "created_at",
     # concentration (lifetime BF/HHI from data/concentration-data.csv)
     "total_commits", "total_contributors",
     "hhi_commits", "bf_commits", "concentration_class",
@@ -279,6 +280,24 @@ def _load_locs() -> dict[str, int]:
     return mapping
 
 
+def _load_repo_created_at() -> dict[str, str]:
+    """Load {repo_lowercased: created_at} from data/github/repos.csv.
+
+    `created_at` is the GitHub repo creation timestamp (ISO 8601 UTC).
+    Empty if the file is missing or the repo isn't in it.
+    """
+    out: dict[str, str] = {}
+    if not GH_REPOS_FILE.exists():
+        return out
+    with open(GH_REPOS_FILE, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            slug = (r.get("repo") or "").strip().lower()
+            ts = (r.get("created_at") or "").strip()
+            if slug and ts:
+                out[slug] = ts
+    return out
+
+
 def _load_funding_data() -> dict[str, dict[str, str]]:
     """Load per-repo funding signals from data/funding-data.csv.
 
@@ -343,6 +362,7 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
 
     concentration_by_repo = _load_concentration_data()
     funding_by_repo = _load_funding_data()
+    created_at_by_repo = _load_repo_created_at()
 
     opened_by_repo = _read_issues_per_year("opened.csv")
     closed_by_repo = _read_issues_per_year("closed.csv")
@@ -398,6 +418,7 @@ def aggregate() -> tuple[list[dict], dict[str, int]]:
         rows.append({
             "repo": repo,
             "repo_id": repo_ids.get(repo, ""),
+            "created_at": created_at_by_repo.get(repo, ""),
             "total_commits": total_commits_str,
             "total_contributors": total_contribs_str,
             "hhi_commits": hhi if hhi is not None else "",
