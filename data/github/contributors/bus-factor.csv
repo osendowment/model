@@ -482,6 +482,7 @@ azahar-emu/azahar,4,3,4,2,1,4
 azerothcore/azerothcore-wotlk,7,5,4,5,4,8
 azure/azure-sdk-for-js,7,4,3,4,4,10
 azure/azure-sdk-for-python,8,7,6,6,6,12
+azure/msrest-for-python,,,,,,1
 azuread/microsoft-authentication-library-for-python,,,,,,1
 b-con/crypto-algorithms,,,,,,
 b4rtaz/distributed-llama,,,1,1,1,1
@@ -565,6 +566,7 @@ bigtreetech/bigtreetech-touchscreenfirmware,4,3,2,1,1,4
 bilibili/ijkplayer,1,,,,,1
 bill-haku/kawaii-gcc,,,1,3,3,1
 binbyu/reader,1,1,1,,1,1
+bincode-org/bincode,,,,,,1
 bingoogolapple/bgaqrcode-android,1,,,1,,1
 binji/pokegb,1,,1,,,1
 binomialllc/basis_universal,1,1,1,1,1,1
@@ -614,6 +616,7 @@ blurrypiano/littlevulkanengine,1,1,,,,1
 bluss/bencher,,,,,,1
 blynkkk/blynk-library,1,1,1,1,1,1
 bmax121/kernelpatch,,,1,2,2,1
+bminor/glibc,,,,,,260
 bmorcelli/launcher,,,,1,1,1
 bo3b/3dmigoto,,1,1,1,1,1
 boazsegev/facil.io,1,,,1,1,2
@@ -665,6 +668,7 @@ brightxiaohan/cmaketutorial,,,1,,,1
 brndnmtthws/conky,1,1,1,1,2,1
 brofield/simpleini,1,1,1,1,1,1
 broofa/mime,,,,,,1
+broofa/node-int64,,,,,,1
 brookhong/keycastow,,,,,,
 browserify/node-util,,,,,,2
 browserify/resolve,,,,,,1
@@ -1248,6 +1252,7 @@ dogecoin/dogecoin,1,1,2,1,1,1
 doitsujin/dxvk,2,1,2,1,1,1
 dokan-dev/dokany,1,1,1,1,1,1
 dolphin-emu/dolphin,3,3,3,4,3,5
+dominictarr/through,,,,,,1
 domoticz/domoticz,2,1,1,1,1,1
 doonny/pipecnn,1,1,,,,1
 doowb/ansi-colors,,,,,,1
@@ -1292,6 +1297,7 @@ dtolnay/dissimilar,,,,,,1
 dtolnay/indoc,,,,,,1
 dtolnay/itoa,,,,,,1
 dtolnay/no-panic,,,,,,1
+dtolnay/paste,,,,,,1
 dtolnay/proc-macro2,,,,,,1
 dtolnay/quote,,,,,,1
 dtolnay/ref-cast,,,,,,1
@@ -1460,6 +1466,7 @@ es-shims/string.prototype.trimend,,,,,,1
 es-shims/string.prototype.trimstart,,,,,,1
 es3n1n/defendnot,,,,,1,1
 eslint-community/eslint-utils,,,,,,2
+eslint/doctrine,,,,,,2
 eslint/eslint,2,2,2,3,4,8
 eslint/js,,,,,,5
 eslint/rewrite,,,,,,5
@@ -1554,10 +1561,12 @@ facebook/mcrouter,2,3,2,3,2,4
 facebook/metro,,,,,,13
 facebook/mvfst,4,5,3,3,3,4
 facebook/openzl,,,,,3,3
+facebook/prop-types,,,,,,4
 facebook/proxygen,4,5,4,3,2,5
 facebook/react,2,5,3,4,3,9
 facebook/react-native,4,7,7,9,9,9
 facebook/redex,2,2,3,2,3,3
+facebook/regenerator,,,,,,1
 facebook/rocksdb,5,4,4,4,3,6
 facebook/threatexchange,2,1,1,2,2,3
 facebook/transform360,,,,1,,1
@@ -1666,6 +1675,7 @@ fireice-uk/xmr-stak-cpu,,,,,,
 firmata/arduino,1,1,3,1,,2
 firmianay/ctf-all-in-one,1,1,1,,,1
 fisco-bcos/fisco-bcos,2,2,3,2,1,3
+fitzgen/glob-to-regexp,,,,,,1
 fix94/nintendont,2,4,1,3,1,3
 flagbrew/pksm,,,,,,
 flame/blis,1,1,1,1,1,2
@@ -1683,6 +1693,7 @@ flif-hub/flif,2,,,,,2
 flightlessmango/mangohud,2,2,1,1,2,2
 flipperdevices/flipperzero-firmware,2,2,2,2,2,2
 flipperdevices/qflipper,1,1,1,1,,1
+floatdrop/require-from-string,,,,,,1
 floating-ui/floating-ui,,,,,,1
 floooh/chips,1,1,1,1,1,1
 floooh/oryol,,,,,,
@@ -1970,7 +1981,12 @@ google/xls,2,3,3,4,5,6
 google/xnnpack,1,2,2,3,2,3
 google/zerocopy,,,,,,2
 googleapis/google-api-python-client,,,,,,
+googleapis/google-auth-library-python,,,,,,20
+googleapis/google-cloud-node-core,,,,,,40
+googleapis/google-resumable-media-python,,,,,,1
 googleapis/python-api-core,,,,,,15
+googleapis/python-crc32c,,,,,,4
+googleapis/python-storage,,,,,,6
 googlechrome/workbox,,,,,,2
 googleprojectzero/jackalope,1,1,1,1,1,1
 googleprojectzero/tinyinst,1,1,1,1,1,1
@@ -2480,6 +2496,7 @@ jhrobotics/patcher9x,,1,1,1,1,1
 jhrobotics/softgpu,,,1,1,1,1
 jiangdongguo/androidusbcamera,1,1,1,1,,1
 jiangwenyuan/nuster,1,,,,,1
+jimmywarting/node-domexception,,,,,,1
 jimp-dev/jimp,,,,,,2
 jjgod/mac-dictionary-kit,,,,,,
 jkornev/hidden,1,1,,,,1
@@ -2822,6 +2839,7 @@ lc-soft/lcui,1,1,1,1,1,1
 lcatro/source-and-fuzzing,1,,,,,1
 lcompilers/lpython,1,3,2,4,2,2
 ldcsaa/hp-socket,1,1,1,1,1,1
+lddubeau/xmlchars,,,,,,2
 ldionne/dyno,,,,,,
 ldpreload/blacklotus,,,1,1,,1
 leadcoding/3-weeks-google-prep,,1,,,,1
@@ -4414,6 +4432,7 @@ ravynsoft/ravynos,,,,1,3,2
 rawtherapee/rawtherapee,3,3,2,2,2,2
 raynos/for-each,,,,,,1
 raynos/function-bind,,,,,,1
+raynos/xtend,,,,,,1
 rayon-rs/either,,,,,,2
 rayon-rs/rayon,,,,,,2
 raysan5/raygui,1,1,1,1,1,1
@@ -4923,6 +4942,7 @@ sindresorhus/p-try,,,,,,1
 sindresorhus/parent-module,,,,,,1
 sindresorhus/parse-json,,,,,,1
 sindresorhus/path-exists,,,,,,1
+sindresorhus/path-is-absolute,,,,,,1
 sindresorhus/path-key,,,,,,1
 sindresorhus/path-type,,,,,,1
 sindresorhus/pify,,,,,,1
@@ -5190,6 +5210,7 @@ switchbrew/libnx,2,2,3,2,3,3
 switchbrew/nx-hbmenu,2,1,2,1,2,3
 swoole/swoole-src,1,1,1,1,1,1
 swow/swow,1,1,1,1,1,1
+sybrenstuvel/python-rsa,,,,,,1
 sylar-yin/sylar,,,,,,
 sylefeb/silice,1,1,1,1,1,1
 sylikc/jpegview,1,1,1,1,,1
@@ -5783,6 +5804,7 @@ webhdx/picoboot,,1,1,1,1,1
 webmproject/libwebp,1,1,1,1,2,2
 webmproject/webpshop,1,1,,1,1,1
 webpack/enhanced-resolve,,,,,,2
+webpack/loader-utils,,,,,,3
 webpack/schema-utils,,,,,,3
 webpack/tapable,,,,,,1
 webpack/terser-webpack-plugin,,,,,,2

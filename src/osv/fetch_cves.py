@@ -7,9 +7,14 @@ map to it across our per-ecosystem `results.csv` files:
     data/npm/results.csv     → ecosystem `npm`
     data/pypi/results.csv    → ecosystem `PyPI`
     data/crates/results.csv  → ecosystem `crates.io`
+    data/cpp/results.csv     → ecosystem `Debian` (binary package name)
 
-(C/C++ is not indexed by OSV under a single clean ecosystem and is skipped —
-those repos appear in the report as "no package mapping".)
+C/C++ packages are queried against OSV's `Debian` ecosystem — a query
+without a release suffix (e.g. `Debian` vs `Debian:13`) aggregates across
+all Debian releases and returns the most CVEs. Most cpp packages in our
+set (glibc, curl, openssl, ffmpeg, …) have a Debian binary of the same
+name, so this gives broad coverage. Cpp packages with no Debian binary
+get `cve_count_5y=0` (legitimate zero — not a failure).
 
 For each (ecosystem, package), we POST to https://api.osv.dev/v1/query:
 
@@ -76,10 +81,13 @@ FIELDS = [
 
 # Per-ecosystem `results.csv` → OSV ecosystem name. The OSV ecosystem
 # strings are case-sensitive and follow the OSV schema spec.
+# `Debian` (no release suffix) aggregates vulns across all Debian
+# releases — gives broader coverage than e.g. `Debian:13` alone.
 ECOSYSTEM_FILES: list[tuple[Path, str]] = [
     (DATA_DIR / "npm" / "results.csv", "npm"),
     (DATA_DIR / "pypi" / "results.csv", "PyPI"),
     (DATA_DIR / "crates" / "results.csv", "crates.io"),
+    (DATA_DIR / "cpp" / "results.csv", "Debian"),
 ]
 
 OSV_QUERY_URL = "https://api.osv.dev/v1/query"

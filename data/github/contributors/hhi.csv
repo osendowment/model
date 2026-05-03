@@ -482,6 +482,7 @@ azahar-emu/azahar,981,1167,1121,2512,5156,1134
 azerothcore/azerothcore-wotlk,611,966,843,861,872,479
 azure/azure-sdk-for-js,603,1125,1200,957,1021,464
 azure/azure-sdk-for-python,518,592,701,728,909,434
+azure/msrest-for-python,,,,,,7251
 azuread/microsoft-authentication-library-for-python,,,,,,7951
 b-con/crypto-algorithms,,,,,,
 b4rtaz/distributed-llama,,,10000,9693,7859,9203
@@ -565,6 +566,7 @@ bigtreetech/bigtreetech-touchscreenfirmware,887,1662,2429,3488,6250,1105
 bilibili/ijkplayer,10000,,,,,10000
 bill-haku/kawaii-gcc,,,6399,1667,2000,3111
 binbyu/reader,5938,8025,6800,,10000,5801
+bincode-org/bincode,,,,,,10000
 bingoogolapple/bgaqrcode-android,10000,,,10000,,10000
 binji/pokegb,9260,,10000,,,9287
 binomialllc/basis_universal,5382,4958,8951,9488,8053,7181
@@ -614,6 +616,7 @@ blurrypiano/littlevulkanengine,10000,10000,,,,10000
 bluss/bencher,,,,,,8397
 blynkkk/blynk-library,7688,9123,9223,10000,10000,8976
 bmax121/kernelpatch,,,10000,2400,3077,3376
+bminor/glibc,,,,,,151
 bmorcelli/launcher,,,,7988,9171,8443
 bo3b/3dmigoto,,6250,10000,10000,9524,6116
 boazsegev/facil.io,5000,,,10000,4400,2500
@@ -665,6 +668,7 @@ brightxiaohan/cmaketutorial,,,10000,,,10000
 brndnmtthws/conky,6842,5860,3852,3142,2948,4231
 brofield/simpleini,10000,7249,3673,10000,8580,7092
 broofa/mime,,,,,,5804
+broofa/node-int64,,,,,,4645
 brookhong/keycastow,,,,,,
 browserify/node-util,,,,,,3111
 browserify/resolve,,,,,,4795
@@ -1248,6 +1252,7 @@ dogecoin/dogecoin,4189,3955,3036,4110,4675,3819
 doitsujin/dxvk,3089,4807,2434,3958,5773,4241
 dokan-dev/dokany,9603,8850,9535,8466,9350,9227
 dolphin-emu/dolphin,1128,1089,1167,931,1310,777
+dominictarr/through,,,,,,7647
 domoticz/domoticz,2473,4399,6032,4072,3835,3802
 doonny/pipecnn,10000,10000,,,,10000
 doowb/ansi-colors,,,,,,3848
@@ -1292,6 +1297,7 @@ dtolnay/dissimilar,,,,,,9321
 dtolnay/indoc,,,,,,9432
 dtolnay/itoa,,,,,,8479
 dtolnay/no-panic,,,,,,9599
+dtolnay/paste,,,,,,9406
 dtolnay/proc-macro2,,,,,,7745
 dtolnay/quote,,,,,,8211
 dtolnay/ref-cast,,,,,,9787
@@ -1460,6 +1466,7 @@ es-shims/string.prototype.trimend,,,,,,8724
 es-shims/string.prototype.trimstart,,,,,,8619
 es3n1n/defendnot,,,,,9535,9535
 eslint-community/eslint-utils,,,,,,2218
+eslint/doctrine,,,,,,2400
 eslint/eslint,2336,1903,2068,1504,1188,707
 eslint/js,,,,,,1513
 eslint/rewrite,,,,,,660
@@ -1554,10 +1561,12 @@ facebook/mcrouter,2439,1563,1783,1454,1587,964
 facebook/metro,,,,,,333
 facebook/mvfst,967,777,1609,1222,1523,843
 facebook/openzl,,,,,1527,1527
+facebook/prop-types,,,,,,1153
 facebook/proxygen,974,826,1108,1276,2077,778
 facebook/react,2288,960,1565,955,1503,372
 facebook/react-native,904,609,552,429,440,384
 facebook/redex,1872,1791,1679,2203,1554,1213
+facebook/regenerator,,,,,,6349
 facebook/rocksdb,854,949,1127,1069,1278,731
 facebook/threatexchange,2032,3299,2944,2146,2663,1744
 facebook/transform360,,,,10000,,10000
@@ -1666,6 +1675,7 @@ fireice-uk/xmr-stak-cpu,,,,,,
 firmata/arduino,6250,3438,2000,10000,,2100
 firmianay/ctf-all-in-one,3850,6250,10000,,,3646
 fisco-bcos/fisco-bcos,2344,1939,1544,2480,4902,1801
+fitzgen/glob-to-regexp,,,,,,3910
 fix94/nintendont,2231,1429,5556,1837,6800,1736
 flagbrew/pksm,,,,,,
 flame/blis,4167,4260,3013,3438,4682,3333
@@ -1683,6 +1693,7 @@ flif-hub/flif,3878,,,,,3878
 flightlessmango/mangohud,3553,2662,3224,3566,2663,2579
 flipperdevices/flipperzero-firmware,2719,2232,2336,1960,1806,2097
 flipperdevices/qflipper,6958,8061,6901,10000,,7206
+floatdrop/require-from-string,,,,,,6456
 floating-ui/floating-ui,,,,,,4010
 floooh/chips,10000,9360,9232,7913,7093,9415
 floooh/oryol,,,,,,
@@ -1970,7 +1981,12 @@ google/xls,1787,1464,1529,1030,656,707
 google/xnnpack,4195,2797,2131,1234,1929,1377
 google/zerocopy,,,,,,2902
 googleapis/google-api-python-client,,,,,,
+googleapis/google-auth-library-python,,,,,,306
+googleapis/google-cloud-node-core,,,,,,253
+googleapis/google-resumable-media-python,,,,,,2715
 googleapis/python-api-core,,,,,,327
+googleapis/python-crc32c,,,,,,792
+googleapis/python-storage,,,,,,527
 googlechrome/workbox,,,,,,1986
 googleprojectzero/jackalope,9209,5312,10000,10000,3554,7374
 googleprojectzero/tinyinst,3871,6178,7336,4568,10000,4801
@@ -2480,6 +2496,7 @@ jhrobotics/patcher9x,,10000,4400,5312,7013,7672
 jhrobotics/softgpu,,,9132,7924,5200,7434
 jiangdongguo/androidusbcamera,7222,8673,10000,4400,,6818
 jiangwenyuan/nuster,6800,,,,,6800
+jimmywarting/node-domexception,,,,,,8951
 jimp-dev/jimp,,,,,,2730
 jjgod/mac-dictionary-kit,,,,,,
 jkornev/hidden,10000,5000,,,,9445
@@ -2822,6 +2839,7 @@ lc-soft/lcui,8290,9260,10000,10000,8347,9238
 lcatro/source-and-fuzzing,10000,,,,,10000
 lcompilers/lpython,5152,1696,2408,1126,3137,2238
 ldcsaa/hp-socket,10000,10000,10000,10000,10000,10000
+lddubeau/xmlchars,,,,,,287
 ldionne/dyno,,,,,,
 ldpreload/blacklotus,,,10000,10000,,10000
 leadcoding/3-weeks-google-prep,,10000,,,,10000
@@ -4414,6 +4432,7 @@ ravynsoft/ravynos,,,,10000,1857,1787
 rawtherapee/rawtherapee,1799,1470,2129,2463,2876,1791
 raynos/for-each,,,,,,6925
 raynos/function-bind,,,,,,8662
+raynos/xtend,,,,,,4802
 rayon-rs/either,,,,,,2303
 rayon-rs/rayon,,,,,,2258
 raysan5/raygui,6748,6527,6119,4134,4821,5746
@@ -4923,6 +4942,7 @@ sindresorhus/p-try,,,,,,5225
 sindresorhus/parent-module,,,,,,6598
 sindresorhus/parse-json,,,,,,4504
 sindresorhus/path-exists,,,,,,4832
+sindresorhus/path-is-absolute,,,,,,8347
 sindresorhus/path-key,,,,,,5047
 sindresorhus/path-type,,,,,,5144
 sindresorhus/pify,,,,,,4913
@@ -5190,6 +5210,7 @@ switchbrew/libnx,1701,2180,1380,2130,1338,1357
 switchbrew/nx-hbmenu,1800,10000,2222,5000,2099,1510
 swoole/swoole-src,4718,4343,4070,5515,7357,5234
 swow/swow,4986,7493,6119,4883,6980,5472
+sybrenstuvel/python-rsa,,,,,,4810
 sylar-yin/sylar,,,,,,
 sylefeb/silice,7340,8965,9860,7978,8850,8068
 sylikc/jpegview,6327,5210,5007,8292,,4719
@@ -5783,6 +5804,7 @@ webhdx/picoboot,,9608,7812,7855,10000,9117
 webmproject/libwebp,5768,6190,5622,4760,3728,3040
 webmproject/webpshop,6213,10000,,10000,10000,7099
 webpack/enhanced-resolve,,,,,,2639
+webpack/loader-utils,,,,,,1444
 webpack/schema-utils,,,,,,1393
 webpack/tapable,,,,,,3697
 webpack/terser-webpack-plugin,,,,,,2682

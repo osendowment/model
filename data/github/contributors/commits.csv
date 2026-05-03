@@ -482,6 +482,7 @@ azahar-emu/azahar,119,343,742,845,418,2467
 azerothcore/azerothcore-wotlk,2381,2047,1895,1533,1551,9407
 azure/azure-sdk-for-js,3342,2722,2115,2725,2858,19162
 azure/azure-sdk-for-python,3061,3306,2899,3019,3391,19963
+azure/msrest-for-python,,,,,,342
 azuread/microsoft-authentication-library-for-python,0,0,0,0,0,1262
 b-con/crypto-algorithms,0,0,0,0,0,0
 b4rtaz/distributed-llama,0,0,86,193,113,392
@@ -565,6 +566,7 @@ bigtreetech/bigtreetech-touchscreenfirmware,306,143,85,36,4,574
 bilibili/ijkplayer,8,0,0,0,0,8
 bill-haku/kawaii-gcc,0,0,19,6,5,30
 binbyu/reader,16,9,5,0,2,32
+bincode-org/bincode,,,,,,1
 bingoogolapple/bgaqrcode-android,3,0,0,1,0,4
 binji/pokegb,52,0,2,0,0,54
 binomialllc/basis_universal,95,29,18,76,87,305
@@ -614,6 +616,7 @@ blurrypiano/littlevulkanengine,123,8,0,0,0,131
 bluss/bencher,0,0,0,0,0,47
 blynkkk/blynk-library,40,66,149,6,4,265
 bmax121/kernelpatch,0,0,27,20,26,73
+bminor/glibc,,,,,,21690
 bmorcelli/launcher,0,0,0,273,188,461
 bo3b/3dmigoto,0,4,13,15,41,73
 boazsegev/facil.io,2,0,0,1,5,8
@@ -665,6 +668,7 @@ brightxiaohan/cmaketutorial,0,0,1,0,0,1
 brndnmtthws/conky,143,181,126,259,45,754
 brofield/simpleini,1,26,14,21,13,75
 broofa/mime,0,0,0,0,0,379
+broofa/node-int64,,,,,,29
 brookhong/keycastow,0,0,0,0,0,0
 browserify/node-util,0,0,0,0,0,158
 browserify/resolve,0,0,0,0,0,604
@@ -1248,6 +1252,7 @@ dogecoin/dogecoin,358,226,113,189,40,926
 doitsujin/dxvk,510,1202,383,819,1210,4124
 dokan-dev/dokany,149,117,42,37,60,405
 dolphin-emu/dolphin,2233,2280,2553,1556,1789,10411
+dominictarr/through,,,,,,93
 domoticz/domoticz,1018,805,828,605,552,3808
 doonny/pipecnn,2,1,0,0,0,3
 doowb/ansi-colors,0,0,0,0,0,122
@@ -1292,6 +1297,7 @@ dtolnay/dissimilar,0,0,0,0,0,143
 dtolnay/indoc,0,0,0,0,0,379
 dtolnay/itoa,0,0,0,0,0,326
 dtolnay/no-panic,0,0,0,0,0,243
+dtolnay/paste,,,,,,298
 dtolnay/proc-macro2,0,0,0,0,0,1283
 dtolnay/quote,0,0,0,0,0,741
 dtolnay/ref-cast,0,0,0,0,0,280
@@ -1460,6 +1466,7 @@ es-shims/string.prototype.trimend,0,0,0,0,0,73
 es-shims/string.prototype.trimstart,0,0,0,0,0,67
 es3n1n/defendnot,0,0,0,0,42,42
 eslint-community/eslint-utils,0,0,0,0,0,150
+eslint/doctrine,,,,,,314
 eslint/eslint,335,383,528,517,504,8605
 eslint/js,0,0,0,0,0,539
 eslint/rewrite,0,0,0,0,0,251
@@ -1554,10 +1561,12 @@ facebook/mcrouter,121,83,54,63,68,389
 facebook/metro,0,0,0,0,0,3779
 facebook/mvfst,301,370,351,392,318,1732
 facebook/openzl,0,0,0,0,222,222
+facebook/prop-types,,,,,,148
 facebook/proxygen,359,238,152,165,282,1196
 facebook/react,556,857,1914,2092,1392,17911
 facebook/react-native,1505,1542,2673,3511,4143,13374
 facebook/redex,886,660,583,497,900,3526
+facebook/regenerator,,,,,,1037
 facebook/rocksdb,885,783,533,611,417,3229
 facebook/threatexchange,509,257,176,132,118,1192
 facebook/transform360,0,0,0,1,0,1
@@ -1666,6 +1675,7 @@ fireice-uk/xmr-stak-cpu,0,0,0,0,0,0
 firmata/arduino,4,8,5,3,0,20
 firmianay/ctf-all-in-one,19,4,1,0,0,24
 fisco-bcos/fisco-bcos,146,1198,515,389,190,2438
+fitzgen/glob-to-regexp,,,,,,39
 fix94/nintendont,22,7,3,7,5,44
 flagbrew/pksm,0,0,0,0,0,0
 flame/blis,139,95,64,24,52,374
@@ -1683,6 +1693,7 @@ flif-hub/flif,7,0,0,0,0,7
 flightlessmango/mangohud,188,295,359,252,256,1350
 flipperdevices/flipperzero-firmware,836,1174,860,724,212,3806
 flipperdevices/qflipper,345,214,52,3,0,614
+floatdrop/require-from-string,,,,,,29
 floating-ui/floating-ui,0,0,0,0,0,2312
 floooh/chips,238,61,75,44,17,435
 floooh/oryol,0,0,0,0,0,0
@@ -1970,7 +1981,12 @@ google/xls,929,814,1131,2036,2083,6993
 google/xnnpack,871,1707,1698,1642,1497,7415
 google/zerocopy,0,0,0,0,0,1469
 googleapis/google-api-python-client,0,0,0,0,0,0
+googleapis/google-auth-library-python,,,,,,668
+googleapis/google-cloud-node-core,,,,,,3146
+googleapis/google-resumable-media-python,,,,,,374
 googleapis/python-api-core,0,0,0,0,0,368
+googleapis/python-crc32c,,,,,,133
+googleapis/python-storage,,,,,,922
 googlechrome/workbox,0,0,0,0,0,1263
 googleprojectzero/jackalope,49,24,10,4,11,98
 googleprojectzero/tinyinst,69,30,34,18,2,153
@@ -2480,6 +2496,7 @@ jhrobotics/patcher9x,0,49,5,8,23,85
 jhrobotics/softgpu,0,0,22,17,10,49
 jiangdongguo/androidusbcamera,6,14,14,5,0,39
 jiangwenyuan/nuster,5,0,0,0,0,5
+jimmywarting/node-domexception,,,,,,18
 jimp-dev/jimp,0,0,0,0,0,1093
 jjgod/mac-dictionary-kit,0,0,0,0,0,0
 jkornev/hidden,33,2,0,0,0,35
@@ -2822,6 +2839,7 @@ lc-soft/lcui,77,26,58,73,22,256
 lcatro/source-and-fuzzing,12,0,0,0,0,12
 lcompilers/lpython,4206,4192,1757,335,132,10622
 ldcsaa/hp-socket,39,14,15,20,6,94
+lddubeau/xmlchars,,,,,,41
 ldionne/dyno,0,0,0,0,0,0
 ldpreload/blacklotus,0,0,5,1,0,6
 leadcoding/3-weeks-google-prep,0,27,0,0,0,27
@@ -4414,6 +4432,7 @@ ravynsoft/ravynos,0,0,0,14,286,300
 rawtherapee/rawtherapee,395,194,438,453,320,1800
 raynos/for-each,0,0,0,0,0,72
 raynos/function-bind,0,0,0,0,0,100
+raynos/xtend,,,,,,77
 rayon-rs/either,0,0,0,0,0,272
 rayon-rs/rayon,0,0,0,0,0,2010
 raysan5/raygui,83,118,191,77,87,556
@@ -4923,6 +4942,7 @@ sindresorhus/p-try,0,0,0,0,0,17
 sindresorhus/parent-module,0,0,0,0,0,26
 sindresorhus/parse-json,0,0,0,0,0,66
 sindresorhus/path-exists,0,0,0,0,0,24
+sindresorhus/path-is-absolute,,,,,,11
 sindresorhus/path-key,0,0,0,0,0,23
 sindresorhus/path-type,0,0,0,0,0,27
 sindresorhus/pify,0,0,0,0,0,69
@@ -5190,6 +5210,7 @@ switchbrew/libnx,92,35,70,36,45,278
 switchbrew/nx-hbmenu,10,2,6,2,9,29
 swoole/swoole-src,404,207,143,234,348,1336
 swow/swow,711,714,290,164,131,2010
+sybrenstuvel/python-rsa,,,,,,563
 sylar-yin/sylar,0,0,0,0,0,0
 sylefeb/silice,1161,521,283,156,49,2170
 sylikc/jpegview,14,83,346,33,0,476
@@ -5783,6 +5804,7 @@ webhdx/picoboot,0,50,8,17,13,88
 webmproject/libwebp,108,208,154,141,120,5049
 webmproject/webpshop,13,3,0,1,1,18
 webpack/enhanced-resolve,0,0,0,0,0,918
+webpack/loader-utils,,,,,,247
 webpack/schema-utils,0,0,0,0,0,191
 webpack/tapable,0,0,0,0,0,267
 webpack/terser-webpack-plugin,0,0,0,0,0,394

@@ -387,14 +387,22 @@ async def analyze_repos(
     return results
 
 
-def _load_repos(filepath: str) -> tuple[list[str], dict[str, int]]:
+def _load_repos(
+    filepath: str,
+    top_repos_file: str | None = None,
+) -> tuple[list[str], dict[str, int]]:
     """Load A/B repos and their sizes from value-data.csv (enriched with top-repos.csv).
 
     `filepath` is treated as the value-data path. Sizes come from top-repos.csv
     via the helper; repos missing there get size 0 and fall back to sparse-clone
     (the tarball threshold is 1MB, so unknown sizes default to safe behavior).
+    `top_repos_file=None` uses the default; pass an alternate path to override
+    enrichment (useful for backfills that want to bypass `archived=true`).
     """
-    entries = load_ab_repos(value_file=filepath)
+    kwargs = {"value_file": filepath}
+    if top_repos_file is not None:
+        kwargs["top_repos_file"] = top_repos_file
+    entries = load_ab_repos(**kwargs)
     repos = [e.repo for e in entries]
     sizes = {e.repo: e.size_kb for e in entries if e.size_kb}
     return repos, sizes
@@ -752,7 +760,7 @@ def _year_main(args: argparse.Namespace) -> None:
     """Year-mode: analyze repos at end-of-year snapshot for one or more years."""
     years: list[int] = sorted(args.year)
 
-    repos_all, sizes = _load_repos(args.input)
+    repos_all, sizes = _load_repos(args.input, args.top_repos_file)
     total_repos = len(repos_all)
 
     # If --limit, pick a consistent sample across all years
@@ -1104,6 +1112,10 @@ def main() -> None:
                              "later steps (LOC/complexity, activity classes).")
     parser.add_argument("--sha-file", default=SHA_FILE,
                         help=f"SHA coordination CSV (default: {SHA_FILE})")
+    parser.add_argument("--top-repos-file", default=None,
+                        help="Override top-repos.csv enrichment path (skips archived "
+                             "filtering when the override doesn't mark them archived). "
+                             "Useful for backfilling specific eligible repos.")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
@@ -1116,7 +1128,7 @@ def main() -> None:
     existing = _load_existing(args.output)
     existing_count = len(existing)
 
-    repos, sizes = _load_repos(args.input)
+    repos, sizes = _load_repos(args.input, args.top_repos_file)
     total_repos = len(repos)
     repos, skipped = _filter_by_ttl(repos, args.output, args.ttl)
     if args.limit:

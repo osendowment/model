@@ -3,11 +3,12 @@
 
 Reads:
     data/eligibility-data.csv               — eligible repo set
+    data/github/git/commits-years.csv       — per (repo, year) last_sha + commits
     data/github/git/loc.csv                 — wide per-year (2021..2025) loc=total lines
     data/github/git/sloc.csv                — wide per-year, code-only
     data/github/git/scc-complexity.csv      — wide per-year
     data/github/git/scc-density.csv         — wide per-year
-    data/github/git/complexity.csv          — single-shot fallback (current state)
+    data/github/git/complexity.csv          — single-shot fallback (current HEAD)
 
 Writes:
     data/complexity.csv  with columns:
@@ -16,10 +17,20 @@ Writes:
         scc_complexity_2025_eoy, scc_density_2025_eoy,
         loc_year   (year of snapshot used: 2021..2025 or "current")
 
-Period: [2025 EOY] — last commit to default branch in 2025. Walks back
-2025→2021 looking for a populated, non-zero year. If no per-year
-snapshot exists (year-mode didn't analyse this repo at any SHA), falls
-back to the single-shot `complexity.csv` and marks `loc_year=current`.
+Period: [2025 EOY] = scc analysis of the last commit on the default
+branch ≤ 2025-12-31.
+
+Selection logic:
+1. Read commits-years.csv → target_year = most recent y ≤ 2025 with
+   commits > 0. (If a repo has no commits in 2021–2025 it falls
+   straight to step 3.)
+2. If wide[target_year] is populated and non-zero, use it (this is the
+   true scc snapshot at that year's last SHA).
+3. Else use single-shot complexity.csv (current HEAD ≈ EOY 2025 for
+   repos with little 2026 activity, AND ≈ wide[target_year] for repos
+   whose default branch hasn't moved since target_year).
+4. Else walk wide 2025→2021 for any populated year.
+5. Else empty.
 
 Naming note: in the wide `loc.csv` / `sloc.csv` pair, `loc` is *total*
 lines (incl. comments/blanks) and `sloc` is scc "Code" (source lines
@@ -55,6 +66,7 @@ SOURCES = {
 # Single-shot fallback (one row per repo, columns: repo,files,loc,uloc,
 # complexity,complexity_density,...). `loc` here is scc Code (sloc-style).
 SINGLE_SHOT_FILE = GIT_DIR / "complexity.csv"
+COMMITS_YEARS_FILE = GIT_DIR / "commits-years.csv"
 YEARS_DESC = ["2025", "2024", "2023", "2022", "2021"]
 
 FIELDS = [
@@ -116,6 +128,37 @@ def _load_single_shot() -> dict[str, dict[str, str]]:
     return out
 
 
+def _load_target_year() -> dict[str, str]:
+    """Return {repo: target_year_str} — most recent year ≤ 2025 with commits>0.
+
+    Empty for repos with no entry in commits-years.csv or no commits at all
+    in 2021–2025 (truly dormant since before 2021).
+    """
+    by_repo: dict[str, dict[int, int]] = {}
+    if not COMMITS_YEARS_FILE.exists():
+        return {}
+    with open(COMMITS_YEARS_FILE, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            slug = (row.get("repo") or "").strip().lower()
+            if not slug:
+                continue
+            try:
+                year = int((row.get("year") or "").strip())
+                commits = int((row.get("commits") or "0").strip())
+            except ValueError:
+                continue
+            if 2021 <= year <= 2025:
+                by_repo.setdefault(slug, {})[year] = commits
+
+    out: dict[str, str] = {}
+    for slug, years in by_repo.items():
+        for y in (2025, 2024, 2023, 2022, 2021):
+            if years.get(y, 0) > 0:
+                out[slug] = str(y)
+                break
+    return out
+
+
 def _from_single_shot(ss: dict | None) -> tuple[str, str, str, str, str] | None:
     """Return (loc, sloc, complexity, density, year_label) or None."""
     if not ss or not ss.get("loc"):
@@ -129,47 +172,60 @@ def _from_single_shot(ss: dict | None) -> tuple[str, str, str, str, str] | None:
     return code, code, cplx, dens, "current"
 
 
+def _from_wide(wides: dict, repo: str, year: str) -> tuple[str, str, str, str] | None:
+    """(loc, sloc, complexity, density) from wide files at year, or None if zero/empty."""
+    val = (wides["loc"].get(repo, {}).get(year) or "").strip()
+    try:
+        if not val or float(val) == 0:
+            return None
+    except ValueError:
+        return None
+    return (
+        val,
+        wides["sloc"].get(repo, {}).get(year, ""),
+        wides["scc_complexity"].get(repo, {}).get(year, ""),
+        wides["scc_density"].get(repo, {}).get(year, ""),
+    )
+
+
 def build() -> list[dict]:
     eligible = load_eligible_repos()
 
     wides = {name: _load_wide(p) for name, p in SOURCES.items()}
     single = _load_single_shot()
+    target_year = _load_target_year()
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
-        loc_per_year = wides["loc"].get(repo, {})
+        ty = target_year.get(repo)  # str like "2025" or None for dormant repos
 
-        # Preference order: wide[2025] → single-shot (≈current state, close
-        # to 2025 EOY for repos with little 2026 activity) → wide[2024..2021].
-        # Single-shot is preferred over old historical years because a 2021
-        # snapshot of an actively-maintained repo is staler than the current
-        # one.
-        loc_2025 = (loc_per_year.get("2025") or "").strip()
-        used_2025 = False
-        try:
-            used_2025 = float(loc_2025) > 0
-        except ValueError:
-            used_2025 = False
+        # Strategy:
+        #   1. wide[target_year] — true scc snapshot at year's last_sha
+        #   2. single-shot complexity.csv (current HEAD ≈ target_year EOY for
+        #      repos whose default branch hasn't moved since target_year)
+        #   3. walk wide 2025→2021 for any populated year (last resort)
+        loc_val = sloc_val = cplx_val = dens_val = loc_year = ""
 
-        if used_2025:
-            loc_year = "2025"
-            loc_val = loc_2025
-            sloc_val = wides["sloc"].get(repo, {}).get("2025", "")
-            cplx_val = wides["scc_complexity"].get(repo, {}).get("2025", "")
-            dens_val = wides["scc_density"].get(repo, {}).get("2025", "")
-        else:
+        if ty:
+            wt = _from_wide(wides, repo, ty)
+            if wt:
+                loc_val, sloc_val, cplx_val, dens_val = wt
+                loc_year = ty
+
+        if not loc_year:
             ss_tuple = _from_single_shot(single.get(repo))
             if ss_tuple:
                 loc_val, sloc_val, cplx_val, dens_val, loc_year = ss_tuple
-            else:
-                loc_year, loc_val = _pick_year(loc_per_year)
-                if loc_year:
-                    sloc_val = wides["sloc"].get(repo, {}).get(loc_year, "")
-                    cplx_val = wides["scc_complexity"].get(repo, {}).get(loc_year, "")
-                    dens_val = wides["scc_density"].get(repo, {}).get(loc_year, "")
-                else:
-                    sloc_val = cplx_val = dens_val = ""
+
+        if not loc_year:
+            # last resort: any populated wide year (2025→2021)
+            for y in YEARS_DESC:
+                wt = _from_wide(wides, repo, y)
+                if wt:
+                    loc_val, sloc_val, cplx_val, dens_val = wt
+                    loc_year = y
+                    break
 
         rows.append({
             "repo": repo,
