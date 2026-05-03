@@ -3,6 +3,62 @@
 Determines which GitHub repos qualify for funding. Two checks: open-source
 license status, and EOL (end-of-life) status.
 
+## Metrics Roadmap
+
+Target shape of inputs per dimension. Each leaf = one metric, with its data
+source and the time period it represents. Per-ecosystem rows feed the
+GitHub rollup that becomes `eligibility-data.csv`.
+
+> **Note:** `[most recent]` means the latest available pull of that source.
+> Eligibility is a *current-state* check — it has no historical window.
+
+```
+Eligibility
+│
+├── Scope gate
+│   └── value_class ∈ {A, B}      ← data/value-data.csv                 [2021–2025]
+│                                    (C/D dropped before any check)
+│
+├── License (OSS check)
+│   ├── package_license           ← npm:    registry.npmjs.org          [most recent]
+│   │                                pypi:   pypi.org/pypi/<n>/json     [most recent]
+│   │                                crates: crates.io DB-dump          [most recent]
+│   │                                cpp:    Homebrew formula.json      [most recent]
+│   ├── repo_license (fallback)   ← GitHub Licensee detection           [most recent]
+│   ├── osi_approved_set          ← SPDX list filtered isOsiApproved=T  [most recent]
+│   │                                (90-day TTL → data/osi/oss-licenses.csv)
+│   └── is_oss                    ← derived ternary: True / False / "" [most recent]
+│                                    SPDX-expression-aware vs OSI set
+│
+├── EOL (per-package signals → AND-aggregate per repo)
+│   ├── npm_deprecated            ← npm registry `deprecated` field    [most recent]
+│   ├── pypi_inactive             ← Trove "Development Status :: 7"    [most recent]
+│   ├── crates_yanked             ← crates.io DB-dump default-ver yank [most recent]
+│   ├── homebrew_disabled         ← formulae.brew.sh formula.json      [most recent]
+│   ├── homebrew_deprecated       ← formulae.brew.sh formula.json      [most recent]
+│   ├── endoflife_date (overlay)  ← endoflife.date/api/<product>.json  [most recent]
+│   │                                whitelist of ~20 well-known products
+│   └── is_eol                    ← derived (every constituent pkg EOL)[most recent]
+│
+├── Repo state (GitHub API)
+│   ├── valid_repo                ← /repos/{o}/{r} HTTP 200 vs 404     [most recent]
+│   └── repo_url                  ← /repos homepage                    [most recent]
+│
+├── Owner / governance
+│   ├── user / user_id / user_type
+│   │                              ← /repos owner_login + users.csv    [most recent]
+│   ├── repo_owner / repo_owner_url
+│   │                              ← data/github/users.csv             [most recent]
+│   └── host                      ← data/foundations/host-by-repo.csv  [most recent]
+│                                    (apache/cncf/eclipse/openjs/
+│                                     psf/lf/numfocus/sfc)
+│
+└── Final rollup (→ eligibility-data.csv)
+    └── eligibility               ← valid_repo                         [most recent]
+                                     AND is_oss is True
+                                     AND NOT is_eol
+```
+
 ```mermaid
 graph LR
     github["GitHub"]
@@ -18,7 +74,7 @@ graph LR
         cpp_eol["cpp/check_eol.py<br/>unsupported"]
     end
 
-    npm --> npm_eol --> unify["unify_value_data.py"]
+    npm --> npm_eol --> unify["src.pipeline.value"]
     pypi --> pypi_eol --> unify
     crates --> crates_eol --> unify
     cpp --> cpp_eol --> unify
@@ -41,15 +97,25 @@ graph LR
 
 ## How It Works
 
-### Source of truth
+### Source of truth and scope
 
 Eligibility reads exclusively from `data/github/repos.csv` (populated by
 `src.github.fetch_repo_owner_data`). No fallback to discovery data: a repo
 must have a fresh GitHub API record to appear in eligibility at all.
 
+**Scope is AB-class only.** A repo must satisfy all three:
+
+1. Be in `value-data.csv` with `class ∈ {A, B}` (`ELIGIBLE_CLASSES` in
+   `eligibility.py` — adjust there if scope changes).
+2. Be in `data/github/repos.csv` (we have a fresh GitHub API record).
+3. Pass the OSS license + EOL checks below.
+
+C/D-class repos are dropped before any other check — they're tracked in
+the value pipeline but not funding-eligible.
+
 Repos that returned HTTP 404 are recorded with `valid=False` in
 `repos.csv` and surface in eligibility as `valid_repo=False`,
-`is_oss=False`, `eligibility=False`.
+`is_oss=""` (unknown — no license to inspect), `eligibility=False`.
 
 ### License check
 
@@ -137,10 +203,31 @@ since it requires parsing an unstructured log.
 | Script | Purpose | Command |
 |--------|---------|---------|
 | `src/{eco}/check_eol.py` | Flag EOL packages → `data/{eco}/eol.csv` | `uv run python -m src.npm.check_eol` |
-| `src/unify_value_data.py` | Join per-eco eol → `is_eol` col in `data/value-data.csv` | `uv run python -m src.unify_value_data` |
-| `src/eligibility.py` | Final eligibility per repo → `data/eligibility-data.csv` | `uv run python -m src.eligibility` |
+| `src/{eco}/fetch_licenses.py` | Add `license` (lowercase SPDX) to `data/{eco}/results.csv` from each registry (npm/PyPI live API; crates DB dump; Homebrew raw cache; cpp joined from Homebrew) | `uv run python -m src.npm.fetch_licenses` |
+| `src/osi/fetch_licenses.py` | Refresh the OSI-approved SPDX list (90-day TTL) → `data/osi/oss-licenses.csv`. Sourced from the SPDX license list filtered by `isOsiApproved=true`. | `uv run python -m src.osi.fetch_licenses` |
+| `src/github/fetch_repo_owner_data.py` | Authoritative repo + owner data → `data/github/{repos,users}.csv` | `uv run python -m src.github.fetch_repo_owner_data` |
+| `src/foundations/match_repos.py` | Determine FOSS-foundation host per repo → `data/foundations/host-by-repo.csv` | `uv run python -m src.foundations.match_repos` |
+| `src/pipeline/value.py` | Unify per-eco results into `data/value-data.csv` | `uv run python -m src.pipeline.value` |
+| `src/pipeline/eligibility.py` | Final eligibility per repo → `data/eligibility-data.csv` | `uv run python -m src.pipeline.eligibility` |
 
-Run order: each ecosystem's `check_eol.py` → `unify_value_data.py` → `eligibility.py`.
+Run order:
+1. per-ecosystem `check_eol.py` and `fetch_licenses.py` (parallelisable)
+2. `src.osi.fetch_licenses` (refreshes the OSI list — TTL'd, usually a no-op)
+3. `src.github.fetch_repo_owner_data` (populates the repo-level source of truth)
+4. `src.foundations.match_repos` (host classification)
+5. `src.pipeline.eligibility` (joins everything)
+
+License priority inside `eligibility.py`:
+1. **Per-eco `results.csv`** — registry-declared SPDX (most authoritative; the package author set it).
+2. **Fallback: `data/github/repos.csv`** — GitHub API's Licensee detection.
+
+`is_oss` is **ternary** with strict OSI semantics:
+
+- **`True`** — license (or any token in an SPDX expression) is in `data/osi/oss-licenses.csv`. Handles `mit or apache-2.0`, `gpl-3.0-or-later`, `apache-2.0 with llvm-exception or mit`, etc.
+- **`False`** — license is **known but not OSI-approved**: CC-BY, CC0, GFDL, WTFPL, MIT-CMU, proprietary EULAs, etc.
+- **`""` (empty)** — license is **unknown**: GitHub returned `noassertion` and we have no per-eco registry data to disambiguate, or no license declared anywhere.
+
+**Eligibility requires `is_oss=True`** — both `False` and `""` produce `eligibility=False`. We won't fund a repo we can't verify is OSS.
 
 ## Output
 
@@ -167,7 +254,8 @@ does **not** carry an `is_eol` column.
 
 ### data/eligibility-data.csv
 
-Final per-repo eligibility table. `eligibility = valid_repo AND is_oss AND NOT is_eol`.
+Final per-repo eligibility table. `eligibility = valid_repo AND (is_oss is True) AND NOT is_eol`.
+A `False` or unknown (`""`) `is_oss` both produce `eligibility=False`.
 Sourced exclusively from `data/github/repos.csv` — no fallbacks.
 
 | Column | Description |
@@ -179,13 +267,13 @@ Sourced exclusively from `data/github/repos.csv` — no fallbacks.
 | `user_id` | Owner numeric ID |
 | `user_type` | `User` or `Organization` |
 | `license` | License SPDX key (from the GitHub API) |
-| `is_oss` | `True` if the license is OSI-approved |
+| `is_oss` | Ternary — `True` if OSI-approved (loaded from `data/osi/oss-licenses.csv`); `False` if the license is known but not OSI-approved (CC-BY, CC0, MIT-CMU, …); `""` (empty) if no usable license signal (GitHub `noassertion`, no per-eco registry data, or empty). |
 | `is_eol` | `True` if every package mapped to this repo (joined via per-eco `data/{eco}/results.csv` ↔ `data/{eco}/eol.csv`) is `is_eol=True`. Repos with no constituent packages default to `False`. |
 | `host` | Slug of FOSS foundation hosting the project: `apache`, `cncf`, `eclipse`, `openjs`, `psf`, `lf`, `numfocus`, `sfc`. Empty if not foundation-hosted. Joined from `data/foundations/host-by-repo.csv`. |
 | `repo_url` | Repo's homepage URL from the GitHub API (empty if not set on the repo). |
 | `repo_owner` | Owner display name from `data/github/users.csv` (e.g. "The Apache Software Foundation"). Empty if not in users.csv. |
 | `repo_owner_url` | Owner's `blog` URL from `data/github/users.csv`. Empty if not set. |
-| `repo_owner_type` | TODO — corporate / foundation / individual classification. |
+| `repo_owner_type` | TODO — `company` / `nonprofit` / `individual` / `community` / `government` classification. |
 | `tm_owner` | Trademark owner (TODO) |
 | `tm_owner_type` | Corporate vs community-held (TODO) |
-| `eligibility` | `True` if `valid_repo AND is_oss AND NOT is_eol` |
+| `eligibility` | `True` only if `valid_repo AND is_oss is True AND NOT is_eol`. `is_oss=False` or `is_oss=""` both produce `eligibility=False`. |

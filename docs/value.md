@@ -3,6 +3,74 @@
 Identifies the most important open-source packages across ecosystems by combining
 download volume with dependency graph analysis (PageRank).
 
+## Metrics Roadmap
+
+Target shape of inputs per dimension. Each leaf = one metric, with its data
+source(s) and the time period it represents. Sources differ per ecosystem
+(npm / pypi / crates / cpp) and are listed inline.
+
+> **Note:** `[2025 EOY]` means *as of the last commit to the default (main)
+> branch in 2025* — not the calendar year-end snapshot. `[most recent]` means
+> the latest available pull of that source.
+
+```
+Value
+│
+├── JavaScript / TypeScript (npm)
+│   ├── downloads_2021..2025      ← api.npmjs.org/downloads             [2021–2025]
+│   ├── avg_downloads             ← derived (mean over populated years) [2021–2025]
+│   ├── avg_downloads_share       ← derived (pkg / ecosystem total)     [2021–2025]
+│   ├── top                       ← derived (95% cum-download cutoff)   [2021–2025]
+│   ├── dep edges (package→dep)   ← registry.npmjs.org                  [most recent]
+│   ├── pagerank                  ← derived (DL-weighted PR, α=0.85)    [2021–2025]
+│   ├── value_class               ← derived (A/B/C/D, cum-PR share)     [2021–2025]
+│   └── package→repo              ← nice-registry                       [most recent]
+│
+├── Python (PyPI)
+│   ├── downloads_2021..2025      ← BigQuery PyPI dataset               [2021–2025]
+│   ├── avg_downloads             ← derived                             [2021–2025]
+│   ├── avg_downloads_share       ← derived                             [2021–2025]
+│   ├── top                       ← derived (95% cum-download cutoff)   [2021–2025]
+│   ├── dep edges (package→dep)   ← pypi.org/pypi/{p}/json              [most recent]
+│   ├── pagerank                  ← derived                             [2021–2025]
+│   ├── value_class               ← derived                             [2021–2025]
+│   └── package→repo              ← BigQuery github mapping             [most recent]
+│
+├── Rust (crates.io)
+│   ├── downloads_2021..2025      ← crates.io daily archives            [2021–2025]
+│   ├── avg_downloads             ← derived                             [2021–2025]
+│   ├── avg_downloads_share       ← derived                             [2021–2025]
+│   ├── top                       ← derived (95% cum-download cutoff)   [2021–2025]
+│   ├── dep edges (package→dep)   ← crates.io DB-dump dependencies      [most recent]
+│   ├── pagerank                  ← derived                             [2021–2025]
+│   ├── value_class               ← derived                             [2021–2025]
+│   └── package→repo              ← DB-dump `repository` field          [most recent]
+│
+├── C / C++ (Debian + Homebrew + Repology)
+│   ├── debian_avg_downloads      ← Debian popcon (Wayback snapshots)   [2021–2025]
+│   ├── homebrew_avg_downloads    ← Homebrew analytics (Wayback)        [2021–2025]
+│   ├── downloads_score           ← derived (debian + homebrew composite)[2021–2025]
+│   ├── dep edges (package→dep)   ← Debian Packages.xz (Depends/Pre-)   [most recent]
+│   │                                + Homebrew formula.json (runtime)  [most recent]
+│   ├── pagerank                  ← derived                             [2021–2025]
+│   ├── value_class               ← derived                             [2021–2025]
+│   └── package→repo              ← Repology project URLs               [most recent]
+│
+└── GitHub (cross-ecosystem rollup → value-data.csv)
+    ├── github_repo               ← per-eco package→repo union          [most recent]
+    ├── git_url                   ← per-eco git.csv union               [most recent]
+    │                                (GitLab/Codeberg/Sourcehut/Bitbucket
+    │                                 /custom hosts when no GH match)
+    ├── ecosystems                ← derived (eco set per repo)          [2021–2025]
+    ├── packages                  ← derived (package count per repo)    [2021–2025]
+    ├── top_eco                   ← derived (best percentile eco)       [2021–2025]
+    ├── top_eco_pkg               ← derived (highest-PR pkg in top_eco) [2021–2025]
+    ├── top_eco_pct               ← derived (100 − pr_cum_pct, 0–100)   [2021–2025]
+    ├── class_{npm,pypi,crates,cpp}
+    │                              ← derived (per-eco cum-PR share)     [2021–2025]
+    └── class                     ← derived (strongest across ecos)     [2021–2025]
+```
+
 ```mermaid
 graph TB
     subgraph sources ["Data sources"]
@@ -357,7 +425,7 @@ All dep-tree packages with downloads, PageRank, and value class.
 
 `data/value-data.csv` is the canonical per-repo table — one row per GitHub
 repo, plus one row per orphan package (no `github_repo`) so nothing is
-dropped. Produced by `uv run -m src.unify_value_data`, which reads each
+dropped. Produced by `uv run python -m src.pipeline.value`, which reads each
 ecosystem's `results.csv` and `eol.csv`, groups packages by repo, computes
 all per-ecosystem and cross-ecosystem aggregates, and writes the file
 sorted by `top_eco_pct` desc (most important repos first).
@@ -419,10 +487,14 @@ rows.
 both per-package and per-repo views). Group by `github_repo` (or use any
 orphan row directly) and the repo-level columns are already there.
 
-**Pipeline order**: each ecosystem's `check_eol.py` → `unify_value_data.py`
-→ `aggregate_by_repo.py`. Re-running `unify_value_data.py` overwrites
+**Pipeline order**: each ecosystem's `check_eol.py` → `src.pipeline.value`
+→ `aggregate_by_repo.py`. Re-running `src.pipeline.value` overwrites
 `value-data.csv` without the enriched columns; re-run `aggregate_by_repo.py`
 afterwards to restore them.
+
+**Three-stage pipeline**: `src.pipeline.value` (this script) →
+`src.pipeline.eligibility` (filters to AB ∩ OSS ∩ alive) →
+`src.pipeline.risk` (concentration + complexity for eligible repos only).
 
 **Grouping**: rows sharing a non-empty `github_repo` are merged into one
 group; rows with an empty `github_repo` (e.g. cpp packages like `glibc`,
