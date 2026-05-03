@@ -3,6 +3,75 @@
 Measures sustainability risk for GitHub repos using contributor concentration,
 codebase complexity, and issue-tracker dynamics over the last 5 years.
 
+## Metrics Roadmap
+
+Target shape of inputs per dimension. Each leaf = one metric, with its data
+source and the time period it represents.
+
+> **Note:** `[2025 EOY]` means *as of the last commit to the default (main)
+> branch in 2025* — not the calendar year-end snapshot. For repos with no
+> 2025 commits, the metric falls back to the most recent prior year.
+
+```
+Risk
+│
+├── Concentration
+│   ├── total_commits         ← GitHub /commits Link header           [2025 EOY]
+│   ├── total_contributors    ← GitHub /contributors?anon=true        [2025 EOY]
+│   ├── hhi_commits           ← GitHub /contributors (weekly)         [2021–2025]
+│   └── bf_commits            ← GitHub /contributors (weekly)         [2021–2025]
+│
+├── Complexity
+│   ├── loc                   ← scc (sparse checkout)                 [2025 EOY]
+│   ├── sloc                  ← scc (no comments/blank)               [2025 EOY]
+│   ├── scc_complexity        ← scc cyclomatic complexity total       [2025 EOY]
+│   └── scc_density           ← scc complexity per line               [2025 EOY]
+│
+├── Security
+│   ├── openssf_score         ← OpenSSF Scorecard                     [2025 EOY]
+│   ├── cve_count_5y          ← OSV.dev /v1/query                     [2021–2025]
+│   └── ossfuzz_enrolled      ← oss-fuzz projects index               [most recent]
+│
+├── Funding
+│   ├── github_sponsors       ← GitHub Sponsors API                   [most recent]
+│   ├── funding.yml data      ← repo /.github/FUNDING.yml             [most recent]
+│   ├── funding.json data     ← repo /funding.json (FLOSS/fund spec)  [most recent]
+│   └── foundation_host       ← data/foundations/ (Apache/CNCF/…)     [most recent]
+│
+├── Visibility
+│   ├── stars                 ← GitHub /repos                         [most recent]
+│   └── forks                 ← GitHub /repos                         [most recent]
+│
+└── Maintainer workload
+    ├── repo_age              ← GitHub /repos created_at              [2025 EOY]
+    ├── active_maintainers    ← GitHub /contributors (weekly)         [2021–2025]
+    ├── openssf_maintained    ← OpenSSF Scorecard "Maintained" check  [2025 EOY]
+    ├── has_issues            ← GitHub /repos has_issues              [most recent]
+    ├── push_cadence          ← derived from commits-years.csv        [2021–2025]
+    ├── issues_opened_5y      ← GitHub Search API                     [2021–2025]
+    ├── issues_closed_5y      ← GitHub Search API                     [2021–2025]
+    ├── issue_close_ratio     ← derived (closed_5y / opened_5y)       [2021–2025]
+    ├── slope_opened          ← OLS over GitHub Search yearly         [2021–2025]
+    ├── slope_closed          ← OLS over GitHub Search yearly         [2021–2025]
+    └── issue_trend_score     ← derived (vol-normalised gap)          [2021–2025]
+```
+
+### Collecting `cve_count_5y`
+
+Single source: **OSV.dev** (free, no auth, aggregates GHSA + NVD + ecosystem
+advisories).
+
+`POST https://api.osv.dev/v1/query` with one of:
+
+- `{"package": {"name": "<pkg>", "ecosystem": "npm|PyPI|crates.io|Go|…"}}` —
+  for ecosystem-published packages.
+- `{"package": {"purl": "pkg:github/<owner>/<name>"}}` — for repos without
+  a published package (uses the GitHub purl form).
+
+Filter the returned `vulns[]` by `published` year ∈ 2021–2025 and dedupe by
+the `aliases[]` set so a CVE listed under multiple GHSA/OSV IDs only counts
+once.
+
 ```mermaid
 graph LR
     github["GitHub"]
