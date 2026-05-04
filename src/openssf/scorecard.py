@@ -1,8 +1,15 @@
 """Fetch OpenSSF Scorecard results and upsert them into two output files.
 
 Outputs:
-    data/openssf-data.json   — full API response per repo (keyed by owner/repo)
-    data/openssf-score.csv   — summary: repo, score, checked_at
+    data/openssf/data.json  — full API response per repo (keyed by owner/repo).
+                              Canonical raw cache; preserved as-is.
+    data/git/openssf.csv    — long-format sha-pinned snapshot rows
+                              (repo, repo_id, commit_sha, metric, value, checked_at).
+                              One row per check (`binary_artifacts`, `ci_tests`, …)
+                              plus one for the overall `score`.
+
+`data/git/openssf.csv` is the canonical sha-pinned long-format output;
+the legacy wide `data/openssf/scores.csv` summary has been removed.
 
 Usage:
     # Single repo
@@ -24,6 +31,7 @@ import csv
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -32,11 +40,16 @@ from rich.console import Console
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
+from src.git.long_format import read as read_long
+from src.git.long_format import upsert_snapshot
+
 log = logging.getLogger(__name__)
 console = Console()
 
-DEFAULT_DATA_OUTPUT = Path("data/openssf/data.json")
-DEFAULT_CSV_OUTPUT = Path("data/openssf/scores.csv")
+ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_DATA_OUTPUT = ROOT / "data" / "openssf" / "data.json"
+DEFAULT_LONG_OUTPUT = ROOT / "data" / "git" / "openssf.csv"
+ELIGIBILITY_CSV = ROOT / "data" / "eligibility-data.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -53,6 +66,33 @@ def load_repos_from_file(path: Path) -> list[str]:
             raise ValueError(f"{path} must contain a JSON array of strings")
         return repos
     return [line.strip() for line in text.splitlines() if line.strip() and not line.startswith("#")]
+
+
+def load_repo_ids(path: Path) -> dict[str, str]:
+    """Map `repo` → `repo_id` from eligibility-data.csv. Empty string if missing."""
+    out: dict[str, str] = {}
+    if not path.exists():
+        return out
+    with path.open(encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            repo = (row.get("repo") or "").strip()
+            repo_id = (row.get("repo_id") or "").strip()
+            if repo:
+                out[repo] = repo_id
+    return out
+
+
+def to_snake_case(name: str) -> str:
+    """`Binary-Artifacts` → `binary_artifacts`, `CII-Best-Practices` → `cii_best_practices`.
+
+    Hyphens become underscores; everything is lowercased. We don't try to
+    insert separators inside CamelCase tokens because Scorecard check names
+    are already hyphen-separated (e.g. `SAST`, `CII-Best-Practices`).
+    """
+    s = name.strip().replace("-", "_")
+    s = re.sub(r"[^A-Za-z0-9_]", "_", s)
+    return s.lower()
 
 
 # ---------------------------------------------------------------------------
@@ -105,6 +145,36 @@ def _github_tokens() -> list[str]:
 SUBPROCESS_TIMEOUT_S = 300  # 5 min per repo — scorecard internal retries
                             # can otherwise wedge a worker for 7+ minutes
 
+# Checks that work without org-admin / branch-protection PAT scope.
+# Branch-Protection is intentionally excluded — it requires admin:repo
+# privileges that personal/org tokens typically don't have, and its
+# absence was causing the scorecard CLI to exit non-zero, so we'd lose
+# the entire run for that repo. Override with SCORECARD_CHECKS env var
+# to customize the check list.
+SCORECARD_CHECKS = os.environ.get("SCORECARD_CHECKS", ",".join([
+    "Binary-Artifacts",
+    "CI-Tests",
+    "CII-Best-Practices",
+    "Code-Review",
+    "Contributors",
+    "Dangerous-Workflow",
+    "Dependency-Update-Tool",
+    "Fuzzing",
+    "License",
+    "Maintained",
+    "Packaging",
+    "Pinned-Dependencies",
+    "SAST",
+    "Security-Policy",
+    "Signed-Releases",
+    "Token-Permissions",
+    "Vulnerabilities",
+    # NOTE: "Webhooks" is in the user spec but NOT supported by the
+    # installed scorecard CLI's --checks flag — including it makes
+    # the CLI exit non-zero with "invalid check name". Omitted.
+    # NOTE: "Branch-Protection" intentionally omitted — needs admin scope.
+]))
+
 
 def run_scorecard(repo: str, token: str) -> dict:
     """Run the scorecard CLI for a single repo and return parsed JSON.
@@ -113,10 +183,18 @@ def run_scorecard(repo: str, token: str) -> dict:
     scorecard's internal rate-limit / 504 retry loops (known to spin
     for 7+ min per call). On timeout or non-zero exit we record an
     error row and move on.
+
+    Passes ``--checks=<SCORECARD_CHECKS>`` so we don't fail on
+    Branch-Protection (admin scope required) — see the constant above.
     """
     try:
         result = subprocess.run(
-            [_scorecard_bin(), "--repo", repo, "--format", "json"],
+            [
+                _scorecard_bin(),
+                "--repo", repo,
+                "--format", "json",
+                f"--checks={SCORECARD_CHECKS}",
+            ],
             capture_output=True,
             text=True,
             timeout=SUBPROCESS_TIMEOUT_S,
@@ -144,16 +222,24 @@ def run_scorecard(repo: str, token: str) -> dict:
         return {"error": True, "repo": repo, "message": f"non-JSON output: {exc}"}
 
 
-async def fetch_all(repos: list[str], concurrency: int = 5) -> dict[str, dict]:
+async def fetch_all(
+    repos: list[str],
+    concurrency: int = 5,
+    repo_ids: dict[str, str] | None = None,
+) -> dict[str, dict]:
     """Run scorecard CLI for all repos with bounded concurrency.
 
-    Upserts each result to disk as soon as it completes.
+    Upserts each result to disk as soon as it completes:
+      - data/openssf/data.json (raw cache, keyed by owner/repo)
+      - data/git/openssf.csv (long-format sha-pinned metric rows)
+
     Returns a mapping of repo -> full scorecard result.
 
     Tokens are round-robined across calls so concurrent scorecard
     subprocesses don't all share one rate-limit budget.
     """
     tokens = _github_tokens()
+    repo_ids = repo_ids or {}
     console.print(f"[dim]Using {len(tokens)} GitHub token(s); concurrency={concurrency}[/dim]")
     semaphore = asyncio.Semaphore(concurrency)
     results: dict[str, dict] = {}
@@ -169,7 +255,7 @@ async def fetch_all(repos: list[str], concurrency: int = 5) -> dict[str, dict]:
             data = await loop.run_in_executor(None, run_scorecard, repo, token)
             results[repo] = data
             upsert_json(DEFAULT_DATA_OUTPUT, {repo: data})
-            upsert_csv(DEFAULT_CSV_OUTPUT, {repo: data})
+            upsert_long(DEFAULT_LONG_OUTPUT, {repo: data}, repo_ids=repo_ids)
             completed += 1
             progress.advance(task)
             # Periodic stdout flush so background runs show progress without
@@ -215,24 +301,40 @@ def upsert_json(data_path: Path, new_results: dict[str, dict]) -> dict[str, dict
     return existing
 
 
-def upsert_csv(csv_path: Path, new_results: dict[str, dict]) -> None:
-    """Upsert repo/score/checked_at rows into the CSV file."""
-    existing: dict[str, dict] = {}
-    if csv_path.exists():
-        with csv_path.open() as f:
-            for row in csv.DictReader(f):
-                existing[row["repo"]] = row
+def upsert_long(
+    long_path: Path,
+    new_results: dict[str, dict],
+    repo_ids: dict[str, str] | None = None,
+) -> None:
+    """Upsert each successful scorecard result as long-format rows.
 
+    Writes one row per check + one row for the overall `score`, all keyed
+    by (repo, commit_sha, metric). Skips errored results and any result
+    missing `repo.commit` (we can't pin metrics without a sha).
+    """
+    repo_ids = repo_ids or {}
     for repo, data in new_results.items():
         if data.get("error"):
             continue
-        existing[repo] = {"repo": repo, "score": data.get("score", ""), "checked_at": str(data.get("date", ""))[:10]}
-
-    csv_path.parent.mkdir(parents=True, exist_ok=True)
-    with csv_path.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["repo", "score", "checked_at"])
-        writer.writeheader()
-        writer.writerows(sorted(existing.values(), key=lambda r: r["repo"]))
+        commit_sha = (data.get("repo") or {}).get("commit") or ""
+        if not commit_sha:
+            log.warning("no commit sha for %s — skipping long-format upsert", repo)
+            continue
+        checks = data.get("checks") or []
+        metrics: dict[str, object] = {"score": data.get("score")}
+        for c in checks:
+            name = c.get("name")
+            if not name:
+                continue
+            metrics[to_snake_case(name)] = c.get("score")
+        upsert_snapshot(
+            long_path,
+            repo=repo,
+            repo_id=repo_ids.get(repo, ""),
+            commit_sha=commit_sha,
+            metrics=metrics,
+            checked_at=str(data.get("date") or ""),
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -266,20 +368,32 @@ def display_summary(results: dict[str, dict]) -> None:
 # ---------------------------------------------------------------------------
 
 
-def load_already_scored(csv_path: Path) -> set[str]:
-    """Return the set of repos already present in scores.csv."""
-    if not csv_path.exists():
-        return set()
-    with csv_path.open() as f:
-        return {row["repo"] for row in csv.DictReader(f)}
+def load_already_scored(long_path: Path) -> set[str]:
+    """Return repos that already have a `score` row in the long-format CSV.
+
+    A repo is considered "scored" if any (repo, sha, score) row exists —
+    we don't try to determine sha freshness here. Use --force to rescan.
+    """
+    rows = read_long(long_path)
+    return {repo for (repo, _sha, metric) in rows.keys() if metric == "score"}
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Fetch and upsert OpenSSF Scorecard scores.")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Fetch and upsert OpenSSF Scorecard scores. "
+            "Writes raw JSON to data/openssf/data.json and long-format rows "
+            "to data/git/openssf.csv."
+        ),
+    )
     parser.add_argument("repos", nargs="*", help="One or more owner/repo identifiers")
     parser.add_argument("--file", "-f", type=Path, help="File with repo list (one per line or JSON array)")
     parser.add_argument("--concurrency", "-c", type=int, default=10, help="Max concurrent API requests")
-    parser.add_argument("--force", action="store_true", help="Re-scan repos even if already in scores.csv")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-scan repos even if they already have a score row in data/git/openssf.csv",
+    )
     return parser
 
 
@@ -297,7 +411,7 @@ async def main() -> None:
     repos = list(dict.fromkeys(repos))  # deduplicate, preserve order
 
     if not args.force:
-        already_scored = load_already_scored(DEFAULT_CSV_OUTPUT)
+        already_scored = load_already_scored(DEFAULT_LONG_OUTPUT)
         skipped = [r for r in repos if r in already_scored]
         repos = [r for r in repos if r not in already_scored]
         if skipped:
@@ -306,13 +420,15 @@ async def main() -> None:
             console.print("[green]All repos already scored — nothing to do.[/green]")
             return
 
+    repo_ids = load_repo_ids(ELIGIBILITY_CSV)
+
     console.print(f"[bold]Fetching OpenSSF Scorecards for {len(repos)} repo(s)...[/bold]\n")
 
-    results = await fetch_all(repos, concurrency=args.concurrency)
+    results = await fetch_all(repos, concurrency=args.concurrency, repo_ids=repo_ids)
 
     display_summary(results)
-    console.print(f"\n[green]Full data → {DEFAULT_DATA_OUTPUT}[/green]")
-    console.print(f"[green]Scores    → {DEFAULT_CSV_OUTPUT}[/green]")
+    console.print(f"\n[green]Raw JSON  → {DEFAULT_DATA_OUTPUT}[/green]")
+    console.print(f"[green]Long CSV  → {DEFAULT_LONG_OUTPUT}[/green]")
 
 
 if __name__ == "__main__":

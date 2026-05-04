@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
 """Build data/security.csv — security metrics per eligible repo.
 
-Reads:
+Reads (long-format, sha-pinned where applicable):
     data/eligibility-data.csv               — eligible set
-    data/openssf/scores.csv                 — OpenSSF Scorecard aggregate score
+    data/github/git/commits-years.csv       — per (repo, year) last_sha
+    data/git/openssf.csv                    — long: scorecard `score` + 18
+                                              individual checks per (repo, sha)
+    data/git/depsdev.csv                    — long: deps.dev-mirrored Scorecard
+                                              `score` + checks per (repo, sha);
+                                              fall-back when local row missing
+    data/git/semgrep.csv                    — long: semgrep findings per
+                                              (repo, sha, rulepack-prefixed
+                                              metric); locked to p_default
+    data/osv/cves.csv                       — per-CVE rows (repo, date, cve);
+                                              5y count = distinct CVEs in
+                                              2021..2025
     data/ossfuzz/projects.csv               — projects enrolled in OSS-Fuzz
-    data/osv/cves.csv                       — CVE counts from OSV.dev (optional;
-                                              empty column if file is missing)
-    data/github/git/semgrep.csv             — semgrep SAST findings (optional;
-                                              p/default rulepack used by default;
-                                              empty columns if file is missing)
-    data/depsdev/repos.csv                  — deps.dev project + Best-Practices
-                                              badge (optional; provides a fresh
-                                              Scorecard mirror as fall-back for
-                                              missing local openssf_score)
+    data/depsdev/repos.csv                  — non-sha enrichment
+                                              (bestpractices_badge_id)
 
 Writes:
     data/security.csv  with columns:
@@ -21,51 +25,56 @@ Writes:
         openssf_score,                      ([2025 EOY], 0..10) — local first,
                                             falls back to deps.dev mirror
         openssf_score_source,               "openssf_local" | "depsdev" | ""
-        cve_count_5y,                       ([2021–2025], unique CVEs across
-                                            mapped ecosystem packages)
+        cve_count_5y,                       ([2021–2025], distinct CVE ids)
         ossfuzz_enrolled,                   ([most recent], "True"/"False")
-        sast_findings_total,                ([2025 EOY] semgrep total findings)
+        sast_findings_total,                ([2025 EOY] semgrep p/default)
         sast_findings_error,                ([2025 EOY] high-severity only)
         sast_findings_security,             ([2025 EOY] security-category only)
         bestpractices_badge_id,             ([2026], "passing"/"silver"/"gold"/
                                             "in_progress"/"" if not enrolled)
-        fetched_at
+        fetched_at                          (checked_at of openssf row used)
 
-Period notes inline above. ossfuzz enrollment is binary — the project
-appears in the curated `data/ossfuzz/projects.csv` list iff Google's
-oss-fuzz repo lists it. Semgrep counts come from the `p/default` rulepack
-row in semgrep.csv (one repo can have multiple rows for different rule
-packs; we lock onto p/default for the build to keep risk.py deterministic).
-deps.dev's Scorecard mirror is typically fresher than our local scan and
-covers a few additional repos — we surface it only as a fall-back so
-historical comparisons against the local scan stay stable.
+Latest-sha picker
+-----------------
+For each long file, we walk per-repo year priority 2025→2024→…→2021 from
+`commits-years.csv` and pick the first sha that has any rows in that file.
+This keeps the build aligned with the same "snapshot year" convention used
+by build_complexity. If commits-years has no usable year for a repo, we
+fall back to any sha present in the long file for that repo (deterministic
+lexicographic pick).
 
 Usage:
     uv run python -m src.pipeline.build_security
 """
 
+from __future__ import annotations
+
 import csv
+from collections import Counter
 from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
 
+from src.git.long_format import read as read_long
 from src.pipeline.repos import load_eligible_repos
 
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-OPENSSF_SCORES_FILE = DATA_DIR / "openssf" / "scores.csv"
-OSSFUZZ_FILE = DATA_DIR / "ossfuzz" / "projects.csv"
+GIT_LONG_DIR = DATA_DIR / "git"
+COMMITS_YEARS_FILE = DATA_DIR / "github" / "git" / "commits-years.csv"
+OPENSSF_FILE = GIT_LONG_DIR / "openssf.csv"
+DEPSDEV_LONG_FILE = GIT_LONG_DIR / "depsdev.csv"
+SEMGREP_FILE = GIT_LONG_DIR / "semgrep.csv"
 OSV_FILE = DATA_DIR / "osv" / "cves.csv"
-SEMGREP_FILE = DATA_DIR / "github" / "git" / "semgrep.csv"
-DEPSDEV_FILE = DATA_DIR / "depsdev" / "repos.csv"
+OSSFUZZ_FILE = DATA_DIR / "ossfuzz" / "projects.csv"
+DEPSDEV_REPOS_FILE = DATA_DIR / "depsdev" / "repos.csv"
 OUTPUT_FILE = DATA_DIR / "security.csv"
 
-# Semgrep rule pack to surface in the build. The fetcher can write rows for
-# multiple rule packs side-by-side (one row per (repo, rulepack)); we lock
-# onto p/default here so risk.py picks up the same shape every run.
-SEMGREP_RULEPACK = "p/default"
+# Semgrep rule pack to surface in the build. Same lock as before — risk.py
+# expects p_default values across runs.
+SEMGREP_PREFIX = "p_default."
 
 FIELDS = [
     "repo", "repo_id",
@@ -77,20 +86,102 @@ FIELDS = [
 ]
 
 
-def _load_openssf_scores() -> dict[str, dict[str, str]]:
-    out: dict[str, dict[str, str]] = {}
-    if not OPENSSF_SCORES_FILE.exists():
-        return out
-    with open(OPENSSF_SCORES_FILE, encoding="utf-8") as f:
+def _per_year_shas(commits_years_file: Path) -> dict[str, list[str]]:
+    """Return {repo: [sha_2025, sha_2024, ..., sha_2021]} (newest first).
+
+    Only includes years with non-empty `last_sha` AND `commits > 0`.
+    Years 2021..2025 only. Repos with no usable year get no key.
+    """
+    by_repo: dict[str, dict[int, str]] = {}
+    if not commits_years_file.exists():
+        return {}
+    with open(commits_years_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             slug = (row.get("repo") or "").strip().lower()
             if not slug:
                 continue
-            out[slug] = {
-                "score": (row.get("score") or "").strip(),
-                "checked_at": (row.get("checked_at") or "").strip(),
-            }
+            last_sha = (row.get("last_sha") or "").strip()
+            if not last_sha:
+                continue
+            try:
+                year = int((row.get("year") or "").strip())
+                commits = int((row.get("commits") or "0").strip())
+            except ValueError:
+                continue
+            if commits <= 0:
+                continue
+            if 2021 <= year <= 2025:
+                by_repo.setdefault(slug, {})[year] = last_sha
+
+    out: dict[str, list[str]] = {}
+    for repo, year_map in by_repo.items():
+        # Walk newest → oldest; keep order, skip duplicates.
+        ordered: list[str] = []
+        seen: set[str] = set()
+        for y in (2025, 2024, 2023, 2022, 2021):
+            sha = year_map.get(y)
+            if sha and sha not in seen:
+                ordered.append(sha)
+                seen.add(sha)
+        if ordered:
+            out[repo] = ordered
     return out
+
+
+def _index_long_by_repo_sha(
+    rows: dict[tuple[str, str, str], dict[str, str]],
+    metrics: set[str] | None = None,
+    metric_prefix: str | None = None,
+) -> dict[tuple[str, str], dict[str, dict[str, str]]]:
+    """Index {(repo, sha): {metric: row}} from long-format rows.
+
+    `metrics` and `metric_prefix` are optional filters (either or both).
+    Stores the full row (so callers can read `value` and `checked_at`).
+    """
+    out: dict[tuple[str, str], dict[str, dict[str, str]]] = {}
+    for (repo, sha, metric), row in rows.items():
+        if metrics is not None and metric not in metrics:
+            continue
+        if metric_prefix is not None and not metric.startswith(metric_prefix):
+            continue
+        out.setdefault((repo, sha), {})[metric] = row
+    return out
+
+
+def _pick_latest(
+    repo: str,
+    sha_priority: list[str],
+    sha_index: dict[tuple[str, str], dict[str, dict[str, str]]],
+    fallback_shas_per_repo: dict[str, list[str]],
+) -> tuple[str, dict[str, dict[str, str]]] | None:
+    """Pick (sha, metric_rows) for `repo` using year priority then fallback.
+
+    1. Try each sha in `sha_priority` (newest year first); first hit wins.
+    2. If none match, fall back to any sha present for the repo in the
+       index (lexicographically smallest — deterministic).
+    Returns None if nothing matches.
+    """
+    for sha in sha_priority:
+        rows = sha_index.get((repo, sha))
+        if rows:
+            return sha, rows
+    for sha in fallback_shas_per_repo.get(repo, []):
+        rows = sha_index.get((repo, sha))
+        if rows:
+            return sha, rows
+    return None
+
+
+def _shas_per_repo(
+    sha_index: dict[tuple[str, str], dict[str, dict[str, str]]],
+) -> dict[str, list[str]]:
+    """Group shas present in the index by repo, sorted lex (deterministic)."""
+    by_repo: dict[str, list[str]] = {}
+    for (repo, sha) in sha_index.keys():
+        by_repo.setdefault(repo, []).append(sha)
+    for repo in by_repo:
+        by_repo[repo].sort()
+    return by_repo
 
 
 def _load_ossfuzz() -> set[str]:
@@ -106,102 +197,153 @@ def _load_ossfuzz() -> set[str]:
     return out
 
 
-def _load_osv() -> dict[str, dict[str, str]]:
-    out: dict[str, dict[str, str]] = {}
+def _load_cve_counts_5y() -> dict[str, int]:
+    """Count distinct CVE ids per repo in 2021..2025.
+
+    Each row in osv/cves.csv is one (repo, cve, package-source) tuple.
+    Multiple package mappings can produce duplicate (repo, cve) pairs —
+    we dedupe on the CVE id within a repo. Date filter uses the `date`
+    column's first 4 chars (YYYY).
+    """
+    counts: dict[str, set[str]] = {}
     if not OSV_FILE.exists():
-        return out
+        return {}
     with open(OSV_FILE, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             slug = (row.get("repo") or "").strip().lower()
-            if not slug:
+            cve = (row.get("cve") or "").strip()
+            date = (row.get("date") or "").strip()
+            if not slug or not cve or len(date) < 4:
                 continue
-            out[slug] = row
-    return out
-
-
-def _load_depsdev() -> dict[str, dict[str, str]]:
-    """Load deps.dev rows keyed by repo. Empty if file missing."""
-    out: dict[str, dict[str, str]] = {}
-    if not DEPSDEV_FILE.exists():
-        return out
-    with open(DEPSDEV_FILE, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if not slug:
+            year = date[:4]
+            if year < "2021" or year > "2025":
                 continue
-            out[slug] = row
-    return out
+            counts.setdefault(slug, set()).add(cve)
+    return {slug: len(cves) for slug, cves in counts.items()}
 
 
-def _load_semgrep(rulepack: str = SEMGREP_RULEPACK) -> dict[str, dict[str, str]]:
-    """Load semgrep counts for the chosen rule pack only.
+def _load_osv_queried() -> set[str]:
+    """Repos we attempted to query OSV for (sidecar to cves.csv).
 
-    The CSV is keyed by (repo, rulepack) — same repo can have rows for
-    p/default and p/security-audit side-by-side. We filter to the locked
-    rule pack so the build output is deterministic across rule-pack
-    experiments. Empty for repos that timed out (findings_total="").
+    Used to distinguish "0 CVEs because we asked and got none" from
+    "missing because we never queried". For now we just count rows in
+    cves.csv directly — a repo absent from cves.csv but present in
+    queried.csv is a confirmed zero.
     """
-    out: dict[str, dict[str, str]] = {}
-    if not SEMGREP_FILE.exists():
+    out: set[str] = set()
+    queried_file = DATA_DIR / "osv" / "queried.csv"
+    if not queried_file.exists():
         return out
-    with open(SEMGREP_FILE, encoding="utf-8") as f:
+    with open(queried_file, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            slug = (row.get("repo") or "").strip().lower()
+            if slug:
+                out.add(slug)
+    return out
+
+
+def _load_bestpractices_badge() -> dict[str, str]:
+    """Map repo → bestpractices_badge_id from the wide depsdev/repos.csv."""
+    out: dict[str, str] = {}
+    if not DEPSDEV_REPOS_FILE.exists():
+        return out
+    with open(DEPSDEV_REPOS_FILE, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             slug = (row.get("repo") or "").strip().lower()
             if not slug:
                 continue
-            if (row.get("rulepack") or "").strip() != rulepack:
-                continue
-            # Keep only rows where the scan succeeded (timeouts leave
-            # findings_total="" per the fetcher contract).
-            if (row.get("findings_total") or "").strip() == "":
-                continue
-            out[slug] = row
+            badge = (row.get("bestpractices_badge_id") or "").strip()
+            if badge:
+                out[slug] = badge
     return out
 
 
 def build() -> list[dict]:
     eligible = load_eligible_repos()
-    scores = _load_openssf_scores()
+
+    per_year = _per_year_shas(COMMITS_YEARS_FILE)
+
+    # Index each long file by (repo, sha) → {metric: row}.
+    openssf_idx = _index_long_by_repo_sha(read_long(OPENSSF_FILE))
+    depsdev_idx = _index_long_by_repo_sha(read_long(DEPSDEV_LONG_FILE))
+    semgrep_idx = _index_long_by_repo_sha(
+        read_long(SEMGREP_FILE), metric_prefix=SEMGREP_PREFIX,
+    )
+
+    openssf_shas = _shas_per_repo(openssf_idx)
+    depsdev_shas = _shas_per_repo(depsdev_idx)
+    semgrep_shas = _shas_per_repo(semgrep_idx)
+
     fuzz = _load_ossfuzz()
-    osv = _load_osv()
-    semgrep = _load_semgrep()
-    depsdev = _load_depsdev()
+    cve_counts = _load_cve_counts_5y()
+    queried = _load_osv_queried()
+    badges = _load_bestpractices_badge()
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
-        s = scores.get(repo, {})
-        o = osv.get(repo, {})
-        sg = semgrep.get(repo, {})
-        dd = depsdev.get(repo, {})
+        priority = per_year.get(repo, [])
 
-        # Prefer the local OpenSSF Scorecard scan; fall back to deps.dev's
-        # mirror only when our local row is missing or empty. Track which
-        # source won so downstream consumers can audit. The fall-back is
-        # rare (≈10% of eligible repos), so we keep it strictly opt-in.
-        local_score = (s.get("score") or "").strip()
-        depsdev_score = (dd.get("depsdev_scorecard_overall") or "").strip()
-        if local_score:
-            ossf_score, ossf_source = local_score, "openssf_local"
-        elif depsdev_score:
-            ossf_score, ossf_source = depsdev_score, "depsdev"
+        # OpenSSF Scorecard: local (openssf.csv) → deps.dev mirror fallback.
+        ossf_score = ""
+        ossf_source = ""
+        ossf_checked_at = ""
+        local = _pick_latest(repo, priority, openssf_idx, openssf_shas)
+        if local is not None:
+            _sha, metrics = local
+            score_row = metrics.get("score")
+            if score_row and score_row.get("value", "").strip():
+                ossf_score = score_row["value"].strip()
+                ossf_source = "openssf_local"
+                ossf_checked_at = (score_row.get("checked_at") or "").strip()
+        if not ossf_score:
+            mirror = _pick_latest(repo, priority, depsdev_idx, depsdev_shas)
+            if mirror is not None:
+                _sha, metrics = mirror
+                score_row = metrics.get("score")
+                if score_row and score_row.get("value", "").strip():
+                    ossf_score = score_row["value"].strip()
+                    ossf_source = "depsdev"
+                    ossf_checked_at = (
+                        score_row.get("checked_at") or ""
+                    ).strip()
+
+        # Semgrep p/default findings.
+        sast_total = sast_error = sast_security = ""
+        sg = _pick_latest(repo, priority, semgrep_idx, semgrep_shas)
+        if sg is not None:
+            _sha, metrics = sg
+            t = metrics.get(SEMGREP_PREFIX + "findings_total")
+            e = metrics.get(SEMGREP_PREFIX + "findings_error")
+            s = metrics.get(SEMGREP_PREFIX + "findings_security")
+            if t and t.get("value", "").strip():
+                sast_total = t["value"].strip()
+            if e and e.get("value", "").strip():
+                sast_error = e["value"].strip()
+            if s and s.get("value", "").strip():
+                sast_security = s["value"].strip()
+
+        # CVE count: count from cves.csv if present; else 0 if we queried;
+        # else "" (unknown — never queried).
+        if repo in cve_counts:
+            cve_5y = str(cve_counts[repo])
+        elif repo in queried:
+            cve_5y = "0"
         else:
-            ossf_score, ossf_source = "", ""
+            cve_5y = ""
 
         rows.append({
             "repo": repo,
             "repo_id": entry.repo_id,
             "openssf_score": ossf_score,
             "openssf_score_source": ossf_source,
-            "cve_count_5y": (o.get("cve_count_5y") or "").strip(),
+            "cve_count_5y": cve_5y,
             "ossfuzz_enrolled": "True" if repo in fuzz else "False",
-            "sast_findings_total": (sg.get("findings_total") or "").strip(),
-            "sast_findings_error": (sg.get("findings_error") or "").strip(),
-            "sast_findings_security": (sg.get("findings_security") or "").strip(),
-            "bestpractices_badge_id": (
-                dd.get("bestpractices_badge_id") or ""
-            ).strip(),
-            "fetched_at": s.get("checked_at", ""),
+            "sast_findings_total": sast_total,
+            "sast_findings_error": sast_error,
+            "sast_findings_security": sast_security,
+            "bestpractices_badge_id": badges.get(repo, ""),
+            "fetched_at": ossf_checked_at,
         })
     return rows
 
@@ -229,22 +371,15 @@ def main() -> None:
         pct = 100 * n / total if total else 0
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")
 
-    # Source attribution for openssf_score
-    src_counts = {"openssf_local": 0, "depsdev": 0, "missing": 0}
-    for r in rows:
-        src = r.get("openssf_score_source") or ""
-        if src == "openssf_local":
-            src_counts["openssf_local"] += 1
-        elif src == "depsdev":
-            src_counts["depsdev"] += 1
-        else:
-            src_counts["missing"] += 1
+    src_counts = Counter(
+        r.get("openssf_score_source") or "missing" for r in rows
+    )
     console.print(table)
     console.print(
         f"[dim]openssf_score sources: "
-        f"local={src_counts['openssf_local']:,} "
-        f"depsdev={src_counts['depsdev']:,} "
-        f"missing={src_counts['missing']:,}[/dim]"
+        f"local={src_counts.get('openssf_local', 0):,} "
+        f"depsdev={src_counts.get('depsdev', 0):,} "
+        f"missing={src_counts.get('missing', 0):,}[/dim]"
     )
 
     enrolled = sum(1 for r in rows if r["ossfuzz_enrolled"] == "True")

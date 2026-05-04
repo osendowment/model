@@ -111,6 +111,7 @@ conventional-changelog/conventional-changelog,15639771,0,False,,False,,2026-04-2
 cosmiconfig/cosmiconfig,45750507,7,True,"github,custom",False,,2026-04-28T00:16:02+00:00
 coveragepy/coveragepy,138421996,22,True,"github,tidelift",False,,2026-04-28T00:16:02+00:00
 cpburnz/python-pathspec,14648551,0,False,,False,,2026-04-28T00:16:02+00:00
+crate-py/rpds,608018848,,,,,,
 criterion-rs/criterion.rs,1081104682,0,False,,False,,2026-04-28T00:16:03+00:00
 crossbeam-rs/crossbeam,35566048,0,False,,False,,2026-04-28T00:16:03+00:00
 crypto-browserify/randombytes,29300004,0,False,,False,,2026-04-28T00:16:04+00:00
@@ -118,6 +119,7 @@ css-modules/icss-utils,42766912,0,False,,False,,2026-04-28T00:16:04+00:00
 cssnano/cssnano,33943153,0,True,open_collective,False,,2026-04-28T00:16:05+00:00
 csstools/postcss-plugins,219192307,6,True,"github,open_collective",False,,2026-04-28T00:16:05+00:00
 csstree/csstree,67236461,0,True,open_collective,False,,2026-04-28T00:16:06+00:00
+curl/curl,569041,,,,,,
 cuviper/autocfg,135481335,0,False,,False,,2026-04-28T00:16:06+00:00
 cyan4973/xxhash,19330466,0,False,,False,,2026-04-28T00:16:07+00:00
 daaku/nodejs-makeerror,2097803,0,False,,False,,2026-04-28T00:16:07+00:00
@@ -229,6 +231,7 @@ follow-redirects/follow-redirects,6697086,4,True,github,False,,2026-04-28T00:15:
 fontconfig/fontconfig,926884194,0,False,,False,,2026-04-28T00:15:59+00:00
 form-data/form-data,1755793,0,False,,False,,2026-04-28T00:15:59+00:00
 formatjs/formatjs,19117456,0,False,,False,,2026-04-28T00:15:59+00:00
+freetype/freetype,187000659,,,,,,
 frenic/csstype,104001328,0,False,,False,,2026-04-28T00:16:00+00:00
 frommi/miniz_oxide,96124162,0,False,,False,,2026-04-28T00:16:00+00:00
 fsevents/fsevents,1402936,0,False,,False,,2026-04-28T00:16:00+00:00
@@ -259,8 +262,8 @@ google/brotli,24993138,0,False,,False,,2026-04-28T00:16:10+00:00
 google/zerocopy,534354967,0,False,,False,,2026-04-28T00:16:10+00:00
 googleapis/google-auth-library-python,69199387,0,False,,False,,2026-04-28T00:16:11+00:00
 googleapis/google-cloud-node-core,1052931509,0,False,,False,,2026-04-28T00:16:11+00:00
+googleapis/google-cloud-python,16316451,,,,,,
 googleapis/google-resumable-media-python,88091939,0,False,,False,,2026-04-28T00:16:12+00:00
-googleapis/python-api-core,226992456,0,False,,False,,2026-04-28T00:16:12+00:00
 googleapis/python-crc32c,159736041,0,False,,False,,2026-04-28T00:16:12+00:00
 googleapis/python-storage,226992639,0,False,,False,,2026-04-28T00:16:13+00:00
 googlechrome/workbox,55424670,0,False,,False,,2026-04-28T00:16:13+00:00
@@ -354,7 +357,6 @@ jbgutierrez/path-parse,34113780,0,False,,False,,2026-04-28T00:15:58+00:00
 jd/tenacity,65468547,3,False,,False,,2026-04-28T00:15:58+00:00
 jensyt/imurmurhash-js,11802843,0,False,,False,,2026-04-28T00:15:58+00:00
 jestjs/jest,15062869,0,True,open_collective,False,lf/openjs,2026-04-28T00:15:59+00:00
-jimmywarting/node-domexception,371470141,3,True,"github,custom",False,,2026-04-28T00:15:59+00:00
 jimp-dev/jimp,24008065,2,True,github,False,,2026-04-28T00:15:59+00:00
 jmespath/jmespath.py,8300763,0,False,,False,,2026-04-28T00:16:00+00:00
 joblib/joblib,654608,0,False,,False,,2026-04-28T00:16:00+00:00
@@ -545,7 +547,6 @@ npm/abbrev-js,554893,0,False,,False,,2026-04-28T00:16:24+00:00
 npm/cacache,193812470,0,False,,False,,2026-04-28T00:16:24+00:00
 npm/fs-minipass,102982143,0,False,,False,,2026-04-28T00:16:25+00:00
 npm/hosted-git-info,25002984,0,False,,False,,2026-04-28T00:16:26+00:00
-npm/inflight,19442260,0,False,,False,,2026-04-28T00:16:26+00:00
 npm/ini,2167680,0,False,,False,,2026-04-28T00:16:26+00:00
 npm/json-parse-even-better-errors,211384370,0,False,,False,,2026-04-28T00:16:27+00:00
 npm/mute-stream,5159166,0,False,,False,,2026-04-28T00:16:27+00:00
@@ -567,7 +568,7 @@ oozcitak/xmlbuilder-js,1042809,1,True,github,False,,2026-04-28T00:15:42+00:00
 open-telemetry/opentelemetry-js,185901023,0,False,,False,lf/cncf,2026-04-28T00:15:42+00:00
 open-telemetry/opentelemetry-js-contrib,255986659,0,False,,False,,2026-04-28T00:15:43+00:00
 open-telemetry/opentelemetry-python,185478926,0,False,,False,lf/cncf,2026-04-28T00:15:43+00:00
-open-telemetry/opentelemetry-python,185478926,0,False,,False,lf/cncf,2026-04-28T00:15:43+00:00
+open-telemetry/opentelemetry-python-contrib,220524743,,,,,lf/cncf,
 openssl/openssl,7634677,31,True,github,True,,2026-04-28T00:15:44+00:00
 opensuse/ca-certificates,10785433,0,False,,False,,2026-04-28T00:15:44+00:00
 p11-glue/p11-kit,12060420,0,False,,False,,2026-04-28T00:15:44+00:00
@@ -593,6 +594,7 @@ pillarjs/parseurl,17533192,0,False,,False,,2026-04-28T00:15:52+00:00
 pillarjs/path-to-regexp,5265803,0,False,,False,lf,2026-04-28T00:15:52+00:00
 pillarjs/send,4879977,0,False,,False,,2026-04-28T00:15:53+00:00
 pkgconf/pkgconf,4180110,0,True,open_collective,False,,2026-04-28T00:15:53+00:00
+pnggroup/libpng,3768025,,,,,,
 postcss/postcss,13078968,18,True,"open_collective,tidelift,github",False,,2026-04-28T00:15:53+00:00
 postcss/postcss-selector-parser,36500102,0,False,,False,,2026-04-28T00:15:54+00:00
 prettier/prettier,75104123,52,False,,False,,2026-04-28T00:15:54+00:00
@@ -627,8 +629,8 @@ python-greenlet/greenlet,3003137,0,False,,False,,2026-04-28T00:16:05+00:00
 python-hyper/brotlicffi,43543393,0,False,,False,,2026-04-28T00:16:05+00:00
 python-hyper/h11,57372073,0,False,,False,,2026-04-28T00:16:05+00:00
 python-jsonschema/jsonschema,3072629,4,True,"github,tidelift",False,,2026-04-28T00:16:06+00:00
-python-jsonschema/referencing,569027868,4,True,github,False,,2026-04-28T00:16:06+00:00
-python-poetry/poetry-core,238972646,0,False,,False,,2026-04-28T00:16:07+00:00
+python-pillow/pillow,5171600,,,,,,
+python-poetry/poetry,123303402,,,,,,
 python-poetry/tomlkit,140365570,5,True,github,False,,2026-04-28T00:16:07+00:00
 python-trio/sniffio,142657210,2,False,,False,,2026-04-28T00:16:07+00:00
 python/importlib_metadata,306448340,177,True,tidelift,False,psf,2026-04-28T00:16:08+00:00
@@ -636,6 +638,7 @@ python/importlib_resources,306147182,177,True,tidelift,False,psf,2026-04-28T00:1
 python/mypy,7053637,177,False,,False,psf,2026-04-28T00:16:09+00:00
 python/typeshed,31696383,177,False,,False,psf,2026-04-28T00:16:09+00:00
 python/typing,24604008,177,False,,False,psf,2026-04-28T00:16:09+00:00
+python/typing_extensions,494077289,,,,,psf,
 python/tzdata,242158882,177,False,,False,psf,2026-04-28T00:16:10+00:00
 qix-/color-convert,1874305,16,False,,False,,2026-04-28T00:16:10+00:00
 qix-/node-error-ex,41388258,16,False,,False,,2026-04-28T00:16:10+00:00
@@ -658,6 +661,7 @@ retep998/winapi-rs,23853482,0,True,patreon,False,,2026-04-28T00:16:17+00:00
 rich-harris/estree-walker,33668779,0,False,,False,,2026-04-28T00:16:18+00:00
 rich-harris/magic-string,26143240,0,False,,False,,2026-04-28T00:16:18+00:00
 rob--w/proxy-from-env,52038793,0,False,,False,,2026-04-28T00:16:18+00:00
+rogdham/backports.zstd,977687927,,,,,,
 rollup/plugins,203607977,0,True,open_collective,False,,2026-04-28T00:16:19+00:00
 ronaldoussoren/pyobjc,243933900,0,False,,False,,2026-04-28T00:16:19+00:00
 rust-cli/anstyle,493821282,0,True,github,False,,2026-04-28T00:16:19+00:00
@@ -728,7 +732,6 @@ sindresorhus/escape-string-regexp,21169121,184,False,,False,,2026-04-28T00:15:54
 sindresorhus/execa,47475908,184,False,,False,,2026-04-28T00:15:54+00:00
 sindresorhus/figures,21672939,184,False,,False,,2026-04-28T00:15:55+00:00
 sindresorhus/file-type,19105307,184,False,,False,,2026-04-28T00:15:55+00:00
-sindresorhus/find-cache-dir,48783244,184,False,,False,,2026-04-28T00:15:56+00:00
 sindresorhus/find-up,41723004,184,False,,False,,2026-04-28T00:15:56+00:00
 sindresorhus/find-up-simple,714044439,184,False,,False,,2026-04-28T00:15:56+00:00
 sindresorhus/get-east-asian-width,711160838,184,False,,False,,2026-04-28T00:15:57+00:00
@@ -754,7 +757,6 @@ sindresorhus/log-symbols,21673868,184,False,,False,,2026-04-28T00:16:04+00:00
 sindresorhus/lowercase-keys,29769737,184,False,,False,,2026-04-28T00:16:05+00:00
 sindresorhus/make-dir,90776169,184,False,,False,,2026-04-28T00:16:05+00:00
 sindresorhus/meow,25121561,184,False,,False,,2026-04-28T00:16:06+00:00
-sindresorhus/mimic-fn,71381729,184,False,,False,,2026-04-28T00:16:06+00:00
 sindresorhus/mimic-function,71381729,184,False,,False,,2026-04-28T00:16:07+00:00
 sindresorhus/mimic-response,93189529,184,False,,False,,2026-04-28T00:16:07+00:00
 sindresorhus/node-defaults,7985040,184,False,,False,,2026-04-28T00:16:08+00:00
@@ -770,14 +772,11 @@ sindresorhus/p-try,71534796,184,False,,False,,2026-04-28T00:16:11+00:00
 sindresorhus/parent-module,50187748,184,False,,False,,2026-04-28T00:16:11+00:00
 sindresorhus/parse-json,41367145,184,False,,False,,2026-04-28T00:16:12+00:00
 sindresorhus/path-exists,34965664,184,False,,False,,2026-04-28T00:16:12+00:00
-sindresorhus/path-is-absolute,30900285,184,False,,False,,2026-04-28T00:16:13+00:00
 sindresorhus/path-key,48706449,184,False,,False,,2026-04-28T00:16:13+00:00
 sindresorhus/path-type,41905436,184,False,,False,,2026-04-28T00:16:14+00:00
 sindresorhus/pify,41585934,184,False,,False,,2026-04-28T00:16:14+00:00
-sindresorhus/pkg-dir,41724281,184,False,,False,,2026-04-28T00:16:15+00:00
 sindresorhus/quick-lru,86679721,184,False,,False,,2026-04-28T00:16:15+00:00
 sindresorhus/read-pkg,41790094,184,False,,False,,2026-04-28T00:16:16+00:00
-sindresorhus/read-pkg-up,41842429,184,False,,False,,2026-04-28T00:16:16+00:00
 sindresorhus/resolve-cwd,47504070,184,False,,False,,2026-04-28T00:16:16+00:00
 sindresorhus/resolve-from,22022707,184,False,,False,,2026-04-28T00:16:17+00:00
 sindresorhus/restore-cursor,23512229,184,False,,False,,2026-04-28T00:16:17+00:00
@@ -801,6 +800,7 @@ smol-rs/fastrand,267368764,0,False,,False,,2026-04-28T00:16:23+00:00
 snowflakedb/snowflake-connector-python,62262074,0,False,,False,psf,2026-04-28T00:16:24+00:00
 socketio/socket.io,557980,0,False,,False,,2026-04-28T00:16:24+00:00
 sqlalchemy/sqlalchemy,159271175,24,True,"github,patreon,tidelift",False,,2026-04-28T00:16:25+00:00
+sqlite/sqlite,176278485,,,,,,
 srijs/rust-crc32fast,157348282,0,False,,False,,2026-04-28T00:16:26+00:00
 stebalien/tempfile,33832372,0,False,,False,,2026-04-28T00:16:26+00:00
 stefanpenner/get-caller-file,48818175,0,False,,False,,2026-04-28T00:16:26+00:00

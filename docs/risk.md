@@ -175,6 +175,52 @@ All data comes from [GitHub](sources/github.md):
 | `src/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
 | `src/pipeline/risk.py` | Aggregate into risk classifications. **Input is `eligibility-data.csv` (eligible repos only)** — `uv run python -m src.pipeline.risk` |
 
+## Source-file coverage
+
+Snapshot of how complete each source file is across the 899 eligible
+repos. Refresh with `uv run python scripts/coverage_report.py`.
+
+| Source | File | Eligible covered | Coverage | Notes |
+|---|---|---:|---:|---|
+| commits-years (foundation) | `data/github/git/commits-years.csv` | 899/899 | **100%** | per-(repo, year) `last_sha`; foundation file |
+| scc | `data/git/scc.csv` | 899/899 | **100%** | sparse-checkout per year sha |
+| repos | `data/github/repos.csv` | 899/899 | **100%** | stars / forks / watchers / pushed_at |
+| contributors | `data/github/contributors/contributors.csv` | 896/899 | 99.7% | per-repo lifetime contributor list |
+| openssf | `data/git/openssf.csv` | 895/899 | 99.6% | overall score + 18 checks per sha |
+| concentration | `data/concentration-data.csv` | 894/899 | 99.4% | lifetime BF / HHI / commits |
+| lizard | `data/git/lizard.csv` | 894/899 | 99.4% | cognitive + cyclomatic + Halstead per sha |
+| semgrep | `data/git/semgrep.csv` | 892/899 | 99.2% | rulepack-prefixed SAST findings per sha |
+| cves-queried | `data/osv/queried.csv` | 888/899 | 98.8% | repos OSV was successfully asked about |
+| funding | `data/funding-data.csv` | 888/899 | 98.8% | github_sponsors + FUNDING.yml |
+| openssf-checks | `data/openssf/checks.csv` | 881/899 | 98.0% | per-check Scorecard scores (used by build_workload) |
+| issues | `data/github/issues.csv` | 878/899 | 97.7% | opened/closed per year |
+| commits-wide | `data/github/contributors/commits.csv` | 876/899 | 97.4% | per-year commits |
+| hhi | `data/github/contributors/hhi.csv` | 876/899 | 97.4% | per-year HHI |
+| bus-factor | `data/github/contributors/bus-factor.csv` | 876/899 | 97.4% | per-year bus factor |
+| churn | `data/github/git/churn.csv` | 869/899 | 96.7% | 5y added+deleted lines (heavy bare-clone) |
+| depsdev | `data/git/depsdev.csv` | 791/899 | 88.0% | structural — deps.dev only indexes npm / pypi / cargo / maven / go / nuget / rubygems (Debian, cpp, Homebrew unsupported) |
+
+### Why the remaining gaps
+
+- **depsdev (88%)** — repos that publish only via Debian / Homebrew / vcpkg / source tarballs are absent from deps.dev's index. Not fillable.
+- **Anything ~99% with 4–6 missing** — a mix of brand-new eligibility additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
+- **commits-wide / hhi / bus-factor (97.4%)** — `fetch_contributors_metrics` skips repos with > 5000 total contributors (GitHub's `/contributors` API caps results there), so a handful of mega-projects (kubernetes, ansible, llvm-project, etc.) are absent by design.
+- **churn (96.7%)** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
+
+### What this rolls up to in `risk-data.csv`
+
+**899 rows × 51 columns · 100% eligible populated · median per-column coverage 98.8%.**
+
+Sub-100% columns (every gap is structural, not a data-collection bug):
+
+| Column | Coverage | Why |
+|---|---:|---|
+| `bestpractices_badge_id` | 2.8% | Only repos enrolled in CII Best Practices have a badge. |
+| `foundation_host` | 3.9% | Only 35 repos belong to a FOSS foundation (apache / psf / lf / numfocus / lf/cncf / lf/openjs). |
+| `funding_yml_platforms` | 27.3% | Most repos don't have a `.github/FUNDING.yml`. |
+| `cognitive_total` / `_avg` / `_max` | 65.1% | Only computed for languages with a Lizard / cognitive-complexity parser. |
+| `issue_trend_score` | 67.5% | Formula requires `mean_opened_per_year ≥ 1`; quiet repos correctly omitted. |
+
 ## Output
 
 ### risk-data.csv

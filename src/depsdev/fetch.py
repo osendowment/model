@@ -5,8 +5,10 @@ hit two free APIs:
 
 1. **deps.dev** (https://api.deps.dev) — Google's dependency-graph index.
    - `GET /v3/projects/github.com%2F{owner}%2F{repo}` → project info, including
-     a mirrored OpenSSF Scorecard (`scorecard.overallScore`, `scorecard.date`)
-     that's typically fresher than our local `data/openssf/scores.csv`.
+     a mirrored OpenSSF Scorecard (`scorecard.overallScore`, `scorecard.date`,
+     plus a `scorecard.repository.commit` SHA and a list of per-check scores
+     under `scorecard.checks[]`). Typically fresher than our local
+     `data/git/openssf.csv` (long-format, sha-pinned).
    - `GET /v3alpha/systems/{ECO}/packages/{pkg}/versions/{default}:dependents`
      → `dependentCount` for a package. We sum across all (eco, pkg) pairs
      mapped to the repo via `data/{npm,pypi,crates}/results.csv`. Debian
@@ -17,9 +19,13 @@ hit two free APIs:
    - `GET /projects.json?url=https://github.com/{owner}/{repo}` → project list.
      We pick the first match and capture `badge_level` and `tiered_percentage`.
 
-For each eligible repo, we capture:
-    depsdev_scorecard_overall   (0..10, fresh OpenSSF mirror)
-    depsdev_scorecard_date      (ISO date)
+Two output files are written:
+
+- `data/depsdev/repos.csv` — wide, one row per repo, NON-sha-pinned fields:
+    depsdev_scorecard_overall   (0..10, fresh OpenSSF mirror — kept for legacy
+                                 dashboard consumers; ALSO written as `score`
+                                 in the long file pinned to the snapshot SHA)
+    depsdev_scorecard_date      (ISO date — same caveat as above)
     depsdev_dependent_count     (int, summed across mapped pkgs; "" if
                                  Debian-only or no published default version)
     depsdev_license             (SPDX-ish, from deps.dev project)
@@ -28,7 +34,11 @@ For each eligible repo, we capture:
     bestpractices_tiered_percentage  (0..300, sum across tiers)
     fetched_at                  (ISO timestamp, this run)
 
-Output: `data/depsdev/repos.csv` (sorted by repo).
+- `data/git/depsdev.csv` — long, sha-pinned (repo, repo_id, commit_sha, metric,
+   value, checked_at). One row per check + one `score` row per repo, anchored
+   to `scorecard.repository.commit` and dated `scorecard.date`. Written via
+   the shared `src.git.long_format.upsert_rows` so historical snapshots for
+   prior SHAs are preserved when the upstream scorecard rolls forward.
 
 Usage:
     uv run python -m src.depsdev.fetch                        # full run (899)
@@ -48,6 +58,7 @@ import csv
 import datetime
 import logging
 import random
+import re
 import time
 from collections import Counter
 from pathlib import Path
@@ -66,6 +77,7 @@ from rich.progress import (
 from rich.table import Table
 from yarl import URL
 
+from src.git.long_format import upsert_rows as upsert_long_rows
 from src.osv.fetch_cves import load_repo_package_mapping
 from src.pipeline.repos import load_eligible_repos
 
@@ -74,6 +86,7 @@ log = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "depsdev" / "repos.csv"
+LONG_FILE = DATA_DIR / "git" / "depsdev.csv"
 
 FIELDS = [
     "repo", "repo_id",
@@ -283,12 +296,27 @@ async def fetch_bestpractices(
 # ── per-repo orchestration ───────────────────────────────────────────────────
 
 
+def _to_snake_case(name: str) -> str:
+    """`Binary-Artifacts` → `binary_artifacts`, `CII-Best-Practices` → `cii_best_practices`.
+
+    Mirrors `src.git.migrations.migrate_openssf.to_snake_case` so the depsdev
+    scorecard mirror produces identical metric names to the openssf migration.
+    """
+    s = name.strip().replace("-", "_")
+    s = re.sub(r"[^A-Za-z0-9_]", "_", s)
+    return s.lower()
+
+
 def _extract_scorecard(project: dict) -> tuple[str, str]:
     """Return (overall_score, date) from a deps.dev project payload.
 
     Both come back as strings — score is a float "0.0".."10.0" rendered with
     Python's default repr (so "7.5" not "7.50"). Empty when scorecard
     missing or fields absent.
+
+    Used for the wide CSV's legacy `depsdev_scorecard_overall` /
+    `depsdev_scorecard_date` columns. The richer per-check + sha extraction
+    lives in `_extract_scorecard_long` so the wide path stays unchanged.
     """
     s = project.get("scorecard") or {}
     overall = s.get("overallScore")
@@ -301,6 +329,37 @@ def _extract_scorecard(project: dict) -> tuple[str, str]:
     return overall_str, date
 
 
+def _extract_scorecard_long(
+    project: dict,
+) -> tuple[str, str, dict[str, float | int]]:
+    """Return (commit_sha, checked_at, metrics) for the long-format file.
+
+    `metrics` includes `score` (overallScore) and one entry per check, keyed
+    by snake_cased name (e.g. `Binary-Artifacts` → `binary_artifacts`). Check
+    scores of -1 are kept (they're a real signal: "not applicable"); only
+    None / missing scores are dropped. Empty tuple-of-defaults when the
+    project payload has no scorecard or no commit SHA — caller writes nothing.
+    """
+    s = (project or {}).get("scorecard") or {}
+    repo_obj = s.get("repository") or {}
+    commit_sha = (repo_obj.get("commit") or "").strip()
+    checked_at = (s.get("date") or "").strip()
+    if not commit_sha:
+        return "", "", {}
+
+    metrics: dict[str, float | int] = {}
+    overall = s.get("overallScore")
+    if overall is not None:
+        metrics["score"] = overall
+    for check in s.get("checks") or []:
+        name = (check or {}).get("name")
+        score = (check or {}).get("score")
+        if not name or score is None:
+            continue
+        metrics[_to_snake_case(name)] = score
+    return commit_sha, checked_at, metrics
+
+
 async def _process_repo(
     repo: str,
     packages: list[tuple[str, str]],
@@ -309,8 +368,14 @@ async def _process_repo(
     last_request_ref: list[float],
     throttle_lock: asyncio.Lock,
     bp_limiter: BestPracticesLimiter,
-) -> dict[str, str]:
+) -> tuple[dict[str, str], list[dict[str, str]]]:
     """Fetch project info + dependents (per package) + best-practices badge.
+
+    Returns `(wide_row, long_rows)`:
+    - `wide_row` populates `data/depsdev/repos.csv`
+    - `long_rows` are sha-pinned scorecard rows for `data/git/depsdev.csv`
+      (empty list when deps.dev has no scorecard mirror for the repo, or
+      the mirror lacks a commit SHA — a legitimate "no data" outcome).
 
     Throttled to ≤1 request per WORKER_MIN_INTERVAL_S per worker for deps.dev.
     Best-Practices uses a separate global limiter (passed in) since the
@@ -328,6 +393,7 @@ async def _process_repo(
     # 1. Project (scorecard, license, open issues)
     project = await _throttled_get(lambda: fetch_project(session, repo))
 
+    long_rows: list[dict[str, str]] = []
     if project is None:
         scorecard_overall, scorecard_date = "", ""
         depsdev_license, depsdev_open_issues = "", ""
@@ -336,6 +402,22 @@ async def _process_repo(
         depsdev_license = (project.get("license") or "").strip()
         oi = project.get("openIssuesCount")
         depsdev_open_issues = str(oi) if isinstance(oi, (int, float)) else ""
+
+        # Long-format extraction — may be empty if no scorecard or no commit.
+        commit_sha, sc_checked_at, metrics = _extract_scorecard_long(project)
+        if commit_sha and metrics:
+            repo_id = repo_id_map.get(repo, "")
+            for metric, value in metrics.items():
+                long_rows.append({
+                    "repo": repo,
+                    "repo_id": str(repo_id) if repo_id else "",
+                    "commit_sha": commit_sha,
+                    "metric": metric,
+                    # `upsert_rows` skips empty values; pass numbers through
+                    # the same shortest-form formatter used by long_format.
+                    "value": _format_metric_value(value),
+                    "checked_at": sc_checked_at,
+                })
 
     # 2. Dependent count — sum across mapped packages in supported systems.
     # Skip Debian (cpp) since deps.dev doesn't index it. If the repo has only
@@ -358,7 +440,7 @@ async def _process_repo(
     badge, pct = await fetch_bestpractices(session, repo, bp_limiter)
 
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
-    return {
+    wide_row = {
         "repo": repo,
         "repo_id": repo_id_map.get(repo, ""),
         "depsdev_scorecard_overall": scorecard_overall,
@@ -370,6 +452,28 @@ async def _process_repo(
         "bestpractices_tiered_percentage": pct,
         "fetched_at": now,
     }
+    return wide_row, long_rows
+
+
+def _format_metric_value(value: float | int) -> str:
+    """Render a numeric metric value as the canonical CSV string.
+
+    Mirrors `src.git.long_format._format_value` for ints/floats so the
+    long-format file uses identical formatting (no trailing `.0` on whole
+    numbers, no spurious precision on floats). `upsert_rows` itself does
+    no further formatting on the `value` field.
+    """
+    if isinstance(value, bool):  # pragma: no cover — scorecard never bools
+        return "True" if value else "False"
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        if value != value or value in (float("inf"), float("-inf")):
+            return ""
+        if value.is_integer():
+            return str(int(value))
+        return repr(value)
+    return str(value).strip()
 
 
 # ── CSV I/O ──────────────────────────────────────────────────────────────────
@@ -428,13 +532,19 @@ async def _worker(
     queue: asyncio.Queue,
     session: aiohttp.ClientSession,
     results: dict[str, dict[str, str]],
+    long_rows_by_repo: dict[str, list[dict[str, str]]],
     repo_id_map: dict[str, str],
     repo_pkg_map: dict[str, list[tuple[str, str]]],
     bp_limiter: BestPracticesLimiter,
     progress: Progress,
     task_id: int,
 ) -> None:
-    """Pull repos off the queue, fetch deps.dev + best-practices, write to results."""
+    """Pull repos off the queue, fetch deps.dev + best-practices, write to results.
+
+    Long-format scorecard rows (when deps.dev has a mirror) are stashed per
+    repo in `long_rows_by_repo` and flushed to `data/git/depsdev.csv` either
+    by the periodic flusher or at end-of-run.
+    """
     last_request_ref = [0.0]
     throttle_lock = asyncio.Lock()
     while True:
@@ -445,7 +555,7 @@ async def _worker(
 
         packages = repo_pkg_map.get(repo, [])
         try:
-            row = await _process_repo(
+            row, long_rows = await _process_repo(
                 repo, packages, session, repo_id_map,
                 last_request_ref, throttle_lock, bp_limiter,
             )
@@ -459,7 +569,10 @@ async def _worker(
                     datetime.timezone.utc
                 ).isoformat(timespec="seconds"),
             }
+            long_rows = []
         results[repo] = row
+        if long_rows:
+            long_rows_by_repo[repo] = long_rows
         progress.advance(task_id)
         queue.task_done()
 
@@ -467,15 +580,34 @@ async def _worker(
 async def _periodic_flush(
     existing: dict[str, dict[str, str]],
     new_results: dict[str, dict[str, str]],
+    long_rows_by_repo: dict[str, list[dict[str, str]]],
     *,
     interval_s: float,
 ) -> None:
-    """Merge & write every interval_s seconds while workers run."""
+    """Merge & write every interval_s seconds while workers run.
+
+    Persists the wide CSV every tick. Long-format upsert is gated by the
+    `flushed_repos` set so we only re-upsert when new repos finished —
+    `upsert_rows` rewrites the entire file each call (O(rows)), so we want
+    to skip ticks where nothing new arrived.
+    """
+    flushed_repos: set[str] = set()
     try:
         while True:
             await asyncio.sleep(interval_s)
             merged = {**existing, **new_results}
             _write(merged)
+            # Long-format: collect rows from repos we haven't flushed yet.
+            new_long: list[dict[str, str]] = []
+            new_repos: list[str] = []
+            for repo, rows in long_rows_by_repo.items():
+                if repo in flushed_repos:
+                    continue
+                new_long.extend(rows)
+                new_repos.append(repo)
+            if new_long:
+                upsert_long_rows(LONG_FILE, new_long)
+                flushed_repos.update(new_repos)
     except asyncio.CancelledError:
         return
 
@@ -524,6 +656,7 @@ async def batch_fetch(
         queue.put_nowait(repo)
 
     new_results: dict[str, dict[str, str]] = {}
+    long_rows_by_repo: dict[str, list[dict[str, str]]] = {}
     t_start = time.monotonic()
 
     headers = {
@@ -547,6 +680,7 @@ async def batch_fetch(
                 asyncio.create_task(
                     _worker(
                         f"w{i}", queue, session, new_results,
+                        long_rows_by_repo,
                         repo_id_map, repo_pkg_map, bp_limiter,
                         progress, task_id,
                     )
@@ -554,7 +688,10 @@ async def batch_fetch(
                 for i in range(concurrency)
             ]
             flush_task = asyncio.create_task(
-                _periodic_flush(existing, new_results, interval_s=15.0)
+                _periodic_flush(
+                    existing, new_results, long_rows_by_repo,
+                    interval_s=15.0,
+                )
             )
             await asyncio.gather(*workers)
             flush_task.cancel()
@@ -566,11 +703,27 @@ async def batch_fetch(
     existing.update(new_results)
     _write(existing)
 
+    # Final long-format flush — rewrites the whole file once with everything
+    # collected this run. `upsert_rows` keys by (repo, sha, metric) so historical
+    # snapshots for prior SHAs are preserved.
+    all_long_rows: list[dict[str, str]] = []
+    for rows in long_rows_by_repo.values():
+        all_long_rows.extend(rows)
+    long_written = 0
+    long_repos = len(long_rows_by_repo)
+    if all_long_rows:
+        long_written = upsert_long_rows(LONG_FILE, all_long_rows)
+
     elapsed = time.monotonic() - t_start
     rate = len(new_results) / elapsed if elapsed > 0 else 0
     console.print(
         f"[green]done[/green] in {elapsed:.1f}s · "
         f"{len(new_results)} fetched ({rate:.1f}/s) → {OUTPUT_FILE}"
+    )
+    console.print(
+        f"long-format: {long_repos} repos with scorecard mirror "
+        f"({len(all_long_rows)} rows in this run, {long_written} total in file) "
+        f"→ {LONG_FILE}"
     )
     return existing
 

@@ -18,6 +18,7 @@ from dataclasses import dataclass
 log = logging.getLogger(__name__)
 
 VALUE_FILE = "data/value-data.csv"
+ELIGIBILITY_FILE = "data/eligibility-data.csv"
 TOP_REPOS_FILE = "data/github/search/top-repos.csv"
 
 # Class precedence — A beats B if a repo has multiple classifications.
@@ -99,3 +100,35 @@ def load_ab_repos(
 def load_ab_slugs(*args, **kwargs) -> list[str]:
     """Convenience wrapper returning just the lowercased repo slugs."""
     return [e.repo for e in load_ab_repos(*args, **kwargs)]
+
+
+def load_eligible_repos(
+    eligibility_file: str = ELIGIBILITY_FILE,
+) -> list[RepoEntry]:
+    """Return repos with `eligibility=True` from `eligibility-data.csv`.
+
+    The risk pipeline runs on this set: licensed-OSS, non-EOL, valid (non-404)
+    AB-class repos. Built by `src.pipeline.eligibility`. Repos not present
+    or with eligibility != True are excluded.
+    """
+    if not os.path.exists(eligibility_file):
+        raise SystemExit(
+            f"missing {eligibility_file} — run "
+            "`uv run python -m src.pipeline.eligibility` first"
+        )
+    out: list[RepoEntry] = []
+    with open(eligibility_file, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            if (row.get("eligibility") or "").strip() != "True":
+                continue
+            slug = row["repo"].strip().lower()
+            if not slug:
+                continue
+            out.append(RepoEntry(
+                repo=slug,
+                value_class=(row.get("value_class") or "").strip(),
+                repo_id=(row.get("repo_id") or "").strip(),
+                enriched=True,
+            ))
+    out.sort(key=lambda e: e.repo)
+    return out

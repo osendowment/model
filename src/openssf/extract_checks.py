@@ -3,8 +3,9 @@
 
 OpenSSF Scorecard returns a top-level aggregate `score` (0-10) plus per-check
 scores for ~18 individual checks (Maintained, Code-Review, CI-Tests,
-Branch-Protection, Vulnerabilities, etc.). The aggregate is already in
-`data/openssf/scores.csv`; the per-check breakdown lives in `data.json`.
+Branch-Protection, Vulnerabilities, etc.). The aggregate is in the
+sha-pinned long file `data/git/openssf.csv`; the per-check breakdown also
+lives in `data.json`.
 
 This script flattens the JSON into a wide CSV so downstream pipeline stages
 can join per-check scores by repo without parsing JSON.

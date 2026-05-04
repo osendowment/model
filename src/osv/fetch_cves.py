@@ -1,4 +1,4 @@
-"""Fetch CVE counts per eligible repo from OSV.dev (2021–2025).
+"""Fetch per-CVE rows per eligible repo from OSV.dev (2021–2025).
 
 OSV.dev does not index `pkg:github/*` purls — they return zero results. So
 instead, we look up each repo by the (ecosystem, package_name) tuples that
@@ -13,8 +13,7 @@ C/C++ packages are queried against OSV's `Debian` ecosystem — a query
 without a release suffix (e.g. `Debian` vs `Debian:13`) aggregates across
 all Debian releases and returns the most CVEs. Most cpp packages in our
 set (glibc, curl, openssl, ffmpeg, …) have a Debian binary of the same
-name, so this gives broad coverage. Cpp packages with no Debian binary
-get `cve_count_5y=0` (legitimate zero — not a failure).
+name, so this gives broad coverage.
 
 For each (ecosystem, package), we POST to https://api.osv.dev/v1/query:
 
@@ -24,19 +23,33 @@ Vulns from all packages mapped to a repo are aggregated, then deduped:
 identity = `{id} ∪ aliases[]`, canonical key = lex-smallest member.
 Then we filter to `published` year ∈ 2021–2025 inclusive.
 
-Output: data/osv/cves.csv with columns
-    repo, repo_id, cve_count_5y, cve_ids_5y, packages_queried, fetched_at
+Output (long format, one row per (repo × CVE) pair):
 
-`packages_queried` is a comma-separated list of `<eco>:<pkg>` strings —
-makes traceability easy. Failed lookups get `cve_count_5y=""` so a future
-run will retry. Repos with no package mapping (cpp / system-tools orphans)
-are skipped entirely.
+    data/osv/cves.csv      cols: repo, repo_id, date, cve
+
+…where `date` is the CVE's `published` date as ISO `YYYY-MM-DD` and
+`cve` is the canonical id (lex-smallest of `{id} ∪ aliases`). Repos
+with zero CVEs in the 5-year window contribute zero rows.
+
+Sidecar (so downstream can distinguish "scanned, 0 CVEs" from "never queried"):
+
+    data/osv/queried.csv   cols: repo, repo_id, packages_queried, fetched_at
+
+Each successful repo lookup writes one row here. Failed lookups (any
+package returned None) do NOT update the sidecar — so a re-run retries.
+
+Re-run behaviour:
+- A repo is skipped if its `queried.csv` row's `fetched_at` is within
+  `--ttl-days` (default 7) and the lookup wasn't a failure.
+- For repos we re-fetch, existing rows in `cves.csv` for that repo are
+  replaced wholesale with the fresh result (an upsert keyed by repo).
+- Repos we don't touch keep their existing `cves.csv` rows untouched.
 
 Usage:
     uv run python -m src.osv.fetch_cves                        # full run
-    uv run python -m src.osv.fetch_cves --limit 10 -v          # quick test
+    uv run python -m src.osv.fetch_cves --limit 20 -v          # quick test
     uv run python -m src.osv.fetch_cves --force                # ignore TTL
-    uv run python -m src.osv.fetch_cves --concurrency 10       # be politer
+    uv run python -m src.osv.fetch_cves --concurrency 8        # be politer
 """
 
 from __future__ import annotations
@@ -48,7 +61,7 @@ import datetime
 import logging
 import random
 import time
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import aiohttp
@@ -70,14 +83,14 @@ log = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "osv" / "cves.csv"
-FIELDS = [
-    "repo",
-    "repo_id",
-    "cve_count_5y",
-    "cve_ids_5y",
-    "packages_queried",
-    "fetched_at",
-]
+QUERIED_FILE = DATA_DIR / "osv" / "queried.csv"
+
+# Long-format CVE rows: one (repo × CVE) pair per row.
+CVE_FIELDS = ["repo", "repo_id", "date", "cve"]
+
+# Sidecar: repos we successfully scanned (used to distinguish 0-CVE
+# from never-queried).
+QUERIED_FIELDS = ["repo", "repo_id", "packages_queried", "fetched_at"]
 
 # Per-ecosystem `results.csv` → OSV ecosystem name. The OSV ecosystem
 # strings are case-sensitive and follow the OSV schema spec.
@@ -91,7 +104,7 @@ ECOSYSTEM_FILES: list[tuple[Path, str]] = [
 ]
 
 OSV_QUERY_URL = "https://api.osv.dev/v1/query"
-TTL_DAYS_DEFAULT = 30
+TTL_DAYS_DEFAULT = 7
 YEAR_MIN = 2021
 YEAR_MAX = 2025
 
@@ -188,28 +201,44 @@ async def fetch_package_vulns(
 # ── parsing ──────────────────────────────────────────────────────────────────
 
 
-def _published_year(vuln: dict) -> int | None:
-    """Extract year from `published` (ISO 8601). None if missing/unparseable."""
+def _parse_published(vuln: dict) -> tuple[int | None, str | None]:
+    """Extract (year, iso_date) from `published`. (None, None) if missing.
+
+    `iso_date` is the full date `YYYY-MM-DD` in UTC. `year` is the year
+    from that same parse (kept separate so we can filter cheaply).
+    """
     raw = (vuln.get("published") or "").strip()
     if not raw:
-        return None
+        return None, None
     try:
         # OSV uses RFC 3339 / ISO 8601. Python 3.11+ handles trailing Z directly.
-        return datetime.datetime.fromisoformat(raw.replace("Z", "+00:00")).year
+        dt = datetime.datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        # Normalise to UTC date for the output column.
+        if dt.tzinfo is not None:
+            dt = dt.astimezone(datetime.timezone.utc)
+        return dt.year, dt.date().isoformat()
     except ValueError:
-        # Fallback: just trust the leading 4 chars if they look like a year
-        head = raw[:4]
-        return int(head) if head.isdigit() else None
+        # Fallback: trust the leading 10 chars if they look like an ISO date.
+        head = raw[:10]
+        try:
+            d = datetime.date.fromisoformat(head)
+            return d.year, d.isoformat()
+        except ValueError:
+            year_head = raw[:4]
+            return (int(year_head), None) if year_head.isdigit() else (None, None)
 
 
-def dedupe_in_window(vulns: list[dict]) -> list[str]:
-    """Return canonical dedup keys for vulns published in [YEAR_MIN, YEAR_MAX].
+def dedupe_in_window(vulns: list[dict]) -> list[tuple[str, str]]:
+    """Return [(canonical_cve_id, iso_date), ...] for vulns published in window.
 
-    Identity = {id} ∪ aliases. Canonical key = lexicographically smallest member.
-    Two vulns sharing any identifier collapse to one entry. The list is sorted
-    so the CSV output is stable.
+    Identity = {id} ∪ aliases. Canonical id = lexicographically smallest
+    member. Two vulns sharing any identifier collapse to one entry. The
+    canonical date is the earliest `published` date among grouped vulns
+    (an alias added later doesn't push the date forward).
+
+    The list is sorted stably by (date, cve) so the CSV output is stable.
     """
-    # parent[x] = canonical representative of x
+    # union-find on identifier strings
     parent: dict[str, str] = {}
 
     def find(x: str) -> str:
@@ -228,10 +257,10 @@ def dedupe_in_window(vulns: list[dict]) -> list[str]:
         else:
             parent[ra] = rb
 
-    # Track which vulns are in window, plus their identifier sets.
-    in_window: list[set[str]] = []
+    # Track which vulns are in window, with their identifier sets and date.
+    in_window: list[tuple[set[str], str | None]] = []
     for v in vulns:
-        year = _published_year(v)
+        year, iso_date = _parse_published(v)
         if year is None or year < YEAR_MIN or year > YEAR_MAX:
             continue
         ids: set[str] = set()
@@ -242,65 +271,114 @@ def dedupe_in_window(vulns: list[dict]) -> list[str]:
                 ids.add(alias)
         if not ids:
             continue
-        in_window.append(ids)
+        in_window.append((ids, iso_date))
         for i in ids:
             parent.setdefault(i, i)
 
     # Union identifiers within each vuln so they share a root
-    for ids in in_window:
+    for ids, _ in in_window:
         ids_list = list(ids)
         for i in ids_list[1:]:
             union(ids_list[0], i)
 
-    # Each in-window vuln contributes its root; dedupe across vulns
-    canonical_keys: set[str] = set()
-    for ids in in_window:
-        canonical_keys.add(find(next(iter(ids))))
+    # For each canonical root, keep the earliest non-empty date seen.
+    by_root: dict[str, str | None] = {}
+    for ids, iso_date in in_window:
+        root = find(next(iter(ids)))
+        prev = by_root.get(root, "__missing__")
+        if prev == "__missing__":
+            by_root[root] = iso_date
+        elif iso_date and (prev is None or iso_date < prev):
+            by_root[root] = iso_date
 
-    return sorted(canonical_keys)
+    out = [(cve, date or "") for cve, date in by_root.items()]
+    # Stable sort: by (date, cve)
+    out.sort(key=lambda t: (t[1], t[0]))
+    return out
 
 
 # ── CSV I/O ──────────────────────────────────────────────────────────────────
 
 
-def _load_existing() -> dict[str, dict[str, str]]:
-    """Read cves.csv keyed by repo. Empty dict if file missing.
+def _load_existing_cves() -> dict[str, list[dict[str, str]]]:
+    """Read cves.csv grouped by repo. Empty dict if file missing.
 
-    Old rows missing `packages_queried` get an empty value — they'll be
-    overwritten on next fetch.
+    Files written in older formats (with `cve_count_5y, cve_ids_5y, …`)
+    are silently dropped — we'll repopulate from a fresh fetch.
     """
-    out: dict[str, dict[str, str]] = {}
+    out: dict[str, list[dict[str, str]]] = defaultdict(list)
     if not OUTPUT_FILE.exists():
         return out
     with open(OUTPUT_FILE, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            # Forward-compat: ensure all fields exist even if old CSV has fewer.
-            for k in FIELDS:
-                row.setdefault(k, "")
-            out[row["repo"]] = row
+        reader = csv.DictReader(f)
+        # Old format detection: if the file lacks `cve` and `date` columns,
+        # treat it as empty so we re-derive from scratch.
+        if not reader.fieldnames or "cve" not in reader.fieldnames or "date" not in reader.fieldnames:
+            log.info("cves.csv is in old format — ignoring; will rewrite as long format")
+            return defaultdict(list)
+        for row in reader:
+            repo = (row.get("repo") or "").strip()
+            cve = (row.get("cve") or "").strip()
+            if not repo or not cve:
+                continue
+            out[repo].append({
+                "repo": repo,
+                "repo_id": (row.get("repo_id") or "").strip(),
+                "date": (row.get("date") or "").strip(),
+                "cve": cve,
+            })
     return out
 
 
-def _write(rows: dict[str, dict[str, str]]) -> None:
+def _load_queried() -> dict[str, dict[str, str]]:
+    """Read queried.csv keyed by repo. Empty dict if file missing."""
+    out: dict[str, dict[str, str]] = {}
+    if not QUERIED_FILE.exists():
+        return out
+    with open(QUERIED_FILE, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            for k in QUERIED_FIELDS:
+                row.setdefault(k, "")
+            repo = row.get("repo", "").strip()
+            if repo:
+                out[repo] = {k: row.get(k, "") for k in QUERIED_FIELDS}
+    return out
+
+
+def _write_cves(rows_by_repo: dict[str, list[dict[str, str]]]) -> None:
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     tmp = OUTPUT_FILE.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=FIELDS, extrasaction="ignore")
+        w = csv.DictWriter(f, fieldnames=CVE_FIELDS, extrasaction="ignore")
         w.writeheader()
-        for repo in sorted(rows):
-            w.writerow(rows[repo])
+        # Stable order: (repo, date, cve)
+        for repo in sorted(rows_by_repo):
+            for row in sorted(
+                rows_by_repo[repo],
+                key=lambda r: (r.get("date", ""), r.get("cve", "")),
+            ):
+                w.writerow(row)
     tmp.replace(OUTPUT_FILE)
 
 
-def _is_fresh(row: dict[str, str], ttl_days: int) -> bool:
-    """True iff the row's `fetched_at` is within ttl_days AND has a count.
+def _write_queried(rows: dict[str, dict[str, str]]) -> None:
+    QUERIED_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = QUERIED_FILE.with_suffix(".csv.tmp")
+    with open(tmp, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=QUERIED_FIELDS, extrasaction="ignore")
+        w.writeheader()
+        for repo in sorted(rows):
+            w.writerow(rows[repo])
+    tmp.replace(QUERIED_FILE)
 
-    Empty `cve_count_5y` means a previous fetch failed — never treat as fresh,
-    so a re-run will retry it.
+
+def _is_fresh(queried_row: dict[str, str], ttl_days: int) -> bool:
+    """True iff the queried.csv row's `fetched_at` is within ttl_days.
+
+    Presence in queried.csv already means the previous fetch succeeded
+    (failures don't write here), so any timestamp within the TTL counts.
     """
-    if not (row.get("cve_count_5y") or "").strip():
-        return False
-    ts = (row.get("fetched_at") or "").strip()
+    ts = (queried_row.get("fetched_at") or "").strip()
     if not ts:
         return False
     try:
@@ -323,13 +401,16 @@ async def _process_repo(
     repo_id_map: dict[str, str],
     last_request_ref: list[float],
     throttle_lock: asyncio.Lock,
-) -> dict[str, str]:
+) -> tuple[list[dict[str, str]], dict[str, str] | None]:
     """Fetch vulns for every (eco, pkg) mapped to `repo`, aggregate & dedupe.
 
     All package fetches are issued sequentially under a single shared
-    throttle so this worker stays at ≤1 req/sec. If any package lookup
-    fails (returns None), we still aggregate the rest but mark the row
-    with empty `cve_count_5y` so it gets retried next run.
+    throttle so this worker stays at ≤1 req/sec.
+
+    Returns `(cve_rows, queried_row)`:
+    - `cve_rows`: list of `{repo, repo_id, date, cve}` dicts (one per CVE).
+    - `queried_row`: sidecar row, or `None` if any package lookup failed
+      (so a re-run retries this repo).
     """
     all_vulns: list[dict] = []
     any_failed = False
@@ -350,34 +431,32 @@ async def _process_repo(
         else:
             all_vulns.extend(vulns)
 
+    if any_failed:
+        return [], None
+
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     pkgs_str = ",".join(f"{eco}:{pkg}" for eco, pkg in packages)
+    repo_id = repo_id_map.get(repo, "")
 
-    if any_failed:
-        return {
-            "repo": repo,
-            "repo_id": repo_id_map.get(repo, ""),
-            "cve_count_5y": "",  # empty → retry next run
-            "cve_ids_5y": "",
-            "packages_queried": pkgs_str,
-            "fetched_at": now,
-        }
-    keys = dedupe_in_window(all_vulns)
-    return {
+    cve_rows: list[dict[str, str]] = [
+        {"repo": repo, "repo_id": repo_id, "date": date, "cve": cve}
+        for cve, date in dedupe_in_window(all_vulns)
+    ]
+    queried_row = {
         "repo": repo,
-        "repo_id": repo_id_map.get(repo, ""),
-        "cve_count_5y": str(len(keys)),
-        "cve_ids_5y": ",".join(keys),
+        "repo_id": repo_id,
         "packages_queried": pkgs_str,
         "fetched_at": now,
     }
+    return cve_rows, queried_row
 
 
 async def _worker(
     name: str,
     queue: asyncio.Queue,
     session: aiohttp.ClientSession,
-    results: dict[str, dict[str, str]],
+    new_cve_rows: dict[str, list[dict[str, str]]],
+    new_queried: dict[str, dict[str, str]],
     repo_id_map: dict[str, str],
     repo_pkg_map: dict[str, list[tuple[str, str]]],
     progress: Progress,
@@ -395,41 +474,26 @@ async def _worker(
         packages = repo_pkg_map.get(repo, [])
         if not packages:
             # Defensive: should never reach here — we filter out unmapped
-            # repos before queueing. But if it does, write a skip row.
-            results[repo] = {
-                "repo": repo,
-                "repo_id": repo_id_map.get(repo, ""),
-                "cve_count_5y": "",
-                "cve_ids_5y": "",
-                "packages_queried": "",
-                "fetched_at": datetime.datetime.now(
-                    datetime.timezone.utc
-                ).isoformat(timespec="seconds"),
-            }
+            # repos before queueing.
             progress.advance(task_id)
             queue.task_done()
             continue
 
         try:
-            row = await _process_repo(
+            cve_rows, queried_row = await _process_repo(
                 repo, packages, session, repo_id_map,
                 last_request_ref, throttle_lock,
             )
         except Exception as exc:
             log.exception("worker %s crashed on %s: %s", name, repo, exc)
-            row = {
-                "repo": repo,
-                "repo_id": repo_id_map.get(repo, ""),
-                "cve_count_5y": "",
-                "cve_ids_5y": "",
-                "packages_queried": ",".join(
-                    f"{eco}:{pkg}" for eco, pkg in packages
-                ),
-                "fetched_at": datetime.datetime.now(
-                    datetime.timezone.utc
-                ).isoformat(timespec="seconds"),
-            }
-        results[repo] = row
+            cve_rows, queried_row = [], None
+
+        if queried_row is not None:
+            # Successful fetch — replace this repo's CVE rows wholesale,
+            # and stamp the sidecar.
+            new_cve_rows[repo] = cve_rows
+            new_queried[repo] = queried_row
+        # else: failed — leave existing rows alone, do NOT update sidecar
         progress.advance(task_id)
         queue.task_done()
 
@@ -442,15 +506,23 @@ async def batch_fetch(
     limit: int | None,
     ttl_days: int,
     concurrency: int,
-) -> tuple[dict[str, dict[str, str]], int]:
-    """Fetch and write CVE counts. Returns (final_rows, n_unmapped_skipped)."""
-    existing = _load_existing()
+) -> tuple[
+    dict[str, list[dict[str, str]]],  # final cve_rows by repo
+    dict[str, dict[str, str]],        # final queried rows
+    list[str],                         # list of repos processed this run
+    int,                               # n unmapped skipped
+]:
+    """Fetch and write CVE rows + queried sidecar."""
+    existing_cves = _load_existing_cves()
+    existing_queried = _load_queried()
     repo_id_map = {r: rid for r, rid in repos_with_ids}
 
     if force:
         fresh: set[str] = set()
     else:
-        fresh = {r for r, row in existing.items() if _is_fresh(row, ttl_days)}
+        fresh = {
+            r for r, row in existing_queried.items() if _is_fresh(row, ttl_days)
+        }
 
     all_repos = [r for r, _ in repos_with_ids]
     mapped_repos = [r for r in all_repos if r in repo_pkg_map]
@@ -473,13 +545,14 @@ async def batch_fetch(
     )
     if not to_fetch:
         console.print("[dim]Nothing to fetch.[/dim]")
-        return existing, unmapped_skipped
+        return existing_cves, existing_queried, [], unmapped_skipped
 
     queue: asyncio.Queue[str] = asyncio.Queue()
     for repo in to_fetch:
         queue.put_nowait(repo)
 
-    new_results: dict[str, dict[str, str]] = {}
+    new_cve_rows: dict[str, list[dict[str, str]]] = {}
+    new_queried: dict[str, dict[str, str]] = {}
     t_start = time.monotonic()
 
     headers = {
@@ -500,7 +573,8 @@ async def batch_fetch(
             workers = [
                 asyncio.create_task(
                     _worker(
-                        f"w{i}", queue, session, new_results,
+                        f"w{i}", queue, session,
+                        new_cve_rows, new_queried,
                         repo_id_map, repo_pkg_map, progress, task_id,
                     )
                 )
@@ -509,7 +583,11 @@ async def batch_fetch(
             # Periodically flush partial results to disk so an aborted run
             # doesn't lose work.
             flush_task = asyncio.create_task(
-                _periodic_flush(existing, new_results, interval_s=15.0)
+                _periodic_flush(
+                    existing_cves, existing_queried,
+                    new_cve_rows, new_queried,
+                    interval_s=15.0,
+                )
             )
             await asyncio.gather(*workers)
             flush_task.cancel()
@@ -518,21 +596,29 @@ async def batch_fetch(
             except asyncio.CancelledError:
                 pass
 
-    # Merge new results into existing and write final.
-    existing.update(new_results)
-    _write(existing)
+    # Merge: new_cve_rows REPLACES existing per-repo rows; new_queried
+    # overrides existing rows for those repos.
+    merged_cves = {**existing_cves, **new_cve_rows}
+    merged_queried = {**existing_queried, **new_queried}
+    _write_cves(merged_cves)
+    _write_queried(merged_queried)
 
     elapsed = time.monotonic() - t_start
+    n_rows_written = sum(len(v) for v in merged_cves.values())
     console.print(
         f"[green]done[/green] in {elapsed:.1f}s · "
-        f"{len(new_results)} fetched → {OUTPUT_FILE}"
+        f"{len(new_queried)} repos fetched · "
+        f"{sum(len(v) for v in new_cve_rows.values())} new cve rows · "
+        f"{n_rows_written} total rows → {OUTPUT_FILE}"
     )
-    return existing, unmapped_skipped
+    return merged_cves, merged_queried, list(new_queried.keys()), unmapped_skipped
 
 
 async def _periodic_flush(
-    existing: dict[str, dict[str, str]],
-    new_results: dict[str, dict[str, str]],
+    existing_cves: dict[str, list[dict[str, str]]],
+    existing_queried: dict[str, dict[str, str]],
+    new_cve_rows: dict[str, list[dict[str, str]]],
+    new_queried: dict[str, dict[str, str]],
     *,
     interval_s: float,
 ) -> None:
@@ -540,8 +626,8 @@ async def _periodic_flush(
     try:
         while True:
             await asyncio.sleep(interval_s)
-            merged = {**existing, **new_results}
-            _write(merged)
+            _write_cves({**existing_cves, **new_cve_rows})
+            _write_queried({**existing_queried, **new_queried})
     except asyncio.CancelledError:
         return
 
@@ -562,40 +648,37 @@ def _bucket(n: int) -> str:
 
 
 def print_summary(
-    rows: dict[str, dict[str, str]],
+    cve_rows_by_repo: dict[str, list[dict[str, str]]],
+    queried: dict[str, dict[str, str]],
     *,
     processed: list[str],
     unmapped_skipped: int,
 ) -> None:
     """Print: top-10 by CVE count, distribution, totals."""
-    relevant = [rows[r] for r in processed if r in rows]
-    counts = []
-    failures = 0
-    for r in relevant:
-        c = (r.get("cve_count_5y") or "").strip()
-        if not c:
-            failures += 1
-            continue
-        try:
-            counts.append((r["repo"], int(c)))
-        except ValueError:
-            failures += 1
-
+    # Per-repo CVE counts, restricted to repos we actually touched this run
+    counts = [(r, len(cve_rows_by_repo.get(r, []))) for r in processed]
     counts.sort(key=lambda t: (-t[1], t[0]))
     with_cve = sum(1 for _, n in counts if n >= 1)
+
+    total_rows_all = sum(len(v) for v in cve_rows_by_repo.values())
+    unique_cves_all = len({
+        row["cve"] for rows in cve_rows_by_repo.values() for row in rows
+    })
 
     overview = Table(title="OSV CVE fetch — overview", show_header=False)
     overview.add_column("metric", style="dim")
     overview.add_column("value", justify="right", style="bold")
     overview.add_row("Repos processed (this run)", str(len(processed)))
-    overview.add_row("Successful lookups", str(len(counts)))
-    overview.add_row("Failed lookups (count='')", str(failures))
-    overview.add_row("Repos with ≥1 CVE", str(with_cve))
+    overview.add_row("Successful lookups (this run)", str(len(processed)))
+    overview.add_row("Repos with ≥1 CVE (this run)", str(with_cve))
     overview.add_row("No package mapping (skipped)", str(unmapped_skipped))
+    overview.add_row("Total CVE rows in file", str(total_rows_all))
+    overview.add_row("Unique CVEs in file", str(unique_cves_all))
+    overview.add_row("Total queried repos in sidecar", str(len(queried)))
     console.print(overview)
 
     dist = Counter(_bucket(n) for _, n in counts)
-    dist_table = Table(title="CVE count distribution (2021–2025)")
+    dist_table = Table(title="CVE count distribution (this run, 2021–2025)")
     dist_table.add_column("bucket", style="cyan")
     dist_table.add_column("repos", justify="right")
     for bucket in ("0", "1-2", "3-10", "11-50", "50+"):
@@ -603,7 +686,7 @@ def print_summary(
     console.print(dist_table)
 
     if counts:
-        top = Table(title="Top 10 repos by CVE count (2021–2025)")
+        top = Table(title="Top 10 repos by CVE count (this run, 2021–2025)")
         top.add_column("repo", style="cyan")
         top.add_column("CVEs", justify="right", style="bold")
         for repo, n in counts[:10]:
@@ -620,8 +703,8 @@ def main() -> None:
                    help="Process only N random eligible repos (testing)")
     p.add_argument("--ttl-days", type=int, default=TTL_DAYS_DEFAULT,
                    help=f"Skip repos fetched within N days (default: {TTL_DAYS_DEFAULT})")
-    p.add_argument("--concurrency", type=int, default=20,
-                   help="Max concurrent HTTP workers (default: 20)")
+    p.add_argument("--concurrency", type=int, default=10,
+                   help="Max concurrent HTTP workers (default: 10)")
     p.add_argument("--force", action="store_true",
                    help="Ignore TTL — refetch every eligible repo")
     p.add_argument("-v", "--verbose", action="store_true",
@@ -655,6 +738,7 @@ def main() -> None:
     banner.add_row("total package queries", str(n_total_pkgs))
     banner.add_row("ecosystems", ", ".join(eco for _, eco in ECOSYSTEM_FILES))
     banner.add_row("output", str(OUTPUT_FILE))
+    banner.add_row("queried sidecar", str(QUERIED_FILE))
     banner.add_row("concurrency", str(args.concurrency))
     banner.add_row("ttl-days", str(args.ttl_days))
     banner.add_row("limit", str(args.limit) if args.limit else "(all)")
@@ -663,7 +747,7 @@ def main() -> None:
     banner.add_row("started", started)
     console.print(banner)
 
-    final_rows, unmapped_skipped = asyncio.run(batch_fetch(
+    final_cves, final_queried, processed, unmapped_skipped = asyncio.run(batch_fetch(
         repos_with_ids,
         repo_pkg_map,
         force=args.force,
@@ -672,29 +756,12 @@ def main() -> None:
         concurrency=args.concurrency,
     ))
 
-    # For the summary, focus on the repos we actually touched this run
-    # (existing fresh ones aren't very interesting for a per-run report).
-    now = datetime.datetime.now(datetime.timezone.utc)
-    recent_cutoff = now - datetime.timedelta(minutes=10)
-    processed = [
-        r for r, row in final_rows.items()
-        if (ts := row.get("fetched_at"))
-        and _safe_fromiso(ts) >= recent_cutoff
-    ]
-
     print_summary(
-        final_rows,
+        final_cves,
+        final_queried,
         processed=processed,
         unmapped_skipped=unmapped_skipped,
     )
-
-
-def _safe_fromiso(ts: str) -> datetime.datetime:
-    try:
-        dt = datetime.datetime.fromisoformat(ts)
-    except ValueError:
-        return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
-    return dt if dt.tzinfo else dt.replace(tzinfo=datetime.timezone.utc)
 
 
 if __name__ == "__main__":

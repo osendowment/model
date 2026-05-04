@@ -3,14 +3,59 @@
 Maps every external data source we ingest to which pipeline(s) it feeds.
 Cells list the **specific fields** we extract -- not the entire dataset.
 
-Pipelines:
+Pipelines (run in this order — each stage feeds the next):
 
-- **Value** — picks the most-depended-on packages per ecosystem and ranks
-  them by download-weighted PageRank. See [docs/value.md](value.md).
-- **Eligibility** — decides whether a repo qualifies for funding
-  (open-source license + not end-of-life). See [docs/eligibility.md](eligibility.md).
-- **Risk** — measures sustainability risk from contributor concentration
-  and codebase complexity. See [docs/risk.md](risk.md).
+1. **Value** (`src.pipeline.value`) → `data/value-data.csv` — picks the
+   most-depended-on packages per ecosystem and ranks them by
+   download-weighted PageRank, then unifies per-package classes into one
+   row per GitHub repo. See [docs/value.md](value.md).
+2. **Eligibility** (`src.pipeline.eligibility`) → `data/eligibility-data.csv`
+   — restricts to AB-class repos with a fresh GitHub API record, an
+   OSI-approved license, and a non-EOL signal. See [docs/eligibility.md](eligibility.md).
+3. **Risk** (`src.pipeline.risk`) → `data/risk-data.csv` — concentration
+   + complexity + issue-debt scoring for **eligible repos only**. See
+   [docs/risk.md](risk.md).
+
+## Funnel — current pipeline conversions
+
+Counts and drop-rates as of the last full run. Re-run the three pipeline
+stages and refresh this table when scope or thresholds change.
+
+| # | Stage | Filter applied | Count | Δ from prev | % of input |
+|---|---|---|---:|---:|---:|
+| 0 | Package discovery (4 ecos) | all packages from npm/pypi/crates/cpp `results.csv` | 17,609 | — | 100.0% |
+|   | ↳ npm | | 6,370 | | 36.2% |
+|   | ↳ crates | | 6,218 | | 35.3% |
+|   | ↳ pypi | | 3,139 | | 17.8% |
+|   | ↳ cpp (Debian + Homebrew) | | 1,882 | | 10.7% |
+| 1 | **AB-class packages** | `value_class ∈ {A, B}` (top ~75% of cumulative downloads × pagerank) | **1,628** | **−90.8%** | 9.2% |
+| 2 | **Unique GitHub repos (AB)** | dedup packages → repos via `value-data.csv` | **917** | **−43.7%** | 5.2% |
+|   | ↳ many-pkgs-per-repo collapse: babel/babel = ~140 npm pkgs, isaacs/glob ships under several names, etc. |  |  |  |  |
+| 3 | AB ∩ fetched in `github/repos.csv` | repo has a GitHub API record (run `src.github.fetch_repo_owner_data`) | 892 | −2.7% | 5.1% |
+| 4 | AB ∩ valid (not 404) | `valid=True` in `repos.csv` (repo still exists) | 892 | 0.0% | 5.1% |
+| 5 | `is_oss=True` | strict OSI membership against `data/osi/oss-licenses.csv` (handles SPDX expressions) | 875 | −1.9% | 5.0% |
+| 6 | NOT `is_eol` | every constituent package alive on its registry | 868 | −0.8% | 4.9% |
+| **7** | **ELIGIBLE** | `valid_repo AND is_oss=True AND NOT is_eol` — final eligibility column | **868** | **0.0%** | **4.9%** |
+| 8 | Risk-scored | eligible ∩ has BF + HHI + issue metrics fetched | 52 | **−94.0%** | 0.3% |
+
+### Key drop points
+
+- **Stage 0 → 1 (−91%)**: the pareto cut. We deliberately keep only the top-of-pagerank packages in the funding scope. Everything else is fetched & classified for completeness but not eligible.
+- **Stage 1 → 2 (−44%)**: monorepo collapse. `babel/babel`, `isaacs/*`, `python/*` etc. ship many AB-class packages from a single GitHub repo. This is normal — the funding decision is per-repo, not per-package.
+- **Stage 2 → 3 (−3%)**: GitHub fetch coverage. Closes to ~0% after a refresh of `src.github.fetch_repo_owner_data`.
+- **Stage 4 → 5 (−2%)**: license check. The few remaining are `noassertion` (cpp libs without Homebrew formula match) plus the genuine non-OSS rows (CC-BY data packages, MIT-CMU variant, etc.). See `docs/eligibility.md` for the breakdown.
+- **Stage 5 → 6 (−1%)**: EOL — small absolute number (~7 archived projects).
+- **Stage 7 → 8 (−94%)**: contributor + issue metrics aren't fetched yet for the full eligible set. This is the biggest current data gap; running `src.github.fetch_contributors_metrics` + `src.github.fetch_issue_metrics` for all 868 eligible repos closes it.
+
+### How to refresh these numbers
+
+```
+uv run python -m src.pipeline.value         # rebuilds value-data.csv
+uv run python -m src.pipeline.eligibility   # rebuilds eligibility-data.csv
+uv run python -m src.pipeline.risk          # rebuilds risk-data.csv
+```
+
+Then re-count and update the table.
 
 | Source | Value | Eligibility | Risk |
 |---|---|---|---|
@@ -33,9 +78,65 @@ Pipelines:
 | **GitHub Repos API** (`api.github.com/repos/<owner>/<repo>`) | — | `license`, `owner`, `valid_repo`, `repo_url` | — |
 | **GitHub Users API** (`api.github.com/users/<login>`) | — | owner display name + `blog` URL → `repo_owner`, `repo_owner_url` | — |
 | **GitHub Contributors stats API** (`api.github.com/repos/.../stats/contributors`) | — | — | per-contributor weekly commit history → bus factor, HHI |
-| **GitHub git tree** (sparse checkout + [scc](https://github.com/boyter/scc)) | — | — | lines of code, complexity per language |
+| **GitHub git tree** (sparse checkout + [scc](https://github.com/boyter/scc)) | — | — | lines of code, complexity per language → `data/git/scc.csv` |
+| **Lizard + multimetric** (sparse checkout) | — | — | per-function McCabe + Halstead + Sonar cognitive + maintainability index → `data/git/lizard.csv` |
+| **Semgrep** (sparse checkout, `p/default` rulepack) | — | — | SAST findings → `data/git/semgrep.csv` |
 | **GitHub Issues Search API** (`api.github.com/search/issues`) | — | — | per-year issue open / close counts |
-| **OpenSSF Scorecard API** (`api.securityscorecards.dev`) | — | — | security score (0–10) per repo |
+| **OpenSSF Scorecard API** (`api.securityscorecards.dev`) | — | — | security score (0–10) per repo → `data/git/openssf.csv` |
+| **deps.dev API** (`api.deps.dev`) | — | — | mirrored Scorecard `score` + checks (fall-back) → `data/git/depsdev.csv` |
+
+## Long-format snapshot files (`data/git/`)
+
+All sha-pinned raw metrics share one canonical schema:
+
+```
+repo, repo_id, commit_sha, metric, value, checked_at
+```
+
+Key = `(repo, commit_sha, metric)`. New runs upsert by key — historical
+snapshots for prior SHAs are preserved as a time-series. Empty `value` /
+empty `commit_sha` rows are dropped. Floats are written in shortest
+round-trip form (`42` not `42.0`, `8.5` not `8.500000000001`).
+
+Files:
+
+| File | Tool | Metrics |
+|------|------|---------|
+| `data/git/scc.csv` | [scc](https://github.com/boyter/scc) | `loc`, `sloc`, `files`, `uloc`, `complexity`, `complexity_density` |
+| `data/git/lizard.csv` | [lizard](https://github.com/terryyin/lizard) + [multimetric](https://github.com/priv-kweihmann/multimetric) | `cyclomatic_*`, `halstead_*`, `cognitive_*`, `maintainability_index`, `files` |
+| `data/git/semgrep.csv` | [semgrep](https://semgrep.dev) | `<rulepack>.<metric>` (e.g. `p_default.total`, `p_default.error`) |
+| `data/git/openssf.csv` | [scorecard CLI](https://github.com/ossf/scorecard) | `score` + 18 individual checks (`maintained`, `code_review`, …) |
+| `data/git/depsdev.csv` | [deps.dev](https://api.deps.dev) | mirrored Scorecard `score` + checks |
+
+The canonical writer/reader is `src/git/long_format.py` (`upsert_snapshot`,
+`upsert_rows`, `read`, `project_to_wide`, `latest_sha_per_repo`).
+
+### Sha-pinning convention
+
+Each repo has per-year `last_sha` resolved by `src/git/commits_years.py`
+into `data/github/git/commits-years.csv`. Fetchers walk per-repo years
+2025 → 2024 → … → 2021 and pick the most-recent year with `commits > 0`
+and a non-empty `last_sha`. That sha is the `commit_sha` for every row
+the fetcher writes. No HEAD fallback persists — if no usable year exists
+for a repo, no row is written for it.
+
+### High-level projection (long → wide)
+
+The pipeline stages project the long files into per-repo wide rows for
+downstream consumers:
+
+- `data/complexity.csv` ← `src.pipeline.build_complexity` projects
+  `data/git/scc.csv` + `data/git/lizard.csv` using
+  `commits-years.last_sha` (2025 → 2021 walk; first sha with `loc > 0`).
+  Also folds in the **hotspot** score (Tornhill `churn × complexity`):
+  joins `data/github/git/churn.csv` (`churn_5y_total`) with the EOY-2025
+  scc complexity snapshot to emit `churn_5y_total`, `hotspot_raw`,
+  `hotspot_log`, `hotspot_percentile`.
+- `data/security.csv` ← `src.pipeline.build_security` projects
+  `data/git/openssf.csv`, `data/git/depsdev.csv`, `data/git/semgrep.csv`
+  using the same per-year sha priority.
+- `data/risk-data.csv` ← `src.pipeline.risk` joins complexity + security
+  + concentration + issue-debt and computes the final risk score.
 
 ## Dataflow at a glance
 
