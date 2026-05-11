@@ -2,18 +2,6 @@
 
 This is the work-in-progress fund distribution model for the [Open Source Endowment][ose].
 
-Work is currently happening in this repo and the following places:
-
-* [bindep][bindep] ([@vladh][vlad.website]) — Strategies for finding binary dependencies
-* [software-finder][software-finder] ([@jring-o][jring-o]) — PyPI to GitHub repository mapper
-
-[bindep]: https://codeberg.org/vladh/bindep
-[jring-o]: https://github.com/jring-o/software-finder
-[ose]: https://endowment.dev
-[software-finder]: https://github.com/jring-o/software-finder
-[vlad.website]: https://vlad.website
-
-
 ## High-level Overview
 
 ### Principles
@@ -39,3 +27,15 @@ Our approach combines three stages:
 | **[Value](docs/value.md)** | Find most important packages in ecosystems | Download-weighted PageRank for Python (PyPI), Rust (crates), JS/TS (npm), C/C++ (Debian, Homebrew) based on dependency trees, covering 95% downloads in each ecosystem | Community nominations, critical software lists, cross-ecosystem dependencies |
 | **[Eligibility](docs/eligibility.md)** | Filter to fundable projects | OSS license check (63 OSI-approved) | Trademark check (corporate vs community), EOL check |
 | **[Risk](docs/risk.md)** | Prioritize risky projects among most valuable | Bus factor and Herfindahl--Hirschman index for contributors, complexity metrics (LOC, etc) using [scc](https://github.com/boyter/scc) | [OpenSSF scorecard](https://scorecard.dev), active maintainers, issue activity, GitHub Sponsors |
+
+
+Work is currently happening in this repo and the following places:
+
+* [bindep][bindep] ([@vladh][vlad.website]) — Strategies for finding binary dependencies
+* [software-finder][software-finder] ([@jring-o][jring-o]) — PyPI to GitHub repository mapper
+
+[bindep]: https://codeberg.org/vladh/bindep
+[jring-o]: https://github.com/jring-o/software-finder
+[ose]: https://endowment.dev
+[software-finder]: https://github.com/jring-o/software-finder
+[vlad.website]: https://vlad.website
