@@ -27,14 +27,13 @@ Concurrency cap defaults to 4. Override with ``--concurrency`` or env
 Usage:
 
     uv run python -m src.git.fetch_scc --limit 5
-    uv run python -m src.git.fetch_scc                   # full eligible set
+    uv run python -m src.git.fetch_scc                   # full risk-scope set
     uv run python -m src.git.fetch_scc --force           # ignore smart-upsert
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
-import csv
 import datetime
 import json
 import logging
@@ -60,7 +59,7 @@ from src.git.disk import check_disk_or_exit, print_disk_banner
 from src.git.long_format import read as read_long
 from src.git.long_format import upsert_snapshot
 from src.github.display import _ETAColumn
-from src.pipeline.repos import load_ab_repos, load_eligible_repos
+from src.pipeline.repos import load_repo_ids, load_risk_repos
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -209,18 +208,8 @@ def _already_done(
 
 
 def _load_repo_id_map() -> dict[str, str]:
-    """Map ``repo`` → ``repo_id`` from eligibility-data.csv (best-effort)."""
-    path = Path("data/eligibility-data.csv")
-    out: dict[str, str] = {}
-    if not path.exists():
-        return out
-    with path.open(encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            rid = (row.get("repo_id") or "").strip()
-            if slug:
-                out[slug] = rid
-    return out
+    """Map ``repo`` → ``repo_id`` from data/github/repos.csv (best-effort)."""
+    return load_repo_ids()
 
 
 # ──────────────────────────── per-repo worker ───────────────────────────
@@ -402,10 +391,10 @@ def main() -> None:
     parser.add_argument("--output", default=OUTPUT_FILE,
                         help=f"long-format CSV (default: {OUTPUT_FILE})")
     parser.add_argument("--years", type=int, nargs="+", default=DEFAULT_YEARS,
-                        help=f"Eligible target years for snapshot SHA (default: {DEFAULT_YEARS}). "
+                        help=f"Target years for snapshot SHA (default: {DEFAULT_YEARS}). "
                              "We pick the most-recent populated year per repo.")
     parser.add_argument("--limit", type=int,
-                        help="Process N random eligible repos (for smoke tests).")
+                        help="Process N random risk-scope repos (for smoke tests).")
     parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                         help=f"Parallel sparse-clone+scc workers (default: {DEFAULT_CONCURRENCY}). "
                              "Override with $SCC_WORKERS.")
@@ -414,8 +403,6 @@ def main() -> None:
                              "(repo, sha) already has all 6 metrics in scc.csv.")
     parser.add_argument("--seed", type=int, default=42,
                         help="RNG seed for --limit sampling (default: 42).")
-    parser.add_argument("--top-repos-file", default=None,
-                        help="Override top-repos.csv enrichment path.")
     parser.add_argument("--max-disk-gb", type=float, default=2.0,
                         help="Abort gracefully if free /tmp dips below this "
                              "(default: 2.0; set 0 to disable).")
@@ -435,16 +422,11 @@ def main() -> None:
     )
     print_disk_banner(console=console)
 
-    # Use the eligibility set as the canonical fetch list. Sizes are still
-    # pulled from value-data for the heuristics that depend on them, so we
-    # do a side load for the size hints (best-effort, missing → 0).
-    entries = load_eligible_repos()
+    # Use the risk-scope set (A/B value classes from value-data.csv) as the
+    # canonical fetch list. Entries carry size_kb directly so no side load needed.
+    entries = load_risk_repos(value_file=args.input)
     repos_all = [e.repo for e in entries]
-    ab_kwargs = {"value_file": args.input}
-    if args.top_repos_file is not None:
-        ab_kwargs["top_repos_file"] = args.top_repos_file
-    ab_entries = load_ab_repos(**ab_kwargs)
-    sizes = {e.repo: e.size_kb for e in ab_entries if e.size_kb}
+    sizes = {e.repo: e.size_kb for e in entries if e.size_kb}
 
     rng = random.Random(args.seed)
     if args.limit and args.limit < len(repos_all):

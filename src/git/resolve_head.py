@@ -1,6 +1,6 @@
 """Resolve HEAD sha for repos with no commits in 2021-2025.
 
-Some eligible repos are dormant — their last commit is older than the
+Some risk-scope repos are dormant — their last commit is older than the
 window covered by `commits-years.csv` (default 2021-2025). Without a
 sha they can't be analysed by sha-pinned fetchers (scc, lizard, semgrep).
 
@@ -12,25 +12,23 @@ matches) — making dormant repos analysable while leaving active repos
 untouched.
 
 Usage:
-    uv run python -m src.git.resolve_head           # all eligible repos with no last_sha
+    uv run python -m src.git.resolve_head           # all risk-scope repos with no last_sha
     uv run python -m src.git.resolve_head --force   # re-resolve all
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
-import csv
 import datetime
 import logging
 import os
-from pathlib import Path
 
 import httpx
 from rich.console import Console
 from rich.progress import Progress
 
 from src.git.commits_years import load_sha_data, write_sha_data, SHA_FILE
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -84,7 +82,7 @@ async def resolve_head_sha(
 
 
 async def main_async(args):
-    eligible = {e.repo for e in load_eligible_repos()}
+    eligible = {e.repo for e in load_risk_repos()}
     sha_data = load_sha_data(args.sha_file)
 
     # Repos with NO last_sha at any year
@@ -101,7 +99,7 @@ async def main_async(args):
         candidates = [c for c in candidates if c not in resolved]
 
     if not candidates:
-        console.print("[green]All eligible repos already have a sha — nothing to resolve.[/green]")
+        console.print("[green]All risk-scope repos already have a sha — nothing to resolve.[/green]")
         return
 
     tokens = _tokens()

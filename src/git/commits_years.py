@@ -21,7 +21,7 @@ recorded, so we don't keep refetching them.
 
 Usage:
 
-    uv run python -m src.git.commits_years                 # all eligible repos
+    uv run python -m src.git.commits_years                 # all risk-scope repos
     uv run python -m src.git.commits_years --limit 10
     uv run python -m src.git.commits_years --force         # re-fetch everything
     uv run python -m src.git.commits_years --years 2024 2025
@@ -45,7 +45,7 @@ from rich.progress import (
 
 from src.github.display import _ETAColumn
 from src.github.github_client import GITHUB_API, get_revolver
-from src.pipeline.repos import load_ab_repos, load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -293,13 +293,11 @@ def main() -> None:
     parser.add_argument("--years", type=int, nargs="+", default=DEFAULT_YEARS,
                         help=f"Years to fetch (default: {DEFAULT_YEARS})")
     parser.add_argument("--limit", type=int,
-                        help="Process N random eligible repos (for smoke tests).")
+                        help="Process N random risk-scope repos (for smoke tests).")
     parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                         help=f"Parallel requests (default: {DEFAULT_CONCURRENCY})")
     parser.add_argument("--force", action="store_true",
                         help="Re-fetch all (repo, year) SHAs even if already cached.")
-    parser.add_argument("--top-repos-file", default=None,
-                        help="Override top-repos.csv enrichment path.")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
@@ -315,10 +313,9 @@ def main() -> None:
         f"{started:%Y-%m-%d %H:%M:%S}[/dim]"
     )
 
-    # Use the eligibility set as the canonical "what to fetch" list. The old
-    # ab-classes-from-value-data path missed ~22 eligible repos that didn't
-    # have a value class assigned. Eligibility is the source of truth.
-    entries = load_eligible_repos()
+    # Use the risk-scope set (A/B value classes from value-data.csv) as the
+    # canonical fetch list.
+    entries = load_risk_repos()
     repos_all = [e.repo for e in entries]
     if args.limit:
         repos_all = random.sample(repos_all, min(args.limit, len(repos_all)))
