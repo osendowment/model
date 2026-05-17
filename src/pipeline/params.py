@@ -1,10 +1,10 @@
-"""Shared model parameters loaded from data/params.json."""
+"""Shared model parameters loaded from src/pipeline/settings.json."""
 
 import csv
 import json
 import os
 
-_PARAMS_PATH = os.path.join(os.path.dirname(__file__), "params.json")
+_PARAMS_PATH = os.path.join(os.path.dirname(__file__), "settings.json")
 
 with open(_PARAMS_PATH, encoding="utf-8") as _f:
     _P = json.load(_f)
@@ -35,6 +35,9 @@ ISSUE_DEBT_THRESHOLDS: dict = _P["risk_classification"]["issue_debt"]
 ISSUE_TREND_THRESHOLDS: dict = _P["risk_classification"]["issue_trend"]
 SECURITY_THRESHOLDS: dict = _P["risk_classification"]["security"]
 FUNDING_THRESHOLDS: dict = _P["risk_classification"]["funding"]
+
+# Risk-pipeline input scope — which value classes feed the risk pipeline.
+RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]
 
 
 _ECOSYSTEM_DL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "ecosystem-downloads.csv")

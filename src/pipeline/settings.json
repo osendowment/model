@@ -19,6 +19,10 @@
     "C": 0.90,
     "comment": "Cumulative PageRank share cutoffs: A <= 50%, B <= 75%, C <= 90%, D > 90%"
   },
+  "risk_input": {
+    "value_classes": ["A", "B"],
+    "comment": "Risk pipeline runs on repos whose value-data.csv class is in this list."
+  },
   "risk_classification": {
     "concentration": {
       "A": {"max_bus_factor": 1, "min_hhi": 8000},
