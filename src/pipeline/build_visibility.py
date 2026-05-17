@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build data/visibility.csv — visibility metrics per eligible repo.
+"""Build data/visibility.csv — visibility metrics per risk-scope repo.
 
 Reads:
-    data/eligibility-data.csv   — eligible repo set
+    data/value-data.csv         — A/B value-class set
     data/github/repos.csv       — stars, forks, watchers, fetched_at
 
 Writes:
@@ -22,7 +22,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 
@@ -53,7 +53,7 @@ def _load_repo_meta() -> dict[str, dict]:
 
 
 def build() -> list[dict]:
-    eligible = load_eligible_repos()
+    eligible = load_risk_repos()
     meta = _load_repo_meta()
     rows: list[dict] = []
     for entry in eligible:
@@ -80,7 +80,6 @@ def main() -> None:
         w.writerows(rows)
 
     total = len(rows)
-    with_stars = sum(1 for r in rows if r["stars"])
     table = Table(title="[bold]Visibility coverage[/bold]",
                   show_header=True, header_style="bold dim", padding=(0, 1))
     table.add_column("Field", style="bold")

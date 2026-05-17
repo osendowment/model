@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build data/funding.csv — funding signals per eligible repo.
+"""Build data/funding.csv — funding signals per risk-scope repo.
 
 Reads:
-    data/eligibility-data.csv               — eligible set
+    data/value-data.csv                     — A/B value-class set
     data/funding-data.csv                   — github_sponsors / FUNDING.yml
                                               / funding.json (raw collector output)
     data/foundations/host-by-repo.csv       — FOSS-foundation host per repo
@@ -31,7 +31,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 
@@ -76,7 +76,7 @@ def _load_foundations() -> dict[str, str]:
 
 
 def build() -> list[dict]:
-    eligible = load_eligible_repos()
+    eligible = load_risk_repos()
     raw = _load_raw_funding()
     foundations = _load_foundations()
 

@@ -12,7 +12,7 @@ Reads the six per-dimension intermediate CSVs (each produced by its own
     data/workload.csv          ← src.pipeline.build_workload
 
 Writes:
-    data/risk-data.csv  — one row per eligible repo with every metric
+    data/risk-data.csv  — one row per risk-scope repo with every metric
                           column from the six intermediates.
 
 This script does **no classification** (no A/B/C/D classes). Class
@@ -38,7 +38,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 
@@ -104,7 +104,7 @@ def aggregate(sample: set[str] | None = None) -> tuple[list[str], list[dict[str,
 
     `sample`, if given, restricts output to the listed repo slugs.
     """
-    eligible = load_eligible_repos()
+    eligible = load_risk_repos()
 
     intermediates: dict[str, tuple[list[str], dict[str, dict[str, str]]]] = {}
     fieldnames: list[str] = list(ID_COLUMNS)
@@ -174,7 +174,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--random", type=int, metavar="N", default=0,
-        help="Aggregate N random eligible repos instead of all (for testing)",
+        help="Aggregate N random risk-scope repos instead of all (for testing)",
     )
     parser.add_argument(
         "--seed", type=int, default=42,
@@ -189,7 +189,7 @@ def main() -> None:
     sample: set[str] | None = None
     if args.random > 0:
         random.seed(args.seed)
-        eligible = load_eligible_repos()
+        eligible = load_risk_repos()
         if args.random < len(eligible):
             chosen = random.sample(eligible, args.random)
         else:
@@ -197,10 +197,10 @@ def main() -> None:
         sample = {e.repo for e in chosen}
         console.print(
             f"[bold]Aggregating risk metrics on {len(sample)} random "
-            f"eligible repos (seed={args.seed})[/bold]\n"
+            f"risk-scope repos (seed={args.seed})[/bold]\n"
         )
     else:
-        console.print("[bold]Aggregating risk metrics on all eligible repos[/bold]\n")
+        console.print("[bold]Aggregating risk metrics on all risk-scope repos[/bold]\n")
 
     fieldnames, rows = aggregate(sample=sample)
 

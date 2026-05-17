@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build data/security.csv — security metrics per eligible repo.
+"""Build data/security.csv — security metrics per risk-scope repo.
 
 Reads (long-format, sha-pinned where applicable):
-    data/eligibility-data.csv               — eligible set
+    data/value-data.csv                     — A/B value-class set
     data/github/git/commits-years.csv       — per (repo, year) last_sha
     data/git/openssf.csv                    — long: scorecard `score` + 18
                                               individual checks per (repo, sha)
@@ -57,7 +57,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.git.long_format import read as read_long
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 
@@ -259,7 +259,7 @@ def _load_bestpractices_badge() -> dict[str, str]:
 
 
 def build() -> list[dict]:
-    eligible = load_eligible_repos()
+    eligible = load_risk_repos()
 
     per_year = _per_year_shas(COMMITS_YEARS_FILE)
 

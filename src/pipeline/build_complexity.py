@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build data/complexity.csv — codebase complexity per eligible repo.
+"""Build data/complexity.csv — codebase complexity per risk-scope repo.
 
 Reads (long-format, sha-pinned):
-    data/eligibility-data.csv               — eligible repo set
+    data/value-data.csv                     — A/B value-class set
     data/github/git/commits-years.csv       — per (repo, year) last_sha + commits
     data/git/scc.csv                        — long: scc metrics per (repo, sha)
     data/git/lizard.csv                     — long: lizard metrics per (repo, sha)
@@ -62,7 +62,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.git.long_format import read as read_long
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 
@@ -195,7 +195,7 @@ def _percentile_ranks(values: list[float]) -> list[float]:
 
 
 def build() -> list[dict]:
-    eligible = load_eligible_repos()
+    eligible = load_risk_repos()
 
     # 1. Build per-repo year→sha lookup from commits-years.csv.
     per_year = _per_year_shas(COMMITS_YEARS_FILE)

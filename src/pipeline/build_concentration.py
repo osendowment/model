@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build data/concentration.csv — contributor-concentration metrics per eligible repo.
+"""Build data/concentration.csv — contributor-concentration metrics per risk-scope repo.
 
 Reads:
-    data/eligibility-data.csv                           — eligible set
+    data/value-data.csv                                 — A/B value-class set
     data/concentration-data.csv                         — lifetime totals (BF/HHI also,
                                                           but we override BF/HHI w/ 5y)
     data/github/contributors/hhi.csv                    — wide per-year + 2021-2025
@@ -43,7 +43,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 
@@ -98,7 +98,7 @@ def _load_agg_column(path: Path) -> dict[str, str]:
 
 
 def build() -> list[dict]:
-    eligible = load_eligible_repos()
+    eligible = load_risk_repos()
     lifetime = _load_lifetime()
     hhi_agg = _load_agg_column(HHI_FILE)
     bf_agg = _load_agg_column(BF_FILE)

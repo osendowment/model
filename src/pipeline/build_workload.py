@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Build data/workload.csv — maintainer-workload metrics per eligible repo.
+"""Build data/workload.csv — maintainer-workload metrics per risk-scope repo.
 
 Reads:
-    data/eligibility-data.csv                           — eligible set
+    data/value-data.csv                                 — A/B value-class set
     data/github/repos.csv                               — created_at, has_issues, pushed_at
     data/github/contributors/contributors.csv           — wide per-year + 2021-2025 (lifetime aggregate)
     data/github/git/commits-years.csv                   — per (repo, year) commits
     data/openssf/checks.csv                             — per-check Scorecard scores
-    data/github/issues/opened.csv                       — wide per-year opened
-    data/github/issues/closed.csv                       — wide per-year closed
+    data/github/issues.csv                              — long: repo, repo_id, year, metric, value
+                                                          (metric ∈ {opened_issues, closed_issues})
 
 Writes:
     data/workload.csv  with columns:
@@ -48,7 +48,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 
@@ -57,8 +57,7 @@ REPOS_FILE = DATA_DIR / "github" / "repos.csv"
 CONTRIB_FILE = DATA_DIR / "github" / "contributors" / "contributors.csv"
 COMMITS_YEARS_FILE = DATA_DIR / "github" / "git" / "commits-years.csv"
 OPENSSF_CHECKS_FILE = DATA_DIR / "openssf" / "checks.csv"
-ISSUES_OPENED_FILE = DATA_DIR / "github" / "issues" / "opened.csv"
-ISSUES_CLOSED_FILE = DATA_DIR / "github" / "issues" / "closed.csv"
+ISSUES_FILE = DATA_DIR / "github" / "issues.csv"
 OUTPUT_FILE = DATA_DIR / "workload.csv"
 
 YEARS = list(range(2021, 2026))  # 2021..2025
@@ -139,16 +138,40 @@ def _load_openssf_maintained() -> dict[str, str]:
     return out
 
 
-def _load_issues(path: Path) -> dict[str, dict[int, int]]:
-    out: dict[str, dict[int, int]] = {}
+def _load_issues_long(path: Path) -> dict[str, dict[str, dict[int, int]]]:
+    """Project long-format issues.csv → wide-by-metric for the build's use.
+
+    Returns {metric: {repo: {year: count}}} where metric ∈ {opened_issues,
+    closed_issues}. Years missing from the file default to 0 in the inner
+    dict (matches the previous wide-loader behaviour where blank cells
+    became 0). Unknown metrics are ignored.
+    """
+    METRICS = ("opened_issues", "closed_issues")
+    out: dict[str, dict[str, dict[int, int]]] = {m: {} for m in METRICS}
     if not path.exists():
         return out
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             slug = (row.get("repo") or "").strip().lower()
-            if not slug:
+            metric = (row.get("metric") or "").strip()
+            year_s = (row.get("year") or "").strip()
+            value = (row.get("value") or "").strip()
+            if not slug or metric not in METRICS or not year_s or value == "":
                 continue
-            out[slug] = {y: int(row.get(str(y)) or 0) for y in YEARS}
+            try:
+                y = int(year_s)
+                v = int(value)
+            except ValueError:
+                continue
+            out[metric].setdefault(slug, {})[y] = v
+    # Backfill missing years with 0 to mirror the old wide-loader's behaviour:
+    # `int(row.get(str(y)) or 0)` made blank-or-missing cells equal to 0, and
+    # downstream sums/slopes treat 0 the same way. Doing this here keeps the
+    # build code below identical to the original.
+    for metric in METRICS:
+        for repo, year_map in out[metric].items():
+            for y in YEARS:
+                year_map.setdefault(y, 0)
     return out
 
 
@@ -182,7 +205,7 @@ def _repo_age_years(created_at_iso: str) -> str:
 
 
 def build() -> list[dict]:
-    eligible = load_eligible_repos()
+    eligible = load_risk_repos()
 
     repos = _load_repo_meta()
     # Despite the column name "2021-2025", the contributors fetcher writes
@@ -190,8 +213,9 @@ def build() -> list[dict]:
     contribs_lifetime = _load_wide_year(CONTRIB_FILE, "2021-2025")
     commits_years = _load_commits_years()
     maintained = _load_openssf_maintained()
-    opened = _load_issues(ISSUES_OPENED_FILE)
-    closed = _load_issues(ISSUES_CLOSED_FILE)
+    issues = _load_issues_long(ISSUES_FILE)
+    opened = issues["opened_issues"]
+    closed = issues["closed_issues"]
 
     rows: list[dict] = []
     for entry in eligible:
