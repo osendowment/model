@@ -41,25 +41,41 @@ class RepoEntry:
     enriched: bool = False  # True iff metadata came from github/repos.csv
 
 
-def _load_repos_meta(path: str) -> dict[str, RepoEntry]:
-    """Map lowercased repo slug -> RepoEntry enriched from data/github/repos.csv."""
-    out: dict[str, RepoEntry] = {}
+def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]:
+    """Read data/github/repos.csv → (canon, meta).
+
+    GitHub's `/repos/{owner}/{repo}` endpoint follows renames, so a repo
+    whose slug in value-data.csv is stale (e.g. `gozala/events`) was still
+    fetched successfully and recorded with its **current** name in the
+    `full_name` column (`browserify/events`). The Search API does *not*
+    follow renames, so the risk pipeline must key on the current name.
+
+    - `canon` maps every known slug — both the looked-up `repo` and the
+      rename-resolved `full_name` — to the canonical lowercased `full_name`.
+    - `meta` maps the canonical name to a RepoEntry with repo_id / archived
+      / size_kb / stars.
+    """
+    canon: dict[str, str] = {}
+    meta: dict[str, RepoEntry] = {}
     if not os.path.exists(path):
-        return out
+        return canon, meta
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             slug = (row.get("repo") or "").strip().lower()
             if not slug:
                 continue
-            out[slug] = RepoEntry(
-                repo=slug,
+            full = (row.get("full_name") or "").strip().lower() or slug
+            canon[slug] = full
+            canon[full] = full
+            meta[full] = RepoEntry(
+                repo=full,
                 repo_id=(row.get("repo_id") or "").strip(),
                 size_kb=int(row.get("size") or 0),
                 stars=int(row.get("stars") or 0),
                 archived=(row.get("archived") or "").strip().lower() in ("true", "1"),
                 enriched=True,
             )
-    return out
+    return canon, meta
 
 
 def load_risk_repos(
@@ -76,27 +92,31 @@ def load_risk_repos(
 
     - Keeps rows with `class` in RISK_INPUT_CLASSES and a non-empty
       `github_repo`. `skip_invalid` drops `gh_valid` != True (404 repos).
-    - Deduped by lowercased `github_repo`; highest class wins (A > B > C > D).
+    - Slugs are canonicalised against `github/repos.csv` `full_name`, so a
+      renamed repo (`gozala/events`) resolves to its current name
+      (`browserify/events`) — the form the Search API and downstream joins need.
+    - Deduped by canonical slug; highest class wins (A > B > C > D).
     - repo_id / archived / size_kb / stars enriched from `data/github/repos.csv`.
       `skip_archived` drops archived repos.
     - Repos missing from github/repos.csv are returned with `enriched=False`
       and default metadata; those still get processed.
     """
+    canon, meta = _read_github_repos(repos_file)
     chosen: dict[str, str] = {}
     with open(value_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             cls = (row.get("class") or "").strip()
             if cls not in RISK_INPUT_CLASSES:
                 continue
-            slug = (row.get("github_repo") or "").strip().lower()
-            if not slug:
+            raw = (row.get("github_repo") or "").strip().lower()
+            if not raw:
                 continue
             if skip_invalid and (row.get("gh_valid") or "").strip() != "True":
                 continue
+            slug = canon.get(raw, raw)  # resolve renamed repos to current name
             if slug not in chosen or _RANK.get(cls, 0) > _RANK.get(chosen[slug], 0):
                 chosen[slug] = cls
 
-    meta = _load_repos_meta(repos_file)
     entries: list[RepoEntry] = []
     skipped_archived = 0
     for slug, cls in chosen.items():
@@ -120,20 +140,28 @@ def load_risk_slugs(*args, **kwargs) -> list[str]:
 
 
 def load_repo_ids(repos_file: str = REPOS_FILE) -> dict[str, str]:
-    """Map lowercased repo slug -> repo_id from data/github/repos.csv.
+    """Map repo slug -> repo_id from data/github/repos.csv.
 
     Replaces the old per-script `repo -> repo_id` readers that keyed off
-    `eligibility-data.csv`. Rows with an empty `repo_id` are skipped.
+    `eligibility-data.csv`. Both the looked-up `repo` slug and the
+    rename-resolved `full_name` are keyed to the same `repo_id`, so callers
+    resolve correctly whether they hold a stale or a canonical slug. Rows
+    with an empty `repo_id` are skipped.
     """
     out: dict[str, str] = {}
     if not os.path.exists(repos_file):
         return out
     with open(repos_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
             rid = (row.get("repo_id") or "").strip()
-            if slug and rid:
+            if not rid:
+                continue
+            slug = (row.get("repo") or "").strip().lower()
+            full = (row.get("full_name") or "").strip().lower()
+            if slug:
                 out[slug] = rid
+            if full:
+                out[full] = rid
     return out
 
 

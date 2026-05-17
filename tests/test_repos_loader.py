@@ -64,10 +64,33 @@ def test_load_risk_repos_dedup_highest_class_wins(tmp_path, monkeypatch):
     assert out[0].value_class == "A"
 
 
+def test_load_risk_repos_canonicalises_renamed_repo(tmp_path, monkeypatch):
+    """A stale slug in value-data.csv resolves to the repo's current name."""
+    value = tmp_path / "value.csv"
+    _write(value, ["github_repo", "gh_valid", "class"], [
+        {"github_repo": "gozala/events", "gh_valid": "True", "class": "A"},
+    ])
+    gh = tmp_path / "repos.csv"
+    _write(gh, ["repo", "valid", "repo_id", "full_name", "archived", "size", "stars"], [
+        {"repo": "gozala/events", "valid": "True", "repo_id": "1649251",
+         "full_name": "browserify/events", "archived": "False", "size": "9", "stars": "3"},
+    ])
+    monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
+    out = repos.load_risk_repos(value_file=str(value), repos_file=str(gh))
+    assert [e.repo for e in out] == ["browserify/events"]
+    assert out[0].repo_id == "1649251"
+
+
 def test_load_repo_ids(tmp_path):
     gh = tmp_path / "repos.csv"
-    _write(gh, ["repo", "valid", "repo_id"], [
-        {"repo": "Owner/Name", "valid": "True", "repo_id": "99"},
-        {"repo": "owner/noid", "valid": "True", "repo_id": ""},
+    _write(gh, ["repo", "valid", "repo_id", "full_name"], [
+        {"repo": "Owner/Name", "valid": "True", "repo_id": "99", "full_name": "Owner/Name"},
+        {"repo": "stale/slug", "valid": "True", "repo_id": "77", "full_name": "fresh/slug"},
+        {"repo": "owner/noid", "valid": "True", "repo_id": "", "full_name": "owner/noid"},
     ])
-    assert repos.load_repo_ids(repos_file=str(gh)) == {"owner/name": "99"}
+    ids = repos.load_repo_ids(repos_file=str(gh))
+    assert ids["owner/name"] == "99"
+    # both the stale and the canonical slug resolve to the same id
+    assert ids["stale/slug"] == "77"
+    assert ids["fresh/slug"] == "77"
+    assert "owner/noid" not in ids
