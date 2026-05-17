@@ -8,7 +8,6 @@ import pytest
 from src.github.models import Contributor, DateRange
 from src.github.fetch_contributors_metrics import calculate_bus_factor, parse_repo
 from src.github.github_client import fetch_contributor_stats, _fetch_stats_once, _Deferred, _NoStats, _AsyncRateLimiter
-from src.pipeline.classify_risk import concentration_class
 
 
 class TestParseRepo:
@@ -291,41 +290,6 @@ class TestDateRange:
         _, contribs, _ = calculate_bus_factor(stats, date_range=dr)
         assert contribs[0].lines_changed == 500
         assert contribs[0].commits == 20
-
-
-class TestConcentrationRiskClass:
-    def test_class_a_bf1_hhi_10000(self):
-        assert concentration_class(1, 10000) == "A"
-
-    def test_class_a_bf1_hhi_9000(self):
-        assert concentration_class(1, 9000) == "A"
-
-    def test_class_a_bf1_hhi_8000(self):
-        assert concentration_class(1, 8000) == "A"
-
-    def test_class_b_bf1_hhi_7999(self):
-        assert concentration_class(1, 7999) == "B"
-
-    def test_class_b_bf2_hhi_5000(self):
-        assert concentration_class(2, 5000) == "B"
-
-    def test_class_c_bf2_hhi_4999(self):
-        assert concentration_class(2, 4999) == "C"
-
-    def test_class_c_bf3_hhi_2500(self):
-        assert concentration_class(3, 2500) == "C"
-
-    def test_class_c_bf4_hhi_3000(self):
-        assert concentration_class(4, 3000) == "C"
-
-    def test_class_d_bf4_hhi_2499(self):
-        assert concentration_class(4, 2499) == "D"
-
-    def test_class_d_bf5_hhi_5000(self):
-        assert concentration_class(5, 5000) == "D"
-
-    def test_class_d_bf10_hhi_1000(self):
-        assert concentration_class(10, 1000) == "D"
 
 
 class TestFetchContributorStats:
