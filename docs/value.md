@@ -102,7 +102,7 @@ graph TB
         end
     end
 
-    params[/"params.json"/]
+    params[/"settings.json"/]
 
     subgraph pipeline ["Per-ecosystem pipeline"]
         direction LR
@@ -212,12 +212,15 @@ Per-ecosystem and combined counts of A/B/C/D classes in `value-data.csv`.
 | **Total** | **444** | **1,184** | **2,337** | **13,644** | **17,609** | **93%** | **96%** |
 
 *A+B GH* and *A+B Git* are the share of A and B class packages with a
-known GitHub repo and any Git URL respectively -- the load-bearing tail
-that risk + eligibility downstream both rely on. C/C++'s A+B Git jumps
-from 32% to 95% once non-GitHub upstreams are counted (glibc, gcc,
-libunistring, glib, mpfr, etc. live on sourceware / savannah / gitlab
-hosts, not GitHub). Non-GitHub upstreams
-are concentrated in C/D classes, so the A+B numbers barely move.
+known GitHub repo and any Git URL respectively — the load-bearing subset
+that the Risk pipeline (default scope: A/B) and the Eligibility pipeline
+both rely on. C/D-class rows are present in `value-data.csv` and tracked
+through the value pipeline, but are outside the default Risk and
+Eligibility scope. C/C++'s A+B Git jumps from 32% to 95% once
+non-GitHub upstreams are counted (glibc, gcc, libunistring, glib, mpfr,
+etc. live on sourceware / savannah / gitlab hosts, not GitHub).
+Non-GitHub upstreams are concentrated in C/D classes, so the A+B
+numbers barely move.
 
 ## Ecosystems
 
@@ -425,6 +428,7 @@ All dep-tree packages with downloads, PageRank, and value class.
 
 `data/value-data.csv` is the canonical per-repo table — one row per GitHub
 repo, plus one row per orphan package (no `github_repo`) so nothing is
+dropped. **All classes A/B/C/D are included** — D-class rows are no longer
 dropped. Produced by `uv run python -m src.pipeline.value`, which reads each
 ecosystem's `results.csv` and `eol.csv`, groups packages by repo, computes
 all per-ecosystem and cross-ecosystem aggregates, and writes the file
@@ -493,8 +497,8 @@ orphan row directly) and the repo-level columns are already there.
 afterwards to restore them.
 
 **Three-stage pipeline**: `src.pipeline.value` (this script) →
-`src.pipeline.eligibility` (filters to AB ∩ OSS ∩ alive) →
-`src.pipeline.risk` (concentration + complexity for eligible repos only).
+`src.pipeline.risk` (concentration + complexity for A/B value-class repos) →
+`src.pipeline.eligibility` (filters to AB ∩ OSS ∩ alive).
 
 **Grouping**: rows sharing a non-empty `github_repo` are merged into one
 group; rows with an empty `github_repo` (e.g. cpp packages like `glibc`,

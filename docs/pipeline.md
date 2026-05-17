@@ -8,13 +8,17 @@ Pipelines (run in this order — each stage feeds the next):
 1. **Value** (`src.pipeline.value`) → `data/value-data.csv` — picks the
    most-depended-on packages per ecosystem and ranks them by
    download-weighted PageRank, then unifies per-package classes into one
-   row per GitHub repo. See [docs/value.md](value.md).
-2. **Eligibility** (`src.pipeline.eligibility`) → `data/eligibility-data.csv`
+   row per GitHub repo. All classes A/B/C/D are included. See [docs/value.md](value.md).
+2. **Risk** (`src.pipeline.risk`) → `data/risk-data.csv` — concentration
+   + complexity + issue-debt scoring for **A/B value-class repos** read
+   directly from `data/value-data.csv`. Target classes are configured in
+   `src/pipeline/settings.json` under `risk_input.value_classes` (default
+   `["A", "B"]`). See [docs/risk.md](risk.md).
+3. **Eligibility** (`src.pipeline.eligibility`) → `data/eligibility-data.csv`
    — restricts to AB-class repos with a fresh GitHub API record, an
-   OSI-approved license, and a non-EOL signal. See [docs/eligibility.md](eligibility.md).
-3. **Risk** (`src.pipeline.risk`) → `data/risk-data.csv` — concentration
-   + complexity + issue-debt scoring for **eligible repos only**. See
-   [docs/risk.md](risk.md).
+   OSI-approved license, and a non-EOL signal. Runs after Risk; its
+   intended scope (future work) is repos that are `value_class=A` AND
+   highest risk class. See [docs/eligibility.md](eligibility.md).
 
 ## Funnel — current pipeline conversions
 
@@ -35,8 +39,8 @@ stages and refresh this table when scope or thresholds change.
 | 4 | AB ∩ valid (not 404) | `valid=True` in `repos.csv` (repo still exists) | 892 | 0.0% | 5.1% |
 | 5 | `is_oss=True` | strict OSI membership against `data/osi/oss-licenses.csv` (handles SPDX expressions) | 875 | −1.9% | 5.0% |
 | 6 | NOT `is_eol` | every constituent package alive on its registry | 868 | −0.8% | 4.9% |
-| **7** | **ELIGIBLE** | `valid_repo AND is_oss=True AND NOT is_eol` — final eligibility column | **868** | **0.0%** | **4.9%** |
-| 8 | Risk-scored | eligible ∩ has BF + HHI + issue metrics fetched | 52 | **−94.0%** | 0.3% |
+| **7** | **Risk-scope (A/B)** | `value_class ∈ {A, B}` repos after dropping archived/invalid — input to the Risk pipeline (~224 A + ~676 B ≈ 900 repos; refresh by re-running the pipeline) | **~900** | — | — |
+| **8** | **ELIGIBLE** | `valid_repo AND is_oss=True AND NOT is_eol` — runs after Risk; future scope narrows to `value_class=A` ∩ highest risk class | **868** | **0.0%** | **4.9%** |
 
 ### Key drop points
 
@@ -45,14 +49,15 @@ stages and refresh this table when scope or thresholds change.
 - **Stage 2 → 3 (−3%)**: GitHub fetch coverage. Closes to ~0% after a refresh of `src.github.fetch_repo_owner_data`.
 - **Stage 4 → 5 (−2%)**: license check. The few remaining are `noassertion` (cpp libs without Homebrew formula match) plus the genuine non-OSS rows (CC-BY data packages, MIT-CMU variant, etc.). See `docs/eligibility.md` for the breakdown.
 - **Stage 5 → 6 (−1%)**: EOL — small absolute number (~7 archived projects).
-- **Stage 7 → 8 (−94%)**: contributor + issue metrics aren't fetched yet for the full eligible set. This is the biggest current data gap; running `src.github.fetch_contributors_metrics` + `src.github.fetch_issue_metrics` for all 868 eligible repos closes it.
+- **Stage 7 (Risk-scope)**: Risk runs on A/B value-class repos directly from `value-data.csv`, skipping archived and invalid repos. Contributor + issue metrics aren't yet fetched for the full risk-scope set — running `src.github.fetch_contributors_metrics` + `src.github.fetch_issue_metrics` for all ~900 repos closes this gap.
+- **Stage 8 (ELIGIBLE)**: Eligibility now runs after Risk. The 868 count reflects the last full eligibility run; re-run `src.pipeline.eligibility` to refresh.
 
 ### How to refresh these numbers
 
 ```
 uv run python -m src.pipeline.value         # rebuilds value-data.csv
-uv run python -m src.pipeline.eligibility   # rebuilds eligibility-data.csv
 uv run python -m src.pipeline.risk          # rebuilds risk-data.csv
+uv run python -m src.pipeline.eligibility   # rebuilds eligibility-data.csv
 ```
 
 Then re-count and update the table.
@@ -141,11 +146,16 @@ downstream consumers:
 ## Dataflow at a glance
 
 ```
-                Value pipeline                 Eligibility            Risk
-                ───────────────                ───────────            ────
+                Value pipeline                    Risk                Eligibility
+                ───────────────                   ────                ───────────
 ecosystem ──► top packages ──► dep tree ──► PageRank ──► A/B/C/D
 registries     (95% cum dl)    (BFS)       ↓
                                       value-data.csv
+                                            │
+                                            ├─► A/B class repos ──► contributors + scc
+                                            │   (settings.json          │
+                                            │    risk_input.            │
+                                            │    value_classes)   risk-data.csv
                                             │
                                             └─► github_repo
                                                     │
@@ -154,10 +164,6 @@ registries     (95% cum dl)    (BFS)       ↓
                                                     │              license + EOL
                                                     │                    │
                                                     │            eligibility-data.csv
-                                                    │
-                                                    └────────────────────────────► contributors + scc
-                                                                                          │
-                                                                                    risk-data.csv
 ```
 
 Source-specific details live in [`docs/sources/`](sources/) (one `.md` per source).

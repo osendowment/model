@@ -89,7 +89,7 @@ graph LR
     github --> trend
 ```
 
-All thresholds are defined in `src/pipeline/params.json`.
+All thresholds are defined in `src/pipeline/settings.json`.
 
 ## How It Works
 
@@ -173,14 +173,15 @@ All data comes from [GitHub](sources/github.md):
 | `src/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
 | `src/github/fetch_git_metrics.py` | scc code analysis via sparse checkout |
 | `src/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/pipeline/risk.py` | Aggregate into risk classifications. **Input is `eligibility-data.csv` (eligible repos only)** — `uv run python -m src.pipeline.risk` |
+| `src/pipeline/risk.py` | Aggregate into risk classifications. **Input is `data/value-data.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.pipeline.risk` |
 
 ## Source-file coverage
 
-Snapshot of how complete each source file is across the 899 eligible
-repos. Refresh with `uv run python scripts/coverage_report.py`.
+Snapshot of how complete each source file is across the risk-scope (A/B)
+repos. Counts reflect the last pipeline run; refresh with
+`uv run python scripts/coverage_report.py`.
 
-| Source | File | Eligible covered | Coverage | Notes |
+| Source | File | Risk-scope covered | Coverage | Notes |
 |---|---|---:|---:|---|
 | commits-years (foundation) | `data/github/git/commits-years.csv` | 899/899 | **100%** | per-(repo, year) `last_sha`; foundation file |
 | scc | `data/git/scc.csv` | 899/899 | **100%** | sparse-checkout per year sha |
@@ -209,7 +210,7 @@ repos. Refresh with `uv run python scripts/coverage_report.py`.
 
 ### What this rolls up to in `risk-data.csv`
 
-**899 rows × 51 columns · 100% eligible populated · median per-column coverage 98.8%.**
+**899 rows × 51 columns · 100% risk-scope (A/B) repos populated · median per-column coverage 98.8%.** Counts refresh on re-run.
 
 Sub-100% columns (every gap is structural, not a data-collection bug):
 

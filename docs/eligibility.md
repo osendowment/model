@@ -97,6 +97,12 @@ graph LR
 
 ## How It Works
 
+> **Pipeline order**: Eligibility now runs **after** the Risk stage
+> (`Value → Risk → Eligibility`). Its intended scope (future work, not yet
+> coded) is repos with `value_class=A` that also have the highest risk
+> class. For now the code is unchanged — it still filters to all AB-class
+> repos — but it is no longer the Risk pipeline's input.
+
 ### Source of truth and scope
 
 Eligibility reads exclusively from `data/github/repos.csv` (populated by
@@ -213,9 +219,11 @@ since it requires parsing an unstructured log.
 Run order:
 1. per-ecosystem `check_eol.py` and `fetch_licenses.py` (parallelisable)
 2. `src.osi.fetch_licenses` (refreshes the OSI list — TTL'd, usually a no-op)
-3. `src.github.fetch_repo_owner_data` (populates the repo-level source of truth)
-4. `src.foundations.match_repos` (host classification)
-5. `src.pipeline.eligibility` (joins everything)
+3. `src.pipeline.value` (unifies per-eco results → `value-data.csv`)
+4. `src.pipeline.risk` (scores A/B repos → `risk-data.csv`)
+5. `src.github.fetch_repo_owner_data` (populates the repo-level source of truth)
+6. `src.foundations.match_repos` (host classification)
+7. `src.pipeline.eligibility` (joins everything → `eligibility-data.csv`)
 
 License priority inside `eligibility.py`:
 1. **Per-eco `results.csv`** — registry-declared SPDX (most authoritative; the package author set it).
