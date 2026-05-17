@@ -84,22 +84,36 @@ All swap their input loader to `load_risk_repos()` and move any
 `src/git/fetch_scc.py`, `src/git/commits_years.py`, `src/git/resolve_head.py`.
 
 **Not touched:** `git/migrations/*` (one-off migration scripts),
-`eligibility.py`, `value.py`, `github/resolve_licenses.py`,
+`eligibility.py`, `github/resolve_licenses.py`,
 `github/fetch_repo_owner_data.py` (value/eligibility-stage fetcher; already
-class-driven).
+class-driven). `value.py` is touched only for §4 below, not the loader swap.
 
-## 4. Docs to update
+## 4. Value pipeline: include all classes
+
+`value.py` currently drops D-class repos before writing — `aggregate_by_repo`
+has `drop_d_class=True` (default) and `value-data.csv` stores only A/B/C.
+
+Change: include **all classes (A/B/C/D)** in the final `value-data.csv`.
+Flip `drop_d_class` default to `False` (single call site at `value.py:942`;
+no CLI flag). Update the in-code comment block (`value.py:352-357`) and the
+module docstring that say "value-data.csv only stores ABC".
+
+The risk loader still filters `class ∈ {A, B}`, so the extra D rows are inert
+for Risk — this purely makes `value-data.csv` the complete long-tail table.
+
+## 5. Docs to update
 
 - `docs/pipeline.md` — pipeline order, dataflow diagram, funnel table,
   "How to refresh" run order → Value → Risk → Eligibility.
 - `docs/risk.md` — input is `value-data.csv` (`class ∈ settings.risk_input`),
   not `eligibility-data.csv`; `params.json` → `settings.json`; drop "eligible"
   framing; refresh coverage/count language.
-- `docs/value.md` — `params.json` → `settings.json`; pipeline-order mention.
+- `docs/value.md` — `params.json` → `settings.json`; pipeline-order mention;
+  value-data.csv now includes D-class (all classes).
 - `docs/eligibility.md` — note Eligibility now runs after Risk, target scope
   `value_class=A` ∩ highest risk class.
 
-## 5. Run plan (collect missing data + perf stats)
+## 6. Run plan (collect missing data + perf stats)
 
 1. Smoke-test the rewiring with `--limit`/`--random` on each builder + fetcher.
 2. Run the 6 builders + `risk.py` → coverage report shows exact gaps on the
