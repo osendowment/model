@@ -1,4 +1,4 @@
-"""Fetch per-CVE rows per eligible repo from OSV.dev (2021–2025).
+"""Fetch per-CVE rows per risk repo from OSV.dev (2021–2025).
 
 OSV.dev does not index `pkg:github/*` purls — they return zero results. So
 instead, we look up each repo by the (ecosystem, package_name) tuples that
@@ -76,7 +76,7 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -538,7 +538,7 @@ async def batch_fetch(
         limit_skipped = 0
 
     console.print(
-        f"[bold]osv-cves[/bold]: {len(all_repos)} eligible · "
+        f"[bold]osv-cves[/bold]: {len(all_repos)} risk repos · "
         f"{unmapped_skipped} no-package-mapping (skipped) · "
         f"{len(mapped_repos)} mapped · {len(to_fetch)} to fetch · "
         f"{fresh_skipped} fresh-skipped · {limit_skipped} limit-skipped"
@@ -700,13 +700,13 @@ def print_summary(
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--limit", type=int, default=None,
-                   help="Process only N random eligible repos (testing)")
+                   help="Process only N random risk repos (testing)")
     p.add_argument("--ttl-days", type=int, default=TTL_DAYS_DEFAULT,
                    help=f"Skip repos fetched within N days (default: {TTL_DAYS_DEFAULT})")
     p.add_argument("--concurrency", type=int, default=10,
                    help="Max concurrent HTTP workers (default: 10)")
     p.add_argument("--force", action="store_true",
-                   help="Ignore TTL — refetch every eligible repo")
+                   help="Ignore TTL — refetch every risk repo")
     p.add_argument("-v", "--verbose", action="store_true",
                    help="DEBUG-level logging")
     args = p.parse_args()
@@ -716,9 +716,9 @@ def main() -> None:
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
 
-    eligible = load_eligible_repos()
+    risk = load_risk_repos()
     repos_with_ids: list[tuple[str, str]] = sorted(
-        {(e.repo, e.repo_id) for e in eligible if e.repo}
+        {(e.repo, e.repo_id) for e in risk if e.repo}
     )
     repo_pkg_map = load_repo_package_mapping()
 
@@ -733,8 +733,8 @@ def main() -> None:
     banner.add_column(style="dim")
     banner.add_column()
     banner.add_row("script", "src.osv.fetch_cves")
-    banner.add_row("eligible repos", str(len(repos_with_ids)))
-    banner.add_row("mapped to packages", f"{n_mapped} (of {len(repos_with_ids)})")
+    banner.add_row("risk repos", str(len(repos_with_ids)))
+    banner.add_row("mapped to packages", f"{n_mapped} (of {len(repos_with_ids)} risk repos)")
     banner.add_row("total package queries", str(n_total_pkgs))
     banner.add_row("ecosystems", ", ".join(eco for _, eco in ECOSYSTEM_FILES))
     banner.add_row("output", str(OUTPUT_FILE))

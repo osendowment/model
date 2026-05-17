@@ -19,8 +19,8 @@ We hit a handful of these per repo and roll the month-by-month series into a
   * ``analyze-repo-top-contributors``        — top-N contributors by event count (lifetime)
   * ``analyze-recent-pull-requests``         — 28-day-window PR throughput (informational)
 
-Numeric ``repo_id`` is taken from ``data/eligibility-data.csv`` when present;
-otherwise resolved via OSSInsight's GitHub proxy (``/gh/repo/{owner}/{repo}``).
+Numeric ``repo_id`` is taken from ``data/value-data.csv`` (A/B risk repos) when
+present; otherwise resolved via OSSInsight's GitHub proxy (``/gh/repo/{owner}/{repo}``).
 
 Output: ``data/ossinsight/repos.csv`` (one row per repo).
 
@@ -40,7 +40,7 @@ custom SQL playground query (heavily rate-limited) or BigQuery against the
 Usage:
     uv run python -m src.ossinsight.fetch --limit 5
     uv run python -m src.ossinsight.fetch --limit 5 --concurrency 4
-    uv run python -m src.ossinsight.fetch  # all eligible repos
+    uv run python -m src.ossinsight.fetch  # all risk repos
 """
 
 from __future__ import annotations
@@ -62,7 +62,7 @@ from rich.logging import RichHandler
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -465,8 +465,8 @@ async def fetch_all(
 def select_repos(args: argparse.Namespace) -> list[tuple[str, str]]:
     """Return [(repo_slug, repo_id)] selected for this run.
 
-    --test-set: ignore eligibility list, use the spec's curated test repos.
-    Otherwise: load eligible repos, optional random --limit sample with --seed.
+    --test-set: ignore risk repo list, use the spec's curated test repos.
+    Otherwise: load risk repos, optional random --limit sample with --seed.
     """
     if args.test_set:
         return [
@@ -477,7 +477,7 @@ def select_repos(args: argparse.Namespace) -> list[tuple[str, str]]:
             ("apache/airflow", "33884891"),
         ]
 
-    entries = load_eligible_repos()
+    entries = load_risk_repos()
     pool = [(e.repo, e.repo_id or "") for e in entries]
 
     if args.limit and args.limit < len(pool):
@@ -532,7 +532,7 @@ def display_results(rows: dict[str, dict[str, str]], repos: list[tuple[str, str]
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--limit", type=int, default=5,
-                   help="Sample N eligible repos (random, deterministic with --seed). 0 = all.")
+                   help="Sample N risk repos (random, deterministic with --seed). 0 = all.")
     p.add_argument("--seed", type=int, default=42, help="Random seed for --limit sampling")
     p.add_argument("--concurrency", type=int, default=4,
                    help="Max concurrent OSSInsight requests (be polite to free public API)")

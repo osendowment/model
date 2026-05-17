@@ -1,6 +1,6 @@
-"""Fetch deps.dev project + Best-Practices badge data per eligible repo.
+"""Fetch deps.dev project + Best-Practices badge data per risk repo.
 
-For each eligible repo (`data/eligibility-data.csv`, eligibility=True), we
+For each risk repo (A/B value-class repos from `data/value-data.csv`), we
 hit two free APIs:
 
 1. **deps.dev** (https://api.deps.dev) — Google's dependency-graph index.
@@ -79,7 +79,7 @@ from yarl import URL
 
 from src.git.long_format import upsert_rows as upsert_long_rows
 from src.osv.fetch_cves import load_repo_package_mapping
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -643,7 +643,7 @@ async def batch_fetch(
         limit_skipped = 0
 
     console.print(
-        f"[bold]depsdev[/bold]: {len(all_repos)} eligible · "
+        f"[bold]depsdev[/bold]: {len(all_repos)} risk repos · "
         f"{len(to_fetch)} to fetch · "
         f"{fresh_skipped} fresh-skipped · {limit_skipped} limit-skipped"
     )
@@ -802,7 +802,7 @@ def _safe_fromiso(ts: str) -> datetime.datetime:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--limit", type=int, default=0,
-                   help="Process only N random eligible repos (0 = all)")
+                   help="Process only N random risk repos (0 = all)")
     p.add_argument("--seed", type=int, default=42,
                    help="Random seed for --limit sampling (default: 42)")
     p.add_argument("--ttl-days", type=int, default=TTL_DAYS_DEFAULT,
@@ -810,7 +810,7 @@ def main() -> None:
     p.add_argument("--concurrency", type=int, default=20,
                    help="Max concurrent HTTP workers (default: 20)")
     p.add_argument("--force", action="store_true",
-                   help="Ignore TTL — refetch every eligible repo")
+                   help="Ignore TTL — refetch every risk repo")
     p.add_argument("-v", "--verbose", action="store_true",
                    help="DEBUG-level logging")
     args = p.parse_args()
@@ -820,9 +820,9 @@ def main() -> None:
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
 
-    eligible = load_eligible_repos()
+    risk = load_risk_repos()
     repos_with_ids: list[tuple[str, str]] = sorted(
-        {(e.repo, e.repo_id) for e in eligible if e.repo}
+        {(e.repo, e.repo_id) for e in risk if e.repo}
     )
     repo_pkg_map = load_repo_package_mapping()
 
@@ -837,7 +837,7 @@ def main() -> None:
     banner.add_column(style="dim")
     banner.add_column()
     banner.add_row("script", "src.depsdev.fetch")
-    banner.add_row("eligible repos", str(len(repos_with_ids)))
+    banner.add_row("risk repos", str(len(repos_with_ids)))
     banner.add_row(
         "with deps.dev-indexed pkgs",
         f"{n_with_supported_pkg} (npm/pypi/cargo)",

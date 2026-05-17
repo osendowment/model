@@ -21,13 +21,15 @@ Usage:
     # Batch from file (one "owner/repo" per line, or a JSON array of strings)
     uv run src/openssf/scorecard.py --file repos.txt
 
+    # All risk repos (A/B value-class, from data/value-data.csv) — default when no args
+    uv run src/openssf/scorecard.py
+
     # Set concurrency limit (default: 10)
     uv run src/openssf/scorecard.py --file repos.txt --concurrency 5
 """
 
 import argparse
 import asyncio
-import csv
 import json
 import logging
 import os
@@ -42,6 +44,8 @@ from rich.table import Table
 
 from src.git.long_format import read as read_long
 from src.git.long_format import upsert_snapshot
+from src.pipeline.repos import load_repo_ids as load_repo_id_map
+from src.pipeline.repos import load_risk_slugs
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -49,7 +53,6 @@ console = Console()
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATA_OUTPUT = ROOT / "data" / "openssf" / "data.json"
 DEFAULT_LONG_OUTPUT = ROOT / "data" / "git" / "openssf.csv"
-ELIGIBILITY_CSV = ROOT / "data" / "eligibility-data.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -66,21 +69,6 @@ def load_repos_from_file(path: Path) -> list[str]:
             raise ValueError(f"{path} must contain a JSON array of strings")
         return repos
     return [line.strip() for line in text.splitlines() if line.strip() and not line.startswith("#")]
-
-
-def load_repo_ids(path: Path) -> dict[str, str]:
-    """Map `repo` → `repo_id` from eligibility-data.csv. Empty string if missing."""
-    out: dict[str, str] = {}
-    if not path.exists():
-        return out
-    with path.open(encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            repo = (row.get("repo") or "").strip()
-            repo_id = (row.get("repo_id") or "").strip()
-            if repo:
-                out[repo] = repo_id
-    return out
 
 
 def to_snake_case(name: str) -> str:
@@ -381,12 +369,13 @@ def load_already_scored(long_path: Path) -> set[str]:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Fetch and upsert OpenSSF Scorecard scores. "
+            "Fetch and upsert OpenSSF Scorecard scores for risk repos "
+            "(A/B value-class from data/value-data.csv). "
             "Writes raw JSON to data/openssf/data.json and long-format rows "
             "to data/git/openssf.csv."
         ),
     )
-    parser.add_argument("repos", nargs="*", help="One or more owner/repo identifiers")
+    parser.add_argument("repos", nargs="*", help="One or more owner/repo identifiers (default: all risk repos)")
     parser.add_argument("--file", "-f", type=Path, help="File with repo list (one per line or JSON array)")
     parser.add_argument("--concurrency", "-c", type=int, default=10, help="Max concurrent API requests")
     parser.add_argument(
@@ -406,7 +395,9 @@ async def main() -> None:
         repos.extend(load_repos_from_file(args.file))
 
     if not repos:
-        parser.error("Provide at least one repo via positional args or --file")
+        repos = load_risk_slugs()
+        if not repos:
+            parser.error("No repos found — provide positional args, --file, or populate data/value-data.csv")
 
     repos = list(dict.fromkeys(repos))  # deduplicate, preserve order
 
@@ -420,9 +411,9 @@ async def main() -> None:
             console.print("[green]All repos already scored — nothing to do.[/green]")
             return
 
-    repo_ids = load_repo_ids(ELIGIBILITY_CSV)
+    repo_ids = load_repo_id_map()
 
-    console.print(f"[bold]Fetching OpenSSF Scorecards for {len(repos)} repo(s)...[/bold]\n")
+    console.print(f"[bold]Fetching OpenSSF Scorecards for {len(repos)} risk repo(s)...[/bold]\n")
 
     results = await fetch_all(repos, concurrency=args.concurrency, repo_ids=repo_ids)
 
