@@ -115,13 +115,12 @@ from src.git.disk import check_disk_or_exit, print_disk_banner  # noqa: E402
 from src.git.long_format import read as _read_long  # noqa: E402
 from src.git.long_format import upsert_snapshot  # noqa: E402
 from src.github.display import _ETAColumn  # noqa: E402
-from src.pipeline.repos import load_eligible_repos  # noqa: E402
+from src.pipeline.repos import load_risk_repos  # noqa: E402
 
 log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = "data"
-ELIGIBILITY_FILE = f"{DATA_DIR}/eligibility-data.csv"
 COMMITS_YEARS_FILE = f"{DATA_DIR}/github/git/commits-years.csv"
 SCC_LONG_FILE = f"{DATA_DIR}/git/scc.csv"
 OUTPUT_FILE = f"{DATA_DIR}/git/lizard.csv"
@@ -718,7 +717,7 @@ def _write_markdown_report(
         # Real wallclock includes parallelism — extrapolate as scaling factor.
         scale = 899 / len(ok)
         lines.append(
-            f"- projected full-eligible-set wallclock (×{scale:.1f}): "
+            f"- projected full-risk-scope wallclock (×{scale:.1f}): "
             f"**~{total_elapsed * scale / 60:.1f} min** "
             f"(mean per-repo {mean_per_repo:.1f}s)"
         )
@@ -739,7 +738,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--limit", type=int, default=DEFAULT_LIMIT,
-        help=f"Sample N random eligible repos (default: {DEFAULT_LIMIT}, 0 = all).",
+        help=f"Sample N random risk-scope repos (default: {DEFAULT_LIMIT}, 0 = all).",
     )
     parser.add_argument(
         "--seed", type=int, default=DEFAULT_SEED,
@@ -787,18 +786,18 @@ def main() -> None:
     print_disk_banner(console=console)
     console.print()
 
-    eligible = load_eligible_repos()
-    repo_ids: dict[str, str] = {e.repo: e.repo_id for e in eligible}
-    repos_all = [e.repo for e in eligible]
+    risk_repos = load_risk_repos()
+    repo_ids: dict[str, str] = {e.repo: e.repo_id for e in risk_repos}
+    repos_all = [e.repo for e in risk_repos]
 
     # Repo selection: explicit --repos > --limit/--seed sample > full set.
     if args.repos:
         explicit = [r.strip().lower() for r in args.repos if r.strip()]
-        eligible_set = set(repos_all)
-        repos = [r for r in explicit if r in eligible_set]
-        unknown = [r for r in explicit if r not in eligible_set]
+        risk_set = set(repos_all)
+        repos = [r for r in explicit if r in risk_set]
+        unknown = [r for r in explicit if r not in risk_set]
         if unknown:
-            console.print(f"[yellow]Skipping non-eligible: {', '.join(unknown)}[/yellow]")
+            console.print(f"[yellow]Skipping non-risk-scope: {', '.join(unknown)}[/yellow]")
     else:
         rng = random.Random(args.seed)
         if args.limit and args.limit < len(repos_all):

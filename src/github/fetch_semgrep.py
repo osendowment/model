@@ -1,4 +1,4 @@
-"""Run **semgrep** SAST per eligible repo and emit per-repo finding counts.
+"""Run **semgrep** SAST per risk-scope repo and emit per-repo finding counts.
 
 Why this exists:
     OpenSSF Scorecard gives a project-management/security-posture signal but
@@ -90,7 +90,7 @@ from src.git.disk import check_disk_or_exit, print_disk_banner
 from src.git.long_format import read as _read_long
 from src.git.long_format import upsert_snapshot as _upsert_snapshot
 from src.github.display import _ETAColumn
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 
 log = logging.getLogger(__name__)
@@ -579,11 +579,11 @@ def _print_results_table(results: list[RepoFindings]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run semgrep SAST per eligible repo and emit per-repo finding counts.",
+        description="Run semgrep SAST per risk-scope (A/B value-class) repo and emit per-repo finding counts.",
     )
     parser.add_argument(
         "--limit", type=int, default=DEFAULT_LIMIT,
-        help=f"Sample N random eligible repos (default: {DEFAULT_LIMIT}, 0 = all).",
+        help=f"Sample N random risk-scope repos (default: {DEFAULT_LIMIT}, 0 = all).",
     )
     parser.add_argument(
         "--seed", type=int, default=DEFAULT_SEED,
@@ -613,7 +613,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--repos", nargs="+", default=None,
-        help="Override the eligible random sample with explicit repo slugs (e.g. urllib3/urllib3).",
+        help="Override the risk-scope set with explicit repo slugs (e.g. urllib3/urllib3).",
     )
     parser.add_argument("--force", action="store_true", help="Bypass --ttl-days.")
     parser.add_argument("--output", default=OUTPUT_FILE)
@@ -637,14 +637,14 @@ def main() -> None:
     print_disk_banner(console=console)
     console.print()
 
-    # Repo selection. Always load eligibility so we can map repo → repo_id
+    # Repo selection. Always load risk-scope set so we can map repo → repo_id
     # for the long-format writer (even when the user passes --repos manually).
-    eligible = load_eligible_repos()
-    repo_ids: dict[str, str] = {e.repo: e.repo_id for e in eligible}
+    risk_repos = load_risk_repos()
+    repo_ids: dict[str, str] = {e.repo: e.repo_id for e in risk_repos}
     if args.repos:
         repos = [r.strip().lower() for r in args.repos]
     else:
-        repos_all = [e.repo for e in eligible]
+        repos_all = [e.repo for e in risk_repos]
         rng = random.Random(args.seed)
         if args.limit and args.limit < len(repos_all):
             repos = rng.sample(repos_all, args.limit)

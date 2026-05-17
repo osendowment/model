@@ -40,7 +40,7 @@ from rich.table import Table
 
 from src.github.display import _ETAColumn, console
 from src.github.github_client import GITHUB_API, get_revolver
-from src.pipeline.repos import VALUE_FILE, load_ab_slugs
+from src.pipeline.repos import VALUE_FILE, load_repo_ids, load_risk_slugs
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +48,6 @@ log = logging.getLogger(__name__)
 # src.repos.load_ab_slugs, which also skips archived repos).
 INPUT_FILE = VALUE_FILE
 OUTPUT_FILE = "data/github/issues.csv"
-ELIGIBILITY_FILE = "data/eligibility-data.csv"
 # Internal "state" name → long-format metric name.
 STATE_METRICS = {"opened": "opened_issues", "closed": "closed_issues"}
 LONG_FIELDS = ["repo", "repo_id", "year", "metric", "value"]
@@ -60,14 +59,6 @@ PACING_BUFFER = 1.05
 TOKEN_INTERVAL = (60.0 / SEARCH_LIMIT_PER_MIN) * PACING_BUFFER  # 2.1s/token
 
 
-# --- repo selection ---------------------------------------------------------
-
-
-def load_eligible_repos(path: str) -> list[str]:
-    """Return unique A/B-class github_repo slugs from value-data.csv (sorted)."""
-    return load_ab_slugs(value_file=path)
-
-
 # --- long-format CSV I/O ----------------------------------------------------
 # Internal shape used by the fetcher loop:
 #     rows_by_state[state][repo][year_str] = value_str
@@ -76,19 +67,6 @@ def load_eligible_repos(path: str) -> list[str]:
 # Smart upsert: keyed on (repo, year, metric); re-fetching a cell overwrites
 # in place. Output is stable-sorted by (repo, year, metric).
 
-
-def _load_repo_ids(path: str) -> dict[str, str]:
-    """Map repo → repo_id from eligibility-data.csv. Empty if file missing."""
-    out: dict[str, str] = {}
-    if not os.path.exists(path):
-        return out
-    with open(path, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            repo = (row.get("repo") or "").strip()
-            repo_id = (row.get("repo_id") or "").strip()
-            if repo:
-                out[repo] = repo_id
-    return out
 
 
 def _load_long(path: str) -> tuple[dict[str, dict[str, dict[str, str]]], set[str]]:
@@ -444,13 +422,13 @@ def main() -> None:
                              f"filters to value_class A/B with non-empty github_repo)")
     parser.add_argument("--output", default=OUTPUT_FILE,
                         help=f"Output long-format CSV (default: {OUTPUT_FILE})")
-    parser.add_argument("--eligibility", default=ELIGIBILITY_FILE,
-                        help=f"Eligibility CSV for repo→repo_id (default: {ELIGIBILITY_FILE})")
+    parser.add_argument("--repos-file", default="data/github/repos.csv",
+                        help="repos.csv for repo→repo_id lookup (default: data/github/repos.csv)")
     parser.add_argument("--years", type=int, nargs=2, metavar=("START", "END"),
                         default=list(DEFAULT_YEARS),
                         help=f"Year range, inclusive (default: {DEFAULT_YEARS[0]}–{DEFAULT_YEARS[1]})")
     parser.add_argument("--limit", type=int,
-                        help="Process only N random eligible repos (for testing)")
+                        help="Process only N random risk-scope repos (for testing)")
     parser.add_argument("--force", action="store_true",
                         help="Re-fetch all (repo, year, state) cells in range, "
                              "overwriting existing values.")
@@ -469,9 +447,9 @@ def main() -> None:
     year_start, year_end = args.years
     years_int = list(range(year_start, year_end + 1))
 
-    all_repos = load_eligible_repos(args.input)
+    all_repos = load_risk_slugs(value_file=args.input)
 
-    repo_ids = _load_repo_ids(args.eligibility)
+    repo_ids = load_repo_ids(repos_file=args.repos_file)
     rows_by_state, _existing_years = _load_long(args.output)
     extra_rows = _load_extra_rows(args.output)
 
@@ -497,7 +475,7 @@ def main() -> None:
     revolver = get_revolver()
     mode = " [yellow](--force)[/]" if args.force else ""
     console.print(f"[bold]Issue counts {year_start}–{year_end}[/bold]{mode}")
-    console.print(f"[dim]Repos:  {len(all_repos):,} eligible | "
+    console.print(f"[dim]Repos:  {len(all_repos):,} risk-scope | "
                   f"{complete_count:,} complete | {len(incomplete):,} incomplete | "
                   f"this run: {len(repos):,}[/dim]")
     console.print(f"[dim]Cells:  {total_cells:,} total | "

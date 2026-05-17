@@ -7,7 +7,7 @@ under multiple verified emails collapse into one entry.
 Usage:
     python -m src.github.fetch_contributors_metrics facebook/react          # all years from first activity
     python -m src.github.fetch_contributors_metrics facebook/react --years 2021 2025
-    python -m src.github.fetch_contributors_metrics                         # batch: data/github/ab-repos.csv → contributors/*.csv
+    python -m src.github.fetch_contributors_metrics                         # batch: value-data.csv (A/B class) → contributors/*.csv
 """
 
 import argparse
@@ -24,7 +24,7 @@ from src.github.models import (
 from src.github.github_client import fetch_contributor_stats
 from src.github.display import _spinner, display_results, display_yearly_breakdown
 from src.github.batch_runner import batch_update, _upsert_yearly_csv
-from src.pipeline.repos import VALUE_FILE, load_ab_slugs
+from src.pipeline.repos import VALUE_FILE, load_risk_slugs
 
 
 def parse_repo(url_or_slug: str) -> str:
@@ -268,7 +268,7 @@ def main() -> None:
     if not args.repo:
         years = args.years or [2021, 2025]
         output = args.output or "data/github/contributors"
-        repos = load_ab_slugs(value_file=args.input)
+        repos = load_risk_slugs(value_file=args.input)
         asyncio.run(batch_update(
             repos, years[0], years[1], output,
             threshold=args.threshold, base=args.base,

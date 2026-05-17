@@ -1,4 +1,4 @@
-"""Code-churn metric per eligible repo over the 2021-2025 window.
+"""Code-churn metric per risk-scope repo over the 2021-2025 window.
 
 Strategy
 --------
@@ -60,9 +60,10 @@ from rich.progress import (
 )
 from rich.table import Table
 
+from src.git.clone import SOURCE_EXTS
+from src.git.disk import check_disk_or_exit, print_disk_banner
 from src.github.display import _ETAColumn
-from src.github.fetch_git_metrics import SOURCE_EXTS
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -74,7 +75,7 @@ PERIOD_END_EXCLUSIVE = "2026-01-01"  # git log --until is exclusive at midnight 
 ANALYZED_THROUGH_YEAR = 2025
 
 DEFAULT_TTL_DAYS = 30
-DEFAULT_CONCURRENCY = 6
+DEFAULT_CONCURRENCY = int(os.environ.get("CHURN_WORKERS") or 4)
 PER_REPO_TIMEOUT = 300  # 5 minutes hard cap per repo
 
 # Source-file matcher built from SOURCE_EXTS (strips the leading "*.").
@@ -478,7 +479,7 @@ def _print_perf_summary(
         summary.add_row("Failed", f"[red]{len(errors):,}[/red]")
     summary.add_row(
         "Coverage",
-        f"{existing_count + len(ok):,} / {total_eligible:,} eligible repos",
+        f"{existing_count + len(ok):,} / {total_eligible:,} risk-scope repos",
     )
     summary.add_row("Output", OUTPUT_FILE)
     console.print(summary)
@@ -505,6 +506,7 @@ def _print_perf_summary(
 async def _run_all(
     repos: list[str], concurrency: int, base_dir: str,
     on_result: callable | None = None,
+    max_disk_gb: float = 0.0,
 ) -> list[ChurnResult]:
     sem = asyncio.Semaphore(concurrency)
     progress = _make_progress()
@@ -521,27 +523,36 @@ async def _run_all(
             return r
 
         coros = [_one(r) for r in repos]
+        aborted = False
         for coro in asyncio.as_completed(coros):
             r = await coro
             results.append(r)
             if on_result:
                 on_result(r, len(results))
+            if max_disk_gb > 0 and not aborted:
+                if not check_disk_or_exit(max_disk_gb, console=console):
+                    aborted = True
+                    break
 
     return results
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Fetch 5y code-churn metric per eligible GitHub repo.",
+        description="Fetch 5y code-churn metric per risk-scope (A/B value-class) GitHub repo.",
     )
     parser.add_argument("--output", default=OUTPUT_FILE,
                         help=f"Output CSV (default: {OUTPUT_FILE})")
     parser.add_argument("--limit", type=int,
-                        help="Process only N random eligible repos (for testing)")
+                        help="Process only N random risk-scope repos (for testing)")
     parser.add_argument("--seed", type=int, default=42,
                         help="Random seed for --limit sampling (default: 42)")
     parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
-                        help=f"Concurrent clones (default: {DEFAULT_CONCURRENCY})")
+                        help=f"Concurrent clones (default: {DEFAULT_CONCURRENCY}). "
+                             "Override with $CHURN_WORKERS.")
+    parser.add_argument("--max-disk-gb", type=float, default=2.0,
+                        help="Abort gracefully if free /tmp dips below this "
+                             "(default: 2.0; set 0 to disable).")
     parser.add_argument("--ttl-days", type=int, default=DEFAULT_TTL_DAYS,
                         help=f"Skip repos refreshed within N days (default: {DEFAULT_TTL_DAYS})")
     parser.add_argument("--force", action="store_true",
@@ -562,15 +573,16 @@ def main() -> None:
         f"[dim]concurrency={args.concurrency}, ttl={args.ttl_days}d, "
         f"started {started:%Y-%m-%d %H:%M:%S}[/dim]"
     )
+    print_disk_banner(console=console)
     console.print()
 
-    # Load eligible set
+    # Load risk-scope set
     if args.repos:
         repos = [r.strip().lower() for r in args.repos]
         total_eligible = len(repos)
     else:
-        eligible = load_eligible_repos()
-        repos = [e.repo for e in eligible]
+        risk_repos = load_risk_repos()
+        repos = [e.repo for e in risk_repos]
         total_eligible = len(repos)
 
     existing = _load_existing(args.output)
@@ -593,7 +605,7 @@ def main() -> None:
 
     console.print(
         f"[dim]Processing {len(repos):,} repos "
-        f"(of {total_eligible:,} eligible, {ttl_skipped:,} TTL-skipped)[/dim]"
+        f"(of {total_eligible:,} risk-scope, {ttl_skipped:,} TTL-skipped)[/dim]"
     )
     console.print()
 
@@ -615,6 +627,7 @@ def main() -> None:
     try:
         results = asyncio.run(_run_all(
             repos, args.concurrency, base_dir, on_result=_on_result,
+            max_disk_gb=args.max_disk_gb,
         ))
     finally:
         shutil.rmtree(base_dir, ignore_errors=True)

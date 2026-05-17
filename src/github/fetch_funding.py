@@ -1,4 +1,4 @@
-"""Fetch funding signals (GitHub Sponsors, FUNDING.yml, funding.json) per repo.
+"""Fetch funding signals (GitHub Sponsors, FUNDING.yml, funding.json) per risk-scope repo.
 
 Writes data/funding-data.csv with one row per repo. TTL-controlled refresh
 so re-runs only fetch repos missing from the file or older than the TTL
@@ -36,7 +36,6 @@ import base64
 import csv
 import datetime
 import logging
-import os
 import time
 from pathlib import Path
 
@@ -53,7 +52,7 @@ from src.github.github_client import (
     _Deferred,
     _graphql,
 )
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -325,7 +324,7 @@ async def batch_fetch(repos: list[str], force: bool = False, limit: int | None =
         to_fetch = random.sample(to_fetch, limit)
     skipped = len(repos) - len(to_fetch)
 
-    console.print(f"[bold]funding[/bold]: {len(repos)} eligible, "
+    console.print(f"[bold]funding[/bold]: {len(repos)} risk-scope repos, "
                   f"{len(to_fetch)} to fetch, {skipped} skipped (fresh)")
     if not to_fetch:
         console.print("[dim]Nothing to fetch.[/dim]")
@@ -403,7 +402,7 @@ def main() -> None:
     else:
         logging.basicConfig(level=logging.INFO)
 
-    repos = sorted({e.repo for e in load_eligible_repos() if e.repo})
+    repos = sorted({e.repo for e in load_risk_repos() if e.repo})
     asyncio.run(batch_fetch(repos, force=args.force, limit=args.limit,
                             concurrency=args.concurrency))
 

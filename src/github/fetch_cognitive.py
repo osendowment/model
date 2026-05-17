@@ -76,7 +76,7 @@ import tempfile
 import time
 import warnings
 from concurrent.futures import ProcessPoolExecutor
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # Lizard 1.22 imports trigger a urllib3/chardet RequestsDependencyWarning
 # transitively — silence at the source like fetch_advanced_complexity does.
@@ -98,14 +98,13 @@ from src.git.disk import check_disk_or_exit, print_disk_banner
 from src.git.long_format import read as _read_long
 from src.git.long_format import upsert_snapshot
 from src.github.display import _ETAColumn
-from src.pipeline.repos import load_eligible_repos
+from src.pipeline.repos import load_risk_repos
 
 
 log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = "data"
-ELIGIBILITY_FILE = f"{DATA_DIR}/eligibility-data.csv"
 COMMITS_YEARS_FILE = f"{DATA_DIR}/github/git/commits-years.csv"
 SCC_LONG_FILE = f"{DATA_DIR}/git/scc.csv"
 LIZARD_LONG_FILE = f"{DATA_DIR}/git/lizard.csv"
@@ -702,7 +701,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--limit", type=int, default=DEFAULT_LIMIT,
-        help=f"Sample N random eligible repos (default: {DEFAULT_LIMIT}, 0 = all).",
+        help=f"Sample N random risk-scope repos (default: {DEFAULT_LIMIT}, 0 = all).",
     )
     parser.add_argument(
         "--seed", type=int, default=DEFAULT_SEED,
@@ -746,17 +745,17 @@ def main() -> None:
     print_disk_banner(console=console)
     console.print()
 
-    eligible = load_eligible_repos()
-    repo_ids: dict[str, str] = {e.repo: e.repo_id for e in eligible}
-    repos_all = [e.repo for e in eligible]
+    risk_repos = load_risk_repos()
+    repo_ids: dict[str, str] = {e.repo: e.repo_id for e in risk_repos}
+    repos_all = [e.repo for e in risk_repos]
 
     if args.repos:
         explicit = [r.strip().lower() for r in args.repos if r.strip()]
-        eligible_set = set(repos_all)
-        repos = [r for r in explicit if r in eligible_set]
-        unknown = [r for r in explicit if r not in eligible_set]
+        risk_set = set(repos_all)
+        repos = [r for r in explicit if r in risk_set]
+        unknown = [r for r in explicit if r not in risk_set]
         if unknown:
-            console.print(f"[yellow]Skipping non-eligible: {', '.join(unknown)}[/yellow]")
+            console.print(f"[yellow]Skipping non-risk-scope: {', '.join(unknown)}[/yellow]")
     else:
         rng = random.Random(args.seed)
         if args.limit and args.limit < len(repos_all):
