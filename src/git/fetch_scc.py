@@ -84,6 +84,7 @@ SOURCE_LANGS: set[str] = {
     "Dart", "Lua", "R", "Julia", "Haskell", "Erlang", "Elixir", "Clojure",
     "Zig", "Nim", "Assembly", "D", "OCaml", "Fortran Modern", "FORTRAN Legacy",
     "Groovy", "Solidity", "GDScript", "Vue",
+    "Powershell", "Shell", "TypeScript Typings",
 }
 
 

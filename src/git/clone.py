@@ -57,6 +57,7 @@ SOURCE_EXTS: list[str] = [
     "*.zig", "*.nim", "*.s", "*.asm", "*.d", "*.ml", "*.mli",
     "*.f03", "*.f08", "*.f90", "*.f95", "*.f", "*.for", "*.ftn", "*.f77",
     "*.groovy", "*.grt", "*.gtpl", "*.gvy", "*.sol", "*.gd", "*.vue",
+    "*.ps1", "*.psm1", "*.sh",
 ]
 
 
