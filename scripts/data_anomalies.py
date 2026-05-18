@@ -24,15 +24,26 @@ from rich.table import Table
 
 console = Console()
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from src.pipeline.common.repos import load_risk_repos  # noqa: E402
 
 
-def load_eligible() -> set[str]:
-    out = set()
-    with (ROOT / "data/eligibility-data.csv").open() as f:
-        for r in csv.DictReader(f):
-            if (r.get("eligibility") or "").strip() == "True":
-                out.add(r["repo"])
-    return out
+def load_risk_scope() -> set[str]:
+    """Repos the risk pipeline runs on — value-class A/B, non-archived, valid.
+
+    risk-data.csv is generated from exactly this set (see
+    `src.pipeline.risk.aggregate_risk`), so any repo here that is *missing*
+    from risk-data.csv means the file is stale and needs a re-run. The old
+    check compared against the *eligible* set (eligibility-data.csv), which
+    after the value→risk rewire flagged every eligible-but-not-A/B repo as a
+    false-positive gap.
+    """
+    entries = load_risk_repos(
+        value_file=str(ROOT / "data/value-data.csv"),
+        repos_file=str(ROOT / "data/github/repos.csv"),
+    )
+    return {e.repo for e in entries}
 
 
 def main():
@@ -41,7 +52,7 @@ def main():
                         help="Exit non-zero if any anomaly is found")
     args = parser.parse_args()
 
-    eligible = load_eligible()
+    risk_scope = load_risk_scope()
 
     findings: list[tuple[str, str, str]] = []  # (severity, category, message)
 
@@ -51,11 +62,12 @@ def main():
 
     in_risk = {r["repo"] for r in rows}
 
-    # 1. Eligibility coverage
-    missing = eligible - in_risk
+    # 1. Risk-scope coverage — a risk-scope repo absent from risk-data.csv
+    #    means the file is stale (re-run src.pipeline.risk.aggregate_risk).
+    missing = risk_scope - in_risk
     if missing:
         findings.append(("warn", "coverage",
-                         f"{len(missing)} eligible repos missing from risk-data.csv: "
+                         f"{len(missing)} risk-scope repos missing from risk-data.csv: "
                          + ", ".join(sorted(missing)[:5]) +
                          ("..." if len(missing) > 5 else "")))
 
@@ -63,12 +75,19 @@ def main():
     for r in rows:
         for f, ok_range in [
             ("loc_2025_eoy", (0, 50_000_000)),
-            ("scc_complexity_2025_eoy", (0, 1_000_000)),
+            # scc "complexity" is a branch-keyword tally; the largest repos
+            # in scope (archlinux/linux ≈ 2.6M) legitimately exceed 1M. The
+            # bound only needs to catch a parse blow-up, not flag monorepos.
+            ("scc_complexity_2025_eoy", (0, 10_000_000)),
             ("hhi_commits_lifetime", (0, 10_000)),
             ("openssf_score", (0, 10)),
             ("cve_count_5y", (0, 1000)),
             ("hotspot_percentile", (0, 100)),
-            ("issue_close_ratio", (0, 1.5)),  # >1 occurs for closed-but-not-opened
+            # issue_close_ratio > 1 is healthy — the repo closes faster than
+            # issues open, or is clearing a pre-window backlog (observed up
+            # to ~5 for quiet repos). Only a negative ratio is impossible;
+            # the wide cap just catches a divide-by-near-zero blow-up.
+            ("issue_close_ratio", (0, 100)),
         ]:
             v = (r.get(f) or "").strip()
             if not v:
@@ -105,7 +124,7 @@ def main():
     numeric_fields = [
         "loc_2025_eoy", "sloc_2025_eoy", "scc_complexity_2025_eoy",
         "cognitive_total", "cyclomatic_total", "stars", "forks",
-        "total_commits_lifetime", "active_maintainers_lifetime",
+        "total_commits_lifetime", "active_contributors",
     ]
     for r in rows:
         zero_count = sum(1 for f in numeric_fields if (r.get(f) or "").strip() == "0")
