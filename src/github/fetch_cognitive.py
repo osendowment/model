@@ -124,6 +124,11 @@ COGNITIVE_METRICS: tuple[str, ...] = (
 SOURCE_SUFFIXES: set[str] = {ext.lstrip("*").lower() for ext in SOURCE_EXTS}
 PY_SUFFIXES: set[str] = {".py", ".pyi", ".pyw"}
 
+# Files larger than this are skipped — minified bundles / generated parsers
+# / vendored amalgamations are the real lizard OOM trigger and aren't
+# hand-written code. Mirrors fetch_advanced_complexity.MAX_FILE_BYTES.
+MAX_FILE_BYTES = 2_000_000
+
 
 # ────────────────────────── target-SHA resolution ──────────────────────────
 
@@ -346,17 +351,29 @@ def _python_cognitive(path: str) -> tuple[int, int, int]:
 
 
 def _list_source_files(root: str) -> tuple[list[str], list[str]]:
-    """Walk `root`. Returns (python_files, other_source_files)."""
+    """Walk `root`. Returns (python_files, other_source_files).
+
+    Files larger than MAX_FILE_BYTES are skipped — minified / generated /
+    vendored blobs that would OOM-kill lizard and aren't real code.
+    """
     py: list[str] = []
     other: list[str] = []
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d != ".git"]
         for fn in filenames:
             ext = os.path.splitext(fn)[1].lower()
+            if ext not in PY_SUFFIXES and ext not in SOURCE_SUFFIXES:
+                continue
+            path = os.path.join(dirpath, fn)
+            try:
+                if os.path.getsize(path) > MAX_FILE_BYTES:
+                    continue
+            except OSError:
+                continue
             if ext in PY_SUFFIXES:
-                py.append(os.path.join(dirpath, fn))
-            elif ext in SOURCE_SUFFIXES:
-                other.append(os.path.join(dirpath, fn))
+                py.append(path)
+            else:
+                other.append(path)
     return py, other
 
 
@@ -606,13 +623,23 @@ def _write_results(path: str, results: list[RepoCognitive]) -> None:
     """Upsert each successful result into `data/git/lizard.csv`.
 
     Drops results without an `analyzed_sha` (HEAD-resolved snapshots can't be
-    pinned in the long format). `elapsed_s` is logged separately, never
-    persisted.
+    pinned in the long format), and results that analyzed **zero files** —
+    a `files == 0` outcome (empty/partial checkout, or a crashed analysis
+    worker) means "not measured", and `RepoCognitive`'s zero-valued
+    dataclass defaults would otherwise be persisted as a real
+    `cognitive_total=0`, indistinguishable from a genuine measurement.
+    `elapsed_s` is logged separately, never persisted.
     """
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     written = 0
+    skipped_empty = 0
     for rc in results:
         if rc.error or not rc.analyzed_sha:
+            continue
+        if rc.files == 0:
+            skipped_empty += 1
+            log.warning("%s@%s: 0 files analyzed — skipping (not a real 0)",
+                        rc.repo, rc.analyzed_sha[:10])
             continue
         metrics = {m: getattr(rc, m) for m in COGNITIVE_METRICS}
         upsert_snapshot(
@@ -624,7 +651,8 @@ def _write_results(path: str, results: list[RepoCognitive]) -> None:
             checked_at=now,
         )
         written += 1
-    log.debug("wrote %d snapshots to %s", written, path)
+    log.debug("wrote %d snapshots to %s (%d skipped: 0 files analyzed)",
+              written, path, skipped_empty)
 
 
 # ──────────────────────────────── reporting ────────────────────────────────
