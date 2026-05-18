@@ -25,8 +25,10 @@ We avoid ``psutil`` so the dependency surface stays flat.
 from __future__ import annotations
 
 import logging
+import os
 import shutil
 import tempfile
+import time
 
 from rich.console import Console
 
@@ -35,6 +37,11 @@ from rich.console import Console
 # checks would monitor a different filesystem and miss disk pressure where
 # clones actually accumulate.
 _DEFAULT_TMP = tempfile.gettempdir()
+
+# Every clone fetcher routes its base temp dir through `make_clone_tmpdir`,
+# so all our clone temp dirs share this prefix. `sweep_stale_clone_dirs`
+# reclaims orphans left by crashed runs by matching exactly this prefix.
+CLONE_TMP_PREFIX = "ose-fetch-"
 
 log = logging.getLogger(__name__)
 
@@ -116,3 +123,62 @@ def check_disk_or_exit(
         f"finishing in-flight repos and exiting.[/dim]"
     )
     return False
+
+
+# ── clone temp-dir lifecycle ────────────────────────────────────────────────
+#
+# Clone fetchers write hundreds of MB per repo into a base temp dir and clean
+# it up in a `finally`. A hard kill (SIGKILL, OOM, power loss) skips that —
+# the base dir and its in-flight clones leak and, run after run, exhaust temp
+# storage. Two helpers close the gap: every fetcher creates its base dir via
+# `make_clone_tmpdir` (shared `CLONE_TMP_PREFIX`) and calls
+# `sweep_stale_clone_dirs` at startup to reclaim orphans from crashed runs.
+
+
+def make_clone_tmpdir(tag: str) -> str:
+    """Create a clone fetcher's base temp dir, namespaced for auto-sweep.
+
+    `tag` identifies the fetcher (e.g. "scc", "churn") — purely for human
+    readability; the sweep keys off `CLONE_TMP_PREFIX` alone.
+    """
+    return tempfile.mkdtemp(prefix=f"{CLONE_TMP_PREFIX}{tag}-")
+
+
+def sweep_stale_clone_dirs(
+    max_age_minutes: float = 60.0,
+    tmp_dir: str = _DEFAULT_TMP,
+    console: Console | None = None,
+) -> int:
+    """Remove orphaned `CLONE_TMP_PREFIX` temp dirs left by crashed runs.
+
+    Only dirs whose mtime is older than `max_age_minutes` are removed — an
+    actively-running fetcher constantly creates/removes per-repo subdirs in
+    its base dir, keeping that dir's mtime fresh, so a concurrent live run
+    is never deleted. Call once at fetcher startup. Returns the count removed.
+    """
+    cutoff = time.time() - max_age_minutes * 60.0
+    removed = 0
+    try:
+        entries = os.listdir(tmp_dir)
+    except OSError:
+        return 0
+    for name in entries:
+        if not name.startswith(CLONE_TMP_PREFIX):
+            continue
+        path = os.path.join(tmp_dir, name)
+        if not os.path.isdir(path):
+            continue
+        try:
+            if os.path.getmtime(path) >= cutoff:
+                continue  # recently touched — possibly a live run
+        except OSError:
+            continue
+        shutil.rmtree(path, ignore_errors=True)
+        removed += 1
+    if removed:
+        console = console or Console()
+        console.print(
+            f"[dim]Temp sweep[/dim] reclaimed [yellow]{removed}[/yellow] "
+            f"stale clone dir(s) [dim]from crashed prior runs[/dim]"
+        )
+    return removed

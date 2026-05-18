@@ -41,7 +41,6 @@ import os
 import random
 import shutil
 import subprocess
-import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -55,7 +54,7 @@ from rich.table import Table
 
 from src.git.clone import resolve_mainline_sha, sparse_clone
 from src.git.commits_years import load_sha_data, resolve_snapshot_sha
-from src.git.disk import check_disk_or_exit, print_disk_banner
+from src.git.disk import check_disk_or_exit, make_clone_tmpdir, print_disk_banner, sweep_stale_clone_dirs
 from src.git.long_format import read as read_long
 from src.git.long_format import upsert_snapshot
 from src.github.display import _ETAColumn
@@ -314,7 +313,7 @@ async def run_all(
     work is awaited so cleanup still runs.
     """
     sem = asyncio.Semaphore(concurrency)
-    base_dir = tempfile.mkdtemp(prefix="complexity-")
+    base_dir = make_clone_tmpdir("scc")
     pool = ThreadPoolExecutor(max_workers=concurrency * 2 + 4)
     loop = asyncio.get_event_loop()
     loop.set_default_executor(pool)
@@ -475,6 +474,7 @@ def main() -> None:
         f"concurrency={args.concurrency} · output={args.output} · "
         f"{started:%Y-%m-%d %H:%M:%S}[/dim]"
     )
+    sweep_stale_clone_dirs(console=console)
     print_disk_banner(console=console)
 
     # Use the risk-scope set (A/B value classes from value-data.csv) as the

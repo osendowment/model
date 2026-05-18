@@ -72,7 +72,6 @@ import random
 import shutil
 import statistics
 import subprocess
-import tempfile
 import time
 import warnings
 from concurrent.futures import ProcessPoolExecutor
@@ -94,7 +93,7 @@ from rich.table import Table
 from src.git.clone import SOURCE_EXTS
 from src.git.clone import download_tarball as _download_tarball
 from src.git.clone import sparse_clone as _sparse_clone
-from src.git.disk import check_disk_or_exit, print_disk_banner
+from src.git.disk import check_disk_or_exit, make_clone_tmpdir, print_disk_banner, sweep_stale_clone_dirs
 from src.git.long_format import read as _read_long
 from src.git.long_format import upsert_snapshot
 from src.github.display import _ETAColumn
@@ -513,7 +512,7 @@ async def analyze_repos(
     when free /tmp dips below the threshold.
     """
     sem = asyncio.Semaphore(concurrency)
-    base_dir = tempfile.mkdtemp(prefix="cognitive-")
+    base_dir = make_clone_tmpdir("cognitive")
     name_width = min(max((len(r) for r in repos), default=20), 38)
 
     progress = Progress(
@@ -742,6 +741,7 @@ def main() -> None:
         f"[dim]limit={args.limit or 'all'} · seed={args.seed} · "
         f"concurrency={args.concurrency} · {started:%Y-%m-%d %H:%M:%S}[/dim]"
     )
+    sweep_stale_clone_dirs(console=console)
     print_disk_banner(console=console)
     console.print()
 

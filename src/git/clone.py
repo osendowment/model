@@ -40,6 +40,8 @@ import time
 
 import httpx
 
+from src.git.disk import CLONE_TMP_PREFIX
+
 
 # Glob patterns for sparse-checkout — one per source-file extension.
 # Kept here so `sparse_clone` is self-contained; ``src.git.fetch_scc``
@@ -103,7 +105,7 @@ def resolve_mainline_sha(
     first-parent commit in range — callers degrade to the pinned SHA.
     """
     url = repo_url or f"https://github.com/{repo}.git"
-    with tempfile.TemporaryDirectory(prefix="mainline-") as tmp:
+    with tempfile.TemporaryDirectory(prefix=f"{CLONE_TMP_PREFIX}mainline-") as tmp:
         _run_git(["git", "init", "--quiet", "."], timeout=10, cwd=tmp)
         _run_git(["git", "remote", "add", "origin", url], timeout=10, cwd=tmp)
         # Commit graph only (--filter=tree:0): no trees, no blobs — tiny

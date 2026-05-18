@@ -66,7 +66,6 @@ import os
 import random
 import shutil
 import subprocess
-import tempfile
 import time
 import warnings
 from collections import Counter
@@ -86,7 +85,7 @@ from rich.table import Table
 
 from src.git.clone import download_tarball as _download_tarball
 from src.git.clone import sparse_clone as _sparse_clone
-from src.git.disk import check_disk_or_exit, print_disk_banner
+from src.git.disk import check_disk_or_exit, make_clone_tmpdir, print_disk_banner, sweep_stale_clone_dirs
 from src.git.long_format import read as _read_long
 from src.git.long_format import upsert_snapshot as _upsert_snapshot
 from src.github.display import _ETAColumn
@@ -365,7 +364,7 @@ async def scan_repos(
     that threshold (waits for in-flight scans to finish).
     """
     sem = asyncio.Semaphore(concurrency)
-    base_dir = tempfile.mkdtemp(prefix="semgrep-")
+    base_dir = make_clone_tmpdir("semgrep")
     name_width = min(max((len(r) for r in repos), default=20), 38)
 
     progress = Progress(
@@ -634,6 +633,7 @@ def main() -> None:
         f"concurrency={args.concurrency} · timeout={args.timeout_s}s · "
         f"{started:%Y-%m-%d %H:%M:%S}[/dim]"
     )
+    sweep_stale_clone_dirs(console=console)
     print_disk_banner(console=console)
     console.print()
 

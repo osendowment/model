@@ -49,7 +49,6 @@ import random
 import shutil
 import statistics
 import subprocess
-import tempfile
 import time
 from dataclasses import dataclass
 
@@ -61,7 +60,7 @@ from rich.progress import (
 from rich.table import Table
 
 from src.git.clone import SOURCE_EXTS
-from src.git.disk import check_disk_or_exit, print_disk_banner
+from src.git.disk import check_disk_or_exit, make_clone_tmpdir, print_disk_banner, sweep_stale_clone_dirs
 from src.github.display import _ETAColumn
 from src.pipeline.common.repos import load_risk_repos
 
@@ -573,6 +572,7 @@ def main() -> None:
         f"[dim]concurrency={args.concurrency}, ttl={args.ttl_days}d, "
         f"started {started:%Y-%m-%d %H:%M:%S}[/dim]"
     )
+    sweep_stale_clone_dirs(console=console)
     print_disk_banner(console=console)
     console.print()
 
@@ -609,7 +609,7 @@ def main() -> None:
     )
     console.print()
 
-    base_dir = tempfile.mkdtemp(prefix="churn-")
+    base_dir = make_clone_tmpdir("churn")
     t0 = time.monotonic()
     pending_flush: list[ChurnResult] = []
 
