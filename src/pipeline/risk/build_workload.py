@@ -61,6 +61,11 @@ from rich.console import Console
 from rich.table import Table
 
 from src.pipeline.common.repos import load_risk_repos
+from src.pipeline.common.stats import (
+    geometric_mean,
+    hazen_percentiles,
+    quartile_classes,
+)
 
 console = Console()
 
@@ -92,60 +97,6 @@ FIELDS = [
     "workload_burden_percentile", "workload_class",
     "fetched_at",
 ]
-
-
-def _hazen_percentiles(values: list[float]) -> list[float]:
-    """Percentile-rank each value via the Hazen plotting position.
-
-    pct = 100 * (rank - 0.5) / n, with tied values sharing the average of
-    their ranks. The result is strictly within (0, 100) — never exactly 0
-    or 100 — so a geometric mean taken over these percentiles cannot
-    collapse to 0. Higher value → higher percentile. Empty input → [].
-    """
-    n = len(values)
-    if n == 0:
-        return []
-    indexed = sorted(enumerate(values), key=lambda iv: iv[1])
-    pctls = [0.0] * n
-    i = 0
-    while i < n:
-        j = i
-        while j + 1 < n and indexed[j + 1][1] == indexed[i][1]:
-            j += 1
-        avg_rank = (i + j) / 2 + 1  # 1-based, tie-averaged
-        pct = 100.0 * (avg_rank - 0.5) / n
-        for k in range(i, j + 1):
-            pctls[indexed[k][0]] = pct
-        i = j + 1
-    return pctls
-
-
-def _geometric_mean(values: list[float]) -> float:
-    """Geometric mean (∏ v)^(1/n). Assumes every value > 0; [] → 0.0."""
-    if not values:
-        return 0.0
-    product = 1.0
-    for v in values:
-        product *= v
-    return product ** (1.0 / len(values))
-
-
-def _quartile_classes(scores: list[float]) -> list[str]:
-    """Assign A/B/C/D by equal-count quartiles of `scores` (higher = worse).
-
-    Sorted descending, the highest-scoring 25% get 'A', then 'B', 'C', 'D'.
-    When n is not divisible by 4 each class holds ⌊n/4⌋ or ⌈n/4⌉ members.
-    Empty input → [].
-    """
-    n = len(scores)
-    if n == 0:
-        return []
-    order = sorted(range(n), key=lambda i: scores[i], reverse=True)
-    labels = ["A", "B", "C", "D"]
-    out = [""] * n
-    for p, idx in enumerate(order):  # p: 0-based rank, 0 = highest score
-        out[idx] = labels[min(3, p * 4 // n)]
-    return out
 
 
 def compute_workload_classes(metrics: list[dict]) -> dict[str, dict]:
@@ -183,16 +134,16 @@ def compute_workload_classes(metrics: list[dict]) -> dict[str, dict]:
         return out
 
     # 2. Hazen-percentile each ratio across the classifiable set.
-    loc_p = _hazen_percentiles([c["loc_per_ac"] for c in classifiable])
-    cve_p = _hazen_percentiles([c["cve_per_ac"] for c in classifiable])
-    nni_p = _hazen_percentiles([c["nni_per_ac"] for c in classifiable])
+    loc_p = hazen_percentiles([c["loc_per_ac"] for c in classifiable])
+    cve_p = hazen_percentiles([c["cve_per_ac"] for c in classifiable])
+    nni_p = hazen_percentiles([c["nni_per_ac"] for c in classifiable])
 
     # 3. Geometric mean of the three percentiles → burden score.
-    burden = [_geometric_mean([loc_p[i], cve_p[i], nni_p[i]])
+    burden = [geometric_mean([loc_p[i], cve_p[i], nni_p[i]])
               for i in range(len(classifiable))]
 
     # 4. Equal-count quartile class (A = highest burden).
-    classes = _quartile_classes(burden)
+    classes = quartile_classes(burden)
 
     # 5. Emit.
     for i, c in enumerate(classifiable):
