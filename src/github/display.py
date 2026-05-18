@@ -14,7 +14,7 @@ from rich.progress import (
 from rich.table import Table
 from rich.text import Text
 
-from src.github.models import Contributor, RunResult, PerfStats, DateRange, THRESHOLD
+from src.github.models import Contributor, RunResult, DateRange, THRESHOLD
 
 # Re-usable table style
 TABLE_KWARGS = dict(show_header=True, header_style="bold dim", padding=(0, 1))
@@ -61,50 +61,6 @@ def _fmt_contribs_label(contributors: list[Contributor]) -> str:
         label += f"[bright_black]{len(bots)} + [/bright_black]"
     label += f"{len(humans):,}"
     return label
-
-
-def display_yearly_breakdown(
-    repo: str, year_results: list[tuple[str, RunResult]],
-    base: str = "commits",
-) -> None:
-    """Show a table with per-year rows for key metrics."""
-    table = Table(show_header=True, header_style="bold dim", padding=(0, 1))
-    table.add_column("Year", style="dim")
-    table.add_column("BF", justify="right")
-    table.add_column("HHI", justify="right")
-    table.add_column("Contribs", justify="right")
-    table.add_column("Commits", justify="right")
-    table.add_column("LOC", justify="right")
-    table.add_column("First", justify="right")
-    table.add_column("Last", justify="right")
-
-    total_label = year_results[-1][0]
-    year_labels = [label for label, _ in year_results[:-1]]
-    range_str = f"{year_labels[0]}–{year_labels[-1]}" if len(year_labels) > 1 else year_labels[0] if year_labels else total_label
-
-    for label, r in year_results:
-        humans = [c for c in r.contributors if not c.is_bot]
-        total_commits = sum(c.commits for c in humans)
-        is_total = label == total_label
-
-        loc_str = f"{r.total_loc:,}" if r.total_loc is not None and r.total_loc > 0 else "[dim]–[/dim]"
-
-        table.add_row(
-            "[bold]Total[/bold]" if is_total else label,
-            f"[yellow bold]{r.bus_factor}[/yellow bold]" if r.bus_factor > 0 else "[dim]–[/dim]",
-            f"{round(r.hhi * 10000):,}" if r.hhi > 0 else "[dim]–[/dim]",
-            _fmt_contribs_label(r.contributors) if humans else "[dim]–[/dim]",
-            f"{total_commits:,}" if total_commits else "[dim]–[/dim]",
-            loc_str,
-            _fmt_date(r.first_week),
-            _fmt_date(r.last_week),
-            end_section=(label == year_labels[-1]),
-        )
-
-    console.print()
-    console.print(f"[bold]Contributor Analysis for [cyan]{repo}[/cyan] ({range_str}) by {base}[/bold]")
-    console.print()
-    console.print(table)
 
 
 def display_results(
