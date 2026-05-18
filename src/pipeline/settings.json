@@ -59,6 +59,11 @@
       "B": 10,
       "C": 100,
       "comment": "funding_class by github_sponsors count (upper bounds): A = 0 sponsors, B = 1-10, C = 11-100, D = 101+. Empty when the sponsor count is unknown."
+    },
+    "workload": {
+      "method": "geom_mean_quartile",
+      "ratios": ["loc_per_ac", "cve_per_ac", "nni_per_ac"],
+      "comment": "workload_class = equal-count quartiles (A = worst 25%) of the geometric mean of Hazen percentiles of LOC/AC, CVE/AC, NNI/AC. AC = active_contributors (lifetime non-bot contributors). NNI = issues_opened_5y - issues_closed_5y. Parameter-free; no numeric thresholds."
     }
   },
   "years": [2021, 2022, 2023, 2024, 2025]
