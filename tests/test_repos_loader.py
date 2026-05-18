@@ -2,7 +2,7 @@
 
 import csv
 
-from src.pipeline import repos
+from src.pipeline.common import repos
 
 
 def _write(path, header, rows):

@@ -17,7 +17,7 @@ import logging
 import os
 from dataclasses import dataclass
 
-from src.pipeline.params import RISK_INPUT_CLASSES
+from src.pipeline.common.params import RISK_INPUT_CLASSES
 
 log = logging.getLogger(__name__)
 
