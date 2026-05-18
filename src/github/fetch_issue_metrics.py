@@ -40,7 +40,7 @@ from rich.table import Table
 
 from src.github.display import _ETAColumn, console
 from src.github.github_client import GITHUB_API, get_revolver
-from src.pipeline.repos import VALUE_FILE, load_repo_ids, load_risk_slugs
+from src.pipeline.common.repos import VALUE_FILE, load_repo_ids, load_risk_slugs
 
 log = logging.getLogger(__name__)
 

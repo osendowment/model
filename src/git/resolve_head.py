@@ -28,7 +28,7 @@ from rich.console import Console
 from rich.progress import Progress
 
 from src.git.commits_years import load_sha_data, write_sha_data, SHA_FILE
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 log = logging.getLogger(__name__)

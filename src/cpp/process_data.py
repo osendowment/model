@@ -57,7 +57,7 @@ import networkx as nx
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.params import (
+from src.pipeline.common.params import (
     TOP_THRESHOLD_PCT, PAGERANK_ALPHA,
     DOWNLOADS_SCORE_DEBIAN_WEIGHT, DOWNLOADS_SCORE_HOMEBREW_WEIGHT,
     assign_value_class,

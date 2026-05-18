@@ -23,7 +23,7 @@ Rule pack:
 Period semantics:
     For each repo, look up `data/github/git/commits-years.csv` to find the
     most recent year ≤ 2025 with commits>0; use that year's `last_sha`.
-    Same logic as `src.pipeline.build_complexity._load_target_year` and
+    Same logic as `src.pipeline.risk.build_complexity._load_target_year` and
     `src.github.fetch_advanced_complexity._load_target_year_shas`. If no
     per-year SHA is recorded, fall back to HEAD (`analyzed_year="current"`).
 
@@ -90,7 +90,7 @@ from src.git.disk import check_disk_or_exit, print_disk_banner
 from src.git.long_format import read as _read_long
 from src.git.long_format import upsert_snapshot as _upsert_snapshot
 from src.github.display import _ETAColumn
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.common.repos import load_risk_repos
 
 
 log = logging.getLogger(__name__)
@@ -137,7 +137,7 @@ def rulepack_prefix(rulepack: str) -> str:
 def _load_target_year_shas() -> dict[str, tuple[str, str]]:
     """Map repo → (year_str, last_sha) for the most recent year ≤ 2025 with commits>0.
 
-    Mirrors `src.pipeline.build_complexity._load_target_year` /
+    Mirrors `src.pipeline.risk.build_complexity._load_target_year` /
     `src.github.fetch_advanced_complexity._load_target_year_shas`. Repos not
     present (or with no commits in 2021–2025) are absent — the caller falls
     back to HEAD with analyzed_year="current".

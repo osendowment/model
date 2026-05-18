@@ -43,7 +43,7 @@ Period semantics:
     most recent year ≤ 2025 with commits>0; use that year's `last_sha`. If
     no per-year SHA is recorded fall back to HEAD (and we DO NOT persist
     HEAD-resolved snapshots — without a pinned sha we can't key them in the
-    long format). Same logic as `src.pipeline.build_complexity._load_target_year()`.
+    long format). Same logic as `src.pipeline.risk.build_complexity._load_target_year()`.
 
 Output format:
     Writes long-format rows to `data/git/lizard.csv` (shared with
@@ -115,7 +115,7 @@ from src.git.disk import check_disk_or_exit, print_disk_banner  # noqa: E402
 from src.git.long_format import read as _read_long  # noqa: E402
 from src.git.long_format import upsert_snapshot  # noqa: E402
 from src.github.display import _ETAColumn  # noqa: E402
-from src.pipeline.repos import load_risk_repos  # noqa: E402
+from src.pipeline.common.repos import load_risk_repos  # noqa: E402
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -149,7 +149,7 @@ SOURCE_SUFFIXES: set[str] = {ext.lstrip("*").lower() for ext in SOURCE_EXTS}
 def _load_target_year_shas() -> dict[str, tuple[str, str]]:
     """Map repo → (year_str, last_sha) for the most recent year ≤2025 with commits>0.
 
-    Mirrors `src.pipeline.build_complexity._load_target_year` but also returns
+    Mirrors `src.pipeline.risk.build_complexity._load_target_year` but also returns
     the corresponding SHA so the caller can sparse-checkout that exact ref.
     Repos with no entry, or no commits in 2021–2025, are absent → caller falls
     back to HEAD.

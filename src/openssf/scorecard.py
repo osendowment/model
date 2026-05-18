@@ -44,8 +44,8 @@ from rich.table import Table
 
 from src.git.long_format import read as read_long
 from src.git.long_format import upsert_snapshot
-from src.pipeline.repos import load_repo_ids as load_repo_id_map
-from src.pipeline.repos import load_risk_slugs
+from src.pipeline.common.repos import load_repo_ids as load_repo_id_map
+from src.pipeline.common.repos import load_risk_slugs
 
 log = logging.getLogger(__name__)
 console = Console()

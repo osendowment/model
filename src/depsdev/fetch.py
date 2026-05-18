@@ -79,7 +79,7 @@ from yarl import URL
 
 from src.git.long_format import upsert_rows as upsert_long_rows
 from src.osv.fetch_cves import load_repo_package_mapping
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 log = logging.getLogger(__name__)

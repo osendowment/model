@@ -52,7 +52,7 @@ from src.github.github_client import (
     _Deferred,
     _graphql,
 )
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 log = logging.getLogger(__name__)

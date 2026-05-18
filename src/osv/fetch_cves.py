@@ -76,7 +76,7 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from src.pipeline.repos import canonical_repo_map, load_risk_repos
+from src.pipeline.common.repos import canonical_repo_map, load_risk_repos
 
 console = Console()
 log = logging.getLogger(__name__)

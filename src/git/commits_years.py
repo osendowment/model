@@ -45,7 +45,7 @@ from rich.progress import (
 
 from src.github.display import _ETAColumn
 from src.github.github_client import GITHUB_API, get_revolver
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.common.repos import load_risk_repos
 
 log = logging.getLogger(__name__)
 console = Console()

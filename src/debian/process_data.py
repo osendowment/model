@@ -48,7 +48,7 @@ import networkx as nx
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.params import (
+from src.pipeline.common.params import (
     TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS,
     assign_value_class, ecosystem_avg_downloads,
 )

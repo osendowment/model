@@ -24,7 +24,7 @@ from src.github.models import (
 from src.github.github_client import fetch_contributor_stats
 from src.github.display import _spinner, display_results, display_yearly_breakdown
 from src.github.batch_runner import batch_update, _upsert_yearly_csv
-from src.pipeline.repos import VALUE_FILE, load_risk_slugs
+from src.pipeline.common.repos import VALUE_FILE, load_risk_slugs
 
 
 def parse_repo(url_or_slug: str) -> str:

@@ -98,7 +98,7 @@ from src.git.disk import check_disk_or_exit, print_disk_banner
 from src.git.long_format import read as _read_long
 from src.git.long_format import upsert_snapshot
 from src.github.display import _ETAColumn
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.common.repos import load_risk_repos
 
 
 log = logging.getLogger(__name__)

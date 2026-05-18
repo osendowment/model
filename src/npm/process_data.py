@@ -36,7 +36,7 @@ from rich.table import Table
 sys.path.insert(0, os.path.dirname(__file__))
 from fetch_npm_data import fetch_and_save_deps, fetch_and_save_downloads, load_fetched_dep_packages  # noqa: E402
 
-from src.pipeline.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
+from src.pipeline.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
 console = Console()
 
