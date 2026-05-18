@@ -25,6 +25,12 @@ src/pipeline/
                      canonical_repo_map / load_eligible_repos
   value/
     __init__.py
+    npm_pipeline.py                ecosystem orchestrator
+    crates_pipeline.py             ecosystem orchestrator
+    pypi_pipeline.py               ecosystem orchestrator
+    debian_pipeline.py             ecosystem orchestrator
+    homebrew_pipeline.py           ecosystem orchestrator
+    cpp_pipeline.py                ecosystem orchestrator (composes debian+homebrew)
     build_ecosystem_downloads.py   <- calculate_ecosystem_downloads.py
     build_git_urls.py              <- build_git.py
     unify_value_data.py            <- value.py core (collect + aggregate + write)
@@ -66,17 +72,35 @@ The two already-standalone value steps move in unchanged (renamed for
 clarity): `calculate_ecosystem_downloads.py` -> `build_ecosystem_downloads.py`,
 `build_git.py` -> `build_git_urls.py`.
 
+## Ecosystem pipeline orchestrators
+
+Each ecosystem (npm, crates, pypi, debian, homebrew, cpp) has its own
+multi-step pipeline — fetch raw data, check EOL, fetch licenses, then
+`process_data` forms `top-packages.csv` / `dependency-tree.csv` /
+`github-repos` / `results.csv`. The per-ecosystem scripts **stay in
+`src/<eco>/`** (per the scope decision); each gets a thin orchestrator in
+`src/pipeline/value/<eco>_pipeline.py` that runs its ecosystem's scripts in
+order. `cpp_pipeline.py` composes `debian_pipeline` + `homebrew_pipeline`
+then runs the cpp aggregation (`src/cpp/process_data.py`), since the cpp
+ecosystem is built from Debian + Homebrew C/C++ packages.
+
+Each orchestrator exposes `--from` / `--only` flags and a `--skip-fetch`
+flag (skip the slow raw-data fetchers, re-run only `process_data`).
+Filenames use underscores (`npm_pipeline.py`) — they are importable Python
+modules run via `python -m src.pipeline.value.npm_pipeline`.
+
 ## Runners
 
 Each runner chains its stage's steps in dependency order and exposes
 `--from <step>` / `--only <step>` flags. Steps that live outside
-`src/pipeline/` (per-ecosystem `process_data.py`, the ~14 risk fetchers in
-`src/<source>/`) are **invoked by** the runner but stay in their source
-folders — they are not moved.
+`src/pipeline/` (per-ecosystem scripts in `src/<eco>/`, the ~14 risk
+fetchers in `src/<source>/`) are **invoked by** an orchestrator but stay in
+their source folders — they are not moved.
 
-- **`run_value_pipeline.py`** — `build_git_urls` -> `build_ecosystem_downloads`
-  -> per-ecosystem `process_data.py` (npm/crates/pypi/debian/homebrew) ->
-  `unify_value_data` -> `verify_git_urls`. Runs the full chain by default.
+- **`run_value_pipeline.py`** — runs the six `<eco>_pipeline.py`
+  orchestrators -> `build_ecosystem_downloads` -> `build_git_urls` ->
+  `unify_value_data` -> `verify_git_urls`. Runs the full chain by default;
+  `--skip-fetch` propagates to each ecosystem orchestrator.
 - **`run_risk_pipeline.py`** — defaults to the cheap projection part: the 6
   `build_*` scripts -> `aggregate_risk`. A `--with-fetchers` flag prepends the
   multi-hour fetch stage (commits_years, contributors, scc, churn, semgrep,
