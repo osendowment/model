@@ -125,7 +125,7 @@ def aggregate(sample: set[str] | None = None) -> tuple[list[str], list[dict[str,
         raise SystemExit(
             "Missing intermediate file(s):\n  - "
             + "\n  - ".join(missing_files)
-            + "\n\nRun the corresponding `src.pipeline.build_<dim>` first."
+            + "\n\nRun the corresponding `src.pipeline.risk.build_<dim>` first."
         )
 
     out_rows: list[dict[str, str]] = []
