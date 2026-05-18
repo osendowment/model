@@ -84,10 +84,12 @@ class TestUpsertConcentrationData:
 
 
 class TestLoadReposFromCsv:
-    def test_loads_repos(self, tmp_path):
+    def test_loads_repos_sorted_by_stars_desc(self, tmp_path):
+        # Lower-starred repo listed first in the CSV — the result must still
+        # come back stars-descending, so this verifies the sort is applied.
         f = tmp_path / "repos.csv"
-        f.write_text("repo,stars\nowner/a,10\nowner/b,5\n", encoding="utf-8")
-        assert _load_repos_from_csv(str(f)) == ["owner/a", "owner/b"]
+        f.write_text("repo,stars\nowner/a,10\nowner/b,50\n", encoding="utf-8")
+        assert _load_repos_from_csv(str(f)) == ["owner/b", "owner/a"]
 
     def test_skips_archived(self, tmp_path):
         f = tmp_path / "repos.csv"

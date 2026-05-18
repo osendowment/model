@@ -47,11 +47,6 @@ def _spinner(message: str):
         yield progress
 
 
-def _fmt_date(d: datetime.date | None, default: str = "–") -> str:
-    """Format a date for display."""
-    return d.isoformat() if d else default
-
-
 def _fmt_contribs_label(contributors: list[Contributor]) -> str:
     """Format contributor count as 'N' or 'B + N' with dimmed bot count."""
     humans = [c for c in contributors if not c.is_bot]

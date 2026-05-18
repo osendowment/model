@@ -46,7 +46,8 @@ Notes:
 Periods:
     repo_age_years_2025_eoy: years between created_at and 2025-12-31.
     push_cadence_years, issues_*: 2021-2025 window.
-    active_contributors: from concentration.csv (2021-2025 window).
+    active_contributors: lifetime distinct non-bot contributors (from
+      concentration.csv) — a floor for repos with >5000 contributors.
 
 Usage:
     uv run python -m src.pipeline.risk.build_workload
