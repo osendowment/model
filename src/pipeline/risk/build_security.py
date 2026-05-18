@@ -32,6 +32,16 @@ Writes:
         sast_findings_security,             ([2025 EOY] security-category only)
         bestpractices_badge_id,             ([2026], "passing"/"silver"/"gold"/
                                             "in_progress"/"" if not enrolled)
+        openssf_risk_pctl,                  (0–100; Hazen percentile of
+                                            openssf_score, inverted — lower
+                                            score ranks higher-risk)
+        cve_risk_pctl,                      (0–100; Hazen percentile of
+                                            cve_count_5y — more CVEs higher)
+        security_risk_percentile,           (geometric mean of the two pctls)
+        security_class,                     (A–D equal-count quartile of
+                                            security_risk_percentile, A =
+                                            worst; "" if openssf_score or
+                                            cve_count_5y missing)
         fetched_at                          (checked_at of openssf row used)
 
 Latest-sha picker
@@ -42,6 +52,19 @@ This keeps the build aligned with the same "snapshot year" convention used
 by build_complexity. If commits-years has no usable year for a repo, we
 fall back to any sha present in the long file for that repo (deterministic
 lexicographic pick).
+
+Security class
+--------------
+`security_class` (A–D) is the equal-count quartile of a composite
+`security_risk_percentile` — the geometric mean of two Hazen risk
+percentiles: one over `cve_count_5y` (more CVEs → higher) and one over
+`-openssf_score` (lower Scorecard score → higher). A = worst 25%. A repo
+is classified only when both `openssf_score` and `cve_count_5y` are
+present.
+
+~78% of risk-scope repos have zero CVEs and thus share one identical
+`cve_risk_pctl`; for them the class effectively tracks the OpenSSF axis,
+with the CVE axis only re-ranking the minority that carry CVEs.
 
 Usage:
     uv run python -m src.pipeline.risk.build_security
@@ -87,6 +110,8 @@ FIELDS = [
     "cve_count_5y", "ossfuzz_enrolled",
     "sast_findings_total", "sast_findings_error", "sast_findings_security",
     "bestpractices_badge_id",
+    "openssf_risk_pctl", "cve_risk_pctl",
+    "security_risk_percentile", "security_class",
     "fetched_at",
 ]
 
@@ -419,6 +444,21 @@ def build() -> list[dict]:
             "bestpractices_badge_id": badges.get(repo, ""),
             "fetched_at": ossf_checked_at,
         })
+
+    # Second pass — security_class needs population-wide percentile
+    # ranking, so it is computed after every row's raw metrics are set.
+    metrics = [
+        {
+            "repo": r["repo"],
+            "openssf_score": _to_float(r["openssf_score"]),
+            "cve": _to_float(r["cve_count_5y"]),
+        }
+        for r in rows
+    ]
+    classes = compute_security_classes(metrics)
+    for r in rows:
+        r.update(classes[r["repo"]])
+
     return rows
 
 
@@ -458,6 +498,18 @@ def main() -> None:
 
     enrolled = sum(1 for r in rows if r["ossfuzz_enrolled"] == "True")
     console.print(f"\n[dim]OSS-Fuzz enrolled: {enrolled:,} / {total:,}[/dim]")
+
+    # Security-class distribution (A/B/C/D, or — when unclassifiable).
+    cls = Counter(r["security_class"] or "—" for r in rows)
+    ctable = Table(title="\n[bold]Security class[/bold]",
+                   show_header=True, header_style="bold dim", padding=(0, 1))
+    ctable.add_column("Class", style="bold")
+    ctable.add_column("Repos", justify="right")
+    for c in ("A", "B", "C", "D", "—"):
+        if cls.get(c):
+            ctable.add_row(c, f"{cls[c]:,}")
+    console.print(ctable)
+
     console.print(f"[dim]Wrote {total:,} rows → {OUTPUT_FILE}[/dim]")
 
 
