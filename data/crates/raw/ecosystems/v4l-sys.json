@@ -1,0 +1,78 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 4300260,
+    "name": "v4l-sys",
+    "ecosystem": "cargo",
+    "description": "Raw video4linux (v4l) bindings",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 3,
+    "first_release_published_at": "2020-04-30T13:00:15.981Z",
+    "latest_release_published_at": "2023-05-07T21:10:58.236Z",
+    "latest_release_number": "0.3.0",
+    "last_synced_at": "2026-03-25T23:38:03.206Z",
+    "created_at": "2022-04-13T08:06:20.298Z",
+    "updated_at": "2026-03-25T23:38:03.206Z",
+    "registry_url": "https://crates.io/crates/v4l-sys/",
+    "install_command": "cargo install v4l-sys",
+    "documentation_url": "https://docs.rs/v4l-sys/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 1,
+    "downloads": 19063,
+    "downloads_period": "total",
+    "dependent_repos_count": 19,
+    "rankings": {
+      "downloads": 16.201019951957687,
+      "dependent_repos_count": 6.187028543269777,
+      "dependent_packages_count": 18.140740853057576,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 3.2963867113463023,
+      "average": 10.956294014907835
+    },
+    "purl": "pkg:cargo/v4l-sys",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/v4l-sys",
+    "docker_dependents_count": 29,
+    "docker_downloads_count": 23282367,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/v4l-sys",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/v4l-sys/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/v4l-sys/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/v4l-sys/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/v4l-sys/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/v4l-sys/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/v4l-sys/codemeta",
+    "maintainers": [
+      {
+        "uuid": "87581",
+        "login": "raymanfx",
+        "name": "Christopher N. Hesse",
+        "email": null,
+        "url": "https://github.com/raymanfx",
+        "packages_count": 10,
+        "html_url": "https://crates.io/users/raymanfx",
+        "role": null,
+        "created_at": "2022-11-08T03:08:00.530Z",
+        "updated_at": "2022-11-08T03:08:00.530Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/raymanfx/packages"
+      }
+    ]
+  }
+}

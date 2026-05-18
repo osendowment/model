@@ -1,0 +1,95 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 11259412,
+    "name": "sagemaker-studio",
+    "ecosystem": "pypi",
+    "description": "Python library to interact with Amazon SageMaker Unified Studio",
+    "homepage": "https://aws.amazon.com/sagemaker/",
+    "licenses": "Apache License 2.0",
+    "normalized_licenses": [
+      "Apache-2.0"
+    ],
+    "repository_url": null,
+    "keywords_array": [
+      "AWS",
+      "Amazon",
+      "SageMaker",
+      "SageMaker Unified Studio",
+      "SDK"
+    ],
+    "namespace": null,
+    "versions_count": 34,
+    "first_release_published_at": "2025-01-13T23:39:41.000Z",
+    "latest_release_published_at": "2026-04-24T03:16:43.000Z",
+    "latest_release_number": "1.1.14",
+    "last_synced_at": "2026-04-24T04:19:41.168Z",
+    "created_at": "2025-01-13T23:50:54.643Z",
+    "updated_at": "2026-04-24T04:19:41.169Z",
+    "registry_url": "https://pypi.org/project/sagemaker-studio/",
+    "install_command": "pip install sagemaker-studio --index-url https://pypi.org/simple",
+    "documentation_url": "https://sagemaker-studio.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12"
+      ],
+      "normalized_name": "sagemaker-studio",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2026-02-22T12:40:37.702Z",
+    "dependent_packages_count": 0,
+    "downloads": 16480267,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 0,
+    "rankings": {
+      "downloads": null,
+      "dependent_repos_count": 54.9783420977628,
+      "dependent_packages_count": 9.766727323409013,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 32.3725347105859
+    },
+    "purl": "pkg:pypi/sagemaker-studio",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/sagemaker-studio",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/sagemaker-studio",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/sagemaker-studio/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sagemaker-studio/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sagemaker-studio/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sagemaker-studio/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sagemaker-studio/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sagemaker-studio/codemeta",
+    "maintainers": [
+      {
+        "uuid": "sagemaker-unified-studio",
+        "login": "sagemaker-unified-studio",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 6,
+        "html_url": "https://pypi.org/user/sagemaker-unified-studio/",
+        "role": "Owner",
+        "created_at": "2025-02-11T23:10:39.711Z",
+        "updated_at": "2025-02-11T23:10:39.711Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/sagemaker-unified-studio/packages"
+      }
+    ]
+  }
+}

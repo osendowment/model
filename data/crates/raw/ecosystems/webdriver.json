@@ -1,0 +1,110 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 496137,
+    "name": "webdriver",
+    "ecosystem": "cargo",
+    "description": "Library implementing the wire protocol for the W3C WebDriver specification.",
+    "homepage": null,
+    "licenses": "MPL-2.0",
+    "normalized_licenses": [
+      "MPL-2.0"
+    ],
+    "repository_url": "https://hg.mozilla.org/mozilla-central/file/tip/testing/webdriver",
+    "keywords_array": [
+      "automation",
+      "browser",
+      "protocol",
+      "w3c",
+      "webdriver"
+    ],
+    "namespace": null,
+    "versions_count": 72,
+    "first_release_published_at": "2015-04-09T15:24:26.008Z",
+    "latest_release_published_at": "2025-04-11T10:56:02.404Z",
+    "latest_release_number": "0.53.0",
+    "last_synced_at": "2026-03-27T19:34:09.587Z",
+    "created_at": "2022-04-07T09:01:14.985Z",
+    "updated_at": "2026-03-27T19:34:09.588Z",
+    "registry_url": "https://crates.io/crates/webdriver/",
+    "install_command": "cargo install webdriver",
+    "documentation_url": "https://docs.rs/webdriver/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2026-03-27T19:34:09.219Z",
+    "dependent_packages_count": 8,
+    "downloads": 3625150,
+    "downloads_period": "total",
+    "dependent_repos_count": 142,
+    "rankings": {
+      "downloads": 1.9426256465452807,
+      "dependent_repos_count": 3.2065656112655843,
+      "dependent_packages_count": 4.22818591153196,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 4.947379436122821,
+      "average": 3.5811891513664116
+    },
+    "purl": "pkg:cargo/webdriver",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/webdriver",
+    "docker_dependents_count": 10,
+    "docker_downloads_count": 18669481,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/webdriver",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/webdriver/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/webdriver/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/webdriver/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/webdriver/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/webdriver/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/webdriver/codemeta",
+    "maintainers": [
+      {
+        "uuid": "1411",
+        "login": "jgraham",
+        "name": null,
+        "email": null,
+        "url": "https://github.com/jgraham",
+        "packages_count": 11,
+        "html_url": "https://crates.io/users/jgraham",
+        "role": null,
+        "created_at": "2022-11-07T16:23:36.831Z",
+        "updated_at": "2022-11-07T16:23:36.831Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/jgraham/packages"
+      },
+      {
+        "uuid": "3503",
+        "login": "andreastt",
+        "name": null,
+        "email": null,
+        "url": "https://github.com/andreastt",
+        "packages_count": 7,
+        "html_url": "https://crates.io/users/andreastt",
+        "role": null,
+        "created_at": "2022-11-07T16:23:36.839Z",
+        "updated_at": "2022-11-07T16:23:36.839Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/andreastt/packages"
+      },
+      {
+        "uuid": "22262",
+        "login": "whimboo",
+        "name": "Henrik Skupin",
+        "email": null,
+        "url": "https://github.com/whimboo",
+        "packages_count": 8,
+        "html_url": "https://crates.io/users/whimboo",
+        "role": null,
+        "created_at": "2022-11-07T16:23:36.846Z",
+        "updated_at": "2022-11-07T16:23:36.846Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/whimboo/packages"
+      }
+    ]
+  }
+}

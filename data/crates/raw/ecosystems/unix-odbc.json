@@ -1,0 +1,78 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 12366082,
+    "name": "unix-odbc",
+    "ecosystem": "cargo",
+    "description": "The unixODBC driver manager. It builds the unixODBC C-library, not the rust bindings to it. It is\nintended to support the `vendored-unix-odbc` feature `odbc-sys`. Therefore it is recommend to use\n`odbc-sys` as a dependency rather than to consume this crate directly.\n",
+    "homepage": null,
+    "licenses": "LGPL-2.1-or-later",
+    "normalized_licenses": [
+      "LGPL-2.1-or-later"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 5,
+    "first_release_published_at": "2025-10-08T19:28:01.099Z",
+    "latest_release_published_at": "2025-11-30T11:32:24.293Z",
+    "latest_release_number": "0.1.4",
+    "last_synced_at": "2026-04-18T13:23:36.200Z",
+    "created_at": "2025-10-08T19:35:14.278Z",
+    "updated_at": "2026-04-18T13:23:36.201Z",
+    "registry_url": "https://crates.io/crates/unix-odbc/",
+    "install_command": "cargo install unix-odbc",
+    "documentation_url": "https://docs.rs/unix-odbc/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 0,
+    "downloads": 4183,
+    "downloads_period": "total",
+    "dependent_repos_count": 0,
+    "rankings": {
+      "downloads": 93.99076236739413,
+      "dependent_repos_count": 19.641543502975992,
+      "dependent_packages_count": 25.97281004289631,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 46.53503863775547
+    },
+    "purl": "pkg:cargo/unix-odbc",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/unix-odbc",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/unix-odbc",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/unix-odbc/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/unix-odbc/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/unix-odbc/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/unix-odbc/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/unix-odbc/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/unix-odbc/codemeta",
+    "maintainers": [
+      {
+        "uuid": "2527",
+        "login": "pacman82",
+        "name": "Markus Klein",
+        "email": null,
+        "url": "https://github.com/pacman82",
+        "packages_count": 34,
+        "html_url": "https://crates.io/users/pacman82",
+        "role": null,
+        "created_at": "2025-10-10T13:40:45.280Z",
+        "updated_at": "2025-10-10T13:40:45.280Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/pacman82/packages"
+      }
+    ]
+  }
+}

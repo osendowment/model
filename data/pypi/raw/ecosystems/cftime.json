@@ -1,0 +1,544 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2667684,
+    "name": "cftime",
+    "ecosystem": "pypi",
+    "description": "Time-handling functionality from netcdf4-python",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "https://github.com/Unidata/cftime",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 36,
+    "first_release_published_at": "2018-04-12T21:38:53.000Z",
+    "latest_release_published_at": "2025-10-13T18:55:52.000Z",
+    "latest_release_number": "1.6.5",
+    "last_synced_at": "2026-04-26T02:31:21.487Z",
+    "created_at": "2022-04-10T10:19:20.668Z",
+    "updated_at": "2026-04-26T02:31:21.487Z",
+    "registry_url": "https://pypi.org/project/cftime/",
+    "install_command": "pip install cftime --index-url https://pypi.org/simple",
+    "documentation_url": "https://cftime.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Development Status :: 5 - Production/Stable",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+        "Topic :: Scientific/Engineering"
+      ],
+      "normalized_name": "cftime",
+      "project_status": null
+    },
+    "repo_metadata": {
+      "id": 39526456,
+      "uuid": "73107250",
+      "full_name": "Unidata/cftime",
+      "owner": "Unidata",
+      "description": "Time-handling functionality from netcdf4-python.",
+      "archived": false,
+      "fork": false,
+      "pushed_at": "2026-04-02T00:11:32.000Z",
+      "size": 8207,
+      "stargazers_count": 92,
+      "open_issues_count": 16,
+      "forks_count": 44,
+      "subscribers_count": 11,
+      "default_branch": "master",
+      "last_synced_at": "2026-04-04T12:57:37.854Z",
+      "etag": null,
+      "topics": [
+        "cf-conventions",
+        "netcdf",
+        "netcdftime",
+        "time"
+      ],
+      "latest_commit_sha": null,
+      "homepage": "https://unidata.github.io/cftime",
+      "language": "Python",
+      "has_issues": true,
+      "has_wiki": null,
+      "has_pages": null,
+      "mirror_url": null,
+      "source_name": null,
+      "license": "mit",
+      "status": null,
+      "scm": "git",
+      "pull_requests_enabled": true,
+      "icon_url": "https://github.com/Unidata.png",
+      "metadata": {
+        "files": {
+          "readme": "README.md",
+          "changelog": "Changelog",
+          "contributing": null,
+          "funding": null,
+          "license": "LICENSE",
+          "code_of_conduct": null,
+          "threat_model": null,
+          "audit": null,
+          "citation": null,
+          "codeowners": null,
+          "security": null,
+          "support": null,
+          "governance": null,
+          "roadmap": null,
+          "authors": null,
+          "dei": null,
+          "publiccode": null,
+          "codemeta": null,
+          "zenodo": null,
+          "notice": null,
+          "maintainers": null,
+          "copyright": null,
+          "agents": null,
+          "dco": null,
+          "cla": null
+        }
+      },
+      "created_at": "2016-11-07T18:15:27.000Z",
+      "updated_at": "2026-04-02T00:11:33.000Z",
+      "dependencies_parsed_at": "2023-01-29T04:15:36.178Z",
+      "dependency_job_id": "d3aec3b6-90ea-452a-93a6-03eb4a5d7300",
+      "html_url": "https://github.com/Unidata/cftime",
+      "commit_stats": {
+        "total_commits": 907,
+        "total_committers": 35,
+        "mean_commits": "25.914285714285715",
+        "dds": "0.24255788313120175",
+        "last_synced_commit": "8e2d31029d7e03faa353f53d73cce30f3b715a3b"
+      },
+      "previous_names": [
+        "unidata/netcdftime"
+      ],
+      "tags_count": 39,
+      "template": false,
+      "template_full_name": null,
+      "purl": "pkg:github/Unidata/cftime",
+      "repository_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/Unidata%2Fcftime",
+      "tags_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/Unidata%2Fcftime/tags",
+      "releases_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/Unidata%2Fcftime/releases",
+      "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/Unidata%2Fcftime/manifests",
+      "owner_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/Unidata",
+      "download_url": "https://codeload.github.com/Unidata/cftime/tar.gz/refs/heads/master",
+      "sbom_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/Unidata%2Fcftime/sbom",
+      "scorecard": {
+        "id": 146006,
+        "data": {
+          "date": "2025-08-11",
+          "repo": {
+            "name": "github.com/Unidata/cftime",
+            "commit": "cc8618a90e393a0590ffdd90708010f45e043c73"
+          },
+          "scorecard": {
+            "version": "v5.2.1-40-gf6ed084d",
+            "commit": "f6ed084d17c9236477efd66e5b258b9d4cc7b389"
+          },
+          "score": 5.5,
+          "checks": [
+            {
+              "name": "Code-Review",
+              "score": 4,
+              "reason": "Found 2/5 approved changesets -- score normalized to 4",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project requires human code review before pull requests (aka merge requests) are merged.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#code-review"
+              }
+            },
+            {
+              "name": "Binary-Artifacts",
+              "score": 10,
+              "reason": "no binaries found in the repo",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has generated executable (binary) artifacts in the source repository.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#binary-artifacts"
+              }
+            },
+            {
+              "name": "Dangerous-Workflow",
+              "score": 10,
+              "reason": "no dangerous workflow patterns detected",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project's GitHub Action workflows avoid dangerous patterns.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#dangerous-workflow"
+              }
+            },
+            {
+              "name": "CII-Best-Practices",
+              "score": 0,
+              "reason": "no effort to earn an OpenSSF best practices badge detected",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has an OpenSSF (formerly CII) Best Practices Badge.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#cii-best-practices"
+              }
+            },
+            {
+              "name": "Maintained",
+              "score": 10,
+              "reason": "14 commit(s) and 2 issue activity found in the last 90 days -- score normalized to 10",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project is \"actively maintained\".",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#maintained"
+              }
+            },
+            {
+              "name": "Token-Permissions",
+              "score": 0,
+              "reason": "detected GitHub workflow tokens with excessive permissions",
+              "details": [
+                "Warn: no topLevel permission defined: .github/workflows/cibuildwheel.yml:1",
+                "Warn: no topLevel permission defined: .github/workflows/deploy-docs.yml:1",
+                "Warn: no topLevel permission defined: .github/workflows/tests_conda.yml:1",
+                "Warn: no topLevel permission defined: .github/workflows/tests_latest.yml:1",
+                "Info: no jobLevel write permissions found"
+              ],
+              "documentation": {
+                "short": "Determines if the project's workflows follow the principle of least privilege.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#token-permissions"
+              }
+            },
+            {
+              "name": "Pinned-Dependencies",
+              "score": 0,
+              "reason": "dependency not pinned by hash detected -- score normalized to 0",
+              "details": [
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/cibuildwheel.yml:32: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/cibuildwheel.yml/master?enable=pin",
+                "Warn: third-party GitHubAction not pinned by hash: .github/workflows/cibuildwheel.yml:38: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/cibuildwheel.yml/master?enable=pin",
+                "Warn: third-party GitHubAction not pinned by hash: .github/workflows/cibuildwheel.yml:59: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/cibuildwheel.yml/master?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/cibuildwheel.yml:75: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/cibuildwheel.yml/master?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/cibuildwheel.yml:85: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/cibuildwheel.yml/master?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/cibuildwheel.yml:94: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/cibuildwheel.yml/master?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/cibuildwheel.yml:104: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/cibuildwheel.yml/master?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/cibuildwheel.yml:122: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/cibuildwheel.yml/master?enable=pin",
+                "Warn: third-party GitHubAction not pinned by hash: .github/workflows/cibuildwheel.yml:128: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/cibuildwheel.yml/master?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/deploy-docs.yml:14: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/deploy-docs.yml/master?enable=pin",
+                "Warn: third-party GitHubAction not pinned by hash: .github/workflows/deploy-docs.yml:19: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/deploy-docs.yml/master?enable=pin",
+                "Warn: third-party GitHubAction not pinned by hash: .github/workflows/deploy-docs.yml:46: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/deploy-docs.yml/master?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/tests_conda.yml:28: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/tests_conda.yml/master?enable=pin",
+                "Warn: third-party GitHubAction not pinned by hash: .github/workflows/tests_conda.yml:31: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/tests_conda.yml/master?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/tests_latest.yml:12: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/tests_latest.yml/master?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/tests_latest.yml:15: update your workflow using https://app.stepsecurity.io/secureworkflow/Unidata/cftime/tests_latest.yml/master?enable=pin",
+                "Warn: pipCommand not pinned by hash: .github/workflows/cibuildwheel.yml:91",
+                "Warn: pipCommand not pinned by hash: .github/workflows/tests_latest.yml:21",
+                "Warn: pipCommand not pinned by hash: .github/workflows/tests_latest.yml:25",
+                "Warn: pipCommand not pinned by hash: .github/workflows/tests_latest.yml:27",
+                "Warn: pipCommand not pinned by hash: .github/workflows/tests_latest.yml:35",
+                "Info:   0 out of  10 GitHub-owned GitHubAction dependencies pinned",
+                "Info:   0 out of   6 third-party GitHubAction dependencies pinned",
+                "Info:   0 out of   5 pipCommand dependencies pinned"
+              ],
+              "documentation": {
+                "short": "Determines if the project has declared and pinned the dependencies of its build process.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#pinned-dependencies"
+              }
+            },
+            {
+              "name": "Fuzzing",
+              "score": 0,
+              "reason": "project is not fuzzed",
+              "details": [
+                "Warn: no fuzzer integrations found"
+              ],
+              "documentation": {
+                "short": "Determines if the project uses fuzzing.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#fuzzing"
+              }
+            },
+            {
+              "name": "License",
+              "score": 10,
+              "reason": "license file detected",
+              "details": [
+                "Info: project has a license file: LICENSE:0",
+                "Info: FSF or OSI recognized license: MIT License: LICENSE:0"
+              ],
+              "documentation": {
+                "short": "Determines if the project has defined a license.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#license"
+              }
+            },
+            {
+              "name": "Signed-Releases",
+              "score": -1,
+              "reason": "no releases found",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project cryptographically signs release artifacts.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#signed-releases"
+              }
+            },
+            {
+              "name": "Branch-Protection",
+              "score": 0,
+              "reason": "branch protection not enabled on development/release branches",
+              "details": [
+                "Warn: branch protection not enabled for branch 'master'"
+              ],
+              "documentation": {
+                "short": "Determines if the default and release branches are protected with GitHub's branch protection settings.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#branch-protection"
+              }
+            },
+            {
+              "name": "Security-Policy",
+              "score": 10,
+              "reason": "security policy file detected",
+              "details": [
+                "Info: security policy file detected: github.com/Unidata/.github/SECURITY.md:1",
+                "Info: Found linked content: github.com/Unidata/.github/SECURITY.md:1",
+                "Info: Found disclosure, vulnerability, and/or timelines in security policy: github.com/Unidata/.github/SECURITY.md:1",
+                "Info: Found text in security policy: github.com/Unidata/.github/SECURITY.md:1"
+              ],
+              "documentation": {
+                "short": "Determines if the project has published a security policy.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#security-policy"
+              }
+            },
+            {
+              "name": "Vulnerabilities",
+              "score": 2,
+              "reason": "8 existing vulnerabilities detected",
+              "details": [
+                "Warn: Project is vulnerable to: PYSEC-2022-43017 / GHSA-qwmp-2cf2-g9g6",
+                "Warn: Project is vulnerable to: PYSEC-2018-34 / GHSA-2fc2-6r4j-p65h",
+                "Warn: Project is vulnerable to: PYSEC-2021-856 / GHSA-5545-2q6w-2gh6",
+                "Warn: Project is vulnerable to: PYSEC-2019-108 / GHSA-9fq2-x9r6-wfmf",
+                "Warn: Project is vulnerable to: PYSEC-2018-33 / GHSA-cw6w-4rcx-xphc",
+                "Warn: Project is vulnerable to: PYSEC-2021-857 / GHSA-f7c7-j99h-c22f",
+                "Warn: Project is vulnerable to: GHSA-fpfv-jqm9-f5jm",
+                "Warn: Project is vulnerable to: PYSEC-2017-1 / GHSA-frgw-fgh6-9g52"
+              ],
+              "documentation": {
+                "short": "Determines if the project has open, known unfixed vulnerabilities.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#vulnerabilities"
+              }
+            },
+            {
+              "name": "Packaging",
+              "score": 10,
+              "reason": "packaging workflow detected",
+              "details": [
+                "Info: Project packages its releases by way of GitHub Actions.: .github/workflows/cibuildwheel.yml:115"
+              ],
+              "documentation": {
+                "short": "Determines if the project is published as a package that others can easily download, install, easily update, and uninstall.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#packaging"
+              }
+            },
+            {
+              "name": "SAST",
+              "score": 9,
+              "reason": "SAST tool is not run on all commits -- score normalized to 9",
+              "details": [
+                "Warn: 27 commits out of 28 are checked with a SAST tool"
+              ],
+              "documentation": {
+                "short": "Determines if the project uses static code analysis.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#sast"
+              }
+            }
+          ]
+        },
+        "last_synced_at": "2025-08-16T09:25:09.585Z",
+        "repository_id": 39526456,
+        "created_at": "2025-08-16T09:25:09.586Z",
+        "updated_at": "2025-08-16T09:25:09.586Z"
+      },
+      "host": {
+        "name": "GitHub",
+        "url": "https://github.com",
+        "kind": "github",
+        "repositories_count": 286080680,
+        "owners_count": 31400460,
+        "icon_url": "https://github.com/github.png",
+        "version": null,
+        "created_at": "2022-05-30T11:31:42.601Z",
+        "updated_at": "2026-04-04T10:20:44.708Z",
+        "status": "ssl_error",
+        "status_checked_at": "2026-04-04T10:20:06.846Z",
+        "response_time": 60,
+        "last_error": "SSL_read: unexpected eof while reading",
+        "robots_txt_status": "success",
+        "robots_txt_updated_at": "2025-07-24T06:49:26.215Z",
+        "robots_txt_url": "https://github.com/robots.txt",
+        "online": false,
+        "can_crawl_api": true,
+        "host_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub",
+        "repositories_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories",
+        "repository_names_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repository_names",
+        "owners_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners"
+      },
+      "owner_record": {
+        "login": "Unidata",
+        "name": "NSF Unidata",
+        "uuid": "613345",
+        "kind": "organization",
+        "description": "Our mission is to transform the geosciences community, research, and education by providing innovative data services and tools.",
+        "email": "support@unidata.ucar.edu",
+        "website": "https://www.unidata.ucar.edu/",
+        "location": "Boulder, Colorado, USA",
+        "twitter": "unidata",
+        "company": null,
+        "icon_url": "https://avatars.githubusercontent.com/u/613345?v=4",
+        "repositories_count": 130,
+        "last_synced_at": "2024-04-16T01:03:51.770Z",
+        "metadata": {
+          "has_sponsors_listing": false
+        },
+        "html_url": "https://github.com/Unidata",
+        "funding_links": [],
+        "total_stars": 4757,
+        "followers": 188,
+        "following": 0,
+        "created_at": "2022-11-02T16:31:38.260Z",
+        "updated_at": "2024-04-16T01:04:46.121Z",
+        "owner_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/Unidata",
+        "repositories_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/Unidata/repositories"
+      },
+      "tags": []
+    },
+    "repo_metadata_updated_at": "2026-04-24T13:09:29.482Z",
+    "dependent_packages_count": 112,
+    "downloads": 4076451,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 1642,
+    "rankings": {
+      "downloads": 0.22821383750491267,
+      "dependent_repos_count": 0.27662858672600477,
+      "dependent_packages_count": 0.19138428940038618,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.661858101116577,
+      "average": 0.33952120368697014
+    },
+    "purl": "pkg:pypi/cftime",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/cftime",
+    "docker_dependents_count": 271,
+    "docker_downloads_count": 3871767,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/cftime",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/cftime/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": {
+      "last_synced_at": "2026-03-15T20:01:40.558Z",
+      "issues_count": 67,
+      "pull_requests_count": 147,
+      "avg_time_to_close_issue": 9138932.02,
+      "avg_time_to_close_pull_request": 727597.5251798561,
+      "issues_closed_count": 50,
+      "pull_requests_closed_count": 139,
+      "pull_request_authors_count": 19,
+      "issue_authors_count": 48,
+      "avg_comments_per_issue": 4.462686567164179,
+      "avg_comments_per_pull_request": 1.653061224489796,
+      "merged_pull_requests_count": 125,
+      "bot_issues_count": 0,
+      "bot_pull_requests_count": 40,
+      "past_year_issues_count": 5,
+      "past_year_pull_requests_count": 33,
+      "past_year_avg_time_to_close_issue": 821617.0,
+      "past_year_avg_time_to_close_pull_request": 1203752.7407407407,
+      "past_year_issues_closed_count": 3,
+      "past_year_pull_requests_closed_count": 27,
+      "past_year_pull_request_authors_count": 6,
+      "past_year_issue_authors_count": 4,
+      "past_year_avg_comments_per_issue": 4.6,
+      "past_year_avg_comments_per_pull_request": 1.0303030303030303,
+      "past_year_bot_issues_count": 0,
+      "past_year_bot_pull_requests_count": 16,
+      "past_year_merged_pull_requests_count": 24,
+      "issues_url": "https://issues.ecosyste.ms/api/v1/hosts/GitHub/repositories/Unidata%2Fcftime/issues",
+      "maintainers": [
+        {
+          "login": "jswhit",
+          "count": 62,
+          "url": "https://issues.ecosyste.ms/api/v1/hosts/GitHub/authors/jswhit"
+        },
+        {
+          "login": "spencerkclark",
+          "count": 14,
+          "url": "https://issues.ecosyste.ms/api/v1/hosts/GitHub/authors/spencerkclark"
+        },
+        {
+          "login": "bjlittle",
+          "count": 1,
+          "url": "https://issues.ecosyste.ms/api/v1/hosts/GitHub/authors/bjlittle"
+        }
+      ],
+      "active_maintainers": [
+        {
+          "login": "jswhit",
+          "count": 9,
+          "url": "https://issues.ecosyste.ms/api/v1/hosts/GitHub/authors/jswhit"
+        }
+      ]
+    },
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/cftime/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/cftime/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/cftime/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/cftime/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/cftime/codemeta",
+    "maintainers": [
+      {
+        "uuid": "jhamman",
+        "login": "jhamman",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 17,
+        "html_url": "https://pypi.org/user/jhamman/",
+        "role": null,
+        "created_at": "2023-02-23T19:17:52.425Z",
+        "updated_at": "2023-02-23T19:17:52.425Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/jhamman/packages"
+      },
+      {
+        "uuid": "dopplershift",
+        "login": "dopplershift",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 10,
+        "html_url": "https://pypi.org/user/dopplershift/",
+        "role": null,
+        "created_at": "2023-02-23T19:17:52.414Z",
+        "updated_at": "2023-02-23T19:17:52.414Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/dopplershift/packages"
+      },
+      {
+        "uuid": "jswhit",
+        "login": "jswhit",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 8,
+        "html_url": "https://pypi.org/user/jswhit/",
+        "role": null,
+        "created_at": "2023-02-23T19:17:52.434Z",
+        "updated_at": "2023-02-23T19:17:52.434Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/jswhit/packages"
+      }
+    ]
+  }
+}

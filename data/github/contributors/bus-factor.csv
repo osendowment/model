@@ -152,6 +152,7 @@ aixed/wechat-hook,,1,1,1,1,1
 aiyaapp/aiyaeffectsandroid,1,1,,,1,1
 ajv-validator/ajv,,,,,,1
 ajv-validator/ajv-formats,,,,,,1
+ajv-validator/ajv-keywords,,,,,,1
 ajweeks/flexengine,,,,,,
 akai-katto/dandere2x,1,1,,,,1
 akemin-dayo/appsync,1,1,1,1,,1
@@ -254,7 +255,6 @@ andreas-mausch/whatsapp-viewer,1,1,,,,1
 andreasfertig/cppinsights,1,1,1,1,1,1
 andrei-markeev/ts2c,,,,1,1,1
 andrewrk/libsoundio,,1,1,,,1
-andrewrk/node-pend,,,,,,1
 andrewssobral/bgslibrary,,,,,,
 andrivet/advobfuscator,,,,,1,1
 android/ndk-samples,1,1,2,2,2,1
@@ -307,7 +307,6 @@ aomediacodec/libavif,1,2,3,2,2,2
 aorimn/dislocker,2,1,1,,3,6
 apache/age,2,4,3,2,1,4
 apache/airflow,4,5,6,9,8,20
-apache/arrow,7,7,8,6,4,17
 apache/arrow-rs,,,,,,12
 apache/brpc,3,5,4,2,2,6
 apache/cloudberry,2,10,10,5,4,12
@@ -349,7 +348,6 @@ aravisproject/aravis,1,1,1,1,1,1
 archagon/sensible-side-buttons,,,,,,
 archlinux/linux,,,,,,
 ardagnir/athame,,,,,,
-ardatan/graphql-tools,,,,,,376
 ardatan/whatwg-node,,,,,,28
 ardera/flutter-pi,1,1,1,1,1,1
 ardour/ardour,2,2,2,2,1,2
@@ -446,6 +444,7 @@ audacity/audacity,2,1,1,4,3,2
 audio4linux/jdsp4linux,1,1,1,1,1,1
 audiorouterdev/audio-router,,,,,,
 audreyt/node-webworker-threads,1,,,,,1
+auth0/node-jwa,,,,,,2
 autoas/as-deprecated,1,,1,,,1
 autodiff/autodiff,1,1,1,2,1,1
 autohotkey/autohotkey,1,1,1,1,1,1
@@ -670,7 +669,9 @@ brofield/simpleini,1,1,1,1,1,1
 broofa/mime,,,,,,1
 broofa/node-int64,,,,,,1
 brookhong/keycastow,,,,,,
+browserify/events,,,,,,2
 browserify/node-util,,,,,,2
+browserify/randombytes,,,,,,2
 browserify/resolve,,,,,,1
 browseros-ai/browseros,,,,,1,1
 browserslist/browserslist,,,,,,1
@@ -791,7 +792,6 @@ ceph/ceph,4,10,9,10,11,11
 cepr/android-serialport-api,,,,,,
 ceres-solver/ceres-solver,2,1,2,1,1,2
 certbot/certbot,2,2,2,2,2,4
-certifi/python-certifi,,,,,,24
 cesanta/elk,1,1,1,1,1,1
 cesanta/mjs,1,,,,1,1
 cesanta/mongoose,1,1,1,1,1,1
@@ -809,7 +809,6 @@ chalk/ansi-regex,,,,,,1
 chalk/ansi-styles,,,,,,1
 chalk/chalk,,,,,,1
 chalk/slice-ansi,,,,,,1
-chalk/strip-ansi,,,,,,1
 chalk/supports-color,,,,,,1
 chalk/wrap-ansi,,,,,,1
 chalker/safer-buffer,,,,,,1
@@ -891,7 +890,6 @@ ckb-next/ckb-next,1,1,1,2,1,1
 ckcr4lyf/evilapplejuice-esp32,,,1,2,1,1
 clab/dynet,1,2,1,,,1
 clangen/musikcube,1,1,1,1,1,1
-clap-rs/clap,,,,,,2
 classicoldsong/apollo,2,1,2,2,2,2
 classicube/classicube,1,1,1,1,1,1
 cleanflight/cleanflight,,,1,,,1
@@ -1008,7 +1006,6 @@ cosmos72/twin,1,1,1,,1,1
 cossacklabs/themis,1,2,2,1,,1
 coturn/coturn,2,2,2,2,2,3
 couchbase/forestdb,,,,,,
-coveragepy/coveragepy,,,,,,1
 covesa/vsomeip,3,2,4,5,2,5
 cowtoolz/webcamize,,,1,1,1,1
 cp-algorithms/cp-algorithms,1,1,3,2,4,3
@@ -1027,7 +1024,7 @@ cr-marcstevens/sha1collisiondetection,,,,,1,1
 cra-ros-pkg/robot_localization,2,2,4,2,1,3
 cracked5pider/stardust,,,,1,1,1
 crankyoldgit/irremoteesp8266,1,1,1,2,3,1
-crate-py/rpds,,,,,,
+crate-py/rpds,,,,,,1
 cratercrash/godot-orchestrator,,,1,1,1,1
 crawl/crawl,3,2,2,2,2,3
 crementif/botw-bettervr,1,1,1,1,1,1
@@ -1173,6 +1170,7 @@ deepseek-ai/flashmla,,,,,2,2
 deepskystacker/dss,1,1,1,1,1,1
 definitelytyped/definitelytyped,4,5,4,3,2,385
 defold/defold,1,2,3,3,4,3
+defunctzombie/node-process,,,,,,2
 dekunukem/bob_cassette_rewinder,1,1,,1,1,1
 dekunukem/daytripper,1,1,1,,1,1
 dekunukem/duckypad,1,1,1,1,1,1
@@ -1263,7 +1261,6 @@ dosx-dev/obfus.h,,,,1,1,1
 dotnet/diagnostics,4,4,4,5,4,8
 doug/depthjs,,,,,,
 dougbinks/enkits,1,1,1,1,1,1
-douglasdwyer/wasm_sync,,,,,,1
 dougwilson/nodejs-depd,,,,,,1
 dovecot/core,1,2,2,1,2,2
 downdemo/cpp-concurrency-in-action-2ed,,,,,,
@@ -1458,6 +1455,7 @@ erthink/libmdbx,,,,,1,1
 erwincoumans/tiny-differentiable-simulator,1,1,1,,,1
 es-shims/array-includes,,,,,,1
 es-shims/dunder-proto,,,,,,1
+es-shims/es-object-atoms,,,,,,1
 es-shims/es-set-tostringtag,,,,,,1
 es-shims/math-intrinsics,,,,,,1
 es-shims/object.values,,,,,,1
@@ -1675,7 +1673,6 @@ fireice-uk/xmr-stak-cpu,,,,,,
 firmata/arduino,1,1,3,1,,2
 firmianay/ctf-all-in-one,1,1,1,,,1
 fisco-bcos/fisco-bcos,2,2,3,2,1,3
-fitzgen/glob-to-regexp,,,,,,1
 fix94/nintendont,2,4,1,3,1,3
 flagbrew/pksm,,,,,,
 flame/blis,1,1,1,1,1,2
@@ -1868,7 +1865,6 @@ gitlab-freedesktop-mirrors/libxcb,,,,,,2
 gitoxidelabs/gitoxide,1,1,1,1,1,1
 gitpython-developers/gitdb,,,,,,1
 gitpython-developers/gitpython,,,,,,
-gitpython-developers/smmap,,,,,,1
 gittup/tup,1,1,1,1,1,1
 giuspen/cherrytree,1,1,1,1,1,1
 gjduck/e9patch,1,1,1,1,1,1
@@ -1983,6 +1979,7 @@ google/zerocopy,,,,,,2
 googleapis/google-api-python-client,,,,,,
 googleapis/google-auth-library-python,,,,,,20
 googleapis/google-cloud-node-core,,,,,,40
+googleapis/google-cloud-python,,,,,,101
 googleapis/google-resumable-media-python,,,,,,1
 googleapis/python-api-core,,,,,,15
 googleapis/python-crc32c,,,,,,4
@@ -2053,7 +2050,6 @@ guillaumegomez/doc-comment,,,,,,1
 guinmoon/llmfarm,,,1,1,1,1
 guitarml/neuralpi,1,1,,1,,1
 guitarml/smartguitaramp,1,1,1,,,1
-gulpjs/glob-parent,,,,,,2
 gulrak/filesystem,1,1,1,1,1,1
 gunrock/gunrock,1,2,1,1,,1
 gurnec/hashcheck,,,,,,
@@ -2316,6 +2312,7 @@ insightsoftwareconsortium/itk,3,3,2,3,2,3
 inspect-js/array-buffer-byte-length,,,,,,1
 inspect-js/available-typed-arrays,,,,,,1
 inspect-js/functions-have-names,,,,,,1
+inspect-js/has-bigints,,,,,,1
 inspect-js/has-property-descriptors,,,,,,1
 inspect-js/has-proto,,,,,,1
 inspect-js/has-symbols,,,,,,1
@@ -2385,6 +2382,7 @@ iryoku/smaa,,,,,,
 isaacs/chownr,,,,,,1
 isaacs/cliui,,,,,,8
 isaacs/core-util-is,,,,,,1
+isaacs/fs-minipass,,,,,,2
 isaacs/fs.realpath,,,,,,1
 isaacs/inherits,,,,,,1
 isaacs/isexe,,,,,,1
@@ -2401,6 +2399,7 @@ isaacs/package-json-from-dist,,,,,,1
 isaacs/path-scurry,,,,,,1
 isaacs/rimraf,,,,,,1
 isaacs/sax-js,,,,,,1
+isaacs/wrappy,,,,,,2
 isaacs/yallist,,,,,,1
 ish-app/ish,1,1,1,1,1,1
 isislovecruft/library--,,,,,,
@@ -2610,6 +2609,7 @@ jshttp/statuses,,,,,,1
 jshttp/type-is,,,,,,1
 jshttp/vary,,,,,,1
 jslicense/spdx-correct.js,,,,,,1
+jslicense/spdx-exceptions.json,,,,,,1
 jslicense/spdx-expression-parse.js,,,,,,1
 jslicense/spdx-license-ids,,,,,,2
 json-c/json-c,2,2,1,1,2,2
@@ -2701,7 +2701,6 @@ kevinbeaty/any-promise,,,,,,1
 kevinlawler/kona,1,1,1,,,1
 kevmo314/scuda,,,,1,1,1
 kevva/dir-glob,,,,,,1
-kevva/shebang-command,,,,,,1
 keystone-engine/keystone,2,1,1,,,1
 kfix/ddcctl,1,1,,,,1
 kfrlib/kfr,1,1,1,1,1,1
@@ -3315,6 +3314,7 @@ micknoise/maximilian,1,1,1,1,,1
 micromark/micromark,,,,,,1
 micromatch/anymatch,,,,,,1
 micromatch/braces,,,,,,1
+micromatch/is-extglob,,,,,,1
 micromatch/is-glob,,,,,,1
 micromatch/micromatch,,,,,,1
 micromatch/picomatch,,,,,,1
@@ -3740,7 +3740,6 @@ novum/vkquake,1,2,2,1,1,2
 nowsecure/fsmon,1,,1,1,1,1
 npm/abbrev-js,,,,,,3
 npm/cacache,,,,,,1
-npm/fs-minipass,,,,,,2
 npm/hosted-git-info,,,,,,4
 npm/inflight,,,,,,2
 npm/ini,,,,,,3
@@ -3807,6 +3806,7 @@ nvlabs/nvdiffrast,1,1,1,1,2,1
 nvlabs/tiny-cuda-nn,1,1,1,1,1,1
 nvpro-samples/vk_mini_path_tracer,1,1,1,1,,1
 nvpro-samples/vk_raytracing_tutorial_khr,1,1,2,1,1,1
+nvzqz/static-assertions,,,,,,1
 nvzqz/static-assertions-rs,,,,,,1
 nyamisty/altserver-linux,,1,,,,1
 nyanmisaka/ffmpeg-rockchip,1,1,2,1,1,1
@@ -3882,6 +3882,7 @@ open-telemetry/opentelemetry-cpp,2,2,3,3,2,3
 open-telemetry/opentelemetry-js,,,,,,10
 open-telemetry/opentelemetry-js-contrib,,,,,,10
 open-telemetry/opentelemetry-python,,,,,,12
+open-telemetry/opentelemetry-python-contrib,,,,,,14
 open-watcom/open-watcom-v2,1,1,1,1,1,1
 open5gs/open5gs,1,1,1,1,1,1
 open62541/open62541,1,1,1,1,1,1
@@ -4152,7 +4153,6 @@ pillarjs/encodeurl,,,,,,1
 pillarjs/finalhandler,,,,,,1
 pillarjs/iconv-lite,,,,,,1
 pillarjs/parseurl,,,,,,1
-pillarjs/path-to-regexp,,,,,,1
 pillarjs/send,,,,,,1
 pimoroni/pimoroni-pico,2,2,2,1,1,2
 pingcap/tiflash,5,8,5,3,3,6
@@ -4259,6 +4259,7 @@ promyloph/pianobar,1,1,1,1,1,1
 proot-me/proot,1,1,1,,,2
 proptest-rs/proptest,,,,,,2
 protobuf-c/protobuf-c,1,2,1,1,1,1
+protobufjs/protobuf.js,,,,,,1
 protocolbuffers/protobuf,2,4,3,2,2,8
 provenance-emu/provenance,1,1,1,1,1,1
 proxmark/proxmark3,1,,,,1,1
@@ -4284,6 +4285,7 @@ pulp-platform/pulpino,,,,,,
 pure-data/pure-data,2,2,2,2,2,2
 puredarwin/puredarwin,1,1,1,1,1,1
 purplei2p/i2pd,1,1,1,1,1,1
+pvorb/clone,,,,,,1
 pvorb/node-clone,,,,,,1
 pwmt/zathura,1,1,1,1,1,1
 pwn20wndstuff/undecimus,,,,,,
@@ -4326,6 +4328,7 @@ python-jsonschema/jsonschema,,,,,,1
 python-jsonschema/jsonschema-specifications,,,,,,
 python-jsonschema/referencing,,,,,,1
 python-pillow/pillow,1,1,1,1,1,2
+python-poetry/poetry,,,,,,3
 python-poetry/poetry-core,,,,,,3
 python-poetry/tomlkit,,,,,,2
 python-trio/sniffio,,,,,,3
@@ -4335,7 +4338,6 @@ python/mypy,3,3,4,3,4,3
 python/mypy_extensions,,,,,,3
 python/typeshed,3,2,2,4,3,12
 python/typing,,,,,,9
-python/typing_extensions,,,,,,2
 python/tzdata,,,,,,1
 pytorch/cpuinfo,1,3,2,1,3,6
 pytorch/fbgemm,2,2,3,3,5,5
@@ -4641,7 +4643,6 @@ rust-lang/cfg-if,,,,,,2
 rust-lang/compiler-builtins,,,,,,4
 rust-lang/flate2-rs,,,,,,2
 rust-lang/futures-rs,,,,,,3
-rust-lang/glob,,,,,,4
 rust-lang/hashbrown,,,,,,3
 rust-lang/libc,,,,,,5
 rust-lang/libz-sys,,,,,,3
@@ -4900,15 +4901,13 @@ sindresorhus/execa,,,,,,1
 sindresorhus/figures,,,,,,2
 sindresorhus/file-type,,,,,,2
 sindresorhus/find-cache-dir,,,,,,2
+sindresorhus/find-cache-directory,,,,,,2
 sindresorhus/find-up,,,,,,1
 sindresorhus/find-up-simple,,,,,,1
 sindresorhus/get-east-asian-width,,,,,,1
-sindresorhus/get-stream,,,,,,1
 sindresorhus/globals,,,,,,2
 sindresorhus/globby,,,,,,1
 sindresorhus/has-flag,,,,,,1
-sindresorhus/import-fresh,,,,,,1
-sindresorhus/import-local,,,,,,1
 sindresorhus/indent-string,,,,,,1
 sindresorhus/is-binary-path,,,,,,1
 sindresorhus/is-docker,,,,,,1
@@ -4939,6 +4938,7 @@ sindresorhus/p-limit,,,,,,1
 sindresorhus/p-locate,,,,,,1
 sindresorhus/p-map,,,,,,1
 sindresorhus/p-try,,,,,,1
+sindresorhus/package-directory,,,,,,1
 sindresorhus/parent-module,,,,,,1
 sindresorhus/parse-json,,,,,,1
 sindresorhus/path-exists,,,,,,1
@@ -4948,6 +4948,7 @@ sindresorhus/path-type,,,,,,1
 sindresorhus/pify,,,,,,1
 sindresorhus/pkg-dir,,,,,,1
 sindresorhus/quick-lru,,,,,,1
+sindresorhus/read-package-up,,,,,,1
 sindresorhus/read-pkg,,,,,,1
 sindresorhus/read-pkg-up,,,,,,1
 sindresorhus/resolve-cwd,,,,,,1
@@ -5432,6 +5433,7 @@ tixiaoshan/lvi-sam,1,1,,,,1
 tizonia/tizonia-openmax-il,1,,,1,,1
 tj/commander.js,,,,,,3
 tj/mon,,,,,,
+tj/node-cookie-signature,,,,,,1
 tjanczuk/edge,,,,,,
 tjanczuk/iisnode,,,,,,
 tjguk/wmi,,,,,,1
@@ -5513,6 +5515,8 @@ trinitycore/trinitycore,2,2,2,2,2,2
 trinkle23897/undergraduate,,,,,,
 triple-mu/yolov8-tensorrt,,,1,1,1,1
 trishume/eyelike,,,,,,
+tritondatacenter/node-assert-plus,,,,,,3
+tritondatacenter/node-extsprintf,,,,,,5
 tritondatacenter/smartos-live,1,2,1,2,1,2
 trojan-gfw/trojan,,,,,,
 troldal/openxlsx,1,1,,1,1,1
@@ -5962,7 +5966,6 @@ xtaci/algorithms,1,,,1,,1
 xtensor-stack/xsimd,1,2,1,1,1,1
 xtensor-stack/xtensor,3,2,3,2,2,3
 xtra-computing/thundersvm,1,1,1,1,,2
-xtuc/webassemblyjs,,,,,,1
 xtxmarkets/ternfs,,1,1,2,1,1
 xufuji456/ffmpegandroid,1,1,,,1,1
 xverse-engine/xscene-ueplugin,,,1,1,1,2
@@ -6079,6 +6082,7 @@ zeromq/czmq,,,,,,
 zeromq/libzmq,1,1,1,2,2,2
 zerotier/zerotierone,2,2,2,2,1,2
 zertosh/loose-envify,,,,,,1
+zesterer/spin-rs,,,,,,2
 zeux/meshoptimizer,1,1,1,1,1,1
 zeux/niagara,1,1,1,1,1,1
 zeux/pugixml,1,1,1,1,1,1

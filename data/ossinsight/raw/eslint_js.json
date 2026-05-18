@@ -1,0 +1,6255 @@
+{
+  "analyze-repo-overview": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:47.391+00:00",
+    "finishedAt": "2026-05-03T17:01:47.427+00:00",
+    "spent": 0.036,
+    "sql": "WITH stars AS (\n    SELECT\n        27620277 AS repo_id, IFNULL(COUNT(DISTINCT actor_login), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'WatchEvent'\n        AND repo_id = 27620277\n        AND action = 'started'\n), commits AS (\n    SELECT\n        27620277 AS repo_id, IFNULL(SUM(push_distinct_size), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PushEvent'\n        AND repo_id = 27620277\n), issues AS (\n    SELECT\n        27620277 AS repo_id, IFNULL(COUNT(DISTINCT number), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'IssuesEvent'\n        AND repo_id = 27620277\n), pull_request_creators AS (\n    SELECT\n        27620277 AS repo_id, IFNULL(COUNT(DISTINCT actor_login), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PullRequestEvent'\n        AND repo_id = 27620277\n        AND action = 'opened'\n)\nSELECT\n    27620277 AS repo_id,\n    s.total AS stars,\n    c.total AS commits,\n    i.total AS issues,\n    prc.total AS pull_request_creators\nFROM (\n    SELECT 27620277 AS repo_id\n) sub\nLEFT JOIN stars s ON sub.repo_id = s.repo_id\nLEFT JOIN commits c ON sub.repo_id = c.repo_id\nLEFT JOIN issues i ON sub.repo_id = i.repo_id\nLEFT JOIN pull_request_creators prc ON sub.repo_id = prc.repo_id\n;",
+    "fields": [
+      {
+        "name": "repo_id",
+        "columnType": 8
+      },
+      {
+        "name": "stars",
+        "columnType": 8
+      },
+      {
+        "name": "commits",
+        "columnType": 246
+      },
+      {
+        "name": "issues",
+        "columnType": 8
+      },
+      {
+        "name": "pull_request_creators",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "repo_id": 27620277,
+        "stars": 2474,
+        "commits": 901,
+        "issues": 299,
+        "pull_request_creators": 76
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:47.427+00:00",
+    "refresh": true
+  },
+  "analyze-repo-pr-overview": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:49.793+00:00",
+    "finishedAt": "2026-05-03T17:01:49.826+00:00",
+    "spent": 0.033,
+    "sql": "WITH pull_requests AS (\n    SELECT\n        27620277 AS repo_id,\n        IFNULL(COUNT(DISTINCT number), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PullRequestEvent'\n        AND repo_id = 27620277\n), pull_request_creators AS (\n    SELECT\n        27620277 AS repo_id, \n        IFNULL(COUNT(DISTINCT actor_login), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PullRequestEvent'\n        AND repo_id = 27620277\n        AND action = 'opened'\n), pull_request_reviews AS (\n    SELECT\n        27620277 AS repo_id,\n        IFNULL(COUNT(1), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PullRequestReviewEvent'\n        AND repo_id = 27620277\n        AND action = 'created'\n), pull_request_reviewers AS (\n    SELECT\n        27620277 AS repo_id,\n        IFNULL(COUNT(DISTINCT actor_login), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PullRequestReviewEvent'\n        AND repo_id = 27620277\n        AND action = 'created'\n)\nSELECT\n    27620277 AS repo_id,\n    pr.total AS pull_requests,\n    prc.total AS pull_request_creators,\n    prr.total AS pull_request_reviews,\n    prrc.total AS pull_request_reviewers\nFROM (\n    SELECT 27620277 AS repo_id\n) sub\nLEFT JOIN pull_requests pr ON sub.repo_id = pr.repo_id\nLEFT JOIN pull_request_creators prc ON sub.repo_id = prc.repo_id\nLEFT JOIN pull_request_reviews prr ON sub.repo_id = prr.repo_id\nLEFT JOIN pull_request_reviewers prrc ON sub.repo_id = prrc.repo_id\n;",
+    "fields": [
+      {
+        "name": "repo_id",
+        "columnType": 8
+      },
+      {
+        "name": "pull_requests",
+        "columnType": 8
+      },
+      {
+        "name": "pull_request_creators",
+        "columnType": 8
+      },
+      {
+        "name": "pull_request_reviews",
+        "columnType": 8
+      },
+      {
+        "name": "pull_request_reviewers",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "repo_id": 27620277,
+        "pull_requests": 405,
+        "pull_request_creators": 76,
+        "pull_request_reviews": 609,
+        "pull_request_reviewers": 26
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:49.826+00:00",
+    "refresh": true
+  },
+  "analyze-repo-issue-overview": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:47.740+00:00",
+    "finishedAt": "2026-05-03T17:01:47.804+00:00",
+    "spent": 0.064,
+    "sql": "WITH issues AS (\n    SELECT\n        27620277 AS repo_id, COUNT(*) AS total\n    FROM github_events\n    WHERE\n        repo_id = 27620277\n        AND type = 'IssuesEvent'\n        AND action = 'opened'\n), issue_creators AS (\n    SELECT\n        27620277 AS repo_id, COUNT(DISTINCT actor_login) AS total\n    FROM github_events\n    WHERE\n        repo_id = 27620277\n        AND type = 'IssuesEvent'\n        AND action = 'opened'\n), issue_comments AS (\n    SELECT\n        27620277 AS repo_id, COUNT(*) AS total\n    FROM github_events\n    WHERE\n        repo_id = 27620277\n        AND type = 'IssueCommentEvent'\n        AND action = 'created'\n), issue_commenters AS (\n    SELECT\n        27620277 AS repo_id, COUNT(DISTINCT actor_login) AS total\n    FROM github_events\n    WHERE\n        repo_id = 27620277\n        AND type = 'IssueCommentEvent'\n        AND action = 'created'\n)\nSELECT\n    27620277 AS repo_id,\n    IFNULL(i.total, 0) AS issues,\n    IFNULL(ic.total, 0) AS issue_creators,\n    IFNULL(ico.total, 0) AS issue_comments,\n    IFNULL(icc.total, 0) AS issue_commenters\nFROM (\n    SELECT 27620277 AS repo_id\n) sub\nLEFT JOIN issues i ON sub.repo_id = i.repo_id\nLEFT JOIN issue_creators ic ON sub.repo_id = ic.repo_id\nLEFT JOIN issue_comments ico ON sub.repo_id = ico.repo_id\nLEFT JOIN issue_commenters icc ON sub.repo_id = icc.repo_id\n;",
+    "fields": [
+      {
+        "name": "repo_id",
+        "columnType": 8
+      },
+      {
+        "name": "issues",
+        "columnType": 8
+      },
+      {
+        "name": "issue_creators",
+        "columnType": 8
+      },
+      {
+        "name": "issue_comments",
+        "columnType": 8
+      },
+      {
+        "name": "issue_commenters",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "repo_id": 27620277,
+        "issues": 289,
+        "issue_creators": 148,
+        "issue_comments": 1949,
+        "issue_commenters": 224
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:47.804+00:00",
+    "refresh": true
+  },
+  "analyze-pushes-and-commits-per-month": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:44.693+00:00",
+    "finishedAt": "2026-05-03T17:01:44.761+00:00",
+    "spent": 0.068,
+    "sql": "SELECT\n    DATE_FORMAT(created_at, '%Y-%m-01') as event_month,\n    IFNULL(COUNT(*), 0) AS pushes,\n    SUM(COALESCE(push_distinct_size, push_size, 0)) AS commits\nFROM github_events\nWHERE repo_id = 27620277 and type = 'PushEvent'\nGROUP BY 1\nORDER BY 1;\n",
+    "fields": [
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "pushes",
+        "columnType": 8
+      },
+      {
+        "name": "commits",
+        "columnType": 246
+      }
+    ],
+    "data": [
+      {
+        "event_month": "2014-12-01",
+        "pushes": 40,
+        "commits": 0
+      },
+      {
+        "event_month": "2015-01-01",
+        "pushes": 10,
+        "commits": 15
+      },
+      {
+        "event_month": "2015-02-01",
+        "pushes": 22,
+        "commits": 33
+      },
+      {
+        "event_month": "2015-03-01",
+        "pushes": 44,
+        "commits": 55
+      },
+      {
+        "event_month": "2015-04-01",
+        "pushes": 17,
+        "commits": 20
+      },
+      {
+        "event_month": "2015-05-01",
+        "pushes": 2,
+        "commits": 3
+      },
+      {
+        "event_month": "2015-06-01",
+        "pushes": 5,
+        "commits": 8
+      },
+      {
+        "event_month": "2015-07-01",
+        "pushes": 13,
+        "commits": 28
+      },
+      {
+        "event_month": "2015-08-01",
+        "pushes": 3,
+        "commits": 7
+      },
+      {
+        "event_month": "2015-09-01",
+        "pushes": 3,
+        "commits": 3
+      },
+      {
+        "event_month": "2015-10-01",
+        "pushes": 4,
+        "commits": 4
+      },
+      {
+        "event_month": "2015-11-01",
+        "pushes": 6,
+        "commits": 8
+      },
+      {
+        "event_month": "2015-12-01",
+        "pushes": 9,
+        "commits": 9
+      },
+      {
+        "event_month": "2016-01-01",
+        "pushes": 16,
+        "commits": 27
+      },
+      {
+        "event_month": "2016-02-01",
+        "pushes": 13,
+        "commits": 19
+      },
+      {
+        "event_month": "2016-03-01",
+        "pushes": 9,
+        "commits": 15
+      },
+      {
+        "event_month": "2016-04-01",
+        "pushes": 11,
+        "commits": 16
+      },
+      {
+        "event_month": "2016-05-01",
+        "pushes": 2,
+        "commits": 3
+      },
+      {
+        "event_month": "2016-06-01",
+        "pushes": 3,
+        "commits": 4
+      },
+      {
+        "event_month": "2016-07-01",
+        "pushes": 3,
+        "commits": 4
+      },
+      {
+        "event_month": "2016-08-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2016-09-01",
+        "pushes": 19,
+        "commits": 23
+      },
+      {
+        "event_month": "2016-10-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2016-11-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2017-02-01",
+        "pushes": 7,
+        "commits": 8
+      },
+      {
+        "event_month": "2017-03-01",
+        "pushes": 9,
+        "commits": 12
+      },
+      {
+        "event_month": "2017-04-01",
+        "pushes": 5,
+        "commits": 6
+      },
+      {
+        "event_month": "2017-05-01",
+        "pushes": 1,
+        "commits": 2
+      },
+      {
+        "event_month": "2017-06-01",
+        "pushes": 3,
+        "commits": 3
+      },
+      {
+        "event_month": "2017-07-01",
+        "pushes": 8,
+        "commits": 8
+      },
+      {
+        "event_month": "2017-08-01",
+        "pushes": 1,
+        "commits": 2
+      },
+      {
+        "event_month": "2017-09-01",
+        "pushes": 2,
+        "commits": 3
+      },
+      {
+        "event_month": "2017-10-01",
+        "pushes": 4,
+        "commits": 3
+      },
+      {
+        "event_month": "2017-11-01",
+        "pushes": 5,
+        "commits": 5
+      },
+      {
+        "event_month": "2018-01-01",
+        "pushes": 6,
+        "commits": 6
+      },
+      {
+        "event_month": "2018-02-01",
+        "pushes": 4,
+        "commits": 5
+      },
+      {
+        "event_month": "2018-03-01",
+        "pushes": 8,
+        "commits": 9
+      },
+      {
+        "event_month": "2018-04-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2018-05-01",
+        "pushes": 3,
+        "commits": 4
+      },
+      {
+        "event_month": "2018-06-01",
+        "pushes": 8,
+        "commits": 11
+      },
+      {
+        "event_month": "2018-07-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2018-10-01",
+        "pushes": 5,
+        "commits": 6
+      },
+      {
+        "event_month": "2018-11-01",
+        "pushes": 7,
+        "commits": 7
+      },
+      {
+        "event_month": "2018-12-01",
+        "pushes": 3,
+        "commits": 4
+      },
+      {
+        "event_month": "2019-02-01",
+        "pushes": 5,
+        "commits": 6
+      },
+      {
+        "event_month": "2019-04-01",
+        "pushes": 3,
+        "commits": 4
+      },
+      {
+        "event_month": "2019-06-01",
+        "pushes": 1,
+        "commits": 2
+      },
+      {
+        "event_month": "2019-07-01",
+        "pushes": 3,
+        "commits": 3
+      },
+      {
+        "event_month": "2019-08-01",
+        "pushes": 12,
+        "commits": 13
+      },
+      {
+        "event_month": "2019-09-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2019-10-01",
+        "pushes": 3,
+        "commits": 4
+      },
+      {
+        "event_month": "2020-02-01",
+        "pushes": 8,
+        "commits": 8
+      },
+      {
+        "event_month": "2020-03-01",
+        "pushes": 4,
+        "commits": 6
+      },
+      {
+        "event_month": "2020-04-01",
+        "pushes": 3,
+        "commits": 3
+      },
+      {
+        "event_month": "2020-05-01",
+        "pushes": 5,
+        "commits": 6
+      },
+      {
+        "event_month": "2020-06-01",
+        "pushes": 7,
+        "commits": 8
+      },
+      {
+        "event_month": "2020-07-01",
+        "pushes": 1,
+        "commits": 2
+      },
+      {
+        "event_month": "2020-08-01",
+        "pushes": 6,
+        "commits": 6
+      },
+      {
+        "event_month": "2020-11-01",
+        "pushes": 2,
+        "commits": 2
+      },
+      {
+        "event_month": "2020-12-01",
+        "pushes": 4,
+        "commits": 5
+      },
+      {
+        "event_month": "2021-02-01",
+        "pushes": 3,
+        "commits": 3
+      },
+      {
+        "event_month": "2021-04-01",
+        "pushes": 31,
+        "commits": 31
+      },
+      {
+        "event_month": "2021-05-01",
+        "pushes": 6,
+        "commits": 8
+      },
+      {
+        "event_month": "2021-06-01",
+        "pushes": 24,
+        "commits": 27
+      },
+      {
+        "event_month": "2021-07-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2021-08-01",
+        "pushes": 2,
+        "commits": 2
+      },
+      {
+        "event_month": "2021-09-01",
+        "pushes": 24,
+        "commits": 26
+      },
+      {
+        "event_month": "2021-11-01",
+        "pushes": 9,
+        "commits": 10
+      },
+      {
+        "event_month": "2021-12-01",
+        "pushes": 4,
+        "commits": 6
+      },
+      {
+        "event_month": "2022-01-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2022-02-01",
+        "pushes": 4,
+        "commits": 5
+      },
+      {
+        "event_month": "2022-03-01",
+        "pushes": 2,
+        "commits": 2
+      },
+      {
+        "event_month": "2022-04-01",
+        "pushes": 7,
+        "commits": 7
+      },
+      {
+        "event_month": "2022-05-01",
+        "pushes": 1,
+        "commits": 2
+      },
+      {
+        "event_month": "2022-06-01",
+        "pushes": 2,
+        "commits": 2
+      },
+      {
+        "event_month": "2022-07-01",
+        "pushes": 2,
+        "commits": 3
+      },
+      {
+        "event_month": "2022-08-01",
+        "pushes": 4,
+        "commits": 7
+      },
+      {
+        "event_month": "2022-10-01",
+        "pushes": 2,
+        "commits": 2
+      },
+      {
+        "event_month": "2022-11-01",
+        "pushes": 1,
+        "commits": 2
+      },
+      {
+        "event_month": "2023-01-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2023-02-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2023-03-01",
+        "pushes": 7,
+        "commits": 9
+      },
+      {
+        "event_month": "2023-04-01",
+        "pushes": 6,
+        "commits": 6
+      },
+      {
+        "event_month": "2023-05-01",
+        "pushes": 6,
+        "commits": 6
+      },
+      {
+        "event_month": "2023-06-01",
+        "pushes": 3,
+        "commits": 3
+      },
+      {
+        "event_month": "2023-07-01",
+        "pushes": 9,
+        "commits": 9
+      },
+      {
+        "event_month": "2023-08-01",
+        "pushes": 8,
+        "commits": 8
+      },
+      {
+        "event_month": "2023-10-01",
+        "pushes": 3,
+        "commits": 3
+      },
+      {
+        "event_month": "2023-12-01",
+        "pushes": 8,
+        "commits": 22
+      },
+      {
+        "event_month": "2024-01-01",
+        "pushes": 9,
+        "commits": 13
+      },
+      {
+        "event_month": "2024-02-01",
+        "pushes": 2,
+        "commits": 2
+      },
+      {
+        "event_month": "2024-04-01",
+        "pushes": 13,
+        "commits": 6
+      },
+      {
+        "event_month": "2024-05-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2024-06-01",
+        "pushes": 5,
+        "commits": 5
+      },
+      {
+        "event_month": "2024-07-01",
+        "pushes": 16,
+        "commits": 16
+      },
+      {
+        "event_month": "2024-08-01",
+        "pushes": 27,
+        "commits": 28
+      },
+      {
+        "event_month": "2024-09-01",
+        "pushes": 27,
+        "commits": 27
+      },
+      {
+        "event_month": "2024-10-01",
+        "pushes": 10,
+        "commits": 10
+      },
+      {
+        "event_month": "2024-11-01",
+        "pushes": 1,
+        "commits": 1
+      },
+      {
+        "event_month": "2024-12-01",
+        "pushes": 9,
+        "commits": 9
+      },
+      {
+        "event_month": "2025-01-01",
+        "pushes": 6,
+        "commits": 6
+      },
+      {
+        "event_month": "2025-02-01",
+        "pushes": 11,
+        "commits": 11
+      },
+      {
+        "event_month": "2025-03-01",
+        "pushes": 8,
+        "commits": 8
+      },
+      {
+        "event_month": "2025-04-01",
+        "pushes": 6,
+        "commits": 6
+      },
+      {
+        "event_month": "2025-05-01",
+        "pushes": 11,
+        "commits": 11
+      },
+      {
+        "event_month": "2025-06-01",
+        "pushes": 3,
+        "commits": 3
+      },
+      {
+        "event_month": "2025-07-01",
+        "pushes": 5,
+        "commits": 5
+      },
+      {
+        "event_month": "2025-08-01",
+        "pushes": 3,
+        "commits": 3
+      },
+      {
+        "event_month": "2025-09-01",
+        "pushes": 19,
+        "commits": 22
+      },
+      {
+        "event_month": "2025-10-01",
+        "pushes": 8,
+        "commits": 1
+      },
+      {
+        "event_month": "2025-11-01",
+        "pushes": 13,
+        "commits": 0
+      },
+      {
+        "event_month": "2025-12-01",
+        "pushes": 34,
+        "commits": 0
+      },
+      {
+        "event_month": "2026-01-01",
+        "pushes": 17,
+        "commits": 0
+      },
+      {
+        "event_month": "2026-02-01",
+        "pushes": 10,
+        "commits": 0
+      },
+      {
+        "event_month": "2026-03-01",
+        "pushes": 5,
+        "commits": 0
+      },
+      {
+        "event_month": "2026-04-01",
+        "pushes": 5,
+        "commits": 0
+      },
+      {
+        "event_month": "2026-05-01",
+        "pushes": 1,
+        "commits": 0
+      }
+    ],
+    "expiresAt": "2026-05-04T17:01:44.761+00:00",
+    "refresh": true
+  },
+  "analyze-stars-history": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:45.290+00:00",
+    "finishedAt": "2026-05-03T17:01:45.328+00:00",
+    "spent": 0.038,
+    "sql": "WITH stars AS (\n    SELECT\n        repo_id,\n        created_at,\n        ROW_NUMBER() OVER (PARTITION BY repo_id, actor_login) AS row_num\n    FROM github_events\n    WHERE\n        type = 'WatchEvent'\n        AND repo_id IN ('27620277')\n), stars_per_month AS (\n    SELECT\n        repo_id,\n        DATE_FORMAT(created_at, '%Y-%m-01') AS t_month,\n        COUNT(*) AS total\n    FROM stars\n    WHERE\n        row_num = 1\n    GROUP BY\n        repo_id, t_month\n), acc AS (\n    SELECT\n        repo_id,\n        t_month,\n        SUM(total) OVER (PARTITION BY repo_id ORDER BY t_month) AS total,\n        ROW_NUMBER() OVER(PARTITION BY repo_id, t_month) AS row_num\n    FROM\n        stars_per_month\n)\nSELECT\n    repo_id,\n    t_month AS event_month,\n    total\nFROM acc\nWHERE row_num = 1\nORDER BY t_month\n;",
+    "fields": [
+      {
+        "name": "repo_id",
+        "columnType": 8
+      },
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "total",
+        "columnType": 246
+      }
+    ],
+    "data": [
+      {
+        "repo_id": 27620277,
+        "event_month": "2014-12-01",
+        "total": 47
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-01-01",
+        "total": 88
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-02-01",
+        "total": 115
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-03-01",
+        "total": 142
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-04-01",
+        "total": 158
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-05-01",
+        "total": 171
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-06-01",
+        "total": 185
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-07-01",
+        "total": 198
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-08-01",
+        "total": 218
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-09-01",
+        "total": 236
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-10-01",
+        "total": 265
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-11-01",
+        "total": 291
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2015-12-01",
+        "total": 308
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-01-01",
+        "total": 324
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-02-01",
+        "total": 346
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-03-01",
+        "total": 365
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-04-01",
+        "total": 378
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-05-01",
+        "total": 395
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-06-01",
+        "total": 416
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-07-01",
+        "total": 442
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-08-01",
+        "total": 460
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-09-01",
+        "total": 471
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-10-01",
+        "total": 483
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-11-01",
+        "total": 499
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2016-12-01",
+        "total": 512
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-01-01",
+        "total": 524
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-02-01",
+        "total": 548
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-03-01",
+        "total": 573
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-04-01",
+        "total": 582
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-05-01",
+        "total": 603
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-06-01",
+        "total": 618
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-07-01",
+        "total": 634
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-08-01",
+        "total": 662
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-09-01",
+        "total": 676
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-10-01",
+        "total": 701
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-11-01",
+        "total": 714
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2017-12-01",
+        "total": 732
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-01-01",
+        "total": 746
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-02-01",
+        "total": 763
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-03-01",
+        "total": 774
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-04-01",
+        "total": 789
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-05-01",
+        "total": 805
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-06-01",
+        "total": 821
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-07-01",
+        "total": 836
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-08-01",
+        "total": 855
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-09-01",
+        "total": 864
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-10-01",
+        "total": 878
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-11-01",
+        "total": 888
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2018-12-01",
+        "total": 903
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-01-01",
+        "total": 919
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-02-01",
+        "total": 934
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-03-01",
+        "total": 953
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-04-01",
+        "total": 983
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-05-01",
+        "total": 1001
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-06-01",
+        "total": 1023
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-07-01",
+        "total": 1035
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-08-01",
+        "total": 1061
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-09-01",
+        "total": 1078
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-10-01",
+        "total": 1099
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-11-01",
+        "total": 1127
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2019-12-01",
+        "total": 1145
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-01-01",
+        "total": 1160
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-02-01",
+        "total": 1172
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-03-01",
+        "total": 1190
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-04-01",
+        "total": 1210
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-05-01",
+        "total": 1255
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-06-01",
+        "total": 1277
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-07-01",
+        "total": 1304
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-08-01",
+        "total": 1322
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-09-01",
+        "total": 1347
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-10-01",
+        "total": 1366
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-11-01",
+        "total": 1400
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2020-12-01",
+        "total": 1418
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-01-01",
+        "total": 1452
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-02-01",
+        "total": 1467
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-03-01",
+        "total": 1488
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-04-01",
+        "total": 1512
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-05-01",
+        "total": 1527
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-06-01",
+        "total": 1556
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-07-01",
+        "total": 1600
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-08-01",
+        "total": 1626
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-09-01",
+        "total": 1680
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-10-01",
+        "total": 1696
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-11-01",
+        "total": 1731
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2021-12-01",
+        "total": 1751
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-01-01",
+        "total": 1776
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-02-01",
+        "total": 1798
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-03-01",
+        "total": 1827
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-04-01",
+        "total": 1843
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-05-01",
+        "total": 1862
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-06-01",
+        "total": 1885
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-07-01",
+        "total": 1919
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-08-01",
+        "total": 1951
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-09-01",
+        "total": 1978
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-10-01",
+        "total": 2008
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-11-01",
+        "total": 2027
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2022-12-01",
+        "total": 2052
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-01-01",
+        "total": 2068
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-02-01",
+        "total": 2093
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-03-01",
+        "total": 2114
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-04-01",
+        "total": 2123
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-05-01",
+        "total": 2136
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-06-01",
+        "total": 2158
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-07-01",
+        "total": 2180
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-08-01",
+        "total": 2196
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-09-01",
+        "total": 2209
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-10-01",
+        "total": 2223
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-11-01",
+        "total": 2244
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2023-12-01",
+        "total": 2257
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-01-01",
+        "total": 2272
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-02-01",
+        "total": 2292
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-03-01",
+        "total": 2309
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-04-01",
+        "total": 2332
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-05-01",
+        "total": 2343
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-06-01",
+        "total": 2352
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-07-01",
+        "total": 2363
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-08-01",
+        "total": 2375
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-09-01",
+        "total": 2384
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-10-01",
+        "total": 2392
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-11-01",
+        "total": 2397
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2024-12-01",
+        "total": 2406
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-01-01",
+        "total": 2412
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-02-01",
+        "total": 2420
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-03-01",
+        "total": 2428
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-04-01",
+        "total": 2430
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-05-01",
+        "total": 2440
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-06-01",
+        "total": 2446
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-07-01",
+        "total": 2448
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-08-01",
+        "total": 2450
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-09-01",
+        "total": 2458
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-10-01",
+        "total": 2461
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-11-01",
+        "total": 2464
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2025-12-01",
+        "total": 2465
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2026-01-01",
+        "total": 2469
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2026-02-01",
+        "total": 2473
+      },
+      {
+        "repo_id": 27620277,
+        "event_month": "2026-03-01",
+        "total": 2474
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:45.328+00:00",
+    "refresh": true
+  },
+  "analyze-pull-request-open-to-merged": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:44.991+00:00",
+    "finishedAt": "2026-05-03T17:01:45.032+00:00",
+    "spent": 0.041,
+    "sql": "WITH pr_with_merged_at AS (\n    SELECT\n        number, DATE_FORMAT(created_at, '%Y-%m-01') AS t_month, created_at AS merged_at\n    FROM\n        github_events ge\n    WHERE\n        type = 'PullRequestEvent'\n        -- Considering that some repositories accept the code of the contributor by closing the PR and push commit directly,\n        -- here is not distinguished whether it is the merged event.\n        -- See: https://github.com/mongodb/mongo/pulls?q=is%3Apr+is%3Aclosed\n        AND action = 'closed'\n        AND repo_id = 27620277\n), pr_with_opened_at AS (\n    SELECT\n        number, created_at AS opened_at\n    FROM\n        github_events ge\n    WHERE\n        type = 'PullRequestEvent'\n        AND action = 'opened'\n        -- Exclude Bots\n        -- AND actor_login NOT LIKE '%bot%'\n        -- AND actor_login NOT IN (SELECT login FROM blacklist_users bu)\n        AND repo_id = 27620277\n), tdiff AS (\n    SELECT\n        t_month,\n        (UNIX_TIMESTAMP(pwm.merged_at) - UNIX_TIMESTAMP(pwo.opened_at)) AS diff\n    FROM\n        pr_with_opened_at pwo\n        JOIN pr_with_merged_at pwm ON pwo.number = pwm.number AND pwm.merged_at > pwo.opened_at\n), tdiff_with_rank AS (\n    SELECT\n        tdiff.t_month,\n        diff  / 60 / 60 AS diff,\n        ROW_NUMBER() OVER (PARTITION BY tdiff.t_month ORDER BY diff) AS r,\n        COUNT(*) OVER (PARTITION BY tdiff.t_month) AS cnt,\n        FIRST_VALUE(diff / 60 / 60) OVER (PARTITION BY tdiff.t_month ORDER BY diff) AS p0,\n        FIRST_VALUE(diff / 60 / 60)  OVER (PARTITION BY tdiff.t_month ORDER BY diff DESC) AS p100\n    FROM tdiff\n), tdiff_p25 AS (\n    SELECT\n        t_month, diff AS p25\n    FROM\n        tdiff_with_rank tr\n    WHERE\n        r = ROUND(cnt * 0.25)\n), tdiff_p50 AS (\n    SELECT\n        t_month, diff AS p50\n    FROM\n        tdiff_with_rank tr\n    WHERE\n        r = ROUND(cnt * 0.5)\n), tdiff_p75 AS (\n    SELECT\n        t_month, diff AS p75\n    FROM\n        tdiff_with_rank tr\n    WHERE\n        r = ROUND(cnt * 0.75)\n)\nSELECT\n    tr.t_month AS event_month,\n    p0,\n    p25,\n    p50,\n    p75,\n    p100\nFROM tdiff_with_rank tr\nLEFT JOIN tdiff_p25 p25 ON tr.t_month = p25.t_month\nLEFT JOIN tdiff_p50 p50 ON tr.t_month = p50.t_month\nLEFT JOIN tdiff_p75 p75 ON tr.t_month = p75.t_month\nWHERE r = 1\nORDER BY event_month\n;",
+    "fields": [
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "p0",
+        "columnType": 246
+      },
+      {
+        "name": "p25",
+        "columnType": 246
+      },
+      {
+        "name": "p50",
+        "columnType": 246
+      },
+      {
+        "name": "p75",
+        "columnType": 246
+      },
+      {
+        "name": "p100",
+        "columnType": 246
+      }
+    ],
+    "data": [
+      {
+        "event_month": "2014-12-01",
+        "p0": 0.13611111,
+        "p25": 1.53111111,
+        "p50": 13.22388889,
+        "p75": 36.45472222,
+        "p100": 114.09305556
+      },
+      {
+        "event_month": "2015-01-01",
+        "p0": 1.20972222,
+        "p25": 1.20972222,
+        "p50": 25.35416667,
+        "p75": 28.80722222,
+        "p100": 47.87
+      },
+      {
+        "event_month": "2015-02-01",
+        "p0": 0.14,
+        "p25": 1.5775,
+        "p50": 19.72222222,
+        "p75": 42.74083333,
+        "p100": 100.26555556
+      },
+      {
+        "event_month": "2015-03-01",
+        "p0": 0.03916667,
+        "p25": 0.2225,
+        "p50": 4.26555556,
+        "p75": 16.9025,
+        "p100": 887.68777778
+      },
+      {
+        "event_month": "2015-04-01",
+        "p0": 0.07277778,
+        "p25": 0.095,
+        "p50": 0.40027778,
+        "p75": 22.06305556,
+        "p100": 167.84666667
+      },
+      {
+        "event_month": "2015-05-01",
+        "p0": 0.60916667,
+        "p25": 0.60916667,
+        "p50": 0.60916667,
+        "p75": 2.43805556,
+        "p100": 2.43805556
+      },
+      {
+        "event_month": "2015-06-01",
+        "p0": 2.96027778,
+        "p25": 2.96027778,
+        "p50": 32.92805556,
+        "p75": 32.92805556,
+        "p100": 141.25583333
+      },
+      {
+        "event_month": "2015-07-01",
+        "p0": 0.24805556,
+        "p25": 0.25694444,
+        "p50": 2.06722222,
+        "p75": 76.38416667,
+        "p100": 355.11555556
+      },
+      {
+        "event_month": "2015-08-01",
+        "p0": 3.9625,
+        "p25": 3.9625,
+        "p50": 3.9625,
+        "p75": 23.26583333,
+        "p100": 23.26583333
+      },
+      {
+        "event_month": "2015-09-01",
+        "p0": 0.17805556,
+        "p25": null,
+        "p50": 0.17805556,
+        "p75": 0.17805556,
+        "p100": 0.17805556
+      },
+      {
+        "event_month": "2015-10-01",
+        "p0": 0.28194444,
+        "p25": null,
+        "p50": 0.28194444,
+        "p75": 0.28194444,
+        "p100": 0.28194444
+      },
+      {
+        "event_month": "2015-12-01",
+        "p0": 0.00111111,
+        "p25": 0.11277778,
+        "p50": 0.47638889,
+        "p75": 17.37916667,
+        "p100": 4797.26972222
+      },
+      {
+        "event_month": "2016-01-01",
+        "p0": 0.14777778,
+        "p25": 1.62138889,
+        "p50": 6.96833333,
+        "p75": 15.97888889,
+        "p100": 64.44833333
+      },
+      {
+        "event_month": "2016-02-01",
+        "p0": 0.22666667,
+        "p25": 0.22666667,
+        "p50": 0.37611111,
+        "p75": 4.71916667,
+        "p100": 595.73111111
+      },
+      {
+        "event_month": "2016-03-01",
+        "p0": 1.09722222,
+        "p25": 1.34027778,
+        "p50": 12.2975,
+        "p75": 46.44222222,
+        "p100": 82.87361111
+      },
+      {
+        "event_month": "2016-04-01",
+        "p0": 0.71416667,
+        "p25": 4.44472222,
+        "p50": 5.37777778,
+        "p75": 31.58583333,
+        "p100": 83.17944444
+      },
+      {
+        "event_month": "2016-05-01",
+        "p0": 24.34138889,
+        "p25": null,
+        "p50": 24.34138889,
+        "p75": 24.34138889,
+        "p100": 24.34138889
+      },
+      {
+        "event_month": "2016-06-01",
+        "p0": 19.51555556,
+        "p25": null,
+        "p50": 19.51555556,
+        "p75": 19.51555556,
+        "p100": 19.51555556
+      },
+      {
+        "event_month": "2016-07-01",
+        "p0": 5.71305556,
+        "p25": 5.71305556,
+        "p50": 5.71305556,
+        "p75": 1013.30444444,
+        "p100": 1013.30444444
+      },
+      {
+        "event_month": "2016-08-01",
+        "p0": 0.01083333,
+        "p25": null,
+        "p50": 0.01083333,
+        "p75": 0.01083333,
+        "p100": 0.01083333
+      },
+      {
+        "event_month": "2016-09-01",
+        "p0": 10.62611111,
+        "p25": 10.62611111,
+        "p50": 42.97638889,
+        "p75": 72.34305556,
+        "p100": 185.76138889
+      },
+      {
+        "event_month": "2016-11-01",
+        "p0": 19.09111111,
+        "p25": null,
+        "p50": 19.09111111,
+        "p75": 19.09111111,
+        "p100": 19.09111111
+      },
+      {
+        "event_month": "2016-12-01",
+        "p0": 83.77361111,
+        "p25": null,
+        "p50": 83.77361111,
+        "p75": 83.77361111,
+        "p100": 83.77361111
+      },
+      {
+        "event_month": "2017-02-01",
+        "p0": 0.01388889,
+        "p25": 0.06972222,
+        "p50": 12.94388889,
+        "p75": 78.6025,
+        "p100": 6150.47611111
+      },
+      {
+        "event_month": "2017-03-01",
+        "p0": 0.3175,
+        "p25": 0.3175,
+        "p50": 139.67638889,
+        "p75": 936.15777778,
+        "p100": 3185.54444444
+      },
+      {
+        "event_month": "2017-04-01",
+        "p0": 73.42444444,
+        "p25": 73.42444444,
+        "p50": 76.30888889,
+        "p75": 76.30888889,
+        "p100": 551.14611111
+      },
+      {
+        "event_month": "2017-06-01",
+        "p0": 28.11916667,
+        "p25": 28.11916667,
+        "p50": 28.11916667,
+        "p75": 172.97333333,
+        "p100": 172.97333333
+      },
+      {
+        "event_month": "2017-07-01",
+        "p0": 54.48333333,
+        "p25": 54.48333333,
+        "p50": 456.60777778,
+        "p75": 456.60777778,
+        "p100": 486.955
+      },
+      {
+        "event_month": "2017-09-01",
+        "p0": 0.27416667,
+        "p25": 0.27416667,
+        "p50": 0.27416667,
+        "p75": 55.14611111,
+        "p100": 55.14611111
+      },
+      {
+        "event_month": "2017-10-01",
+        "p0": 31.56361111,
+        "p25": 31.56361111,
+        "p50": 31.56361111,
+        "p75": 33.08194444,
+        "p100": 33.08194444
+      },
+      {
+        "event_month": "2017-11-01",
+        "p0": 124.02305556,
+        "p25": 124.02305556,
+        "p50": 124.02305556,
+        "p75": 770.00138889,
+        "p100": 770.00138889
+      },
+      {
+        "event_month": "2018-01-01",
+        "p0": 2.48972222,
+        "p25": 2.48972222,
+        "p50": 35.63416667,
+        "p75": 35.63416667,
+        "p100": 383.97055556
+      },
+      {
+        "event_month": "2018-02-01",
+        "p0": 209.82472222,
+        "p25": null,
+        "p50": 209.82472222,
+        "p75": 209.82472222,
+        "p100": 209.82472222
+      },
+      {
+        "event_month": "2018-03-01",
+        "p0": 0.06527778,
+        "p25": 0.29166667,
+        "p50": 24.21611111,
+        "p75": 56.14361111,
+        "p100": 3237.74166667
+      },
+      {
+        "event_month": "2018-04-01",
+        "p0": 661.07694444,
+        "p25": null,
+        "p50": 661.07694444,
+        "p75": 661.07694444,
+        "p100": 661.07694444
+      },
+      {
+        "event_month": "2018-06-01",
+        "p0": 1.17388889,
+        "p25": 1.17388889,
+        "p50": 2.10277778,
+        "p75": 104.2775,
+        "p100": 109.52888889
+      },
+      {
+        "event_month": "2018-10-01",
+        "p0": 2.51583333,
+        "p25": 2.51583333,
+        "p50": 2.51583333,
+        "p75": 367.24638889,
+        "p100": 367.24638889
+      },
+      {
+        "event_month": "2018-11-01",
+        "p0": 5.44277778,
+        "p25": 5.44277778,
+        "p50": 5.44277778,
+        "p75": 2907.93805556,
+        "p100": 2907.93805556
+      },
+      {
+        "event_month": "2018-12-01",
+        "p0": 46.03361111,
+        "p25": 46.03361111,
+        "p50": 46.03361111,
+        "p75": 114.58361111,
+        "p100": 114.58361111
+      },
+      {
+        "event_month": "2019-02-01",
+        "p0": 50.47416667,
+        "p25": 50.47416667,
+        "p50": 50.47416667,
+        "p75": 57.20055556,
+        "p100": 57.20055556
+      },
+      {
+        "event_month": "2019-04-01",
+        "p0": 9.78888889,
+        "p25": 9.78888889,
+        "p50": 9.78888889,
+        "p75": 439.42805556,
+        "p100": 439.42805556
+      },
+      {
+        "event_month": "2019-08-01",
+        "p0": 0.21972222,
+        "p25": 10.50277778,
+        "p50": 39.065,
+        "p75": 385.33611111,
+        "p100": 765.4975
+      },
+      {
+        "event_month": "2019-10-01",
+        "p0": 501.42333333,
+        "p25": null,
+        "p50": 501.42333333,
+        "p75": 501.42333333,
+        "p100": 501.42333333
+      },
+      {
+        "event_month": "2020-02-01",
+        "p0": 183.28222222,
+        "p25": null,
+        "p50": 183.28222222,
+        "p75": 183.28222222,
+        "p100": 183.28222222
+      },
+      {
+        "event_month": "2020-03-01",
+        "p0": 66.70916667,
+        "p25": 66.70916667,
+        "p50": 66.70916667,
+        "p75": 72.54611111,
+        "p100": 72.54611111
+      },
+      {
+        "event_month": "2020-04-01",
+        "p0": 99.30555556,
+        "p25": 99.30555556,
+        "p50": 291.25416667,
+        "p75": 291.25416667,
+        "p100": 372.32583333
+      },
+      {
+        "event_month": "2020-05-01",
+        "p0": 300.79305556,
+        "p25": 300.79305556,
+        "p50": 679.47305556,
+        "p75": 679.47305556,
+        "p100": 2056.78194444
+      },
+      {
+        "event_month": "2020-06-01",
+        "p0": 1.16722222,
+        "p25": 1.16722222,
+        "p50": 21.58333333,
+        "p75": 290.26833333,
+        "p100": 1113.91611111
+      },
+      {
+        "event_month": "2020-08-01",
+        "p0": 30.97305556,
+        "p25": 30.97305556,
+        "p50": 30.97305556,
+        "p75": 40.80805556,
+        "p100": 40.80805556
+      },
+      {
+        "event_month": "2020-10-01",
+        "p0": 10.07361111,
+        "p25": null,
+        "p50": 10.07361111,
+        "p75": 10.07361111,
+        "p100": 10.07361111
+      },
+      {
+        "event_month": "2020-11-01",
+        "p0": 2.94083333,
+        "p25": 2.94083333,
+        "p50": 2.94083333,
+        "p75": 29.66861111,
+        "p100": 29.66861111
+      },
+      {
+        "event_month": "2020-12-01",
+        "p0": 77.82138889,
+        "p25": 77.82138889,
+        "p50": 159.45527778,
+        "p75": 177.97055556,
+        "p100": 217.77
+      },
+      {
+        "event_month": "2021-02-01",
+        "p0": 30.83583333,
+        "p25": 30.83583333,
+        "p50": 61.78111111,
+        "p75": 360.065,
+        "p100": 2312.60694444
+      },
+      {
+        "event_month": "2021-03-01",
+        "p0": 2575.30111111,
+        "p25": null,
+        "p50": 2575.30111111,
+        "p75": 2575.30111111,
+        "p100": 2575.30111111
+      },
+      {
+        "event_month": "2021-04-01",
+        "p0": 0.00555556,
+        "p25": 4.6025,
+        "p50": 75.88527778,
+        "p75": 102.78083333,
+        "p100": 3482.13527778
+      },
+      {
+        "event_month": "2021-05-01",
+        "p0": 7.36027778,
+        "p25": 7.36027778,
+        "p50": 87.73666667,
+        "p75": 87.73666667,
+        "p100": 112.71027778
+      },
+      {
+        "event_month": "2021-06-01",
+        "p0": 13.11,
+        "p25": 63.64388889,
+        "p50": 309.79111111,
+        "p75": 459.34833333,
+        "p100": 16494.28055556
+      },
+      {
+        "event_month": "2021-07-01",
+        "p0": 0.91888889,
+        "p25": null,
+        "p50": 0.91888889,
+        "p75": 0.91888889,
+        "p100": 0.91888889
+      },
+      {
+        "event_month": "2021-08-01",
+        "p0": 4.88805556,
+        "p25": null,
+        "p50": 4.88805556,
+        "p75": 4.88805556,
+        "p100": 4.88805556
+      },
+      {
+        "event_month": "2021-09-01",
+        "p0": 2.99444444,
+        "p25": 2.99444444,
+        "p50": 62.3075,
+        "p75": 62.3075,
+        "p100": 302.31583333
+      },
+      {
+        "event_month": "2021-10-01",
+        "p0": 5.75472222,
+        "p25": null,
+        "p50": 5.75472222,
+        "p75": 5.75472222,
+        "p100": 5.75472222
+      },
+      {
+        "event_month": "2021-11-01",
+        "p0": 10.92055556,
+        "p25": 10.92055556,
+        "p50": 43.83722222,
+        "p75": 46.52888889,
+        "p100": 106.04194444
+      },
+      {
+        "event_month": "2021-12-01",
+        "p0": 1.71916667,
+        "p25": 1.71916667,
+        "p50": 1.71916667,
+        "p75": 7.16194444,
+        "p100": 7.16194444
+      },
+      {
+        "event_month": "2022-02-01",
+        "p0": 0.13638889,
+        "p25": 0.13638889,
+        "p50": 16.17722222,
+        "p75": 16.17722222,
+        "p100": 336.58222222
+      },
+      {
+        "event_month": "2022-03-01",
+        "p0": 22.31555556,
+        "p25": 22.31555556,
+        "p50": 22.31555556,
+        "p75": 71.78666667,
+        "p100": 71.78666667
+      },
+      {
+        "event_month": "2022-04-01",
+        "p0": 4.91833333,
+        "p25": 4.91833333,
+        "p50": 20.92638889,
+        "p75": 20.92638889,
+        "p100": 40.06166667
+      },
+      {
+        "event_month": "2022-05-01",
+        "p0": 920.84305556,
+        "p25": 920.84305556,
+        "p50": 920.84305556,
+        "p75": 2480.02333333,
+        "p100": 2480.02333333
+      },
+      {
+        "event_month": "2022-06-01",
+        "p0": 4.89361111,
+        "p25": 4.89361111,
+        "p50": 7.64833333,
+        "p75": 7.64833333,
+        "p100": 25.98916667
+      },
+      {
+        "event_month": "2022-07-01",
+        "p0": 0.55361111,
+        "p25": null,
+        "p50": 0.55361111,
+        "p75": 0.55361111,
+        "p100": 0.55361111
+      },
+      {
+        "event_month": "2022-08-01",
+        "p0": 74.82833333,
+        "p25": null,
+        "p50": 74.82833333,
+        "p75": 74.82833333,
+        "p100": 74.82833333
+      },
+      {
+        "event_month": "2022-10-01",
+        "p0": 1.21138889,
+        "p25": 1.21138889,
+        "p50": 1.21138889,
+        "p75": 3.60027778,
+        "p100": 3.60027778
+      },
+      {
+        "event_month": "2023-01-01",
+        "p0": 20.885,
+        "p25": null,
+        "p50": 20.885,
+        "p75": 20.885,
+        "p100": 20.885
+      },
+      {
+        "event_month": "2023-02-01",
+        "p0": 1.61083333,
+        "p25": null,
+        "p50": 1.61083333,
+        "p75": 1.61083333,
+        "p100": 1.61083333
+      },
+      {
+        "event_month": "2023-03-01",
+        "p0": 0.08638889,
+        "p25": 0.08638889,
+        "p50": 36.46388889,
+        "p75": 160.40638889,
+        "p100": 7720.89055556
+      },
+      {
+        "event_month": "2023-04-01",
+        "p0": 277.95277778,
+        "p25": null,
+        "p50": 277.95277778,
+        "p75": 277.95277778,
+        "p100": 277.95277778
+      },
+      {
+        "event_month": "2023-05-01",
+        "p0": 31.37027778,
+        "p25": 31.37027778,
+        "p50": 31.37027778,
+        "p75": 370.63722222,
+        "p100": 370.63722222
+      },
+      {
+        "event_month": "2023-06-01",
+        "p0": 269.48611111,
+        "p25": 269.48611111,
+        "p50": 269.48611111,
+        "p75": 630.01638889,
+        "p100": 630.01638889
+      },
+      {
+        "event_month": "2023-07-01",
+        "p0": 42.09555556,
+        "p25": 42.09555556,
+        "p50": 58.13444444,
+        "p75": 58.13444444,
+        "p100": 237.44722222
+      },
+      {
+        "event_month": "2023-08-01",
+        "p0": 4.93972222,
+        "p25": 4.93972222,
+        "p50": 4.93972222,
+        "p75": 220.27194444,
+        "p100": 220.27194444
+      },
+      {
+        "event_month": "2023-10-01",
+        "p0": 3.20666667,
+        "p25": null,
+        "p50": 3.20666667,
+        "p75": 3.20666667,
+        "p100": 3.20666667
+      },
+      {
+        "event_month": "2024-01-01",
+        "p0": 3.57111111,
+        "p25": 3.57111111,
+        "p50": 638.41861111,
+        "p75": 698.16444444,
+        "p100": 4407.78388889
+      },
+      {
+        "event_month": "2024-02-01",
+        "p0": 0.04305556,
+        "p25": 0.04305556,
+        "p50": 0.04305556,
+        "p75": 0.15722222,
+        "p100": 0.15722222
+      },
+      {
+        "event_month": "2024-04-01",
+        "p0": 0.01638889,
+        "p25": 0.01638889,
+        "p50": 0.26694444,
+        "p75": 0.70027778,
+        "p100": 1.37277778
+      },
+      {
+        "event_month": "2024-05-01",
+        "p0": 16.63694444,
+        "p25": 16.63694444,
+        "p50": 16.63694444,
+        "p75": 538.47388889,
+        "p100": 538.47388889
+      },
+      {
+        "event_month": "2024-06-01",
+        "p0": 0.08861111,
+        "p25": 0.08861111,
+        "p50": 19.86888889,
+        "p75": 19.86888889,
+        "p100": 77.00472222
+      },
+      {
+        "event_month": "2024-07-01",
+        "p0": 10.01833333,
+        "p25": 10.01833333,
+        "p50": 76.92694444,
+        "p75": 76.92694444,
+        "p100": 289.9
+      },
+      {
+        "event_month": "2024-08-01",
+        "p0": 3.40611111,
+        "p25": 3.40611111,
+        "p50": 16.39,
+        "p75": 76.11472222,
+        "p100": 603.11916667
+      },
+      {
+        "event_month": "2024-09-01",
+        "p0": 0.07,
+        "p25": 0.29555556,
+        "p50": 10.13527778,
+        "p75": 67.30194444,
+        "p100": 1031.81694444
+      },
+      {
+        "event_month": "2024-10-01",
+        "p0": 1.32555556,
+        "p25": 1.32555556,
+        "p50": 4.32861111,
+        "p75": 22.1475,
+        "p100": 67.59805556
+      },
+      {
+        "event_month": "2024-12-01",
+        "p0": 21.235,
+        "p25": 21.235,
+        "p50": 21.235,
+        "p75": 352.25472222,
+        "p100": 352.25472222
+      },
+      {
+        "event_month": "2025-01-01",
+        "p0": 1.37472222,
+        "p25": null,
+        "p50": 1.37472222,
+        "p75": 1.37472222,
+        "p100": 1.37472222
+      },
+      {
+        "event_month": "2025-03-01",
+        "p0": 144.41972222,
+        "p25": 144.41972222,
+        "p50": 144.41972222,
+        "p75": 409.30805556,
+        "p100": 409.30805556
+      },
+      {
+        "event_month": "2025-05-01",
+        "p0": 0.34555556,
+        "p25": null,
+        "p50": 0.34555556,
+        "p75": 0.34555556,
+        "p100": 0.34555556
+      },
+      {
+        "event_month": "2025-06-01",
+        "p0": 32.87166667,
+        "p25": null,
+        "p50": 32.87166667,
+        "p75": 32.87166667,
+        "p100": 32.87166667
+      },
+      {
+        "event_month": "2025-07-01",
+        "p0": 2.635,
+        "p25": 2.635,
+        "p50": 2.635,
+        "p75": 9.87055556,
+        "p100": 9.87055556
+      },
+      {
+        "event_month": "2025-09-01",
+        "p0": 0.39694444,
+        "p25": null,
+        "p50": 0.39694444,
+        "p75": 0.39694444,
+        "p100": 0.39694444
+      },
+      {
+        "event_month": "2025-10-01",
+        "p0": 603.87027778,
+        "p25": null,
+        "p50": 603.87027778,
+        "p75": 603.87027778,
+        "p100": 603.87027778
+      },
+      {
+        "event_month": "2025-12-01",
+        "p0": 4060.64194444,
+        "p25": null,
+        "p50": 4060.64194444,
+        "p75": 4060.64194444,
+        "p100": 4060.64194444
+      }
+    ],
+    "expiresAt": "2026-05-04T17:01:45.032+00:00",
+    "refresh": true
+  },
+  "analyze-issue-open-to-closed": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:44.391+00:00",
+    "finishedAt": "2026-05-03T17:01:44.428+00:00",
+    "spent": 0.037,
+    "sql": "with issue_with_closed_at as (\n    select\n        number, DATE_FORMAT(created_at, '%Y-%m-01') AS t_month, created_at as closed_at\n    from\n        github_events ge\n    where\n        type = 'IssuesEvent'\n        and action = 'closed'\n        and repo_id = 27620277\n), issue_with_opened_at as (\n    select\n        number, created_at as opened_at\n    from\n        github_events ge\n    where\n        type = 'IssuesEvent'\n        and action = 'opened'\n        -- Exclude Bots\n        -- and actor_login not like '%bot%'\n        -- and actor_login not in (select login from blacklist_users bu)\n        and repo_id = 27620277\n), tdiff as (\n    select\n        DATE_FORMAT(t_month, '%Y-%m-01') AS t_month,\n        (UNIX_TIMESTAMP(iwc.closed_at) - UNIX_TIMESTAMP(iwo.opened_at)) as diff\n    from\n        issue_with_opened_at iwo\n        join issue_with_closed_at iwc on iwo.number = iwc.number and iwc.closed_at > iwo.opened_at\n), tdiff_with_rank as (\n    select\n        tdiff.t_month,\n        diff  / 60 / 60 as diff,\n        ROW_NUMBER() over (partition by tdiff.t_month order by diff) as r,\n        count(*) over (partition by tdiff.t_month) as cnt,\n        first_value(diff / 60 / 60) over (partition by tdiff.t_month order by diff) as p0,\n        first_value(diff / 60 / 60)  over (partition by tdiff.t_month order by diff desc) as p100\n    from tdiff\n), tdiff_p25 as (\n    select\n        t_month, diff as p25\n    from\n        tdiff_with_rank tr\n    where\n        r = round(cnt * 0.25)\n), tdiff_p50 as (\n    select\n        t_month, diff as p50\n    from\n        tdiff_with_rank tr\n    where\n        r = round(cnt * 0.5)\n), tdiff_p75 as (\n    select\n        t_month, diff as p75\n    from\n        tdiff_with_rank tr\n    where\n        r = round(cnt * 0.75)\n)\nselect\n    distinct tr.t_month AS event_month,\n    p0,\n    p25,\n    p50,\n    p75,\n    p100\nfrom tdiff_with_rank tr\nleft join tdiff_p25 p25 on tr.t_month = p25.t_month\nleft join tdiff_p50 p50 on tr.t_month = p50.t_month\nleft join tdiff_p75 p75 on tr.t_month = p75.t_month\norder by 1\n;",
+    "fields": [
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "p0",
+        "columnType": 246
+      },
+      {
+        "name": "p25",
+        "columnType": 246
+      },
+      {
+        "name": "p50",
+        "columnType": 246
+      },
+      {
+        "name": "p75",
+        "columnType": 246
+      },
+      {
+        "name": "p100",
+        "columnType": 246
+      }
+    ],
+    "data": [
+      {
+        "event_month": "2014-12-01",
+        "p0": 0.06805556,
+        "p25": 0.2325,
+        "p50": 3.91416667,
+        "p75": 70.77416667,
+        "p100": 410.50194444
+      },
+      {
+        "event_month": "2015-01-01",
+        "p0": 0.79333333,
+        "p25": 1.25555556,
+        "p50": 4.71361111,
+        "p75": 196.77027778,
+        "p100": 1002.92305556
+      },
+      {
+        "event_month": "2015-02-01",
+        "p0": 1.46555556,
+        "p25": 3.66888889,
+        "p50": 23.99611111,
+        "p75": 174.2,
+        "p100": 694.93833333
+      },
+      {
+        "event_month": "2015-03-01",
+        "p0": 0.01305556,
+        "p25": 0.7175,
+        "p50": 15.07333333,
+        "p75": 114.17861111,
+        "p100": 2064.9625
+      },
+      {
+        "event_month": "2015-04-01",
+        "p0": 0.21527778,
+        "p25": 3.04888889,
+        "p50": 115.5,
+        "p75": 164.16194444,
+        "p100": 742.42555556
+      },
+      {
+        "event_month": "2015-05-01",
+        "p0": 0.04583333,
+        "p25": 0.04583333,
+        "p50": 4.45222222,
+        "p75": 22.58694444,
+        "p100": 796.88722222
+      },
+      {
+        "event_month": "2015-06-01",
+        "p0": 72.03944444,
+        "p25": 72.03944444,
+        "p50": 150.01722222,
+        "p75": 150.01722222,
+        "p100": 162.66416667
+      },
+      {
+        "event_month": "2015-07-01",
+        "p0": 0.82027778,
+        "p25": 15.44111111,
+        "p50": 24.85083333,
+        "p75": 218.91027778,
+        "p100": 391.855
+      },
+      {
+        "event_month": "2015-08-01",
+        "p0": 1.055,
+        "p25": 13.76166667,
+        "p50": 27.35305556,
+        "p75": 594.34722222,
+        "p100": 1890.17388889
+      },
+      {
+        "event_month": "2015-09-01",
+        "p0": 2.58027778,
+        "p25": 2.58027778,
+        "p50": 243.16277778,
+        "p75": 527.9775,
+        "p100": 883.17055556
+      },
+      {
+        "event_month": "2015-10-01",
+        "p0": 0.30277778,
+        "p25": 0.30277778,
+        "p50": 16.9175,
+        "p75": 93.52166667,
+        "p100": 4798.11361111
+      },
+      {
+        "event_month": "2015-11-01",
+        "p0": 8.67722222,
+        "p25": 8.67722222,
+        "p50": 8.67722222,
+        "p75": 835.64916667,
+        "p100": 835.64916667
+      },
+      {
+        "event_month": "2015-12-01",
+        "p0": 1.18333333,
+        "p25": 1.94166667,
+        "p50": 1257.27194444,
+        "p75": 2083.76527778,
+        "p100": 3523.63138889
+      },
+      {
+        "event_month": "2016-01-01",
+        "p0": 1.69972222,
+        "p25": 21.98416667,
+        "p50": 3134.57833333,
+        "p75": 4322.39777778,
+        "p100": 7947.21166667
+      },
+      {
+        "event_month": "2016-02-01",
+        "p0": 13.15638889,
+        "p25": 18.57361111,
+        "p50": 75.01666667,
+        "p75": 276.315,
+        "p100": 658.62777778
+      },
+      {
+        "event_month": "2016-03-01",
+        "p0": 9.77194444,
+        "p25": 111.39166667,
+        "p50": 3401.64111111,
+        "p75": 6691.90138889,
+        "p100": 7810.98194444
+      },
+      {
+        "event_month": "2016-04-01",
+        "p0": 5.48333333,
+        "p25": 5.48333333,
+        "p50": 43.39472222,
+        "p75": 43.39472222,
+        "p100": 623.83194444
+      },
+      {
+        "event_month": "2016-05-01",
+        "p0": 1.37527778,
+        "p25": 1.37527778,
+        "p50": 1.37527778,
+        "p75": 667.11166667,
+        "p100": 667.11166667
+      },
+      {
+        "event_month": "2016-06-01",
+        "p0": 4.93305556,
+        "p25": 4.93305556,
+        "p50": 4.93305556,
+        "p75": 20.70861111,
+        "p100": 20.70861111
+      },
+      {
+        "event_month": "2016-07-01",
+        "p0": 5.79305556,
+        "p25": 5.79305556,
+        "p50": 5.79305556,
+        "p75": 19.28583333,
+        "p100": 19.28583333
+      },
+      {
+        "event_month": "2016-09-01",
+        "p0": 0.03805556,
+        "p25": 1.01472222,
+        "p50": 39.12305556,
+        "p75": 213.98638889,
+        "p100": 1173.43805556
+      },
+      {
+        "event_month": "2016-10-01",
+        "p0": 2231.91861111,
+        "p25": null,
+        "p50": 2231.91861111,
+        "p75": 2231.91861111,
+        "p100": 2231.91861111
+      },
+      {
+        "event_month": "2016-12-01",
+        "p0": 306.45361111,
+        "p25": null,
+        "p50": 306.45361111,
+        "p75": 306.45361111,
+        "p100": 306.45361111
+      },
+      {
+        "event_month": "2017-01-01",
+        "p0": 0.04027778,
+        "p25": 0.04027778,
+        "p50": 0.04027778,
+        "p75": 6.82583333,
+        "p100": 6.82583333
+      },
+      {
+        "event_month": "2017-02-01",
+        "p0": 13.37694444,
+        "p25": null,
+        "p50": 13.37694444,
+        "p75": 13.37694444,
+        "p100": 13.37694444
+      },
+      {
+        "event_month": "2017-03-01",
+        "p0": 0.03583333,
+        "p25": 0.03583333,
+        "p50": 1890.2625,
+        "p75": 2858.8975,
+        "p100": 3624.26416667
+      },
+      {
+        "event_month": "2017-04-01",
+        "p0": 0.74916667,
+        "p25": 0.74916667,
+        "p50": 73.46805556,
+        "p75": 76.76138889,
+        "p100": 17426.93083333
+      },
+      {
+        "event_month": "2017-06-01",
+        "p0": 177.42166667,
+        "p25": 177.42166667,
+        "p50": 1123.00444444,
+        "p75": 1123.045,
+        "p100": 2065.60777778
+      },
+      {
+        "event_month": "2017-07-01",
+        "p0": 55.28166667,
+        "p25": 55.28166667,
+        "p50": 424.7025,
+        "p75": 424.7025,
+        "p100": 3430.69
+      },
+      {
+        "event_month": "2017-08-01",
+        "p0": 6.63583333,
+        "p25": null,
+        "p50": 6.63583333,
+        "p75": 6.63583333,
+        "p100": 6.63583333
+      },
+      {
+        "event_month": "2017-09-01",
+        "p0": 12.97222222,
+        "p25": 12.97222222,
+        "p50": 125.74861111,
+        "p75": 245.87111111,
+        "p100": 2495.74888889
+      },
+      {
+        "event_month": "2017-10-01",
+        "p0": 92.0425,
+        "p25": null,
+        "p50": 92.0425,
+        "p75": 92.0425,
+        "p100": 92.0425
+      },
+      {
+        "event_month": "2017-11-01",
+        "p0": 69.81805556,
+        "p25": 69.81805556,
+        "p50": 4043.67638889,
+        "p75": 4043.67638889,
+        "p100": 8443.38416667
+      },
+      {
+        "event_month": "2018-03-01",
+        "p0": 0.33527778,
+        "p25": 0.33527778,
+        "p50": 0.33527778,
+        "p75": 6560.86472222,
+        "p100": 6560.86472222
+      },
+      {
+        "event_month": "2018-04-01",
+        "p0": 7.05583333,
+        "p25": 7.05583333,
+        "p50": 7.05583333,
+        "p75": 7520.39583333,
+        "p100": 7520.39583333
+      },
+      {
+        "event_month": "2018-05-01",
+        "p0": 0.10972222,
+        "p25": null,
+        "p50": 0.10972222,
+        "p75": 0.10972222,
+        "p100": 0.10972222
+      },
+      {
+        "event_month": "2018-06-01",
+        "p0": 0.90388889,
+        "p25": 0.90388889,
+        "p50": 0.90388889,
+        "p75": 9109.73638889,
+        "p100": 9109.73638889
+      },
+      {
+        "event_month": "2018-10-01",
+        "p0": 396.25555556,
+        "p25": 396.25555556,
+        "p50": 396.25555556,
+        "p75": 17247.16888889,
+        "p100": 17247.16888889
+      },
+      {
+        "event_month": "2018-11-01",
+        "p0": 1.71694444,
+        "p25": 1.71694444,
+        "p50": 1.71694444,
+        "p75": 13.18722222,
+        "p100": 13.18722222
+      },
+      {
+        "event_month": "2018-12-01",
+        "p0": 979.02111111,
+        "p25": 979.02111111,
+        "p50": 979.02111111,
+        "p75": 5833.42972222,
+        "p100": 5833.42972222
+      },
+      {
+        "event_month": "2019-03-01",
+        "p0": 383.79861111,
+        "p25": null,
+        "p50": 383.79861111,
+        "p75": 383.79861111,
+        "p100": 383.79861111
+      },
+      {
+        "event_month": "2019-04-01",
+        "p0": 1350.47416667,
+        "p25": 1350.47416667,
+        "p50": 1372.14861111,
+        "p75": 1372.14861111,
+        "p100": 6988.23027778
+      },
+      {
+        "event_month": "2019-08-01",
+        "p0": 530.02305556,
+        "p25": 530.02305556,
+        "p50": 3694.8125,
+        "p75": 3694.8125,
+        "p100": 6409.26111111
+      },
+      {
+        "event_month": "2019-10-01",
+        "p0": 14.50666667,
+        "p25": 14.50666667,
+        "p50": 14.50666667,
+        "p75": 8514.43222222,
+        "p100": 8514.43222222
+      },
+      {
+        "event_month": "2020-01-01",
+        "p0": 42.31333333,
+        "p25": 42.31333333,
+        "p50": 42.31333333,
+        "p75": 2996.6475,
+        "p100": 2996.6475
+      },
+      {
+        "event_month": "2020-03-01",
+        "p0": 2.98833333,
+        "p25": 2.98833333,
+        "p50": 2.98833333,
+        "p75": 8.315,
+        "p100": 8.315
+      },
+      {
+        "event_month": "2020-05-01",
+        "p0": 5.83944444,
+        "p25": 5.83944444,
+        "p50": 5.83944444,
+        "p75": 1989.62638889,
+        "p100": 1989.62638889
+      },
+      {
+        "event_month": "2020-07-01",
+        "p0": 2795.25361111,
+        "p25": null,
+        "p50": 2795.25361111,
+        "p75": 2795.25361111,
+        "p100": 2795.25361111
+      },
+      {
+        "event_month": "2020-08-01",
+        "p0": 1.41305556,
+        "p25": null,
+        "p50": 1.41305556,
+        "p75": 1.41305556,
+        "p100": 1.41305556
+      },
+      {
+        "event_month": "2020-10-01",
+        "p0": 0.00944444,
+        "p25": null,
+        "p50": 0.00944444,
+        "p75": 0.00944444,
+        "p100": 0.00944444
+      },
+      {
+        "event_month": "2020-12-01",
+        "p0": 90.34666667,
+        "p25": 90.34666667,
+        "p50": 31430.34277778,
+        "p75": 47356.58972222,
+        "p100": 50426.19638889
+      },
+      {
+        "event_month": "2021-02-01",
+        "p0": 0.07,
+        "p25": null,
+        "p50": 0.07,
+        "p75": 0.07,
+        "p100": 0.07
+      },
+      {
+        "event_month": "2021-04-01",
+        "p0": 1.42055556,
+        "p25": 198.51666667,
+        "p50": 824.47861111,
+        "p75": 5544.75277778,
+        "p100": 55607.23444444
+      },
+      {
+        "event_month": "2021-05-01",
+        "p0": 14.07722222,
+        "p25": null,
+        "p50": 14.07722222,
+        "p75": 14.07722222,
+        "p100": 14.07722222
+      },
+      {
+        "event_month": "2021-06-01",
+        "p0": 103.87111111,
+        "p25": 103.87111111,
+        "p50": 103.87111111,
+        "p75": 816.45222222,
+        "p100": 816.45222222
+      },
+      {
+        "event_month": "2021-07-01",
+        "p0": 6.4625,
+        "p25": null,
+        "p50": 6.4625,
+        "p75": 6.4625,
+        "p100": 6.4625
+      },
+      {
+        "event_month": "2021-08-01",
+        "p0": 1.54861111,
+        "p25": 1.54861111,
+        "p50": 1.54861111,
+        "p75": 13.95,
+        "p100": 13.95
+      },
+      {
+        "event_month": "2021-11-01",
+        "p0": 201.53111111,
+        "p25": null,
+        "p50": 201.53111111,
+        "p75": 201.53111111,
+        "p100": 201.53111111
+      },
+      {
+        "event_month": "2022-02-01",
+        "p0": 367.07166667,
+        "p25": null,
+        "p50": 367.07166667,
+        "p75": 367.07166667,
+        "p100": 367.07166667
+      },
+      {
+        "event_month": "2022-03-01",
+        "p0": 121.43277778,
+        "p25": 121.43277778,
+        "p50": 133.24416667,
+        "p75": 133.24416667,
+        "p100": 157.28638889
+      },
+      {
+        "event_month": "2022-04-01",
+        "p0": 327.06,
+        "p25": null,
+        "p50": 327.06,
+        "p75": 327.06,
+        "p100": 327.06
+      },
+      {
+        "event_month": "2022-05-01",
+        "p0": 11.63,
+        "p25": 11.63,
+        "p50": 11.63,
+        "p75": 3417.68083333,
+        "p100": 3417.68083333
+      },
+      {
+        "event_month": "2022-07-01",
+        "p0": 5.39361111,
+        "p25": 5.39361111,
+        "p50": 5.39361111,
+        "p75": 7.64555556,
+        "p100": 7.64555556
+      },
+      {
+        "event_month": "2023-01-01",
+        "p0": 43.82833333,
+        "p25": null,
+        "p50": 43.82833333,
+        "p75": 43.82833333,
+        "p100": 43.82833333
+      },
+      {
+        "event_month": "2023-03-01",
+        "p0": 6.175,
+        "p25": 6.175,
+        "p50": 6.175,
+        "p75": 104.12944444,
+        "p100": 104.12944444
+      },
+      {
+        "event_month": "2023-04-01",
+        "p0": 58.89027778,
+        "p25": 58.89027778,
+        "p50": 58.89027778,
+        "p75": 1044.7425,
+        "p100": 1044.7425
+      },
+      {
+        "event_month": "2023-11-01",
+        "p0": 1.505,
+        "p25": 1.505,
+        "p50": 1.505,
+        "p75": 135.31,
+        "p100": 135.31
+      },
+      {
+        "event_month": "2023-12-01",
+        "p0": 7135.20083333,
+        "p25": null,
+        "p50": 7135.20083333,
+        "p75": 7135.20083333,
+        "p100": 7135.20083333
+      },
+      {
+        "event_month": "2024-01-01",
+        "p0": 1.1575,
+        "p25": 1.1575,
+        "p50": 1.96,
+        "p75": 1.96,
+        "p100": 54.78694444
+      },
+      {
+        "event_month": "2024-05-01",
+        "p0": 0.07555556,
+        "p25": null,
+        "p50": 0.07555556,
+        "p75": 0.07555556,
+        "p100": 0.07555556
+      },
+      {
+        "event_month": "2024-08-01",
+        "p0": 22.285,
+        "p25": 22.285,
+        "p50": 22.285,
+        "p75": 1751.70666667,
+        "p100": 1751.70666667
+      },
+      {
+        "event_month": "2024-09-01",
+        "p0": 26.18861111,
+        "p25": 26.18861111,
+        "p50": 26.18861111,
+        "p75": 412.84527778,
+        "p100": 412.84527778
+      },
+      {
+        "event_month": "2024-10-01",
+        "p0": 25.60388889,
+        "p25": null,
+        "p50": 25.60388889,
+        "p75": 25.60388889,
+        "p100": 25.60388889
+      },
+      {
+        "event_month": "2025-03-01",
+        "p0": 746.57777778,
+        "p25": 746.57777778,
+        "p50": 746.57777778,
+        "p75": 746.57777778,
+        "p100": 746.57777778
+      },
+      {
+        "event_month": "2025-04-01",
+        "p0": 18.49722222,
+        "p25": null,
+        "p50": 18.49722222,
+        "p75": 18.49722222,
+        "p100": 18.49722222
+      },
+      {
+        "event_month": "2025-06-01",
+        "p0": 2.07,
+        "p25": 2.07,
+        "p50": 2.07,
+        "p75": 7.565,
+        "p100": 7.565
+      },
+      {
+        "event_month": "2025-09-01",
+        "p0": 1920.94388889,
+        "p25": null,
+        "p50": 1920.94388889,
+        "p75": 1920.94388889,
+        "p100": 1920.94388889
+      }
+    ],
+    "expiresAt": "2026-05-04T17:01:44.428+00:00",
+    "refresh": true
+  },
+  "analyze-pull-requests-size-per-month": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:49.793+00:00",
+    "finishedAt": "2026-05-03T17:01:49.828+00:00",
+    "spent": 0.035,
+    "sql": "SELECT t_month AS event_month, xs, s, m, l, xl, xxl, all_size\nFROM (\n    SELECT\n        t_month,\n        SUM(CASE WHEN (additions + deletions) < 10 THEN 1 ELSE 0 END) OVER(PARTITION BY t_month) AS xs,\n        SUM(CASE WHEN (additions + deletions) >= 10 AND (additions + deletions) < 30 THEN 1 ELSE 0 END) OVER(PARTITION BY t_month) AS s,\n        SUM(CASE WHEN (additions + deletions) >= 30 AND (additions + deletions) < 100 THEN 1 ELSE 0 END) OVER(PARTITION BY t_month) AS m,\n        SUM(CASE WHEN (additions + deletions) >= 100 AND (additions + deletions) < 500 THEN 1 ELSE 0 END) OVER(PARTITION BY t_month) AS l,\n        SUM(CASE WHEN (additions + deletions) >= 500 AND (additions + deletions) < 1000 THEN 1 ELSE 0 END) OVER(PARTITION BY t_month) AS xl,\n        SUM(CASE WHEN (additions + deletions) >= 1000 THEN 1 ELSE 0 END) OVER (PARTITION BY t_month) AS xxl,\n        COUNT(*) OVER (PARTITION BY t_month) AS all_size,\n        ROW_NUMBER() OVER (PARTITION BY t_month) AS row_num\n    FROM (\n        SELECT\n            DATE_FORMAT(created_at, '%Y-%m-01') as t_month,\n            additions,\n            deletions\n        FROM\n            github_events\n        WHERE\n            type = 'PullRequestEvent'\n            AND repo_id = 27620277\n            AND action = 'opened'\n    ) sub\n) sub\nWHERE row_num = 1\nORDER BY t_month\n;",
+    "fields": [
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "xs",
+        "columnType": 246
+      },
+      {
+        "name": "s",
+        "columnType": 246
+      },
+      {
+        "name": "m",
+        "columnType": 246
+      },
+      {
+        "name": "l",
+        "columnType": 246
+      },
+      {
+        "name": "xl",
+        "columnType": 246
+      },
+      {
+        "name": "xxl",
+        "columnType": 246
+      },
+      {
+        "name": "all_size",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "event_month": "2014-12-01",
+        "xs": 3,
+        "s": 0,
+        "m": 1,
+        "l": 3,
+        "xl": 1,
+        "xxl": 6,
+        "all_size": 14
+      },
+      {
+        "event_month": "2015-01-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 4,
+        "xl": 1,
+        "xxl": 2,
+        "all_size": 7
+      },
+      {
+        "event_month": "2015-02-01",
+        "xs": 2,
+        "s": 1,
+        "m": 1,
+        "l": 6,
+        "xl": 1,
+        "xxl": 4,
+        "all_size": 15
+      },
+      {
+        "event_month": "2015-03-01",
+        "xs": 1,
+        "s": 4,
+        "m": 2,
+        "l": 4,
+        "xl": 5,
+        "xxl": 7,
+        "all_size": 23
+      },
+      {
+        "event_month": "2015-04-01",
+        "xs": 1,
+        "s": 1,
+        "m": 1,
+        "l": 3,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 7
+      },
+      {
+        "event_month": "2015-05-01",
+        "xs": 1,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 3
+      },
+      {
+        "event_month": "2015-06-01",
+        "xs": 2,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 1,
+        "xxl": 0,
+        "all_size": 4
+      },
+      {
+        "event_month": "2015-07-01",
+        "xs": 2,
+        "s": 0,
+        "m": 1,
+        "l": 4,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 8
+      },
+      {
+        "event_month": "2015-08-01",
+        "xs": 0,
+        "s": 0,
+        "m": 1,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2015-09-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2015-10-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 1
+      },
+      {
+        "event_month": "2015-11-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 1
+      },
+      {
+        "event_month": "2015-12-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 4,
+        "xl": 1,
+        "xxl": 0,
+        "all_size": 5
+      },
+      {
+        "event_month": "2016-01-01",
+        "xs": 6,
+        "s": 1,
+        "m": 0,
+        "l": 3,
+        "xl": 2,
+        "xxl": 0,
+        "all_size": 12
+      },
+      {
+        "event_month": "2016-02-01",
+        "xs": 0,
+        "s": 0,
+        "m": 1,
+        "l": 1,
+        "xl": 1,
+        "xxl": 1,
+        "all_size": 4
+      },
+      {
+        "event_month": "2016-03-01",
+        "xs": 1,
+        "s": 1,
+        "m": 0,
+        "l": 4,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 7
+      },
+      {
+        "event_month": "2016-04-01",
+        "xs": 1,
+        "s": 1,
+        "m": 2,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 5
+      },
+      {
+        "event_month": "2016-05-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2016-06-01",
+        "xs": 0,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2016-07-01",
+        "xs": 0,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2016-08-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2016-09-01",
+        "xs": 0,
+        "s": 0,
+        "m": 2,
+        "l": 2,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 5
+      },
+      {
+        "event_month": "2016-10-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2016-11-01",
+        "xs": 1,
+        "s": 1,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 3
+      },
+      {
+        "event_month": "2017-02-01",
+        "xs": 2,
+        "s": 0,
+        "m": 2,
+        "l": 2,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 6
+      },
+      {
+        "event_month": "2017-03-01",
+        "xs": 3,
+        "s": 0,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 4
+      },
+      {
+        "event_month": "2017-04-01",
+        "xs": 1,
+        "s": 0,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2017-06-01",
+        "xs": 1,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 1,
+        "xxl": 0,
+        "all_size": 3
+      },
+      {
+        "event_month": "2017-07-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 2,
+        "all_size": 2
+      },
+      {
+        "event_month": "2017-09-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2017-10-01",
+        "xs": 3,
+        "s": 1,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 5
+      },
+      {
+        "event_month": "2018-01-01",
+        "xs": 2,
+        "s": 0,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 4
+      },
+      {
+        "event_month": "2018-02-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 1
+      },
+      {
+        "event_month": "2018-03-01",
+        "xs": 3,
+        "s": 1,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 6
+      },
+      {
+        "event_month": "2018-05-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 1
+      },
+      {
+        "event_month": "2018-06-01",
+        "xs": 2,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 3
+      },
+      {
+        "event_month": "2018-07-01",
+        "xs": 2,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2018-10-01",
+        "xs": 0,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 1,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2018-11-01",
+        "xs": 0,
+        "s": 0,
+        "m": 1,
+        "l": 0,
+        "xl": 1,
+        "xxl": 1,
+        "all_size": 3
+      },
+      {
+        "event_month": "2019-02-01",
+        "xs": 0,
+        "s": 1,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2019-03-01",
+        "xs": 0,
+        "s": 0,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2019-04-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2019-07-01",
+        "xs": 0,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 2,
+        "xxl": 1,
+        "all_size": 4
+      },
+      {
+        "event_month": "2019-08-01",
+        "xs": 3,
+        "s": 1,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 5
+      },
+      {
+        "event_month": "2019-09-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2020-02-01",
+        "xs": 0,
+        "s": 1,
+        "m": 0,
+        "l": 2,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 3
+      },
+      {
+        "event_month": "2020-03-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 1,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2020-04-01",
+        "xs": 1,
+        "s": 0,
+        "m": 2,
+        "l": 1,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 5
+      },
+      {
+        "event_month": "2020-06-01",
+        "xs": 1,
+        "s": 1,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 4
+      },
+      {
+        "event_month": "2020-08-01",
+        "xs": 0,
+        "s": 0,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 2
+      },
+      {
+        "event_month": "2020-10-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2020-11-01",
+        "xs": 1,
+        "s": 1,
+        "m": 1,
+        "l": 1,
+        "xl": 1,
+        "xxl": 0,
+        "all_size": 5
+      },
+      {
+        "event_month": "2020-12-01",
+        "xs": 2,
+        "s": 1,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 4
+      },
+      {
+        "event_month": "2021-01-01",
+        "xs": 0,
+        "s": 0,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2021-02-01",
+        "xs": 1,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 3
+      },
+      {
+        "event_month": "2021-04-01",
+        "xs": 7,
+        "s": 3,
+        "m": 3,
+        "l": 1,
+        "xl": 1,
+        "xxl": 1,
+        "all_size": 16
+      },
+      {
+        "event_month": "2021-05-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2021-06-01",
+        "xs": 2,
+        "s": 0,
+        "m": 1,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 4
+      },
+      {
+        "event_month": "2021-07-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2021-08-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2021-09-01",
+        "xs": 0,
+        "s": 0,
+        "m": 2,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 3
+      },
+      {
+        "event_month": "2021-10-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2021-11-01",
+        "xs": 3,
+        "s": 0,
+        "m": 2,
+        "l": 0,
+        "xl": 1,
+        "xxl": 0,
+        "all_size": 6
+      },
+      {
+        "event_month": "2021-12-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 2
+      },
+      {
+        "event_month": "2022-01-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 2,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2022-02-01",
+        "xs": 3,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 4
+      },
+      {
+        "event_month": "2022-03-01",
+        "xs": 2,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2022-04-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 2,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 4
+      },
+      {
+        "event_month": "2022-06-01",
+        "xs": 3,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 3
+      },
+      {
+        "event_month": "2022-07-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2022-08-01",
+        "xs": 0,
+        "s": 0,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2022-10-01",
+        "xs": 2,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2023-01-01",
+        "xs": 0,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2023-02-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2023-03-01",
+        "xs": 3,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 4
+      },
+      {
+        "event_month": "2023-04-01",
+        "xs": 0,
+        "s": 1,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2023-05-01",
+        "xs": 2,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 1,
+        "xxl": 0,
+        "all_size": 3
+      },
+      {
+        "event_month": "2023-06-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2023-07-01",
+        "xs": 3,
+        "s": 0,
+        "m": 1,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 5
+      },
+      {
+        "event_month": "2023-08-01",
+        "xs": 0,
+        "s": 2,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2023-10-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2023-12-01",
+        "xs": 0,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 2
+      },
+      {
+        "event_month": "2024-01-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2024-02-01",
+        "xs": 2,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2024-04-01",
+        "xs": 3,
+        "s": 1,
+        "m": 3,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 7
+      },
+      {
+        "event_month": "2024-05-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2024-06-01",
+        "xs": 1,
+        "s": 1,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 3
+      },
+      {
+        "event_month": "2024-07-01",
+        "xs": 0,
+        "s": 0,
+        "m": 1,
+        "l": 1,
+        "xl": 1,
+        "xxl": 1,
+        "all_size": 4
+      },
+      {
+        "event_month": "2024-08-01",
+        "xs": 1,
+        "s": 0,
+        "m": 2,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 4
+      },
+      {
+        "event_month": "2024-09-01",
+        "xs": 6,
+        "s": 1,
+        "m": 2,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 9
+      },
+      {
+        "event_month": "2024-10-01",
+        "xs": 2,
+        "s": 1,
+        "m": 1,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 5
+      },
+      {
+        "event_month": "2024-12-01",
+        "xs": 0,
+        "s": 0,
+        "m": 1,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2025-01-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2025-02-01",
+        "xs": 0,
+        "s": 0,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2025-03-01",
+        "xs": 0,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2025-04-01",
+        "xs": 0,
+        "s": 0,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2025-05-01",
+        "xs": 1,
+        "s": 0,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2025-06-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 1,
+        "all_size": 2
+      },
+      {
+        "event_month": "2025-07-01",
+        "xs": 1,
+        "s": 1,
+        "m": 1,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 3
+      },
+      {
+        "event_month": "2025-08-01",
+        "xs": 0,
+        "s": 1,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2025-09-01",
+        "xs": 5,
+        "s": 1,
+        "m": 0,
+        "l": 1,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 7
+      },
+      {
+        "event_month": "2025-10-01",
+        "xs": 2,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2025-11-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      },
+      {
+        "event_month": "2025-12-01",
+        "xs": 4,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 4
+      },
+      {
+        "event_month": "2026-01-01",
+        "xs": 2,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 2
+      },
+      {
+        "event_month": "2026-02-01",
+        "xs": 4,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 4
+      },
+      {
+        "event_month": "2026-03-01",
+        "xs": 1,
+        "s": 0,
+        "m": 0,
+        "l": 0,
+        "xl": 0,
+        "xxl": 0,
+        "all_size": 1
+      }
+    ],
+    "expiresAt": "2026-05-04T17:01:49.828+00:00",
+    "refresh": true
+  },
+  "analyze-issue-opened-and-closed": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:45.898+00:00",
+    "finishedAt": "2026-05-03T17:01:45.925+00:00",
+    "spent": 0.027,
+    "sql": "WITH issue_closed AS (\n    SELECT\n        DATE_FORMAT(created_at, '%Y-%m-01') AS t_month,COUNT(number) AS closed\n    FROM\n        github_events ge\n    WHERE\n        type = 'IssuesEvent'\n        AND action = 'closed'\n        AND repo_id = 27620277\n    GROUP BY 1\n), issue_opened AS (\n    SELECT\n        DATE_FORMAT(created_at, '%Y-%m-01') AS t_month, COUNT(number) AS opened\n    FROM\n        github_events ge\n    WHERE\n        type = 'IssuesEvent'\n        AND action = 'opened'\n        AND repo_id = 27620277\n    GROUP BY 1\n)\nSELECT\n    io.t_month AS event_month,\n    opened,\n    COALESCE(closed, 0) AS closed\nFROM\n    issue_opened io\n    JOIN issue_closed ic ON io.t_month = ic.t_month\nORDER BY event_month\n;",
+    "fields": [
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "opened",
+        "columnType": 8
+      },
+      {
+        "name": "closed",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "event_month": "2014-12-01",
+        "opened": 15,
+        "closed": 12
+      },
+      {
+        "event_month": "2015-01-01",
+        "opened": 8,
+        "closed": 6
+      },
+      {
+        "event_month": "2015-02-01",
+        "opened": 7,
+        "closed": 7
+      },
+      {
+        "event_month": "2015-03-01",
+        "opened": 26,
+        "closed": 24
+      },
+      {
+        "event_month": "2015-04-01",
+        "opened": 12,
+        "closed": 12
+      },
+      {
+        "event_month": "2015-05-01",
+        "opened": 8,
+        "closed": 5
+      },
+      {
+        "event_month": "2015-06-01",
+        "opened": 7,
+        "closed": 3
+      },
+      {
+        "event_month": "2015-07-01",
+        "opened": 14,
+        "closed": 10
+      },
+      {
+        "event_month": "2015-08-01",
+        "opened": 12,
+        "closed": 9
+      },
+      {
+        "event_month": "2015-09-01",
+        "opened": 7,
+        "closed": 5
+      },
+      {
+        "event_month": "2015-10-01",
+        "opened": 9,
+        "closed": 5
+      },
+      {
+        "event_month": "2015-11-01",
+        "opened": 3,
+        "closed": 2
+      },
+      {
+        "event_month": "2015-12-01",
+        "opened": 5,
+        "closed": 13
+      },
+      {
+        "event_month": "2016-01-01",
+        "opened": 10,
+        "closed": 21
+      },
+      {
+        "event_month": "2016-02-01",
+        "opened": 3,
+        "closed": 6
+      },
+      {
+        "event_month": "2016-03-01",
+        "opened": 4,
+        "closed": 8
+      },
+      {
+        "event_month": "2016-04-01",
+        "opened": 3,
+        "closed": 3
+      },
+      {
+        "event_month": "2016-05-01",
+        "opened": 1,
+        "closed": 2
+      },
+      {
+        "event_month": "2016-06-01",
+        "opened": 2,
+        "closed": 2
+      },
+      {
+        "event_month": "2016-07-01",
+        "opened": 6,
+        "closed": 2
+      },
+      {
+        "event_month": "2016-09-01",
+        "opened": 6,
+        "closed": 8
+      },
+      {
+        "event_month": "2016-10-01",
+        "opened": 2,
+        "closed": 1
+      },
+      {
+        "event_month": "2016-12-01",
+        "opened": 1,
+        "closed": 1
+      },
+      {
+        "event_month": "2017-01-01",
+        "opened": 4,
+        "closed": 2
+      },
+      {
+        "event_month": "2017-02-01",
+        "opened": 2,
+        "closed": 1
+      },
+      {
+        "event_month": "2017-03-01",
+        "opened": 3,
+        "closed": 5
+      },
+      {
+        "event_month": "2017-04-01",
+        "opened": 3,
+        "closed": 4
+      },
+      {
+        "event_month": "2017-06-01",
+        "opened": 3,
+        "closed": 4
+      },
+      {
+        "event_month": "2017-07-01",
+        "opened": 2,
+        "closed": 3
+      },
+      {
+        "event_month": "2017-08-01",
+        "opened": 2,
+        "closed": 1
+      },
+      {
+        "event_month": "2017-09-01",
+        "opened": 2,
+        "closed": 4
+      },
+      {
+        "event_month": "2017-10-01",
+        "opened": 2,
+        "closed": 1
+      },
+      {
+        "event_month": "2018-03-01",
+        "opened": 1,
+        "closed": 2
+      },
+      {
+        "event_month": "2018-04-01",
+        "opened": 2,
+        "closed": 2
+      },
+      {
+        "event_month": "2018-05-01",
+        "opened": 1,
+        "closed": 1
+      },
+      {
+        "event_month": "2018-06-01",
+        "opened": 2,
+        "closed": 2
+      },
+      {
+        "event_month": "2018-10-01",
+        "opened": 3,
+        "closed": 3
+      },
+      {
+        "event_month": "2018-11-01",
+        "opened": 3,
+        "closed": 2
+      },
+      {
+        "event_month": "2019-02-01",
+        "opened": 3,
+        "closed": 1
+      },
+      {
+        "event_month": "2019-03-01",
+        "opened": 1,
+        "closed": 1
+      },
+      {
+        "event_month": "2019-10-01",
+        "opened": 1,
+        "closed": 2
+      },
+      {
+        "event_month": "2020-01-01",
+        "opened": 1,
+        "closed": 2
+      },
+      {
+        "event_month": "2020-03-01",
+        "opened": 2,
+        "closed": 2
+      },
+      {
+        "event_month": "2020-05-01",
+        "opened": 1,
+        "closed": 2
+      },
+      {
+        "event_month": "2020-08-01",
+        "opened": 2,
+        "closed": 1
+      },
+      {
+        "event_month": "2020-10-01",
+        "opened": 1,
+        "closed": 1
+      },
+      {
+        "event_month": "2020-12-01",
+        "opened": 1,
+        "closed": 4
+      },
+      {
+        "event_month": "2021-02-01",
+        "opened": 1,
+        "closed": 2
+      },
+      {
+        "event_month": "2021-04-01",
+        "opened": 5,
+        "closed": 12
+      },
+      {
+        "event_month": "2021-05-01",
+        "opened": 3,
+        "closed": 1
+      },
+      {
+        "event_month": "2021-07-01",
+        "opened": 1,
+        "closed": 1
+      },
+      {
+        "event_month": "2021-08-01",
+        "opened": 2,
+        "closed": 2
+      },
+      {
+        "event_month": "2021-11-01",
+        "opened": 2,
+        "closed": 1
+      },
+      {
+        "event_month": "2022-02-01",
+        "opened": 2,
+        "closed": 1
+      },
+      {
+        "event_month": "2022-03-01",
+        "opened": 2,
+        "closed": 3
+      },
+      {
+        "event_month": "2022-05-01",
+        "opened": 1,
+        "closed": 2
+      },
+      {
+        "event_month": "2022-07-01",
+        "opened": 2,
+        "closed": 2
+      },
+      {
+        "event_month": "2023-01-01",
+        "opened": 1,
+        "closed": 1
+      },
+      {
+        "event_month": "2023-03-01",
+        "opened": 3,
+        "closed": 2
+      },
+      {
+        "event_month": "2023-04-01",
+        "opened": 1,
+        "closed": 2
+      },
+      {
+        "event_month": "2023-11-01",
+        "opened": 2,
+        "closed": 2
+      },
+      {
+        "event_month": "2024-01-01",
+        "opened": 3,
+        "closed": 3
+      },
+      {
+        "event_month": "2024-05-01",
+        "opened": 1,
+        "closed": 1
+      },
+      {
+        "event_month": "2024-08-01",
+        "opened": 2,
+        "closed": 2
+      },
+      {
+        "event_month": "2024-09-01",
+        "opened": 4,
+        "closed": 2
+      },
+      {
+        "event_month": "2025-04-01",
+        "opened": 2,
+        "closed": 1
+      },
+      {
+        "event_month": "2025-06-01",
+        "opened": 3,
+        "closed": 3
+      },
+      {
+        "event_month": "2025-09-01",
+        "opened": 1,
+        "closed": 1
+      }
+    ],
+    "expiresAt": "2026-05-04T17:01:45.925+00:00",
+    "refresh": true
+  },
+  "analyze-repo-top-contributors": {
+    "params": {
+      "repoId": "27620277",
+      "limit": "999999"
+    },
+    "requestedAt": "2026-05-03T17:01:50.093+00:00",
+    "finishedAt": "2026-05-03T17:01:50.133+00:00",
+    "spent": 0.04,
+    "sql": "SELECT actor_login,\n       COUNT(*) AS events\nFROM github_events ge\nWHERE repo_id = 27620277\n  AND (\n        (type = 'PullRequestEvent' AND action = 'opened') OR\n        (type = 'IssuesEvent' AND action = 'opened') OR\n        (type = 'IssueCommentEvent' AND action = 'created') OR\n        (type = 'PullRequestReviewEvent' AND action = 'created') OR\n        (type = 'PullRequestReviewCommentEvent' AND action = 'created') OR\n        (type = 'PushEvent' AND action = '')\n    )\n  AND actor_login NOT LIKE '%bot'\n  AND actor_login NOT LIKE '%[bot]'\n  AND actor_login NOT IN (SELECT login FROM blacklist_users bu)\nGROUP BY actor_login\nORDER BY events DESC\nLIMIT 999999\n",
+    "fields": [
+      {
+        "name": "actor_login",
+        "columnType": 253
+      },
+      {
+        "name": "events",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "actor_login": "nzakas",
+        "events": 1315
+      },
+      {
+        "actor_login": "mdjermanovic",
+        "events": 557
+      },
+      {
+        "actor_login": "aladdin-add",
+        "events": 244
+      },
+      {
+        "actor_login": "xjamundx",
+        "events": 232
+      },
+      {
+        "actor_login": "kaicataldo",
+        "events": 175
+      },
+      {
+        "actor_login": "mysticatea",
+        "events": 162
+      },
+      {
+        "actor_login": "not-an-aardvark",
+        "events": 129
+      },
+      {
+        "actor_login": "fasttime",
+        "events": 115
+      },
+      {
+        "actor_login": "lumirlumir",
+        "events": 108
+      },
+      {
+        "actor_login": "snitin315",
+        "events": 100
+      },
+      {
+        "actor_login": "brettz9",
+        "events": 80
+      },
+      {
+        "actor_login": "btmills",
+        "events": 74
+      },
+      {
+        "actor_login": "mreinstein",
+        "events": 67
+      },
+      {
+        "actor_login": "platinumazure",
+        "events": 62
+      },
+      {
+        "actor_login": "ilyavolodin",
+        "events": 46
+      },
+      {
+        "actor_login": "FredKSchott",
+        "events": 45
+      },
+      {
+        "actor_login": "ljharb",
+        "events": 40
+      },
+      {
+        "actor_login": "anikethsaha",
+        "events": 36
+      },
+      {
+        "actor_login": "Aladdin-ADD",
+        "events": 29
+      },
+      {
+        "actor_login": "gyandeeps",
+        "events": 26
+      },
+      {
+        "actor_login": "caridy",
+        "events": 25
+      },
+      {
+        "actor_login": "fisker",
+        "events": 25
+      },
+      {
+        "actor_login": "srijan-paul",
+        "events": 22
+      },
+      {
+        "actor_login": "RReverser",
+        "events": 22
+      },
+      {
+        "actor_login": "ota-meshi",
+        "events": 22
+      },
+      {
+        "actor_login": "bmish",
+        "events": 17
+      },
+      {
+        "actor_login": "alberto",
+        "events": 16
+      },
+      {
+        "actor_login": "EmpireWorld",
+        "events": 16
+      },
+      {
+        "actor_login": "amareshsm",
+        "events": 15
+      },
+      {
+        "actor_login": "mikesherov",
+        "events": 15
+      },
+      {
+        "actor_login": "lo1tuma",
+        "events": 14
+      },
+      {
+        "actor_login": "danez",
+        "events": 12
+      },
+      {
+        "actor_login": "Copilot",
+        "events": 11
+      },
+      {
+        "actor_login": "ariya",
+        "events": 9
+      },
+      {
+        "actor_login": "OKEAMAH",
+        "events": 8
+      },
+      {
+        "actor_login": "cvrebert",
+        "events": 8
+      },
+      {
+        "actor_login": "Hirse",
+        "events": 8
+      },
+      {
+        "actor_login": "omerts",
+        "events": 8
+      },
+      {
+        "actor_login": "finico",
+        "events": 7
+      },
+      {
+        "actor_login": "overlookmotel",
+        "events": 7
+      },
+      {
+        "actor_login": "ehmicky",
+        "events": 7
+      },
+      {
+        "actor_login": "DMartens",
+        "events": 7
+      },
+      {
+        "actor_login": "Marsup",
+        "events": 6
+      },
+      {
+        "actor_login": "nre",
+        "events": 6
+      },
+      {
+        "actor_login": "IanVS",
+        "events": 6
+      },
+      {
+        "actor_login": "coderaiser",
+        "events": 6
+      },
+      {
+        "actor_login": "papandreou",
+        "events": 6
+      },
+      {
+        "actor_login": "yyx990803",
+        "events": 6
+      },
+      {
+        "actor_login": "michaelficarra",
+        "events": 6
+      },
+      {
+        "actor_login": "jrvidal",
+        "events": 6
+      },
+      {
+        "actor_login": "hzoo",
+        "events": 6
+      },
+      {
+        "actor_login": "soda0289",
+        "events": 5
+      },
+      {
+        "actor_login": "touzoku",
+        "events": 5
+      },
+      {
+        "actor_login": "jasonLaster",
+        "events": 5
+      },
+      {
+        "actor_login": "hegemonic",
+        "events": 5
+      },
+      {
+        "actor_login": "matz3",
+        "events": 5
+      },
+      {
+        "actor_login": "alewitt2",
+        "events": 5
+      },
+      {
+        "actor_login": "jaapz",
+        "events": 5
+      },
+      {
+        "actor_login": "iancmyers",
+        "events": 5
+      },
+      {
+        "actor_login": "Standard8",
+        "events": 5
+      },
+      {
+        "actor_login": "rictic",
+        "events": 5
+      },
+      {
+        "actor_login": "BenoitZugmeyer",
+        "events": 5
+      },
+      {
+        "actor_login": "DanielRosenwasser",
+        "events": 5
+      },
+      {
+        "actor_login": "visualjeff",
+        "events": 5
+      },
+      {
+        "actor_login": "Rastalamm",
+        "events": 4
+      },
+      {
+        "actor_login": "silverwind",
+        "events": 4
+      },
+      {
+        "actor_login": "Skalman",
+        "events": 4
+      },
+      {
+        "actor_login": "shinnn",
+        "events": 4
+      },
+      {
+        "actor_login": "peterkc",
+        "events": 4
+      },
+      {
+        "actor_login": "garlicnation",
+        "events": 4
+      },
+      {
+        "actor_login": "kahwee",
+        "events": 4
+      },
+      {
+        "actor_login": "kentor",
+        "events": 4
+      },
+      {
+        "actor_login": "tjx666",
+        "events": 4
+      },
+      {
+        "actor_login": "eTorAken",
+        "events": 4
+      },
+      {
+        "actor_login": "h13i32maru",
+        "events": 4
+      },
+      {
+        "actor_login": "nene",
+        "events": 4
+      },
+      {
+        "actor_login": "sam3k",
+        "events": 4
+      },
+      {
+        "actor_login": "codeworrior",
+        "events": 4
+      },
+      {
+        "actor_login": "robpalme",
+        "events": 4
+      },
+      {
+        "actor_login": "martypdx",
+        "events": 4
+      },
+      {
+        "actor_login": "CreatorVilius",
+        "events": 4
+      },
+      {
+        "actor_login": "justinfagnani",
+        "events": 4
+      },
+      {
+        "actor_login": "simonbrunel",
+        "events": 4
+      },
+      {
+        "actor_login": "ajeecai",
+        "events": 4
+      },
+      {
+        "actor_login": "MichaelDeBoey",
+        "events": 4
+      },
+      {
+        "actor_login": "JounQin",
+        "events": 4
+      },
+      {
+        "actor_login": "molisani",
+        "events": 4
+      },
+      {
+        "actor_login": "stonegray",
+        "events": 4
+      },
+      {
+        "actor_login": "dmail",
+        "events": 4
+      },
+      {
+        "actor_login": "AsaAyers",
+        "events": 4
+      },
+      {
+        "actor_login": "othree",
+        "events": 4
+      },
+      {
+        "actor_login": "Pixel998",
+        "events": 4
+      },
+      {
+        "actor_login": "aminya",
+        "events": 4
+      },
+      {
+        "actor_login": "silverbucket",
+        "events": 3
+      },
+      {
+        "actor_login": "bradzacher",
+        "events": 3
+      },
+      {
+        "actor_login": "jonathanKingston",
+        "events": 3
+      },
+      {
+        "actor_login": "markphd",
+        "events": 3
+      },
+      {
+        "actor_login": "JamesHenry",
+        "events": 3
+      },
+      {
+        "actor_login": "m1sta",
+        "events": 3
+      },
+      {
+        "actor_login": "conartist6",
+        "events": 3
+      },
+      {
+        "actor_login": "gre",
+        "events": 3
+      },
+      {
+        "actor_login": "realityking",
+        "events": 3
+      },
+      {
+        "actor_login": "Rec0iL99",
+        "events": 3
+      },
+      {
+        "actor_login": "coreybutler",
+        "events": 3
+      },
+      {
+        "actor_login": "jrencz",
+        "events": 3
+      },
+      {
+        "actor_login": "sebmck",
+        "events": 3
+      },
+      {
+        "actor_login": "lencioni",
+        "events": 3
+      },
+      {
+        "actor_login": "amilajack",
+        "events": 3
+      },
+      {
+        "actor_login": "tractorcow",
+        "events": 3
+      },
+      {
+        "actor_login": "jmz527",
+        "events": 3
+      },
+      {
+        "actor_login": "retrohacker",
+        "events": 3
+      },
+      {
+        "actor_login": "puzrin",
+        "events": 3
+      },
+      {
+        "actor_login": "dmnd",
+        "events": 2
+      },
+      {
+        "actor_login": "rwaldron",
+        "events": 2
+      },
+      {
+        "actor_login": "zxqfox",
+        "events": 2
+      },
+      {
+        "actor_login": "cletusw",
+        "events": 2
+      },
+      {
+        "actor_login": "hugoluchessi",
+        "events": 2
+      },
+      {
+        "actor_login": "feross",
+        "events": 2
+      },
+      {
+        "actor_login": "s100",
+        "events": 2
+      },
+      {
+        "actor_login": "MatheusRV",
+        "events": 2
+      },
+      {
+        "actor_login": "gland2015",
+        "events": 2
+      },
+      {
+        "actor_login": "WRidder",
+        "events": 2
+      },
+      {
+        "actor_login": "tapasweni-pathak",
+        "events": 2
+      },
+      {
+        "actor_login": "SilencerWeb",
+        "events": 2
+      },
+      {
+        "actor_login": "dharmarajrdr",
+        "events": 2
+      },
+      {
+        "actor_login": "silkentrance",
+        "events": 2
+      },
+      {
+        "actor_login": "aaahhm8985",
+        "events": 2
+      },
+      {
+        "actor_login": "jasdevsidhu12",
+        "events": 2
+      },
+      {
+        "actor_login": "andreaswachowski",
+        "events": 2
+      },
+      {
+        "actor_login": "g-plane",
+        "events": 2
+      },
+      {
+        "actor_login": "joelharkes",
+        "events": 2
+      },
+      {
+        "actor_login": "Nokel81",
+        "events": 2
+      },
+      {
+        "actor_login": "Awen-hub",
+        "events": 2
+      },
+      {
+        "actor_login": "srcdes",
+        "events": 2
+      },
+      {
+        "actor_login": "akorchyn",
+        "events": 2
+      },
+      {
+        "actor_login": "j-f1",
+        "events": 2
+      },
+      {
+        "actor_login": "jupl",
+        "events": 2
+      },
+      {
+        "actor_login": "erosman",
+        "events": 2
+      },
+      {
+        "actor_login": "smehrbrodt",
+        "events": 2
+      },
+      {
+        "actor_login": "oaleynik",
+        "events": 2
+      },
+      {
+        "actor_login": "kecrily",
+        "events": 2
+      },
+      {
+        "actor_login": "jonassmedegaard",
+        "events": 2
+      },
+      {
+        "actor_login": "Alaneor",
+        "events": 2
+      },
+      {
+        "actor_login": "max-mykhailenko",
+        "events": 2
+      },
+      {
+        "actor_login": "elfring",
+        "events": 2
+      },
+      {
+        "actor_login": "sanex3339",
+        "events": 2
+      },
+      {
+        "actor_login": "ritz078",
+        "events": 2
+      },
+      {
+        "actor_login": "Mavrick91",
+        "events": 2
+      },
+      {
+        "actor_login": "JoshuaKGoldberg",
+        "events": 2
+      },
+      {
+        "actor_login": "yllhwa",
+        "events": 2
+      },
+      {
+        "actor_login": "bradwestfall",
+        "events": 2
+      },
+      {
+        "actor_login": "mzgol",
+        "events": 2
+      },
+      {
+        "actor_login": "DiffYao",
+        "events": 2
+      },
+      {
+        "actor_login": "eprouty",
+        "events": 2
+      },
+      {
+        "actor_login": "heinrich10",
+        "events": 2
+      },
+      {
+        "actor_login": "ChrisMGeo",
+        "events": 2
+      },
+      {
+        "actor_login": "gkovacs",
+        "events": 2
+      },
+      {
+        "actor_login": "dmitriiabramov",
+        "events": 2
+      },
+      {
+        "actor_login": "eirikurn",
+        "events": 2
+      },
+      {
+        "actor_login": "gaearon",
+        "events": 2
+      },
+      {
+        "actor_login": "julien-f",
+        "events": 2
+      },
+      {
+        "actor_login": "Playaset",
+        "events": 2
+      },
+      {
+        "actor_login": "tschaub",
+        "events": 2
+      },
+      {
+        "actor_login": "loganfsmyth",
+        "events": 2
+      },
+      {
+        "actor_login": "naholyr",
+        "events": 2
+      },
+      {
+        "actor_login": "slacktracer",
+        "events": 2
+      },
+      {
+        "actor_login": "Ryuno-Ki",
+        "events": 2
+      },
+      {
+        "actor_login": "isiahmeadows",
+        "events": 2
+      },
+      {
+        "actor_login": "steadicat",
+        "events": 2
+      },
+      {
+        "actor_login": "Jayllyz",
+        "events": 2
+      },
+      {
+        "actor_login": "DeepshikaS",
+        "events": 1
+      },
+      {
+        "actor_login": "koistya",
+        "events": 1
+      },
+      {
+        "actor_login": "tromey",
+        "events": 1
+      },
+      {
+        "actor_login": "koic",
+        "events": 1
+      },
+      {
+        "actor_login": "Announcement",
+        "events": 1
+      },
+      {
+        "actor_login": "bmix",
+        "events": 1
+      },
+      {
+        "actor_login": "debugwand",
+        "events": 1
+      },
+      {
+        "actor_login": "niels4",
+        "events": 1
+      },
+      {
+        "actor_login": "daltones",
+        "events": 1
+      },
+      {
+        "actor_login": "jarias-lfx",
+        "events": 1
+      },
+      {
+        "actor_login": "mo",
+        "events": 1
+      },
+      {
+        "actor_login": "marsmining",
+        "events": 1
+      },
+      {
+        "actor_login": "kazboo",
+        "events": 1
+      },
+      {
+        "actor_login": "amark",
+        "events": 1
+      },
+      {
+        "actor_login": "okuryu",
+        "events": 1
+      },
+      {
+        "actor_login": "wmertens",
+        "events": 1
+      },
+      {
+        "actor_login": "sstern6",
+        "events": 1
+      },
+      {
+        "actor_login": "muffinresearch",
+        "events": 1
+      },
+      {
+        "actor_login": "vanessadnguyen",
+        "events": 1
+      },
+      {
+        "actor_login": "ai",
+        "events": 1
+      },
+      {
+        "actor_login": "martijnsenden",
+        "events": 1
+      },
+      {
+        "actor_login": "rhinonan",
+        "events": 1
+      },
+      {
+        "actor_login": "fivemeyestore",
+        "events": 1
+      },
+      {
+        "actor_login": "coastman",
+        "events": 1
+      },
+      {
+        "actor_login": "douglasduteil",
+        "events": 1
+      },
+      {
+        "actor_login": "fivemhostingserver",
+        "events": 1
+      },
+      {
+        "actor_login": "nfroidure",
+        "events": 1
+      },
+      {
+        "actor_login": "thetalecrafter",
+        "events": 1
+      },
+      {
+        "actor_login": "robertrossmann",
+        "events": 1
+      },
+      {
+        "actor_login": "fczuardi",
+        "events": 1
+      },
+      {
+        "actor_login": "whitneyit",
+        "events": 1
+      },
+      {
+        "actor_login": "jokeyrhyme",
+        "events": 1
+      },
+      {
+        "actor_login": "marijnh",
+        "events": 1
+      },
+      {
+        "actor_login": "CatWithApple",
+        "events": 1
+      },
+      {
+        "actor_login": "MoOx",
+        "events": 1
+      },
+      {
+        "actor_login": "ntdiary",
+        "events": 1
+      },
+      {
+        "actor_login": "quarterto",
+        "events": 1
+      },
+      {
+        "actor_login": "krivaten",
+        "events": 1
+      },
+      {
+        "actor_login": "BYK",
+        "events": 1
+      },
+      {
+        "actor_login": "NeverLiez",
+        "events": 1
+      },
+      {
+        "actor_login": "adius",
+        "events": 1
+      },
+      {
+        "actor_login": "magwas",
+        "events": 1
+      },
+      {
+        "actor_login": "BillyGeoThink2020",
+        "events": 1
+      },
+      {
+        "actor_login": "Zopfjunge",
+        "events": 1
+      },
+      {
+        "actor_login": "futpib",
+        "events": 1
+      },
+      {
+        "actor_login": "yairEO",
+        "events": 1
+      },
+      {
+        "actor_login": "benmosher",
+        "events": 1
+      },
+      {
+        "actor_login": "benjamine",
+        "events": 1
+      },
+      {
+        "actor_login": "SwetaTanwar",
+        "events": 1
+      },
+      {
+        "actor_login": "impinball",
+        "events": 1
+      },
+      {
+        "actor_login": "luckydrq",
+        "events": 1
+      },
+      {
+        "actor_login": "runn1ng",
+        "events": 1
+      },
+      {
+        "actor_login": "SimenB",
+        "events": 1
+      },
+      {
+        "actor_login": "egoroof",
+        "events": 1
+      },
+      {
+        "actor_login": "Iswaryasl",
+        "events": 1
+      },
+      {
+        "actor_login": "linonetwo",
+        "events": 1
+      },
+      {
+        "actor_login": "keenwon",
+        "events": 1
+      },
+      {
+        "actor_login": "tickct",
+        "events": 1
+      },
+      {
+        "actor_login": "endel",
+        "events": 1
+      },
+      {
+        "actor_login": "nickiaconis",
+        "events": 1
+      },
+      {
+        "actor_login": "fregante",
+        "events": 1
+      },
+      {
+        "actor_login": "doersino",
+        "events": 1
+      },
+      {
+        "actor_login": "tcoopman",
+        "events": 1
+      },
+      {
+        "actor_login": "jvswatson",
+        "events": 1
+      },
+      {
+        "actor_login": "Flickdm",
+        "events": 1
+      },
+      {
+        "actor_login": "kentcdodds",
+        "events": 1
+      },
+      {
+        "actor_login": "Swatinem",
+        "events": 1
+      },
+      {
+        "actor_login": "FrozenKoi",
+        "events": 1
+      },
+      {
+        "actor_login": "vanesyan",
+        "events": 1
+      },
+      {
+        "actor_login": "bterlson",
+        "events": 1
+      },
+      {
+        "actor_login": "ikarienator",
+        "events": 1
+      },
+      {
+        "actor_login": "nickpoorman",
+        "events": 1
+      },
+      {
+        "actor_login": "mantoni",
+        "events": 1
+      },
+      {
+        "actor_login": "rjhilgefort",
+        "events": 1
+      },
+      {
+        "actor_login": "simonbuchan",
+        "events": 1
+      },
+      {
+        "actor_login": "rocketraman",
+        "events": 1
+      },
+      {
+        "actor_login": "leumasme",
+        "events": 1
+      },
+      {
+        "actor_login": "deepsweet",
+        "events": 1
+      },
+      {
+        "actor_login": "AbrahamAlcaina",
+        "events": 1
+      },
+      {
+        "actor_login": "josiahsavary",
+        "events": 1
+      },
+      {
+        "actor_login": "fivemtebex",
+        "events": 1
+      },
+      {
+        "actor_login": "stuft2",
+        "events": 1
+      },
+      {
+        "actor_login": "pmcelhaney",
+        "events": 1
+      },
+      {
+        "actor_login": "walshie4",
+        "events": 1
+      },
+      {
+        "actor_login": "weaweawe01",
+        "events": 1
+      },
+      {
+        "actor_login": "trusktr",
+        "events": 1
+      },
+      {
+        "actor_login": "koutsenko",
+        "events": 1
+      },
+      {
+        "actor_login": "barneycarroll",
+        "events": 1
+      },
+      {
+        "actor_login": "ogorbacheva",
+        "events": 1
+      },
+      {
+        "actor_login": "ntucker",
+        "events": 1
+      },
+      {
+        "actor_login": "globexdesigns",
+        "events": 1
+      },
+      {
+        "actor_login": "Thompson1985",
+        "events": 1
+      },
+      {
+        "actor_login": "SamuelEnglard",
+        "events": 1
+      },
+      {
+        "actor_login": "einSelbst",
+        "events": 1
+      },
+      {
+        "actor_login": "oshando",
+        "events": 1
+      },
+      {
+        "actor_login": "sethamus",
+        "events": 1
+      },
+      {
+        "actor_login": "fivemserverhostings",
+        "events": 1
+      },
+      {
+        "actor_login": "scriptforfivem",
+        "events": 1
+      },
+      {
+        "actor_login": "jeffmo",
+        "events": 1
+      },
+      {
+        "actor_login": "vslinko",
+        "events": 1
+      },
+      {
+        "actor_login": "sosukesuzuki",
+        "events": 1
+      },
+      {
+        "actor_login": "mlegenhausen",
+        "events": 1
+      },
+      {
+        "actor_login": "andy-hanson",
+        "events": 1
+      },
+      {
+        "actor_login": "rosshadden",
+        "events": 1
+      },
+      {
+        "actor_login": "retorquere",
+        "events": 1
+      },
+      {
+        "actor_login": "thr0w",
+        "events": 1
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:50.133+00:00",
+    "refresh": true
+  },
+  "analyze-recent-pull-requests": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:48.592+00:00",
+    "finishedAt": "2026-05-03T17:01:48.624+00:00",
+    "spent": 0.032,
+    "sql": "WITH RECURSIVE seq(idx, current_period_day, last_period_day) AS (\n      SELECT\n        1 AS idx,\n        CURRENT_DATE() AS current_period_day,\n        DATE_SUB(CURRENT_DATE(), INTERVAL 28 day) AS last_period_day\n      UNION ALL\n      SELECT\n        idx + 1 AS idx,\n        DATE_SUB(CURRENT_DATE(), INTERVAL idx day) AS current_period_day,\n        DATE_SUB(CURRENT_DATE(), INTERVAL idx + 28 day) AS last_period_day\n      FROM seq\n      WHERE idx < 28\n), opened_prs_group_by_day AS (\n    SELECT\n        day_offset % 28 + 1 AS idx,\n        day_offset DIV 28 AS period,\n        day,\n        prs\n    FROM (\n        SELECT\n            (DATEDIFF(CURRENT_DATE(), day)) AS day_offset,\n            day,\n            prs\n        FROM (\n            SELECT\n                DATE_FORMAT(created_at, '%Y-%m-%d') AS day,\n                COUNT(*) AS prs\n            FROM\n                github_events ge\n            WHERE\n                type = 'PullRequestEvent'\n                AND action = 'opened'\n                AND repo_id = 27620277\n                AND created_at > DATE_SUB(CURRENT_DATE(), INTERVAL 56 DAY)\n            GROUP BY day\n            ORDER BY day\n        ) sub\n    ) sub2\n), merged_prs_group_by_day AS (\n    SELECT\n        day_offset % 28 + 1 AS idx,\n        day_offset DIV 28 AS period,\n        day,\n        prs\n    FROM (\n        SELECT\n            (DATEDIFF(CURRENT_DATE(), day)) AS day_offset,\n            day,\n            prs\n        FROM (\n            SELECT\n                DATE_FORMAT(created_at, '%Y-%m-%d') AS day,\n                COUNT(*) AS prs\n            FROM\n                github_events ge\n            WHERE\n                type = 'PullRequestEvent'\n                AND action = 'closed'\n                AND pr_merged = true\n                AND repo_id = 27620277\n                AND created_at > DATE_SUB(CURRENT_DATE(), INTERVAL 56 DAY)\n            GROUP BY day\n            ORDER BY day\n        ) sub\n    ) sub2\n), opened_prs_last_28_days AS (\n    SELECT idx, day, prs\n    FROM opened_prs_group_by_day\n    WHERE period = 0\n), opened_prs_last_2nd_28_days AS (\n    SELECT idx, day, prs\n    FROM opened_prs_group_by_day\n    WHERE period = 1\n), merged_prs_last_28_days AS (\n    SELECT idx, day, prs\n    FROM merged_prs_group_by_day\n    WHERE period = 0\n), merged_prs_last_2nd_28_days AS (\n    SELECT idx, day, prs\n    FROM merged_prs_group_by_day\n    WHERE period = 1\n), opened_prs_last_28_days_total AS (\n    SELECT SUM(prs) AS total FROM opened_prs_last_28_days\n), opened_prs_last_2nd_28_days_total AS (\n    SELECT SUM(prs) AS total FROM opened_prs_last_2nd_28_days\n), merged_prs_last_28_days_total AS (\n    SELECT SUM(prs) AS total FROM merged_prs_last_28_days\n), merged_prs_last_2nd_28_days_total AS (\n    SELECT SUM(prs) AS total FROM merged_prs_last_2nd_28_days\n)\nSELECT\n    s.idx AS idx,\n    s.current_period_day AS current_period_day,\n    IFNULL(opcp.prs, 0) AS current_period_opened_day_prs,\n    IFNULL(opcpt.total, 0) AS current_period_opened_prs,\n    IFNULL(oplp.prs, 0) AS last_period_opened_day_prs,\n    IFNULL(oplpt.total, 0) AS last_period_opened_prs,\n    s.last_period_day AS last_period_day,\n    IFNULL(mpcp.prs, 0) AS current_period_merged_day_prs,\n    IFNULL(mpcpt.total, 0) AS current_period_merged_prs,\n    IFNULL(mplp.prs, 0) AS last_period_merged_day_prs,\n    IFNULL(mplpt.total, 0) AS last_period_merged_prs\nFROM seq s\nLEFT JOIN opened_prs_last_28_days opcp ON s.idx = opcp.idx\nLEFT JOIN opened_prs_last_2nd_28_days oplp ON s.idx = oplp.idx\nLEFT JOIN merged_prs_last_28_days mpcp ON s.idx = mpcp.idx\nLEFT JOIN merged_prs_last_2nd_28_days mplp ON s.idx = mplp.idx\nJOIN opened_prs_last_28_days_total opcpt ON 1 = 1\nJOIN opened_prs_last_2nd_28_days_total oplpt ON 1 = 1\nJOIN merged_prs_last_28_days_total mpcpt ON 1 = 1\nJOIN merged_prs_last_2nd_28_days_total mplpt ON 1 = 1\nORDER BY idx",
+    "fields": [
+      {
+        "name": "idx",
+        "columnType": 8
+      },
+      {
+        "name": "current_period_day",
+        "columnType": 10
+      },
+      {
+        "name": "current_period_opened_day_prs",
+        "columnType": 8
+      },
+      {
+        "name": "current_period_opened_prs",
+        "columnType": 246
+      },
+      {
+        "name": "last_period_opened_day_prs",
+        "columnType": 8
+      },
+      {
+        "name": "last_period_opened_prs",
+        "columnType": 246
+      },
+      {
+        "name": "last_period_day",
+        "columnType": 10
+      },
+      {
+        "name": "current_period_merged_day_prs",
+        "columnType": 8
+      },
+      {
+        "name": "current_period_merged_prs",
+        "columnType": 246
+      },
+      {
+        "name": "last_period_merged_day_prs",
+        "columnType": 8
+      },
+      {
+        "name": "last_period_merged_prs",
+        "columnType": 246
+      }
+    ],
+    "data": [
+      {
+        "idx": 1,
+        "current_period_day": "2026-05-03T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-04-05T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 2,
+        "current_period_day": "2026-05-02T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-04-04T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 3,
+        "current_period_day": "2026-05-01T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-04-03T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 4,
+        "current_period_day": "2026-04-30T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-04-02T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 5,
+        "current_period_day": "2026-04-29T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-04-01T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 6,
+        "current_period_day": "2026-04-28T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-31T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 7,
+        "current_period_day": "2026-04-27T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-30T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 8,
+        "current_period_day": "2026-04-26T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-29T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 9,
+        "current_period_day": "2026-04-25T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-28T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 10,
+        "current_period_day": "2026-04-24T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-27T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 11,
+        "current_period_day": "2026-04-23T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 1,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-26T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 12,
+        "current_period_day": "2026-04-22T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-25T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 13,
+        "current_period_day": "2026-04-21T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-24T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 14,
+        "current_period_day": "2026-04-20T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-23T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 15,
+        "current_period_day": "2026-04-19T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-22T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 16,
+        "current_period_day": "2026-04-18T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-21T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 17,
+        "current_period_day": "2026-04-17T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-20T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 18,
+        "current_period_day": "2026-04-16T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-19T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 19,
+        "current_period_day": "2026-04-15T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-18T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 20,
+        "current_period_day": "2026-04-14T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-17T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 21,
+        "current_period_day": "2026-04-13T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-16T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 22,
+        "current_period_day": "2026-04-12T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-15T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 23,
+        "current_period_day": "2026-04-11T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-14T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 24,
+        "current_period_day": "2026-04-10T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-13T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 25,
+        "current_period_day": "2026-04-09T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-12T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 26,
+        "current_period_day": "2026-04-08T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-11T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 27,
+        "current_period_day": "2026-04-07T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-10T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 28,
+        "current_period_day": "2026-04-06T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 1,
+        "last_period_day": "2026-03-09T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:48.624+00:00",
+    "refresh": true
+  },
+  "analyze-recent-contributors": {
+    "params": {
+      "repoId": "27620277"
+    },
+    "requestedAt": "2026-05-03T17:01:47.091+00:00",
+    "finishedAt": "2026-05-03T17:01:47.134+00:00",
+    "spent": 0.043,
+    "sql": "WITH RECURSIVE seq(idx, current_period_day, last_period_day) AS (\n      SELECT\n        1 AS idx,\n        CURRENT_DATE() AS current_period_day,\n        DATE_SUB(CURRENT_DATE(), INTERVAL 28 day) AS last_period_day\n      UNION ALL\n      SELECT\n        idx + 1 AS idx,\n        DATE_SUB(CURRENT_DATE(), INTERVAL idx day) AS current_period_day,\n        DATE_SUB(CURRENT_DATE(), INTERVAL idx + 28 day) AS last_period_day\n      FROM seq\n      WHERE idx < 28\n), group_by_day AS (\n    SELECT\n        day_offset % 28 + 1 AS idx,\n        day_offset DIV 28 AS period,\n        day,\n        contributors\n    FROM (\n        SELECT\n            (DATEDIFF(CURRENT_DATE(), day)) AS day_offset,\n            day,\n            contributors\n        FROM (\n            SELECT\n                DATE_FORMAT(created_at, '%Y-%m-%d') AS day,\n                COUNT(DISTINCT actor_id) AS contributors\n            FROM\n                github_events ge\n            WHERE\n                repo_id = 27620277\n                AND (\n                    (type = 'PullRequestEvent' AND action = 'opened') OR\n                    (type = 'IssuesEvent' AND action = 'opened') OR\n                    (type = 'IssueCommentEvent' AND action = 'created') OR\n                    (type = 'PullRequestReviewEvent' AND action = 'created') OR\n                    (type = 'PullRequestReviewCommentEvent' AND action = 'created') OR\n                    (type = 'PushEvent' AND action = '')\n                )\n                AND created_at > DATE_SUB(CURRENT_DATE(), INTERVAL 56 DAY)\n            GROUP BY day\n            ORDER BY day\n        ) sub\n    ) sub2\n), group_by_period AS (\n    SELECT\n        (DATEDIFF(CURRENT_DATE(), created_at)) DIV 28 AS period,\n        COUNT(DISTINCT actor_id) AS contributors\n    FROM\n        github_events ge\n    WHERE\n        repo_id = 27620277\n        AND (\n            (type = 'PullRequestEvent' AND action = 'opened') OR\n            (type = 'IssuesEvent' AND action = 'opened') OR\n            (type = 'IssueCommentEvent' AND action = 'created') OR\n            (type = 'PullRequestReviewEvent' AND action = 'created') OR\n            (type = 'PullRequestReviewCommentEvent' AND action = 'created') OR\n            (type = 'PushEvent' AND action = '')\n        )\n        AND created_at > DATE_SUB(CURRENT_DATE(), INTERVAL 56 DAY)\n    GROUP BY period\n    ORDER BY period\n), last_28_days AS (\n    SELECT idx, day, contributors\n    FROM group_by_day\n    WHERE period = 0\n), last_2nd_28_days AS (\n    SELECT idx, day, contributors\n    FROM group_by_day\n    WHERE period = 1\n), last_28_days_total AS (\n    SELECT contributors AS total FROM group_by_period WHERE period = 0\n), last_2nd_28_days_total AS (\n    SELECT contributors AS total FROM group_by_period WHERE period = 1\n)\nSELECT\n    s.idx AS idx,\n    s.current_period_day AS current_period_day,\n    IFNULL(cp.contributors, 0) AS current_period_day_contributors,\n    IFNULL(cpt.total, 0) AS current_period_contributors,\n    s.last_period_day AS last_period_day,\n    IFNULL(lp.contributors, 0) AS last_period_day_contributors,\n    IFNULL(lpt.total, 0) AS last_period_contributors\nFROM seq s\nLEFT JOIN last_28_days cp ON s.idx = cp.idx\nLEFT JOIN last_2nd_28_days lp ON s.idx = lp.idx\nJOIN last_28_days_total cpt\nJOIN last_2nd_28_days_total lpt\nORDER BY idx\n;",
+    "fields": [
+      {
+        "name": "idx",
+        "columnType": 8
+      },
+      {
+        "name": "current_period_day",
+        "columnType": 10
+      },
+      {
+        "name": "current_period_day_contributors",
+        "columnType": 8
+      },
+      {
+        "name": "current_period_contributors",
+        "columnType": 8
+      },
+      {
+        "name": "last_period_day",
+        "columnType": 10
+      },
+      {
+        "name": "last_period_day_contributors",
+        "columnType": 8
+      },
+      {
+        "name": "last_period_contributors",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "idx": 1,
+        "current_period_day": "2026-05-03T00:00:00.000Z",
+        "current_period_day_contributors": 1,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-04-05T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 2,
+        "current_period_day": "2026-05-02T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-04-04T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 3,
+        "current_period_day": "2026-05-01T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-04-03T00:00:00.000Z",
+        "last_period_day_contributors": 1,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 4,
+        "current_period_day": "2026-04-30T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-04-02T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 5,
+        "current_period_day": "2026-04-29T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-04-01T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 6,
+        "current_period_day": "2026-04-28T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-31T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 7,
+        "current_period_day": "2026-04-27T00:00:00.000Z",
+        "current_period_day_contributors": 1,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-30T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 8,
+        "current_period_day": "2026-04-26T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-29T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 9,
+        "current_period_day": "2026-04-25T00:00:00.000Z",
+        "current_period_day_contributors": 1,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-28T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 10,
+        "current_period_day": "2026-04-24T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-27T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 11,
+        "current_period_day": "2026-04-23T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-26T00:00:00.000Z",
+        "last_period_day_contributors": 1,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 12,
+        "current_period_day": "2026-04-22T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-25T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 13,
+        "current_period_day": "2026-04-21T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-24T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 14,
+        "current_period_day": "2026-04-20T00:00:00.000Z",
+        "current_period_day_contributors": 1,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-23T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 15,
+        "current_period_day": "2026-04-19T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-22T00:00:00.000Z",
+        "last_period_day_contributors": 1,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 16,
+        "current_period_day": "2026-04-18T00:00:00.000Z",
+        "current_period_day_contributors": 1,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-21T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 17,
+        "current_period_day": "2026-04-17T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-20T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 18,
+        "current_period_day": "2026-04-16T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-19T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 19,
+        "current_period_day": "2026-04-15T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-18T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 20,
+        "current_period_day": "2026-04-14T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-17T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 21,
+        "current_period_day": "2026-04-13T00:00:00.000Z",
+        "current_period_day_contributors": 1,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-16T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 22,
+        "current_period_day": "2026-04-12T00:00:00.000Z",
+        "current_period_day_contributors": 1,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-15T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 23,
+        "current_period_day": "2026-04-11T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-14T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 24,
+        "current_period_day": "2026-04-10T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-13T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 25,
+        "current_period_day": "2026-04-09T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-12T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 26,
+        "current_period_day": "2026-04-08T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-11T00:00:00.000Z",
+        "last_period_day_contributors": 0,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 27,
+        "current_period_day": "2026-04-07T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-10T00:00:00.000Z",
+        "last_period_day_contributors": 1,
+        "last_period_contributors": 4
+      },
+      {
+        "idx": 28,
+        "current_period_day": "2026-04-06T00:00:00.000Z",
+        "current_period_day_contributors": 0,
+        "current_period_contributors": 4,
+        "last_period_day": "2026-03-09T00:00:00.000Z",
+        "last_period_day_contributors": 1,
+        "last_period_contributors": 4
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:47.134+00:00",
+    "refresh": true
+  }
+}

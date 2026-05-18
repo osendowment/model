@@ -1,0 +1,863 @@
+{
+  "analyze-repo-overview": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:51.357+00:00",
+    "finishedAt": "2026-05-03T17:01:51.389+00:00",
+    "spent": 0.032,
+    "sql": "WITH stars AS (\n    SELECT\n        795552264 AS repo_id, IFNULL(COUNT(DISTINCT actor_login), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'WatchEvent'\n        AND repo_id = 795552264\n        AND action = 'started'\n), commits AS (\n    SELECT\n        795552264 AS repo_id, IFNULL(SUM(push_distinct_size), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PushEvent'\n        AND repo_id = 795552264\n), issues AS (\n    SELECT\n        795552264 AS repo_id, IFNULL(COUNT(DISTINCT number), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'IssuesEvent'\n        AND repo_id = 795552264\n), pull_request_creators AS (\n    SELECT\n        795552264 AS repo_id, IFNULL(COUNT(DISTINCT actor_login), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PullRequestEvent'\n        AND repo_id = 795552264\n        AND action = 'opened'\n)\nSELECT\n    795552264 AS repo_id,\n    s.total AS stars,\n    c.total AS commits,\n    i.total AS issues,\n    prc.total AS pull_request_creators\nFROM (\n    SELECT 795552264 AS repo_id\n) sub\nLEFT JOIN stars s ON sub.repo_id = s.repo_id\nLEFT JOIN commits c ON sub.repo_id = c.repo_id\nLEFT JOIN issues i ON sub.repo_id = i.repo_id\nLEFT JOIN pull_request_creators prc ON sub.repo_id = prc.repo_id\n;",
+    "fields": [
+      {
+        "name": "repo_id",
+        "columnType": 8
+      },
+      {
+        "name": "stars",
+        "columnType": 8
+      },
+      {
+        "name": "commits",
+        "columnType": 246
+      },
+      {
+        "name": "issues",
+        "columnType": 8
+      },
+      {
+        "name": "pull_request_creators",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "repo_id": 795552264,
+        "stars": 12,
+        "commits": 3,
+        "issues": 0,
+        "pull_request_creators": 0
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:51.389+00:00",
+    "refresh": true
+  },
+  "analyze-repo-pr-overview": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:52.796+00:00",
+    "finishedAt": "2026-05-03T17:01:52.826+00:00",
+    "spent": 0.03,
+    "sql": "WITH pull_requests AS (\n    SELECT\n        795552264 AS repo_id,\n        IFNULL(COUNT(DISTINCT number), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PullRequestEvent'\n        AND repo_id = 795552264\n), pull_request_creators AS (\n    SELECT\n        795552264 AS repo_id, \n        IFNULL(COUNT(DISTINCT actor_login), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PullRequestEvent'\n        AND repo_id = 795552264\n        AND action = 'opened'\n), pull_request_reviews AS (\n    SELECT\n        795552264 AS repo_id,\n        IFNULL(COUNT(1), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PullRequestReviewEvent'\n        AND repo_id = 795552264\n        AND action = 'created'\n), pull_request_reviewers AS (\n    SELECT\n        795552264 AS repo_id,\n        IFNULL(COUNT(DISTINCT actor_login), 0) AS total\n    FROM github_events\n    WHERE\n        type = 'PullRequestReviewEvent'\n        AND repo_id = 795552264\n        AND action = 'created'\n)\nSELECT\n    795552264 AS repo_id,\n    pr.total AS pull_requests,\n    prc.total AS pull_request_creators,\n    prr.total AS pull_request_reviews,\n    prrc.total AS pull_request_reviewers\nFROM (\n    SELECT 795552264 AS repo_id\n) sub\nLEFT JOIN pull_requests pr ON sub.repo_id = pr.repo_id\nLEFT JOIN pull_request_creators prc ON sub.repo_id = prc.repo_id\nLEFT JOIN pull_request_reviews prr ON sub.repo_id = prr.repo_id\nLEFT JOIN pull_request_reviewers prrc ON sub.repo_id = prrc.repo_id\n;",
+    "fields": [
+      {
+        "name": "repo_id",
+        "columnType": 8
+      },
+      {
+        "name": "pull_requests",
+        "columnType": 8
+      },
+      {
+        "name": "pull_request_creators",
+        "columnType": 8
+      },
+      {
+        "name": "pull_request_reviews",
+        "columnType": 8
+      },
+      {
+        "name": "pull_request_reviewers",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "repo_id": 795552264,
+        "pull_requests": 0,
+        "pull_request_creators": 0,
+        "pull_request_reviews": 0,
+        "pull_request_reviewers": 0
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:52.826+00:00",
+    "refresh": true
+  },
+  "analyze-repo-issue-overview": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:51.056+00:00",
+    "finishedAt": "2026-05-03T17:01:51.118+00:00",
+    "spent": 0.062,
+    "sql": "WITH issues AS (\n    SELECT\n        795552264 AS repo_id, COUNT(*) AS total\n    FROM github_events\n    WHERE\n        repo_id = 795552264\n        AND type = 'IssuesEvent'\n        AND action = 'opened'\n), issue_creators AS (\n    SELECT\n        795552264 AS repo_id, COUNT(DISTINCT actor_login) AS total\n    FROM github_events\n    WHERE\n        repo_id = 795552264\n        AND type = 'IssuesEvent'\n        AND action = 'opened'\n), issue_comments AS (\n    SELECT\n        795552264 AS repo_id, COUNT(*) AS total\n    FROM github_events\n    WHERE\n        repo_id = 795552264\n        AND type = 'IssueCommentEvent'\n        AND action = 'created'\n), issue_commenters AS (\n    SELECT\n        795552264 AS repo_id, COUNT(DISTINCT actor_login) AS total\n    FROM github_events\n    WHERE\n        repo_id = 795552264\n        AND type = 'IssueCommentEvent'\n        AND action = 'created'\n)\nSELECT\n    795552264 AS repo_id,\n    IFNULL(i.total, 0) AS issues,\n    IFNULL(ic.total, 0) AS issue_creators,\n    IFNULL(ico.total, 0) AS issue_comments,\n    IFNULL(icc.total, 0) AS issue_commenters\nFROM (\n    SELECT 795552264 AS repo_id\n) sub\nLEFT JOIN issues i ON sub.repo_id = i.repo_id\nLEFT JOIN issue_creators ic ON sub.repo_id = ic.repo_id\nLEFT JOIN issue_comments ico ON sub.repo_id = ico.repo_id\nLEFT JOIN issue_commenters icc ON sub.repo_id = icc.repo_id\n;",
+    "fields": [
+      {
+        "name": "repo_id",
+        "columnType": 8
+      },
+      {
+        "name": "issues",
+        "columnType": 8
+      },
+      {
+        "name": "issue_creators",
+        "columnType": 8
+      },
+      {
+        "name": "issue_comments",
+        "columnType": 8
+      },
+      {
+        "name": "issue_commenters",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "repo_id": 795552264,
+        "issues": 0,
+        "issue_creators": 0,
+        "issue_comments": 0,
+        "issue_commenters": 0
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:51.118+00:00",
+    "refresh": true
+  },
+  "analyze-pushes-and-commits-per-month": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:53.094+00:00",
+    "finishedAt": "2026-05-03T17:01:53.117+00:00",
+    "spent": 0.023,
+    "sql": "SELECT\n    DATE_FORMAT(created_at, '%Y-%m-01') as event_month,\n    IFNULL(COUNT(*), 0) AS pushes,\n    SUM(COALESCE(push_distinct_size, push_size, 0)) AS commits\nFROM github_events\nWHERE repo_id = 795552264 and type = 'PushEvent'\nGROUP BY 1\nORDER BY 1;\n",
+    "fields": [
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "pushes",
+        "columnType": 8
+      },
+      {
+        "name": "commits",
+        "columnType": 246
+      }
+    ],
+    "data": [
+      {
+        "event_month": "2024-05-01",
+        "pushes": 2,
+        "commits": 1
+      },
+      {
+        "event_month": "2025-05-01",
+        "pushes": 1,
+        "commits": 2
+      },
+      {
+        "event_month": "2026-02-01",
+        "pushes": 1,
+        "commits": 0
+      }
+    ],
+    "expiresAt": "2026-05-04T17:01:53.117+00:00",
+    "refresh": true
+  },
+  "analyze-stars-history": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:51.958+00:00",
+    "finishedAt": "2026-05-03T17:01:51.984+00:00",
+    "spent": 0.026,
+    "sql": "WITH stars AS (\n    SELECT\n        repo_id,\n        created_at,\n        ROW_NUMBER() OVER (PARTITION BY repo_id, actor_login) AS row_num\n    FROM github_events\n    WHERE\n        type = 'WatchEvent'\n        AND repo_id IN ('795552264')\n), stars_per_month AS (\n    SELECT\n        repo_id,\n        DATE_FORMAT(created_at, '%Y-%m-01') AS t_month,\n        COUNT(*) AS total\n    FROM stars\n    WHERE\n        row_num = 1\n    GROUP BY\n        repo_id, t_month\n), acc AS (\n    SELECT\n        repo_id,\n        t_month,\n        SUM(total) OVER (PARTITION BY repo_id ORDER BY t_month) AS total,\n        ROW_NUMBER() OVER(PARTITION BY repo_id, t_month) AS row_num\n    FROM\n        stars_per_month\n)\nSELECT\n    repo_id,\n    t_month AS event_month,\n    total\nFROM acc\nWHERE row_num = 1\nORDER BY t_month\n;",
+    "fields": [
+      {
+        "name": "repo_id",
+        "columnType": 8
+      },
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "total",
+        "columnType": 246
+      }
+    ],
+    "data": [
+      {
+        "repo_id": 795552264,
+        "event_month": "2024-05-01",
+        "total": 5
+      },
+      {
+        "repo_id": 795552264,
+        "event_month": "2024-06-01",
+        "total": 6
+      },
+      {
+        "repo_id": 795552264,
+        "event_month": "2024-07-01",
+        "total": 7
+      },
+      {
+        "repo_id": 795552264,
+        "event_month": "2024-09-01",
+        "total": 8
+      },
+      {
+        "repo_id": 795552264,
+        "event_month": "2025-10-01",
+        "total": 12
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:51.985+00:00",
+    "refresh": true
+  },
+  "analyze-pull-request-open-to-merged": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:52.707+00:00",
+    "finishedAt": "2026-05-03T17:01:52.738+00:00",
+    "spent": 0.031,
+    "sql": "WITH pr_with_merged_at AS (\n    SELECT\n        number, DATE_FORMAT(created_at, '%Y-%m-01') AS t_month, created_at AS merged_at\n    FROM\n        github_events ge\n    WHERE\n        type = 'PullRequestEvent'\n        -- Considering that some repositories accept the code of the contributor by closing the PR and push commit directly,\n        -- here is not distinguished whether it is the merged event.\n        -- See: https://github.com/mongodb/mongo/pulls?q=is%3Apr+is%3Aclosed\n        AND action = 'closed'\n        AND repo_id = 795552264\n), pr_with_opened_at AS (\n    SELECT\n        number, created_at AS opened_at\n    FROM\n        github_events ge\n    WHERE\n        type = 'PullRequestEvent'\n        AND action = 'opened'\n        -- Exclude Bots\n        -- AND actor_login NOT LIKE '%bot%'\n        -- AND actor_login NOT IN (SELECT login FROM blacklist_users bu)\n        AND repo_id = 795552264\n), tdiff AS (\n    SELECT\n        t_month,\n        (UNIX_TIMESTAMP(pwm.merged_at) - UNIX_TIMESTAMP(pwo.opened_at)) AS diff\n    FROM\n        pr_with_opened_at pwo\n        JOIN pr_with_merged_at pwm ON pwo.number = pwm.number AND pwm.merged_at > pwo.opened_at\n), tdiff_with_rank AS (\n    SELECT\n        tdiff.t_month,\n        diff  / 60 / 60 AS diff,\n        ROW_NUMBER() OVER (PARTITION BY tdiff.t_month ORDER BY diff) AS r,\n        COUNT(*) OVER (PARTITION BY tdiff.t_month) AS cnt,\n        FIRST_VALUE(diff / 60 / 60) OVER (PARTITION BY tdiff.t_month ORDER BY diff) AS p0,\n        FIRST_VALUE(diff / 60 / 60)  OVER (PARTITION BY tdiff.t_month ORDER BY diff DESC) AS p100\n    FROM tdiff\n), tdiff_p25 AS (\n    SELECT\n        t_month, diff AS p25\n    FROM\n        tdiff_with_rank tr\n    WHERE\n        r = ROUND(cnt * 0.25)\n), tdiff_p50 AS (\n    SELECT\n        t_month, diff AS p50\n    FROM\n        tdiff_with_rank tr\n    WHERE\n        r = ROUND(cnt * 0.5)\n), tdiff_p75 AS (\n    SELECT\n        t_month, diff AS p75\n    FROM\n        tdiff_with_rank tr\n    WHERE\n        r = ROUND(cnt * 0.75)\n)\nSELECT\n    tr.t_month AS event_month,\n    p0,\n    p25,\n    p50,\n    p75,\n    p100\nFROM tdiff_with_rank tr\nLEFT JOIN tdiff_p25 p25 ON tr.t_month = p25.t_month\nLEFT JOIN tdiff_p50 p50 ON tr.t_month = p50.t_month\nLEFT JOIN tdiff_p75 p75 ON tr.t_month = p75.t_month\nWHERE r = 1\nORDER BY event_month\n;",
+    "fields": [
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "p0",
+        "columnType": 246
+      },
+      {
+        "name": "p25",
+        "columnType": 246
+      },
+      {
+        "name": "p50",
+        "columnType": 246
+      },
+      {
+        "name": "p75",
+        "columnType": 246
+      },
+      {
+        "name": "p100",
+        "columnType": 246
+      }
+    ],
+    "data": [],
+    "expiresAt": "2026-05-04T17:01:52.738+00:00",
+    "refresh": true
+  },
+  "analyze-issue-open-to-closed": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:50.757+00:00",
+    "finishedAt": "2026-05-03T17:01:50.788+00:00",
+    "spent": 0.031,
+    "sql": "with issue_with_closed_at as (\n    select\n        number, DATE_FORMAT(created_at, '%Y-%m-01') AS t_month, created_at as closed_at\n    from\n        github_events ge\n    where\n        type = 'IssuesEvent'\n        and action = 'closed'\n        and repo_id = 795552264\n), issue_with_opened_at as (\n    select\n        number, created_at as opened_at\n    from\n        github_events ge\n    where\n        type = 'IssuesEvent'\n        and action = 'opened'\n        -- Exclude Bots\n        -- and actor_login not like '%bot%'\n        -- and actor_login not in (select login from blacklist_users bu)\n        and repo_id = 795552264\n), tdiff as (\n    select\n        DATE_FORMAT(t_month, '%Y-%m-01') AS t_month,\n        (UNIX_TIMESTAMP(iwc.closed_at) - UNIX_TIMESTAMP(iwo.opened_at)) as diff\n    from\n        issue_with_opened_at iwo\n        join issue_with_closed_at iwc on iwo.number = iwc.number and iwc.closed_at > iwo.opened_at\n), tdiff_with_rank as (\n    select\n        tdiff.t_month,\n        diff  / 60 / 60 as diff,\n        ROW_NUMBER() over (partition by tdiff.t_month order by diff) as r,\n        count(*) over (partition by tdiff.t_month) as cnt,\n        first_value(diff / 60 / 60) over (partition by tdiff.t_month order by diff) as p0,\n        first_value(diff / 60 / 60)  over (partition by tdiff.t_month order by diff desc) as p100\n    from tdiff\n), tdiff_p25 as (\n    select\n        t_month, diff as p25\n    from\n        tdiff_with_rank tr\n    where\n        r = round(cnt * 0.25)\n), tdiff_p50 as (\n    select\n        t_month, diff as p50\n    from\n        tdiff_with_rank tr\n    where\n        r = round(cnt * 0.5)\n), tdiff_p75 as (\n    select\n        t_month, diff as p75\n    from\n        tdiff_with_rank tr\n    where\n        r = round(cnt * 0.75)\n)\nselect\n    distinct tr.t_month AS event_month,\n    p0,\n    p25,\n    p50,\n    p75,\n    p100\nfrom tdiff_with_rank tr\nleft join tdiff_p25 p25 on tr.t_month = p25.t_month\nleft join tdiff_p50 p50 on tr.t_month = p50.t_month\nleft join tdiff_p75 p75 on tr.t_month = p75.t_month\norder by 1\n;",
+    "fields": [
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "p0",
+        "columnType": 246
+      },
+      {
+        "name": "p25",
+        "columnType": 246
+      },
+      {
+        "name": "p50",
+        "columnType": 246
+      },
+      {
+        "name": "p75",
+        "columnType": 246
+      },
+      {
+        "name": "p100",
+        "columnType": 246
+      }
+    ],
+    "data": [],
+    "expiresAt": "2026-05-04T17:01:50.788+00:00",
+    "refresh": true
+  },
+  "analyze-pull-requests-size-per-month": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:50.455+00:00",
+    "finishedAt": "2026-05-03T17:01:50.483+00:00",
+    "spent": 0.028,
+    "sql": "SELECT t_month AS event_month, xs, s, m, l, xl, xxl, all_size\nFROM (\n    SELECT\n        t_month,\n        SUM(CASE WHEN (additions + deletions) < 10 THEN 1 ELSE 0 END) OVER(PARTITION BY t_month) AS xs,\n        SUM(CASE WHEN (additions + deletions) >= 10 AND (additions + deletions) < 30 THEN 1 ELSE 0 END) OVER(PARTITION BY t_month) AS s,\n        SUM(CASE WHEN (additions + deletions) >= 30 AND (additions + deletions) < 100 THEN 1 ELSE 0 END) OVER(PARTITION BY t_month) AS m,\n        SUM(CASE WHEN (additions + deletions) >= 100 AND (additions + deletions) < 500 THEN 1 ELSE 0 END) OVER(PARTITION BY t_month) AS l,\n        SUM(CASE WHEN (additions + deletions) >= 500 AND (additions + deletions) < 1000 THEN 1 ELSE 0 END) OVER(PARTITION BY t_month) AS xl,\n        SUM(CASE WHEN (additions + deletions) >= 1000 THEN 1 ELSE 0 END) OVER (PARTITION BY t_month) AS xxl,\n        COUNT(*) OVER (PARTITION BY t_month) AS all_size,\n        ROW_NUMBER() OVER (PARTITION BY t_month) AS row_num\n    FROM (\n        SELECT\n            DATE_FORMAT(created_at, '%Y-%m-01') as t_month,\n            additions,\n            deletions\n        FROM\n            github_events\n        WHERE\n            type = 'PullRequestEvent'\n            AND repo_id = 795552264\n            AND action = 'opened'\n    ) sub\n) sub\nWHERE row_num = 1\nORDER BY t_month\n;",
+    "fields": [
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "xs",
+        "columnType": 246
+      },
+      {
+        "name": "s",
+        "columnType": 246
+      },
+      {
+        "name": "m",
+        "columnType": 246
+      },
+      {
+        "name": "l",
+        "columnType": 246
+      },
+      {
+        "name": "xl",
+        "columnType": 246
+      },
+      {
+        "name": "xxl",
+        "columnType": 246
+      },
+      {
+        "name": "all_size",
+        "columnType": 8
+      }
+    ],
+    "data": [],
+    "expiresAt": "2026-05-04T17:01:50.483+00:00",
+    "refresh": true
+  },
+  "analyze-issue-opened-and-closed": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:51.656+00:00",
+    "finishedAt": "2026-05-03T17:01:51.681+00:00",
+    "spent": 0.025,
+    "sql": "WITH issue_closed AS (\n    SELECT\n        DATE_FORMAT(created_at, '%Y-%m-01') AS t_month,COUNT(number) AS closed\n    FROM\n        github_events ge\n    WHERE\n        type = 'IssuesEvent'\n        AND action = 'closed'\n        AND repo_id = 795552264\n    GROUP BY 1\n), issue_opened AS (\n    SELECT\n        DATE_FORMAT(created_at, '%Y-%m-01') AS t_month, COUNT(number) AS opened\n    FROM\n        github_events ge\n    WHERE\n        type = 'IssuesEvent'\n        AND action = 'opened'\n        AND repo_id = 795552264\n    GROUP BY 1\n)\nSELECT\n    io.t_month AS event_month,\n    opened,\n    COALESCE(closed, 0) AS closed\nFROM\n    issue_opened io\n    JOIN issue_closed ic ON io.t_month = ic.t_month\nORDER BY event_month\n;",
+    "fields": [
+      {
+        "name": "event_month",
+        "columnType": 253
+      },
+      {
+        "name": "opened",
+        "columnType": 8
+      },
+      {
+        "name": "closed",
+        "columnType": 8
+      }
+    ],
+    "data": [],
+    "expiresAt": "2026-05-04T17:01:51.681+00:00",
+    "refresh": true
+  },
+  "analyze-repo-top-contributors": {
+    "params": {
+      "repoId": "795552264",
+      "limit": "999999"
+    },
+    "requestedAt": "2026-05-03T17:01:51.593+00:00",
+    "finishedAt": "2026-05-03T17:01:51.622+00:00",
+    "spent": 0.029,
+    "sql": "SELECT actor_login,\n       COUNT(*) AS events\nFROM github_events ge\nWHERE repo_id = 795552264\n  AND (\n        (type = 'PullRequestEvent' AND action = 'opened') OR\n        (type = 'IssuesEvent' AND action = 'opened') OR\n        (type = 'IssueCommentEvent' AND action = 'created') OR\n        (type = 'PullRequestReviewEvent' AND action = 'created') OR\n        (type = 'PullRequestReviewCommentEvent' AND action = 'created') OR\n        (type = 'PushEvent' AND action = '')\n    )\n  AND actor_login NOT LIKE '%bot'\n  AND actor_login NOT LIKE '%[bot]'\n  AND actor_login NOT IN (SELECT login FROM blacklist_users bu)\nGROUP BY actor_login\nORDER BY events DESC\nLIMIT 999999\n",
+    "fields": [
+      {
+        "name": "actor_login",
+        "columnType": 253
+      },
+      {
+        "name": "events",
+        "columnType": 8
+      }
+    ],
+    "data": [
+      {
+        "actor_login": "sindresorhus",
+        "events": 4
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:51.622+00:00",
+    "refresh": true
+  },
+  "analyze-recent-pull-requests": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:51.912+00:00",
+    "finishedAt": "2026-05-03T17:01:51.943+00:00",
+    "spent": 0.031,
+    "sql": "WITH RECURSIVE seq(idx, current_period_day, last_period_day) AS (\n      SELECT\n        1 AS idx,\n        CURRENT_DATE() AS current_period_day,\n        DATE_SUB(CURRENT_DATE(), INTERVAL 28 day) AS last_period_day\n      UNION ALL\n      SELECT\n        idx + 1 AS idx,\n        DATE_SUB(CURRENT_DATE(), INTERVAL idx day) AS current_period_day,\n        DATE_SUB(CURRENT_DATE(), INTERVAL idx + 28 day) AS last_period_day\n      FROM seq\n      WHERE idx < 28\n), opened_prs_group_by_day AS (\n    SELECT\n        day_offset % 28 + 1 AS idx,\n        day_offset DIV 28 AS period,\n        day,\n        prs\n    FROM (\n        SELECT\n            (DATEDIFF(CURRENT_DATE(), day)) AS day_offset,\n            day,\n            prs\n        FROM (\n            SELECT\n                DATE_FORMAT(created_at, '%Y-%m-%d') AS day,\n                COUNT(*) AS prs\n            FROM\n                github_events ge\n            WHERE\n                type = 'PullRequestEvent'\n                AND action = 'opened'\n                AND repo_id = 795552264\n                AND created_at > DATE_SUB(CURRENT_DATE(), INTERVAL 56 DAY)\n            GROUP BY day\n            ORDER BY day\n        ) sub\n    ) sub2\n), merged_prs_group_by_day AS (\n    SELECT\n        day_offset % 28 + 1 AS idx,\n        day_offset DIV 28 AS period,\n        day,\n        prs\n    FROM (\n        SELECT\n            (DATEDIFF(CURRENT_DATE(), day)) AS day_offset,\n            day,\n            prs\n        FROM (\n            SELECT\n                DATE_FORMAT(created_at, '%Y-%m-%d') AS day,\n                COUNT(*) AS prs\n            FROM\n                github_events ge\n            WHERE\n                type = 'PullRequestEvent'\n                AND action = 'closed'\n                AND pr_merged = true\n                AND repo_id = 795552264\n                AND created_at > DATE_SUB(CURRENT_DATE(), INTERVAL 56 DAY)\n            GROUP BY day\n            ORDER BY day\n        ) sub\n    ) sub2\n), opened_prs_last_28_days AS (\n    SELECT idx, day, prs\n    FROM opened_prs_group_by_day\n    WHERE period = 0\n), opened_prs_last_2nd_28_days AS (\n    SELECT idx, day, prs\n    FROM opened_prs_group_by_day\n    WHERE period = 1\n), merged_prs_last_28_days AS (\n    SELECT idx, day, prs\n    FROM merged_prs_group_by_day\n    WHERE period = 0\n), merged_prs_last_2nd_28_days AS (\n    SELECT idx, day, prs\n    FROM merged_prs_group_by_day\n    WHERE period = 1\n), opened_prs_last_28_days_total AS (\n    SELECT SUM(prs) AS total FROM opened_prs_last_28_days\n), opened_prs_last_2nd_28_days_total AS (\n    SELECT SUM(prs) AS total FROM opened_prs_last_2nd_28_days\n), merged_prs_last_28_days_total AS (\n    SELECT SUM(prs) AS total FROM merged_prs_last_28_days\n), merged_prs_last_2nd_28_days_total AS (\n    SELECT SUM(prs) AS total FROM merged_prs_last_2nd_28_days\n)\nSELECT\n    s.idx AS idx,\n    s.current_period_day AS current_period_day,\n    IFNULL(opcp.prs, 0) AS current_period_opened_day_prs,\n    IFNULL(opcpt.total, 0) AS current_period_opened_prs,\n    IFNULL(oplp.prs, 0) AS last_period_opened_day_prs,\n    IFNULL(oplpt.total, 0) AS last_period_opened_prs,\n    s.last_period_day AS last_period_day,\n    IFNULL(mpcp.prs, 0) AS current_period_merged_day_prs,\n    IFNULL(mpcpt.total, 0) AS current_period_merged_prs,\n    IFNULL(mplp.prs, 0) AS last_period_merged_day_prs,\n    IFNULL(mplpt.total, 0) AS last_period_merged_prs\nFROM seq s\nLEFT JOIN opened_prs_last_28_days opcp ON s.idx = opcp.idx\nLEFT JOIN opened_prs_last_2nd_28_days oplp ON s.idx = oplp.idx\nLEFT JOIN merged_prs_last_28_days mpcp ON s.idx = mpcp.idx\nLEFT JOIN merged_prs_last_2nd_28_days mplp ON s.idx = mplp.idx\nJOIN opened_prs_last_28_days_total opcpt ON 1 = 1\nJOIN opened_prs_last_2nd_28_days_total oplpt ON 1 = 1\nJOIN merged_prs_last_28_days_total mpcpt ON 1 = 1\nJOIN merged_prs_last_2nd_28_days_total mplpt ON 1 = 1\nORDER BY idx",
+    "fields": [
+      {
+        "name": "idx",
+        "columnType": 8
+      },
+      {
+        "name": "current_period_day",
+        "columnType": 10
+      },
+      {
+        "name": "current_period_opened_day_prs",
+        "columnType": 8
+      },
+      {
+        "name": "current_period_opened_prs",
+        "columnType": 246
+      },
+      {
+        "name": "last_period_opened_day_prs",
+        "columnType": 8
+      },
+      {
+        "name": "last_period_opened_prs",
+        "columnType": 246
+      },
+      {
+        "name": "last_period_day",
+        "columnType": 10
+      },
+      {
+        "name": "current_period_merged_day_prs",
+        "columnType": 8
+      },
+      {
+        "name": "current_period_merged_prs",
+        "columnType": 246
+      },
+      {
+        "name": "last_period_merged_day_prs",
+        "columnType": 8
+      },
+      {
+        "name": "last_period_merged_prs",
+        "columnType": 246
+      }
+    ],
+    "data": [
+      {
+        "idx": 1,
+        "current_period_day": "2026-05-03T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-04-05T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 2,
+        "current_period_day": "2026-05-02T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-04-04T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 3,
+        "current_period_day": "2026-05-01T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-04-03T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 4,
+        "current_period_day": "2026-04-30T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-04-02T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 5,
+        "current_period_day": "2026-04-29T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-04-01T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 6,
+        "current_period_day": "2026-04-28T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-31T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 7,
+        "current_period_day": "2026-04-27T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-30T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 8,
+        "current_period_day": "2026-04-26T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-29T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 9,
+        "current_period_day": "2026-04-25T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-28T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 10,
+        "current_period_day": "2026-04-24T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-27T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 11,
+        "current_period_day": "2026-04-23T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-26T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 12,
+        "current_period_day": "2026-04-22T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-25T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 13,
+        "current_period_day": "2026-04-21T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-24T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 14,
+        "current_period_day": "2026-04-20T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-23T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 15,
+        "current_period_day": "2026-04-19T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-22T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 16,
+        "current_period_day": "2026-04-18T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-21T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 17,
+        "current_period_day": "2026-04-17T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-20T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 18,
+        "current_period_day": "2026-04-16T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-19T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 19,
+        "current_period_day": "2026-04-15T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-18T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 20,
+        "current_period_day": "2026-04-14T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-17T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 21,
+        "current_period_day": "2026-04-13T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-16T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 22,
+        "current_period_day": "2026-04-12T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-15T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 23,
+        "current_period_day": "2026-04-11T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-14T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 24,
+        "current_period_day": "2026-04-10T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-13T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 25,
+        "current_period_day": "2026-04-09T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-12T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 26,
+        "current_period_day": "2026-04-08T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-11T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 27,
+        "current_period_day": "2026-04-07T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-10T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      },
+      {
+        "idx": 28,
+        "current_period_day": "2026-04-06T00:00:00.000Z",
+        "current_period_opened_day_prs": 0,
+        "current_period_opened_prs": 0,
+        "last_period_opened_day_prs": 0,
+        "last_period_opened_prs": 0,
+        "last_period_day": "2026-03-09T00:00:00.000Z",
+        "current_period_merged_day_prs": 0,
+        "current_period_merged_prs": 0,
+        "last_period_merged_day_prs": 0,
+        "last_period_merged_prs": 0
+      }
+    ],
+    "expiresAt": "2026-05-03T18:01:51.943+00:00",
+    "refresh": true
+  },
+  "analyze-recent-contributors": {
+    "params": {
+      "repoId": "795552264"
+    },
+    "requestedAt": "2026-05-03T17:01:52.195+00:00",
+    "finishedAt": "2026-05-03T17:01:52.228+00:00",
+    "spent": 0.033,
+    "sql": "WITH RECURSIVE seq(idx, current_period_day, last_period_day) AS (\n      SELECT\n        1 AS idx,\n        CURRENT_DATE() AS current_period_day,\n        DATE_SUB(CURRENT_DATE(), INTERVAL 28 day) AS last_period_day\n      UNION ALL\n      SELECT\n        idx + 1 AS idx,\n        DATE_SUB(CURRENT_DATE(), INTERVAL idx day) AS current_period_day,\n        DATE_SUB(CURRENT_DATE(), INTERVAL idx + 28 day) AS last_period_day\n      FROM seq\n      WHERE idx < 28\n), group_by_day AS (\n    SELECT\n        day_offset % 28 + 1 AS idx,\n        day_offset DIV 28 AS period,\n        day,\n        contributors\n    FROM (\n        SELECT\n            (DATEDIFF(CURRENT_DATE(), day)) AS day_offset,\n            day,\n            contributors\n        FROM (\n            SELECT\n                DATE_FORMAT(created_at, '%Y-%m-%d') AS day,\n                COUNT(DISTINCT actor_id) AS contributors\n            FROM\n                github_events ge\n            WHERE\n                repo_id = 795552264\n                AND (\n                    (type = 'PullRequestEvent' AND action = 'opened') OR\n                    (type = 'IssuesEvent' AND action = 'opened') OR\n                    (type = 'IssueCommentEvent' AND action = 'created') OR\n                    (type = 'PullRequestReviewEvent' AND action = 'created') OR\n                    (type = 'PullRequestReviewCommentEvent' AND action = 'created') OR\n                    (type = 'PushEvent' AND action = '')\n                )\n                AND created_at > DATE_SUB(CURRENT_DATE(), INTERVAL 56 DAY)\n            GROUP BY day\n            ORDER BY day\n        ) sub\n    ) sub2\n), group_by_period AS (\n    SELECT\n        (DATEDIFF(CURRENT_DATE(), created_at)) DIV 28 AS period,\n        COUNT(DISTINCT actor_id) AS contributors\n    FROM\n        github_events ge\n    WHERE\n        repo_id = 795552264\n        AND (\n            (type = 'PullRequestEvent' AND action = 'opened') OR\n            (type = 'IssuesEvent' AND action = 'opened') OR\n            (type = 'IssueCommentEvent' AND action = 'created') OR\n            (type = 'PullRequestReviewEvent' AND action = 'created') OR\n            (type = 'PullRequestReviewCommentEvent' AND action = 'created') OR\n            (type = 'PushEvent' AND action = '')\n        )\n        AND created_at > DATE_SUB(CURRENT_DATE(), INTERVAL 56 DAY)\n    GROUP BY period\n    ORDER BY period\n), last_28_days AS (\n    SELECT idx, day, contributors\n    FROM group_by_day\n    WHERE period = 0\n), last_2nd_28_days AS (\n    SELECT idx, day, contributors\n    FROM group_by_day\n    WHERE period = 1\n), last_28_days_total AS (\n    SELECT contributors AS total FROM group_by_period WHERE period = 0\n), last_2nd_28_days_total AS (\n    SELECT contributors AS total FROM group_by_period WHERE period = 1\n)\nSELECT\n    s.idx AS idx,\n    s.current_period_day AS current_period_day,\n    IFNULL(cp.contributors, 0) AS current_period_day_contributors,\n    IFNULL(cpt.total, 0) AS current_period_contributors,\n    s.last_period_day AS last_period_day,\n    IFNULL(lp.contributors, 0) AS last_period_day_contributors,\n    IFNULL(lpt.total, 0) AS last_period_contributors\nFROM seq s\nLEFT JOIN last_28_days cp ON s.idx = cp.idx\nLEFT JOIN last_2nd_28_days lp ON s.idx = lp.idx\nJOIN last_28_days_total cpt\nJOIN last_2nd_28_days_total lpt\nORDER BY idx\n;",
+    "fields": [
+      {
+        "name": "idx",
+        "columnType": 8
+      },
+      {
+        "name": "current_period_day",
+        "columnType": 10
+      },
+      {
+        "name": "current_period_day_contributors",
+        "columnType": 8
+      },
+      {
+        "name": "current_period_contributors",
+        "columnType": 8
+      },
+      {
+        "name": "last_period_day",
+        "columnType": 10
+      },
+      {
+        "name": "last_period_day_contributors",
+        "columnType": 8
+      },
+      {
+        "name": "last_period_contributors",
+        "columnType": 8
+      }
+    ],
+    "data": [],
+    "expiresAt": "2026-05-03T18:01:52.228+00:00",
+    "refresh": true
+  }
+}

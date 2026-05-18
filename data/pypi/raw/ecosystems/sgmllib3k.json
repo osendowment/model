@@ -1,0 +1,87 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2917166,
+    "name": "sgmllib3k",
+    "ecosystem": "pypi",
+    "description": "Py3k port of sgmllib.",
+    "homepage": "http://hg.hardcoded.net/sgmllib",
+    "licenses": "BSD License",
+    "normalized_licenses": [
+      "BSD-3-Clause"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 1,
+    "first_release_published_at": "2010-08-24T14:33:52.000Z",
+    "latest_release_published_at": "2010-08-24T14:33:52.000Z",
+    "latest_release_number": "1.0.0",
+    "last_synced_at": "2026-04-27T02:31:02.342Z",
+    "created_at": "2022-04-10T12:35:34.242Z",
+    "updated_at": "2026-04-27T02:31:02.342Z",
+    "registry_url": "https://pypi.org/project/sgmllib3k/",
+    "install_command": "pip install sgmllib3k --index-url https://pypi.org/simple",
+    "documentation_url": "https://sgmllib3k.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python :: 3"
+      ],
+      "normalized_name": "sgmllib3k",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2024-09-09T14:23:45.815Z",
+    "dependent_packages_count": 28,
+    "downloads": 7993706,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 2388,
+    "rankings": {
+      "downloads": 0.22310420603703016,
+      "dependent_repos_count": 0.22409051994523987,
+      "dependent_packages_count": 0.7594921722383806,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.03886076798346149,
+      "average": 0.311386916551028
+    },
+    "purl": "pkg:pypi/sgmllib3k",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/sgmllib3k",
+    "docker_dependents_count": 442,
+    "docker_downloads_count": 1522569201,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/sgmllib3k",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/sgmllib3k/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sgmllib3k/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sgmllib3k/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sgmllib3k/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sgmllib3k/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sgmllib3k/codemeta",
+    "maintainers": [
+      {
+        "uuid": "hsoft",
+        "login": "hsoft",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 12,
+        "html_url": "https://pypi.org/user/hsoft/",
+        "role": null,
+        "created_at": "2023-01-30T15:32:36.148Z",
+        "updated_at": "2023-01-30T15:32:36.148Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/hsoft/packages"
+      }
+    ]
+  }
+}

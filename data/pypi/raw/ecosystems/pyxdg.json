@@ -1,0 +1,203 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2892575,
+    "name": "pyxdg",
+    "ecosystem": "pypi",
+    "description": "PyXDG contains implementations of freedesktop.org standards in python.",
+    "homepage": "http://freedesktop.org/wiki/Software/pyxdg",
+    "licenses": "GNU Lesser General Public License v2 (LGPLv2)",
+    "normalized_licenses": [
+      "LGPL-2.1"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 10,
+    "first_release_published_at": "2011-10-09T16:27:36.000Z",
+    "latest_release_published_at": "2022-06-05T11:34:58.000Z",
+    "latest_release_number": "0.28",
+    "last_synced_at": "2026-04-27T18:30:32.716Z",
+    "created_at": "2022-04-10T12:23:20.991Z",
+    "updated_at": "2026-04-27T18:33:06.120Z",
+    "registry_url": "https://pypi.org/project/pyxdg/",
+    "install_command": "pip install pyxdg --index-url https://pypi.org/simple",
+    "documentation_url": "https://pyxdg.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Topic :: Desktop Environment"
+      ],
+      "normalized_name": "pyxdg",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2026-04-27T18:33:06.086Z",
+    "dependent_packages_count": 103,
+    "downloads": 1415599,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 10133,
+    "rankings": {
+      "downloads": 0.5212618403581357,
+      "dependent_repos_count": 0.08862378512383644,
+      "dependent_packages_count": 0.25030053830407567,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.0651355213605034,
+      "average": 0.2313304212866378
+    },
+    "purl": "pkg:pypi/pyxdg",
+    "advisories": [
+      {
+        "uuid": "GSA_kwCzR0hTQS03MzcyLXE0NTktanhocs4AAZrH",
+        "url": "https://github.com/advisories/GHSA-7372-q459-jxhr",
+        "title": "pyxdg Arbitrary File Overwrite via Race Condition",
+        "description": "Race condition in the `xdg.BaseDirectory.get_runtime_dir` function in pyxdg 0.25 allows local users to overwrite arbitrary files by pre-creating `/tmp/pyxdg-runtime-dir-fallback-victim` to point to a victim-owned location, then replacing it with a symlink to an attacker-controlled location once the `get_runtime_dir` function is called.",
+        "origin": "UNSPECIFIED",
+        "severity": "LOW",
+        "published_at": "2022-05-17T01:27:07.000Z",
+        "withdrawn_at": null,
+        "classification": "GENERAL",
+        "cvss_score": 0.0,
+        "cvss_vector": null,
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2014-1624",
+          "https://exchange.xforce.ibmcloud.com/vulnerabilities/90618",
+          "http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=736247",
+          "http://www.openwall.com/lists/oss-security/2014/01/21/3",
+          "http://www.openwall.com/lists/oss-security/2014/01/21/4",
+          "https://github.com/takluyver/pyxdg/commit/bd999c1c3fe7ee5f30ede2cf704cf03e400347b4",
+          "https://web.archive.org/web/20200227194825/http://www.securityfocus.com/bid/65042",
+          "https://github.com/pypa/advisory-database/tree/main/vulns/pyxdg/PYSEC-2014-95.yaml",
+          "https://github.com/advisories/GHSA-7372-q459-jxhr"
+        ],
+        "source_kind": "github",
+        "identifiers": [
+          "GHSA-7372-q459-jxhr",
+          "CVE-2014-1624"
+        ],
+        "repository_url": "https://github.com/takluyver/pyxdg",
+        "blast_radius": 0.0,
+        "created_at": "2023-08-16T23:05:11.920Z",
+        "updated_at": "2026-04-05T20:03:59.802Z",
+        "epss_percentage": 0.00046,
+        "epss_percentile": 0.1442,
+        "api_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS03MzcyLXE0NTktanhocs4AAZrH",
+        "html_url": "https://advisories.ecosyste.ms/advisories/GSA_kwCzR0hTQS03MzcyLXE0NTktanhocs4AAZrH",
+        "packages": [
+          {
+            "ecosystem": "pypi",
+            "package_name": "pyxdg",
+            "versions": [
+              {
+                "first_patched_version": "0.26",
+                "vulnerable_version_range": "<= 0.25"
+              }
+            ],
+            "purl": "pkg:pypi/pyxdg"
+          }
+        ],
+        "related_packages_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS03MzcyLXE0NTktanhocs4AAZrH/related_packages",
+        "related_advisories": []
+      },
+      {
+        "uuid": "MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLXI2djMtaHB4ai1yOHJ2",
+        "url": "https://github.com/advisories/GHSA-r6v3-hpxj-r8rv",
+        "title": "Code Injection in PyXDG",
+        "description": "A code injection issue was discovered in PyXDG before 0.26 via crafted Python code in a Category element of a Menu XML document in a .menu file. XDG_CONFIG_DIRS must be set up to trigger xdg.Menu.parse parsing within the directory containing this file. This is due to a lack of sanitization in xdg/Menu.py before an eval call.",
+        "origin": "UNSPECIFIED",
+        "severity": "HIGH",
+        "published_at": "2019-06-07T20:56:27.000Z",
+        "withdrawn_at": null,
+        "classification": "GENERAL",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2019-12761",
+          "https://gist.github.com/dhondta/b45cd41f4186110a354dc7272916feba",
+          "https://snyk.io/vuln/SNYK-PYTHON-PYXDG-174562",
+          "https://lists.debian.org/debian-lts-announce/2019/06/msg00006.html",
+          "https://lists.debian.org/debian-lts-announce/2021/08/msg00003.html",
+          "https://github.com/pypa/advisory-database/tree/main/vulns/pyxdg/PYSEC-2019-199.yaml",
+          "https://github.com/advisories/GHSA-r6v3-hpxj-r8rv"
+        ],
+        "source_kind": "github",
+        "identifiers": [
+          "GHSA-r6v3-hpxj-r8rv",
+          "CVE-2019-12761"
+        ],
+        "repository_url": null,
+        "blast_radius": 0.0,
+        "created_at": "2022-12-21T16:13:29.553Z",
+        "updated_at": "2026-04-26T12:10:48.653Z",
+        "epss_percentage": 0.00633,
+        "epss_percentile": 0.70137,
+        "api_url": "https://advisories.ecosyste.ms/api/v1/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLXI2djMtaHB4ai1yOHJ2",
+        "html_url": "https://advisories.ecosyste.ms/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLXI2djMtaHB4ai1yOHJ2",
+        "packages": [
+          {
+            "ecosystem": "pypi",
+            "package_name": "pyxdg",
+            "versions": [
+              {
+                "first_patched_version": "0.26",
+                "vulnerable_version_range": "< 0.26"
+              }
+            ],
+            "purl": "pkg:pypi/pyxdg"
+          }
+        ],
+        "related_packages_url": "https://advisories.ecosyste.ms/api/v1/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLXI2djMtaHB4ai1yOHJ2/related_packages",
+        "related_advisories": []
+      }
+    ],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/pyxdg",
+    "docker_dependents_count": 1803,
+    "docker_downloads_count": 760073834,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/pyxdg",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/pyxdg/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/pyxdg/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/pyxdg/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/pyxdg/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/pyxdg/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/pyxdg/codemeta",
+    "maintainers": [
+      {
+        "uuid": "takowl",
+        "login": "takowl",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 116,
+        "html_url": "https://pypi.org/user/takowl/",
+        "role": null,
+        "created_at": "2023-01-23T12:47:41.510Z",
+        "updated_at": "2023-01-23T12:47:41.510Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/takowl/packages"
+      },
+      {
+        "uuid": "knutwalker",
+        "login": "knutwalker",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 4,
+        "html_url": "https://pypi.org/user/knutwalker/",
+        "role": null,
+        "created_at": "2023-01-23T12:47:41.446Z",
+        "updated_at": "2023-01-23T12:47:41.446Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/knutwalker/packages"
+      }
+    ]
+  }
+}

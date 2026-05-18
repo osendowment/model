@@ -1,0 +1,120 @@
+{
+  "ecosystem": "npm",
+  "registry_hit": "npmjs.org",
+  "fetched_at": "2026-04-27T20:49:21Z",
+  "data": {
+    "id": 8138017,
+    "name": "@tabby_ai/hijri-converter",
+    "ecosystem": "npm",
+    "description": "Typescript port of an accurate python Hijri-Gregorian dates converter based on the Umm al-Qura calendar: https://github.com/mhalshehri/hijri-converter",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [
+      "hijri",
+      "hijriah",
+      "date",
+      "converter",
+      "conversion",
+      "islamic",
+      "gregorian",
+      "ummalqura",
+      "ummulqura",
+      "Umm al-Qura",
+      "arabic",
+      "saudi-arabia"
+    ],
+    "namespace": "tabby_ai",
+    "versions_count": 1,
+    "first_release_published_at": "2023-08-24T08:06:49.207Z",
+    "latest_release_published_at": "2023-08-24T08:06:49.207Z",
+    "latest_release_number": "1.0.5",
+    "last_synced_at": "2023-12-24T20:00:58.779Z",
+    "created_at": "2023-08-24T09:11:15.022Z",
+    "updated_at": "2023-12-24T20:00:58.780Z",
+    "registry_url": "https://www.npmjs.com/package/@tabby_ai/hijri-converter",
+    "install_command": "npm install @tabby_ai/hijri-converter",
+    "documentation_url": null,
+    "metadata": {
+      "funding": null,
+      "dist-tags": {
+        "latest": "1.0.5"
+      }
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 0,
+    "downloads": 33,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 0,
+    "rankings": {
+      "downloads": null,
+      "dependent_repos_count": 37.49662796984681,
+      "dependent_packages_count": 53.96848874002429,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 45.73255835493555
+    },
+    "purl": "pkg:npm/%40tabby_ai/hijri-converter",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/npm/@tabby_ai/hijri-converter",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/npm/@tabby_ai/hijri-converter",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/npm/@tabby_ai/hijri-converter/dependencies",
+    "status": "removed",
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@tabby_ai%2Fhijri-converter/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@tabby_ai%2Fhijri-converter/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@tabby_ai%2Fhijri-converter/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@tabby_ai%2Fhijri-converter/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@tabby_ai%2Fhijri-converter/codemeta",
+    "maintainers": [
+      {
+        "uuid": "dmitry.volovod",
+        "login": "dmitry.volovod",
+        "name": null,
+        "email": "dmitry.volovod@tabby.ai",
+        "url": null,
+        "packages_count": 1,
+        "html_url": "https://www.npmjs.com/~dmitry.volovod",
+        "role": null,
+        "created_at": "2023-08-24T09:11:15.251Z",
+        "updated_at": "2023-08-24T09:11:15.251Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/dmitry.volovod/packages"
+      },
+      {
+        "uuid": "ivan.potapov",
+        "login": "ivan.potapov",
+        "name": null,
+        "email": "ivan.potapov@tabby.ai",
+        "url": null,
+        "packages_count": 1,
+        "html_url": "https://www.npmjs.com/~ivan.potapov",
+        "role": null,
+        "created_at": "2023-08-24T09:11:15.261Z",
+        "updated_at": "2023-08-24T09:11:15.261Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/ivan.potapov/packages"
+      },
+      {
+        "uuid": "tabbyadmin",
+        "login": "tabbyadmin",
+        "name": null,
+        "email": "npmjs@tabby.ai",
+        "url": null,
+        "packages_count": 1,
+        "html_url": "https://www.npmjs.com/~tabbyadmin",
+        "role": null,
+        "created_at": "2023-08-24T09:11:15.270Z",
+        "updated_at": "2023-08-24T09:11:15.270Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/tabbyadmin/packages"
+      }
+    ]
+  }
+}

@@ -152,6 +152,7 @@ aixed/wechat-hook,0,0,0,0,0,0
 aiyaapp/aiyaeffectsandroid,0,0,0,0,0,0
 ajv-validator/ajv,0,0,0,0,0,3
 ajv-validator/ajv-formats,0,0,0,0,0,0
+ajv-validator/ajv-keywords,,,,,,3
 ajweeks/flexengine,0,0,0,0,0,0
 akai-katto/dandere2x,1,0,0,0,0,1
 akemin-dayo/appsync,0,0,0,0,0,0
@@ -446,6 +447,7 @@ audacity/audacity,0,0,0,0,0,0
 audio4linux/jdsp4linux,0,0,1,2,1,2
 audiorouterdev/audio-router,0,0,0,0,0,0
 audreyt/node-webworker-threads,0,0,0,0,0,0
+auth0/node-jwa,,,,,,1
 autoas/as-deprecated,0,0,0,0,0,0
 autodiff/autodiff,0,0,0,0,0,0
 autohotkey/autohotkey,0,0,0,0,0,0
@@ -670,7 +672,9 @@ brofield/simpleini,0,0,0,0,1,1
 broofa/mime,0,0,0,0,0,1
 broofa/node-int64,,,,,,0
 brookhong/keycastow,0,0,0,0,0,0
+browserify/events,,,,,,0
 browserify/node-util,0,0,0,0,0,0
+browserify/randombytes,,,,,,0
 browserify/resolve,0,0,0,0,0,0
 browseros-ai/browseros,0,0,0,0,2,2
 browserslist/browserslist,0,0,0,0,0,1
@@ -1027,7 +1031,7 @@ cr-marcstevens/sha1collisiondetection,0,0,0,0,0,0
 cra-ros-pkg/robot_localization,0,0,0,0,0,0
 cracked5pider/stardust,0,0,0,0,0,0
 crankyoldgit/irremoteesp8266,0,0,0,0,0,0
-crate-py/rpds,0,0,0,0,0,0
+crate-py/rpds,0,0,0,0,0,2
 cratercrash/godot-orchestrator,0,0,0,0,1,1
 crawl/crawl,0,0,0,0,0,0
 crementif/botw-bettervr,0,0,0,0,0,0
@@ -1173,6 +1177,7 @@ deepseek-ai/flashmla,0,0,0,0,0,0
 deepskystacker/dss,0,0,0,0,0,0
 definitelytyped/definitelytyped,1,3,3,3,2,2
 defold/defold,0,0,0,1,1,1
+defunctzombie/node-process,,,,,,0
 dekunukem/bob_cassette_rewinder,0,0,0,0,0,0
 dekunukem/daytripper,0,0,0,0,0,0
 dekunukem/duckypad,0,0,0,0,0,0
@@ -1458,6 +1463,7 @@ erthink/libmdbx,0,0,0,0,0,0
 erwincoumans/tiny-differentiable-simulator,0,0,0,0,0,0
 es-shims/array-includes,0,0,0,0,0,0
 es-shims/dunder-proto,0,0,0,0,0,0
+es-shims/es-object-atoms,,,,,,0
 es-shims/es-set-tostringtag,0,0,0,0,0,0
 es-shims/math-intrinsics,0,0,0,0,0,0
 es-shims/object.values,0,0,0,0,0,0
@@ -1983,6 +1989,7 @@ google/zerocopy,0,0,0,0,0,2
 googleapis/google-api-python-client,0,0,0,0,0,0
 googleapis/google-auth-library-python,,,,,,6
 googleapis/google-cloud-node-core,,,,,,8
+googleapis/google-cloud-python,,,,,,7
 googleapis/google-resumable-media-python,,,,,,4
 googleapis/python-api-core,0,0,0,0,0,4
 googleapis/python-crc32c,,,,,,4
@@ -2316,6 +2323,7 @@ insightsoftwareconsortium/itk,0,0,0,0,0,0
 inspect-js/array-buffer-byte-length,0,0,0,0,0,0
 inspect-js/available-typed-arrays,0,0,0,0,0,0
 inspect-js/functions-have-names,0,0,0,0,0,0
+inspect-js/has-bigints,,,,,,0
 inspect-js/has-property-descriptors,0,0,0,0,0,0
 inspect-js/has-proto,0,0,0,0,0,0
 inspect-js/has-symbols,0,0,0,0,0,0
@@ -2385,6 +2393,7 @@ iryoku/smaa,0,0,0,0,0,0
 isaacs/chownr,0,0,0,0,0,0
 isaacs/cliui,0,0,0,0,0,2
 isaacs/core-util-is,0,0,0,0,0,0
+isaacs/fs-minipass,,,,,,2
 isaacs/fs.realpath,0,0,0,0,0,0
 isaacs/inherits,0,0,0,0,0,0
 isaacs/isexe,0,0,0,0,0,0
@@ -2401,6 +2410,7 @@ isaacs/package-json-from-dist,0,0,0,0,0,0
 isaacs/path-scurry,0,0,0,0,0,0
 isaacs/rimraf,0,0,0,0,0,0
 isaacs/sax-js,0,0,0,0,0,0
+isaacs/wrappy,,,,,,0
 isaacs/yallist,0,0,0,0,0,0
 ish-app/ish,1,1,1,1,1,1
 isislovecruft/library--,0,0,0,0,0,0
@@ -2610,6 +2620,7 @@ jshttp/statuses,0,0,0,0,0,1
 jshttp/type-is,0,0,0,0,0,1
 jshttp/vary,0,0,0,0,0,1
 jslicense/spdx-correct.js,0,0,0,0,0,0
+jslicense/spdx-exceptions.json,,,,,,0
 jslicense/spdx-expression-parse.js,0,0,0,0,0,0
 jslicense/spdx-license-ids,0,0,0,0,0,1
 json-c/json-c,0,0,0,0,0,0
@@ -3315,6 +3326,7 @@ micknoise/maximilian,0,0,0,0,0,0
 micromark/micromark,0,0,0,0,0,0
 micromatch/anymatch,0,0,0,0,0,0
 micromatch/braces,0,0,0,0,0,0
+micromatch/is-extglob,,,,,,0
 micromatch/is-glob,0,0,0,0,0,0
 micromatch/micromatch,0,0,0,0,0,0
 micromatch/picomatch,0,0,0,0,0,1
@@ -3807,6 +3819,7 @@ nvlabs/nvdiffrast,0,0,0,0,0,0
 nvlabs/tiny-cuda-nn,0,0,0,0,0,0
 nvpro-samples/vk_mini_path_tracer,0,0,0,0,0,0
 nvpro-samples/vk_raytracing_tutorial_khr,0,0,0,0,0,0
+nvzqz/static-assertions,,,,,,0
 nvzqz/static-assertions-rs,0,0,0,0,0,0
 nyamisty/altserver-linux,0,1,0,0,0,1
 nyanmisaka/ffmpeg-rockchip,0,0,0,0,0,0
@@ -3882,6 +3895,7 @@ open-telemetry/opentelemetry-cpp,0,1,1,1,2,2
 open-telemetry/opentelemetry-js,0,0,0,0,0,4
 open-telemetry/opentelemetry-js-contrib,0,0,0,0,0,5
 open-telemetry/opentelemetry-python,0,0,0,0,0,3
+open-telemetry/opentelemetry-python-contrib,,,,,,3
 open-watcom/open-watcom-v2,0,0,0,0,0,0
 open5gs/open5gs,0,0,0,0,0,0
 open62541/open62541,1,1,1,1,1,1
@@ -4259,6 +4273,7 @@ promyloph/pianobar,0,0,0,0,0,0
 proot-me/proot,0,0,0,0,0,0
 proptest-rs/proptest,0,0,0,0,0,1
 protobuf-c/protobuf-c,0,0,0,0,0,0
+protobufjs/protobuf.js,,,,,,5
 protocolbuffers/protobuf,0,0,1,1,1,1
 provenance-emu/provenance,0,0,0,0,0,0
 proxmark/proxmark3,0,0,0,0,0,0
@@ -4284,6 +4299,7 @@ pulp-platform/pulpino,0,0,0,0,0,0
 pure-data/pure-data,0,0,0,0,0,0
 puredarwin/puredarwin,0,0,0,0,0,0
 purplei2p/i2pd,0,0,0,0,0,0
+pvorb/clone,,,,,,0
 pvorb/node-clone,0,0,0,0,0,0
 pwmt/zathura,0,0,0,0,1,1
 pwn20wndstuff/undecimus,0,0,0,0,0,0
@@ -4326,6 +4342,7 @@ python-jsonschema/jsonschema,0,0,0,0,0,2
 python-jsonschema/jsonschema-specifications,0,0,0,0,0,0
 python-jsonschema/referencing,0,0,0,0,0,2
 python-pillow/pillow,2,3,3,3,3,3
+python-poetry/poetry,,,,,,2
 python-poetry/poetry-core,0,0,0,0,0,3
 python-poetry/tomlkit,0,0,0,0,0,2
 python-trio/sniffio,0,0,0,0,0,0
@@ -4900,6 +4917,7 @@ sindresorhus/execa,0,0,0,0,0,0
 sindresorhus/figures,0,0,0,0,0,0
 sindresorhus/file-type,0,0,0,0,0,0
 sindresorhus/find-cache-dir,0,0,0,0,0,0
+sindresorhus/find-cache-directory,,,,,,0
 sindresorhus/find-up,0,0,0,0,0,0
 sindresorhus/find-up-simple,0,0,0,0,0,0
 sindresorhus/get-east-asian-width,0,0,0,0,0,1
@@ -4939,6 +4957,7 @@ sindresorhus/p-limit,0,0,0,0,0,0
 sindresorhus/p-locate,0,0,0,0,0,0
 sindresorhus/p-map,0,0,0,0,0,0
 sindresorhus/p-try,0,0,0,0,0,0
+sindresorhus/package-directory,,,,,,0
 sindresorhus/parent-module,0,0,0,0,0,0
 sindresorhus/parse-json,0,0,0,0,0,0
 sindresorhus/path-exists,0,0,0,0,0,0
@@ -4948,6 +4967,7 @@ sindresorhus/path-type,0,0,0,0,0,0
 sindresorhus/pify,0,0,0,0,0,0
 sindresorhus/pkg-dir,0,0,0,0,0,0
 sindresorhus/quick-lru,0,0,0,0,0,0
+sindresorhus/read-package-up,,,,,,0
 sindresorhus/read-pkg,0,0,0,0,0,0
 sindresorhus/read-pkg-up,0,0,0,0,0,0
 sindresorhus/resolve-cwd,0,0,0,0,0,0
@@ -5432,6 +5452,7 @@ tixiaoshan/lvi-sam,0,0,0,0,0,0
 tizonia/tizonia-openmax-il,0,0,0,0,0,0
 tj/commander.js,0,0,0,0,0,1
 tj/mon,0,0,0,0,0,0
+tj/node-cookie-signature,,,,,,0
 tjanczuk/edge,0,0,0,0,0,0
 tjanczuk/iisnode,0,0,0,0,0,0
 tjguk/wmi,0,0,0,0,0,0
@@ -5513,6 +5534,8 @@ trinitycore/trinitycore,0,0,0,0,0,0
 trinkle23897/undergraduate,0,0,0,0,0,0
 triple-mu/yolov8-tensorrt,0,0,0,0,0,0
 trishume/eyelike,0,0,0,0,0,0
+tritondatacenter/node-assert-plus,,,,,,0
+tritondatacenter/node-extsprintf,,,,,,0
 tritondatacenter/smartos-live,0,0,0,0,0,0
 trojan-gfw/trojan,0,0,0,0,0,0
 troldal/openxlsx,0,0,0,0,0,0
@@ -6079,6 +6102,7 @@ zeromq/czmq,0,0,0,0,0,0
 zeromq/libzmq,0,0,0,0,0,0
 zerotier/zerotierone,0,0,1,1,2,2
 zertosh/loose-envify,0,0,0,0,0,0
+zesterer/spin-rs,,,,,,0
 zeux/meshoptimizer,0,0,0,0,0,0
 zeux/niagara,0,0,0,0,0,0
 zeux/pugixml,0,0,0,0,0,0

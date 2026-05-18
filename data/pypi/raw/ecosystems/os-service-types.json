@@ -1,0 +1,93 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2842778,
+    "name": "os-service-types",
+    "ecosystem": "pypi",
+    "description": "Python library for consuming OpenStack sevice-types-authority data",
+    "homepage": "https://docs.openstack.org/os-service-types/",
+    "licenses": "Apache-2.0",
+    "normalized_licenses": [
+      "Apache-2.0"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 12,
+    "first_release_published_at": "2017-07-06T21:42:07.000Z",
+    "latest_release_published_at": "2025-11-21T13:55:46.000Z",
+    "latest_release_number": "1.8.2",
+    "last_synced_at": "2026-04-27T19:32:15.077Z",
+    "created_at": "2022-04-10T11:58:24.128Z",
+    "updated_at": "2026-04-27T19:32:15.077Z",
+    "registry_url": "https://pypi.org/project/os-service-types/",
+    "install_command": "pip install os-service-types --index-url https://pypi.org/simple",
+    "documentation_url": "https://os-service-types.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Environment :: OpenStack",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13"
+      ],
+      "normalized_name": "os-service-types",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2024-09-07T05:41:41.333Z",
+    "dependent_packages_count": 9,
+    "downloads": 1655737,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 507,
+    "rankings": {
+      "downloads": 0.4827886916564565,
+      "dependent_repos_count": 0.6387228700684515,
+      "dependent_packages_count": 0.9465851305032471,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.40818260052582134,
+      "average": 0.6190698231884941
+    },
+    "purl": "pkg:pypi/os-service-types",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/os-service-types",
+    "docker_dependents_count": 214,
+    "docker_downloads_count": 42273553,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/os-service-types",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/os-service-types/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/os-service-types/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/os-service-types/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/os-service-types/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/os-service-types/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/os-service-types/codemeta",
+    "maintainers": [
+      {
+        "uuid": "openstackci",
+        "login": "openstackci",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 741,
+        "html_url": "https://pypi.org/user/openstackci/",
+        "role": null,
+        "created_at": "2023-02-24T23:12:59.532Z",
+        "updated_at": "2023-02-24T23:12:59.532Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/openstackci/packages"
+      }
+    ]
+  }
+}

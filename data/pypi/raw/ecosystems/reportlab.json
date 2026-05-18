@@ -1,0 +1,330 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2901459,
+    "name": "reportlab",
+    "ecosystem": "pypi",
+    "description": "The Reportlab Toolkit",
+    "homepage": "https://www.reportlab.com/",
+    "licenses": "BSD license (see license.txt for details), Copyright (c) 2000-2025, ReportLab Inc.",
+    "normalized_licenses": [
+      "Sendmail",
+      "CERN-OHL-P-2.0"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 97,
+    "first_release_published_at": "2009-02-06T12:27:43.000Z",
+    "latest_release_published_at": "2026-02-12T10:45:18.000Z",
+    "latest_release_number": "4.4.10",
+    "last_synced_at": "2026-04-26T17:00:57.928Z",
+    "created_at": "2022-04-10T12:27:45.608Z",
+    "updated_at": "2026-04-26T17:00:57.928Z",
+    "registry_url": "https://pypi.org/project/reportlab/",
+    "install_command": "pip install reportlab --index-url https://pypi.org/simple",
+    "documentation_url": "https://reportlab.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+        "Topic :: Printing",
+        "Topic :: Text Processing :: Markup"
+      ],
+      "normalized_name": "reportlab",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2024-09-07T14:06:25.200Z",
+    "dependent_packages_count": 332,
+    "downloads": 31512992,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 13661,
+    "rankings": {
+      "downloads": 0.1700425303591014,
+      "dependent_repos_count": 0.0745662140089795,
+      "dependent_packages_count": 0.09942259930917074,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.40439348867303704,
+      "average": 0.18710620808757217
+    },
+    "purl": "pkg:pypi/reportlab",
+    "advisories": [
+      {
+        "uuid": "GSA_kwCzR0hTQS1wajk4LTJ4ZjYtY2ZmNc4AA19n",
+        "url": "https://github.com/advisories/GHSA-pj98-2xf6-cff5",
+        "title": "ReportLab vulnerable to remote code execution via paraparser",
+        "description": "paraparser in ReportLab before 3.5.31 allows remote code execution because start_unichar in paraparser.py evaluates untrusted user input in a unichar element in a crafted XML document with '<unichar code=\"' followed by arbitrary Python code, a similar issue to CVE-2019-17626.",
+        "origin": "UNSPECIFIED",
+        "severity": "CRITICAL",
+        "published_at": "2023-09-20T15:30:51.000Z",
+        "withdrawn_at": null,
+        "classification": "GENERAL",
+        "cvss_score": 9.8,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2019-19450",
+          "https://pastebin.com/5MicRrr4",
+          "https://github.com/MrBitBucket/reportlab-mirror/blob/master/CHANGES.md#release-353115102019",
+          "https://github.com/MrBitBucket/reportlab-mirror/blob/master/CHANGES.md",
+          "https://lists.debian.org/debian-lts-announce/2023/09/msg00037.html",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/CHMCB2GJQKFMGVO5RWHN222NQL5XYPHZ",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/HADPTB3SBU7IVRMDK7OL6WSQRU5AFWDZ",
+          "https://github.com/advisories/GHSA-pj98-2xf6-cff5"
+        ],
+        "source_kind": "github",
+        "identifiers": [
+          "GHSA-pj98-2xf6-cff5",
+          "CVE-2019-19450"
+        ],
+        "repository_url": "https://github.com/MrBitBucket/reportlab-mirror",
+        "blast_radius": 0.0,
+        "created_at": "2023-09-21T17:06:07.597Z",
+        "updated_at": "2026-04-23T10:07:06.391Z",
+        "epss_percentage": 0.09484,
+        "epss_percentile": 0.92837,
+        "api_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS1wajk4LTJ4ZjYtY2ZmNc4AA19n",
+        "html_url": "https://advisories.ecosyste.ms/advisories/GSA_kwCzR0hTQS1wajk4LTJ4ZjYtY2ZmNc4AA19n",
+        "packages": [
+          {
+            "ecosystem": "pypi",
+            "package_name": "reportlab",
+            "versions": [
+              {
+                "first_patched_version": "3.5.31",
+                "vulnerable_version_range": "< 3.5.31"
+              }
+            ],
+            "purl": "pkg:pypi/reportlab"
+          }
+        ],
+        "related_packages_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS1wajk4LTJ4ZjYtY2ZmNc4AA19n/related_packages",
+        "related_advisories": []
+      },
+      {
+        "uuid": "GSA_kwCzR0hTQS05cTltLWM2NWMtMzdwcc4AAzoq",
+        "url": "https://github.com/advisories/GHSA-9q9m-c65c-37pq",
+        "title": "Reportlab vulnerable to remote code execution",
+        "description": "Reportlab up to and including v3.6.12 allows attackers to execute arbitrary code via supplying a crafted PDF file.",
+        "origin": "UNSPECIFIED",
+        "severity": "HIGH",
+        "published_at": "2023-06-05T18:30:27.000Z",
+        "withdrawn_at": null,
+        "classification": "GENERAL",
+        "cvss_score": 7.8,
+        "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2023-33733",
+          "https://github.com/c53elyas/CVE-2023-33733",
+          "https://lists.debian.org/debian-lts-announce/2024/10/msg00008.html",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/36WOY22ECJCPOXHVTNCHEWOQLL7JSWP4",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6ALE727IRACYBTTOFIFG57RS4OA2SHIJ",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/36WOY22ECJCPOXHVTNCHEWOQLL7JSWP4",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/6ALE727IRACYBTTOFIFG57RS4OA2SHIJ",
+          "https://github.com/advisories/GHSA-9q9m-c65c-37pq"
+        ],
+        "source_kind": "github",
+        "identifiers": [
+          "GHSA-9q9m-c65c-37pq",
+          "CVE-2023-33733"
+        ],
+        "repository_url": "https://github.com/c53elyas/CVE-2023-33733",
+        "blast_radius": 0.0,
+        "created_at": "2023-08-28T18:05:42.817Z",
+        "updated_at": "2026-04-23T10:07:32.269Z",
+        "epss_percentage": 0.24606,
+        "epss_percentile": 0.96142,
+        "api_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS05cTltLWM2NWMtMzdwcc4AAzoq",
+        "html_url": "https://advisories.ecosyste.ms/advisories/GSA_kwCzR0hTQS05cTltLWM2NWMtMzdwcc4AAzoq",
+        "packages": [
+          {
+            "ecosystem": "pypi",
+            "package_name": "reportlab",
+            "versions": [
+              {
+                "first_patched_version": "3.6.13",
+                "vulnerable_version_range": "<= 3.6.12"
+              }
+            ],
+            "purl": "pkg:pypi/reportlab"
+          }
+        ],
+        "related_packages_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS05cTltLWM2NWMtMzdwcc4AAzoq/related_packages",
+        "related_advisories": []
+      },
+      {
+        "uuid": "GSA_kwCzR0hTQS1xcGcyLXZ4N2otMzg2Oc4AAq9o",
+        "url": "https://github.com/advisories/GHSA-qpg2-vx7j-3869",
+        "title": "XML Injection in ReportLab",
+        "description": "ReportLab through 3.5.26 allows remote code execution because of toColor(eval(arg)) in colors.py, as demonstrated by a crafted XML document with '<span color=\"' followed by arbitrary Python code.",
+        "origin": "UNSPECIFIED",
+        "severity": "CRITICAL",
+        "published_at": "2022-05-24T22:00:57.000Z",
+        "withdrawn_at": null,
+        "classification": "GENERAL",
+        "cvss_score": 9.3,
+        "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2019-17626",
+          "https://access.redhat.com/errata/RHSA-2020:0195",
+          "https://access.redhat.com/errata/RHSA-2020:0197",
+          "https://access.redhat.com/errata/RHSA-2020:0201",
+          "https://access.redhat.com/errata/RHSA-2020:0230",
+          "https://hg.reportlab.com/hg-public/reportlab/rev/51a521ad7dd3",
+          "https://lists.debian.org/debian-lts-announce/2020/02/msg00019.html",
+          "https://security.gentoo.org/glsa/202007-35",
+          "https://www.debian.org/security/2020/dsa-4663",
+          "https://access.redhat.com/security/cve/cve-2019-17626",
+          "https://web.archive.org/web/20191016111823/https://bitbucket.org/rptlab/reportlab/issues/199/eval-in-colorspy-leads-to-remote-code",
+          "https://github.com/advisories/GHSA-qpg2-vx7j-3869",
+          "https://github.com/pypa/advisory-database/tree/main/vulns/reportlab/PYSEC-2019-117.yaml",
+          "https://usn.ubuntu.com/4273-1",
+          "https://security.netapp.com/advisory/ntap-20240719-0006",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ZZPHP2BJSTP4IYCSJRQINP763IHO6ASL",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/NSCTOE3DITFICY2XKBYZ5WAF5TSQ52DM",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ZZPHP2BJSTP4IYCSJRQINP763IHO6ASL",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/NSCTOE3DITFICY2XKBYZ5WAF5TSQ52DM",
+          "https://bitbucket.org/rptlab/reportlab/src/default/CHANGES.md",
+          "https://bitbucket.org/rptlab/reportlab/issues/199/eval-in-colorspy-leads-to-remote-code",
+          "http://lists.opensuse.org/opensuse-security-announce/2020-02/msg00002.html"
+        ],
+        "source_kind": "github",
+        "identifiers": [
+          "GHSA-qpg2-vx7j-3869",
+          "CVE-2019-17626"
+        ],
+        "repository_url": "https://bitbucket.org/web.archive.org/web",
+        "blast_radius": 38.45998716942212,
+        "created_at": "2022-12-21T16:11:59.761Z",
+        "updated_at": "2026-04-05T20:03:58.542Z",
+        "epss_percentage": 0.16839,
+        "epss_percentile": 0.94828,
+        "api_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS1xcGcyLXZ4N2otMzg2Oc4AAq9o",
+        "html_url": "https://advisories.ecosyste.ms/advisories/GSA_kwCzR0hTQS1xcGcyLXZ4N2otMzg2Oc4AAq9o",
+        "packages": [
+          {
+            "ecosystem": "pypi",
+            "package_name": "reportlab",
+            "versions": [
+              {
+                "first_patched_version": "3.5.28",
+                "vulnerable_version_range": "< 3.5.28"
+              }
+            ],
+            "purl": "pkg:pypi/reportlab"
+          }
+        ],
+        "related_packages_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS1xcGcyLXZ4N2otMzg2Oc4AAq9o/related_packages",
+        "related_advisories": []
+      },
+      {
+        "uuid": "MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLW1wdnctMjVtZy01OXZ4",
+        "url": "https://github.com/advisories/GHSA-mpvw-25mg-59vx",
+        "title": "Server-side Request Forgery (SSRF) via img tags in reportlab",
+        "description": "All versions of package reportlab at time of writing are vulnerable to Server-side Request Forgery (SSRF) via img tags. In order to reduce risk, use trustedSchemes & trustedHosts (see in Reportlab's documentation) \n\nSteps to reproduce by Karan Bamal: \n1. Download and install the latest package of reportlab \n2. Go to demos -> odyssey -> dodyssey \n3. In the text file odyssey.txt that needs to be converted to pdf inject `<img src=\"http://127.0.0.1:5000\" valign=\"top\"/>`\n4. Create a nc listener `nc -lp 5000`\n5. Run python3 dodyssey.py \n6. You will get a hit on your nc showing we have successfully proceded to send a server side request \n7. dodyssey.py will show error since there is no img file on the url, but we are able to do SSRF",
+        "origin": "UNSPECIFIED",
+        "severity": "HIGH",
+        "published_at": "2021-03-29T16:32:27.000Z",
+        "withdrawn_at": null,
+        "classification": "GENERAL",
+        "cvss_score": 7.1,
+        "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2020-28463",
+          "https://bugzilla.redhat.com/show_bug.cgi?id=1930417",
+          "https://hg.reportlab.com/hg-public/reportlab/rev/7f2231703dc7",
+          "https://snyk.io/vuln/SNYK-PYTHON-REPORTLAB-1022145",
+          "https://hg.reportlab.com/hg-public/reportlab/file/f094d273903a/CHANGES.md#l71",
+          "https://www.reportlab.com/docs/reportlab-userguide.pdf",
+          "https://lists.debian.org/debian-lts-announce/2023/09/msg00037.html",
+          "https://github.com/advisories/GHSA-mpvw-25mg-59vx",
+          "https://github.com/pypa/advisory-database/tree/main/vulns/reportlab/PYSEC-2021-146.yaml",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/HMUJA5GZTPQ5WRYUCCK2GEZM4W43N7HH",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/YZQSFCID67K6BTC655EQY6MNOF35QI44"
+        ],
+        "source_kind": "github",
+        "identifiers": [
+          "GHSA-mpvw-25mg-59vx",
+          "CVE-2020-28463"
+        ],
+        "repository_url": null,
+        "blast_radius": 29.36192568848355,
+        "created_at": "2022-12-21T16:12:43.078Z",
+        "updated_at": "2026-04-05T20:08:06.983Z",
+        "epss_percentage": 0.00713,
+        "epss_percentile": 0.72129,
+        "api_url": "https://advisories.ecosyste.ms/api/v1/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLW1wdnctMjVtZy01OXZ4",
+        "html_url": "https://advisories.ecosyste.ms/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLW1wdnctMjVtZy01OXZ4",
+        "packages": [
+          {
+            "ecosystem": "pypi",
+            "package_name": "reportlab",
+            "versions": [
+              {
+                "first_patched_version": "3.5.55",
+                "vulnerable_version_range": "< 3.5.55"
+              }
+            ],
+            "purl": "pkg:pypi/reportlab"
+          }
+        ],
+        "related_packages_url": "https://advisories.ecosyste.ms/api/v1/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLW1wdnctMjVtZy01OXZ4/related_packages",
+        "related_advisories": []
+      }
+    ],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/reportlab",
+    "docker_dependents_count": 947,
+    "docker_downloads_count": 327778364,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/reportlab",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/reportlab/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/reportlab/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/reportlab/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/reportlab/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/reportlab/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/reportlab/codemeta",
+    "maintainers": [
+      {
+        "uuid": "reportlab",
+        "login": "reportlab",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 9,
+        "html_url": "https://pypi.org/user/reportlab/",
+        "role": null,
+        "created_at": "2023-02-17T09:54:25.310Z",
+        "updated_at": "2023-02-17T09:54:25.310Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/reportlab/packages"
+      },
+      {
+        "uuid": "alfieroddan",
+        "login": "alfieroddan",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 3,
+        "html_url": "https://pypi.org/user/alfieroddan/",
+        "role": "Maintainer",
+        "created_at": "2023-06-05T15:10:14.045Z",
+        "updated_at": "2023-06-05T15:10:14.045Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/alfieroddan/packages"
+      }
+    ]
+  }
+}

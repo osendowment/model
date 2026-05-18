@@ -1,0 +1,81 @@
+{
+  "ecosystem": "npm",
+  "registry_hit": "npmjs.org",
+  "fetched_at": "2026-04-27T20:49:21Z",
+  "data": {
+    "id": 1496626,
+    "name": "bundle-require",
+    "ecosystem": "npm",
+    "description": "bundle and require a file",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 43,
+    "first_release_published_at": "2021-10-09T14:58:13.551Z",
+    "latest_release_published_at": "2024-12-22T15:13:14.839Z",
+    "latest_release_number": "5.1.0",
+    "last_synced_at": "2026-04-27T13:38:53.504Z",
+    "created_at": "2022-04-09T03:22:23.515Z",
+    "updated_at": "2026-04-27T13:38:53.504Z",
+    "registry_url": "https://www.npmjs.com/package/bundle-require",
+    "install_command": "npm install bundle-require",
+    "documentation_url": null,
+    "metadata": {
+      "funding": null,
+      "dist-tags": {
+        "latest": "5.1.0"
+      }
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 153,
+    "downloads": 23062275,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 8343,
+    "rankings": {
+      "downloads": 0.16108169819491025,
+      "dependent_repos_count": 0.26617273134172004,
+      "dependent_packages_count": 0.27206702000725214,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.1587009045335353,
+      "average": 0.21450558851935442
+    },
+    "purl": "pkg:npm/bundle-require",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/npm/bundle-require",
+    "docker_dependents_count": 489,
+    "docker_downloads_count": 110448607,
+    "usage_url": "https://repos.ecosyste.ms/usage/npm/bundle-require",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/npm/bundle-require/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/bundle-require/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/bundle-require/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/bundle-require/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/bundle-require/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/bundle-require/codemeta",
+    "maintainers": [
+      {
+        "uuid": "egoist",
+        "login": "egoist",
+        "name": null,
+        "email": "0x142857@gmail.com",
+        "url": null,
+        "packages_count": 467,
+        "html_url": "https://www.npmjs.com/~egoist",
+        "role": null,
+        "created_at": "2022-11-10T11:31:29.546Z",
+        "updated_at": "2022-11-10T11:31:29.546Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/egoist/packages"
+      }
+    ]
+  }
+}

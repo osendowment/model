@@ -1,0 +1,122 @@
+{
+  "ecosystem": "npm",
+  "registry_hit": "npmjs.org",
+  "fetched_at": "2026-04-27T20:49:21Z",
+  "data": {
+    "id": 2044218,
+    "name": "mux-embed",
+    "ecosystem": "npm",
+    "description": "Mux Javascript SDK and HTML5 Video element monitor",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 152,
+    "first_release_published_at": "2016-09-20T23:30:30.162Z",
+    "latest_release_published_at": "2026-04-10T16:55:42.435Z",
+    "latest_release_number": "5.18.0",
+    "last_synced_at": "2026-04-27T18:32:45.266Z",
+    "created_at": "2022-04-09T20:02:34.005Z",
+    "updated_at": "2026-04-27T18:32:45.266Z",
+    "registry_url": "https://www.npmjs.com/package/mux-embed",
+    "install_command": "npm install mux-embed",
+    "documentation_url": null,
+    "metadata": {
+      "funding": null,
+      "dist-tags": {
+        "beta": "4.2.1-beta.0",
+        "experiment-types": "4.30.0-experiment-types.1",
+        "latest": "5.18.0"
+      }
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 32,
+    "downloads": 6926764,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 102,
+    "rankings": {
+      "downloads": 0.4034964711307129,
+      "dependent_repos_count": 1.4647861905299708,
+      "dependent_packages_count": 0.947869886686163,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 0.9387175161156156
+    },
+    "purl": "pkg:npm/mux-embed",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/npm/mux-embed",
+    "docker_dependents_count": 1,
+    "docker_downloads_count": 225,
+    "usage_url": "https://repos.ecosyste.ms/usage/npm/mux-embed",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/npm/mux-embed/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/mux-embed/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/mux-embed/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/mux-embed/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/mux-embed/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/mux-embed/codemeta",
+    "maintainers": [
+      {
+        "uuid": "mux-npmjs",
+        "login": "mux-npmjs",
+        "name": null,
+        "email": "mux-npmjs@mux.com",
+        "url": null,
+        "packages_count": 79,
+        "html_url": "https://www.npmjs.com/~mux-npmjs",
+        "role": null,
+        "created_at": "2022-11-13T09:19:31.194Z",
+        "updated_at": "2022-11-13T09:19:31.194Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/mux-npmjs/packages"
+      },
+      {
+        "uuid": "dylanjha",
+        "login": "dylanjha",
+        "name": null,
+        "email": "dylanjhaveri@gmail.com",
+        "url": null,
+        "packages_count": 59,
+        "html_url": "https://www.npmjs.com/~dylanjha",
+        "role": null,
+        "created_at": "2026-02-19T02:33:27.110Z",
+        "updated_at": "2026-02-19T02:33:27.110Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/dylanjha/packages"
+      },
+      {
+        "uuid": "jsanford8",
+        "login": "jsanford8",
+        "name": null,
+        "email": "justin@mux.com",
+        "url": null,
+        "packages_count": 48,
+        "html_url": "https://www.npmjs.com/~jsanford8",
+        "role": null,
+        "created_at": "2026-02-11T01:41:44.339Z",
+        "updated_at": "2026-02-11T01:41:44.339Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/jsanford8/packages"
+      },
+      {
+        "uuid": "phil-mux",
+        "login": "phil-mux",
+        "name": null,
+        "email": "pcluff@mux.com",
+        "url": null,
+        "packages_count": 47,
+        "html_url": "https://www.npmjs.com/~phil-mux",
+        "role": null,
+        "created_at": "2026-02-11T01:41:44.397Z",
+        "updated_at": "2026-02-11T01:41:44.397Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/phil-mux/packages"
+      }
+    ]
+  }
+}

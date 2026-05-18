@@ -1,0 +1,85 @@
+{
+  "ecosystem": "npm",
+  "registry_hit": "npmjs.org",
+  "fetched_at": "2026-04-27T20:49:21Z",
+  "data": {
+    "id": 5420455,
+    "name": "btoa",
+    "ecosystem": "npm",
+    "description": "btoa for Node.JS (it's a one-liner)",
+    "homepage": "https://git.coolaj86.com/coolaj86/btoa.js.git",
+    "licenses": "(MIT OR Apache-2.0)",
+    "normalized_licenses": [
+      "MIT",
+      "Apache-2.0"
+    ],
+    "repository_url": "git://git.coolaj86.com/coolaj86/btoa.js.git",
+    "keywords_array": [
+      "btoa",
+      "browser"
+    ],
+    "namespace": null,
+    "versions_count": 6,
+    "first_release_published_at": "2011-09-09T20:52:26.042Z",
+    "latest_release_published_at": "2018-03-28T04:54:07.825Z",
+    "latest_release_number": "1.2.1",
+    "last_synced_at": "2026-04-27T08:37:40.610Z",
+    "created_at": "2022-11-13T19:50:02.283Z",
+    "updated_at": "2026-04-27T08:37:40.610Z",
+    "registry_url": "https://www.npmjs.com/package/btoa",
+    "install_command": "npm install btoa",
+    "documentation_url": null,
+    "metadata": {
+      "funding": null,
+      "dist-tags": {
+        "latest": "1.2.1"
+      }
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2026-04-22T19:26:22.589Z",
+    "dependent_packages_count": 1572,
+    "downloads": 34599620,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 133540,
+    "rankings": {
+      "downloads": 0.0896924927383578,
+      "dependent_repos_count": 0.09411962218762289,
+      "dependent_packages_count": 0.047059811093811445,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.13428001076309912,
+      "average": 0.09128798419572282
+    },
+    "purl": "pkg:npm/btoa",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/npm/btoa",
+    "docker_dependents_count": 923,
+    "docker_downloads_count": 421814131,
+    "usage_url": "https://repos.ecosyste.ms/usage/npm/btoa",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/npm/btoa/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/btoa/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/btoa/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/btoa/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/btoa/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/btoa/codemeta",
+    "maintainers": [
+      {
+        "uuid": "coolaj86",
+        "login": "coolaj86",
+        "name": null,
+        "email": "coolaj86@gmail.com",
+        "url": null,
+        "packages_count": 376,
+        "html_url": "https://www.npmjs.com/~coolaj86",
+        "role": null,
+        "created_at": "2022-11-13T20:05:46.187Z",
+        "updated_at": "2022-11-13T20:05:46.187Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/coolaj86/packages"
+      }
+    ]
+  }
+}

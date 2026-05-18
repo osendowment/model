@@ -1,0 +1,91 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 11534263,
+    "name": "nvidia-cusparselt-cu13",
+    "ecosystem": "pypi",
+    "description": "NVIDIA cuSPARSELt",
+    "homepage": "https://developer.nvidia.com/cusparselt",
+    "licenses": "NVIDIA Proprietary Software",
+    "normalized_licenses": [
+      "Other"
+    ],
+    "repository_url": null,
+    "keywords_array": [
+      "cuda",
+      "nvidia",
+      "machine learning",
+      "high-performance computing"
+    ],
+    "namespace": null,
+    "versions_count": 4,
+    "first_release_published_at": "2025-04-09T20:30:18.000Z",
+    "latest_release_published_at": "2026-03-22T02:36:05.000Z",
+    "latest_release_number": "0.9.0",
+    "last_synced_at": "2026-04-18T21:48:02.547Z",
+    "created_at": "2025-04-09T20:46:29.826Z",
+    "updated_at": "2026-04-18T21:48:02.547Z",
+    "registry_url": "https://pypi.org/project/nvidia-cusparselt-cu13/",
+    "install_command": "pip install nvidia-cusparselt-cu13 --index-url https://pypi.org/simple",
+    "documentation_url": "https://nvidia-cusparselt-cu13.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Environment :: GPU :: NVIDIA CUDA",
+        "Environment :: GPU :: NVIDIA CUDA :: 13",
+        "Topic :: Scientific/Engineering"
+      ],
+      "normalized_name": "nvidia-cusparselt-cu13",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2026-04-18T21:48:02.262Z",
+    "dependent_packages_count": 0,
+    "downloads": 23017460,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 0,
+    "rankings": {
+      "downloads": null,
+      "dependent_repos_count": 52.56603332954089,
+      "dependent_packages_count": 9.332241510428206,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 30.94913741998455
+    },
+    "purl": "pkg:pypi/nvidia-cusparselt-cu13",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/nvidia-cusparselt-cu13",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/nvidia-cusparselt-cu13",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/nvidia-cusparselt-cu13/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/nvidia-cusparselt-cu13/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/nvidia-cusparselt-cu13/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/nvidia-cusparselt-cu13/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/nvidia-cusparselt-cu13/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/nvidia-cusparselt-cu13/codemeta",
+    "maintainers": [
+      {
+        "uuid": "nvidia",
+        "login": "nvidia",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 817,
+        "html_url": "https://pypi.org/user/nvidia/",
+        "role": "Owner",
+        "created_at": "2025-04-09T21:06:15.463Z",
+        "updated_at": "2025-04-09T21:06:15.463Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/nvidia/packages"
+      }
+    ]
+  }
+}

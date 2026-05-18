@@ -1,12 +1,15 @@
 repo,analyzed_through_year,commits_5y_examined,churn_5y_added,churn_5y_deleted,churn_5y_total,churn_files_count,top_file_path,top_file_churn,elapsed_s,fetched_at
 definitelytyped/definitelytyped,2025,17207,6842920,5574242,12417162,65486,types/arcgis-js-api/index.d.ts,749218,310.8,2026-05-03T17:22:01Z
 cloudflare/cloudflare-python,2025,6147,4785718,3810098,8595816,12529,src/cloudflare/resources/origin_post_quantum_encryption.py,62670,53.9,2026-05-03T17:22:01Z
+grpc/grpc,2025,9557,4145447,3628040,7773487,12115,test/cpp/end2end/xds/xds_end2end_test.cc,75270,265.3,2026-05-18T00:11:16Z
 chardet/chardet,2025,177,3553395,3298957,6852352,96,chardet/langrussianmodel.py,476559,30.2,2026-05-03T17:22:01Z
 octokit/openapi-types.ts,2025,467,3504342,2596626,6100968,39,packages/openapi-types-github.ae/types.d.ts,605164,69.6,2026-05-03T17:22:01Z
+protocolbuffers/protobuf,2025,11698,2955948,2777687,5733635,4816,php/ext/google/protobuf/php-upb.c,281490,176.6,2026-05-18T00:11:16Z
 apache/arrow,2025,10137,2376983,2145281,4522264,7725,go/arrow/compute/internal/kernels/_lib/scalar_comparison_avx2_amd64.s,135526,102.5,2026-05-03T17:22:01Z
 astral-sh/ruff,2025,13424,2645776,1803457,4449233,14522,crates/ruff_python_parser/src/python.rs,441558,55.7,2026-05-03T17:22:01Z
 langchain-ai/langchain,2025,14906,1586335,1267884,2854219,9803,libs/core/langchain_core/runnables/base.py,15923,208.3,2026-05-03T17:22:01Z
 scipy/scipy,2025,9378,1014133,935849,1949982,3118,scipy/interpolate/src/dfitpack.c,27008,130.4,2026-05-03T17:22:01Z
+systemd/systemd,2025,31742,1048088,681327,1729415,3748,src/partition/repart.c,22173,293.8,2026-05-18T00:11:16Z
 getsentry/sentry-javascript,2025,8042,1034814,652724,1687538,10201,packages/deno/lib.deno.d.ts,27640,171.6,2026-05-03T17:22:01Z
 apache/arrow-rs,2025,4680,862994,573282,1436276,1287,arrow-cast/src/cast.rs,28760,21.8,2026-05-03T17:22:01Z
 numpy/numpy,2025,10810,771871,651294,1423165,2209,numpy/core/src/umath/svml/svml_z0_tan_d_la.s,40438,127.4,2026-05-03T17:22:01Z
@@ -27,6 +30,7 @@ firebase/firebase-js-sdk,2025,1890,525307,356737,882044,3001,.yarn/releases/yarn
 adobe/react-spectrum,2025,3559,602800,246020,848820,3752,packages/@react-spectrum/table/test/Table.test.js,10210,244.9,2026-05-03T17:22:01Z
 colinhacks/zod,2025,1943,427088,376290,803378,1015,deno/lib/types.ts,32812,23.3,2026-05-03T17:22:01Z
 nodejs/undici,2025,2648,414997,303194,718191,3451,deps/llhttp/src/llhttp.c,39383,5.7,2026-05-03T17:22:01Z
+curl/curl,2025,10841,383050,318024,701074,1576,lib/vtls/openssl.c,16142,116.1,2026-05-18T00:11:16Z
 eslint/js,2025,261,360050,297210,657260,3811,packages/espree/tests/fixtures/libraries/angular-1.2.5.js,20369,93.8,2026-05-03T17:22:01Z
 typescript-eslint/typescript-eslint,2025,4492,358699,242100,600799,3803,packages/scope-manager/src/lib/dom.ts,15797,62.8,2026-05-03T17:22:01Z
 open-telemetry/opentelemetry-js,2025,2072,345051,252490,597541,2514,semantic-conventions/src/experimental_attributes.ts,31245,31.1,2026-05-03T17:22:01Z
@@ -39,6 +43,7 @@ scikit-learn/scikit-learn,2025,6875,343499,196690,540189,1094,sklearn/utils/esti
 prettier/prettier,2025,5530,291360,239088,530448,11363,vendors/tempy.js,20414,66.5,2026-05-03T17:22:01Z
 gnome/glib,2025,6585,291599,236909,528508,1725,glib/gunibreak.h,54834,51.8,2026-05-03T17:22:01Z
 clap-rs/clap,2025,3901,280377,245897,526274,928,src/build/arg/mod.rs,16871,12.6,2026-05-03T17:22:01Z
+sqlite/sqlite,2025,8104,295834,214133,509967,617,ext/jni/src/c/sqlite3-jni.c,25050,271.7,2026-05-18T00:11:16Z
 facebook/regenerator,2025,132,255748,250174,505922,30,docs/bundle.js,499249,7.7,2026-05-03T17:22:01Z
 gnutls/gnutls,2025,1219,260592,232654,493246,1275,lib/nettle/gost/kuztable.h,82542,95.4,2026-05-03T17:22:01Z
 libjxl/libjxl,2025,3141,278830,201681,480511,970,lib/jxl/decode_test.cc,12667,18.7,2026-05-03T17:22:01Z
@@ -62,14 +67,18 @@ nlnetlabs/unbound,2025,1784,168805,164792,333597,231,util/configlexer.c,137247,3
 reactivex/rxjs,2025,879,157066,159883,316949,1885,spec/operators/groupBy-spec.ts,4215,43.4,2026-05-03T17:22:01Z
 gregberge/svgr,2025,188,154556,153701,308257,171,.yarn/releases/yarn-1.18.0.cjs,294310,9.2,2026-05-03T17:22:01Z
 facebook/watchman,2025,8797,157268,139692,296960,1117,watchman/watcher/eden.cpp,4595,20.8,2026-05-03T17:22:01Z
+libjpeg-turbo/libjpeg-turbo,2025,508,161444,131987,293431,628,java/doc/jquery/jszip/dist/jszip.js,11370,10.1,2026-05-18T00:11:16Z
 pcre2project/pcre2,2025,937,137599,149370,286969,113,src/pcre2_ucd.c,67369,23.3,2026-05-03T17:22:01Z
 wasm-bindgen/wasm-bindgen,2025,992,185641,98976,284617,2501,crates/cli-support/src/js/mod.rs,7541,43.5,2026-05-03T17:22:01Z
 csstools/postcss-plugins,2025,4556,189037,91603,280640,3018,plugins/postcss-progressive-custom-properties/src/matchers.ts,7223,16.0,2026-05-03T17:22:01Z
+browserslist/caniuse-lite,2025,742,139438,139149,278587,903,publish.js,867,33.4,2026-05-18T00:11:16Z
 smithy-lang/smithy-typescript,2025,2429,195661,80347,276008,1637,packages/signature-v4a/src/elliptic/Ec.ts,9563,17.7,2026-05-03T17:22:01Z
 mrabarnett/mrab-regex,2025,104,106922,166827,273749,27,regex_3/_regex_unicode.c,76979,3.1,2026-05-03T17:22:01Z
+open-telemetry/opentelemetry-python,2025,1263,164082,106382,270464,928,opentelemetry-proto/src/opentelemetry/proto/metrics/v1/metrics_pb2.pyi,4409,10.0,2026-05-18T00:11:16Z
 rustcrypto/formats,2025,1639,173451,96872,270323,574,const-oid/src/db/gen.rs,56334,6.0,2026-05-03T17:22:01Z
 certbot/certbot,2025,1137,133897,134026,267923,810,certbot/certbot/_internal/tests/main_test.py,5384,35.8,2026-05-03T17:22:01Z
 radix-ui/primitives,2025,1164,144925,120503,265428,632,packages/react/dropdown-menu/src/DropdownMenu.stories.tsx,9420,31.1,2026-05-03T17:22:01Z
+open-telemetry/opentelemetry-python-contrib,2025,1644,151216,113046,264262,1187,reference/ddtrace/vendor/msgpack/_cmsgpack.cpp,15777,7.3,2026-05-18T00:11:16Z
 vuejs/core,2025,3830,166214,97999,264213,731,packages/compiler-sfc/src/compileScript.ts,8433,16.4,2026-05-03T17:22:01Z
 socketio/socket.io,2025,1035,141915,111672,253587,604,dist/socket.io.js,26187,16.3,2026-05-03T17:22:01Z
 toml-rs/toml,2025,1579,131276,116481,247757,429,crates/toml_edit/tests/testsuite/parse.rs,7086,5.2,2026-05-03T17:22:01Z
@@ -77,12 +86,15 @@ indygreg/python-zstandard,2025,385,114081,133631,247712,83,zstd/zstdlib.c,156379
 python-poetry/poetry-core,2025,795,115411,114870,230281,594,src/poetry/core/_vendor/pyparsing.py,14214,4.8,2026-05-03T17:22:01Z
 burntsushi/jiff,2025,543,170692,46718,217410,229,src/span.rs,10649,2.4,2026-05-03T17:22:01Z
 rust-lang/compiler-builtins,2025,1096,121429,95466,216895,674,libm/src/math/support/hex_float.rs,4068,1.9,2026-05-03T17:22:01Z
+bdwgc/bdwgc,2025,2516,112506,104121,216627,153,os_dep.c,19627,11.8,2026-05-18T00:11:16Z
 tokio-rs/tokio,2025,1995,151105,65462,216567,816,tokio/src/runtime/metrics/runtime.rs,6468,28.6,2026-05-03T17:22:01Z
 jestjs/jest,2025,2229,127619,86871,214490,2158,packages/jest-mock/src/index.ts,3516,185.4,2026-05-03T17:22:01Z
 time-rs/time,2025,727,120323,93185,213508,390,tests/parsing.rs,5186,3.4,2026-05-03T17:22:01Z
 taiki-e/portable-atomic,2025,1755,121672,86726,208398,405,src/lib.rs,13833,6.5,2026-05-03T17:22:01Z
 burntsushi/memchr,2025,112,133580,69025,202605,123,bench/data/code/rust-library.rs,104190,6.7,2026-05-03T17:22:01Z
 facebook/metro,2025,1727,131134,67947,199081,746,flow-typed/npm/babel-types_v17.x.x.js,8028,57.0,2026-05-03T17:22:01Z
+python-poetry/poetry,2025,1994,117388,80543,197931,656,tests/installation/test_installer.py,7220,15.0,2026-05-18T00:11:16Z
+aio-libs/aiohttp,2025,5091,141864,55100,196964,171,aiohttp/client_reqrep.py,11538,46.9,2026-05-18T00:11:16Z
 nghttp2/nghttp2,2025,1395,93578,86191,179769,358,third-party/llhttp/src/llhttp.c,30118,16.1,2026-05-03T17:22:01Z
 pyca/cryptography,2025,6421,105251,67707,172958,430,src/rust/src/x509/certificate.rs,6263,58.7,2026-05-03T17:22:01Z
 floating-ui/floating-ui,2025,1429,102124,60469,162593,728,website/pages/index.js,8331,34.5,2026-05-03T17:22:01Z
@@ -143,7 +155,9 @@ dateutil/dateutil,2025,66,29538,29459,58997,86,src/dateutil/test/test_rrule.py,9
 nicolo-ribaudo/babel-preset-current-node-syntax,2025,15,11980,46805,58785,8,.yarn/plugins/@yarnpkg/plugin-version.js,34800,2.1,2026-05-03T17:22:01Z
 python-jsonschema/jsonschema,2025,930,10718,47296,58014,47,jsonschema/tests/test_validators.py,11898,2.9,2026-05-03T17:22:01Z
 cssnano/cssnano,2025,541,30652,26335,56987,525,packages/postcss-merge-longhand/test/borders.js,1338,26.7,2026-05-03T17:22:01Z
+netflix/vmaf,2025,525,25400,31323,56723,281,libvmaf/src/feature/cambi.c,3202,55.7,2026-05-18T00:11:16Z
 python-greenlet/greenlet,2025,536,32050,23073,55123,88,src/greenlet/greenlet.cpp,21707,2.5,2026-05-03T17:22:01Z
+selinuxproject/selinux,2025,1223,35000,19685,54685,389,libselinux/src/label_file.c,3210,2.7,2026-05-18T00:11:16Z
 agronholm/anyio,2025,814,36331,18107,54438,87,src/anyio/_backends/_asyncio.py,8019,4.0,2026-05-03T17:22:01Z
 libuv/libuv,2025,852,31466,22940,54406,329,src/unix/linux.c,4955,8.3,2026-05-03T17:22:01Z
 python/typing,2025,452,26344,27016,53360,174,typing_extensions/src/typing_extensions.py,6664,2.2,2026-05-03T17:22:01Z
@@ -173,14 +187,18 @@ grahamdumpleton/wrapt,2025,503,23933,16508,40441,140,src/wrapt/_wrappers.c,8067,
 googlechrome/workbox,2025,262,22861,17514,40375,538,test/workbox-build/node/generate-sw.js,2336,6.9,2026-05-03T17:22:01Z
 jridgewell/sourcemaps,2025,449,23672,16204,39876,130,packages/trace-mapping/test/binary-search.test.ts,3022,4.7,2026-05-03T17:22:01Z
 moment/moment,2025,84,22740,16833,39573,504,min/tests.js,21243,12.3,2026-05-03T17:22:01Z
+rogdham/backports.zstd,2025,61,35541,2534,38075,72,tests/test/test_tarfile.py,4863,0.6,2026-05-18T00:11:16Z
 rust-lang/hashbrown,2025,495,25058,13002,38060,48,src/raw/mod.rs,13103,7.1,2026-05-03T17:22:01Z
 terser/terser,2025,525,28108,9752,37860,142,lib/compress/index.js,6920,6.5,2026-05-03T17:22:01Z
+thomasdickey/ncurses-snapshots,2025,267,21129,16559,37688,377,ncurses/win32con/win_driver.c,3409,161.7,2026-05-18T00:11:16Z
 jawah/charset_normalizer,2025,571,19845,16684,36529,77,charset_normalizer/constant.py,5869,1.7,2026-05-03T17:22:01Z
+pnggroup/libpng,2025,507,19997,16420,36417,101,png.h,4924,14.2,2026-05-18T00:11:16Z
 emotion-js/emotion,2025,271,18607,16644,35251,529,flow-typed/npm/jest_v25.x.x.js,2938,14.8,2026-05-03T17:22:01Z
 rollup/plugins,2025,719,22568,12222,34790,970,packages/typescript/test/test.js,1554,3.3,2026-05-03T17:22:01Z
 webpack/enhanced-resolve,2025,243,20173,14591,34764,143,test/exportsField.test.js,5322,1.8,2026-05-03T17:22:01Z
 fontconfig/fontconfig,2025,456,19642,14918,34560,122,src/fcfreetype.c,3099,3.4,2026-05-03T17:22:01Z
 gyscos/zstd-rs,2025,241,15458,18490,33948,58,zstd-safe/zstd-sys/src/bindings_zstd_experimental.rs,4701,1.2,2026-05-03T17:22:01Z
+python/typing_extensions,2025,450,21439,12192,33631,12,src/typing_extensions.py,11715,1.0,2026-05-18T00:11:16Z
 7rulnik/source-map-js,2025,39,1069,32553,33622,34,dist/test/test_source_map_consumer.js,4461,9.9,2026-05-03T17:22:01Z
 taiki-e/pin-project,2025,530,17615,15866,33481,317,tests/lint/lib.rs,1821,2.1,2026-05-03T17:22:01Z
 encode/httpcore,2025,385,19571,13727,33298,94,httpcore/_sync/connection_pool.py,1412,2.3,2026-05-03T17:22:01Z
@@ -188,10 +206,12 @@ burntsushi/aho-corasick,2025,127,21294,11804,33098,58,src/ahocorasick.rs,3864,4.
 paulmillr/chokidar,2025,179,15609,16444,32053,20,src/index.test.mts,7612,1.7,2026-05-03T17:22:01Z
 isaacs/node-lru-cache,2025,320,19747,11520,31267,70,src/index.ts,5207,1.5,2026-05-03T17:22:01Z
 dcodeio/protobuf.js,2025,180,8602,22166,30768,95,dist/protobuf.js,9279,29.9,2026-05-03T17:22:01Z
+protobufjs/protobuf.js,2025,180,8602,22166,30768,95,dist/protobuf.js,9279,66.5,2026-05-18T00:11:16Z
 yaml/pyyaml,2025,62,11315,18973,30288,110,lib/yaml/scanner.py,2883,1.3,2026-05-03T17:22:01Z
 seanmonstar/reqwest,2025,514,20595,9608,30203,77,src/async_impl/client.rs,4914,3.7,2026-05-03T17:22:01Z
 conventional-changelog/commitlint,2025,1811,18974,11103,30077,327,@commitlint/cli/src/cli.test.ts,1498,13.1,2026-05-03T17:22:01Z
 pallets/flask,2025,814,16258,13741,29999,72,src/flask/app.py,6663,6.9,2026-05-03T17:22:01Z
+aio-libs/multidict,2025,720,19559,10179,29738,48,multidict/_multidict.c,4341,1.1,2026-05-18T00:11:16Z
 rust-lang/futures-rs,2025,392,18355,11357,29712,331,futures/tests/auto_traits.rs,2235,8.0,2026-05-03T17:22:01Z
 isaacs/node-glob,2025,301,15498,13549,29047,114,src/walker.ts,5214,2.9,2026-05-03T17:22:01Z
 tj/commander.js,2025,454,19940,8836,28776,177,lib/command.js,4693,4.4,2026-05-03T17:22:01Z
@@ -231,6 +251,7 @@ acornjs/acorn,2025,294,16301,2103,18404,87,test/tests-class-features-2022.js,652
 marshallpierce/rust-base64,2025,146,9372,8662,18034,36,src/engine/tests.rs,3759,1.7,2026-05-03T17:22:01Z
 pyca/pynacl,2025,153,12040,5943,17983,216,src/libsodium/src/libsodium/crypto_aead/aes256gcm/aesni/aead_aes256gcm_aesni.c,1800,61.5,2026-05-03T17:22:01Z
 tootallnate/proxy-agents,2025,149,12876,5004,17880,121,packages/agent-base/test/test-legacy.js,1378,2.7,2026-05-03T17:22:01Z
+linux-pam/linux-pam,2025,715,11423,6217,17640,197,modules/pam_namespace/pam_namespace.c,1505,1.4,2026-05-18T00:11:16Z
 libffi/libffi,2025,492,13389,4116,17505,219,src/wasm32/ffi.c,1914,3.6,2026-05-03T17:22:01Z
 mrmlnc/fast-glob,2025,155,12991,4192,17183,138,__snapshots__/regular.e2e.js,5678,2.1,2026-05-03T17:22:01Z
 browserslist/browserslist,2025,442,8544,7780,16324,88,index.js,2076,2.8,2026-05-03T17:22:01Z
@@ -312,6 +333,7 @@ serde-rs/test,2025,142,3864,3760,7624,16,src/configure.rs,1087,1.3,2026-05-03T17
 dtolnay/anyhow,2025,444,5384,2235,7619,34,src/ensure.rs,2183,4.3,2026-05-03T17:22:01Z
 rust-phf/rust-phf,2025,146,4991,2544,7535,36,phf_macros_tests/tests/test.rs,1368,5.2,2026-05-03T17:22:01Z
 fb55/entities,2025,1499,4926,2516,7442,31,src/decode.ts,1901,6.8,2026-05-03T17:22:01Z
+tqdm/tqdm,2025,290,4247,3193,7440,66,tqdm/gui.py,961,5.2,2026-05-18T00:11:16Z
 rust-fuzz/arbitrary,2025,162,4950,2342,7292,65,src/lib.rs,2714,0.9,2026-05-03T17:22:01Z
 python/importlib_resources,2025,537,4340,2829,7169,48,importlib_resources/tests/test_resource.py,636,3.1,2026-05-03T17:22:01Z
 pytest-dev/pluggy,2025,320,4603,2524,7127,31,src/pluggy/_hooks.py,1566,1.5,2026-05-03T17:22:01Z
@@ -327,6 +349,7 @@ hyperium/http,2025,146,3802,3015,6817,42,src/header/name.rs,1221,1.5,2026-05-03T
 amanieu/parking_lot,2025,182,4507,2104,6611,40,lock_api/src/rwlock.rs,1898,2.5,2026-05-03T17:22:01Z
 stub42/pytz,2025,75,3912,2697,6609,18,zic.c,2548,5.4,2026-05-03T17:22:01Z
 mvdnes/spin-rs,2025,93,4187,2254,6441,13,src/once.rs,1347,1.2,2026-05-03T17:22:01Z
+zesterer/spin-rs,2025,93,4187,2254,6441,13,src/once.rs,1347,0.7,2026-05-18T00:11:16Z
 agronholm/exceptiongroup,2025,206,4779,1572,6351,17,tests/test_exceptiongroup.py,1576,0.8,2026-05-03T17:22:01Z
 micheles/decorator,2025,84,3206,3145,6351,10,src/tests/documentation.py,2827,1.0,2026-05-03T17:22:01Z
 fb55/css-select,2025,1195,3435,2768,6203,30,test/qwery.ts,1005,7.3,2026-05-03T17:22:01Z
@@ -336,6 +359,7 @@ nodelib/nodelib,2025,122,3633,2480,6113,82,packages/fs/fs.scandir/src/providers/
 psycopg/psycopg2,2025,258,2496,3617,6113,129,scripts/build/appveyor.py,1736,3.6,2026-05-03T17:22:01Z
 matklad/once_cell,2025,172,3610,2495,6105,18,src/lib.rs,1588,1.9,2026-05-03T17:22:01Z
 mozilla/source-map,2025,37,4459,1561,6020,32,test/test-source-map-consumer.js,1230,2.1,2026-05-03T17:22:01Z
+crate-py/rpds,2025,384,4546,1382,5928,12,src/lib.rs,3723,0.6,2026-05-18T00:11:16Z
 jsdom/whatwg-url,2025,87,2950,2833,5783,27,lib/url-state-machine.js,1439,2.0,2026-05-03T17:22:01Z
 jpadilla/pyjwt,2025,294,4364,1391,5755,24,jwt/algorithms.py,1248,1.7,2026-05-03T17:22:01Z
 node-fetch/node-fetch,2025,97,3819,1915,5734,24,test/main.js,2711,3.6,2026-05-03T17:22:01Z
@@ -459,6 +483,7 @@ inspect-js/is-descriptor,2025,29,576,523,1099,3,test/index.js,714,0.7,2026-05-03
 juliangruber/brace-expansion,2025,29,561,517,1078,14,index.js,547,0.7,2026-05-03T17:22:01Z
 googleapis/python-crc32c,2025,132,690,376,1066,15,.kokoro/noxfile.py,292,2.9,2026-05-03T17:22:01Z
 npm/fs-minipass,2025,38,576,485,1061,6,lib/index.js,449,0.6,2026-05-03T17:22:01Z
+isaacs/fs-minipass,2025,38,576,485,1061,6,lib/index.js,449,0.5,2026-05-18T00:11:16Z
 rust-lang/pkg-config-rs,2025,65,761,283,1044,2,src/lib.rs,1018,1.9,2026-05-03T17:22:01Z
 dtolnay/ryu,2025,149,487,523,1010,25,src/pretty/mantissa.rs,112,2.2,2026-05-03T17:22:01Z
 py4j/py4j,2025,59,779,230,1009,160,py4j-python/src/py4j/java_gateway.py,114,23.6,2026-05-03T17:22:01Z
@@ -546,6 +571,7 @@ jmespath/jmespath.py,2025,43,111,278,389,12,docs/conf.py,101,1.8,2026-05-03T17:2
 dtolnay/paste,2025,96,304,84,388,10,src/lib.rs,167,1.0,2026-05-03T17:22:01Z
 npm/abbrev-js,2025,60,211,175,386,5,test/test.js,234,0.5,2026-05-03T17:22:01Z
 sindresorhus/read-pkg-up,2025,16,174,211,385,4,index.d.ts,184,0.9,2026-05-03T17:22:01Z
+sindresorhus/read-package-up,2025,16,174,211,385,4,index.d.ts,184,0.5,2026-05-18T00:11:16Z
 sindresorhus/locate-path,2025,13,214,153,367,4,index.d.ts,171,0.8,2026-05-03T17:22:01Z
 isaacs/package-json-from-dist,2025,6,351,11,362,3,test/index.ts,216,0.8,2026-05-03T17:22:01Z
 ljharb/set-function-length,2025,34,328,21,349,6,test/index.js,125,0.9,2026-05-03T17:22:01Z
@@ -553,8 +579,10 @@ rich-harris/estree-walker,2025,14,200,149,349,7,src/sync.js,114,1.6,2026-05-03T1
 inspect-js/is-array-buffer,2025,39,168,178,346,12,index.js,75,0.9,2026-05-03T17:22:01Z
 stream-utils/raw-body,2025,138,328,17,345,8,test/index.js,92,0.8,2026-05-03T17:22:01Z
 burntsushi/winapi-util,2025,17,253,86,339,5,src/sysinfo.rs,181,0.5,2026-05-03T17:22:01Z
+python/mypy_extensions,2025,24,221,114,335,3,tests/testextensions.py,169,0.5,2026-05-18T00:11:16Z
 servo/rust-fnv,2025,9,250,77,327,1,lib.rs,327,0.8,2026-05-03T17:22:01Z
 gozala/events,2025,11,245,82,327,3,tests/events-once.js,224,0.6,2026-05-03T17:22:01Z
+browserify/events,2025,11,245,82,327,3,tests/events-once.js,224,0.5,2026-05-18T00:11:16Z
 es-shims/math-intrinsics,2025,10,323,2,325,31,test/index.js,194,4.5,2026-05-03T17:22:01Z
 ljharb/es-to-primitive,2025,32,161,161,322,12,test/es2015.js,97,1.1,2026-05-03T17:22:01Z
 chalk/slice-ansi,2025,12,205,115,320,3,index.js,254,1.2,2026-05-03T17:22:01Z
@@ -575,6 +603,7 @@ eventualbuddha/lines-and-columns,2025,10,129,122,251,3,test/test.ts,161,0.8,2026
 burntsushi/walkdir,2025,12,201,46,247,4,src/tests/recursive.rs,116,1.0,2026-05-03T17:22:01Z
 inspect-js/has-proto,2025,31,212,34,246,14,test/accessor.js,36,0.5,2026-05-03T17:22:01Z
 sindresorhus/find-cache-dir,2025,12,142,103,245,4,test.js,91,1.1,2026-05-03T17:22:01Z
+sindresorhus/find-cache-directory,2025,12,142,103,245,4,test.js,91,0.5,2026-05-18T00:11:16Z
 ljharb/side-channel-list,2025,5,244,0,244,4,index.js,113,0.5,2026-05-03T17:22:01Z
 sindresorhus/is-docker,2025,14,156,87,243,5,test.js,185,2.4,2026-05-03T17:22:01Z
 jshttp/forwarded,2025,50,195,33,228,3,test/test.js,149,0.9,2026-05-03T17:22:01Z
@@ -585,6 +614,7 @@ ljharb/call-bound,2025,20,198,24,222,3,index.d.ts,118,0.6,2026-05-03T17:22:01Z
 inspect-js/is-typed-array,2025,63,92,129,221,3,index.js,161,1.1,2026-05-03T17:22:01Z
 ljharb/side-channel-weakmap,2025,12,217,4,221,3,test/index.js,114,0.8,2026-05-03T17:22:01Z
 sindresorhus/pkg-dir,2025,14,119,102,221,4,index.d.ts,137,0.5,2026-05-03T17:22:01Z
+sindresorhus/package-directory,2025,14,119,102,221,4,index.d.ts,137,0.5,2026-05-18T00:11:16Z
 isaacs/cliui,2025,14,120,98,218,11,test/cjs-esm-compare.cjs,68,0.7,2026-05-03T17:22:01Z
 graydon/exhaustigen-rs,2025,1,217,0,217,1,src/lib.rs,217,0.8,2026-05-03T17:22:01Z
 sindresorhus/strip-json-comments,2025,16,140,75,215,5,index.js,130,0.7,2026-05-03T17:22:01Z
@@ -612,6 +642,7 @@ micromatch/micromatch,2025,31,69,96,165,7,bench/glob-parent.js,53,1.8,2026-05-03
 azure/msrest-for-python,2025,17,109,56,165,12,tests/test_serialization.py,50,1.7,2026-05-03T17:22:01Z
 isaacs/core-util-is,2025,9,90,70,160,2,test.js,158,0.6,2026-05-03T17:22:01Z
 mathiasbynens/jsesc,2025,4,121,36,157,3,tests/tests.js,71,0.6,2026-05-03T17:22:01Z
+jslicense/spdx-license-ids,2025,56,79,78,157,3,build.js,80,0.5,2026-05-18T00:11:16Z
 jshttp/mime-types,2025,139,128,28,156,3,index.js,73,1.0,2026-05-03T17:22:01Z
 ljharb/es-shim-unscopables,2025,22,149,6,155,4,test/index.js,76,0.7,2026-05-03T17:22:01Z
 jsdom/xml-name-validator,2025,9,81,74,155,4,test/test.js,78,0.9,2026-05-03T17:22:01Z
@@ -645,6 +676,7 @@ sindresorhus/cli-cursor,2025,5,54,58,112,4,index.d.ts,68,0.6,2026-05-03T17:22:01
 primus/eventemitter3,2025,46,61,48,109,6,test/browser.js,44,0.9,2026-05-03T17:22:01Z
 inspect-js/has-property-descriptors,2025,18,93,14,107,2,test/index.js,57,0.7,2026-05-03T17:22:01Z
 yargs/y18n,2025,11,55,52,107,4,test/y18n-test.cjs,68,0.7,2026-05-03T17:22:01Z
+jslicense/spdx-exceptions.json,2025,8,84,23,107,3,latest.js,56,0.5,2026-05-18T00:11:16Z
 sindresorhus/is-plain-obj,2025,11,86,20,106,5,benchmark.js,62,1.0,2026-05-03T17:22:01Z
 jshttp/content-type,2025,42,86,20,106,4,scripts/version-history.js,63,0.8,2026-05-03T17:22:01Z
 xiph/ogg,2025,38,64,38,102,2,src/bitwise.c,56,1.8,2026-05-03T17:22:01Z
@@ -653,6 +685,7 @@ lukeed/escalade,2025,7,92,6,98,8,build.ts,34,1.5,2026-05-03T17:22:01Z
 sindresorhus/mimic-response,2025,4,49,49,98,4,test.js,47,0.7,2026-05-03T17:22:01Z
 ljharb/concat-map,2025,16,53,44,97,3,test/map.js,52,0.7,2026-05-03T17:22:01Z
 ljharb/es-object-atoms,2025,16,91,6,97,9,test/index.js,40,1.5,2026-05-03T17:22:01Z
+es-shims/es-object-atoms,2025,16,91,6,97,9,test/index.js,40,0.5,2026-05-18T00:11:16Z
 samverschueren/decode-uri-component,2025,12,57,39,96,4,index.js,50,0.6,2026-05-03T17:22:01Z
 kriszyp/json-schema,2025,8,75,17,92,2,test/tests.js,80,0.9,2026-05-03T17:22:01Z
 sindresorhus/detect-newline,2025,6,47,44,91,4,index.d.ts,48,0.7,2026-05-03T17:22:01Z
@@ -671,6 +704,7 @@ es-shims/array-includes,2025,49,43,33,76,4,implementation.js,49,1.0,2026-05-03T1
 jshttp/fresh,2025,72,37,38,75,3,index.js,41,1.1,2026-05-03T17:22:01Z
 inspect-js/is-symbol,2025,37,39,35,74,3,test/index.js,50,0.7,2026-05-03T17:22:01Z
 visionmedia/node-cookie-signature,2025,18,48,24,72,2,index.js,45,0.7,2026-05-03T17:22:01Z
+tj/node-cookie-signature,2025,18,48,24,72,2,index.js,45,0.5,2026-05-18T00:11:16Z
 acornjs/acorn-jsx,2025,6,68,3,71,1,index.d.ts,71,1.8,2026-05-03T17:22:01Z
 jonschlinkert/word-wrap,2025,12,45,26,71,3,index.js,37,0.8,2026-05-03T17:22:01Z
 sindresorhus/path-exists,2025,3,36,34,70,4,index.d.ts,47,0.7,2026-05-03T17:22:01Z
@@ -693,11 +727,13 @@ benjaminp/six,2025,35,46,12,58,4,six.py,33,1.6,2026-05-03T17:22:01Z
 sindresorhus/is-inside-container,2025,3,57,0,57,5,index.js,23,0.8,2026-05-03T17:22:01Z
 ljharb/internal-slot,2025,46,43,12,55,3,index.js,28,0.6,2026-05-03T17:22:01Z
 inspect-js/array-buffer-byte-length,2025,25,50,3,53,3,test/index.js,29,0.7,2026-05-03T17:22:01Z
+thkukuk/rpcsvc-proto,2025,8,40,13,53,3,rpcgen/nls.h,27,0.5,2026-05-18T00:11:16Z
 inspect-js/is-boolean-object,2025,39,43,8,51,4,test/index.js,33,0.8,2026-05-03T17:22:01Z
 browserify/node-util,2025,9,26,24,50,2,support/types.js,46,0.7,2026-05-03T17:22:01Z
 oozcitak/xmlbuilder-js,2025,14,49,0,49,2,test/issues/249.coffee,26,1.1,2026-05-03T17:22:01Z
 sindresorhus/import-local,2025,10,31,17,48,3,index.js,23,0.9,2026-05-03T17:22:01Z
 epoberezkin/ajv-keywords,2025,25,32,13,45,8,spec/transform.spec.ts,15,1.0,2026-05-03T17:22:01Z
+ajv-validator/ajv-keywords,2025,25,32,13,45,8,spec/transform.spec.ts,15,0.6,2026-05-18T00:11:16Z
 jimmywarting/node-domexception,2025,16,24,19,43,1,index.js,43,0.6,2026-05-03T17:22:01Z
 jshttp/statuses,2025,45,34,8,42,3,index.js,38,1.0,2026-05-03T17:22:01Z
 inspect-js/is-arguments,2025,31,31,11,42,3,index.js,29,0.8,2026-05-03T17:22:01Z
@@ -720,6 +756,7 @@ crypto-browserify/randombytes,2025,8,14,14,28,2,browser.js,18,0.8,2026-05-03T17:
 mcollina/reusify,2025,7,28,0,28,2,eslint.config.js,14,0.7,2026-05-03T17:22:01Z
 medikoo/es6-symbol,2025,16,24,4,28,3,commitlint.config.js,22,1.5,2026-05-03T17:22:01Z
 jshttp/accepts,2025,46,14,14,28,5,test/type.js,8,2.5,2026-05-03T17:22:01Z
+browserify/randombytes,2025,8,14,14,28,2,browser.js,18,0.5,2026-05-18T00:11:16Z
 doowb/ansi-colors,2025,5,17,10,27,2,index.js,21,0.9,2026-05-03T17:22:01Z
 sindresorhus/lowercase-keys,2025,4,9,18,27,4,index.js,13,0.7,2026-05-03T17:22:01Z
 inspect-js/has-symbols,2025,31,22,5,27,8,shams.js,7,0.8,2026-05-03T17:22:01Z
@@ -733,6 +770,7 @@ fb55/domelementtype,2025,14,10,10,20,1,src/index.ts,20,0.9,2026-05-03T17:22:01Z
 sindresorhus/has-flag,2025,5,10,10,20,4,index.js,8,0.6,2026-05-03T17:22:01Z
 brianloveswords/node-jwa,2025,3,16,2,18,1,index.js,18,0.7,2026-05-03T17:22:01Z
 chaijs/type-detect,2025,3,5,13,18,2,rollup.conf.js,10,1.7,2026-05-03T17:22:01Z
+auth0/node-jwa,2025,3,16,2,18,1,index.js,18,0.6,2026-05-18T00:11:16Z
 sindresorhus/binary-extensions,2025,10,7,10,17,5,index.d.ts,4,1.2,2026-05-03T17:22:01Z
 moxystudio/node-cross-spawn,2025,13,9,8,17,3,lib/util/escape.js,10,1.1,2026-05-03T17:22:01Z
 sindresorhus/escape-string-regexp,2025,6,6,10,16,4,index.d.ts,6,1.3,2026-05-03T17:22:01Z
@@ -754,6 +792,7 @@ jprichardson/node-jsonfile,2025,5,3,3,6,1,index.js,6,0.7,2026-05-03T17:22:01Z
 micromatch/anymatch,2025,4,5,1,6,3,test.js,3,4.7,2026-05-03T17:22:01Z
 micromatch/to-regex-range,2025,3,3,3,6,1,index.js,6,0.9,2026-05-03T17:22:01Z
 inspect-js/functions-have-names,2025,16,5,1,6,1,index.js,6,0.7,2026-05-03T17:22:01Z
+inspect-js/has-bigints,2025,24,5,1,6,2,index.d.ts,3,0.5,2026-05-18T00:11:16Z
 retep998/winapi-rs,2025,1,3,2,5,1,src/um/sysinfoapi.rs,5,19.7,2026-05-03T17:22:01Z
 estools/estraverse,2025,2,4,0,4,1,estraverse.js,4,0.5,2026-05-03T17:22:01Z
 feross/run-parallel,2025,3,3,1,4,1,index.js,4,0.9,2026-05-03T17:22:01Z
@@ -762,6 +801,7 @@ mafintosh/end-of-stream,2025,2,3,1,4,1,index.js,4,0.7,2026-05-03T17:22:01Z
 alexei/sprintf.js,2025,3,2,2,4,2,dist/angular-sprintf.min.js,2,1.6,2026-05-03T17:22:01Z
 sindresorhus/tagged-tag,2025,4,3,0,3,1,index.d.ts,3,0.8,2026-05-03T17:22:01Z
 sindresorhus/import-fresh,2025,4,2,1,3,1,index.js,3,0.6,2026-05-03T17:22:01Z
+mdn/data,2025,527,2,1,3,2,test/lint.js,2,1.2,2026-05-18T00:11:16Z
 feross/queue-microtask,2025,6,1,1,2,1,index.js,2,0.6,2026-05-03T17:22:01Z
 teambition/merge2,2025,2,1,1,2,1,index.js,2,0.9,2026-05-03T17:22:01Z
 dchest/tweetnacl-js,2025,13,1,1,2,1,test/04-secretbox.quick.js,2,2.2,2026-05-03T17:22:01Z
@@ -878,3 +918,12 @@ zertosh/loose-envify,2025,0,0,0,0,0,,0,0.5,2026-05-03T17:22:01Z
 braveg1rl/performance-now,2025,1,0,0,0,0,,0,1.3,2026-05-03T17:22:01Z
 nodejs/string_decoder,2025,0,0,0,0,0,,0,0.9,2026-05-03T17:22:01Z
 sindresorhus/resolve-cwd,2025,1,0,0,0,0,,0,0.9,2026-05-03T17:22:01Z
+tjguk/wmi,2025,0,0,0,0,0,,0,8.5,2026-05-18T00:11:16Z
+micromatch/is-extglob,2025,0,0,0,0,0,,0,0.4,2026-05-18T00:11:16Z
+freedesktop-unofficial-mirror/cairo,2025,0,0,0,0,0,,0,86.9,2026-05-18T00:11:16Z
+isaacs/wrappy,2025,1,0,0,0,0,,0,0.5,2026-05-18T00:11:16Z
+tritondatacenter/node-assert-plus,2025,2,0,0,0,0,,0,0.5,2026-05-18T00:11:16Z
+tritondatacenter/node-extsprintf,2025,1,0,0,0,0,,0,0.5,2026-05-18T00:11:16Z
+pvorb/clone,2025,1,0,0,0,0,,0,0.5,2026-05-18T00:11:16Z
+defunctzombie/node-process,2025,0,0,0,0,0,,0,0.5,2026-05-18T00:11:16Z
+nvzqz/static-assertions,2025,0,0,0,0,0,,0,0.5,2026-05-18T00:11:16Z

@@ -1,0 +1,78 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 4089223,
+    "name": "firestorm-enabled",
+    "ecosystem": "cargo",
+    "description": "A dependency of firestorm. Do not use directly.",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 7,
+    "first_release_published_at": "2021-02-13T19:24:11.096Z",
+    "latest_release_published_at": "2022-05-20T18:51:49.058Z",
+    "latest_release_number": "0.5.1",
+    "last_synced_at": "2026-04-24T05:02:41.805Z",
+    "created_at": "2022-04-12T12:37:08.302Z",
+    "updated_at": "2026-04-24T05:02:41.805Z",
+    "registry_url": "https://crates.io/crates/firestorm-enabled/",
+    "install_command": "cargo install firestorm-enabled",
+    "documentation_url": "https://docs.rs/firestorm-enabled/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 1,
+    "downloads": 60045,
+    "downloads_period": "total",
+    "dependent_repos_count": 3,
+    "rankings": {
+      "downloads": 8.531897956862894,
+      "dependent_repos_count": 11.660533404150385,
+      "dependent_packages_count": 18.140740853057576,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 12.777724071356952
+    },
+    "purl": "pkg:cargo/firestorm-enabled",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/firestorm-enabled",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/firestorm-enabled",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/firestorm-enabled/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/firestorm-enabled/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/firestorm-enabled/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/firestorm-enabled/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/firestorm-enabled/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/firestorm-enabled/codemeta",
+    "maintainers": [
+      {
+        "uuid": "51874",
+        "login": "That3Percent",
+        "name": "Zac Burns",
+        "email": null,
+        "url": "https://github.com/That3Percent",
+        "packages_count": 26,
+        "html_url": "https://crates.io/users/That3Percent",
+        "role": null,
+        "created_at": "2022-11-07T19:23:14.937Z",
+        "updated_at": "2022-11-07T19:23:14.937Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/That3Percent/packages"
+      }
+    ]
+  }
+}

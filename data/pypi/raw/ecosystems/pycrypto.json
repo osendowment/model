@@ -1,0 +1,345 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2868574,
+    "name": "pycrypto",
+    "ecosystem": "pypi",
+    "description": "Cryptographic modules for Python.",
+    "homepage": "http://www.pycrypto.org/",
+    "licenses": "Public domain",
+    "normalized_licenses": [
+      "Unlicense"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 13,
+    "first_release_published_at": "2010-12-17T03:18:31.000Z",
+    "latest_release_published_at": "2014-06-20T08:10:20.000Z",
+    "latest_release_number": "2.6.1",
+    "last_synced_at": "2026-04-27T11:39:02.869Z",
+    "created_at": "2022-04-10T12:11:21.435Z",
+    "updated_at": "2026-04-27T13:53:22.570Z",
+    "registry_url": "https://pypi.org/project/pycrypto/",
+    "install_command": "pip install pycrypto --index-url https://pypi.org/simple",
+    "documentation_url": "https://pycrypto.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "License :: Public Domain",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: Unix",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
+        "Topic :: Security :: Cryptography"
+      ],
+      "normalized_name": "pycrypto",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2024-09-08T01:58:28.373Z",
+    "dependent_packages_count": 201,
+    "downloads": 8477580,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 30404,
+    "rankings": {
+      "downloads": 0.09891797782034902,
+      "dependent_repos_count": 0.041200002278341134,
+      "dependent_packages_count": 0.10424202377629548,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.31004425677664094,
+      "average": 0.13860106516290663
+    },
+    "purl": "pkg:pypi/pycrypto",
+    "advisories": [
+      {
+        "uuid": "GSA_kwCzR0hTQS14Mzc3LWY2NHAtaGY1as4AAe7b",
+        "url": "https://github.com/advisories/GHSA-x377-f64p-hf5j",
+        "title": "PyCrypto does not properly reseed PRNG before allowing access",
+        "description": "The Crypto.Random.atfork function in PyCrypto before 2.6.1 does not properly reseed the pseudo-random number generator (PRNG) before allowing a child process to access it, which makes it easier for context-dependent attackers to obtain sensitive information by leveraging a race condition in which a child process is created and accesses the PRNG within the same rate-limit period as another process.",
+        "origin": "UNSPECIFIED",
+        "severity": "HIGH",
+        "published_at": "2022-05-17T04:59:18.000Z",
+        "withdrawn_at": null,
+        "classification": "GENERAL",
+        "cvss_score": 8.7,
+        "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2013-1445",
+          "https://github.com/dlitz/pycrypto/commit/19dcf7b15d61b7dc1a125a367151de40df6ef175",
+          "http://www.debian.org/security/2013/dsa-2781",
+          "http://www.openwall.com/lists/oss-security/2013/10/17/3",
+          "https://github.com/pypa/advisory-database/tree/main/vulns/pycrypto/PYSEC-2013-29.yaml",
+          "https://github.com/advisories/GHSA-x377-f64p-hf5j"
+        ],
+        "source_kind": "github",
+        "identifiers": [
+          "GHSA-x377-f64p-hf5j",
+          "CVE-2013-1445"
+        ],
+        "repository_url": "https://github.com/dlitz/pycrypto",
+        "blast_radius": 39.00149729758535,
+        "created_at": "2024-05-02T06:05:20.634Z",
+        "updated_at": "2026-04-05T20:05:16.926Z",
+        "epss_percentage": 0.00424,
+        "epss_percentile": 0.615,
+        "api_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS14Mzc3LWY2NHAtaGY1as4AAe7b",
+        "html_url": "https://advisories.ecosyste.ms/advisories/GSA_kwCzR0hTQS14Mzc3LWY2NHAtaGY1as4AAe7b",
+        "packages": [
+          {
+            "ecosystem": "pypi",
+            "package_name": "pycrypto",
+            "versions": [
+              {
+                "first_patched_version": "2.6.1",
+                "vulnerable_version_range": "< 2.6.1"
+              }
+            ],
+            "purl": "pkg:pypi/pycrypto"
+          }
+        ],
+        "related_packages_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS14Mzc3LWY2NHAtaGY1as4AAe7b/related_packages",
+        "related_advisories": []
+      },
+      {
+        "uuid": "GSA_kwCzR0hTQS12MzY3LXA1OHctOThoNc4AAaJC",
+        "url": "https://github.com/advisories/GHSA-v367-p58w-98h5",
+        "title": "PyCrypto makes Use of Insufficiently Random Values",
+        "description": "PyCrypto before 2.6 does not produce appropriate prime numbers when using an ElGamal scheme to generate a key, which reduces the signature space or public key space and makes it easier for attackers to conduct brute force attacks to obtain the private key.",
+        "origin": "UNSPECIFIED",
+        "severity": "MODERATE",
+        "published_at": "2022-05-17T01:46:08.000Z",
+        "withdrawn_at": null,
+        "classification": "GENERAL",
+        "cvss_score": 6.9,
+        "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2012-2417",
+          "https://github.com/Legrandin/pycrypto/commit/9f912f13df99ad3421eff360d6a62d7dbec755c2",
+          "https://bugs.launchpad.net/pycrypto/+bug/985164",
+          "https://exchange.xforce.ibmcloud.com/vulnerabilities/75871",
+          "https://github.com/dlitz/pycrypto/blob/373ea760f21701b162e8c4912a66928ee30d401a/ChangeLog",
+          "https://hermes.opensuse.org/messages/15083589",
+          "http://lists.fedoraproject.org/pipermail/package-announce/2012-June/081713.html",
+          "http://lists.fedoraproject.org/pipermail/package-announce/2012-June/081759.html",
+          "http://lists.fedoraproject.org/pipermail/package-announce/2012-June/081789.html",
+          "http://www.debian.org/security/2012/dsa-2502",
+          "http://www.mandriva.com/security/advisories?name=MDVSA-2012:117",
+          "http://www.openwall.com/lists/oss-security/2012/05/25/1",
+          "https://web.archive.org/web/20140724111917/http://secunia.com/advisories/49263",
+          "https://web.archive.org/web/20200228184120/http://www.securityfocus.com/bid/53687",
+          "https://github.com/pypa/advisory-database/tree/main/vulns/pycrypto/PYSEC-2012-16.yaml",
+          "https://github.com/advisories/GHSA-v367-p58w-98h5"
+        ],
+        "source_kind": "github",
+        "identifiers": [
+          "GHSA-v367-p58w-98h5",
+          "CVE-2012-2417"
+        ],
+        "repository_url": "https://github.com/Legrandin/pycrypto",
+        "blast_radius": 30.932221994636663,
+        "created_at": "2024-04-30T15:05:28.558Z",
+        "updated_at": "2026-04-05T20:05:18.733Z",
+        "epss_percentage": 0.04088,
+        "epss_percentile": 0.88506,
+        "api_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS12MzY3LXA1OHctOThoNc4AAaJC",
+        "html_url": "https://advisories.ecosyste.ms/advisories/GSA_kwCzR0hTQS12MzY3LXA1OHctOThoNc4AAaJC",
+        "packages": [
+          {
+            "ecosystem": "pypi",
+            "package_name": "PyCrypto",
+            "versions": [
+              {
+                "first_patched_version": "2.6",
+                "vulnerable_version_range": "< 2.6"
+              }
+            ],
+            "purl": "pkg:pypi/pycrypto"
+          }
+        ],
+        "related_packages_url": "https://advisories.ecosyste.ms/api/v1/advisories/GSA_kwCzR0hTQS12MzY3LXA1OHctOThoNc4AAaJC/related_packages",
+        "related_advisories": []
+      },
+      {
+        "uuid": "MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLWNxMjctdjd4cC1jMzU2",
+        "url": "https://github.com/advisories/GHSA-cq27-v7xp-c356",
+        "title": "Buffer Overflow in pycrypto",
+        "description": "Heap-based buffer overflow in the ALGnew function in block_templace.c in Python Cryptography Toolkit (aka pycrypto) allows remote attackers to execute arbitrary code as demonstrated by a crafted iv parameter to cryptmsg.py.",
+        "origin": "UNSPECIFIED",
+        "severity": "CRITICAL",
+        "published_at": "2018-12-14T18:51:38.000Z",
+        "withdrawn_at": null,
+        "classification": "GENERAL",
+        "cvss_score": 9.3,
+        "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2013-7459",
+          "https://github.com/dlitz/pycrypto/issues/176",
+          "https://github.com/dlitz/pycrypto/commit/8dbe0dc3eea5c689d4f76b37b93fe216cf1f00d4",
+          "https://bugzilla.redhat.com/show_bug.cgi?id=1409754",
+          "https://github.com/advisories/GHSA-cq27-v7xp-c356",
+          "https://security.gentoo.org/glsa/201702-14",
+          "http://www.openwall.com/lists/oss-security/2016/12/27/8",
+          "https://github.com/pypa/advisory-database/tree/main/vulns/pycrypto/PYSEC-2017-94.yaml",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/C6BWNADPLKDBBQBUT3P75W7HAJCE7M3B",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/RJ37R2YLX56YZABFNAOWV4VTHTGYREAE"
+        ],
+        "source_kind": "github",
+        "identifiers": [
+          "GHSA-cq27-v7xp-c356",
+          "CVE-2013-7459"
+        ],
+        "repository_url": "https://github.com/dlitz/pycrypto",
+        "blast_radius": 41.69125573190159,
+        "created_at": "2022-12-21T16:12:47.532Z",
+        "updated_at": "2026-04-27T13:10:16.919Z",
+        "epss_percentage": 0.14532,
+        "epss_percentile": 0.94261,
+        "api_url": "https://advisories.ecosyste.ms/api/v1/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLWNxMjctdjd4cC1jMzU2",
+        "html_url": "https://advisories.ecosyste.ms/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLWNxMjctdjd4cC1jMzU2",
+        "packages": [
+          {
+            "ecosystem": "pypi",
+            "package_name": "pycrypto",
+            "versions": [
+              {
+                "first_patched_version": null,
+                "vulnerable_version_range": "<= 2.6.1"
+              }
+            ],
+            "purl": "pkg:pypi/pycrypto",
+            "statistics": {
+              "dependent_packages_count": 201,
+              "dependent_repos_count": 30404,
+              "downloads": 8486520,
+              "downloads_period": "last-month"
+            },
+            "affected_versions": [
+              "2.0.1",
+              "2.1.0",
+              "2.4.1",
+              "2.6.1"
+            ],
+            "unaffected_versions": []
+          }
+        ],
+        "related_packages_url": "https://advisories.ecosyste.ms/api/v1/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLWNxMjctdjd4cC1jMzU2/related_packages",
+        "related_advisories": []
+      },
+      {
+        "uuid": "MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLTY1Mjgtd3ZmNi1mNnFn",
+        "url": "https://github.com/advisories/GHSA-6528-wvf6-f6qg",
+        "title": "Pycrypto generates weak key parameters",
+        "description": "lib/Crypto/PublicKey/ElGamal.py in PyCrypto through 2.6.1 generates weak ElGamal key parameters, which allows attackers to obtain sensitive information by reading ciphertext data (i.e., it does not have semantic security in face of a ciphertext-only attack). The Decisional Diffie-Hellman (DDH) assumption does not hold for PyCrypto's ElGamal implementation.",
+        "origin": "UNSPECIFIED",
+        "severity": "HIGH",
+        "published_at": "2018-07-12T20:29:26.000Z",
+        "withdrawn_at": null,
+        "classification": "GENERAL",
+        "cvss_score": 8.7,
+        "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N",
+        "references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2018-6594",
+          "https://github.com/dlitz/pycrypto/issues/253",
+          "https://github.com/TElgamal/attack-on-pycrypto-elgamal",
+          "https://github.com/advisories/GHSA-6528-wvf6-f6qg",
+          "https://lists.debian.org/debian-lts-announce/2018/02/msg00018.html",
+          "https://security.gentoo.org/glsa/202007-62",
+          "https://github.com/pypa/advisory-database/tree/main/vulns/pycrypto/PYSEC-2018-97.yaml",
+          "https://usn.ubuntu.com/3616-1",
+          "https://usn.ubuntu.com/3616-2"
+        ],
+        "source_kind": "github",
+        "identifiers": [
+          "GHSA-6528-wvf6-f6qg",
+          "CVE-2018-6594"
+        ],
+        "repository_url": "https://github.com/dlitz/pycrypto",
+        "blast_radius": 39.00149729758535,
+        "created_at": "2022-12-21T16:12:48.045Z",
+        "updated_at": "2026-04-27T13:10:16.939Z",
+        "epss_percentage": 0.00798,
+        "epss_percentile": 0.73519,
+        "api_url": "https://advisories.ecosyste.ms/api/v1/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLTY1Mjgtd3ZmNi1mNnFn",
+        "html_url": "https://advisories.ecosyste.ms/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLTY1Mjgtd3ZmNi1mNnFn",
+        "packages": [
+          {
+            "ecosystem": "pypi",
+            "package_name": "pycrypto",
+            "versions": [
+              {
+                "first_patched_version": null,
+                "vulnerable_version_range": "<= 2.6.1"
+              }
+            ],
+            "purl": "pkg:pypi/pycrypto",
+            "statistics": {
+              "dependent_packages_count": 201,
+              "dependent_repos_count": 30404,
+              "downloads": 8486520,
+              "downloads_period": "last-month"
+            },
+            "affected_versions": [
+              "2.0.1",
+              "2.1.0",
+              "2.4.1",
+              "2.6.1"
+            ],
+            "unaffected_versions": []
+          }
+        ],
+        "related_packages_url": "https://advisories.ecosyste.ms/api/v1/advisories/MDE2OlNlY3VyaXR5QWR2aXNvcnlHSFNBLTY1Mjgtd3ZmNi1mNnFn/related_packages",
+        "related_advisories": []
+      }
+    ],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/pycrypto",
+    "docker_dependents_count": 1924,
+    "docker_downloads_count": 78214219,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/pycrypto",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/pycrypto/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/pycrypto/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/pycrypto/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/pycrypto/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/pycrypto/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/pycrypto/codemeta",
+    "maintainers": [
+      {
+        "uuid": "dlitz",
+        "login": "dlitz",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 5,
+        "html_url": "https://pypi.org/user/dlitz/",
+        "role": null,
+        "created_at": "2022-12-29T08:31:22.682Z",
+        "updated_at": "2022-12-29T08:31:22.682Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/dlitz/packages"
+      },
+      {
+        "uuid": "amk",
+        "login": "amk",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 8,
+        "html_url": "https://pypi.org/user/amk/",
+        "role": null,
+        "created_at": "2022-12-29T08:31:22.678Z",
+        "updated_at": "2022-12-29T08:31:22.678Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/amk/packages"
+      }
+    ]
+  }
+}

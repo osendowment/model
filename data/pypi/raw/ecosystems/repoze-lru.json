@@ -1,0 +1,111 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2901564,
+    "name": "repoze.lru",
+    "ecosystem": "pypi",
+    "description": "A tiny LRU cache implementation and decorator",
+    "homepage": "http://www.repoze.org",
+    "licenses": "BSD-derived (http://www.repoze.org/LICENSE.txt)",
+    "normalized_licenses": [
+      "Other"
+    ],
+    "repository_url": null,
+    "keywords_array": [
+      "repoze",
+      "lru",
+      "cache"
+    ],
+    "namespace": null,
+    "versions_count": 7,
+    "first_release_published_at": "2009-06-15T01:51:50.000Z",
+    "latest_release_published_at": "2017-09-07T05:01:00.000Z",
+    "latest_release_number": "0.7",
+    "last_synced_at": "2026-04-26T21:01:35.891Z",
+    "created_at": "2022-04-10T12:27:48.893Z",
+    "updated_at": "2026-04-26T21:01:35.891Z",
+    "registry_url": "https://pypi.org/project/repoze.lru/",
+    "install_command": "pip install repoze.lru --index-url https://pypi.org/simple",
+    "documentation_url": "https://repoze.lru.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Intended Audience :: Developers",
+        "License :: Repoze Public License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy"
+      ],
+      "normalized_name": "repoze-lru",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2024-09-08T16:14:11.503Z",
+    "dependent_packages_count": 19,
+    "downloads": 3149128,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 3180,
+    "rankings": {
+      "downloads": 0.1893748853394249,
+      "dependent_repos_count": 0.18806599873307062,
+      "dependent_packages_count": 0.6423982869379015,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.05821560296564095,
+      "average": 0.2695136934940095
+    },
+    "purl": "pkg:pypi/repoze.lru",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/repoze.lru",
+    "docker_dependents_count": 229,
+    "docker_downloads_count": 831987738,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/repoze.lru",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/repoze.lru/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/repoze.lru/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/repoze.lru/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/repoze.lru/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/repoze.lru/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/repoze.lru/codemeta",
+    "maintainers": [
+      {
+        "uuid": "chrism",
+        "login": "chrism",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 249,
+        "html_url": "https://pypi.org/user/chrism/",
+        "role": null,
+        "created_at": "2023-01-21T20:36:12.667Z",
+        "updated_at": "2023-01-21T20:36:12.667Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/chrism/packages"
+      },
+      {
+        "uuid": "tseaver",
+        "login": "tseaver",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 146,
+        "html_url": "https://pypi.org/user/tseaver/",
+        "role": null,
+        "created_at": "2023-01-21T20:36:12.698Z",
+        "updated_at": "2023-01-21T20:36:12.698Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/tseaver/packages"
+      }
+    ]
+  }
+}

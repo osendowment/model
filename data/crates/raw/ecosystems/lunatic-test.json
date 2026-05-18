@@ -1,0 +1,79 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 4334734,
+    "name": "lunatic-test",
+    "ecosystem": "cargo",
+    "description": "#[lunatic::test] macro, meant as a drop-in replacement for Rust's #[test]",
+    "homepage": null,
+    "licenses": "Apache-2.0/MIT",
+    "normalized_licenses": [
+      "Apache-2.0",
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 5,
+    "first_release_published_at": "2022-04-25T14:22:07.398Z",
+    "latest_release_published_at": "2023-05-03T19:34:39.035Z",
+    "latest_release_number": "0.13.0",
+    "last_synced_at": "2026-04-22T19:01:45.992Z",
+    "created_at": "2022-04-25T14:32:19.360Z",
+    "updated_at": "2026-04-22T19:01:45.992Z",
+    "registry_url": "https://crates.io/crates/lunatic-test/",
+    "install_command": "cargo install lunatic-test",
+    "documentation_url": "https://docs.rs/lunatic-test/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 3,
+    "downloads": 29017,
+    "downloads_period": "total",
+    "dependent_repos_count": 9,
+    "rankings": {
+      "downloads": 16.22555969159155,
+      "dependent_repos_count": 8.150686489314117,
+      "dependent_packages_count": 12.218069338832324,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 12.198105173245997
+    },
+    "purl": "pkg:cargo/lunatic-test",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/lunatic-test",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/lunatic-test",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/lunatic-test/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/lunatic-test/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/lunatic-test/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/lunatic-test/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/lunatic-test/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/lunatic-test/codemeta",
+    "maintainers": [
+      {
+        "uuid": "99660",
+        "login": "bkolobara",
+        "name": "Bernard Kolobara",
+        "email": null,
+        "url": "https://github.com/bkolobara",
+        "packages_count": 41,
+        "html_url": "https://crates.io/users/bkolobara",
+        "role": null,
+        "created_at": "2022-11-08T04:04:17.470Z",
+        "updated_at": "2022-11-08T04:04:17.470Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/bkolobara/packages"
+      }
+    ]
+  }
+}

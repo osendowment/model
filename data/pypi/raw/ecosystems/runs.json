@@ -1,0 +1,548 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2907975,
+    "name": "runs",
+    "ecosystem": "pypi",
+    "description": "🏃 Run a block of text as a subprocess 🏃",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "https://github.com/rec/runs",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 8,
+    "first_release_published_at": "2020-11-09T11:50:02.000Z",
+    "latest_release_published_at": "2026-02-03T15:59:59.000Z",
+    "latest_release_number": "1.3.0",
+    "last_synced_at": "2026-04-25T00:05:17.029Z",
+    "created_at": "2022-04-10T12:31:00.010Z",
+    "updated_at": "2026-04-25T00:05:17.029Z",
+    "registry_url": "https://pypi.org/project/runs/",
+    "install_command": "pip install runs --index-url https://pypi.org/simple",
+    "documentation_url": "https://runs.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14"
+      ],
+      "normalized_name": "runs",
+      "project_status": null
+    },
+    "repo_metadata": {
+      "id": 57463249,
+      "uuid": "310845757",
+      "full_name": "rec/runs",
+      "owner": "rec",
+      "description": "🏃 Run a block of text as a subprocess 🏃",
+      "archived": false,
+      "fork": false,
+      "pushed_at": "2024-02-14T14:47:16.000Z",
+      "size": 63,
+      "stargazers_count": 3,
+      "open_issues_count": 0,
+      "forks_count": 2,
+      "subscribers_count": 3,
+      "default_branch": "main",
+      "last_synced_at": "2025-09-25T16:48:28.467Z",
+      "etag": null,
+      "topics": [],
+      "latest_commit_sha": null,
+      "homepage": "",
+      "language": "Python",
+      "has_issues": true,
+      "has_wiki": null,
+      "has_pages": null,
+      "mirror_url": null,
+      "source_name": null,
+      "license": "mit",
+      "status": null,
+      "scm": "git",
+      "pull_requests_enabled": true,
+      "icon_url": "https://github.com/rec.png",
+      "metadata": {
+        "files": {
+          "readme": "README.rst",
+          "changelog": "CHANGELOG",
+          "contributing": null,
+          "funding": "FUNDING.yml",
+          "license": "LICENSE",
+          "code_of_conduct": null,
+          "threat_model": null,
+          "audit": null,
+          "citation": null,
+          "codeowners": null,
+          "security": null,
+          "support": null,
+          "governance": null,
+          "roadmap": null,
+          "authors": null,
+          "dei": null,
+          "publiccode": null,
+          "codemeta": null
+        },
+        "funding": {
+          "github": "rec"
+        }
+      },
+      "created_at": "2020-11-07T13:00:32.000Z",
+      "updated_at": "2024-12-30T22:25:33.000Z",
+      "dependencies_parsed_at": "2024-01-25T11:35:58.515Z",
+      "dependency_job_id": "b6113698-e763-4e85-8323-5ea38ae2061f",
+      "html_url": "https://github.com/rec/runs",
+      "commit_stats": {
+        "total_commits": 37,
+        "total_committers": 1,
+        "mean_commits": 37.0,
+        "dds": 0.0,
+        "last_synced_commit": "55926dd520bbbd2def30684ce4b2aef8a24ebbc0"
+      },
+      "previous_names": [],
+      "tags_count": 7,
+      "template": false,
+      "template_full_name": null,
+      "purl": "pkg:github/rec/runs",
+      "repository_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns",
+      "tags_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags",
+      "releases_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/releases",
+      "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/manifests",
+      "owner_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/rec",
+      "download_url": "https://codeload.github.com/rec/runs/tar.gz/refs/heads/main",
+      "sbom_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/sbom",
+      "scorecard": {
+        "id": 767031,
+        "data": {
+          "date": "2025-08-11",
+          "repo": {
+            "name": "github.com/rec/runs",
+            "commit": "45eb186becb5439c5903044eee1a88c8b270d7b6"
+          },
+          "scorecard": {
+            "version": "v5.2.1-40-gf6ed084d",
+            "commit": "f6ed084d17c9236477efd66e5b258b9d4cc7b389"
+          },
+          "score": 3.3,
+          "checks": [
+            {
+              "name": "Packaging",
+              "score": -1,
+              "reason": "packaging workflow not detected",
+              "details": [
+                "Warn: no GitHub/GitLab publishing workflow detected."
+              ],
+              "documentation": {
+                "short": "Determines if the project is published as a package that others can easily download, install, easily update, and uninstall.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#packaging"
+              }
+            },
+            {
+              "name": "Maintained",
+              "score": 0,
+              "reason": "0 commit(s) and 0 issue activity found in the last 90 days -- score normalized to 0",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project is \"actively maintained\".",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#maintained"
+              }
+            },
+            {
+              "name": "Dangerous-Workflow",
+              "score": 10,
+              "reason": "no dangerous workflow patterns detected",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project's GitHub Action workflows avoid dangerous patterns.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#dangerous-workflow"
+              }
+            },
+            {
+              "name": "Pinned-Dependencies",
+              "score": 0,
+              "reason": "dependency not pinned by hash detected -- score normalized to 0",
+              "details": [
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/python-package.yml:5: update your workflow using https://app.stepsecurity.io/secureworkflow/rec/runs/python-package.yml/main?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/python-package.yml:7: update your workflow using https://app.stepsecurity.io/secureworkflow/rec/runs/python-package.yml/main?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/python-package.yml:10: update your workflow using https://app.stepsecurity.io/secureworkflow/rec/runs/python-package.yml/main?enable=pin",
+                "Warn: third-party GitHubAction not pinned by hash: .github/workflows/python-package.yml:13: update your workflow using https://app.stepsecurity.io/secureworkflow/rec/runs/python-package.yml/main?enable=pin",
+                "Warn: GitHub-owned GitHubAction not pinned by hash: .github/workflows/python-package.yml:17: update your workflow using https://app.stepsecurity.io/secureworkflow/rec/runs/python-package.yml/main?enable=pin",
+                "Info:   0 out of   4 GitHub-owned GitHubAction dependencies pinned",
+                "Info:   0 out of   1 third-party GitHubAction dependencies pinned"
+              ],
+              "documentation": {
+                "short": "Determines if the project has declared and pinned the dependencies of its build process.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#pinned-dependencies"
+              }
+            },
+            {
+              "name": "Code-Review",
+              "score": 0,
+              "reason": "Found 0/30 approved changesets -- score normalized to 0",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project requires human code review before pull requests (aka merge requests) are merged.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#code-review"
+              }
+            },
+            {
+              "name": "Binary-Artifacts",
+              "score": 10,
+              "reason": "no binaries found in the repo",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has generated executable (binary) artifacts in the source repository.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#binary-artifacts"
+              }
+            },
+            {
+              "name": "Token-Permissions",
+              "score": 0,
+              "reason": "detected GitHub workflow tokens with excessive permissions",
+              "details": [
+                "Warn: no topLevel permission defined: .github/workflows/python-package.yml:1",
+                "Info: no jobLevel write permissions found"
+              ],
+              "documentation": {
+                "short": "Determines if the project's workflows follow the principle of least privilege.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#token-permissions"
+              }
+            },
+            {
+              "name": "SAST",
+              "score": 0,
+              "reason": "no SAST tool detected",
+              "details": [
+                "Warn: no pull requests merged into dev branch"
+              ],
+              "documentation": {
+                "short": "Determines if the project uses static code analysis.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#sast"
+              }
+            },
+            {
+              "name": "CII-Best-Practices",
+              "score": 0,
+              "reason": "no effort to earn an OpenSSF best practices badge detected",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has an OpenSSF (formerly CII) Best Practices Badge.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#cii-best-practices"
+              }
+            },
+            {
+              "name": "Security-Policy",
+              "score": 0,
+              "reason": "security policy file not detected",
+              "details": [
+                "Warn: no security policy file detected",
+                "Warn: no security file to analyze",
+                "Warn: no security file to analyze",
+                "Warn: no security file to analyze"
+              ],
+              "documentation": {
+                "short": "Determines if the project has published a security policy.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#security-policy"
+              }
+            },
+            {
+              "name": "Fuzzing",
+              "score": 0,
+              "reason": "project is not fuzzed",
+              "details": [
+                "Warn: no fuzzer integrations found"
+              ],
+              "documentation": {
+                "short": "Determines if the project uses fuzzing.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#fuzzing"
+              }
+            },
+            {
+              "name": "License",
+              "score": 10,
+              "reason": "license file detected",
+              "details": [
+                "Info: project has a license file: LICENSE:0",
+                "Info: FSF or OSI recognized license: MIT License: LICENSE:0"
+              ],
+              "documentation": {
+                "short": "Determines if the project has defined a license.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#license"
+              }
+            },
+            {
+              "name": "Signed-Releases",
+              "score": -1,
+              "reason": "no releases found",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project cryptographically signs release artifacts.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#signed-releases"
+              }
+            },
+            {
+              "name": "Branch-Protection",
+              "score": 0,
+              "reason": "branch protection not enabled on development/release branches",
+              "details": [
+                "Warn: branch protection not enabled for branch 'main'"
+              ],
+              "documentation": {
+                "short": "Determines if the default and release branches are protected with GitHub's branch protection settings.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#branch-protection"
+              }
+            },
+            {
+              "name": "Vulnerabilities",
+              "score": 9,
+              "reason": "1 existing vulnerabilities detected",
+              "details": [
+                "Warn: Project is vulnerable to: PYSEC-2024-48 / GHSA-fj7x-q9j7-g6q6"
+              ],
+              "documentation": {
+                "short": "Determines if the project has open, known unfixed vulnerabilities.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#vulnerabilities"
+              }
+            }
+          ]
+        },
+        "last_synced_at": "2025-08-23T01:08:18.531Z",
+        "repository_id": 57463249,
+        "created_at": "2025-08-23T01:08:18.531Z",
+        "updated_at": "2025-08-23T01:08:18.531Z"
+      },
+      "host": {
+        "name": "GitHub",
+        "url": "https://github.com",
+        "kind": "github",
+        "repositories_count": 281461729,
+        "owners_count": 26505547,
+        "icon_url": "https://github.com/github.png",
+        "version": null,
+        "created_at": "2022-05-30T11:31:42.601Z",
+        "updated_at": "2022-07-04T15:15:14.044Z",
+        "status": "online",
+        "status_checked_at": "2025-10-28T02:00:06.022Z",
+        "response_time": 60,
+        "last_error": null,
+        "robots_txt_status": "success",
+        "robots_txt_updated_at": "2025-07-24T06:49:26.215Z",
+        "robots_txt_url": "https://github.com/robots.txt",
+        "online": true,
+        "can_crawl_api": true,
+        "host_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub",
+        "repositories_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories",
+        "repository_names_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repository_names",
+        "owners_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners"
+      },
+      "owner_record": {
+        "login": "rec",
+        "name": "Tom Ritchford",
+        "uuid": "253362",
+        "kind": "user",
+        "description": "Difficult problems made simpler",
+        "email": "",
+        "website": null,
+        "location": "Rouen, France",
+        "twitter": null,
+        "company": null,
+        "icon_url": "https://avatars.githubusercontent.com/u/253362?u=a75186518fd71ea4de9ae4c267c23ddeea5015d8&v=4",
+        "repositories_count": 238,
+        "last_synced_at": "2025-10-20T13:44:04.800Z",
+        "metadata": {
+          "has_sponsors_listing": true
+        },
+        "html_url": "https://github.com/rec",
+        "funding_links": [
+          "https://github.com/sponsors/rec"
+        ],
+        "total_stars": 500,
+        "followers": 135,
+        "following": 15,
+        "created_at": "2022-11-02T20:59:11.895Z",
+        "updated_at": "2025-10-20T13:44:04.801Z",
+        "owner_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/rec",
+        "repositories_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/rec/repositories"
+      },
+      "tags": [
+        {
+          "name": "v1.2.2",
+          "sha": "67f7e2582a50e527a6aff68cb7f8ac6bcbaf2116",
+          "kind": "commit",
+          "published_at": "2024-01-25T14:43:53.000Z",
+          "download_url": "https://codeload.github.com/rec/runs/tar.gz/v1.2.2",
+          "html_url": "https://github.com/rec/runs/releases/tag/v1.2.2",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/rec/runs@v1.2.2",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v1.2.2",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v1.2.2/manifests"
+        },
+        {
+          "name": "v1.2.1",
+          "sha": "47d9bcecaefae83483638c30f56a88e31428d6a7",
+          "kind": "commit",
+          "published_at": "2024-01-25T10:43:16.000Z",
+          "download_url": "https://codeload.github.com/rec/runs/tar.gz/v1.2.1",
+          "html_url": "https://github.com/rec/runs/releases/tag/v1.2.1",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/rec/runs@v1.2.1",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v1.2.1",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v1.2.1/manifests"
+        },
+        {
+          "name": "v1.2.0",
+          "sha": "cc4f9a0da35ae03d61091ae817e4f599ed03dd60",
+          "kind": "commit",
+          "published_at": "2023-12-29T13:03:26.000Z",
+          "download_url": "https://codeload.github.com/rec/runs/tar.gz/v1.2.0",
+          "html_url": "https://github.com/rec/runs/releases/tag/v1.2.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/rec/runs@v1.2.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v1.2.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v1.2.0/manifests"
+        },
+        {
+          "name": "v1.1.0",
+          "sha": "787ccb5eea89ca320e7e2b988e7034dd08b8846a",
+          "kind": "commit",
+          "published_at": "2020-11-17T12:25:14.000Z",
+          "download_url": "https://codeload.github.com/rec/runs/tar.gz/v1.1.0",
+          "html_url": "https://github.com/rec/runs/releases/tag/v1.1.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/rec/runs@v1.1.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v1.1.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v1.1.0/manifests"
+        },
+        {
+          "name": "v1.0.0",
+          "sha": "a50fa8a0464c92e64ccc1645fd40492f3d32bde1",
+          "kind": "commit",
+          "published_at": "2020-11-14T18:42:34.000Z",
+          "download_url": "https://codeload.github.com/rec/runs/tar.gz/v1.0.0",
+          "html_url": "https://github.com/rec/runs/releases/tag/v1.0.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/rec/runs@v1.0.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v1.0.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v1.0.0/manifests"
+        },
+        {
+          "name": "v0.3.2",
+          "sha": "f1a7455ab580bbaa89dd4a3380affda6949a80e4",
+          "kind": "commit",
+          "published_at": "2020-11-14T18:38:53.000Z",
+          "download_url": "https://codeload.github.com/rec/runs/tar.gz/v0.3.2",
+          "html_url": "https://github.com/rec/runs/releases/tag/v0.3.2",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/rec/runs@v0.3.2",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v0.3.2",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v0.3.2/manifests"
+        },
+        {
+          "name": "v0.3.1",
+          "sha": "227a9caaedef53c17037776cc58c4a16103274f8",
+          "kind": "commit",
+          "published_at": "2020-11-09T11:49:29.000Z",
+          "download_url": "https://codeload.github.com/rec/runs/tar.gz/v0.3.1",
+          "html_url": "https://github.com/rec/runs/releases/tag/v0.3.1",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/rec/runs@v0.3.1",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v0.3.1",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/tags/v0.3.1/manifests"
+        }
+      ]
+    },
+    "repo_metadata_updated_at": "2026-03-23T16:10:08.122Z",
+    "dependent_packages_count": 2,
+    "downloads": 3934669,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 30,
+    "rankings": {
+      "downloads": 12.382520999401248,
+      "dependent_repos_count": 2.662008693522713,
+      "dependent_packages_count": 4.732581140073995,
+      "stargazers_count": 27.783442341647806,
+      "forks_count": 22.605014366661695,
+      "docker_downloads_count": null,
+      "average": 14.03311350826149
+    },
+    "purl": "pkg:pypi/runs",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/runs",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/runs",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/runs/dependencies",
+    "status": null,
+    "funding_links": [
+      "https://github.com/sponsors/rec"
+    ],
+    "critical": null,
+    "issue_metadata": {
+      "last_synced_at": "2025-08-17T08:56:39.947Z",
+      "issues_count": 0,
+      "pull_requests_count": 0,
+      "avg_time_to_close_issue": null,
+      "avg_time_to_close_pull_request": null,
+      "issues_closed_count": 0,
+      "pull_requests_closed_count": 0,
+      "pull_request_authors_count": 0,
+      "issue_authors_count": 0,
+      "avg_comments_per_issue": null,
+      "avg_comments_per_pull_request": null,
+      "merged_pull_requests_count": 0,
+      "bot_issues_count": 0,
+      "bot_pull_requests_count": 0,
+      "past_year_issues_count": 0,
+      "past_year_pull_requests_count": 0,
+      "past_year_avg_time_to_close_issue": null,
+      "past_year_avg_time_to_close_pull_request": null,
+      "past_year_issues_closed_count": 0,
+      "past_year_pull_requests_closed_count": 0,
+      "past_year_pull_request_authors_count": 0,
+      "past_year_issue_authors_count": 0,
+      "past_year_avg_comments_per_issue": null,
+      "past_year_avg_comments_per_pull_request": null,
+      "past_year_bot_issues_count": 0,
+      "past_year_bot_pull_requests_count": 0,
+      "past_year_merged_pull_requests_count": 0,
+      "issues_url": "https://issues.ecosyste.ms/api/v1/hosts/GitHub/repositories/rec%2Fruns/issues",
+      "maintainers": [],
+      "active_maintainers": []
+    },
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/runs/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/runs/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/runs/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/runs/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/runs/codemeta",
+    "maintainers": [
+      {
+        "uuid": "TomSwirly",
+        "login": "TomSwirly",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 54,
+        "html_url": "https://pypi.org/user/TomSwirly/",
+        "role": null,
+        "created_at": "2023-02-25T09:30:41.097Z",
+        "updated_at": "2023-02-25T09:30:41.097Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/TomSwirly/packages"
+      }
+    ]
+  }
+}

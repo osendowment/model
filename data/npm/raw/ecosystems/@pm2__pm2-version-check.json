@@ -1,0 +1,94 @@
+{
+  "ecosystem": "npm",
+  "registry_hit": "npmjs.org",
+  "fetched_at": "2026-04-27T20:49:21Z",
+  "data": {
+    "id": 1124966,
+    "name": "@pm2/pm2-version-check",
+    "ecosystem": "npm",
+    "description": "Module to check latest PM2 version",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": "pm2",
+    "versions_count": 5,
+    "first_release_published_at": "2019-12-10T14:50:04.176Z",
+    "latest_release_published_at": "2021-04-01T09:39:04.568Z",
+    "latest_release_number": "1.0.4",
+    "last_synced_at": "2026-04-25T22:31:14.786Z",
+    "created_at": "2022-04-08T11:26:21.205Z",
+    "updated_at": "2026-04-25T22:31:14.786Z",
+    "registry_url": "https://www.npmjs.com/package/@pm2/pm2-version-check",
+    "install_command": "npm install @pm2/pm2-version-check",
+    "documentation_url": null,
+    "metadata": {
+      "funding": null,
+      "dist-tags": {
+        "latest": "1.0.4"
+      }
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 17,
+    "downloads": 7090979,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 11456,
+    "rankings": {
+      "downloads": 0.08622107621948742,
+      "dependent_repos_count": 0.2381517474128773,
+      "dependent_packages_count": 1.3478853351723226,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.2568978962561783,
+      "average": 0.4822890137652164
+    },
+    "purl": "pkg:npm/%40pm2/pm2-version-check",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/npm/@pm2/pm2-version-check",
+    "docker_dependents_count": 1435,
+    "docker_downloads_count": 30276238,
+    "usage_url": "https://repos.ecosyste.ms/usage/npm/@pm2/pm2-version-check",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/npm/@pm2/pm2-version-check/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@pm2%2Fpm2-version-check/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@pm2%2Fpm2-version-check/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@pm2%2Fpm2-version-check/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@pm2%2Fpm2-version-check/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@pm2%2Fpm2-version-check/codemeta",
+    "maintainers": [
+      {
+        "uuid": "tknew",
+        "login": "tknew",
+        "name": null,
+        "email": "strzelewicz.alexandre@gmail.com",
+        "url": null,
+        "packages_count": 138,
+        "html_url": "https://www.npmjs.com/~tknew",
+        "role": null,
+        "created_at": "2022-11-20T01:59:32.354Z",
+        "updated_at": "2022-11-20T01:59:32.354Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/tknew/packages"
+      },
+      {
+        "uuid": "keymetrics_bot",
+        "login": "keymetrics_bot",
+        "name": null,
+        "email": "tech@keymetrics.io",
+        "url": null,
+        "packages_count": 19,
+        "html_url": "https://www.npmjs.com/~keymetrics_bot",
+        "role": null,
+        "created_at": "2022-11-20T01:59:32.331Z",
+        "updated_at": "2022-11-20T01:59:32.331Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/keymetrics_bot/packages"
+      }
+    ]
+  }
+}

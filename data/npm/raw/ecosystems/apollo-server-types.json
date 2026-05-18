@@ -1,0 +1,90 @@
+{
+  "ecosystem": "npm",
+  "registry_hit": "npmjs.org",
+  "fetched_at": "2026-04-27T20:49:21Z",
+  "data": {
+    "id": 1424764,
+    "name": "apollo-server-types",
+    "ecosystem": "npm",
+    "description": "Apollo Server shared types",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 81,
+    "first_release_published_at": "2019-07-13T20:49:29.461Z",
+    "latest_release_published_at": "2023-03-02T19:33:15.172Z",
+    "latest_release_number": "3.8.0",
+    "last_synced_at": "2026-02-13T15:32:17.153Z",
+    "created_at": "2022-04-09T00:40:58.736Z",
+    "updated_at": "2026-02-13T15:32:17.153Z",
+    "registry_url": "https://www.npmjs.com/package/apollo-server-types",
+    "install_command": "npm install apollo-server-types",
+    "documentation_url": null,
+    "metadata": {
+      "funding": null,
+      "dist-tags": {
+        "latest": "3.8.0",
+        "next": "3.2.0",
+        "alpha": "3.5.0-alpha.1",
+        "next-v3": "0.300.0-alpha.3",
+        "rc": "3.0.0-rc.1",
+        "unified": "0.7.1-unified2.1",
+        "alphalambda": "0.300.0-lambda.0",
+        "html": "0.300.0-html.0",
+        "preview": "3.0.0-preview.3",
+        "v2": "0.10.0"
+      }
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 147,
+    "downloads": 4771864,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 58398,
+    "rankings": {
+      "downloads": 0.10755585481976272,
+      "dependent_repos_count": 0.12455752249569917,
+      "dependent_packages_count": 0.28377526747367154,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.20869757142240938,
+      "average": 0.1811465540528857
+    },
+    "purl": "pkg:npm/apollo-server-types",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/npm/apollo-server-types",
+    "docker_dependents_count": 797,
+    "docker_downloads_count": 40271761,
+    "usage_url": "https://repos.ecosyste.ms/usage/npm/apollo-server-types",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/npm/apollo-server-types/dependencies",
+    "status": "deprecated",
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/apollo-server-types/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/apollo-server-types/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/apollo-server-types/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/apollo-server-types/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/apollo-server-types/codemeta",
+    "maintainers": [
+      {
+        "uuid": "apollo-bot",
+        "login": "apollo-bot",
+        "name": null,
+        "email": "npm@apollographql.com",
+        "url": null,
+        "packages_count": 219,
+        "html_url": "https://www.npmjs.com/~apollo-bot",
+        "role": null,
+        "created_at": "2022-11-10T11:15:31.170Z",
+        "updated_at": "2022-11-10T11:15:31.170Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/apollo-bot/packages"
+      }
+    ]
+  }
+}

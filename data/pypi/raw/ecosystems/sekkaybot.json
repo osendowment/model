@@ -1,0 +1,86 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 335124,
+    "name": "sekkaybot",
+    "ecosystem": "pypi",
+    "description": "Lobby bot.",
+    "homepage": "https://www.youtube.com",
+    "licenses": "MIT License",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 167,
+    "first_release_published_at": "2021-09-07T09:35:59.000Z",
+    "latest_release_published_at": "2024-02-26T19:07:04.000Z",
+    "latest_release_number": "0.25.612",
+    "last_synced_at": "2026-03-27T22:31:28.139Z",
+    "created_at": "2022-04-06T12:42:13.048Z",
+    "updated_at": "2026-03-27T22:32:52.074Z",
+    "registry_url": "https://pypi.org/project/sekkaybot/",
+    "install_command": "pip install sekkaybot --index-url https://pypi.org/simple",
+    "documentation_url": "https://sekkaybot.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3"
+      ],
+      "normalized_name": "sekkaybot",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2026-03-27T22:32:52.052Z",
+    "dependent_packages_count": 0,
+    "downloads": 78,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 1,
+    "rankings": {
+      "downloads": 0.5107942507014831,
+      "dependent_repos_count": 21.619800316896704,
+      "dependent_packages_count": 10.082087700208083,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 10.737560755935425
+    },
+    "purl": "pkg:pypi/sekkaybot",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/sekkaybot",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/sekkaybot",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/sekkaybot/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sekkaybot/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sekkaybot/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sekkaybot/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sekkaybot/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sekkaybot/codemeta",
+    "maintainers": [
+      {
+        "uuid": "Sekkay",
+        "login": "Sekkay",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 18,
+        "html_url": "https://pypi.org/user/Sekkay/",
+        "role": null,
+        "created_at": "2022-11-14T17:37:00.680Z",
+        "updated_at": "2022-11-14T17:37:00.680Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/Sekkay/packages"
+      }
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 8886267,
+    "name": "llama-index-indices-managed-llama-cloud",
+    "ecosystem": "pypi",
+    "description": "llama-index indices llama-cloud integration",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 54,
+    "first_release_published_at": "2024-02-16T21:57:39.000Z",
+    "latest_release_published_at": "2026-03-25T14:32:01.000Z",
+    "latest_release_number": "0.11.1",
+    "last_synced_at": "2026-03-27T01:19:43.055Z",
+    "created_at": "2024-02-16T22:02:18.438Z",
+    "updated_at": "2026-03-27T01:19:43.056Z",
+    "registry_url": "https://pypi.org/project/llama-index-indices-managed-llama-cloud/",
+    "install_command": "pip install llama-index-indices-managed-llama-cloud --index-url https://pypi.org/simple",
+    "documentation_url": "https://llama-index-indices-managed-llama-cloud.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [],
+      "normalized_name": "llama-index-indices-managed-llama-cloud",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 6,
+    "downloads": 7959027,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 0,
+    "rankings": {
+      "downloads": null,
+      "dependent_repos_count": 64.95529010301794,
+      "dependent_packages_count": 9.842810578547725,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 37.399050340782836
+    },
+    "purl": "pkg:pypi/llama-index-indices-managed-llama-cloud",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/llama-index-indices-managed-llama-cloud",
+    "docker_dependents_count": 1,
+    "docker_downloads_count": 2328,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/llama-index-indices-managed-llama-cloud",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/llama-index-indices-managed-llama-cloud/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/llama-index-indices-managed-llama-cloud/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/llama-index-indices-managed-llama-cloud/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/llama-index-indices-managed-llama-cloud/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/llama-index-indices-managed-llama-cloud/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/llama-index-indices-managed-llama-cloud/codemeta",
+    "maintainers": [
+      {
+        "uuid": "jerryjliu",
+        "login": "jerryjliu",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 794,
+        "html_url": "https://pypi.org/user/jerryjliu/",
+        "role": null,
+        "created_at": "2024-02-16T22:03:56.965Z",
+        "updated_at": "2024-02-16T22:03:56.965Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/jerryjliu/packages"
+      }
+    ]
+  }
+}

@@ -152,6 +152,7 @@ aixed/wechat-hook,,10000,10000,10000,10000,10000
 aiyaapp/aiyaeffectsandroid,10000,10000,,,10000,10000
 ajv-validator/ajv,,,,,,5738
 ajv-validator/ajv-formats,,,,,,6732
+ajv-validator/ajv-keywords,,,,,,6414
 ajweeks/flexengine,,,,,,
 akai-katto/dandere2x,8875,7743,,,,8371
 akemin-dayo/appsync,10000,8906,9524,10000,,9369
@@ -254,7 +255,6 @@ andreas-mausch/whatsapp-viewer,10000,10000,,,,10000
 andreasfertig/cppinsights,8850,8864,9239,8109,7622,8598
 andrei-markeev/ts2c,,,,10000,10000,10000
 andrewrk/libsoundio,,10000,10000,,,5556
-andrewrk/node-pend,,,,,,10000
 andrewssobral/bgslibrary,,,,,,
 andrivet/advobfuscator,,,,,8893,8893
 android/ndk-samples,4722,7241,2346,2222,2500,3874
@@ -307,7 +307,6 @@ aomediacodec/libavif,4294,3458,1844,2276,2134,2139
 aorimn/dislocker,2083,5556,3878,,1484,665
 apache/age,1638,1110,1352,1929,3398,1214
 apache/airflow,1041,987,758,580,479,266
-apache/arrow,573,555,543,718,1032,277
 apache/arrow-rs,,,,,,356
 apache/brpc,1638,702,990,2073,2156,772
 apache/cloudberry,2738,385,365,780,1187,321
@@ -349,7 +348,6 @@ aravisproject/aravis,7911,6541,7097,5119,7401,7107
 archagon/sensible-side-buttons,,,,,,
 archlinux/linux,,,,,,
 ardagnir/athame,,,,,,
-ardatan/graphql-tools,,,,,,140
 ardatan/whatwg-node,,,,,,268
 ardera/flutter-pi,9616,8030,9245,9211,8262,8987
 ardour/ardour,3781,3036,3861,3829,4151,3591
@@ -446,6 +444,7 @@ audacity/audacity,2681,3928,4563,1287,1609,1969
 audio4linux/jdsp4linux,9184,7586,9011,4201,5000,8460
 audiorouterdev/audio-router,,,,,,
 audreyt/node-webworker-threads,10000,,,,,10000
+auth0/node-jwa,,,,,,2720
 autoas/as-deprecated,10000,,10000,,,10000
 autodiff/autodiff,5484,5170,7648,2520,10000,4730
 autohotkey/autohotkey,9431,9505,9283,9181,8396,9345
@@ -670,7 +669,9 @@ brofield/simpleini,10000,7249,3673,10000,8580,7092
 broofa/mime,,,,,,5804
 broofa/node-int64,,,,,,4645
 brookhong/keycastow,,,,,,
+browserify/events,,,,,,2825
 browserify/node-util,,,,,,3111
+browserify/randombytes,,,,,,1945
 browserify/resolve,,,,,,4795
 browseros-ai/browseros,,,,,4800,4800
 browserslist/browserslist,,,,,,6645
@@ -791,7 +792,6 @@ ceph/ceph,957,356,450,396,344,338
 cepr/android-serialport-api,,,,,,
 ceres-solver/ceres-solver,2422,3395,2714,4419,5662,3028
 certbot/certbot,2829,2299,2676,2511,3065,891
-certifi/python-certifi,,,,,,732
 cesanta/elk,10000,10000,10000,5000,5556,9244
 cesanta/mjs,6250,,,,10000,6358
 cesanta/mongoose,7688,5668,4911,5061,6344,4546
@@ -809,7 +809,6 @@ chalk/ansi-regex,,,,,,4131
 chalk/ansi-styles,,,,,,3850
 chalk/chalk,,,,,,3096
 chalk/slice-ansi,,,,,,4100
-chalk/strip-ansi,,,,,,5815
 chalk/supports-color,,,,,,4184
 chalk/wrap-ansi,,,,,,4361
 chalker/safer-buffer,,,,,,7734
@@ -891,7 +890,6 @@ ckb-next/ckb-next,7072,5479,6826,2909,4654,5661
 ckcr4lyf/evilapplejuice-esp32,,,6735,3223,10000,3813
 clab/dynet,7222,3333,10000,,,3000
 clangen/musikcube,8105,8988,7637,5986,10000,8428
-clap-rs/clap,,,,,,2453
 classicoldsong/apollo,2036,3987,2469,2302,2770,1979
 classicube/classicube,9305,8591,8671,7531,7437,8078
 cleanflight/cleanflight,,,10000,,,10000
@@ -1008,7 +1006,6 @@ cosmos72/twin,10000,10000,10000,,10000,10000
 cossacklabs/themis,5781,3715,2308,3750,,3739
 coturn/coturn,3285,2096,2379,1786,1897,1384
 couchbase/forestdb,,,,,,
-coveragepy/coveragepy,,,,,,8585
 covesa/vsomeip,1667,3333,1176,843,1835,701
 cowtoolz/webcamize,,,10000,10000,10000,10000
 cp-algorithms/cp-algorithms,3710,3491,1412,2712,1218,1258
@@ -1027,7 +1024,7 @@ cr-marcstevens/sha1collisiondetection,,,,,10000,10000
 cra-ros-pkg/robot_localization,2449,2111,1429,2704,4400,1694
 cracked5pider/stardust,,,,5000,8025,6533
 crankyoldgit/irremoteesp8266,5605,5076,4102,1667,1300,4491
-crate-py/rpds,,,,,,
+crate-py/rpds,,,,,,4049
 cratercrash/godot-orchestrator,,,7763,9828,9070,9382
 crawl/crawl,1784,2414,2151,2262,2618,1188
 crementif/botw-bettervr,10000,10000,7429,10000,7400,7848
@@ -1173,6 +1170,7 @@ deepseek-ai/flashmla,,,,,1570,1570
 deepskystacker/dss,6318,7311,6634,5699,7646,6486
 definitelytyped/definitelytyped,1127,782,1010,1228,1921,47
 defold/defold,3957,2007,1643,1583,1136,1506
+defunctzombie/node-process,,,,,,3285
 dekunukem/bob_cassette_rewinder,8728,5000,,10000,10000,8558
 dekunukem/daytripper,10000,10000,10000,,10000,10000
 dekunukem/duckypad,8909,7651,9274,10000,10000,9144
@@ -1263,7 +1261,6 @@ dosx-dev/obfus.h,,,,9815,6198,9221
 dotnet/diagnostics,962,1417,1090,1076,919,668
 doug/depthjs,,,,,,
 dougbinks/enkits,8977,8437,4400,3373,4400,6280
-douglasdwyer/wasm_sync,,,,,,10000
 dougwilson/nodejs-depd,,,,,,9913
 dovecot/core,4022,2350,2638,3428,2864,2873
 downdemo/cpp-concurrency-in-action-2ed,,,,,,
@@ -1458,6 +1455,7 @@ erthink/libmdbx,,,,,10000,10000
 erwincoumans/tiny-differentiable-simulator,4151,6633,10000,,,4303
 es-shims/array-includes,,,,,,9830
 es-shims/dunder-proto,,,,,,10000
+es-shims/es-object-atoms,,,,,,10000
 es-shims/es-set-tostringtag,,,,,,10000
 es-shims/math-intrinsics,,,,,,10000
 es-shims/object.values,,,,,,10000
@@ -1675,7 +1673,6 @@ fireice-uk/xmr-stak-cpu,,,,,,
 firmata/arduino,6250,3438,2000,10000,,2100
 firmianay/ctf-all-in-one,3850,6250,10000,,,3646
 fisco-bcos/fisco-bcos,2344,1939,1544,2480,4902,1801
-fitzgen/glob-to-regexp,,,,,,3910
 fix94/nintendont,2231,1429,5556,1837,6800,1736
 flagbrew/pksm,,,,,,
 flame/blis,4167,4260,3013,3438,4682,3333
@@ -1868,7 +1865,6 @@ gitlab-freedesktop-mirrors/libxcb,,,,,,2863
 gitoxidelabs/gitoxide,8962,9060,7176,4796,3577,7130
 gitpython-developers/gitdb,,,,,,4573
 gitpython-developers/gitpython,,,,,,
-gitpython-developers/smmap,,,,,,3219
 gittup/tup,7682,7944,9168,8550,10000,8030
 giuspen/cherrytree,8626,9344,8700,9106,9405,9000
 gjduck/e9patch,9659,9406,9672,7167,5702,9075
@@ -1983,6 +1979,7 @@ google/zerocopy,,,,,,2902
 googleapis/google-api-python-client,,,,,,
 googleapis/google-auth-library-python,,,,,,306
 googleapis/google-cloud-node-core,,,,,,253
+googleapis/google-cloud-python,,,,,,186
 googleapis/google-resumable-media-python,,,,,,2715
 googleapis/python-api-core,,,,,,327
 googleapis/python-crc32c,,,,,,792
@@ -2053,7 +2050,6 @@ guillaumegomez/doc-comment,,,,,,9667
 guinmoon/llmfarm,,,10000,10000,10000,10000
 guitarml/neuralpi,8524,10000,,10000,,8535
 guitarml/smartguitaramp,10000,6488,6250,,,5508
-gulpjs/glob-parent,,,,,,2997
 gulrak/filesystem,5955,3000,3840,3400,8828,4895
 gunrock/gunrock,7592,3584,4619,6800,,4298
 gurnec/hashcheck,,,,,,
@@ -2316,6 +2312,7 @@ insightsoftwareconsortium/itk,1601,1378,2212,1658,1832,1470
 inspect-js/array-buffer-byte-length,,,,,,10000
 inspect-js/available-typed-arrays,,,,,,9425
 inspect-js/functions-have-names,,,,,,10000
+inspect-js/has-bigints,,,,,,9649
 inspect-js/has-property-descriptors,,,,,,10000
 inspect-js/has-proto,,,,,,10000
 inspect-js/has-symbols,,,,,,10000
@@ -2385,6 +2382,7 @@ iryoku/smaa,,,,,,
 isaacs/chownr,,,,,,7623
 isaacs/cliui,,,,,,536
 isaacs/core-util-is,,,,,,5503
+isaacs/fs-minipass,,,,,,2699
 isaacs/fs.realpath,,,,,,7347
 isaacs/inherits,,,,,,6341
 isaacs/isexe,,,,,,9481
@@ -2401,6 +2399,7 @@ isaacs/package-json-from-dist,,,,,,10000
 isaacs/path-scurry,,,,,,9232
 isaacs/rimraf,,,,,,7371
 isaacs/sax-js,,,,,,5287
+isaacs/wrappy,,,,,,2578
 isaacs/yallist,,,,,,8817
 ish-app/ish,5246,3920,4722,4286,5556,4329
 isislovecruft/library--,,,,,,
@@ -2610,6 +2609,7 @@ jshttp/statuses,,,,,,6616
 jshttp/type-is,,,,,,7146
 jshttp/vary,,,,,,8665
 jslicense/spdx-correct.js,,,,,,7393
+jslicense/spdx-exceptions.json,,,,,,9556
 jslicense/spdx-expression-parse.js,,,,,,9083
 jslicense/spdx-license-ids,,,,,,4424
 json-c/json-c,3104,2915,4224,2978,2273,2307
@@ -2701,7 +2701,6 @@ kevinbeaty/any-promise,,,,,,6938
 kevinlawler/kona,5556,9376,10000,,,8620
 kevmo314/scuda,,,,5678,3884,5352
 kevva/dir-glob,,,,,,5781
-kevva/shebang-command,,,,,,6944
 keystone-engine/keystone,3333,3750,10000,,,6087
 kfix/ddcctl,5306,10000,,,,6173
 kfrlib/kfr,8756,9836,9412,9530,9703,9607
@@ -3315,6 +3314,7 @@ micknoise/maximilian,5988,6433,6888,5000,,5979
 micromark/micromark,,,,,,8908
 micromatch/anymatch,,,,,,4525
 micromatch/braces,,,,,,7244
+micromatch/is-extglob,,,,,,7341
 micromatch/is-glob,,,,,,5967
 micromatch/micromatch,,,,,,7343
 micromatch/picomatch,,,,,,3477
@@ -3740,7 +3740,6 @@ novum/vkquake,3978,3475,2640,3990,5406,2310
 nowsecure/fsmon,5062,,10000,4286,8580,4733
 npm/abbrev-js,,,,,,1410
 npm/cacache,,,,,,3565
-npm/fs-minipass,,,,,,2699
 npm/hosted-git-info,,,,,,1072
 npm/inflight,,,,,,2175
 npm/ini,,,,,,1288
@@ -3807,6 +3806,7 @@ nvlabs/nvdiffrast,8025,10000,5000,10000,3765,4694
 nvlabs/tiny-cuda-nn,10000,8136,6659,3878,4467,7579
 nvpro-samples/vk_mini_path_tracer,4306,5556,4321,10000,,3717
 nvpro-samples/vk_raytracing_tutorial_khr,5137,3600,1975,3750,9260,4459
+nvzqz/static-assertions,,,,,,9257
 nvzqz/static-assertions-rs,,,,,,9257
 nyamisty/altserver-linux,,10000,,,,10000
 nyanmisaka/ffmpeg-rockchip,10000,10000,3719,7587,10000,7150
@@ -3882,6 +3882,7 @@ open-telemetry/opentelemetry-cpp,1828,2008,1687,1542,1856,1206
 open-telemetry/opentelemetry-js,,,,,,424
 open-telemetry/opentelemetry-js-contrib,,,,,,421
 open-telemetry/opentelemetry-python,,,,,,346
+open-telemetry/opentelemetry-python-contrib,,,,,,367
 open-watcom/open-watcom-v2,9954,9822,9046,9172,9622,9538
 open5gs/open5gs,7138,4056,3734,4131,4752,4514
 open62541/open62541,4406,5253,6297,6364,5845,5661
@@ -4152,7 +4153,6 @@ pillarjs/encodeurl,,,,,,5165
 pillarjs/finalhandler,,,,,,6455
 pillarjs/iconv-lite,,,,,,5058
 pillarjs/parseurl,,,,,,8087
-pillarjs/path-to-regexp,,,,,,7274
 pillarjs/send,,,,,,5936
 pimoroni/pimoroni-pico,3159,2626,2585,3916,6250,2694
 pingcap/tiflash,717,502,819,1668,1776,600
@@ -4259,6 +4259,7 @@ promyloph/pianobar,5510,10000,10000,7551,10000,7648
 proot-me/proot,4392,4688,5148,,,3308
 proptest-rs/proptest,,,,,,2085
 protobuf-c/protobuf-c,4970,3125,5138,4442,10000,4163
+protobufjs/protobuf.js,,,,,,4317
 protocolbuffers/protobuf,2764,1110,1551,2047,2102,528
 provenance-emu/provenance,7199,6171,5426,9013,8530,7926
 proxmark/proxmark3,10000,,,,10000,7551
@@ -4284,6 +4285,7 @@ pulp-platform/pulpino,,,,,,
 pure-data/pure-data,2457,2969,2014,2345,2032,2111
 puredarwin/puredarwin,9006,10000,10000,3875,10000,8514
 purplei2p/i2pd,5117,6118,4121,7724,7074,5948
+pvorb/clone,,,,,,4483
 pvorb/node-clone,,,,,,4483
 pwmt/zathura,3028,3698,5930,4983,4522,4485
 pwn20wndstuff/undecimus,,,,,,
@@ -4326,6 +4328,7 @@ python-jsonschema/jsonschema,,,,,,6043
 python-jsonschema/jsonschema-specifications,,,,,,
 python-jsonschema/referencing,,,,,,5213
 python-pillow/pillow,4367,4271,4153,3659,4540,2103
+python-poetry/poetry,,,,,,1336
 python-poetry/poetry-core,,,,,,1105
 python-poetry/tomlkit,,,,,,2769
 python-trio/sniffio,,,,,,1521
@@ -4335,7 +4338,6 @@ python/mypy,1411,1543,1097,1237,1125,1681
 python/mypy_extensions,,,,,,1337
 python/typeshed,1137,1864,1919,874,1571,304
 python/typing,,,,,,409
-python/typing_extensions,,,,,,1539
 python/tzdata,,,,,,6334
 pytorch/cpuinfo,4375,1065,2485,2788,1488,665
 pytorch/fbgemm,1955,1796,1247,1234,1140,807
@@ -4641,7 +4643,6 @@ rust-lang/cfg-if,,,,,,1924
 rust-lang/compiler-builtins,,,,,,991
 rust-lang/flate2-rs,,,,,,2070
 rust-lang/futures-rs,,,,,,1400
-rust-lang/glob,,,,,,1280
 rust-lang/hashbrown,,,,,,1155
 rust-lang/libc,,,,,,793
 rust-lang/libz-sys,,,,,,1369
@@ -4900,15 +4901,13 @@ sindresorhus/execa,,,,,,5453
 sindresorhus/figures,,,,,,3908
 sindresorhus/file-type,,,,,,2704
 sindresorhus/find-cache-dir,,,,,,2743
+sindresorhus/find-cache-directory,,,,,,2743
 sindresorhus/find-up,,,,,,4875
 sindresorhus/find-up-simple,,,,,,5918
 sindresorhus/get-east-asian-width,,,,,,4253
-sindresorhus/get-stream,,,,,,3674
 sindresorhus/globals,,,,,,2367
 sindresorhus/globby,,,,,,3484
 sindresorhus/has-flag,,,,,,5413
-sindresorhus/import-fresh,,,,,,6216
-sindresorhus/import-local,,,,,,5489
 sindresorhus/indent-string,,,,,,6128
 sindresorhus/is-binary-path,,,,,,4463
 sindresorhus/is-docker,,,,,,6556
@@ -4939,6 +4938,7 @@ sindresorhus/p-limit,,,,,,5663
 sindresorhus/p-locate,,,,,,6159
 sindresorhus/p-map,,,,,,3821
 sindresorhus/p-try,,,,,,5225
+sindresorhus/package-directory,,,,,,5879
 sindresorhus/parent-module,,,,,,6598
 sindresorhus/parse-json,,,,,,4504
 sindresorhus/path-exists,,,,,,4832
@@ -4948,6 +4948,7 @@ sindresorhus/path-type,,,,,,5144
 sindresorhus/pify,,,,,,4913
 sindresorhus/pkg-dir,,,,,,5879
 sindresorhus/quick-lru,,,,,,4696
+sindresorhus/read-package-up,,,,,,6857
 sindresorhus/read-pkg,,,,,,6931
 sindresorhus/read-pkg-up,,,,,,6857
 sindresorhus/resolve-cwd,,,,,,6533
@@ -5432,6 +5433,7 @@ tixiaoshan/lvi-sam,6250,7551,,,,6860
 tizonia/tizonia-openmax-il,10000,,,10000,,5000
 tj/commander.js,,,,,,1714
 tj/mon,,,,,,
+tj/node-cookie-signature,,,,,,3593
 tjanczuk/edge,,,,,,
 tjanczuk/iisnode,,,,,,
 tjguk/wmi,,,,,,19
@@ -5513,6 +5515,8 @@ trinitycore/trinitycore,1743,2410,2184,2453,2979,2014
 trinkle23897/undergraduate,,,,,,
 triple-mu/yolov8-tensorrt,,,7111,9050,10000,7465
 trishume/eyelike,,,,,,
+tritondatacenter/node-assert-plus,,,,,,1330
+tritondatacenter/node-extsprintf,,,,,,454
 tritondatacenter/smartos-live,7551,3964,4133,2959,4458,3098
 trojan-gfw/trojan,,,,,,
 troldal/openxlsx,8650,8906,,5947,8686,4597
@@ -5962,7 +5966,6 @@ xtaci/algorithms,10000,,,10000,,10000
 xtensor-stack/xsimd,4008,2812,3669,7686,4006,3541
 xtensor-stack/xtensor,1884,1794,1688,2663,2076,1276
 xtra-computing/thundersvm,5200,10000,10000,5000,,2361
-xtuc/webassemblyjs,,,,,,4546
 xtxmarkets/ternfs,,5014,9169,4132,4886,4659
 xufuji456/ffmpegandroid,10000,10000,,,10000,10000
 xverse-engine/xscene-ueplugin,,,5136,5200,5556,3421
@@ -6079,6 +6082,7 @@ zeromq/czmq,,,,,,
 zeromq/libzmq,4594,4418,4701,3047,3333,2287
 zerotier/zerotierone,3177,2311,1925,2220,3709,2131
 zertosh/loose-envify,,,,,,7627
+zesterer/spin-rs,,,,,,2113
 zeux/meshoptimizer,9164,8164,9024,9655,9730,9448
 zeux/niagara,10000,9488,8861,9751,8127,9157
 zeux/pugixml,6358,4675,6401,4678,5156,5318

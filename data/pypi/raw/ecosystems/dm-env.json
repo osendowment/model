@@ -1,0 +1,113 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2712447,
+    "name": "dm-env",
+    "ecosystem": "pypi",
+    "description": "A Python interface for Reinforcement Learning environments.",
+    "homepage": null,
+    "licenses": "Apache License, Version 2.0",
+    "normalized_licenses": [
+      "Apache-2.0"
+    ],
+    "repository_url": null,
+    "keywords_array": [
+      "reinforcement-learning",
+      "python",
+      "machine",
+      "learning"
+    ],
+    "namespace": null,
+    "versions_count": 8,
+    "first_release_published_at": "2019-07-18T21:51:24.000Z",
+    "latest_release_published_at": "2022-12-21T00:25:37.000Z",
+    "latest_release_number": "1.6",
+    "last_synced_at": "2026-04-27T14:30:39.938Z",
+    "created_at": "2022-04-10T10:46:45.748Z",
+    "updated_at": "2026-04-27T14:30:39.938Z",
+    "registry_url": "https://pypi.org/project/dm-env/",
+    "install_command": "pip install dm-env --index-url https://pypi.org/simple",
+    "documentation_url": "https://dm-env.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence"
+      ],
+      "normalized_name": "dm-env",
+      "project_status": null
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 23,
+    "downloads": 353157,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 420,
+    "rankings": {
+      "downloads": 0.6531244600806153,
+      "dependent_repos_count": 0.7054690467147741,
+      "dependent_packages_count": 0.6466008355488037,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 1.4421899415035913,
+      "average": 0.8618460709619461
+    },
+    "purl": "pkg:pypi/dm-env",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/dm-env",
+    "docker_dependents_count": 32,
+    "docker_downloads_count": 24435169,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/dm-env",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/dm-env/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/dm-env/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/dm-env/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/dm-env/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/dm-env/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/dm-env/codemeta",
+    "maintainers": [
+      {
+        "uuid": "deepmind",
+        "login": "deepmind",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 60,
+        "html_url": "https://pypi.org/user/deepmind/",
+        "role": null,
+        "created_at": "2022-12-21T01:05:17.106Z",
+        "updated_at": "2022-12-21T01:05:17.106Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/deepmind/packages"
+      },
+      {
+        "uuid": "alimuldal",
+        "login": "alimuldal",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 5,
+        "html_url": "https://pypi.org/user/alimuldal/",
+        "role": null,
+        "created_at": "2022-12-21T01:05:17.104Z",
+        "updated_at": "2022-12-21T01:05:17.104Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/alimuldal/packages"
+      }
+    ]
+  }
+}

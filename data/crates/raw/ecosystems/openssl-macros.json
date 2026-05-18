@@ -1,0 +1,79 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 4345959,
+    "name": "openssl-macros",
+    "ecosystem": "cargo",
+    "description": "Internal macros used by the openssl crate.",
+    "homepage": null,
+    "licenses": "MIT/Apache-2.0",
+    "normalized_licenses": [
+      "MIT",
+      "Apache-2.0"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 2,
+    "first_release_published_at": "2022-05-03T01:02:41.264Z",
+    "latest_release_published_at": "2023-04-01T13:58:02.902Z",
+    "latest_release_number": "0.1.1",
+    "last_synced_at": "2026-04-14T05:40:53.121Z",
+    "created_at": "2022-05-03T01:11:47.891Z",
+    "updated_at": "2026-04-14T05:40:53.121Z",
+    "registry_url": "https://crates.io/crates/openssl-macros/",
+    "install_command": "cargo install openssl-macros",
+    "documentation_url": "https://docs.rs/openssl-macros/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 5,
+    "downloads": 218550693,
+    "downloads_period": "total",
+    "dependent_repos_count": 11980,
+    "rankings": {
+      "downloads": 0.23625323525885594,
+      "dependent_repos_count": 0.25670500786335393,
+      "dependent_packages_count": 8.689182422759297,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.41326685331847646,
+      "average": 2.3988518797999956
+    },
+    "purl": "pkg:cargo/openssl-macros",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/openssl-macros",
+    "docker_dependents_count": 359,
+    "docker_downloads_count": 29025423,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/openssl-macros",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/openssl-macros/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": true,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/openssl-macros/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/openssl-macros/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/openssl-macros/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/openssl-macros/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/openssl-macros/codemeta",
+    "maintainers": [
+      {
+        "uuid": "5",
+        "login": "sfackler",
+        "name": "Steven Fackler",
+        "email": null,
+        "url": "https://github.com/sfackler",
+        "packages_count": 113,
+        "html_url": "https://crates.io/users/sfackler",
+        "role": null,
+        "created_at": "2022-11-08T04:15:16.538Z",
+        "updated_at": "2022-11-08T04:15:16.538Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/sfackler/packages"
+      }
+    ]
+  }
+}

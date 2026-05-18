@@ -1,0 +1,542 @@
+{
+  "ecosystem": "npm",
+  "registry_hit": "npmjs.org",
+  "fetched_at": "2026-04-27T20:49:21Z",
+  "data": {
+    "id": 935087,
+    "name": "@fal-works/esbuild-plugin-global-externals",
+    "ecosystem": "npm",
+    "description": "esbuild plugin for replacing imports with global variables.",
+    "homepage": "https://github.com/fal-works/esbuild-plugin-global-externals#readme",
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "https://github.com/fal-works/esbuild-plugin-global-externals",
+    "keywords_array": [
+      "esbuild"
+    ],
+    "namespace": "fal-works",
+    "versions_count": 8,
+    "first_release_published_at": "2021-01-24T14:16:46.971Z",
+    "latest_release_published_at": "2021-07-19T14:57:01.362Z",
+    "latest_release_number": "2.1.2",
+    "last_synced_at": "2026-03-28T12:35:17.243Z",
+    "created_at": "2022-04-07T17:16:30.760Z",
+    "updated_at": "2026-03-28T12:35:17.244Z",
+    "registry_url": "https://www.npmjs.com/package/@fal-works/esbuild-plugin-global-externals",
+    "install_command": "npm install @fal-works/esbuild-plugin-global-externals",
+    "documentation_url": null,
+    "metadata": {
+      "funding": null,
+      "dist-tags": {
+        "latest": "2.1.2"
+      }
+    },
+    "repo_metadata": {
+      "id": 48585000,
+      "uuid": "332467308",
+      "full_name": "fal-works/esbuild-plugin-global-externals",
+      "owner": "fal-works",
+      "description": "esbuild plugin for replacing imports with global variables.",
+      "archived": false,
+      "fork": false,
+      "pushed_at": "2021-07-19T14:56:11.000Z",
+      "size": 98,
+      "stargazers_count": 38,
+      "open_issues_count": 2,
+      "forks_count": 2,
+      "subscribers_count": 1,
+      "default_branch": "main",
+      "last_synced_at": "2025-08-15T17:35:50.003Z",
+      "etag": null,
+      "topics": [
+        "esbuild",
+        "esbuild-plugin"
+      ],
+      "latest_commit_sha": null,
+      "homepage": "https://www.npmjs.com/package/@fal-works/esbuild-plugin-global-externals",
+      "language": "TypeScript",
+      "has_issues": true,
+      "has_wiki": null,
+      "has_pages": null,
+      "mirror_url": null,
+      "source_name": null,
+      "license": "mit",
+      "status": null,
+      "scm": "git",
+      "pull_requests_enabled": true,
+      "icon_url": "https://github.com/fal-works.png",
+      "metadata": {
+        "files": {
+          "readme": "README.md",
+          "changelog": null,
+          "contributing": null,
+          "funding": null,
+          "license": "LICENSE",
+          "code_of_conduct": null,
+          "threat_model": null,
+          "audit": null,
+          "citation": null,
+          "codeowners": null,
+          "security": null,
+          "support": null
+        }
+      },
+      "created_at": "2021-01-24T14:15:53.000Z",
+      "updated_at": "2025-08-06T11:35:22.000Z",
+      "dependencies_parsed_at": "2022-09-03T10:21:24.288Z",
+      "dependency_job_id": null,
+      "html_url": "https://github.com/fal-works/esbuild-plugin-global-externals",
+      "commit_stats": null,
+      "previous_names": [],
+      "tags_count": 8,
+      "template": false,
+      "template_full_name": null,
+      "purl": "pkg:github/fal-works/esbuild-plugin-global-externals",
+      "repository_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals",
+      "tags_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags",
+      "releases_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/releases",
+      "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/manifests",
+      "owner_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/fal-works",
+      "download_url": "https://codeload.github.com/fal-works/esbuild-plugin-global-externals/tar.gz/refs/heads/main",
+      "sbom_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/sbom",
+      "scorecard": {
+        "id": 391727,
+        "data": {
+          "date": "2025-08-11",
+          "repo": {
+            "name": "github.com/fal-works/esbuild-plugin-global-externals",
+            "commit": "5060147a2fbc8f9bea55085864c981469afaed2a"
+          },
+          "scorecard": {
+            "version": "v5.2.1-40-gf6ed084d",
+            "commit": "f6ed084d17c9236477efd66e5b258b9d4cc7b389"
+          },
+          "score": 1.9,
+          "checks": [
+            {
+              "name": "Code-Review",
+              "score": 0,
+              "reason": "Found 1/29 approved changesets -- score normalized to 0",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project requires human code review before pull requests (aka merge requests) are merged.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#code-review"
+              }
+            },
+            {
+              "name": "Packaging",
+              "score": -1,
+              "reason": "packaging workflow not detected",
+              "details": [
+                "Warn: no GitHub/GitLab publishing workflow detected."
+              ],
+              "documentation": {
+                "short": "Determines if the project is published as a package that others can easily download, install, easily update, and uninstall.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#packaging"
+              }
+            },
+            {
+              "name": "Binary-Artifacts",
+              "score": 10,
+              "reason": "no binaries found in the repo",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has generated executable (binary) artifacts in the source repository.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#binary-artifacts"
+              }
+            },
+            {
+              "name": "Pinned-Dependencies",
+              "score": -1,
+              "reason": "no dependencies found",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has declared and pinned the dependencies of its build process.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#pinned-dependencies"
+              }
+            },
+            {
+              "name": "Dangerous-Workflow",
+              "score": -1,
+              "reason": "no workflows found",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project's GitHub Action workflows avoid dangerous patterns.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#dangerous-workflow"
+              }
+            },
+            {
+              "name": "Token-Permissions",
+              "score": -1,
+              "reason": "No tokens found",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project's workflows follow the principle of least privilege.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#token-permissions"
+              }
+            },
+            {
+              "name": "Maintained",
+              "score": 0,
+              "reason": "0 commit(s) and 0 issue activity found in the last 90 days -- score normalized to 0",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project is \"actively maintained\".",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#maintained"
+              }
+            },
+            {
+              "name": "CII-Best-Practices",
+              "score": 0,
+              "reason": "no effort to earn an OpenSSF best practices badge detected",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has an OpenSSF (formerly CII) Best Practices Badge.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#cii-best-practices"
+              }
+            },
+            {
+              "name": "Security-Policy",
+              "score": 0,
+              "reason": "security policy file not detected",
+              "details": [
+                "Warn: no security policy file detected",
+                "Warn: no security file to analyze",
+                "Warn: no security file to analyze",
+                "Warn: no security file to analyze"
+              ],
+              "documentation": {
+                "short": "Determines if the project has published a security policy.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#security-policy"
+              }
+            },
+            {
+              "name": "Fuzzing",
+              "score": 0,
+              "reason": "project is not fuzzed",
+              "details": [
+                "Warn: no fuzzer integrations found"
+              ],
+              "documentation": {
+                "short": "Determines if the project uses fuzzing.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#fuzzing"
+              }
+            },
+            {
+              "name": "License",
+              "score": 10,
+              "reason": "license file detected",
+              "details": [
+                "Info: project has a license file: LICENSE:0",
+                "Info: FSF or OSI recognized license: MIT License: LICENSE:0"
+              ],
+              "documentation": {
+                "short": "Determines if the project has defined a license.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#license"
+              }
+            },
+            {
+              "name": "Signed-Releases",
+              "score": -1,
+              "reason": "no releases found",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project cryptographically signs release artifacts.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#signed-releases"
+              }
+            },
+            {
+              "name": "Branch-Protection",
+              "score": 0,
+              "reason": "branch protection not enabled on development/release branches",
+              "details": [
+                "Warn: branch protection not enabled for branch 'main'"
+              ],
+              "documentation": {
+                "short": "Determines if the default and release branches are protected with GitHub's branch protection settings.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#branch-protection"
+              }
+            },
+            {
+              "name": "Vulnerabilities",
+              "score": 1,
+              "reason": "9 existing vulnerabilities detected",
+              "details": [
+                "Warn: Project is vulnerable to: GHSA-93q8-gq69-wqmw",
+                "Warn: Project is vulnerable to: GHSA-v6h2-p8h4-qcjw",
+                "Warn: Project is vulnerable to: GHSA-grv7-fg5c-xmjg",
+                "Warn: Project is vulnerable to: GHSA-3xgq-45jj-v275",
+                "Warn: Project is vulnerable to: GHSA-67mh-4wv8-2f99",
+                "Warn: Project is vulnerable to: GHSA-952p-6rrq-rcjv",
+                "Warn: Project is vulnerable to: GHSA-f8q6-p94x-37v3",
+                "Warn: Project is vulnerable to: GHSA-c2qf-rxjj-qqgw",
+                "Warn: Project is vulnerable to: GHSA-j8xg-fqg3-53r7"
+              ],
+              "documentation": {
+                "short": "Determines if the project has open, known unfixed vulnerabilities.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#vulnerabilities"
+              }
+            },
+            {
+              "name": "SAST",
+              "score": 0,
+              "reason": "SAST tool is not run on all commits -- score normalized to 0",
+              "details": [
+                "Warn: 0 commits out of 2 are checked with a SAST tool"
+              ],
+              "documentation": {
+                "short": "Determines if the project uses static code analysis.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#sast"
+              }
+            }
+          ]
+        },
+        "last_synced_at": "2025-08-18T17:58:37.763Z",
+        "repository_id": 48585000,
+        "created_at": "2025-08-18T17:58:37.763Z",
+        "updated_at": "2025-08-18T17:58:37.763Z"
+      },
+      "host": {
+        "name": "GitHub",
+        "url": "https://github.com",
+        "kind": "github",
+        "repositories_count": 276204831,
+        "owners_count": 25602738,
+        "icon_url": "https://github.com/github.png",
+        "version": null,
+        "created_at": "2022-05-30T11:31:42.601Z",
+        "updated_at": "2022-07-04T15:15:14.044Z",
+        "status": "online",
+        "status_checked_at": "2025-09-21T02:00:07.055Z",
+        "response_time": 72,
+        "last_error": null,
+        "robots_txt_status": "success",
+        "robots_txt_updated_at": "2025-07-24T06:49:26.215Z",
+        "robots_txt_url": "https://github.com/robots.txt",
+        "online": true,
+        "can_crawl_api": true,
+        "host_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub",
+        "repositories_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories",
+        "repository_names_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repository_names",
+        "owners_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners"
+      },
+      "owner_record": {
+        "login": "fal-works",
+        "name": "FAL",
+        "uuid": "33595446",
+        "kind": "user",
+        "description": "Indie game dev.\r\nCreative coder.\r\nMainly Haxe, TypeScript and p5.js.",
+        "email": "",
+        "website": "https://www.fal-works.com/",
+        "location": null,
+        "twitter": "falworks_ja",
+        "company": null,
+        "icon_url": "https://avatars.githubusercontent.com/u/33595446?u=5a141d83e9e85fe98d2330bbd8d66e4ff5aa8504&v=4",
+        "repositories_count": 95,
+        "last_synced_at": "2025-02-25T03:34:47.765Z",
+        "metadata": {
+          "has_sponsors_listing": false
+        },
+        "html_url": "https://github.com/fal-works",
+        "funding_links": [],
+        "total_stars": 224,
+        "followers": 98,
+        "following": 0,
+        "created_at": "2022-11-14T07:40:43.957Z",
+        "updated_at": "2025-02-25T03:34:47.765Z",
+        "owner_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/fal-works",
+        "repositories_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/fal-works/repositories"
+      },
+      "tags": [
+        {
+          "name": "v2.1.2",
+          "sha": "5060147a2fbc8f9bea55085864c981469afaed2a",
+          "kind": "commit",
+          "published_at": "2021-07-19T14:55:47.000Z",
+          "download_url": "https://codeload.github.com/fal-works/esbuild-plugin-global-externals/tar.gz/v2.1.2",
+          "html_url": "https://github.com/fal-works/esbuild-plugin-global-externals/releases/tag/v2.1.2",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/fal-works/esbuild-plugin-global-externals@v2.1.2",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v2.1.2",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v2.1.2/manifests"
+        },
+        {
+          "name": "v2.1.1",
+          "sha": "630c84ee2cd09e31e8b9c869640b9156bba258e8",
+          "kind": "commit",
+          "published_at": "2021-02-04T05:16:56.000Z",
+          "download_url": "https://codeload.github.com/fal-works/esbuild-plugin-global-externals/tar.gz/v2.1.1",
+          "html_url": "https://github.com/fal-works/esbuild-plugin-global-externals/releases/tag/v2.1.1",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/fal-works/esbuild-plugin-global-externals@v2.1.1",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v2.1.1",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v2.1.1/manifests"
+        },
+        {
+          "name": "v2.1.0",
+          "sha": "3b45a15c63a736197df78be47be77052d1a04fe2",
+          "kind": "commit",
+          "published_at": "2021-02-04T04:58:08.000Z",
+          "download_url": "https://codeload.github.com/fal-works/esbuild-plugin-global-externals/tar.gz/v2.1.0",
+          "html_url": "https://github.com/fal-works/esbuild-plugin-global-externals/releases/tag/v2.1.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/fal-works/esbuild-plugin-global-externals@v2.1.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v2.1.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v2.1.0/manifests"
+        },
+        {
+          "name": "v2.0.0",
+          "sha": "750b4cfb01c250b2fbedb300890d802ac1617770",
+          "kind": "commit",
+          "published_at": "2021-02-03T13:04:47.000Z",
+          "download_url": "https://codeload.github.com/fal-works/esbuild-plugin-global-externals/tar.gz/v2.0.0",
+          "html_url": "https://github.com/fal-works/esbuild-plugin-global-externals/releases/tag/v2.0.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/fal-works/esbuild-plugin-global-externals@v2.0.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v2.0.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v2.0.0/manifests"
+        },
+        {
+          "name": "v1.2.0",
+          "sha": "18537b2b2074d633f22d3c096ece74b9b54d5334",
+          "kind": "commit",
+          "published_at": "2021-02-03T08:52:17.000Z",
+          "download_url": "https://codeload.github.com/fal-works/esbuild-plugin-global-externals/tar.gz/v1.2.0",
+          "html_url": "https://github.com/fal-works/esbuild-plugin-global-externals/releases/tag/v1.2.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/fal-works/esbuild-plugin-global-externals@v1.2.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v1.2.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v1.2.0/manifests"
+        },
+        {
+          "name": "v1.1.0",
+          "sha": "44bad86be8beddc08255a135304f5bb7b4c2d6f1",
+          "kind": "commit",
+          "published_at": "2021-02-02T01:14:06.000Z",
+          "download_url": "https://codeload.github.com/fal-works/esbuild-plugin-global-externals/tar.gz/v1.1.0",
+          "html_url": "https://github.com/fal-works/esbuild-plugin-global-externals/releases/tag/v1.1.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/fal-works/esbuild-plugin-global-externals@v1.1.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v1.1.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v1.1.0/manifests"
+        },
+        {
+          "name": "v1.0.0",
+          "sha": "b217e20b8a21161f5757a89b8bc59e2fa49d5777",
+          "kind": "commit",
+          "published_at": "2021-01-28T14:11:53.000Z",
+          "download_url": "https://codeload.github.com/fal-works/esbuild-plugin-global-externals/tar.gz/v1.0.0",
+          "html_url": "https://github.com/fal-works/esbuild-plugin-global-externals/releases/tag/v1.0.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/fal-works/esbuild-plugin-global-externals@v1.0.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v1.0.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v1.0.0/manifests"
+        },
+        {
+          "name": "v0.1.0",
+          "sha": "cdf90207375bead1cfb4af9a3de8fade2b225a1e",
+          "kind": "commit",
+          "published_at": "2021-01-24T14:15:23.000Z",
+          "download_url": "https://codeload.github.com/fal-works/esbuild-plugin-global-externals/tar.gz/v0.1.0",
+          "html_url": "https://github.com/fal-works/esbuild-plugin-global-externals/releases/tag/v0.1.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/fal-works/esbuild-plugin-global-externals@v0.1.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v0.1.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/tags/v0.1.0/manifests"
+        }
+      ]
+    },
+    "repo_metadata_updated_at": "2025-11-05T01:17:07.034Z",
+    "dependent_packages_count": 30,
+    "downloads": 4200577,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 9463,
+    "rankings": {
+      "downloads": 0.08642891292385686,
+      "dependent_repos_count": 0.26044250701354,
+      "dependent_packages_count": 0.881057268722467,
+      "stargazers_count": 6.777249541180415,
+      "forks_count": 9.887904819483671,
+      "docker_downloads_count": 0.6220073298742282,
+      "average": 3.0858483965330294
+    },
+    "purl": "pkg:npm/%40fal-works/esbuild-plugin-global-externals",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/npm/@fal-works/esbuild-plugin-global-externals",
+    "docker_dependents_count": 98,
+    "docker_downloads_count": 95259007,
+    "usage_url": "https://repos.ecosyste.ms/usage/npm/@fal-works/esbuild-plugin-global-externals",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/npm/@fal-works/esbuild-plugin-global-externals/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": {
+      "last_synced_at": "2025-08-15T17:12:58.013Z",
+      "issues_count": 4,
+      "pull_requests_count": 1,
+      "avg_time_to_close_issue": 102280.5,
+      "avg_time_to_close_pull_request": 4383.0,
+      "issues_closed_count": 2,
+      "pull_requests_closed_count": 1,
+      "pull_request_authors_count": 1,
+      "issue_authors_count": 3,
+      "avg_comments_per_issue": 1.25,
+      "avg_comments_per_pull_request": 2.0,
+      "merged_pull_requests_count": 1,
+      "bot_issues_count": 0,
+      "bot_pull_requests_count": 0,
+      "past_year_issues_count": 0,
+      "past_year_pull_requests_count": 0,
+      "past_year_avg_time_to_close_issue": null,
+      "past_year_avg_time_to_close_pull_request": null,
+      "past_year_issues_closed_count": 0,
+      "past_year_pull_requests_closed_count": 0,
+      "past_year_pull_request_authors_count": 0,
+      "past_year_issue_authors_count": 0,
+      "past_year_avg_comments_per_issue": null,
+      "past_year_avg_comments_per_pull_request": null,
+      "past_year_bot_issues_count": 0,
+      "past_year_bot_pull_requests_count": 0,
+      "past_year_merged_pull_requests_count": 0,
+      "issues_url": "https://issues.ecosyste.ms/api/v1/hosts/GitHub/repositories/fal-works%2Fesbuild-plugin-global-externals/issues",
+      "maintainers": [
+        {
+          "login": "fal-works",
+          "count": 2,
+          "url": "https://issues.ecosyste.ms/api/v1/hosts/GitHub/authors/fal-works"
+        }
+      ],
+      "active_maintainers": []
+    },
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@fal-works%2Fesbuild-plugin-global-externals/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@fal-works%2Fesbuild-plugin-global-externals/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@fal-works%2Fesbuild-plugin-global-externals/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@fal-works%2Fesbuild-plugin-global-externals/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/@fal-works%2Fesbuild-plugin-global-externals/codemeta",
+    "maintainers": [
+      {
+        "uuid": "fal-works",
+        "login": "fal-works",
+        "name": null,
+        "email": "falworks.contact@gmail.com",
+        "url": null,
+        "packages_count": 26,
+        "html_url": "https://www.npmjs.com/~fal-works",
+        "role": null,
+        "created_at": "2022-11-20T15:27:46.972Z",
+        "updated_at": "2022-11-20T15:27:46.972Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/fal-works/packages"
+      }
+    ]
+  }
+}

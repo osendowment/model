@@ -1,0 +1,570 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2931232,
+    "name": "sseclient-py",
+    "ecosystem": "pypi",
+    "description": "SSE client for Python",
+    "homepage": null,
+    "licenses": "Apache Software License v2",
+    "normalized_licenses": [
+      "Apache-1.1"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 11,
+    "first_release_published_at": "2016-03-11T22:54:01.000Z",
+    "latest_release_published_at": "2026-01-02T23:39:30.000Z",
+    "latest_release_number": "1.9.0",
+    "last_synced_at": "2026-04-19T09:58:06.963Z",
+    "created_at": "2022-04-10T12:42:32.737Z",
+    "updated_at": "2026-04-19T09:58:06.963Z",
+    "registry_url": "https://pypi.org/project/sseclient-py/",
+    "install_command": "pip install sseclient-py --index-url https://pypi.org/simple",
+    "documentation_url": "https://sseclient-py.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3"
+      ],
+      "normalized_name": "sseclient-py",
+      "project_status": null
+    },
+    "repo_metadata": {
+      "id": 57470789,
+      "uuid": "53699894",
+      "full_name": "mpetazzoni/sseclient",
+      "owner": "mpetazzoni",
+      "description": "Pure-Python Server Side Events (SSE) client",
+      "archived": false,
+      "fork": false,
+      "pushed_at": "2024-03-01T17:29:29.000Z",
+      "size": 44,
+      "stargazers_count": 218,
+      "open_issues_count": 10,
+      "forks_count": 34,
+      "subscribers_count": 6,
+      "default_branch": "master",
+      "last_synced_at": "2025-09-29T17:13:41.387Z",
+      "etag": null,
+      "topics": [
+        "library",
+        "python",
+        "server-sent-events",
+        "sse",
+        "sseclient"
+      ],
+      "latest_commit_sha": null,
+      "homepage": null,
+      "language": "Python",
+      "has_issues": true,
+      "has_wiki": null,
+      "has_pages": null,
+      "mirror_url": null,
+      "source_name": null,
+      "license": "apache-2.0",
+      "status": null,
+      "scm": "git",
+      "pull_requests_enabled": true,
+      "icon_url": "https://github.com/mpetazzoni.png",
+      "metadata": {
+        "files": {
+          "readme": "README.rst",
+          "changelog": null,
+          "contributing": null,
+          "funding": null,
+          "license": "LICENSE",
+          "code_of_conduct": null,
+          "threat_model": null,
+          "audit": null,
+          "citation": null,
+          "codeowners": null,
+          "security": null,
+          "support": null,
+          "governance": null,
+          "roadmap": null,
+          "authors": null,
+          "dei": null,
+          "publiccode": null,
+          "codemeta": null
+        }
+      },
+      "created_at": "2016-03-11T22:15:14.000Z",
+      "updated_at": "2025-09-22T23:00:01.000Z",
+      "dependencies_parsed_at": "2024-06-18T14:06:50.523Z",
+      "dependency_job_id": null,
+      "html_url": "https://github.com/mpetazzoni/sseclient",
+      "commit_stats": {
+        "total_commits": 39,
+        "total_committers": 8,
+        "mean_commits": 4.875,
+        "dds": 0.3589743589743589,
+        "last_synced_commit": "052edbf8b3cdabdd00adc8f8122948acbbc43428"
+      },
+      "previous_names": [],
+      "tags_count": 10,
+      "template": false,
+      "template_full_name": null,
+      "purl": "pkg:github/mpetazzoni/sseclient",
+      "repository_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient",
+      "tags_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags",
+      "releases_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/releases",
+      "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/manifests",
+      "owner_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/mpetazzoni",
+      "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/refs/heads/master",
+      "sbom_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/sbom",
+      "scorecard": {
+        "id": 662799,
+        "data": {
+          "date": "2025-08-11",
+          "repo": {
+            "name": "github.com/mpetazzoni/sseclient",
+            "commit": "052edbf8b3cdabdd00adc8f8122948acbbc43428"
+          },
+          "scorecard": {
+            "version": "v5.2.1-40-gf6ed084d",
+            "commit": "f6ed084d17c9236477efd66e5b258b9d4cc7b389"
+          },
+          "score": 3.4,
+          "checks": [
+            {
+              "name": "Pinned-Dependencies",
+              "score": -1,
+              "reason": "no dependencies found",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has declared and pinned the dependencies of its build process.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#pinned-dependencies"
+              }
+            },
+            {
+              "name": "Dangerous-Workflow",
+              "score": -1,
+              "reason": "no workflows found",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project's GitHub Action workflows avoid dangerous patterns.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#dangerous-workflow"
+              }
+            },
+            {
+              "name": "Maintained",
+              "score": 0,
+              "reason": "0 commit(s) and 0 issue activity found in the last 90 days -- score normalized to 0",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project is \"actively maintained\".",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#maintained"
+              }
+            },
+            {
+              "name": "Token-Permissions",
+              "score": -1,
+              "reason": "No tokens found",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project's workflows follow the principle of least privilege.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#token-permissions"
+              }
+            },
+            {
+              "name": "Code-Review",
+              "score": 3,
+              "reason": "Found 7/20 approved changesets -- score normalized to 3",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project requires human code review before pull requests (aka merge requests) are merged.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#code-review"
+              }
+            },
+            {
+              "name": "Binary-Artifacts",
+              "score": 10,
+              "reason": "no binaries found in the repo",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has generated executable (binary) artifacts in the source repository.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#binary-artifacts"
+              }
+            },
+            {
+              "name": "Packaging",
+              "score": -1,
+              "reason": "packaging workflow not detected",
+              "details": [
+                "Warn: no GitHub/GitLab publishing workflow detected."
+              ],
+              "documentation": {
+                "short": "Determines if the project is published as a package that others can easily download, install, easily update, and uninstall.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#packaging"
+              }
+            },
+            {
+              "name": "CII-Best-Practices",
+              "score": 0,
+              "reason": "no effort to earn an OpenSSF best practices badge detected",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has an OpenSSF (formerly CII) Best Practices Badge.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#cii-best-practices"
+              }
+            },
+            {
+              "name": "Security-Policy",
+              "score": 0,
+              "reason": "security policy file not detected",
+              "details": [
+                "Warn: no security policy file detected",
+                "Warn: no security file to analyze",
+                "Warn: no security file to analyze",
+                "Warn: no security file to analyze"
+              ],
+              "documentation": {
+                "short": "Determines if the project has published a security policy.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#security-policy"
+              }
+            },
+            {
+              "name": "Vulnerabilities",
+              "score": 10,
+              "reason": "0 existing vulnerabilities detected",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project has open, known unfixed vulnerabilities.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#vulnerabilities"
+              }
+            },
+            {
+              "name": "Fuzzing",
+              "score": 0,
+              "reason": "project is not fuzzed",
+              "details": [
+                "Warn: no fuzzer integrations found"
+              ],
+              "documentation": {
+                "short": "Determines if the project uses fuzzing.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#fuzzing"
+              }
+            },
+            {
+              "name": "License",
+              "score": 10,
+              "reason": "license file detected",
+              "details": [
+                "Info: project has a license file: LICENSE:0",
+                "Info: FSF or OSI recognized license: Apache License 2.0: LICENSE:0"
+              ],
+              "documentation": {
+                "short": "Determines if the project has defined a license.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#license"
+              }
+            },
+            {
+              "name": "Signed-Releases",
+              "score": -1,
+              "reason": "no releases found",
+              "details": null,
+              "documentation": {
+                "short": "Determines if the project cryptographically signs release artifacts.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#signed-releases"
+              }
+            },
+            {
+              "name": "Branch-Protection",
+              "score": 0,
+              "reason": "branch protection not enabled on development/release branches",
+              "details": [
+                "Warn: branch protection not enabled for branch 'master'"
+              ],
+              "documentation": {
+                "short": "Determines if the default and release branches are protected with GitHub's branch protection settings.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#branch-protection"
+              }
+            },
+            {
+              "name": "SAST",
+              "score": 0,
+              "reason": "SAST tool is not run on all commits -- score normalized to 0",
+              "details": [
+                "Warn: 0 commits out of 17 are checked with a SAST tool"
+              ],
+              "documentation": {
+                "short": "Determines if the project uses static code analysis.",
+                "url": "https://github.com/ossf/scorecard/blob/f6ed084d17c9236477efd66e5b258b9d4cc7b389/docs/checks.md#sast"
+              }
+            }
+          ]
+        },
+        "last_synced_at": "2025-08-21T16:44:42.904Z",
+        "repository_id": 57470789,
+        "created_at": "2025-08-21T16:44:42.904Z",
+        "updated_at": "2025-08-21T16:44:42.904Z"
+      },
+      "host": {
+        "name": "GitHub",
+        "url": "https://github.com",
+        "kind": "github",
+        "repositories_count": 286080680,
+        "owners_count": 27520587,
+        "icon_url": "https://github.com/github.png",
+        "version": null,
+        "created_at": "2022-05-30T11:31:42.601Z",
+        "updated_at": "2022-07-04T15:15:14.044Z",
+        "status": "online",
+        "status_checked_at": "2025-12-05T02:00:07.920Z",
+        "response_time": 54,
+        "last_error": null,
+        "robots_txt_status": "success",
+        "robots_txt_updated_at": "2025-07-24T06:49:26.215Z",
+        "robots_txt_url": "https://github.com/robots.txt",
+        "online": true,
+        "can_crawl_api": true,
+        "host_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub",
+        "repositories_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories",
+        "repository_names_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repository_names",
+        "owners_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners"
+      },
+      "owner_record": {
+        "login": "mpetazzoni",
+        "name": "Maxime Petazzoni",
+        "uuid": "879507",
+        "kind": "user",
+        "description": "Chasing rainbows, running, driving and writing software @signalfx / @splunk",
+        "email": "",
+        "website": "https://www.bulix.org",
+        "location": "San Francisco Bay Area",
+        "twitter": null,
+        "company": "Splunk",
+        "icon_url": "https://avatars.githubusercontent.com/u/879507?u=667f34e443464336e6e14d45d42fafe25f73b722&v=4",
+        "repositories_count": 15,
+        "last_synced_at": "2023-03-31T05:26:20.334Z",
+        "metadata": {
+          "has_sponsors_listing": false
+        },
+        "html_url": "https://github.com/mpetazzoni",
+        "funding_links": [],
+        "total_stars": null,
+        "followers": null,
+        "following": null,
+        "created_at": "2022-11-04T07:51:27.521Z",
+        "updated_at": "2023-03-31T05:26:20.625Z",
+        "owner_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/mpetazzoni",
+        "repositories_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/owners/mpetazzoni/repositories"
+      },
+      "tags": [
+        {
+          "name": "sseclient-py-1.8.0",
+          "sha": "052edbf8b3cdabdd00adc8f8122948acbbc43428",
+          "kind": "tag",
+          "published_at": "2023-09-01T19:34:45.000Z",
+          "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/sseclient-py-1.8.0",
+          "html_url": "https://github.com/mpetazzoni/sseclient/releases/tag/sseclient-py-1.8.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/mpetazzoni/sseclient@sseclient-py-1.8.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.8.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.8.0/manifests"
+        },
+        {
+          "name": "sseclient-py-1.7.2",
+          "sha": "9eeeab1f4838b2f5c3d9d9d6b1c9ac414806bf9b",
+          "kind": "tag",
+          "published_at": "2021-09-20T19:56:58.000Z",
+          "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/sseclient-py-1.7.2",
+          "html_url": "https://github.com/mpetazzoni/sseclient/releases/tag/sseclient-py-1.7.2",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/mpetazzoni/sseclient@sseclient-py-1.7.2",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.7.2",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.7.2/manifests"
+        },
+        {
+          "name": "sseclient-py-1.7",
+          "sha": "ee274733cdfaef38ec97ea32b4a55b79ec71a8fd",
+          "kind": "tag",
+          "published_at": "2017-07-22T16:51:57.000Z",
+          "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/sseclient-py-1.7",
+          "html_url": "https://github.com/mpetazzoni/sseclient/releases/tag/sseclient-py-1.7",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/mpetazzoni/sseclient@sseclient-py-1.7",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.7",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.7/manifests"
+        },
+        {
+          "name": "sseclient-py-1.6",
+          "sha": "5eaa6de85a71220550fa9d106d53a04fddc1403f",
+          "kind": "tag",
+          "published_at": "2017-06-11T07:23:53.000Z",
+          "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/sseclient-py-1.6",
+          "html_url": "https://github.com/mpetazzoni/sseclient/releases/tag/sseclient-py-1.6",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/mpetazzoni/sseclient@sseclient-py-1.6",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.6",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.6/manifests"
+        },
+        {
+          "name": "sseclient-py-1.5",
+          "sha": "f39f74aed04883db4cd2b507de710afaf3f05a1d",
+          "kind": "tag",
+          "published_at": "2017-02-13T07:49:38.000Z",
+          "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/sseclient-py-1.5",
+          "html_url": "https://github.com/mpetazzoni/sseclient/releases/tag/sseclient-py-1.5",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/mpetazzoni/sseclient@sseclient-py-1.5",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.5",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.5/manifests"
+        },
+        {
+          "name": "sseclient-py-1.4",
+          "sha": "d9542d1962e7e5a4deb51c9eaff4cf988c8039b8",
+          "kind": "tag",
+          "published_at": "2016-06-27T15:17:58.000Z",
+          "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/sseclient-py-1.4",
+          "html_url": "https://github.com/mpetazzoni/sseclient/releases/tag/sseclient-py-1.4",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/mpetazzoni/sseclient@sseclient-py-1.4",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.4",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.4/manifests"
+        },
+        {
+          "name": "sseclient-py-1.3",
+          "sha": "a488348c5312d5ca288fba456f1e10a8f832fb56",
+          "kind": "tag",
+          "published_at": "2016-04-14T16:00:51.000Z",
+          "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/sseclient-py-1.3",
+          "html_url": "https://github.com/mpetazzoni/sseclient/releases/tag/sseclient-py-1.3",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/mpetazzoni/sseclient@sseclient-py-1.3",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.3",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.3/manifests"
+        },
+        {
+          "name": "sseclient-py-1.2",
+          "sha": "31c86242408be3959bda4f6c7094ea93438577fa",
+          "kind": "tag",
+          "published_at": "2016-03-17T18:39:32.000Z",
+          "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/sseclient-py-1.2",
+          "html_url": "https://github.com/mpetazzoni/sseclient/releases/tag/sseclient-py-1.2",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/mpetazzoni/sseclient@sseclient-py-1.2",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.2",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.2/manifests"
+        },
+        {
+          "name": "sseclient-py-1.1",
+          "sha": "d7130318317e424094c5532b7e19f2c176930a29",
+          "kind": "tag",
+          "published_at": "2016-03-17T02:10:41.000Z",
+          "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/sseclient-py-1.1",
+          "html_url": "https://github.com/mpetazzoni/sseclient/releases/tag/sseclient-py-1.1",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/mpetazzoni/sseclient@sseclient-py-1.1",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.1",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.1/manifests"
+        },
+        {
+          "name": "sseclient-py-1.0",
+          "sha": "8bc4e39b24fa0ea57fdea4ab3fd9303cef4a817f",
+          "kind": "tag",
+          "published_at": "2016-03-11T22:48:38.000Z",
+          "download_url": "https://codeload.github.com/mpetazzoni/sseclient/tar.gz/sseclient-py-1.0",
+          "html_url": "https://github.com/mpetazzoni/sseclient/releases/tag/sseclient-py-1.0",
+          "dependencies_parsed_at": null,
+          "dependency_job_id": null,
+          "purl": "pkg:github/mpetazzoni/sseclient@sseclient-py-1.0",
+          "tag_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.0",
+          "manifests_url": "https://repos.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/tags/sseclient-py-1.0/manifests"
+        }
+      ]
+    },
+    "repo_metadata_updated_at": "2025-12-05T13:14:59.308Z",
+    "dependent_packages_count": 67,
+    "downloads": 7754568,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 477,
+    "rankings": {
+      "downloads": 0.2539957165613591,
+      "dependent_repos_count": 0.6520430173090555,
+      "dependent_packages_count": 0.27000144813761884,
+      "stargazers_count": 5.739645195965572,
+      "forks_count": 7.571633347057658,
+      "docker_downloads_count": 0.0727879697872762,
+      "average": 2.4266844491364234
+    },
+    "purl": "pkg:pypi/sseclient-py",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/sseclient-py",
+    "docker_dependents_count": 91,
+    "docker_downloads_count": 824356622,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/sseclient-py",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/sseclient-py/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": {
+      "last_synced_at": "2025-08-28T20:02:50.323Z",
+      "issues_count": 21,
+      "pull_requests_count": 12,
+      "avg_time_to_close_issue": 2742732.6666666665,
+      "avg_time_to_close_pull_request": 1758553.0909090908,
+      "issues_closed_count": 12,
+      "pull_requests_closed_count": 11,
+      "pull_request_authors_count": 9,
+      "issue_authors_count": 20,
+      "avg_comments_per_issue": 2.761904761904762,
+      "avg_comments_per_pull_request": 1.8333333333333333,
+      "merged_pull_requests_count": 10,
+      "bot_issues_count": 0,
+      "bot_pull_requests_count": 0,
+      "past_year_issues_count": 1,
+      "past_year_pull_requests_count": 0,
+      "past_year_avg_time_to_close_issue": null,
+      "past_year_avg_time_to_close_pull_request": null,
+      "past_year_issues_closed_count": 0,
+      "past_year_pull_requests_closed_count": 0,
+      "past_year_pull_request_authors_count": 0,
+      "past_year_issue_authors_count": 1,
+      "past_year_avg_comments_per_issue": 2.0,
+      "past_year_avg_comments_per_pull_request": null,
+      "past_year_bot_issues_count": 0,
+      "past_year_bot_pull_requests_count": 0,
+      "past_year_merged_pull_requests_count": 0,
+      "issues_url": "https://issues.ecosyste.ms/api/v1/hosts/GitHub/repositories/mpetazzoni%2Fsseclient/issues",
+      "maintainers": [],
+      "active_maintainers": []
+    },
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sseclient-py/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sseclient-py/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sseclient-py/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sseclient-py/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/sseclient-py/codemeta",
+    "maintainers": [
+      {
+        "uuid": "mpetazzoni",
+        "login": "mpetazzoni",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 9,
+        "html_url": "https://pypi.org/user/mpetazzoni/",
+        "role": null,
+        "created_at": "2023-02-25T13:19:45.154Z",
+        "updated_at": "2023-02-25T13:19:45.154Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/mpetazzoni/packages"
+      }
+    ]
+  }
+}

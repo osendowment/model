@@ -1,0 +1,81 @@
+{
+  "ecosystem": "npm",
+  "registry_hit": "npmjs.org",
+  "fetched_at": "2026-04-27T20:49:21Z",
+  "data": {
+    "id": 1967973,
+    "name": "load-tsconfig",
+    "ecosystem": "npm",
+    "description": "Load tsconfig.json",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 8,
+    "first_release_published_at": "2022-01-26T06:32:32.445Z",
+    "latest_release_published_at": "2023-03-19T12:17:40.179Z",
+    "latest_release_number": "0.2.5",
+    "last_synced_at": "2026-04-26T12:02:31.606Z",
+    "created_at": "2022-04-09T19:00:00.534Z",
+    "updated_at": "2026-04-26T12:02:31.607Z",
+    "registry_url": "https://www.npmjs.com/package/load-tsconfig",
+    "install_command": "npm install load-tsconfig",
+    "documentation_url": null,
+    "metadata": {
+      "funding": null,
+      "dist-tags": {
+        "latest": "0.2.5"
+      }
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 36,
+    "downloads": 26091758,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 6296,
+    "rankings": {
+      "downloads": 0.16376990650242434,
+      "dependent_repos_count": 0.3016778906197679,
+      "dependent_packages_count": 0.7499566535474205,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.17914696801599214,
+      "average": 0.34863785467140124
+    },
+    "purl": "pkg:npm/load-tsconfig",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/npm/load-tsconfig",
+    "docker_dependents_count": 452,
+    "docker_downloads_count": 88229445,
+    "usage_url": "https://repos.ecosyste.ms/usage/npm/load-tsconfig",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/npm/load-tsconfig/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/load-tsconfig/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/load-tsconfig/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/load-tsconfig/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/load-tsconfig/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/load-tsconfig/codemeta",
+    "maintainers": [
+      {
+        "uuid": "egoist",
+        "login": "egoist",
+        "name": null,
+        "email": "0x142857@gmail.com",
+        "url": null,
+        "packages_count": 467,
+        "html_url": "https://www.npmjs.com/~egoist",
+        "role": null,
+        "created_at": "2022-11-13T04:07:57.951Z",
+        "updated_at": "2022-11-13T04:07:57.951Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/egoist/packages"
+      }
+    ]
+  }
+}

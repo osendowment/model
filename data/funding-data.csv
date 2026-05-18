@@ -8,13 +8,16 @@ agronholm/anyio,145337588,0,True,tidelift,False,1,B,2026-04-28T00:16:11+00:00
 agronholm/exceptiongroup,447694800,0,True,tidelift,False,1,B,2026-04-28T00:16:12+00:00
 ai/nanoid,99401299,18,True,"tidelift,github",False,2,C,2026-04-28T00:16:12+00:00
 aio-libs/aiobotocore,36618494,3,True,"open_collective,tidelift",False,2,C,2026-04-28T00:16:13+00:00
+aio-libs/aiohttp,13258039,3,True,"open_collective,tidelift,- https",False,3,C,2026-05-17T23:35:55+00:00
 aio-libs/aiosignal,205007356,3,False,,False,0,B,2026-04-28T00:16:13+00:00
 aio-libs/async-timeout,67703198,3,False,,False,0,B,2026-04-28T00:16:14+00:00
 aio-libs/frozenlist,204197530,3,True,,False,0,B,2026-04-28T00:16:14+00:00
+aio-libs/multidict,51206425,3,True,"open_collective,tidelift,- https",False,3,C,2026-05-17T23:35:54+00:00
 aio-libs/propcache,866565706,3,True,,False,0,B,2026-04-28T00:16:15+00:00
 aio-libs/yarl,64756820,3,True,,False,0,B,2026-04-28T00:16:15+00:00
 ajv-validator/ajv,35914020,18,True,"github,tidelift,open_collective",False,3,C,2026-04-28T00:16:16+00:00
 ajv-validator/ajv-formats,281084700,18,True,"github,open_collective",False,2,C,2026-04-28T00:16:16+00:00
+ajv-validator/ajv-keywords,60477053,16,True,"github,tidelift",False,2,C,2026-05-17T23:35:56+00:00
 alexcrichton/tar-rs,21946092,0,False,,False,0,A,2026-04-28T00:16:16+00:00
 alexei/sprintf.js,9175790,0,False,,False,0,A,2026-04-28T00:16:17+00:00
 alexeyraspopov/picocolors,410740124,0,False,,False,0,A,2026-04-28T00:16:17+00:00
@@ -29,10 +32,12 @@ antonk52/lilconfig,238967485,2,False,,False,0,B,2026-04-28T00:16:20+00:00
 apache/airflow,33884891,0,False,,False,0,A,2026-04-28T00:16:21+00:00
 apache/arrow,51905353,0,False,,False,0,A,2026-04-28T00:16:21+00:00
 apache/arrow-rs,358917250,0,False,,False,0,A,2026-04-28T00:16:21+00:00
+archlinux/linux,142707813,45,False,,False,0,C,2026-05-17T23:35:55+00:00
 ardatan/graphql-tools,54432168,3,True,github,False,1,B,2026-04-28T00:16:22+00:00
 ardatan/whatwg-node,429511342,3,True,github,False,1,B,2026-04-28T00:16:22+00:00
 assert-rs/snapbox,424722460,0,False,,False,0,A,2026-04-28T00:16:23+00:00
 astral-sh/ruff,523043277,0,False,,False,0,A,2026-04-28T00:16:20+00:00
+auth0/node-jwa,8116861,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 autotools-mirror/autoconf,47662429,0,False,,False,0,A,2026-04-28T00:16:23+00:00
 autotools-mirror/libtool,47662711,0,False,,False,0,A,2026-04-28T00:16:24+00:00
 autotools-mirror/m4,66880383,0,False,,False,0,A,2026-04-28T00:16:24+00:00
@@ -46,6 +51,7 @@ azure/msrest-for-python,71186468,0,False,,False,0,A,2026-04-28T00:16:27+00:00
 azuread/microsoft-authentication-library-for-python,67243113,0,False,,False,0,A,2026-04-28T00:16:28+00:00
 babel/babel,24560307,43,False,,False,0,C,2026-04-28T00:16:28+00:00
 babel/babel-polyfills,190579283,43,False,,False,0,C,2026-04-28T00:15:38+00:00
+bdwgc/bdwgc,2109456,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 beatgammit/base64-js,2853282,0,False,,False,0,A,2026-04-28T00:15:38+00:00
 benjaminp/six,77868600,0,False,,False,0,A,2026-04-28T00:15:39+00:00
 besser82/libxcrypt,35503965,0,False,,False,0,A,2026-04-28T00:15:39+00:00
@@ -63,9 +69,12 @@ brianc/node-postgres,991475,18,True,github,False,1,C,2026-04-28T00:15:43+00:00
 brianloveswords/node-jwa,8116861,0,False,,False,0,A,2026-04-28T00:15:43+00:00
 broofa/mime,534940,7,True,github,False,1,C,2026-04-28T00:15:44+00:00
 broofa/node-int64,1208666,7,False,,False,0,C,2026-04-28T00:15:21+00:00
+browserify/events,1649251,0,True,tidelift,False,1,B,2026-05-17T23:35:56+00:00
 browserify/node-util,14568009,0,True,tidelift,False,1,B,2026-04-28T00:15:44+00:00
+browserify/randombytes,29300004,0,False,,False,0,A,2026-05-17T23:35:56+00:00
 browserify/resolve,1915099,73,True,"github,tidelift",False,2,D,2026-04-28T00:15:44+00:00
 browserslist/browserslist,27971466,18,True,"open_collective,tidelift,github",False,3,C,2026-04-28T00:15:45+00:00
+browserslist/caniuse-lite,80221890,17,True,"open_collective,tidelift,github",False,3,C,2026-05-17T23:35:54+00:00
 browserslist/update-db,505548145,18,True,"open_collective,tidelift,github",False,3,C,2026-04-28T00:15:45+00:00
 burntsushi/aho-corasick,37290678,113,True,github,False,1,D,2026-04-28T00:15:46+00:00
 burntsushi/jiff,759017108,113,True,github,False,1,D,2026-04-28T00:15:46+00:00
@@ -111,6 +120,7 @@ conventional-changelog/conventional-changelog,15639771,0,False,,False,0,A,2026-0
 cosmiconfig/cosmiconfig,45750507,7,True,"github,custom",False,2,C,2026-04-28T00:16:02+00:00
 coveragepy/coveragepy,138421996,22,True,"github,tidelift",False,2,C,2026-04-28T00:16:02+00:00
 cpburnz/python-pathspec,14648551,0,False,,False,0,A,2026-04-28T00:16:02+00:00
+crate-py/rpds,608018848,0,False,,False,0,A,2026-05-17T23:35:54+00:00
 criterion-rs/criterion.rs,1081104682,0,False,,False,0,A,2026-04-28T00:16:03+00:00
 crossbeam-rs/crossbeam,35566048,0,False,,False,0,A,2026-04-28T00:16:03+00:00
 crypto-browserify/randombytes,29300004,0,False,,False,0,A,2026-04-28T00:16:04+00:00
@@ -118,6 +128,7 @@ css-modules/icss-utils,42766912,0,False,,False,0,A,2026-04-28T00:16:04+00:00
 cssnano/cssnano,33943153,0,True,open_collective,False,1,B,2026-04-28T00:16:05+00:00
 csstools/postcss-plugins,219192307,6,True,"github,open_collective",False,2,C,2026-04-28T00:16:05+00:00
 csstree/csstree,67236461,0,True,open_collective,False,1,B,2026-04-28T00:16:06+00:00
+curl/curl,569041,62,True,"github,open_collective",False,2,D,2026-05-17T23:35:54+00:00
 cuviper/autocfg,135481335,0,False,,False,0,A,2026-04-28T00:16:06+00:00
 cyan4973/xxhash,19330466,0,False,,False,0,A,2026-04-28T00:16:07+00:00
 daaku/nodejs-makeerror,2097803,0,False,,False,0,A,2026-04-28T00:16:07+00:00
@@ -131,6 +142,7 @@ dcodeio/long.js,8678904,1,True,github,False,1,B,2026-04-28T00:16:10+00:00
 dcodeio/protobuf.js,8507859,1,False,,False,0,B,2026-04-28T00:16:10+00:00
 debug-js/debug,2871998,0,False,,False,0,A,2026-04-28T00:16:10+00:00
 definitelytyped/definitelytyped,6093316,0,False,,False,0,A,2026-04-28T00:16:11+00:00
+defunctzombie/node-process,7580644,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 django/asgiref,48501860,153,False,,False,0,D,2026-04-28T00:16:11+00:00
 djc/rustc-version-rs,41272773,32,True,"github,patreon",False,2,C,2026-04-28T00:16:12+00:00
 dmitrysoshnikov/regexp-tree,85459304,0,False,,False,0,A,2026-04-28T00:16:12+00:00
@@ -168,6 +180,7 @@ epoberezkin/fast-json-stable-stringify,108103016,18,True,"github,tidelift",False
 epoberezkin/json-schema-traverse,93333933,18,True,"github,tidelift",False,2,C,2026-04-28T00:16:25+00:00
 es-shims/array-includes,28753032,73,True,"github,tidelift",False,2,D,2026-04-28T00:16:26+00:00
 es-shims/dunder-proto,898274312,73,True,"github,tidelift",False,2,D,2026-04-28T00:16:26+00:00
+es-shims/es-object-atoms,773229339,67,True,"github,tidelift",False,2,D,2026-05-17T23:35:55+00:00
 es-shims/es-set-tostringtag,580683868,0,False,,False,0,A,2026-04-28T00:16:27+00:00
 es-shims/math-intrinsics,902014040,73,True,"github,tidelift",False,2,D,2026-04-28T00:16:27+00:00
 es-shims/object.values,41723335,0,False,,False,0,A,2026-04-28T00:16:27+00:00
@@ -229,6 +242,8 @@ follow-redirects/follow-redirects,6697086,4,True,github,False,1,B,2026-04-28T00:
 fontconfig/fontconfig,926884194,0,False,,False,0,A,2026-04-28T00:15:59+00:00
 form-data/form-data,1755793,0,False,,False,0,A,2026-04-28T00:15:59+00:00
 formatjs/formatjs,19117456,0,False,,False,0,A,2026-04-28T00:15:59+00:00
+freedesktop-unofficial-mirror/cairo,34372735,0,False,,False,0,A,2026-05-17T23:35:55+00:00
+freetype/freetype,187000659,0,False,,False,0,A,2026-05-17T23:35:56+00:00
 frenic/csstype,104001328,0,False,,False,0,A,2026-04-28T00:16:00+00:00
 frommi/miniz_oxide,96124162,0,False,,False,0,A,2026-04-28T00:16:00+00:00
 fsevents/fsevents,1402936,0,False,,False,0,A,2026-04-28T00:16:00+00:00
@@ -259,6 +274,7 @@ google/brotli,24993138,0,False,,False,0,A,2026-04-28T00:16:10+00:00
 google/zerocopy,534354967,0,False,,False,0,A,2026-04-28T00:16:10+00:00
 googleapis/google-auth-library-python,69199387,0,False,,False,0,A,2026-04-28T00:16:11+00:00
 googleapis/google-cloud-node-core,1052931509,0,False,,False,0,A,2026-04-28T00:16:11+00:00
+googleapis/google-cloud-python,16316451,0,False,,False,0,A,2026-05-17T23:35:56+00:00
 googleapis/google-resumable-media-python,88091939,0,False,,False,0,A,2026-04-28T00:16:12+00:00
 googleapis/python-api-core,226992456,0,False,,False,0,A,2026-04-28T00:16:12+00:00
 googleapis/python-crc32c,159736041,0,False,,False,0,A,2026-04-28T00:16:12+00:00
@@ -292,6 +308,7 @@ inikulin/parse5,8862593,7,True,"open_collective,github",False,2,C,2026-04-28T00:
 inspect-js/array-buffer-byte-length,607836784,73,True,"github,tidelift",False,2,D,2026-04-28T00:16:24+00:00
 inspect-js/available-typed-arrays,235965505,73,True,"github,tidelift",False,2,D,2026-04-28T00:16:24+00:00
 inspect-js/functions-have-names,198357138,73,True,"github,tidelift",False,2,D,2026-04-28T00:16:25+00:00
+inspect-js/has-bigints,201714166,67,True,"github,tidelift",False,2,D,2026-05-17T23:35:54+00:00
 inspect-js/has-property-descriptors,481834578,73,True,"github,tidelift",False,2,D,2026-04-28T00:16:25+00:00
 inspect-js/has-proto,577580747,73,True,"github,tidelift",False,2,D,2026-04-28T00:16:26+00:00
 inspect-js/has-symbols,68573418,73,True,"github,tidelift",False,2,D,2026-04-28T00:16:26+00:00
@@ -322,6 +339,7 @@ ipython/traitlets,14993021,4,False,,False,0,B,2026-04-28T00:15:45+00:00
 isaacs/chownr,3858354,23,False,,False,0,C,2026-04-28T00:15:45+00:00
 isaacs/cliui,634056857,23,False,,False,0,C,2026-04-28T00:15:45+00:00
 isaacs/core-util-is,12391440,23,False,,False,0,C,2026-04-28T00:15:46+00:00
+isaacs/fs-minipass,102982143,23,False,,False,0,C,2026-05-17T23:35:54+00:00
 isaacs/fs.realpath,61231712,23,False,,False,0,C,2026-04-28T00:15:46+00:00
 isaacs/inherits,1580001,23,False,,False,0,C,2026-04-28T00:15:47+00:00
 isaacs/isexe,49804297,23,False,,False,0,C,2026-04-28T00:15:47+00:00
@@ -338,6 +356,7 @@ isaacs/package-json-from-dist,800543709,23,False,,False,0,C,2026-04-28T00:15:51+
 isaacs/path-scurry,591569499,23,False,,False,0,C,2026-04-28T00:15:51+00:00
 isaacs/rimraf,1341324,23,False,,False,0,C,2026-04-28T00:15:52+00:00
 isaacs/sax-js,508894,23,False,,False,0,C,2026-04-28T00:15:52+00:00
+isaacs/wrappy,24208073,23,False,,False,0,C,2026-05-17T23:35:54+00:00
 isaacs/yallist,48222381,23,False,,False,0,C,2026-04-28T00:15:53+00:00
 istanbuljs/istanbuljs,81482340,0,False,,False,0,A,2026-04-28T00:15:53+00:00
 istanbuljs/schema,211950686,0,False,,False,0,A,2026-04-28T00:15:53+00:00
@@ -410,7 +429,9 @@ jshttp/statuses,17690272,0,False,,False,0,A,2026-04-28T00:16:20+00:00
 jshttp/type-is,15484233,0,False,,False,0,A,2026-04-28T00:16:21+00:00
 jshttp/vary,20498698,0,False,,False,0,A,2026-04-28T00:16:21+00:00
 jslicense/spdx-correct.js,34817196,0,False,,False,0,A,2026-04-28T00:16:21+00:00
+jslicense/spdx-exceptions.json,40062896,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 jslicense/spdx-expression-parse.js,40067336,0,False,,False,0,A,2026-04-28T00:16:22+00:00
+jslicense/spdx-license-ids,26001547,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 json5/json5,4463453,0,False,,False,0,A,2026-04-28T00:16:22+00:00
 juliangruber/balanced-match,13538817,5,False,,False,0,B,2026-04-28T00:16:22+00:00
 juliangruber/brace-expansion,13539234,5,False,,False,0,B,2026-04-28T00:16:23+00:00
@@ -438,11 +459,13 @@ libevent/libevent,1856976,0,False,,False,0,A,2026-04-28T00:15:41+00:00
 libexpat/libexpat,80314213,0,False,,False,0,A,2026-04-28T00:15:41+00:00
 libffi/libffi,321154,0,False,,False,0,A,2026-04-28T00:15:42+00:00
 libidn/libidn2,87378214,0,False,,False,0,A,2026-04-28T00:15:42+00:00
+libjpeg-turbo/libjpeg-turbo,39760454,9,True,github,False,1,C,2026-05-17T23:35:55+00:00
 libjxl/libjxl,340219494,0,False,,False,0,A,2026-04-28T00:15:42+00:00
 libpixman/pixman,81675971,0,False,,False,0,A,2026-04-28T00:15:43+00:00
 libuv/libuv,14812739,0,False,,False,0,A,2026-04-28T00:15:43+00:00
 linusu/buffer-from,66025821,4,False,,False,0,B,2026-04-28T00:15:43+00:00
 linux-audit/audit-userspace,52464964,0,False,,False,0,A,2026-04-28T00:15:44+00:00
+linux-pam/linux-pam,76264690,0,False,,False,0,A,2026-05-17T23:27:34+00:00
 litejs/natural-compare-lite,9146732,1,False,,False,0,B,2026-04-28T00:15:44+00:00
 ljharb/call-bind,308533760,73,True,"github,tidelift",False,2,D,2026-04-28T00:15:45+00:00
 ljharb/call-bind-apply-helpers,898190951,73,True,"github,tidelift",False,2,D,2026-04-28T00:15:45+00:00
@@ -498,6 +521,7 @@ matplotlib/matplotlib,1385122,81,True,"github,custom",False,2,D,2026-04-28T00:16
 mcavage/node-assert-plus,4767976,0,False,,False,0,A,2026-04-28T00:16:05+00:00
 mcollina/fastq,37368217,15,False,,False,0,C,2026-04-28T00:16:06+00:00
 mcollina/reusify,42106515,15,False,,False,0,C,2026-04-28T00:16:06+00:00
+mdn/data,70901646,0,False,,False,0,A,2026-05-17T23:35:56+00:00
 medikoo/d,10817569,3,True,"github,tidelift",False,2,C,2026-04-28T00:16:07+00:00
 medikoo/es5-ext,1792941,3,True,"github,tidelift",False,2,C,2026-04-28T00:16:07+00:00
 medikoo/es6-symbol,14423385,3,True,"github,tidelift",False,2,C,2026-04-28T00:16:07+00:00
@@ -507,6 +531,7 @@ micheles/decorator,14656555,0,False,,False,0,A,2026-04-28T00:16:08+00:00
 micromark/micromark,157420458,0,False,,False,0,A,2026-04-28T00:16:09+00:00
 micromatch/anymatch,11458302,0,False,,False,0,A,2026-04-28T00:16:09+00:00
 micromatch/braces,25475303,0,False,,False,0,A,2026-04-28T00:16:10+00:00
+micromatch/is-extglob,31788841,20,True,"github,tidelift",False,2,C,2026-05-17T23:35:56+00:00
 micromatch/is-glob,28179425,0,False,,False,0,A,2026-04-28T00:16:10+00:00
 micromatch/micromatch,27359938,22,True,github,False,1,C,2026-04-28T00:16:10+00:00
 micromatch/picomatch,156211895,0,False,,False,0,A,2026-04-28T00:16:11+00:00
@@ -529,6 +554,7 @@ msgpack/msgpack-python,2242705,0,False,,False,0,A,2026-04-28T00:16:18+00:00
 mvdnes/spin-rs,21686666,0,False,,False,0,A,2026-04-28T00:16:18+00:00
 mysticatea/abort-controller,105228556,7,False,,False,0,C,2026-04-28T00:16:18+00:00
 mysticatea/event-target-shim,31137469,7,False,,False,0,C,2026-04-28T00:16:19+00:00
+netflix/vmaf,51317975,0,False,,False,0,A,2026-05-17T23:35:54+00:00
 nghttp2/nghttp2,11452676,0,False,,False,0,A,2026-04-28T00:16:19+00:00
 nicolo-ribaudo/babel-preset-current-node-syntax,253327079,8,True,github,False,1,C,2026-04-28T00:16:19+00:00
 nlnetlabs/unbound,94195301,16,True,"github,custom",False,2,C,2026-04-28T00:16:20+00:00
@@ -537,6 +563,7 @@ node-fetch/node-fetch,29849956,5,True,"github,open_collective",False,2,C,2026-04
 nodeca/argparse,4325614,6,True,"open_collective,patreon,tidelift",False,3,C,2026-04-28T00:16:21+00:00
 nodeca/js-yaml,2504175,6,False,,False,0,C,2026-04-28T00:16:21+00:00
 nodeca/pako,16231859,6,True,"open_collective,patreon,tidelift",False,3,C,2026-04-28T00:16:22+00:00
+nodejs/node,27193779,46,False,,False,0,C,2026-05-17T23:35:54+00:00
 nodejs/readable-stream,5187096,49,False,,False,0,C,2026-04-28T00:16:22+00:00
 nodejs/string_decoder,95052330,49,False,,False,0,C,2026-04-28T00:16:23+00:00
 nodejs/undici,133092972,49,False,,False,0,C,2026-04-28T00:16:23+00:00
@@ -559,6 +586,7 @@ npm/wrappy,24208073,0,False,,False,0,A,2026-04-28T00:15:39+00:00
 npm/write-file-atomic,23896209,0,False,,False,0,A,2026-04-28T00:15:40+00:00
 numpy/numpy,908607,0,False,,False,0,A,2026-04-28T00:15:40+00:00
 nv/cssom,1025209,0,False,,False,0,A,2026-04-28T00:15:40+00:00
+nvzqz/static-assertions,100129252,5,True,"github,patreon,custom",False,3,C,2026-05-17T23:35:55+00:00
 nvzqz/static-assertions-rs,100129252,5,True,"github,patreon,custom",False,3,C,2026-04-28T00:15:41+00:00
 oauthlib/oauthlib,2811323,0,True,"github,open_collective",False,2,C,2026-04-28T00:15:41+00:00
 octokit/openapi-types.ts,304109193,0,False,,False,0,A,2026-04-28T00:15:41+00:00
@@ -567,6 +595,7 @@ oozcitak/xmlbuilder-js,1042809,1,True,github,False,1,B,2026-04-28T00:15:42+00:00
 open-telemetry/opentelemetry-js,185901023,0,False,,False,0,A,2026-04-28T00:15:42+00:00
 open-telemetry/opentelemetry-js-contrib,255986659,0,False,,False,0,A,2026-04-28T00:15:43+00:00
 open-telemetry/opentelemetry-python,185478926,0,False,,False,0,A,2026-04-28T00:15:43+00:00
+open-telemetry/opentelemetry-python-contrib,220524743,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 openssl/openssl,7634677,31,True,github,True,2,D,2026-04-28T00:15:44+00:00
 opensuse/ca-certificates,10785433,0,False,,False,0,A,2026-04-28T00:15:44+00:00
 p11-glue/p11-kit,12060420,0,False,,False,0,A,2026-04-28T00:15:44+00:00
@@ -592,13 +621,17 @@ pillarjs/parseurl,17533192,0,False,,False,0,A,2026-04-28T00:15:52+00:00
 pillarjs/path-to-regexp,5265803,0,False,,False,0,A,2026-04-28T00:15:52+00:00
 pillarjs/send,4879977,0,False,,False,0,A,2026-04-28T00:15:53+00:00
 pkgconf/pkgconf,4180110,0,True,open_collective,False,1,B,2026-04-28T00:15:53+00:00
+pnggroup/libpng,3768025,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 postcss/postcss,13078968,18,True,"open_collective,tidelift,github",False,3,C,2026-04-28T00:15:53+00:00
 postcss/postcss-selector-parser,36500102,0,False,,False,0,A,2026-04-28T00:15:54+00:00
 prettier/prettier,75104123,52,False,,False,0,D,2026-04-28T00:15:54+00:00
 primus/eventemitter3,13100677,0,False,,False,0,A,2026-04-28T00:15:55+00:00
 proptest-rs/proptest,94702898,0,False,,False,0,A,2026-04-28T00:15:55+00:00
+protobufjs/protobuf.js,8507859,1,True,github,False,1,B,2026-05-17T23:35:56+00:00
+protocolbuffers/protobuf,23357588,0,False,,False,0,A,2026-05-17T23:35:56+00:00
 psf/requests,1362490,22,True,custom,False,1,C,2026-04-28T00:15:56+00:00
 psycopg/psycopg2,7730829,0,True,,False,0,A,2026-04-28T00:15:56+00:00
+pvorb/clone,2317381,5,False,,False,0,B,2026-05-17T23:35:54+00:00
 pvorb/node-clone,2317381,5,False,,False,0,B,2026-04-28T00:15:57+00:00
 py4j/py4j,1045976,0,False,,False,0,A,2026-04-28T00:15:57+00:00
 pyasn1/pyasn1,512723255,0,True,custom,False,1,B,2026-04-28T00:15:57+00:00
@@ -627,14 +660,18 @@ python-hyper/brotlicffi,43543393,0,False,,False,0,A,2026-04-28T00:16:05+00:00
 python-hyper/h11,57372073,0,False,,False,0,A,2026-04-28T00:16:05+00:00
 python-jsonschema/jsonschema,3072629,4,True,"github,tidelift",False,2,C,2026-04-28T00:16:06+00:00
 python-jsonschema/referencing,569027868,4,True,github,False,1,B,2026-04-28T00:16:06+00:00
+python-pillow/pillow,5171600,1,True,"github,tidelift",False,2,C,2026-05-17T23:27:34+00:00
+python-poetry/poetry,123303402,0,False,,False,0,A,2026-05-17T23:35:54+00:00
 python-poetry/poetry-core,238972646,0,False,,False,0,A,2026-04-28T00:16:07+00:00
 python-poetry/tomlkit,140365570,5,True,github,False,1,B,2026-04-28T00:16:07+00:00
 python-trio/sniffio,142657210,2,False,,False,0,B,2026-04-28T00:16:07+00:00
 python/importlib_metadata,306448340,177,True,tidelift,False,1,D,2026-04-28T00:16:08+00:00
 python/importlib_resources,306147182,177,True,tidelift,False,1,D,2026-04-28T00:16:08+00:00
 python/mypy,7053637,177,False,,False,0,D,2026-04-28T00:16:09+00:00
+python/mypy_extensions,165752308,173,False,,False,0,D,2026-05-17T23:35:54+00:00
 python/typeshed,31696383,177,False,,False,0,D,2026-04-28T00:16:09+00:00
 python/typing,24604008,177,False,,False,0,D,2026-04-28T00:16:09+00:00
+python/typing_extensions,494077289,173,False,,False,0,D,2026-05-17T23:35:55+00:00
 python/tzdata,242158882,177,False,,False,0,D,2026-04-28T00:16:10+00:00
 qix-/color-convert,1874305,16,False,,False,0,C,2026-04-28T00:16:10+00:00
 qix-/node-error-ex,41388258,16,False,,False,0,C,2026-04-28T00:16:10+00:00
@@ -657,6 +694,7 @@ retep998/winapi-rs,23853482,0,True,patreon,False,1,B,2026-04-28T00:16:17+00:00
 rich-harris/estree-walker,33668779,0,False,,False,0,A,2026-04-28T00:16:18+00:00
 rich-harris/magic-string,26143240,0,False,,False,0,A,2026-04-28T00:16:18+00:00
 rob--w/proxy-from-env,52038793,0,False,,False,0,A,2026-04-28T00:16:18+00:00
+rogdham/backports.zstd,977687927,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 rollup/plugins,203607977,0,True,open_collective,False,1,B,2026-04-28T00:16:19+00:00
 ronaldoussoren/pyobjc,243933900,0,False,,False,0,A,2026-04-28T00:16:19+00:00
 rust-cli/anstyle,493821282,0,True,github,False,1,B,2026-04-28T00:16:19+00:00
@@ -703,6 +741,7 @@ scikit-learn/scikit-learn,843222,11,True,custom,False,1,C,2026-04-28T00:15:45+00
 scipy/scipy,1460385,70,True,"github,tidelift,custom",False,3,D,2026-04-28T00:15:45+00:00
 seanmonstar/reqwest,62350380,67,True,github,False,1,D,2026-04-28T00:15:46+00:00
 sec-ant/readable-stream,569980966,0,False,,False,0,A,2026-04-28T00:15:46+00:00
+selinuxproject/selinux,20648799,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 serde-rs/bytes,87358441,0,False,,False,0,A,2026-04-28T00:15:47+00:00
 serde-rs/json,35894511,0,False,,False,0,A,2026-04-28T00:15:47+00:00
 serde-rs/serde,14367737,130,True,github,False,1,D,2026-04-28T00:15:48+00:00
@@ -728,6 +767,7 @@ sindresorhus/execa,47475908,184,False,,False,0,D,2026-04-28T00:15:54+00:00
 sindresorhus/figures,21672939,184,False,,False,0,D,2026-04-28T00:15:55+00:00
 sindresorhus/file-type,19105307,184,False,,False,0,D,2026-04-28T00:15:55+00:00
 sindresorhus/find-cache-dir,48783244,184,False,,False,0,D,2026-04-28T00:15:56+00:00
+sindresorhus/find-cache-directory,48783244,192,False,,False,0,D,2026-05-17T23:35:56+00:00
 sindresorhus/find-up,41723004,184,False,,False,0,D,2026-04-28T00:15:56+00:00
 sindresorhus/find-up-simple,714044439,184,False,,False,0,D,2026-04-28T00:15:56+00:00
 sindresorhus/get-east-asian-width,711160838,184,False,,False,0,D,2026-04-28T00:15:57+00:00
@@ -766,6 +806,7 @@ sindresorhus/p-limit,71542716,184,False,,False,0,D,2026-04-28T00:16:10+00:00
 sindresorhus/p-locate,74265632,184,False,,False,0,D,2026-04-28T00:16:10+00:00
 sindresorhus/p-map,71526722,184,False,,False,0,D,2026-04-28T00:16:11+00:00
 sindresorhus/p-try,71534796,184,False,,False,0,D,2026-04-28T00:16:11+00:00
+sindresorhus/package-directory,41724281,192,False,,False,0,D,2026-05-17T23:35:56+00:00
 sindresorhus/parent-module,50187748,184,False,,False,0,D,2026-04-28T00:16:11+00:00
 sindresorhus/parse-json,41367145,184,False,,False,0,D,2026-04-28T00:16:12+00:00
 sindresorhus/path-exists,34965664,184,False,,False,0,D,2026-04-28T00:16:12+00:00
@@ -775,6 +816,7 @@ sindresorhus/path-type,41905436,184,False,,False,0,D,2026-04-28T00:16:14+00:00
 sindresorhus/pify,41585934,184,False,,False,0,D,2026-04-28T00:16:14+00:00
 sindresorhus/pkg-dir,41724281,184,False,,False,0,D,2026-04-28T00:16:15+00:00
 sindresorhus/quick-lru,86679721,184,False,,False,0,D,2026-04-28T00:16:15+00:00
+sindresorhus/read-package-up,41842429,192,False,,False,0,D,2026-05-17T23:35:54+00:00
 sindresorhus/read-pkg,41790094,184,False,,False,0,D,2026-04-28T00:16:16+00:00
 sindresorhus/read-pkg-up,41842429,184,False,,False,0,D,2026-04-28T00:16:16+00:00
 sindresorhus/resolve-cwd,47504070,184,False,,False,0,D,2026-04-28T00:16:16+00:00
@@ -800,6 +842,7 @@ smol-rs/fastrand,267368764,0,False,,False,0,A,2026-04-28T00:16:23+00:00
 snowflakedb/snowflake-connector-python,62262074,0,False,,False,0,A,2026-04-28T00:16:24+00:00
 socketio/socket.io,557980,0,False,,False,0,A,2026-04-28T00:16:24+00:00
 sqlalchemy/sqlalchemy,159271175,24,True,"github,patreon,tidelift",False,3,C,2026-04-28T00:16:25+00:00
+sqlite/sqlite,176278485,0,False,,False,0,A,2026-05-17T23:35:54+00:00
 srijs/rust-crc32fast,157348282,0,False,,False,0,A,2026-04-28T00:16:26+00:00
 stebalien/tempfile,33832372,0,False,,False,0,A,2026-04-28T00:16:26+00:00
 stefanpenner/get-caller-file,48818175,0,False,,False,0,A,2026-04-28T00:16:26+00:00
@@ -828,11 +871,15 @@ terkelg/sisteransi,122441239,2,False,,False,0,B,2026-04-28T00:15:44+00:00
 terser/terser,29097127,0,True,open_collective,False,1,B,2026-04-28T00:15:44+00:00
 textualize/rich,220809393,47,True,github,False,1,C,2026-04-28T00:15:44+00:00
 theskumar/python-dotenv,23727790,0,False,,False,0,A,2026-04-28T00:15:45+00:00
+thkukuk/rpcsvc-proto,55140533,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 thlorenz/convert-source-map,8751561,2,False,,False,0,B,2026-04-28T00:15:45+00:00
 thlorenz/deep-is,9345558,2,False,,False,0,B,2026-04-28T00:15:46+00:00
+thomasdickey/ncurses-snapshots,65149533,0,False,,False,0,A,2026-05-17T23:35:55+00:00
 tim-kos/node-retry,1738798,0,False,,False,0,A,2026-04-28T00:15:46+00:00
 time-rs/time,26459635,0,False,,False,0,A,2026-04-28T00:15:47+00:00
 tj/commander.js,2206953,20,True,"github,tidelift",False,2,C,2026-04-28T00:15:47+00:00
+tj/node-cookie-signature,6229722,5,False,,False,0,B,2026-05-17T23:35:55+00:00
+tjguk/wmi,23124645,0,False,,False,0,A,2026-05-17T23:35:56+00:00
 tkem/cachetools,18006791,2,True,"github,custom",False,2,C,2026-04-28T00:15:48+00:00
 tokio-rs/bytes,30062547,121,False,,False,0,D,2026-04-28T00:15:48+00:00
 tokio-rs/loom,161875917,121,False,,False,0,D,2026-04-28T00:15:48+00:00
@@ -846,11 +893,15 @@ tootallnate/util-deprecate,19321056,0,False,,False,0,A,2026-04-28T00:15:51+00:00
 tower-rs/tower,98244646,0,False,,False,0,A,2026-04-28T00:15:51+00:00
 tox-dev/filelock,17098256,4,False,,False,0,B,2026-04-28T00:15:52+00:00
 tox-dev/platformdirs,367032142,4,False,,False,0,B,2026-04-28T00:15:52+00:00
+tqdm/tqdm,36804486,18,True,"github,tidelift,custom",False,3,C,2026-05-17T23:35:56+00:00
+tritondatacenter/node-assert-plus,4767976,0,False,,False,0,A,2026-05-17T23:35:56+00:00
+tritondatacenter/node-extsprintf,4058064,0,False,,False,0,A,2026-05-17T23:35:54+00:00
 troygoode/node-require-directory,3053807,0,False,,False,0,A,2026-04-28T00:15:53+00:00
 trysound/postcss-value-parser,40920306,0,False,,False,0,A,2026-04-28T00:15:53+00:00
 tsconfig/bases,263697285,0,False,,False,0,A,2026-04-28T00:15:53+00:00
 tukaani-project/xz,553665726,0,False,,False,0,A,2026-04-28T00:15:54+00:00
 typescript-eslint/typescript-eslint,165536154,0,True,open_collective,False,1,B,2026-04-28T00:15:54+00:00
+unicode-org/icu,49244766,0,False,,False,0,A,2026-05-17T23:35:54+00:00
 unicode-org/icu4x,243395141,0,False,,False,0,A,2026-04-28T00:15:54+00:00
 unicode-rs/unicode-xid,34637906,0,False,,False,0,A,2026-04-28T00:15:55+00:00
 unshiftio/requires-port,26316179,0,False,,False,0,A,2026-04-28T00:15:55+00:00
@@ -896,4 +947,5 @@ yargs/yargs,14210523,0,False,,False,0,A,2026-04-28T00:16:11+00:00
 yargs/yargs-parser,50258379,0,False,,False,0,A,2026-04-28T00:16:11+00:00
 yuzujs/setimmediate,1981208,0,False,,False,0,A,2026-04-28T00:16:12+00:00
 zertosh/loose-envify,41947687,0,False,,False,0,A,2026-04-28T00:16:12+00:00
+zesterer/spin-rs,21686666,5,False,,False,0,B,2026-05-17T23:35:55+00:00
 zloirock/core-js,11481338,1,True,"open_collective,patreon,custom",False,3,C,2026-04-28T00:16:13+00:00

@@ -1,0 +1,92 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 4194498,
+    "name": "neon-sys",
+    "ecosystem": "cargo",
+    "description": "Exposes the low-level V8/NAN C/C++ APIs. Will be superseded by N-API.",
+    "homepage": null,
+    "licenses": "MIT/Apache-2.0",
+    "normalized_licenses": [
+      "MIT",
+      "Apache-2.0"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 34,
+    "first_release_published_at": "2015-12-17T20:59:48.125Z",
+    "latest_release_published_at": "2022-05-23T19:05:49.034Z",
+    "latest_release_number": "0.10.1",
+    "last_synced_at": "2026-04-21T03:50:26.586Z",
+    "created_at": "2022-04-12T20:10:44.350Z",
+    "updated_at": "2026-04-21T03:50:26.586Z",
+    "registry_url": "https://crates.io/crates/neon-sys/",
+    "install_command": "cargo install neon-sys",
+    "documentation_url": "https://docs.rs/neon-sys/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 3,
+    "downloads": 472389,
+    "downloads_period": "total",
+    "dependent_repos_count": 195,
+    "rankings": {
+      "downloads": 3.42164259699247,
+      "dependent_repos_count": 2.8511205618822757,
+      "dependent_packages_count": 9.150901236406972,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 5.920180027123291,
+      "average": 5.335961105601252
+    },
+    "purl": "pkg:cargo/neon-sys",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/neon-sys",
+    "docker_dependents_count": 4,
+    "docker_downloads_count": 130,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/neon-sys",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/neon-sys/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/neon-sys/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/neon-sys/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/neon-sys/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/neon-sys/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/neon-sys/codemeta",
+    "maintainers": [
+      {
+        "uuid": "57952",
+        "login": "kjvalencik",
+        "name": "K.J. Valencik",
+        "email": null,
+        "url": "https://github.com/kjvalencik",
+        "packages_count": 7,
+        "html_url": "https://crates.io/users/kjvalencik",
+        "role": null,
+        "created_at": "2022-11-07T22:23:34.215Z",
+        "updated_at": "2022-11-07T22:23:34.215Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/kjvalencik/packages"
+      },
+      {
+        "uuid": "2483",
+        "login": "dherman",
+        "name": "Dave Herman",
+        "email": null,
+        "url": "https://github.com/dherman",
+        "packages_count": 26,
+        "html_url": "https://crates.io/users/dherman",
+        "role": null,
+        "created_at": "2022-11-07T22:23:34.178Z",
+        "updated_at": "2022-11-07T22:23:34.178Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/dherman/packages"
+      }
+    ]
+  }
+}

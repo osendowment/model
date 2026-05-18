@@ -1,0 +1,93 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2650608,
+    "name": "azureml-train-core",
+    "ecosystem": "pypi",
+    "description": "Provides estimators for training models.",
+    "homepage": "https://docs.microsoft.com/python/api/overview/azure/ml/?view=azure-ml-py",
+    "licenses": "https://aka.ms/azureml-sdk-license",
+    "normalized_licenses": [
+      "Other"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 110,
+    "first_release_published_at": "2018-09-19T22:37:15.000Z",
+    "latest_release_published_at": "2026-02-25T09:34:20.000Z",
+    "latest_release_number": "1.62.0",
+    "last_synced_at": "2026-04-27T06:00:47.275Z",
+    "created_at": "2022-04-10T10:08:46.035Z",
+    "updated_at": "2026-04-27T06:02:46.659Z",
+    "registry_url": "https://pypi.org/project/azureml-train-core/",
+    "install_command": "pip install azureml-train-core --index-url https://pypi.org/simple",
+    "documentation_url": "https://azureml-train-core.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Development Status :: 4 - Beta",
+        "Framework :: IPython",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Topic :: Multimedia :: Graphics"
+      ],
+      "normalized_name": "azureml-train-core",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2026-04-27T06:02:46.626Z",
+    "dependent_packages_count": 9,
+    "downloads": 318049,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 63,
+    "rankings": {
+      "downloads": 0.34347583338758714,
+      "dependent_repos_count": 1.8609166079704527,
+      "dependent_packages_count": 0.7007769311810222,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 2.185888339099868,
+      "average": 1.2727644279097325
+    },
+    "purl": "pkg:pypi/azureml-train-core",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/azureml-train-core",
+    "docker_dependents_count": 14,
+    "docker_downloads_count": 1151,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/azureml-train-core",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/azureml-train-core/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/azureml-train-core/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/azureml-train-core/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/azureml-train-core/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/azureml-train-core/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/azureml-train-core/codemeta",
+    "maintainers": [
+      {
+        "uuid": "amlpypi",
+        "login": "amlpypi",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 112,
+        "html_url": "https://pypi.org/user/amlpypi/",
+        "role": null,
+        "created_at": "2023-02-23T16:31:10.670Z",
+        "updated_at": "2023-02-23T16:31:10.670Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/amlpypi/packages"
+      }
+    ]
+  }
+}

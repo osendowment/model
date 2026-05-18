@@ -1,0 +1,78 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 3587821,
+    "name": "axum-msgpack",
+    "ecosystem": "cargo",
+    "description": "serialize/derserialize msgpack for axum",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 6,
+    "first_release_published_at": "2021-08-28T12:51:08.652Z",
+    "latest_release_published_at": "2025-01-05T01:37:08.014Z",
+    "latest_release_number": "0.5.0",
+    "last_synced_at": "2026-04-20T14:02:05.242Z",
+    "created_at": "2022-04-11T04:52:10.201Z",
+    "updated_at": "2026-04-20T14:02:05.242Z",
+    "registry_url": "https://crates.io/crates/axum-msgpack/",
+    "install_command": "cargo install axum-msgpack",
+    "documentation_url": "https://docs.rs/axum-msgpack/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 5,
+    "downloads": 24875,
+    "downloads_period": "total",
+    "dependent_repos_count": 1,
+    "rankings": {
+      "downloads": 19.93076274853668,
+      "dependent_repos_count": 16.750609631030787,
+      "dependent_packages_count": 9.17868157578888,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 15.28668465178545
+    },
+    "purl": "pkg:cargo/axum-msgpack",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/axum-msgpack",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/axum-msgpack",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/axum-msgpack/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/axum-msgpack/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/axum-msgpack/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/axum-msgpack/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/axum-msgpack/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/axum-msgpack/codemeta",
+    "maintainers": [
+      {
+        "uuid": "131121",
+        "login": "loehde",
+        "name": "Kasper Løhde",
+        "email": null,
+        "url": "https://github.com/loehde",
+        "packages_count": 1,
+        "html_url": "https://crates.io/users/loehde",
+        "role": null,
+        "created_at": "2022-11-07T16:59:08.435Z",
+        "updated_at": "2022-11-07T16:59:08.435Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/loehde/packages"
+      }
+    ]
+  }
+}

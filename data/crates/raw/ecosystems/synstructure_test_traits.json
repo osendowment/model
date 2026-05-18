@@ -1,0 +1,78 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 4292487,
+    "name": "synstructure_test_traits",
+    "ecosystem": "cargo",
+    "description": "Helper test traits for synstructure doctests",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 1,
+    "first_release_published_at": "2018-01-09T05:45:40.513Z",
+    "latest_release_published_at": "2018-01-09T05:45:40.513Z",
+    "latest_release_number": "0.1.0",
+    "last_synced_at": "2026-04-22T19:01:51.246Z",
+    "created_at": "2022-04-13T06:20:08.338Z",
+    "updated_at": "2026-04-22T19:01:51.246Z",
+    "registry_url": "https://crates.io/crates/synstructure_test_traits/",
+    "install_command": "cargo install synstructure_test_traits",
+    "documentation_url": "https://docs.rs/synstructure_test_traits/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 1,
+    "downloads": 308321,
+    "downloads_period": "total",
+    "dependent_repos_count": 22,
+    "rankings": {
+      "downloads": 3.7825702428736645,
+      "dependent_repos_count": 5.828775465432071,
+      "dependent_packages_count": 18.15597474766567,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 9.255773485323802
+    },
+    "purl": "pkg:cargo/synstructure_test_traits",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/synstructure_test_traits",
+    "docker_dependents_count": 1,
+    "docker_downloads_count": 95271,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/synstructure_test_traits",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/synstructure_test_traits/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/synstructure_test_traits/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/synstructure_test_traits/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/synstructure_test_traits/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/synstructure_test_traits/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/synstructure_test_traits/codemeta",
+    "maintainers": [
+      {
+        "uuid": "1947",
+        "login": "mystor",
+        "name": "Nika Layzell",
+        "email": null,
+        "url": "https://github.com/mystor",
+        "packages_count": 26,
+        "html_url": "https://crates.io/users/mystor",
+        "role": null,
+        "created_at": "2022-11-08T01:56:32.646Z",
+        "updated_at": "2022-11-08T01:56:32.646Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/mystor/packages"
+      }
+    ]
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 7680365,
+    "name": "lunatic-sys",
+    "ecosystem": "cargo",
+    "description": "Exported guest functions for the Lunatic VM",
+    "homepage": null,
+    "licenses": "Apache-2.0/MIT",
+    "normalized_licenses": [
+      "Apache-2.0",
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 2,
+    "first_release_published_at": "2023-05-03T19:34:16.323Z",
+    "latest_release_published_at": "2023-07-21T14:15:05.683Z",
+    "latest_release_number": "0.14.0",
+    "last_synced_at": "2026-04-23T20:01:51.301Z",
+    "created_at": "2023-05-04T01:34:52.085Z",
+    "updated_at": "2026-04-23T20:01:51.301Z",
+    "registry_url": "https://crates.io/crates/lunatic-sys/",
+    "install_command": "cargo install lunatic-sys",
+    "documentation_url": "https://docs.rs/lunatic-sys/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 2,
+    "downloads": 14333,
+    "downloads_period": "total",
+    "dependent_repos_count": 1,
+    "rankings": {
+      "downloads": 28.331827082391925,
+      "dependent_repos_count": 16.64470364987688,
+      "dependent_packages_count": 18.161281334949813,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 21.04593735573954
+    },
+    "purl": "pkg:cargo/lunatic-sys",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/lunatic-sys",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/lunatic-sys",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/lunatic-sys/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/lunatic-sys/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/lunatic-sys/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/lunatic-sys/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/lunatic-sys/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/lunatic-sys/codemeta",
+    "maintainers": [
+      {
+        "uuid": "99660",
+        "login": "bkolobara",
+        "name": "Bernard Kolobara",
+        "email": null,
+        "url": "https://github.com/bkolobara",
+        "packages_count": 41,
+        "html_url": "https://crates.io/users/bkolobara",
+        "role": null,
+        "created_at": "2023-05-04T12:11:47.108Z",
+        "updated_at": "2023-05-04T12:11:47.108Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/bkolobara/packages"
+      }
+    ]
+  }
+}

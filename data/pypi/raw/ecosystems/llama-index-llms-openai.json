@@ -1,0 +1,82 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 8854664,
+    "name": "llama-index-llms-openai",
+    "ecosystem": "pypi",
+    "description": "llama-index llms openai integration",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 140,
+    "first_release_published_at": "2024-02-02T22:27:19.000Z",
+    "latest_release_published_at": "2026-03-13T22:08:09.000Z",
+    "latest_release_number": "0.7.2",
+    "last_synced_at": "2026-03-18T06:03:57.035Z",
+    "created_at": "2024-02-02T22:31:06.191Z",
+    "updated_at": "2026-03-18T06:03:57.036Z",
+    "registry_url": "https://pypi.org/project/llama-index-llms-openai/",
+    "install_command": "pip install llama-index-llms-openai --index-url https://pypi.org/simple",
+    "documentation_url": "https://llama-index-llms-openai.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [],
+      "normalized_name": "llama-index-llms-openai",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 55,
+    "downloads": 3221810,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 0,
+    "rankings": {
+      "downloads": null,
+      "dependent_repos_count": 65.42495157088464,
+      "dependent_packages_count": 9.913124475815131,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 37.669038023349884
+    },
+    "purl": "pkg:pypi/llama-index-llms-openai",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/llama-index-llms-openai",
+    "docker_dependents_count": 1,
+    "docker_downloads_count": 2328,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/llama-index-llms-openai",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/llama-index-llms-openai/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/llama-index-llms-openai/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/llama-index-llms-openai/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/llama-index-llms-openai/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/llama-index-llms-openai/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/llama-index-llms-openai/codemeta",
+    "maintainers": [
+      {
+        "uuid": "jerryjliu",
+        "login": "jerryjliu",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 794,
+        "html_url": "https://pypi.org/user/jerryjliu/",
+        "role": "Owner",
+        "created_at": "2024-02-02T22:31:27.428Z",
+        "updated_at": "2024-02-02T22:31:27.428Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/jerryjliu/packages"
+      }
+    ]
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 2959775,
+    "name": "unittest2",
+    "ecosystem": "pypi",
+    "description": "The new features in unittest backported to Python 2.4+.",
+    "homepage": "http://pypi.python.org/pypi/unittest2",
+    "licenses": "UNKNOWN",
+    "normalized_licenses": [
+      "Other"
+    ],
+    "repository_url": null,
+    "keywords_array": [
+      "unittest",
+      "testing",
+      "tests"
+    ],
+    "namespace": null,
+    "versions_count": 22,
+    "first_release_published_at": "2010-02-11T19:09:30.000Z",
+    "latest_release_published_at": "2015-06-30T06:48:35.000Z",
+    "latest_release_number": "1.1.0",
+    "last_synced_at": "2026-04-27T11:29:05.350Z",
+    "created_at": "2022-04-10T12:57:53.974Z",
+    "updated_at": "2026-04-27T11:29:05.350Z",
+    "registry_url": "https://pypi.org/project/unittest2/",
+    "install_command": "pip install unittest2 --index-url https://pypi.org/simple",
+    "documentation_url": "https://unittest2.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Development Status :: 4 - Beta",
+        "Environment :: Console",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.4",
+        "Programming Language :: Python :: 2.5",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Topic :: Software Development :: Libraries",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Software Development :: Testing"
+      ],
+      "normalized_name": "unittest2",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2024-11-11T16:02:38.852Z",
+    "dependent_packages_count": 93,
+    "downloads": 1116340,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 11302,
+    "rankings": {
+      "downloads": 0.35902654632031017,
+      "dependent_repos_count": 0.08334883862221902,
+      "dependent_packages_count": 0.19138428940038618,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.3098526301400033,
+      "average": 0.23590307612072967
+    },
+    "purl": "pkg:pypi/unittest2",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/unittest2",
+    "docker_dependents_count": 1049,
+    "docker_downloads_count": 676467522,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/unittest2",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/unittest2/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/unittest2/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/unittest2/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/unittest2/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/unittest2/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/unittest2/codemeta",
+    "maintainers": [
+      {
+        "uuid": "lifeless",
+        "login": "lifeless",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 40,
+        "html_url": "https://pypi.org/user/lifeless/",
+        "role": null,
+        "created_at": "2022-12-17T16:48:34.047Z",
+        "updated_at": "2022-12-17T16:48:34.047Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/lifeless/packages"
+      },
+      {
+        "uuid": "Fuzzyman",
+        "login": "Fuzzyman",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 17,
+        "html_url": "https://pypi.org/user/Fuzzyman/",
+        "role": null,
+        "created_at": "2022-12-17T16:48:34.034Z",
+        "updated_at": "2022-12-17T16:48:34.034Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/Fuzzyman/packages"
+      }
+    ]
+  }
+}

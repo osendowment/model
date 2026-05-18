@@ -1,0 +1,81 @@
+{
+  "ecosystem": "npm",
+  "registry_hit": "npmjs.org",
+  "fetched_at": "2026-04-27T20:49:21Z",
+  "data": {
+    "id": 2361082,
+    "name": "signedsource",
+    "ecosystem": "npm",
+    "description": "This package exports utilities to sign and verify generated files.",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 3,
+    "first_release_published_at": "2016-12-02T21:38:57.108Z",
+    "latest_release_published_at": "2019-09-23T13:16:36.200Z",
+    "latest_release_number": "2.0.0",
+    "last_synced_at": "2026-04-27T12:43:01.943Z",
+    "created_at": "2022-04-10T00:42:16.185Z",
+    "updated_at": "2026-04-27T12:43:01.943Z",
+    "registry_url": "https://www.npmjs.com/package/signedsource",
+    "install_command": "npm install signedsource",
+    "documentation_url": null,
+    "metadata": {
+      "funding": null,
+      "dist-tags": {
+        "latest": "2.0.0"
+      }
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 49,
+    "downloads": 21096885,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 75450,
+    "rankings": {
+      "downloads": 0.08803912052785365,
+      "dependent_repos_count": 0.10995083034732582,
+      "dependent_packages_count": 0.6055324294295094,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.15069204016511678,
+      "average": 0.2385536051174514
+    },
+    "purl": "pkg:npm/signedsource",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/npm/signedsource",
+    "docker_dependents_count": 337,
+    "docker_downloads_count": 141785746,
+    "usage_url": "https://repos.ecosyste.ms/usage/npm/signedsource",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/npm/signedsource/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/signedsource/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/signedsource/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/signedsource/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/signedsource/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/signedsource/codemeta",
+    "maintainers": [
+      {
+        "uuid": "kassens",
+        "login": "kassens",
+        "name": null,
+        "email": "jkassens@fb.com",
+        "url": null,
+        "packages_count": 23,
+        "html_url": "https://www.npmjs.com/~kassens",
+        "role": null,
+        "created_at": "2022-11-10T12:00:44.412Z",
+        "updated_at": "2022-11-10T12:00:44.412Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/kassens/packages"
+      }
+    ]
+  }
+}

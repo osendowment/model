@@ -1,0 +1,92 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 12098411,
+    "name": "bevy_animation_macros",
+    "ecosystem": "cargo",
+    "description": "Macros for bevy_animation",
+    "homepage": null,
+    "licenses": "MIT OR Apache-2.0",
+    "normalized_licenses": [
+      "MIT",
+      "Apache-2.0"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 10,
+    "first_release_published_at": "2025-09-12T20:34:12.229Z",
+    "latest_release_published_at": "2026-03-04T01:21:16.703Z",
+    "latest_release_number": "0.18.1",
+    "last_synced_at": "2026-04-19T12:16:53.304Z",
+    "created_at": "2025-09-12T20:46:52.883Z",
+    "updated_at": "2026-04-19T12:16:53.304Z",
+    "registry_url": "https://crates.io/crates/bevy_animation_macros/",
+    "install_command": "cargo install bevy_animation_macros",
+    "documentation_url": "https://docs.rs/bevy_animation_macros/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 0,
+    "downloads": 414991,
+    "downloads_period": "total",
+    "dependent_repos_count": 0,
+    "rankings": {
+      "downloads": 94.53624746440438,
+      "dependent_repos_count": 20.02597617391389,
+      "dependent_packages_count": 26.503966960641716,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 47.022063532986664
+    },
+    "purl": "pkg:cargo/bevy_animation_macros",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/bevy_animation_macros",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/bevy_animation_macros",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/bevy_animation_macros/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/bevy_animation_macros/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/bevy_animation_macros/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/bevy_animation_macros/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/bevy_animation_macros/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/bevy_animation_macros/codemeta",
+    "maintainers": [
+      {
+        "uuid": "74364",
+        "login": "cart",
+        "name": "Carter Anderson",
+        "email": null,
+        "url": "https://github.com/cart",
+        "packages_count": 204,
+        "html_url": "https://crates.io/users/cart",
+        "role": null,
+        "created_at": "2025-11-17T02:47:36.775Z",
+        "updated_at": "2025-11-17T02:47:36.775Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/cart/packages"
+      },
+      {
+        "uuid": "6596",
+        "login": "mockersf",
+        "name": "François Mockers",
+        "email": null,
+        "url": "https://github.com/mockersf",
+        "packages_count": 37,
+        "html_url": "https://crates.io/users/mockersf",
+        "role": null,
+        "created_at": "2025-09-15T01:14:57.275Z",
+        "updated_at": "2025-09-15T01:14:57.275Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/mockersf/packages"
+      }
+    ]
+  }
+}

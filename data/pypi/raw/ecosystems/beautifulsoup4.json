@@ -1,0 +1,97 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 1565777,
+    "name": "beautifulsoup4",
+    "ecosystem": "pypi",
+    "description": "Screen-scraping library",
+    "homepage": "https://www.crummy.com/software/BeautifulSoup/bs4/",
+    "licenses": "MIT License",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": null,
+    "keywords_array": [
+      "HTML",
+      "XML",
+      "parse",
+      "soup"
+    ],
+    "namespace": null,
+    "versions_count": 53,
+    "first_release_published_at": "2014-01-21T05:35:05.000Z",
+    "latest_release_published_at": "2025-11-30T15:08:24.000Z",
+    "latest_release_number": "4.14.3",
+    "last_synced_at": "2026-04-25T17:01:58.400Z",
+    "created_at": "2022-04-09T06:09:23.553Z",
+    "updated_at": "2026-04-25T17:01:58.401Z",
+    "registry_url": "https://pypi.org/project/beautifulsoup4/",
+    "install_command": "pip install beautifulsoup4 --index-url https://pypi.org/simple",
+    "documentation_url": "https://beautifulsoup4.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Text Processing :: Markup :: HTML",
+        "Topic :: Text Processing :: Markup :: SGML",
+        "Topic :: Text Processing :: Markup :: XML"
+      ],
+      "normalized_name": "beautifulsoup4",
+      "project_status": null
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2026-04-24T13:07:14.199Z",
+    "dependent_packages_count": 5924,
+    "downloads": 322606227,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 156449,
+    "rankings": {
+      "downloads": 0.01283916017219148,
+      "dependent_repos_count": 0.004401997773322793,
+      "dependent_packages_count": 0.0060527469383188405,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.008620578972757136,
+      "average": 0.007978620964147563
+    },
+    "purl": "pkg:pypi/beautifulsoup4",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/beautifulsoup4",
+    "docker_dependents_count": 7182,
+    "docker_downloads_count": 4820927310,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/beautifulsoup4",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/beautifulsoup4/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": true,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/beautifulsoup4/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/beautifulsoup4/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/beautifulsoup4/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/beautifulsoup4/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/beautifulsoup4/codemeta",
+    "maintainers": [
+      {
+        "uuid": "leonard",
+        "login": "leonard",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 5,
+        "html_url": "https://pypi.org/user/leonard/",
+        "role": null,
+        "created_at": "2022-11-14T20:31:23.322Z",
+        "updated_at": "2022-11-14T20:31:23.322Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/leonard/packages"
+      }
+    ]
+  }
+}

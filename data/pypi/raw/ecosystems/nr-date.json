@@ -1,0 +1,91 @@
+{
+  "ecosystem": "pypi",
+  "registry_hit": "pypi.org",
+  "fetched_at": "2026-04-27T20:49:24Z",
+  "data": {
+    "id": 5392854,
+    "name": "nr-date",
+    "ecosystem": "pypi",
+    "description": "",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": null,
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 4,
+    "first_release_published_at": "2019-04-06T01:18:07.000Z",
+    "latest_release_published_at": "2023-08-16T13:46:02.000Z",
+    "latest_release_number": "2.1.0",
+    "last_synced_at": "2026-04-01T15:03:39.798Z",
+    "created_at": "2022-11-05T23:35:46.517Z",
+    "updated_at": "2026-04-01T15:03:39.799Z",
+    "registry_url": "https://pypi.org/project/nr-date/",
+    "install_command": "pip install nr-date --index-url https://pypi.org/simple",
+    "documentation_url": "https://nr-date.readthedocs.io/",
+    "metadata": {
+      "funding": null,
+      "documentation": null,
+      "classifiers": [
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9"
+      ],
+      "normalized_name": "nr-date",
+      "project_status": null
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 6,
+    "downloads": 307034,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 1,
+    "rankings": {
+      "downloads": 1.0701336133874022,
+      "dependent_repos_count": 21.705497690843316,
+      "dependent_packages_count": 1.8500059424084774,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 8.208545748879732
+    },
+    "purl": "pkg:pypi/nr-date",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/pypi/nr-date",
+    "docker_dependents_count": 1,
+    "docker_downloads_count": 33,
+    "usage_url": "https://repos.ecosyste.ms/usage/pypi/nr-date",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/pypi/nr-date/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/nr-date/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/nr-date/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/nr-date/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/nr-date/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/packages/nr-date/codemeta",
+    "maintainers": [
+      {
+        "uuid": "niklasrosenstein",
+        "login": "niklasrosenstein",
+        "name": null,
+        "email": null,
+        "url": null,
+        "packages_count": 128,
+        "html_url": "https://pypi.org/user/niklasrosenstein/",
+        "role": null,
+        "created_at": "2022-11-20T09:18:27.786Z",
+        "updated_at": "2022-11-20T09:18:27.786Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/pypi.org/maintainers/niklasrosenstein/packages"
+      }
+    ]
+  }
+}

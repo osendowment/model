@@ -1,0 +1,91 @@
+{
+  "ecosystem": "npm",
+  "registry_hit": "npmjs.org",
+  "fetched_at": "2026-04-27T20:49:21Z",
+  "data": {
+    "id": 5428264,
+    "name": "becke-ch--regex--s0-0-v1--base--pl--lib",
+    "ecosystem": "npm",
+    "description": "A JavaScript Regular Expression library, extending the standard RegExp class with missing functionality",
+    "homepage": null,
+    "licenses": "SEE LICENSE IN LICENSE",
+    "normalized_licenses": [
+      "ICU"
+    ],
+    "repository_url": "file:///ws/tool/becke-ch--regex--s0-v1",
+    "keywords_array": [
+      "Regular Expression",
+      "RegExp",
+      "Regex",
+      "Search",
+      "Search & Replace",
+      "Search and Replace",
+      "match",
+      "split",
+      "exec"
+    ],
+    "namespace": null,
+    "versions_count": 7,
+    "first_release_published_at": "2017-04-06T19:34:29.995Z",
+    "latest_release_published_at": "2018-04-07T20:18:28.365Z",
+    "latest_release_number": "1.4.0",
+    "last_synced_at": "2026-04-25T06:07:25.027Z",
+    "created_at": "2022-11-15T20:18:51.422Z",
+    "updated_at": "2026-04-25T06:07:25.027Z",
+    "registry_url": "https://www.npmjs.com/package/becke-ch--regex--s0-0-v1--base--pl--lib",
+    "install_command": "npm install becke-ch--regex--s0-0-v1--base--pl--lib",
+    "documentation_url": null,
+    "metadata": {
+      "funding": null,
+      "dist-tags": {
+        "latest": "1.4.0"
+      }
+    },
+    "repo_metadata": {},
+    "repo_metadata_updated_at": "2024-09-07T19:37:35.393Z",
+    "dependent_packages_count": 7,
+    "downloads": 1160968,
+    "downloads_period": "last-month",
+    "dependent_repos_count": 9325,
+    "rankings": {
+      "downloads": 0.1855490312334331,
+      "dependent_repos_count": 0.2575606606912892,
+      "dependent_packages_count": 2.7697266450909077,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 0.6096891227134207,
+      "average": 0.9556313649322626
+    },
+    "purl": "pkg:npm/becke-ch--regex--s0-0-v1--base--pl--lib",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/npm/becke-ch--regex--s0-0-v1--base--pl--lib",
+    "docker_dependents_count": 79,
+    "docker_downloads_count": 3470406,
+    "usage_url": "https://repos.ecosyste.ms/usage/npm/becke-ch--regex--s0-0-v1--base--pl--lib",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/npm/becke-ch--regex--s0-0-v1--base--pl--lib/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/becke-ch--regex--s0-0-v1--base--pl--lib/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/becke-ch--regex--s0-0-v1--base--pl--lib/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/becke-ch--regex--s0-0-v1--base--pl--lib/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/becke-ch--regex--s0-0-v1--base--pl--lib/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/packages/becke-ch--regex--s0-0-v1--base--pl--lib/codemeta",
+    "maintainers": [
+      {
+        "uuid": "becke.ch",
+        "login": "becke.ch",
+        "name": null,
+        "email": "npm--s0-v1@becke.ch",
+        "url": null,
+        "packages_count": 1,
+        "html_url": "https://www.npmjs.com/~becke.ch",
+        "role": null,
+        "created_at": "2022-11-15T20:32:12.833Z",
+        "updated_at": "2022-11-15T20:32:12.833Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/npmjs.org/maintainers/becke.ch/packages"
+      }
+    ]
+  }
+}

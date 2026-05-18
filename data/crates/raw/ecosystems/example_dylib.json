@@ -1,0 +1,78 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 4078922,
+    "name": "example_dylib",
+    "ecosystem": "cargo",
+    "description": "Example dynamic link library for executing tests of libraries that load and operate on dynamic link libraries",
+    "homepage": null,
+    "licenses": "MIT",
+    "normalized_licenses": [
+      "MIT"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 1,
+    "first_release_published_at": "2017-09-04T19:53:46.257Z",
+    "latest_release_published_at": "2017-09-04T19:53:46.257Z",
+    "latest_release_number": "0.1.0",
+    "last_synced_at": "2026-03-27T02:08:01.066Z",
+    "created_at": "2022-04-12T12:00:27.918Z",
+    "updated_at": "2026-03-27T02:08:01.066Z",
+    "registry_url": "https://crates.io/crates/example_dylib/",
+    "install_command": "cargo install example_dylib",
+    "documentation_url": "https://docs.rs/example_dylib/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 1,
+    "downloads": 8120,
+    "downloads_period": "total",
+    "dependent_repos_count": 1,
+    "rankings": {
+      "downloads": 17.843064279692236,
+      "dependent_repos_count": 16.737754436028595,
+      "dependent_packages_count": 18.150908456155797,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 17.577242390625543
+    },
+    "purl": "pkg:cargo/example_dylib",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/example_dylib",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/example_dylib",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/example_dylib/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/example_dylib/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/example_dylib/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/example_dylib/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/example_dylib/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/example_dylib/codemeta",
+    "maintainers": [
+      {
+        "uuid": "9246",
+        "login": "szymonwieloch",
+        "name": "Szymon Wieloch",
+        "email": null,
+        "url": "https://github.com/szymonwieloch",
+        "packages_count": 6,
+        "html_url": "https://crates.io/users/szymonwieloch",
+        "role": null,
+        "created_at": "2022-11-07T19:02:47.233Z",
+        "updated_at": "2022-11-07T19:02:47.233Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/szymonwieloch/packages"
+      }
+    ]
+  }
+}

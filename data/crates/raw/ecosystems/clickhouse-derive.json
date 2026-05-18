@@ -1,0 +1,92 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 3994521,
+    "name": "clickhouse-derive",
+    "ecosystem": "cargo",
+    "description": "A macro for deriving clickhouse::Row",
+    "homepage": null,
+    "licenses": "MIT OR Apache-2.0",
+    "normalized_licenses": [
+      "MIT",
+      "Apache-2.0"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 3,
+    "first_release_published_at": "2021-05-31T10:43:25.308Z",
+    "latest_release_published_at": "2024-07-16T17:53:38.024Z",
+    "latest_release_number": "0.2.0",
+    "last_synced_at": "2026-04-22T19:01:44.220Z",
+    "created_at": "2022-04-12T08:12:43.931Z",
+    "updated_at": "2026-04-22T19:01:44.221Z",
+    "registry_url": "https://crates.io/crates/clickhouse-derive/",
+    "install_command": "cargo install clickhouse-derive",
+    "documentation_url": "https://docs.rs/clickhouse-derive/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 2,
+    "downloads": 5157757,
+    "downloads_period": "total",
+    "dependent_repos_count": 7,
+    "rankings": {
+      "downloads": 5.099047055880279,
+      "dependent_repos_count": 8.813129780259803,
+      "dependent_packages_count": 18.140740853057576,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 10.684305896399218
+    },
+    "purl": "pkg:cargo/clickhouse-derive",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/clickhouse-derive",
+    "docker_dependents_count": null,
+    "docker_downloads_count": null,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/clickhouse-derive",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/clickhouse-derive/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/clickhouse-derive/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/clickhouse-derive/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/clickhouse-derive/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/clickhouse-derive/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/clickhouse-derive/codemeta",
+    "maintainers": [
+      {
+        "uuid": "127",
+        "login": "abonander",
+        "name": "Austin Bonander",
+        "email": null,
+        "url": "https://github.com/abonander",
+        "packages_count": 46,
+        "html_url": "https://crates.io/users/abonander",
+        "role": null,
+        "created_at": "2026-03-17T22:22:32.671Z",
+        "updated_at": "2026-03-17T22:22:32.671Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/abonander/packages"
+      },
+      {
+        "uuid": "281534",
+        "login": "slvrtrn",
+        "name": "Serge Klochkov",
+        "email": null,
+        "url": "https://github.com/slvrtrn",
+        "packages_count": 6,
+        "html_url": "https://crates.io/users/slvrtrn",
+        "role": null,
+        "created_at": "2026-03-17T22:22:32.758Z",
+        "updated_at": "2026-03-17T22:22:32.758Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/slvrtrn/packages"
+      }
+    ]
+  }
+}

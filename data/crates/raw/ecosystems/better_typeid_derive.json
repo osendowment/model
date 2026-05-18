@@ -1,0 +1,83 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 3605746,
+    "name": "better_typeid_derive",
+    "ecosystem": "cargo",
+    "description": "derive macro part of better_any",
+    "homepage": null,
+    "licenses": "MIT OR Apache-2.0",
+    "normalized_licenses": [
+      "MIT",
+      "Apache-2.0"
+    ],
+    "repository_url": "",
+    "keywords_array": [
+      "template",
+      "proc_macro",
+      "procmacro"
+    ],
+    "namespace": null,
+    "versions_count": 3,
+    "first_release_published_at": "2020-10-18T02:52:35.352Z",
+    "latest_release_published_at": "2025-12-12T21:13:41.672Z",
+    "latest_release_number": "0.1.2",
+    "last_synced_at": "2026-04-26T21:05:52.606Z",
+    "created_at": "2022-04-11T06:42:56.464Z",
+    "updated_at": "2026-04-26T21:05:52.606Z",
+    "registry_url": "https://crates.io/crates/better_typeid_derive/",
+    "install_command": "cargo install better_typeid_derive",
+    "documentation_url": "https://docs.rs/better_typeid_derive/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 1,
+    "downloads": 2941258,
+    "downloads_period": "total",
+    "dependent_repos_count": 663,
+    "rankings": {
+      "downloads": 2.1978268846271933,
+      "dependent_repos_count": 1.6092436030881903,
+      "dependent_packages_count": 18.186925548888738,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": null,
+      "average": 7.331332012201373
+    },
+    "purl": "pkg:cargo/better_typeid_derive",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/better_typeid_derive",
+    "docker_dependents_count": 2,
+    "docker_downloads_count": 46,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/better_typeid_derive",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/better_typeid_derive/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/better_typeid_derive/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/better_typeid_derive/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/better_typeid_derive/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/better_typeid_derive/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/better_typeid_derive/codemeta",
+    "maintainers": [
+      {
+        "uuid": "76735",
+        "login": "rrevenantt",
+        "name": "Konstantin",
+        "email": null,
+        "url": "https://github.com/rrevenantt",
+        "packages_count": 7,
+        "html_url": "https://crates.io/users/rrevenantt",
+        "role": null,
+        "created_at": "2022-11-07T17:08:05.807Z",
+        "updated_at": "2022-11-07T17:08:05.807Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/rrevenantt/packages"
+      }
+    ]
+  }
+}

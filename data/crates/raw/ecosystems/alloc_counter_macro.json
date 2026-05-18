@@ -1,0 +1,92 @@
+{
+  "ecosystem": "crates",
+  "registry_hit": "crates.io",
+  "fetched_at": "2026-04-27T20:49:32Z",
+  "data": {
+    "id": 3509175,
+    "name": "alloc_counter_macro",
+    "ecosystem": "cargo",
+    "description": "The #[no_alloc] macro for the alloc_counter crate.",
+    "homepage": null,
+    "licenses": "MIT OR Apache-2.0",
+    "normalized_licenses": [
+      "MIT",
+      "Apache-2.0"
+    ],
+    "repository_url": "",
+    "keywords_array": [],
+    "namespace": null,
+    "versions_count": 3,
+    "first_release_published_at": "2019-02-06T03:16:11.067Z",
+    "latest_release_published_at": "2019-11-03T15:04:35.253Z",
+    "latest_release_number": "0.0.2",
+    "last_synced_at": "2026-03-27T22:17:57.477Z",
+    "created_at": "2022-04-10T20:57:22.419Z",
+    "updated_at": "2026-03-27T22:17:57.477Z",
+    "registry_url": "https://crates.io/crates/alloc_counter_macro/",
+    "install_command": "cargo install alloc_counter_macro",
+    "documentation_url": "https://docs.rs/alloc_counter_macro/",
+    "metadata": {
+      "categories": []
+    },
+    "repo_metadata": null,
+    "repo_metadata_updated_at": null,
+    "dependent_packages_count": 1,
+    "downloads": 99242,
+    "downloads_period": "total",
+    "dependent_repos_count": 14,
+    "rankings": {
+      "downloads": 7.5932208523914815,
+      "dependent_repos_count": 7.019962877381719,
+      "dependent_packages_count": 18.154888175040913,
+      "stargazers_count": null,
+      "forks_count": null,
+      "docker_downloads_count": 5.395601732650774,
+      "average": 9.540918409366222
+    },
+    "purl": "pkg:cargo/alloc_counter_macro",
+    "advisories": [],
+    "docker_usage_url": "https://docker.ecosyste.ms/usage/cargo/alloc_counter_macro",
+    "docker_dependents_count": 6,
+    "docker_downloads_count": 347,
+    "usage_url": "https://repos.ecosyste.ms/usage/cargo/alloc_counter_macro",
+    "dependent_repositories_url": "https://repos.ecosyste.ms/api/v1/usage/cargo/alloc_counter_macro/dependencies",
+    "status": null,
+    "funding_links": [],
+    "critical": null,
+    "issue_metadata": null,
+    "versions_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/alloc_counter_macro/versions",
+    "version_numbers_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/alloc_counter_macro/version_numbers",
+    "dependent_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/alloc_counter_macro/dependent_packages",
+    "related_packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/alloc_counter_macro/related_packages",
+    "codemeta_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/packages/alloc_counter_macro/codemeta",
+    "maintainers": [
+      {
+        "uuid": "2201",
+        "login": "WildCryptoFox",
+        "name": null,
+        "email": null,
+        "url": "https://github.com/WildCryptoFox",
+        "packages_count": 11,
+        "html_url": "https://crates.io/users/WildCryptoFox",
+        "role": null,
+        "created_at": "2022-11-07T16:37:17.127Z",
+        "updated_at": "2022-11-07T16:37:17.127Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/WildCryptoFox/packages"
+      },
+      {
+        "uuid": "23527",
+        "login": "bspeice",
+        "name": null,
+        "email": null,
+        "url": "https://github.com/bspeice",
+        "packages_count": 9,
+        "html_url": "https://crates.io/users/bspeice",
+        "role": null,
+        "created_at": "2022-12-27T21:12:02.340Z",
+        "updated_at": "2022-12-27T21:12:02.340Z",
+        "packages_url": "https://packages.ecosyste.ms/api/v1/registries/crates.io/maintainers/bspeice/packages"
+      }
+    ]
+  }
+}
