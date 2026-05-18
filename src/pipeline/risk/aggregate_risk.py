@@ -109,6 +109,7 @@ def aggregate(sample: set[str] | None = None) -> tuple[list[str], list[dict[str,
     intermediates: dict[str, tuple[list[str], dict[str, dict[str, str]]]] = {}
     fieldnames: list[str] = list(ID_COLUMNS)
     qualified_per_dim: dict[str, list[tuple[str, str]]] = {}
+    seen_outputs: set[str] = set(ID_COLUMNS)
 
     missing_files: list[str] = []
     for dim, path in INTERMEDIATES.items():
@@ -117,7 +118,17 @@ def aggregate(sample: set[str] | None = None) -> tuple[list[str], list[dict[str,
         if not cols:
             missing_files.append(str(path))
             continue
-        qualified = _qualify_columns(dim, cols)
+        # Drop any column already emitted by an earlier dimension — first
+        # writer wins. `active_contributors` legitimately lives in both
+        # concentration.csv and workload.csv (the workload builder reads it
+        # straight from concentration.csv); without this dedup it would
+        # land twice in risk-data.csv, breaking the DictWriter header.
+        qualified: list[tuple[str, str]] = []
+        for src_col, out_col in _qualify_columns(dim, cols):
+            if out_col in seen_outputs:
+                continue
+            seen_outputs.add(out_col)
+            qualified.append((src_col, out_col))
         qualified_per_dim[dim] = qualified
         fieldnames.extend(out for _, out in qualified)
 
