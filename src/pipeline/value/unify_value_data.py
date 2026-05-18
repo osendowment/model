@@ -10,9 +10,9 @@ Reads `data/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crates,
 cpp), groups packages by canonical `git_url` (or by a per-package synthetic
 key for orphans), and writes `data/value-data.csv` with **one row per repo**:
 
-    id, github_repo, gh_valid, git_url, git_valid, llm_guess,
-    ecosystems, packages, top_eco, top_eco_pkg, top_eco_pct, class,
-    class_npm, class_pypi, class_crates, class_cpp
+    id, github_repo, gh_repo_id, gh_valid, git_url, git_valid,
+    llm_guess, ecosystems, packages, top_eco, top_eco_pkg,
+    top_eco_pct, class, class_npm, class_pypi, class_crates, class_cpp
 
 `github_repo` is normalised to lowercase `owner/repo`. `git_url` is the
 canonical clone URL from `results.csv`'s `git` column (lowercased), which
@@ -63,7 +63,7 @@ ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
 CLASS_RANK = {"A": 0, "B": 1, "C": 2, "D": 3}
 
 FIELDS = (
-    ["id", "github_repo", "gh_valid", "git_url", "git_valid",
+    ["id", "github_repo", "gh_repo_id", "gh_valid", "git_url", "git_valid",
      "llm_guess", "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]

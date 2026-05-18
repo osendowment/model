@@ -2,7 +2,9 @@
 """Value pipeline step — verify every repo's git URL accepts a connection.
 
 Runs after `unify_value_data` has written `data/value-data.csv`. Reads that
-file back, populates the `gh_valid` / `git_valid` columns, and rewrites it.
+file back, populates the `gh_valid` / `git_valid` / `gh_repo_id` columns,
+canonicalises `github_repo` to each repo's current (post-rename) name, and
+rewrites it.
 
 Two strategies, chosen per URL:
 
@@ -378,14 +380,17 @@ def verify_urls_in_aggregates(aggs: list[dict],
         force=force,
         quiet=False,
     )
-    # Read back validity
-    gh_valid: dict[str, bool] = {}
+    # Read back validity + identity. `data/github/repos.csv` is keyed by the
+    # slug we *asked* for (`repo`); `full_name` is the repo's current name
+    # (differs when GitHub redirected us through a rename) and `repo_id` its
+    # stable numeric id.
+    gh_meta: dict[str, dict] = {}
     if GH_REPOS_FILE.exists():
         with open(GH_REPOS_FILE, encoding="utf-8") as f:
             for r in csv.DictReader(f):
                 slug = (r.get("repo") or "").strip().lower()
                 if slug:
-                    gh_valid[slug] = (r.get("valid", "").lower() == "true")
+                    gh_meta[slug] = r
 
     # --- Non-github side ---
     nongh_valid = _verify_non_github(sorted(nongithub_urls), force=force)
@@ -399,12 +404,28 @@ def verify_urls_in_aggregates(aggs: list[dict],
     # `git_url` (they're tracked via `github_repo`), so we never need to
     # cross-reference gh_valid from git_valid.
     invalid_examples: list[tuple[str, str, str]] = []  # (kind, key, url)
+    renamed = 0
     for a in aggs:
         gh = (a.get("github_repo") or "").strip().lower()
         gu = (a.get("git_url") or "").strip()
         has_gh = bool(gh and "/" in gh)
 
-        a["gh_valid"] = gh_valid.get(gh, False) if has_gh else ""
+        meta = gh_meta.get(gh) if has_gh else None
+        is_valid = bool(meta) and meta.get("valid", "").lower() == "true"
+
+        a["gh_valid"] = is_valid if has_gh else ""
+        # gh_repo_id: GitHub's stable numeric repo id. Only a repo that
+        # resolved (HTTP 200) carries one — sparse 404 rows have none.
+        a["gh_repo_id"] = (meta.get("repo_id") or "") if is_valid else ""
+        # github_repo: rewrite to the repo's *current* name. The GitHub API
+        # follows renames, so `full_name` is the live owner/repo even when we
+        # queried a stale slug. Only a validated repo is canonicalised.
+        if is_valid:
+            full = (meta.get("full_name") or "").strip().lower()
+            if full and "/" in full and full != gh:
+                a["github_repo"] = full
+                renamed += 1
+
         a["git_valid"] = nongh_valid.get(gu, False) if gu and not has_gh else ""
 
         # Track invalids for the summary table. After the fix, gh_valid
@@ -414,6 +435,10 @@ def verify_urls_in_aggregates(aggs: list[dict],
             invalid_examples.append(("gh", gh, gu))
         elif a["git_valid"] is False:
             invalid_examples.append(("git", a.get("top_eco_pkg", ""), gu))
+
+    if renamed:
+        console.print(f"  [dim]github_repo canonicalised to current "
+                      f"name:[/dim] [cyan]{renamed}[/cyan]")
 
     # Stats: a row is "valid" if BOTH columns are True (or one is True and the
     # other is empty). A row is "invalid" if either is explicitly False.

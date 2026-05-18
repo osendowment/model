@@ -590,6 +590,12 @@ class TestInvariants:
     def test_ecosystems_tuple_canonical(self):
         assert ECOSYSTEMS == ("npm", "pypi", "crates", "cpp")
 
+    def test_gh_repo_id_follows_github_repo(self):
+        # gh_repo_id is written directly after github_repo so the repo's
+        # name and its stable numeric id sit together in value-data.csv.
+        i = FIELDS.index("github_repo")
+        assert FIELDS[i + 1] == "gh_repo_id"
+
 
 if __name__ == "__main__":  # pragma: no cover
     pytest.main([__file__, "-v"])
