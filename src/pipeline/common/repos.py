@@ -177,6 +177,34 @@ def load_repo_ids(repos_file: str = REPOS_FILE) -> dict[str, str]:
     return out
 
 
+def load_default_branches(repos_file: str = REPOS_FILE) -> dict[str, str]:
+    """Map repo slug -> default_branch from data/github/repos.csv.
+
+    Both the looked-up `repo` slug and the rename-resolved `full_name` are
+    keyed to the same branch, so callers resolve whether they hold a stale
+    or canonical slug. Rows with an empty default_branch are skipped.
+
+    Used by SHA-pinned fetchers (scc, lizard, …) to verify a snapshot SHA
+    is actually on the repo's default branch — GitHub's Commits API can
+    hand back a fork-network sibling's commit.
+    """
+    out: dict[str, str] = {}
+    if not os.path.exists(repos_file):
+        return out
+    with open(repos_file, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            branch = (row.get("default_branch") or "").strip()
+            if not branch:
+                continue
+            slug = (row.get("repo") or "").strip().lower()
+            full = (row.get("full_name") or "").strip().lower()
+            if slug:
+                out[slug] = branch
+            if full:
+                out[full] = branch
+    return out
+
+
 # Back-compat aliases — risk scripts migrate to load_risk_*; these keep any
 # remaining `load_ab_*` imports working. The old `top_repos_file` kwarg of
 # load_ab_repos is no longer accepted.

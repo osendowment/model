@@ -35,7 +35,7 @@ import datetime
 import logging
 import os
 import random
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 
 import aiohttp
 from rich.console import Console
@@ -45,7 +45,7 @@ from rich.progress import (
 
 from src.github.display import _ETAColumn
 from src.github.github_client import GITHUB_API, get_revolver
-from src.pipeline.common.repos import load_risk_repos
+from src.pipeline.common.repos import load_default_branches, load_risk_repos
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -168,15 +168,23 @@ async def fetch_commit_shas_multi(
     concurrency: int = DEFAULT_CONCURRENCY,
     sha_data: dict[tuple[str, str], dict[str, str]] | None = None,
     sha_file: str = "",
+    default_branches: dict[str, str] | None = None,
 ) -> dict[tuple[str, int], dict[str, str]]:
     """For each ``(repo, year)`` pair, fetch first/last commit SHA + commits count.
 
     Per (repo, year):
-      Call A: GET /commits?since=Y-01-01&until=Y+1-01-01&per_page=1
+      Call A: GET /commits?sha={default_branch}&since=Y-01-01&until=Y+1-01-01&per_page=1
         → newest commit IN year (first record) + commits-in-year
           (Link header rel="last" page).
       Call B (only if commits > 1): same URL with ``&page={commits}``
         → oldest commit IN year.
+
+    ``default_branches`` maps repo → default branch; when a repo is known
+    the query is pinned to its default branch with ``&sha=`` so we only
+    record commits from the default branch (not, e.g., a stray PR branch).
+    The downstream SHA-pinned fetchers additionally check each SHA is on
+    the default branch's first-parent line (and recompute it if not) —
+    see ``src.git.clone.resolve_mainline_sha``.
 
     Returns ``{(repo, year): {"first_sha", "last_sha", "commits"}}``.
     Inactive years (no commits) get empty SHAs and commits=0.
@@ -232,6 +240,13 @@ async def fetch_commit_shas_multi(
                     f"{GITHUB_API}/repos/{repo}/commits"
                     f"?since={since}&until={until}&per_page=1"
                 )
+                # Pin to the default branch so we never pick up a commit
+                # from a stray ref. (GitHub can still leak a fork-network
+                # sibling's commit even with &sha — the SHA-pinned fetchers
+                # verify against the real branch as the hard guard.)
+                branch = (default_branches or {}).get(repo)
+                if branch:
+                    base += f"&sha={quote(branch, safe='')}"
                 first_sha, last_sha, commits = "", "", 0
                 async with sem:
                     try:
@@ -320,6 +335,11 @@ def main() -> None:
     if args.limit:
         repos_all = random.sample(repos_all, min(args.limit, len(repos_all)))
 
+    # Per-repo default branch — used to pin each Commits API query so we
+    # only record default-branch commits. Empty when github/repos.csv is
+    # missing (the query then falls back to the unpinned default).
+    default_branches = load_default_branches()
+
     sha_data = {} if args.force else load_sha_data(args.sha_file)
     pairs_to_fetch: list[tuple[str, int]] = []
     for year in years:
@@ -346,6 +366,7 @@ def main() -> None:
         concurrency=args.concurrency,
         sha_data=sha_data,
         sha_file=args.sha_file,
+        default_branches=default_branches,
     ))
 
     # Final write so a crash mid-run doesn't keep the file behind

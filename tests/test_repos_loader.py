@@ -94,3 +94,22 @@ def test_load_repo_ids(tmp_path):
     assert ids["stale/slug"] == "77"
     assert ids["fresh/slug"] == "77"
     assert "owner/noid" not in ids
+
+
+def test_load_default_branches(tmp_path):
+    gh = tmp_path / "repos.csv"
+    _write(gh, ["repo", "valid", "full_name", "default_branch"], [
+        {"repo": "Owner/Name", "valid": "True", "full_name": "Owner/Name",
+         "default_branch": "main"},
+        {"repo": "stale/slug", "valid": "True", "full_name": "fresh/slug",
+         "default_branch": "master"},
+        {"repo": "owner/nobranch", "valid": "True", "full_name": "owner/nobranch",
+         "default_branch": ""},
+    ])
+    branches = repos.load_default_branches(repos_file=str(gh))
+    assert branches["owner/name"] == "main"
+    # both the stale and the canonical slug resolve to the same branch
+    assert branches["stale/slug"] == "master"
+    assert branches["fresh/slug"] == "master"
+    # a row with no default_branch is skipped
+    assert "owner/nobranch" not in branches

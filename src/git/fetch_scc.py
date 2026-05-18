@@ -53,13 +53,15 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from src.git.clone import sparse_clone
+from src.git.clone import resolve_mainline_sha, sparse_clone
 from src.git.commits_years import load_sha_data, resolve_snapshot_sha
 from src.git.disk import check_disk_or_exit, print_disk_banner
 from src.git.long_format import read as read_long
 from src.git.long_format import upsert_snapshot
 from src.github.display import _ETAColumn
-from src.pipeline.common.repos import load_repo_ids, load_risk_repos
+from src.pipeline.common.repos import (
+    load_default_branches, load_repo_ids, load_risk_repos,
+)
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -167,19 +169,23 @@ def _target_sha_per_repo(
     sha_data: dict[tuple[str, str], dict[str, str]],
     repos: list[str],
     years: list[int],
-) -> dict[str, str]:
+) -> dict[str, tuple[str, int]]:
     """For each repo, pick its newest populated last_sha across ``years``.
 
-    Walks years high→low, returns the first non-empty ``last_sha``. Cascade
-    via ``resolve_snapshot_sha`` so a year with 0 commits doesn't block us.
+    Walks years high→low, returns the first non-empty ``last_sha`` paired
+    with the target year it was requested for. Cascade via
+    ``resolve_snapshot_sha`` so a year with 0 commits doesn't block us.
     Repos with no SHA at any requested year are absent from the result.
+
+    The year is kept so an off-mainline SHA can be recomputed against a
+    ``{year + 1}-01-01`` cutoff — see ``resolve_mainline_sha``.
     """
-    out: dict[str, str] = {}
+    out: dict[str, tuple[str, int]] = {}
     for r in repos:
         for y in sorted(years, reverse=True):
             sha = resolve_snapshot_sha(sha_data, r, y)
             if sha:
-                out[r] = sha
+                out[r] = (sha, y)
                 break
     return out
 
@@ -227,16 +233,45 @@ def _load_repo_id_map() -> dict[str, str]:
 async def _process_one(
     repo: str, sha: str, sizes: dict[str, int],
     base_dir: str, sem: asyncio.Semaphore,
+    verify_branch: str | None = None, cutoff: str | None = None,
 ) -> SccResult:
-    """Sparse-clone at ``sha`` and run scc. Always cleans up its tmp dir."""
+    """Sparse-clone the snapshot and run scc. Always cleans up its tmp dir.
+
+    When ``verify_branch`` is known the pinned ``sha`` is checked against
+    the branch's first-parent history (``resolve_mainline_sha``): an
+    off-mainline SHA (e.g. a merged CI-template commit) is replaced — for
+    the *checkout* — with the real last first-parent commit at or before
+    ``cutoff``. The metrics are still recorded under the pinned ``sha``
+    (``res.sha``) because ``build_complexity.py`` joins ``scc.csv`` on
+    ``commits-years.csv``'s ``last_sha``; we're correcting the measured
+    codebase for that snapshot, not the snapshot id.
+    """
     res = SccResult(repo=repo, sha=sha)
     dest = os.path.join(base_dir, repo.replace("/", "__"))
     async with sem:
         loop = asyncio.get_event_loop()
         t0 = time.monotonic()
         try:
+            clone_sha = sha
+            if verify_branch:
+                try:
+                    effective, corrected = await loop.run_in_executor(
+                        None, resolve_mainline_sha, repo, verify_branch, sha, cutoff,
+                    )
+                except Exception as e:
+                    # Branch unfetchable — can't verify; fall back to the
+                    # pinned SHA rather than dropping the repo.
+                    log.warning("scc: %s mainline check unavailable (%s) — "
+                                "using pinned SHA", repo, e)
+                else:
+                    clone_sha = effective
+                    if corrected:
+                        log.warning("scc: %s pinned SHA %s is off-mainline "
+                                    "(merged side branch) — measuring mainline "
+                                    "commit %s instead",
+                                    repo, sha[:12], effective[:12])
             await loop.run_in_executor(
-                None, sparse_clone, repo, dest, sizes.get(repo, 0), sha,
+                None, sparse_clone, repo, dest, sizes.get(repo, 0), clone_sha,
             )
             if not os.path.isdir(dest):
                 res.error = "clone failed"
@@ -266,6 +301,8 @@ async def run_all(
     targets: dict[str, str],
     sizes: dict[str, int],
     repo_ids: dict[str, str],
+    default_branches: dict[str, str],
+    cutoffs: dict[str, str],
     output_path: str,
     concurrency: int,
     max_disk_gb: float = 0.0,
@@ -293,12 +330,17 @@ async def run_all(
             task = progress.add_task(" " * name_width, total=len(targets))
 
             async def _run(repo: str, sha: str) -> SccResult:
-                res = await _process_one(repo, sha, sizes, base_dir, sem)
+                res = await _process_one(
+                    repo, sha, sizes, base_dir, sem,
+                    default_branches.get(repo), cutoffs.get(repo),
+                )
                 if not res.error:
                     upsert_snapshot(
                         output_path,
                         repo=repo,
                         repo_id=repo_ids.get(repo, ""),
+                        # Recorded under the pinned target SHA — that's the
+                        # key build_complexity.py joins scc.csv on.
                         commit_sha=sha,
                         metrics={
                             "files":      res.files,
@@ -405,6 +447,9 @@ def main() -> None:
                              "We pick the most-recent populated year per repo.")
     parser.add_argument("--limit", type=int,
                         help="Process N random risk-scope repos (for smoke tests).")
+    parser.add_argument("--repos",
+                        help="Comma-separated repo slugs — process only these "
+                             "(targeted re-run; pair with --force).")
     parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                         help=f"Parallel sparse-clone+scc workers (default: {DEFAULT_CONCURRENCY}). "
                              "Override with $SCC_WORKERS.")
@@ -438,6 +483,16 @@ def main() -> None:
     repos_all = [e.repo for e in entries]
     sizes = {e.repo: e.size_kb for e in entries if e.size_kb}
 
+    if args.repos:
+        want = {r.strip().lower() for r in args.repos.split(",") if r.strip()}
+        repos_all = [r for r in repos_all if r in want]
+        unknown = want - set(repos_all)
+        if unknown:
+            console.print(
+                f"[yellow]--repos: not in risk scope, skipped — "
+                f"{', '.join(sorted(unknown))}[/yellow]"
+            )
+
     rng = random.Random(args.seed)
     if args.limit and args.limit < len(repos_all):
         repos = rng.sample(repos_all, args.limit)
@@ -453,7 +508,11 @@ def main() -> None:
         )
         return
 
-    targets = _target_sha_per_repo(sha_data, repos, args.years)
+    raw_targets = _target_sha_per_repo(sha_data, repos, args.years)
+    targets = {r: sha for r, (sha, _y) in raw_targets.items()}
+    # Year-end cutoff per repo — used to recompute an off-mainline snapshot
+    # SHA to the real last first-parent commit of that year.
+    cutoffs = {r: f"{y + 1}-01-01T00:00:00" for r, (_sha, y) in raw_targets.items()}
     missing = [r for r in repos if r not in targets]
     if missing:
         console.print(
@@ -479,11 +538,16 @@ def main() -> None:
         return
 
     repo_ids = _load_repo_id_map()
+    # Default branch per repo — lets sparse_clone verify each pinned SHA is
+    # actually on the default branch (GitHub's Commits API can leak a
+    # fork-network sibling's commit; an unverified SHA measured the wrong
+    # codebase, e.g. toml-rs/toml showing 11 LOC).
+    default_branches = load_default_branches()
 
     t0 = time.monotonic()
     results = asyncio.run(run_all(
-        pending, sizes, repo_ids, args.output, args.concurrency,
-        max_disk_gb=args.max_disk_gb,
+        pending, sizes, repo_ids, default_branches, cutoffs, args.output,
+        args.concurrency, max_disk_gb=args.max_disk_gb,
     ))
     elapsed = time.monotonic() - t0
 

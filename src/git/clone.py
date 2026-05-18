@@ -35,6 +35,7 @@ import io
 import os
 import subprocess
 import tarfile
+import tempfile
 import time
 
 import httpx
@@ -71,6 +72,69 @@ def _run_git(args: list[str], timeout: int, **kwargs) -> subprocess.CompletedPro
         os.killpg(proc.pid, 9)  # SIGKILL entire group
         proc.wait()
         raise
+
+
+def resolve_mainline_sha(
+    repo: str, branch: str, pinned_sha: str, before: str | None = None,
+    *, repo_url: str | None = None, timeout: int = 120,
+) -> tuple[str, bool]:
+    """Resolve the snapshot SHA to analyse, constrained to the default
+    branch's **first-parent (mainline) history**.
+
+    GitHub's Commits API (``/commits?since=&until=``) returns the newest
+    commit *by date* reachable from a branch — which includes commits
+    merged in from side branches. A repo that periodically merges a shared
+    CI-template branch (e.g. epage's ``template-update``) can have a tiny
+    ~25-file template commit as its newest dated commit; pinning a code
+    analysis to it measures the template, not the repo (toml-rs/toml → 11
+    LOC). Such a commit is a genuine *ancestor* of the branch, so a plain
+    ``merge-base --is-ancestor`` check passes it — only first-parent
+    membership distinguishes mainline from merged-in side branches.
+
+    - If ``pinned_sha`` is on ``branch``'s first-parent line → return it.
+    - Otherwise recompute: the newest first-parent commit at or before
+      ``before`` (an ISO-8601 timestamp; the branch tip when omitted).
+
+    ``repo_url`` overrides the GitHub URL (used by tests). Returns
+    ``(sha, corrected)`` — ``corrected`` is True when the pinned SHA was
+    off-mainline and a replacement was computed.
+
+    Raises ``RuntimeError`` if ``branch`` cannot be fetched or has no
+    first-parent commit in range — callers degrade to the pinned SHA.
+    """
+    url = repo_url or f"https://github.com/{repo}.git"
+    with tempfile.TemporaryDirectory(prefix="mainline-") as tmp:
+        _run_git(["git", "init", "--quiet", "."], timeout=10, cwd=tmp)
+        _run_git(["git", "remote", "add", "origin", url], timeout=10, cwd=tmp)
+        # Commit graph only (--filter=tree:0): no trees, no blobs — tiny
+        # even for huge repos, and enough to walk first-parent history.
+        fetched = _run_git(
+            ["git", "fetch", "--quiet", "--no-tags", "--filter=tree:0", "origin", branch],
+            timeout=timeout, cwd=tmp,
+        )
+        if fetched.returncode != 0:
+            raise RuntimeError(
+                f"cannot fetch {branch!r}: "
+                f"{fetched.stderr.decode('utf-8', 'replace').strip()[:160]}"
+            )
+        first_parent = _run_git(
+            ["git", "rev-list", "--first-parent", "FETCH_HEAD"],
+            timeout=min(timeout, 60), cwd=tmp,
+        )
+        mainline = set(first_parent.stdout.decode().split())
+        if pinned_sha and pinned_sha in mainline:
+            return pinned_sha, False
+        # Off-mainline (a merged side-branch commit) — recompute the newest
+        # first-parent commit at or before the year-end cutoff.
+        args = ["git", "rev-list", "-1", "--first-parent"]
+        if before:
+            args.append(f"--before={before}")
+        args.append("FETCH_HEAD")
+        recomputed = _run_git(args, timeout=min(timeout, 60), cwd=tmp)
+        sha = recomputed.stdout.decode().strip()
+        if not sha:
+            raise RuntimeError(f"no first-parent commit on {branch!r} before {before}")
+        return sha, True
 
 
 def download_tarball(
