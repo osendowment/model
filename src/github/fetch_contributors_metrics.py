@@ -36,15 +36,16 @@ def parse_repo(url_or_slug: str) -> str:
 def _compute_bus_factor(
     contributors: list[Contributor], threshold: float = THRESHOLD,
     base: str = "commits", include_bots: bool = False,
-    total_override: int | None = None,
 ) -> tuple[int, list[Contributor], float]:
     """Core bus factor + HHI computation from a list of Contributors.
 
-    If `total_override` is provided (and not less than the sum of visible
-    contributions), it's used as the denominator for percent calculations.
-    This matters for repos with >500 contributors where /contributors
-    truncates the long tail — using the exact total commit count from
-    /commits gives accurate BF/HHI even when we can't see every author.
+    Both metrics are measured over the *non-bot* contributors we can see,
+    and each contributor's share is taken against the sum of those same
+    contributors' contributions. Numerator and denominator must come from
+    the one population: using an external total (e.g. the lifetime
+    /commits count, which also includes bot commits) deflates HHI below
+    its mathematical floor and inflates the bus factor toward the full
+    contributor count for any repo with bot activity.
     """
     for c in contributors:
         c.is_bot = is_bot(c.login) and not include_bots
@@ -59,16 +60,11 @@ def _compute_bus_factor(
             c.pct = c.lines_changed / total
         sort_key = lambda c: c.lines_changed
     else:
-        sum_visible = sum(c.commits for c in active)
-        if sum_visible == 0:
+        total = sum(c.commits for c in active)
+        if total == 0:
             return 0, [], 0.0
-        denominator = (
-            total_override
-            if total_override and total_override >= sum_visible
-            else sum_visible
-        )
         for c in active:
-            c.pct = c.commits / denominator
+            c.pct = c.commits / total
         sort_key = lambda c: c.commits
 
     hhi = sum(c.pct ** 2 for c in active)
@@ -95,14 +91,11 @@ def compute_lifetime_metrics(
 ) -> list[tuple[str, RunResult]]:
     """Compute BF/HHI from /repos/{owner}/{repo}/contributors output.
 
-    `total_commits`, when provided, is used as the BF/HHI denominator
-    instead of the sum-of-visible contributions. This matters for repos
-    with >500 contributors — /contributors truncates the long tail, so
-    sum-of-visible underestimates the real total. The exact figure comes
-    from /commits via `_fetch_total_commits`.
-
-    `total_contributors` is recorded on the RunResult for downstream
-    reporting but doesn't affect BF/HHI.
+    `total_commits` and `total_contributors` are recorded on the
+    RunResult for downstream reporting (the lifetime-count columns in
+    concentration-data.csv) but do NOT affect BF/HHI — those are computed
+    purely from the visible non-bot contributors' own commit shares (see
+    `_compute_bus_factor`).
     """
     contributors: list[Contributor] = []
     for c in contributors_data:
@@ -118,7 +111,7 @@ def compute_lifetime_metrics(
         )
     bf, sorted_c, hhi = _compute_bus_factor(
         contributors, threshold=threshold, base="commits",
-        include_bots=include_bots, total_override=total_commits,
+        include_bots=include_bots,
     )
     return [(label, RunResult(
         bus_factor=bf, contributors=sorted_c, hhi=hhi,

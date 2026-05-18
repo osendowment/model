@@ -2,7 +2,10 @@
 
 import pytest
 
-from src.github.fetch_contributors_metrics import _compute_bus_factor
+from src.github.fetch_contributors_metrics import (
+    _compute_bus_factor,
+    compute_lifetime_metrics,
+)
 from src.github.models import Contributor, is_bot
 
 
@@ -43,6 +46,52 @@ class TestComputeBusFactor:
         bf, sorted_c, _ = _compute_bus_factor(contribs, base="locs")
         assert bf == 1
         assert sorted_c[0].login == "alice"  # more lines changed
+
+    def test_hhi_never_below_mathematical_floor(self):
+        """HHI for n equal contributors is exactly 1/n — never below.
+
+        Regression guard: the old `total_override` path used the lifetime
+        /commits count (bots included) as the denominator, which pushed
+        HHI under its 1/n floor and inflated the bus factor.
+        """
+        contribs = [Contributor(login=f"dev{i}", commits=10, lines_changed=10)
+                    for i in range(7)]
+        bf, _sorted, hhi = _compute_bus_factor(contribs)
+        assert hhi == pytest.approx(1 / 7)  # not a deflated ~0.0017
+        assert bf == 4  # 4 of 7 equal contributors clear the 50% threshold
+
+
+class TestComputeLifetimeMetrics:
+    def test_total_commits_does_not_distort_bf_hhi(self):
+        """A large lifetime total_commits must not change BF/HHI.
+
+        Regression for the denominator bug: BF/HHI are computed from the
+        visible non-bot contributors' own commit shares. Passing the
+        repo's bot-inflated lifetime commit count (here 1000, vs 100
+        visible) previously deflated HHI ~12x and inflated BF.
+        """
+        data = [
+            {"login": "alice", "contributions": 90, "type": "User"},
+            {"login": "bob", "contributions": 10, "type": "User"},
+        ]
+        results = compute_lifetime_metrics(data, total_commits=1000,
+                                           total_contributors=42)
+        _label, rr = results[0]
+        assert rr.hhi == pytest.approx(0.82)  # 0.9^2 + 0.1^2
+        assert rr.bus_factor == 1             # alice alone clears 50%
+        assert rr.total_commits == 1000       # still recorded, just unused
+        assert rr.total_contributors == 42
+
+    def test_bot_commits_excluded_from_denominator(self):
+        """Bot contributions are excluded from the BF/HHI denominator."""
+        data = [
+            {"login": "alice", "contributions": 90, "type": "User"},
+            {"login": "bob", "contributions": 10, "type": "User"},
+            {"login": "dependabot[bot]", "contributions": 900, "type": "Bot"},
+        ]
+        _label, rr = compute_lifetime_metrics(data, total_commits=1000)[0]
+        assert rr.hhi == pytest.approx(0.82)  # bot's 900 commits not in denom
+        assert rr.bus_factor == 1
 
 
 class TestIsBotDetection:

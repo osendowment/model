@@ -76,10 +76,10 @@ class RunResult:
     first_week: datetime.date | None = None
     last_week: datetime.date | None = None
     total_loc: int | None = None
-    # Exact totals from /commits and /contributors Link-header tricks. When
-    # `total_commits` is set, BF/HHI use it as denominator (more accurate
-    # than sum-of-visible-contributions for repos with >500 contributors,
-    # whose long tail is silently truncated by /contributors).
+    # Exact lifetime totals from the /commits and /contributors Link-header
+    # tricks. Recorded as standalone columns in concentration-data.csv only;
+    # BF/HHI are computed from the visible non-bot contributors' own commit
+    # shares and do NOT use these (see _compute_bus_factor).
     total_commits: int | None = None
     total_contributors: int | None = None
 
