@@ -57,7 +57,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.git.long_format import read as read_long
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.repos import canonical_repo_map, load_risk_repos
 
 console = Console()
 
@@ -185,15 +185,16 @@ def _shas_per_repo(
 
 
 def _load_ossfuzz() -> set[str]:
-    """Return the set of GitHub repos enrolled in OSS-Fuzz."""
+    """Return the set of GitHub repos enrolled in OSS-Fuzz (canonical slugs)."""
     out: set[str] = set()
     if not OSSFUZZ_FILE.exists():
         return out
+    canon = canonical_repo_map()
     with open(OSSFUZZ_FILE, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             slug = (row.get("github_repo") or "").strip().lower()
             if slug:
-                out.add(slug)
+                out.add(canon.get(slug, slug))
     return out
 
 

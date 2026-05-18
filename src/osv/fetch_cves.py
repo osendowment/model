@@ -76,7 +76,7 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.repos import canonical_repo_map, load_risk_repos
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -128,13 +128,17 @@ def load_repo_package_mapping() -> dict[str, list[tuple[str, str]]]:
     """
     mapping: dict[str, list[tuple[str, str]]] = {}
     seen: dict[str, set[tuple[str, str]]] = {}
+    # Resolve renamed repos to their canonical name so the mapping keys
+    # match the canonical slugs load_risk_repos iterates over.
+    canon = canonical_repo_map()
     for path, eco in ECOSYSTEM_FILES:
         if not path.exists():
             log.warning("missing ecosystem file: %s — skipping", path)
             continue
         with open(path, encoding="utf-8") as f:
             for row in csv.DictReader(f):
-                ghr = (row.get("github_repo") or "").strip().lower()
+                raw = (row.get("github_repo") or "").strip().lower()
+                ghr = canon.get(raw, raw)
                 pkg = (row.get("package") or "").strip()
                 if not ghr or not pkg:
                     continue

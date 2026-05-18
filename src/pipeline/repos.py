@@ -139,6 +139,18 @@ def load_risk_slugs(*args, **kwargs) -> list[str]:
     return [e.repo for e in load_risk_repos(*args, **kwargs)]
 
 
+def canonical_repo_map(repos_file: str = REPOS_FILE) -> dict[str, str]:
+    """Map every known repo slug -> its canonical lowercased `full_name`.
+
+    For risk scripts that read `github_repo` straight from value-data.csv
+    or a per-ecosystem results.csv: pass each raw slug through this map so
+    a renamed repo (`gozala/events`) resolves to the same canonical name
+    `load_risk_repos` uses (`browserify/events`). Unknown slugs map to
+    themselves via `.get(slug, slug)`.
+    """
+    return _read_github_repos(repos_file)[0]
+
+
 def load_repo_ids(repos_file: str = REPOS_FILE) -> dict[str, str]:
     """Map repo slug -> repo_id from data/github/repos.csv.
 
