@@ -293,6 +293,44 @@ def bare_blobless_clone(
     return elapsed, size
 
 
+def bare_treeless_clone(repo: str, dest: str, timeout: int = 300) -> tuple[float, int]:
+    """Bare clone with ``--filter=tree:0 --no-tags`` — commit graph only.
+
+    The lightest possible clone: every commit object, but no trees and no
+    blobs. Enough for author/date history walking — ``git log --pretty``,
+    ``git shortlog``, ``git rev-list`` — which is all the git-based
+    contributor fetcher (``src.git.contributors``) needs. Far smaller and
+    faster than ``bare_blobless_clone`` on big repos, which still pulls
+    every tree object. ``git log`` without ``-p`` / ``--stat`` /
+    ``--name-*`` never dereferences a tree, so no lazy fetch is triggered.
+
+    Raises ``RuntimeError`` (via ``_check``) on a non-zero clone exit
+    (404 / private / network), so batch callers can record the failure
+    per repo. ``subprocess.TimeoutExpired`` propagates on timeout.
+
+    Returns ``(elapsed_s, on_disk_bytes)``.
+    """
+    url = f"https://github.com/{repo}.git"
+    t0 = time.monotonic()
+    _check(
+        _run_git(
+            ["git", "clone", "--bare", "--filter=tree:0", "--no-tags",
+             "--quiet", url, dest],
+            timeout=timeout,
+        ),
+        f"{repo}: treeless clone",
+    )
+    elapsed = time.monotonic() - t0
+    size = 0
+    for root, _dirs, files in os.walk(dest):
+        for f in files:
+            try:
+                size += os.path.getsize(os.path.join(root, f))
+            except OSError:
+                continue
+    return elapsed, size
+
+
 def fetch_all_blobs(dest: str, timeout: int = 600) -> tuple[float, int]:
     """Bulk-fetch all blobs into an existing bare blobless clone.
 
