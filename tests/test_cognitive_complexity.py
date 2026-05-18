@@ -261,32 +261,46 @@ def test_lizard_aggregator_empty():
 
 # ─────────────────────── build_complexity wiring tests ─────────────────────
 
-def test_build_complexity_loads_cognitive(tmp_path, monkeypatch):
-    """`_load_cognitive` reads cognitive.csv into the right dict shape."""
+def test_build_complexity_reads_cognitive_from_lizard(tmp_path, monkeypatch):
+    """build_complexity surfaces cognitive_* from the sha-pinned lizard.csv.
+
+    Cognitive metrics were consolidated out of a standalone cognitive.csv
+    into the long-format data/git/lizard.csv; build_complexity picks them
+    up at the same snapshot sha it uses for scc.
+    """
+    from src.pipeline.common.repos import RepoEntry
     from src.pipeline.risk import build_complexity
 
-    cog_csv = tmp_path / "cognitive.csv"
-    cog_csv.write_text(
-        "repo,analyzed_sha,analyzed_year,files,"
-        "cognitive_total,cognitive_avg,cognitive_max,elapsed_s,fetched_at\n"
-        "foo/bar,abc123,2025,10,42,4.2,15,1.0,2025-01-01T00:00:00Z\n"
-        "Baz/Qux,def456,2024,5,7,1.4,3,0.5,2025-01-01T00:00:00Z\n"
+    sha = "a" * 40
+    (tmp_path / "commits-years.csv").write_text(
+        "repo,year,commits,last_sha\n"
+        f"foo/bar,2025,120,{sha}\n"
     )
-    monkeypatch.setattr(build_complexity, "COGNITIVE_FILE", cog_csv)
-    out = build_complexity._load_cognitive()
+    (tmp_path / "scc.csv").write_text(
+        "repo,repo_id,commit_sha,metric,value,checked_at\n"
+        f"foo/bar,1,{sha},loc,5000,2025-01-01T00:00:00Z\n"
+    )
+    (tmp_path / "lizard.csv").write_text(
+        "repo,repo_id,commit_sha,metric,value,checked_at\n"
+        f"foo/bar,1,{sha},cognitive_total,42,2025-01-01T00:00:00Z\n"
+        f"foo/bar,1,{sha},cognitive_avg,4.2,2025-01-01T00:00:00Z\n"
+        f"foo/bar,1,{sha},cognitive_max,15,2025-01-01T00:00:00Z\n"
+    )
+    monkeypatch.setattr(build_complexity, "COMMITS_YEARS_FILE",
+                        tmp_path / "commits-years.csv")
+    monkeypatch.setattr(build_complexity, "SCC_FILE", tmp_path / "scc.csv")
+    monkeypatch.setattr(build_complexity, "LIZARD_FILE", tmp_path / "lizard.csv")
+    monkeypatch.setattr(build_complexity, "CHURN_FILE", tmp_path / "absent.csv")
+    monkeypatch.setattr(build_complexity, "load_risk_repos",
+                        lambda: [RepoEntry(repo="foo/bar", repo_id="1")])
 
-    assert out == {
-        "foo/bar": {"cognitive_total": "42", "cognitive_avg": "4.2", "cognitive_max": "15"},
-        # Slug is lowercased.
-        "baz/qux": {"cognitive_total": "7", "cognitive_avg": "1.4", "cognitive_max": "3"},
-    }
-
-
-def test_build_complexity_loads_cognitive_missing_file(tmp_path, monkeypatch):
-    """Missing cognitive.csv → empty dict, not a crash."""
-    from src.pipeline.risk import build_complexity
-    monkeypatch.setattr(build_complexity, "COGNITIVE_FILE", tmp_path / "absent.csv")
-    assert build_complexity._load_cognitive() == {}
+    rows = build_complexity.build()
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["cognitive_total"] == "42"
+    assert row["cognitive_avg"] == "4.2"
+    assert row["cognitive_max"] == "15"
+    assert row["loc_2025_eoy"] == "5000"
 
 
 def test_build_complexity_includes_cognitive_columns():
