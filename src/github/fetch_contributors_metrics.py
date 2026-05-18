@@ -16,11 +16,11 @@ import asyncio
 import logging
 import re
 
+from src.github.batch_runner import batch_update
 from src.github.models import (
     Contributor, PerfStats, RunResult,
     THRESHOLD, is_bot,
 )
-from src.github.batch_runner import batch_update
 from src.pipeline.common.repos import VALUE_FILE, load_risk_slugs
 
 
