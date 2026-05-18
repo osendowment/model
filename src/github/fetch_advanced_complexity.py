@@ -109,6 +109,20 @@ CYCLO_METRICS: tuple[str, ...] = (
 # Build a set of suffixes (".py", ".js", …) for quick filtering after checkout.
 SOURCE_SUFFIXES: set[str] = {ext.lstrip("*").lower() for ext in SOURCE_EXTS}
 
+# lizard 1.22.1 registers Fortran (.f/.f90/.for/…) as a supported language,
+# but its Fortran reader has a pathological memory blowup on large fixed-form
+# sources: scipy's 359 KB ODRPACK `d_odr.f` OOM-kills the *entire* repo
+# analysis (no traceback — a bare SIGKILL). That single file is why
+# scipy/scipy was the lone 1/899 repo we could never cover. Fortran is a
+# rounding error in our corpus (6/1648 files even in scipy) and lizard's
+# fixed-form CC is unreliable anyway — so exclude Fortran from the lizard
+# input entirely. The `files` metric still counts these as source files;
+# they simply contribute no functions, exactly like any other language
+# lizard skips.
+LIZARD_SKIP_SUFFIXES: frozenset[str] = frozenset(
+    {".f", ".f03", ".f08", ".f77", ".f90", ".f95", ".for", ".ftn"}
+)
+
 
 # ────────────────────────── target-SHA resolution ──────────────────────────
 
@@ -232,14 +246,21 @@ def _run_lizard(files: list[str]) -> tuple[int, int, float, int]:
     """Return (n_funcs, total_ccn, avg_ccn, max_ccn) using lizard.
 
     Lizard skips files it doesn't understand silently — those just don't
-    contribute to the CCN count.
+    contribute to the CCN count. Fortran files are dropped *explicitly*
+    (see LIZARD_SKIP_SUFFIXES): lizard claims to parse them but its Fortran
+    reader OOM-kills the process on large fixed-form sources, so they can't
+    even be handed to `analyze_files`.
     """
     import lizard
+    analyzable = [
+        f for f in files
+        if os.path.splitext(f)[1].lower() not in LIZARD_SKIP_SUFFIXES
+    ]
     total = 0
     nfn = 0
     mx = 0
     # analyze_files is a generator; iterate to drive it.
-    for r in lizard.analyze_files(files):
+    for r in lizard.analyze_files(analyzable):
         for fn in r.function_list:
             ccn = fn.cyclomatic_complexity
             total += ccn

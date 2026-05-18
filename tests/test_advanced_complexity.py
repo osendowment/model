@@ -1,8 +1,10 @@
 """Tests for src/github/fetch_advanced_complexity.py."""
 
 from src.github.fetch_advanced_complexity import (
+    LIZARD_SKIP_SUFFIXES,
     MAX_FILE_BYTES,
     _list_source_files,
+    _run_lizard,
     analyze_directory,
 )
 
@@ -47,3 +49,47 @@ def test_analyze_directory_returns_cc_metrics(tmp_path):
 
 def test_analyze_directory_empty(tmp_path):
     assert analyze_directory(str(tmp_path)) == {"files": 0}
+
+
+def test_run_lizard_excludes_fortran(tmp_path):
+    """lizard's Fortran reader OOM-kills on large fixed-form sources — scipy's
+    359 KB ODRPACK `d_odr.f` was the lone repo we could never analyze. Fortran
+    files must be dropped before they ever reach `analyze_files`.
+
+    lizard *does* count Fortran subroutines as functions (verified), so a `.f`
+    file alone would yield a function if it weren't excluded. The fix means it
+    contributes nothing — adding the Fortran file leaves the result unchanged.
+    """
+    py = tmp_path / "m.py"
+    py.write_text("def a(x):\n    if x:\n        return 1\n    return 0\n")
+    fortran = tmp_path / "legacy.f"
+    fortran.write_text(
+        "      SUBROUTINE FOO(X)\n"
+        "      INTEGER X\n"
+        "      IF (X.GT.0) X = 1\n"
+        "      RETURN\n"
+        "      END\n"
+    )
+
+    # A Fortran-only input yields nothing — the file never reaches lizard.
+    assert _run_lizard([str(fortran)]) == (0, 0, 0.0, 0)
+
+    # Adding the Fortran file to a real input changes nothing.
+    only_py = _run_lizard([str(py)])
+    with_fortran = _run_lizard([str(py), str(fortran)])
+    assert only_py == with_fortran
+    assert only_py[0] == 1  # just a()
+
+
+def test_fortran_skip_set_covers_source_exts():
+    """Every Fortran extension in the sparse-checkout set is on the skip list —
+    otherwise a Fortran file could slip through to lizard and OOM the run."""
+    from src.git.clone import SOURCE_EXTS
+
+    fortran_source_exts = {
+        ext.lstrip("*").lower()
+        for ext in SOURCE_EXTS
+        if ext.lstrip("*").lower().startswith(".f")
+    }
+    assert fortran_source_exts
+    assert fortran_source_exts <= LIZARD_SKIP_SUFFIXES
