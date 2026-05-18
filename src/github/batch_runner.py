@@ -39,7 +39,7 @@ log = logging.getLogger(__name__)
 CONCENTRATION_FILE = "data/concentration-data.csv"
 CONCENTRATION_FIELDS = [
     "repo", "repo_id",
-    "total_commits", "total_contributors",
+    "total_commits", "total_contributors", "active_contributors",
     "bus_factor", "hhi", "fetched_at",
 ]
 CONCENTRATION_TTL_DAYS = 90  # rows older than this get re-fetched
@@ -136,6 +136,7 @@ def _upsert_concentration_data(
             "total_contributors": (
                 str(agg.total_contributors) if agg.total_contributors is not None else ""
             ),
+            "active_contributors": str(len(humans)),
             "bus_factor": str(agg.bus_factor),
             "hhi": str(round(agg.hhi * 10000)),
             "fetched_at": fetched_at,
