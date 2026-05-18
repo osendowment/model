@@ -4,7 +4,7 @@
 Pipeline order (each stage feeds the next):
     1. `src.pipeline.value`       → data/value-data.csv  (this script)
     2. `src.pipeline.eligibility` → data/eligibility-data.csv
-    3. `src.pipeline.risk`        → data/risk-data.csv
+    3. `src.pipeline.risk.aggregate_risk`        → data/risk-data.csv
 
 Reads `data/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crates,
 cpp), groups packages by canonical `git_url` (or by a per-package synthetic
@@ -57,7 +57,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.params import assign_value_class
+from src.pipeline.common.params import assign_value_class
 
 console = Console()
 

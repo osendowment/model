@@ -23,7 +23,7 @@ import pandas as pd
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.params import YEARS
+from src.pipeline.common.params import YEARS
 
 console = Console()
 

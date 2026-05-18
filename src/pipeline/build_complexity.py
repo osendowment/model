@@ -62,7 +62,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.git.long_format import read as read_long
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 

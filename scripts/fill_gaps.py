@@ -130,7 +130,7 @@ def main():
     plan.append(("build_funding",       ["uv", "run", "python", "-m", "src.pipeline.build_funding"], 0))
     plan.append(("build_visibility",    ["uv", "run", "python", "-m", "src.pipeline.build_visibility"], 0))
     plan.append(("build_workload",      ["uv", "run", "python", "-m", "src.pipeline.build_workload"], 0))
-    plan.append(("risk",                ["uv", "run", "python", "-m", "src.pipeline.risk"], 0))
+    plan.append(("risk",                ["uv", "run", "python", "-m", "src.pipeline.risk.aggregate_risk"], 0))
 
     table = Table(title="Plan", show_header=True, header_style="bold dim")
     table.add_column("step")

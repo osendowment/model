@@ -43,7 +43,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 

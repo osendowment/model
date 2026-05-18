@@ -56,7 +56,7 @@ PIPELINE_STAGES = [
     "src.pipeline.build_funding",
     "src.pipeline.build_visibility",
     "src.pipeline.build_workload",
-    "src.pipeline.risk",
+    "src.pipeline.risk.aggregate_risk",
 ]
 
 

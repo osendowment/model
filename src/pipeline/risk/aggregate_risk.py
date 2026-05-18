@@ -20,9 +20,9 @@ thresholds and rollups are deliberately deferred — the goal here is to
 get a clean, validated metric matrix per repo.
 
 Usage:
-    uv run python -m src.pipeline.risk
-    uv run python -m src.pipeline.risk --random 5      # test on 5 repos
-    uv run python -m src.pipeline.risk --random 50
+    uv run python -m src.pipeline.risk.aggregate_risk
+    uv run python -m src.pipeline.risk.aggregate_risk --random 5      # test on 5 repos
+    uv run python -m src.pipeline.risk.aggregate_risk --random 50
 
 `--random N` runs the aggregator on a random sample of N eligible repos
 (seeded by `--seed` if provided, default 42 for reproducibility) and
@@ -38,11 +38,11 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.pipeline.repos import load_risk_repos
+from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 
 # Intermediate CSVs feeding the aggregator. Each has its own builder.
 INTERMEDIATES = {

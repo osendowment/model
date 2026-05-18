@@ -32,7 +32,9 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
 PLATFORMS = ("github", "gitlab", "bitbucket", "sourcehut", "codeberg", "custom")
-GIT_FIELDS = ["package"] + list(PLATFORMS)
+GIT_FIELDS = ["package"] + list(PLATFORMS) + ["eco_guess", "llm_guess"]
+# Order in which the `git` column picks across platforms — github wins.
+GIT_HOST_PRIORITY = ("github", "gitlab", "codeberg", "sourcehut", "bitbucket", "custom")
 
 
 # ── URL classification ─────────────────────────────────────────────────────────
@@ -102,8 +104,18 @@ def classify(url: str) -> tuple[str, str]:
 
     # GitLab: gitlab.com, gitlab.* self-hosted, salsa.debian.org, gitlab.freedesktop.org, gitlab.gnome.org, ...
     if (host.startswith("gitlab.") or host == "salsa.debian.org") and len(parts) >= 2:
-        # GitLab supports nested groups (group/subgroup/repo). Take first 2 — covers most cases.
-        return ("gitlab", _slug(host, *parts[:2]))
+        # GitLab allows arbitrarily nested groups — `gitlab.freedesktop.org/xorg/lib/libXau`
+        # is a 3-segment project path, not a 2-segment one. Strip GitLab's `/-/` UI
+        # separator (e.g. `/-/issues`, `/-/blob/main/...`) and keep all path segments
+        # before it as the project. Truncating to 2 segments collapses every
+        # xorg/lib/* lib into the same `xorg/lib.git` repo.
+        proj_parts: list[str] = []
+        for p in parts:
+            if p == "-":
+                break
+            proj_parts.append(p)
+        if len(proj_parts) >= 2:
+            return ("gitlab", _slug(host, *proj_parts))
 
     if host == "bitbucket.org" and len(parts) >= 2:
         return ("bitbucket", _slug(host, parts[0].lower(), parts[1].lower()))
@@ -137,6 +149,97 @@ def merge_urls(urls: list[str]) -> dict[str, str]:
     return out
 
 
+# ── Validity-aware merge ───────────────────────────────────────────────────────
+#
+# Source-priority for picking each platform slot is native > eco > llm. But if
+# the priority candidate is KNOWN-invalid in the validity cache, fall through
+# to the next candidate. Unknown URLs (no cache entry) get the benefit of the
+# doubt and win on priority — they'll get validated by `value.py` later, and
+# the cache will inform the next build.
+#
+# Two caches feed this lookup:
+#   • data/git/urls.csv          — non-github URLs (ls-remote results, by URL)
+#   • data/github/repos.csv      — github repos (API results, by owner/repo slug)
+
+
+def _load_invalid_lookup():
+    """Return `is_invalid(url) -> bool`, True only if KNOWN invalid."""
+    import re
+    invalid_urls: set[str] = set()
+    invalid_slugs: set[str] = set()
+
+    nongh = DATA_DIR / "git" / "urls.csv"
+    if nongh.exists():
+        with open(nongh, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                if (r.get("valid") or "").lower() == "false":
+                    url = (r.get("url") or "").strip()
+                    if url:
+                        invalid_urls.add(url)
+
+    gh_repos = DATA_DIR / "github" / "repos.csv"
+    if gh_repos.exists():
+        with open(gh_repos, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                if (r.get("valid") or "").lower() == "false":
+                    slug = (r.get("repo") or "").strip().lower()
+                    if slug:
+                        invalid_slugs.add(slug)
+
+    gh_url_re = re.compile(r"^https?://github\.com/([^/]+)/([^/?#]+?)(?:\.git)?/?$",
+                           re.IGNORECASE)
+
+    def is_invalid(url: str) -> bool:
+        if not url:
+            return False
+        if url in invalid_urls:
+            return True
+        m = gh_url_re.match(url)
+        if m:
+            slug = f"{m.group(1)}/{m.group(2)}".lower()
+            return slug in invalid_slugs
+        return False
+
+    return is_invalid
+
+
+def merge_urls_with_source(
+    sources: dict[str, list[str]],
+    is_invalid,
+) -> tuple[dict[str, str], dict[str, str]]:
+    """Pick the first not-known-invalid URL per platform across labelled source lists.
+
+    `sources` is an ordered dict like {"native": [...], "eco": [...], "llm": [...]}.
+    Iteration order is the source priority. Returns (winners, source_label_per_platform).
+    If every candidate for a slot is known-invalid, keeps the first one anyway
+    (so `git_url` doesn't silently drop to empty — value.py's verifier will
+    re-flag it).
+    """
+    candidates: dict[str, list[tuple[str, str]]] = {p: [] for p in PLATFORMS}
+    for label, urls in sources.items():
+        for u in urls:
+            plat, canon = classify(u)
+            if not plat:
+                continue
+            if any(c == canon for c, _ in candidates[plat]):
+                continue
+            candidates[plat].append((canon, label))
+
+    winners: dict[str, str] = {p: "" for p in PLATFORMS}
+    sources_used: dict[str, str] = {p: "" for p in PLATFORMS}
+    for plat, cands in candidates.items():
+        chosen = None
+        for canon, label in cands:
+            if not is_invalid(canon):
+                chosen = (canon, label)
+                break
+        if chosen is None and cands:
+            chosen = cands[0]  # all known-invalid — keep first for visibility
+        if chosen:
+            winners[plat], sources_used[plat] = chosen
+    return winners, sources_used
+
+
 # ── per-ecosystem URL collectors ───────────────────────────────────────────────
 
 
@@ -152,12 +255,22 @@ def npm_urls() -> dict[str, list[str]]:
 
 
 def pypi_urls() -> dict[str, list[str]]:
-    """PyPI raw mapping is github-only -- BigQuery extract pre-filtered. Captured for completeness."""
+    """PyPI URLs from `package-urls.csv` if present (full project_urls + home_page),
+    falling back to the legacy github-only `package-github-mapping.csv`.
+
+    Run `uv run -m src.pypi.fetch_pypi_urls` to populate the rich source.
+    """
     out: dict[str, list[str]] = {}
-    path = DATA_DIR / "pypi" / "raw" / "package-github-mapping.csv"
-    if not path.exists():
+    rich = DATA_DIR / "pypi" / "raw" / "package-urls.csv"
+    if rich.exists():
+        with open(rich, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                out.setdefault(r["package"], []).append(r["url"])
         return out
-    with open(path, encoding="utf-8") as f:
+    legacy = DATA_DIR / "pypi" / "raw" / "package-github-mapping.csv"
+    if not legacy.exists():
+        return out
+    with open(legacy, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             out[r["package"]] = [r.get("github_url", "")]
     return out
@@ -230,6 +343,45 @@ def repology_urls_lookup() -> dict[str, list[str]]:
     return out
 
 
+def claude_git_lookup() -> dict[tuple[str, str], list[str]]:
+    """{(package, ecosystem): [github_url, canonical_git_url]} from `claude-git-data.csv`.
+
+    The hand-curated, HTTP-verified fill-in for AB packages whose github_repo /
+    canonical git URL the registry/Repology/OSS-Fuzz extractors couldn't find.
+    This is the **last URL source** before unify_value_data.py — anything not
+    populated here will leave a gap in value-data.csv.
+
+    Only rows with `confidence >= 0.5` are used. The GitHub URL (when present)
+    is emitted first so it wins the host-priority merge.
+    """
+    out: dict[tuple[str, str], list[str]] = {}
+    path = DATA_DIR / "llms" / "claude-git-data.csv"
+    if not path.exists():
+        return out
+    with open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            try:
+                conf = float(r.get("confidence") or 0)
+            except ValueError:
+                conf = 0.0
+            if conf < 0.5:
+                continue
+            urls: list[str] = []
+            gh = (r.get("github_repo") or "").strip()
+            if gh:
+                urls.append(f"https://github.com/{gh}.git")
+            canon = (r.get("canonical_git_url") or "").strip()
+            if canon and canon not in urls:
+                urls.append(canon)
+            if urls:
+                out[(r["package"], r["ecosystem"])] = urls
+    return out
+
+
+# Back-compat alias — old call sites may still reference the previous name.
+claude_repo_lookup = claude_git_lookup
+
+
 def cpp_urls() -> dict[str, list[str]]:
     """For the unified C/C++ ecosystem, collect URLs from debian + homebrew + oss-fuzz."""
     out: dict[str, list[str]] = {}
@@ -246,13 +398,17 @@ def cpp_urls() -> dict[str, list[str]]:
         for r in csv.DictReader(f):
             project = r["project"]
             urls: list[str] = []
-            for src in (r.get("debian_sources", "") or "").split(","):
+            # cpp/raw/packages.csv uses `|` as the multi-value separator
+            # (e.g. "tree-sitter|tree-sitter@0.25", "openssl@3|openssl@3.0|openssl@3.5"),
+            # NOT `,`. Splitting on `,` collapses the whole list into a single
+            # bogus key and the lookup misses every constituent formula/source.
+            for src in (r.get("debian_sources", "") or "").split("|"):
                 src = src.strip()
                 if src and src in deb:
                     for u in deb[src]:
                         if u and u not in urls:
                             urls.append(u)
-            for fm in (r.get("homebrew_formulas", "") or "").split(","):
+            for fm in (r.get("homebrew_formulas", "") or "").split("|"):
                 fm = fm.strip()
                 if fm and fm in brew:
                     for u in brew[fm]:
@@ -276,8 +432,8 @@ PKG_COL = {
     "pypi": "package",
     "crates": "package",
     "cpp": "package",
-    "debian": "source",
-    "homebrew": "formula",
+    "debian": "package",
+    "homebrew": "package",
 }
 
 
@@ -312,19 +468,91 @@ ECOSYSTEMS = [
 ]
 
 
-def build(ecosystem: str, get_urls) -> dict:
+def _pick_git(merged: dict[str, str]) -> str:
+    """Same host-priority pick that unify_value_data uses for the `git` column."""
+    for plat in GIT_HOST_PRIORITY:
+        if merged.get(plat):
+            return merged[plat]
+    return ""
+
+
+def _load_ecosystems_urls(ecosystem: str) -> dict[str, list[str]]:
+    """Load ecosyste.ms-derived URLs from data/{eco}/raw/ecosystems.csv.
+
+    Returns {package: [repository_url, homepage]} skipping empty values.
+    `merge_urls()` will classify each URL into the right platform slot.
+    """
+    path = DATA_DIR / ecosystem / "raw" / "ecosystems.csv"
+    if not path.exists():
+        return {}
+    out: dict[str, list[str]] = {}
+    with open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            urls = [u for u in (r.get("repository_url"), r.get("homepage")) if (u or "").strip()]
+            if urls:
+                out[r["package"]] = urls
+    return out
+
+
+def build(ecosystem: str, get_urls, llm_cache: dict[tuple[str, str], list[str]] | None = None) -> dict:
     raw_urls = get_urls()
     pkgs = universe(ecosystem)
+    llm_cache = llm_cache or {}
+    eco_cache = _load_ecosystems_urls(ecosystem)  # ecosyste.ms backfill (run via src.ecosystems.packages)
+    is_invalid = _load_invalid_lookup()  # cache-backed validator; unknown URLs → win on priority
 
     rows: list[dict] = []
     counts = {p: 0 for p in PLATFORMS}
     any_count = 0
+    n_eco_github = n_eco_git = 0
+    n_llm_github = n_llm_git = 0
     for pkg in sorted(pkgs):
-        merged = merge_urls(raw_urls.get(pkg, []))
-        rows.append({"package": pkg, **merged})
+        native = list(raw_urls.get(pkg, []))
+        eco = [u for u in eco_cache.get(pkg, []) if u not in native]
+        llm = [u for u in llm_cache.get((pkg, ecosystem), []) if u not in native and u not in eco]
+
+        # Validity-aware merge across source priority native > eco > llm.
+        # If a higher-priority candidate is known-invalid, fall through to the
+        # next one. `sources_used` tells us which source actually won each slot.
+        merged_full, sources_used = merge_urls_with_source(
+            {"native": native, "eco": eco, "llm": llm}, is_invalid,
+        )
+
+        # eco_used / llm_used now reflect what ACTUALLY won, not just availability.
+        eco_used: list[str] = []
+        llm_used: list[str] = []
+        if sources_used.get("github") == "eco":
+            eco_used.append("github")
+        elif sources_used.get("github") == "llm":
+            llm_used.append("github")
+
+        # The `git` URL is whichever platform won by host priority.
+        git_plat = next((p for p in GIT_HOST_PRIORITY if merged_full.get(p)), None)
+        if git_plat:
+            src = sources_used.get(git_plat, "")
+            if src == "eco" and "git" not in eco_used:
+                eco_used.append("git")
+            elif src == "llm" and "git" not in llm_used:
+                llm_used.append("git")
+
+        eco_used.sort()
+        llm_used.sort()
+        if "github" in eco_used:
+            n_eco_github += 1
+        if "git" in eco_used:
+            n_eco_git += 1
+        if "github" in llm_used:
+            n_llm_github += 1
+        if "git" in llm_used:
+            n_llm_git += 1
+
+        row = {"package": pkg, **merged_full,
+               "eco_guess": ",".join(eco_used),
+               "llm_guess": ",".join(llm_used)}
+        rows.append(row)
         has_any = False
         for p in PLATFORMS:
-            if merged[p]:
+            if merged_full[p]:
                 counts[p] += 1
                 has_any = True
         if has_any:
@@ -343,6 +571,10 @@ def build(ecosystem: str, get_urls) -> dict:
         "before": before_github_count(ecosystem),
         **counts,
         "any": any_count,
+        "eco_github": n_eco_github,
+        "eco_git": n_eco_git,
+        "llm_github": n_llm_github,
+        "llm_git": n_llm_git,
     }
 
 
@@ -432,36 +664,81 @@ def update_results_csv(ecosystem: str) -> tuple[int, int]:
         return (0, 0)
 
     git_lookup: dict[str, str] = {}
+    eco_guess_lookup: dict[str, str] = {}
+    llm_guess_lookup: dict[str, str] = {}
     with open(git_path, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             for p in PLATFORMS:
                 if r[p]:
                     git_lookup[r["package"]] = r[p]
                     break
+            eco_guess_lookup[r["package"]] = (r.get("eco_guess") or "").strip()
+            llm_guess_lookup[r["package"]] = (r.get("llm_guess") or "").strip()
 
     with open(results_path, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         rows = list(reader)
         original_fields = list(reader.fieldnames or [])
 
-    if "git" in original_fields:
-        new_fields = original_fields
-    elif "github_repo" in original_fields:
-        new_fields = []
-        for col in original_fields:
-            new_fields.append(col)
-            if col == "github_repo":
-                new_fields.append("git")
-    else:
-        # No github_repo — append git at the end.
-        new_fields = original_fields + ["git"]
+    # Layout: insert `git` after `github_repo`, then `eco_guess`, then `llm_guess`.
+    new_fields: list[str] = []
+    inserted_git = "git" in original_fields
+    inserted_eco = "eco_guess" in original_fields
+    inserted_llm = "llm_guess" in original_fields
+    for col in original_fields:
+        new_fields.append(col)
+        if col == "github_repo" and not inserted_git:
+            new_fields.append("git")
+            inserted_git = True
+        if col == "git" and not inserted_eco:
+            new_fields.append("eco_guess")
+            inserted_eco = True
+        if col == "eco_guess" and not inserted_llm:
+            new_fields.append("llm_guess")
+            inserted_llm = True
+    if not inserted_git:
+        new_fields.append("git")
+    if not inserted_eco:
+        new_fields.append("eco_guess")
+    if not inserted_llm:
+        new_fields.append("llm_guess")
+
+    # Also build a slug lookup from the `github` column in git.csv, used to
+    # backfill `github_repo` in results.csv when the per-ecosystem extractor
+    # missed it but a downstream source (LLM, OSS-Fuzz, Repology) found one.
+    github_slug_lookup: dict[str, str] = {}
+    with open(git_path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            gh_url = (r.get("github") or "").strip()
+            if not gh_url:
+                continue
+            # github URL is canonicalised by classify(): https://github.com/owner/repo.git
+            try:
+                from urllib.parse import urlparse
+                tail = urlparse(gh_url).path.lstrip("/")
+                if tail.endswith(".git"):
+                    tail = tail[:-4]
+                parts = [p for p in tail.split("/") if p]
+                if len(parts) >= 2:
+                    github_slug_lookup[r["package"]] = f"{parts[0].lower()}/{parts[1].lower()}"
+            except Exception:
+                pass
 
     pkg_col = PKG_COL[ecosystem]
     n_with = 0
+    n_gh_filled = 0
     for r in rows:
         r["git"] = git_lookup.get(r[pkg_col], "")
         if r["git"]:
             n_with += 1
+        r["eco_guess"] = eco_guess_lookup.get(r[pkg_col], "")
+        r["llm_guess"] = llm_guess_lookup.get(r[pkg_col], "")
+        # Backfill github_repo slug if missing.
+        if "github_repo" in new_fields and not (r.get("github_repo") or "").strip():
+            slug = github_slug_lookup.get(r[pkg_col], "")
+            if slug:
+                r["github_repo"] = slug
+                n_gh_filled += 1
 
     tmp = results_path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:
@@ -470,20 +747,32 @@ def update_results_csv(ecosystem: str) -> tuple[int, int]:
         writer.writerows(rows)
     tmp.replace(results_path)
 
-    return (n_with, len(rows))
+    return (n_with, len(rows), n_gh_filled)
 
 
 def main() -> None:
+    import argparse
+    p = argparse.ArgumentParser()
+    p.add_argument("--no-llm", action="store_true",
+                   help="Skip the LLM data (data/llms/claude-git-data.csv) for this run")
+    args = p.parse_args()
+
     console.rule("[bold white]build_git.py[/bold white]")
-    stats = [build(eco, fn) for eco, fn in ECOSYSTEMS]
+    llm_cache = {} if args.no_llm else claude_repo_lookup()
+    if args.no_llm:
+        console.print("[yellow]LLM cache disabled (--no-llm)[/yellow]\n")
+    elif llm_cache:
+        console.print(f"[dim]Loaded {len(llm_cache):,} entries from claude-git-data.csv[/dim]\n")
+    stats = [build(eco, fn, llm_cache) for eco, fn in ECOSYSTEMS]
     console.print()
     print_summary(stats)
     console.print()
     console.print("[bold]Injecting `git` column into results.csv[/bold]\n")
     for s in stats:
-        n, total = update_results_csv(s["ecosystem"])
+        n, total, n_gh = update_results_csv(s["ecosystem"])
         pct = 100.0 * n / total if total else 0.0
-        console.print(f"  {s['ecosystem']:>9}: [green]{n:,}[/green]/{total:,} rows have a git URL  ({pct:.0f}%)")
+        extra = f"  [blue](+{n_gh} github_repo backfilled)[/blue]" if n_gh else ""
+        console.print(f"  {s['ecosystem']:>9}: [green]{n:,}[/green]/{total:,} rows have a git URL  ({pct:.0f}%){extra}")
 
 
 if __name__ == "__main__":
