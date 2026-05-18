@@ -76,6 +76,121 @@ FIELDS = [
 ]
 
 
+def _hazen_percentiles(values: list[float]) -> list[float]:
+    """Percentile-rank each value via the Hazen plotting position.
+
+    pct = 100 * (rank - 0.5) / n, with tied values sharing the average of
+    their ranks. The result is strictly within (0, 100) — never exactly 0
+    or 100 — so a geometric mean taken over these percentiles cannot
+    collapse to 0. Higher value → higher percentile. Empty input → [].
+    """
+    n = len(values)
+    if n == 0:
+        return []
+    indexed = sorted(enumerate(values), key=lambda iv: iv[1])
+    pctls = [0.0] * n
+    i = 0
+    while i < n:
+        j = i
+        while j + 1 < n and indexed[j + 1][1] == indexed[i][1]:
+            j += 1
+        avg_rank = (i + j) / 2 + 1  # 1-based, tie-averaged
+        pct = 100.0 * (avg_rank - 0.5) / n
+        for k in range(i, j + 1):
+            pctls[indexed[k][0]] = pct
+        i = j + 1
+    return pctls
+
+
+def _geometric_mean(values: list[float]) -> float:
+    """Geometric mean (∏ v)^(1/n). Assumes every value > 0; [] → 0.0."""
+    if not values:
+        return 0.0
+    product = 1.0
+    for v in values:
+        product *= v
+    return product ** (1.0 / len(values))
+
+
+def _quartile_classes(scores: list[float]) -> list[str]:
+    """Assign A/B/C/D by equal-count quartiles of `scores` (higher = worse).
+
+    Sorted descending, the highest-scoring 25% get 'A', then 'B', 'C', 'D'.
+    When n is not divisible by 4 each class holds ⌊n/4⌋ or ⌈n/4⌉ members.
+    Empty input → [].
+    """
+    n = len(scores)
+    if n == 0:
+        return []
+    order = sorted(range(n), key=lambda i: scores[i], reverse=True)
+    labels = ["A", "B", "C", "D"]
+    out = [""] * n
+    for p, idx in enumerate(order):  # p: 0-based rank, 0 = highest score
+        out[idx] = labels[min(3, p * 4 // n)]
+    return out
+
+
+def compute_workload_classes(metrics: list[dict]) -> dict[str, dict]:
+    """Compute per-maintainer burden ratios, percentiles, and the class.
+
+    `metrics` — one dict per repo with keys `repo`, `loc`, `cve`, `nni`,
+    `ac`. `loc`/`cve`/`ac` are floats or None (None = the underlying
+    metric is missing); `nni` is always a float and may be negative.
+
+    Returns {repo: {...}} with these keys per repo:
+        loc_per_ac, cve_per_ac, nni_per_ac,
+        loc_per_ac_pctl, cve_per_ac_pctl, nni_per_ac_pctl,
+        workload_burden_percentile, workload_class
+    A repo is classified only when loc, cve, nni, and ac are all present
+    AND ac > 0; otherwise every value is the empty string "".
+    """
+    keys = ("loc_per_ac", "cve_per_ac", "nni_per_ac",
+            "loc_per_ac_pctl", "cve_per_ac_pctl", "nni_per_ac_pctl",
+            "workload_burden_percentile", "workload_class")
+    out: dict[str, dict] = {m["repo"]: {k: "" for k in keys} for m in metrics}
+
+    # 1. Keep only repos with all four inputs present and ac > 0.
+    classifiable: list[dict] = []
+    for m in metrics:
+        loc, cve, nni, ac = m["loc"], m["cve"], m["nni"], m["ac"]
+        if loc is None or cve is None or nni is None or ac is None or ac <= 0:
+            continue
+        classifiable.append({
+            "repo": m["repo"],
+            "loc_per_ac": loc / ac,
+            "cve_per_ac": cve / ac,
+            "nni_per_ac": nni / ac,
+        })
+    if not classifiable:
+        return out
+
+    # 2. Hazen-percentile each ratio across the classifiable set.
+    loc_p = _hazen_percentiles([c["loc_per_ac"] for c in classifiable])
+    cve_p = _hazen_percentiles([c["cve_per_ac"] for c in classifiable])
+    nni_p = _hazen_percentiles([c["nni_per_ac"] for c in classifiable])
+
+    # 3. Geometric mean of the three percentiles → burden score.
+    burden = [_geometric_mean([loc_p[i], cve_p[i], nni_p[i]])
+              for i in range(len(classifiable))]
+
+    # 4. Equal-count quartile class (A = highest burden).
+    classes = _quartile_classes(burden)
+
+    # 5. Emit.
+    for i, c in enumerate(classifiable):
+        out[c["repo"]] = {
+            "loc_per_ac": round(c["loc_per_ac"], 4),
+            "cve_per_ac": round(c["cve_per_ac"], 4),
+            "nni_per_ac": round(c["nni_per_ac"], 4),
+            "loc_per_ac_pctl": round(loc_p[i], 2),
+            "cve_per_ac_pctl": round(cve_p[i], 2),
+            "nni_per_ac_pctl": round(nni_p[i], 2),
+            "workload_burden_percentile": round(burden[i], 2),
+            "workload_class": classes[i],
+        }
+    return out
+
+
 def _load_repo_meta() -> dict[str, dict]:
     out: dict[str, dict] = {}
     if not REPOS_FILE.exists():
