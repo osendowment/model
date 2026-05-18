@@ -74,7 +74,7 @@ from src.git.disk import (
 )
 from src.github.fetch_contributors_metrics import _compute_bus_factor
 from src.github.models import Contributor, is_bot
-from src.pipeline.common.repos import load_risk_repos
+from src.pipeline.common.repos import load_repo_ids, load_risk_repos
 
 console = Console()
 
@@ -456,7 +456,11 @@ async def run_batch(
     a crash loses at most that many repos.
     """
     since, until = _window_bounds(*window)
-    rows_by_repo = {} if force else _load_existing(output_path)
+    # Always start from what's on disk so repos NOT in `targets` are
+    # preserved — `--force` re-fetches the targets, it must not discard
+    # the rest of the CSV (a `--repos X --force` run would otherwise
+    # truncate contributors.csv to just X).
+    rows_by_repo = _load_existing(output_path)
 
     to_fetch = [
         (repo, rid) for repo, rid in targets
@@ -719,7 +723,11 @@ def main() -> int:
 
     # Build the target list.
     if args.repos:
-        targets = [(r.strip().lower(), "") for r in args.repos]
+        # Ad-hoc positional repos — resolve repo_id from github/repos.csv so
+        # a re-collect doesn't blank the repo_id of an existing CSV row.
+        ids = load_repo_ids()
+        targets = [(s, ids.get(s, ""))
+                   for s in (r.strip().lower() for r in args.repos)]
     else:
         entries = load_risk_repos()
         targets = [(e.repo, e.repo_id) for e in entries]
