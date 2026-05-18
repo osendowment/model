@@ -5,16 +5,16 @@ Cells list the **specific fields** we extract -- not the entire dataset.
 
 Pipelines (run in this order — each stage feeds the next):
 
-1. **Value** (`src.pipeline.value`) → `data/value-data.csv` — picks the
+1. **Value** (`src.pipeline.run_value_pipeline`) → `data/value-data.csv` — picks the
    most-depended-on packages per ecosystem and ranks them by
    download-weighted PageRank, then unifies per-package classes into one
    row per GitHub repo. All classes A/B/C/D are included. See [docs/value.md](value.md).
-2. **Risk** (`src.pipeline.risk`) → `data/risk-data.csv` — concentration
+2. **Risk** (`src.pipeline.run_risk_pipeline`) → `data/risk-data.csv` — concentration
    + complexity + issue-debt scoring for **A/B value-class repos** read
    directly from `data/value-data.csv`. Target classes are configured in
    `src/pipeline/settings.json` under `risk_input.value_classes` (default
    `["A", "B"]`). See [docs/risk.md](risk.md).
-3. **Eligibility** (`src.pipeline.eligibility`) → `data/eligibility-data.csv`
+3. **Eligibility** (`src.pipeline.run_eligibility_pipeline`) → `data/eligibility-data.csv`
    — restricts to AB-class repos with a fresh GitHub API record, an
    OSI-approved license, and a non-EOL signal. Runs after Risk; its
    intended scope (future work) is repos that are `value_class=A` AND
@@ -50,14 +50,14 @@ stages and refresh this table when scope or thresholds change.
 - **Stage 4 → 5 (−2%)**: license check. The few remaining are `noassertion` (cpp libs without Homebrew formula match) plus the genuine non-OSS rows (CC-BY data packages, MIT-CMU variant, etc.). See `docs/eligibility.md` for the breakdown.
 - **Stage 5 → 6 (−1%)**: EOL — small absolute number (~7 archived projects).
 - **Stage 7 (Risk-scope)**: Risk runs on A/B value-class repos directly from `value-data.csv`, skipping archived and invalid repos. Contributor + issue metrics aren't yet fetched for the full risk-scope set — running `src.github.fetch_contributors_metrics` + `src.github.fetch_issue_metrics` for all ~900 repos closes this gap.
-- **Stage 8 (ELIGIBLE)**: Eligibility now runs after Risk. The 868 count reflects the last full eligibility run; re-run `src.pipeline.eligibility` to refresh.
+- **Stage 8 (ELIGIBLE)**: Eligibility now runs after Risk. The 868 count reflects the last full eligibility run; re-run `src.pipeline.run_eligibility_pipeline` to refresh.
 
 ### How to refresh these numbers
 
 ```
-uv run python -m src.pipeline.value         # rebuilds value-data.csv
-uv run python -m src.pipeline.risk          # rebuilds risk-data.csv
-uv run python -m src.pipeline.eligibility   # rebuilds eligibility-data.csv
+uv run python -m src.pipeline.run_value_pipeline         # rebuilds value-data.csv
+uv run python -m src.pipeline.run_risk_pipeline          # rebuilds risk-data.csv
+uv run python -m src.pipeline.run_eligibility_pipeline   # rebuilds eligibility-data.csv
 ```
 
 Then re-count and update the table.
@@ -130,17 +130,17 @@ for a repo, no row is written for it.
 The pipeline stages project the long files into per-repo wide rows for
 downstream consumers:
 
-- `data/complexity.csv` ← `src.pipeline.build_complexity` projects
+- `data/complexity.csv` ← `src.pipeline.risk.build_complexity` projects
   `data/git/scc.csv` + `data/git/lizard.csv` using
   `commits-years.last_sha` (2025 → 2021 walk; first sha with `loc > 0`).
   Also folds in the **hotspot** score (Tornhill `churn × complexity`):
   joins `data/github/git/churn.csv` (`churn_5y_total`) with the EOY-2025
   scc complexity snapshot to emit `churn_5y_total`, `hotspot_raw`,
   `hotspot_log`, `hotspot_percentile`.
-- `data/security.csv` ← `src.pipeline.build_security` projects
+- `data/security.csv` ← `src.pipeline.risk.build_security` projects
   `data/git/openssf.csv`, `data/git/depsdev.csv`, `data/git/semgrep.csv`
   using the same per-year sha priority.
-- `data/risk-data.csv` ← `src.pipeline.risk` joins complexity + security
+- `data/risk-data.csv` ← `src.pipeline.run_risk_pipeline` joins complexity + security
   + concentration + issue-debt and computes the final risk score.
 
 ## Dataflow at a glance

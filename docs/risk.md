@@ -173,7 +173,7 @@ All data comes from [GitHub](sources/github.md):
 | `src/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
 | `src/github/fetch_git_metrics.py` | scc code analysis via sparse checkout |
 | `src/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/pipeline/risk.py` | Aggregate into risk classifications. **Input is `data/value-data.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.pipeline.risk` |
+| `src/pipeline/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value-data.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.pipeline.run_risk_pipeline` |
 
 ## Source-file coverage
 

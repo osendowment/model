@@ -429,7 +429,7 @@ All dep-tree packages with downloads, PageRank, and value class.
 `data/value-data.csv` is the canonical per-repo table — one row per GitHub
 repo, plus one row per orphan package (no `github_repo`) so nothing is
 dropped. **All classes A/B/C/D are included** — D-class rows are no longer
-dropped. Produced by `uv run python -m src.pipeline.value`, which reads each
+dropped. Produced by `uv run python -m src.pipeline.run_value_pipeline`, which reads each
 ecosystem's `results.csv` and `eol.csv`, groups packages by repo, computes
 all per-ecosystem and cross-ecosystem aggregates, and writes the file
 sorted by `top_eco_pct` desc (most important repos first).
@@ -491,14 +491,14 @@ rows.
 both per-package and per-repo views). Group by `github_repo` (or use any
 orphan row directly) and the repo-level columns are already there.
 
-**Pipeline order**: each ecosystem's `check_eol.py` → `src.pipeline.value`
-→ `aggregate_by_repo.py`. Re-running `src.pipeline.value` overwrites
+**Pipeline order**: each ecosystem's `check_eol.py` → `src.pipeline.run_value_pipeline`
+→ `aggregate_by_repo.py`. Re-running `src.pipeline.run_value_pipeline` overwrites
 `value-data.csv` without the enriched columns; re-run `aggregate_by_repo.py`
 afterwards to restore them.
 
-**Three-stage pipeline**: `src.pipeline.value` (this script) →
-`src.pipeline.risk` (concentration + complexity for A/B value-class repos) →
-`src.pipeline.eligibility` (filters to AB ∩ OSS ∩ alive).
+**Three-stage pipeline**: `src.pipeline.run_value_pipeline` (this script) →
+`src.pipeline.run_risk_pipeline` (concentration + complexity for A/B value-class repos) →
+`src.pipeline.run_eligibility_pipeline` (filters to AB ∩ OSS ∩ alive).
 
 **Grouping**: rows sharing a non-empty `github_repo` are merged into one
 group; rows with an empty `github_repo` (e.g. cpp packages like `glibc`,

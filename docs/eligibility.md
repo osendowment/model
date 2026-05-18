@@ -74,7 +74,7 @@ graph LR
         cpp_eol["cpp/check_eol.py<br/>unsupported"]
     end
 
-    npm --> npm_eol --> unify["src.pipeline.value"]
+    npm --> npm_eol --> unify["src.pipeline.run_value_pipeline"]
     pypi --> pypi_eol --> unify
     crates --> crates_eol --> unify
     cpp --> cpp_eol --> unify
@@ -213,17 +213,17 @@ since it requires parsing an unstructured log.
 | `src/osi/fetch_licenses.py` | Refresh the OSI-approved SPDX list (90-day TTL) → `data/osi/oss-licenses.csv`. Sourced from the SPDX license list filtered by `isOsiApproved=true`. | `uv run python -m src.osi.fetch_licenses` |
 | `src/github/fetch_repo_owner_data.py` | Authoritative repo + owner data → `data/github/{repos,users}.csv` | `uv run python -m src.github.fetch_repo_owner_data` |
 | `src/foundations/match_repos.py` | Determine FOSS-foundation host per repo → `data/foundations/host-by-repo.csv` | `uv run python -m src.foundations.match_repos` |
-| `src/pipeline/value.py` | Unify per-eco results into `data/value-data.csv` | `uv run python -m src.pipeline.value` |
-| `src/pipeline/eligibility.py` | Final eligibility per repo → `data/eligibility-data.csv` | `uv run python -m src.pipeline.eligibility` |
+| `src/pipeline/value/unify_value_data.py` | Unify per-eco results into `data/value-data.csv` | `uv run python -m src.pipeline.run_value_pipeline` |
+| `src/pipeline/eligibility/classify_eligibility.py` | Final eligibility per repo → `data/eligibility-data.csv` | `uv run python -m src.pipeline.run_eligibility_pipeline` |
 
 Run order:
 1. per-ecosystem `check_eol.py` and `fetch_licenses.py` (parallelisable)
 2. `src.osi.fetch_licenses` (refreshes the OSI list — TTL'd, usually a no-op)
-3. `src.pipeline.value` (unifies per-eco results → `value-data.csv`)
-4. `src.pipeline.risk` (scores A/B repos → `risk-data.csv`)
+3. `src.pipeline.run_value_pipeline` (unifies per-eco results → `value-data.csv`)
+4. `src.pipeline.run_risk_pipeline` (scores A/B repos → `risk-data.csv`)
 5. `src.github.fetch_repo_owner_data` (populates the repo-level source of truth)
 6. `src.foundations.match_repos` (host classification)
-7. `src.pipeline.eligibility` (joins everything → `eligibility-data.csv`)
+7. `src.pipeline.run_eligibility_pipeline` (joins everything → `eligibility-data.csv`)
 
 License priority inside `eligibility.py`:
 1. **Per-eco `results.csv`** — registry-declared SPDX (most authoritative; the package author set it).
