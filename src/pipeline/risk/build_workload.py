@@ -4,18 +4,19 @@
 Reads:
     data/value-data.csv                                 — A/B value-class set
     data/github/repos.csv                               — created_at, has_issues, pushed_at
-    data/github/contributors/contributors.csv           — wide per-year + 2021-2025 (lifetime aggregate)
     data/github/git/commits-years.csv                   — per (repo, year) commits
     data/openssf/checks.csv                             — per-check Scorecard scores
     data/github/issues.csv                              — long: repo, repo_id, year, metric, value
                                                           (metric ∈ {opened_issues, closed_issues})
+    data/complexity.csv                                 — loc_2025_eoy per repo
+    data/security.csv                                   — cve_count_5y per repo
+    data/concentration.csv                              — active_contributors per repo
 
 Writes:
     data/workload.csv  with columns:
         repo, repo_id,
-        repo_age_years,                  ([2025 EOY])
         repo_age_years_2025_eoy,         (years between created_at and 2025-12-31)
-        active_maintainers_lifetime,     (lifetime distinct contributors — see note)
+        active_contributors,             (from concentration.csv)
         openssf_maintained,              (Scorecard "Maintained" sub-check, 0-10 or "")
         has_issues,                      (bool from GH /repos)
         push_cadence_years,              (count of years 2021-2025 with ≥1 commit, 0-5)
@@ -23,19 +24,29 @@ Writes:
         issues_opened_5y,
         issues_closed_5y,
         issue_close_ratio,               (closed_5y / opened_5y, 3 dp)
+        net_new_issues_5y,               (opened_5y − closed_5y)
         slope_opened,                    (OLS slope of yearly opened, 2 dp)
         slope_closed,
         issue_trend_score,               (vol-normalised slope_closed - slope_opened)
+        loc_per_ac,                      (loc_2025_eoy / active_contributors)
+        cve_per_ac,                      (cve_count_5y / active_contributors)
+        nni_per_ac,                      (net_new_issues_5y / active_contributors)
+        loc_per_ac_pctl,                 (Hazen percentile of loc_per_ac)
+        cve_per_ac_pctl,
+        nni_per_ac_pctl,
+        workload_burden_percentile,      (geometric mean of the three percentiles)
+        workload_class,                  (A/B/C/D equal-count quartile; "" if unclassifiable)
         fetched_at
+
+Notes:
+    workload_class is empty unless LOC, CVE, NNI, and AC are all present with
+    AC > 0. build_workload must run after build_complexity, build_security,
+    and build_concentration.
 
 Periods:
     repo_age_years_2025_eoy: years between created_at and 2025-12-31.
     push_cadence_years, issues_*: 2021-2025 window.
-    active_maintainers_lifetime: lifetime distinct contributors. Roadmap
-      target was [2021–2025] but the contributors fetcher uses
-      /contributors (lifetime only), not /stats/contributors (per-year,
-      202-pathology). For repos created post-2020 lifetime ≈ 5y.
-      Documented gap.
+    active_contributors: from concentration.csv (2021-2025 window).
 
 Usage:
     uv run python -m src.pipeline.risk.build_workload
@@ -54,11 +65,13 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 REPOS_FILE = DATA_DIR / "github" / "repos.csv"
-CONTRIB_FILE = DATA_DIR / "github" / "contributors" / "contributors.csv"
 COMMITS_YEARS_FILE = DATA_DIR / "github" / "git" / "commits-years.csv"
 OPENSSF_CHECKS_FILE = DATA_DIR / "openssf" / "checks.csv"
 ISSUES_FILE = DATA_DIR / "github" / "issues.csv"
 OUTPUT_FILE = DATA_DIR / "workload.csv"
+COMPLEXITY_FILE = DATA_DIR / "complexity.csv"
+SECURITY_FILE = DATA_DIR / "security.csv"
+CONCENTRATION_FILE = DATA_DIR / "concentration.csv"
 
 YEARS = list(range(2021, 2026))  # 2021..2025
 EOY_2025 = datetime.date(2025, 12, 31)
@@ -66,12 +79,16 @@ EOY_2025 = datetime.date(2025, 12, 31)
 FIELDS = [
     "repo", "repo_id",
     "repo_age_years_2025_eoy",
-    "active_maintainers_lifetime",
+    "active_contributors",
     "openssf_maintained",
     "has_issues",
     "push_cadence_years", "pushed_at",
     "issues_opened_5y", "issues_closed_5y", "issue_close_ratio",
+    "net_new_issues_5y",
     "slope_opened", "slope_closed", "issue_trend_score",
+    "loc_per_ac", "cve_per_ac", "nni_per_ac",
+    "loc_per_ac_pctl", "cve_per_ac_pctl", "nni_per_ac_pctl",
+    "workload_burden_percentile", "workload_class",
     "fetched_at",
 ]
 
@@ -204,21 +221,6 @@ def _load_repo_meta() -> dict[str, dict]:
     return out
 
 
-def _load_wide_year(path: Path, year_col: str) -> dict[str, str]:
-    out: dict[str, str] = {}
-    if not path.exists():
-        return out
-    with open(path, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if not slug:
-                continue
-            v = (row.get(year_col) or "").strip()
-            if v:
-                out[slug] = v
-    return out
-
-
 def _load_commits_years() -> dict[str, dict[int, int]]:
     """Return {repo: {year: commits}}."""
     out: dict[str, dict[int, int]] = {}
@@ -290,6 +292,30 @@ def _load_issues_long(path: Path) -> dict[str, dict[str, dict[int, int]]]:
     return out
 
 
+def _load_column(path: Path, column: str) -> dict[str, str]:
+    """Return {repo_lowercased: value} for one column of a wide CSV."""
+    out: dict[str, str] = {}
+    if not path.exists():
+        return out
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            slug = (row.get("repo") or "").strip().lower()
+            if slug:
+                out[slug] = (row.get(column) or "").strip()
+    return out
+
+
+def _num(value: str) -> float | None:
+    """Parse a CSV cell to float. Empty / unparseable → None."""
+    s = (value or "").strip()
+    if not s:
+        return None
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
 def _ols_slope(years: list[int], values: list[int]) -> float:
     """OLS slope. Returns 0 for series shorter than 2 or with no year variance."""
     n = len(years)
@@ -323,16 +349,19 @@ def build() -> list[dict]:
     eligible = load_risk_repos()
 
     repos = _load_repo_meta()
-    # Despite the column name "2021-2025", the contributors fetcher writes
-    # lifetime counts here (see module docstring).
-    contribs_lifetime = _load_wide_year(CONTRIB_FILE, "2021-2025")
     commits_years = _load_commits_years()
     maintained = _load_openssf_maintained()
     issues = _load_issues_long(ISSUES_FILE)
     opened = issues["opened_issues"]
     closed = issues["closed_issues"]
 
+    # Cross-dimension inputs for the workload class.
+    loc_by_repo = _load_column(COMPLEXITY_FILE, "loc_2025_eoy")
+    cve_by_repo = _load_column(SECURITY_FILE, "cve_count_5y")
+    ac_by_repo = _load_column(CONCENTRATION_FILE, "active_contributors")
+
     rows: list[dict] = []
+    metrics: list[dict] = []
     for entry in eligible:
         repo = entry.repo
         meta = repos.get(repo, {})
@@ -348,10 +377,7 @@ def build() -> list[dict]:
         # Push cadence: years with ≥1 commit in 2021-2025
         cy = commits_years.get(repo, {})
         cadence = sum(1 for y in YEARS if cy.get(y, 0) > 0) if cy else ""
-        if cadence == "":
-            cadence_val = ""
-        else:
-            cadence_val = str(cadence)
+        cadence_val = str(cadence) if cadence != "" else ""
 
         # OpenSSF maintained
         openssf_maintained = maintained.get(repo, "")
@@ -362,6 +388,7 @@ def build() -> list[dict]:
         op_5y = sum(op.values())
         cl_5y = sum(cl.values())
         ratio = round(cl_5y / op_5y, 3) if op_5y > 0 else ""
+        net_new_issues = op_5y - cl_5y
 
         op_vals = [op.get(y, 0) for y in YEARS]
         cl_vals = [cl.get(y, 0) for y in YEARS]
@@ -373,11 +400,13 @@ def build() -> list[dict]:
         else:
             trend_score = ""
 
+        ac_raw = ac_by_repo.get(repo, "")
+
         rows.append({
             "repo": repo,
             "repo_id": entry.repo_id,
             "repo_age_years_2025_eoy": age,
-            "active_maintainers_lifetime": contribs_lifetime.get(repo, ""),
+            "active_contributors": ac_raw,
             "openssf_maintained": openssf_maintained,
             "has_issues": has_issues,
             "push_cadence_years": cadence_val,
@@ -385,11 +414,28 @@ def build() -> list[dict]:
             "issues_opened_5y": op_5y,
             "issues_closed_5y": cl_5y,
             "issue_close_ratio": ratio,
+            "net_new_issues_5y": net_new_issues,
             "slope_opened": (round(s_open, 2) if op_5y >= 1 else ""),
             "slope_closed": (round(s_close, 2) if op_5y >= 1 else ""),
             "issue_trend_score": trend_score,
+            # workload-class columns — filled by the second pass below.
+            "loc_per_ac": "", "cve_per_ac": "", "nni_per_ac": "",
+            "loc_per_ac_pctl": "", "cve_per_ac_pctl": "", "nni_per_ac_pctl": "",
+            "workload_burden_percentile": "", "workload_class": "",
             "fetched_at": (meta.get("fetched_at") or "").strip(),
         })
+        metrics.append({
+            "repo": repo,
+            "loc": _num(loc_by_repo.get(repo, "")),
+            "cve": _num(cve_by_repo.get(repo, "")),
+            "nni": float(net_new_issues),
+            "ac": _num(ac_raw),
+        })
+
+    # Second pass: percentile-rank + classify, then merge back by repo.
+    workload = compute_workload_classes(metrics)
+    for row in rows:
+        row.update(workload.get(row["repo"], {}))
     return rows
 
 
@@ -410,15 +456,26 @@ def main() -> None:
     table.add_column("Populated", justify="right")
     table.add_column("Coverage", justify="right")
     for col in (
-        "repo_age_years_2025_eoy", "active_maintainers_lifetime",
-        "openssf_maintained",
-        "has_issues", "push_cadence_years", "pushed_at",
-        "issue_close_ratio", "issue_trend_score",
+        "repo_age_years_2025_eoy", "active_contributors",
+        "openssf_maintained", "has_issues", "push_cadence_years", "pushed_at",
+        "issue_close_ratio", "net_new_issues_5y", "issue_trend_score",
+        "workload_burden_percentile", "workload_class",
     ):
         n = sum(1 for r in rows if r[col] not in ("", None))
         pct = 100 * n / total if total else 0
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")
     console.print(table)
+
+    from collections import Counter
+    cls = Counter(r["workload_class"] or "—" for r in rows)
+    ctable = Table(title="\n[bold]Workload class[/bold]",
+                   show_header=True, header_style="bold dim", padding=(0, 1))
+    ctable.add_column("Class", style="bold")
+    ctable.add_column("Repos", justify="right")
+    for label in ("A", "B", "C", "D", "—"):
+        ctable.add_row(label, f"{cls.get(label, 0):,}")
+    console.print(ctable)
+
     console.print(f"\n[dim]Wrote {total:,} rows → {OUTPUT_FILE}[/dim]")
 
 
