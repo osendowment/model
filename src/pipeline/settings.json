@@ -49,10 +49,9 @@
       "comment": "trend_score = (slope_closed - slope_opened) / mean(opened_per_year). >= +0.05 → improving; <= -0.05 → deteriorating; otherwise stable. Empty if total < min_total_for_trend or fewer than min_active_years had any issues opened."
     },
     "security": {
-      "A": 3.0,
-      "B": 5.0,
-      "C": 7.0,
-      "comment": "Buckets the OpenSSF Scorecard score (0-10). A: score ≤ 3 (critical hygiene); B: ≤ 5; C: ≤ 7; D: > 7. Empty when no scorecard available."
+      "method": "geom_mean_quartile",
+      "metrics": ["openssf_score", "cve_count_5y"],
+      "comment": "security_class = equal-count quartiles (A = worst 25%) of the geometric mean of Hazen risk-percentiles of openssf_score (inverted — lower score ranks higher-risk) and cve_count_5y. Parameter-free; no numeric thresholds. Empty when openssf_score or cve_count_5y is missing."
     },
     "funding": {
       "A": 0,
