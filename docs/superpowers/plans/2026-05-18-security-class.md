@@ -14,7 +14,7 @@
 - Run everything with `uv run` (never bare `python`).
 - Every `git commit` must be authored as Konstantin Vinogradov — prefix each commit with `-c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov"`.
 - Do **not** push. Commit locally only.
-- Work happens on the current branch `feat/security-class`.
+- Work happens on `main` — the implementation commits go directly on the `main` branch.
 
 ---
 
