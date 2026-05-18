@@ -279,34 +279,44 @@ async def _fetch_repo(limiter: _Limiter, session: aiohttp.ClientSession,
     On 404 → row is a sparse {repo, valid=False, fetched_at} so the repo is
              recorded as known-invalid and won't be re-fetched until TTL expires.
     On transient errors → row is None (will retry on the next run).
+
+    301/302 redirects (a renamed or moved repo) are followed *iteratively*
+    to the end of the chain — a repo can be renamed more than once, so a
+    single hop may land on yet another redirect. The originally-requested
+    `slug` stays the row key (so the cache/TTL keep tracking it); the repo's
+    current name lands in the row's `full_name` from the final payload.
+    A chain longer than `MAX_REDIRECTS` is abandoned as `redirect_loop`.
     """
     url = f"{GITHUB_API}/repos/{slug}"
     for attempt in range(4):
-        try:
-            resp = await limiter.get(session, url)
-        except (aiohttp.ClientError, asyncio.TimeoutError):
-            await asyncio.sleep(2 ** attempt)
-            continue
-        async with resp:
-            if resp.status == 200:
-                return slug, _flat_repo(await resp.json(), slug), "ok"
-            if resp.status == 404:
-                return slug, _invalid_repo_row(slug), "404"
-            if resp.status in (301, 302) and "Location" in resp.headers:
-                # Repo was renamed/moved — follow once, keep original slug.
-                resp2 = await limiter.get(session, resp.headers["Location"])
-                async with resp2:
-                    if resp2.status == 200:
-                        return slug, _flat_repo(await resp2.json(), slug), "ok"
-                    if resp2.status == 404:
-                        return slug, _invalid_repo_row(slug), "404"
-            if resp.status == 403:
-                # Rate limited — re-queue (limiter will sleep on next call).
-                await asyncio.sleep(2)
-                continue
-            text = await resp.text()
-            log.warning("%s: HTTP %d %s", slug, resp.status, text[:120])
-            return slug, None, f"http_{resp.status}"
+        current = url
+        redirects = 0
+        while True:
+            try:
+                resp = await limiter.get(session, current)
+            except (aiohttp.ClientError, asyncio.TimeoutError):
+                break  # transient — fall through to the back-off + retry
+            async with resp:
+                if resp.status == 200:
+                    return slug, _flat_repo(await resp.json(), slug), "ok"
+                if resp.status == 404:
+                    return slug, _invalid_repo_row(slug), "404"
+                if resp.status in (301, 302) and "Location" in resp.headers:
+                    redirects += 1
+                    if redirects > MAX_REDIRECTS:
+                        log.warning("%s: redirect chain exceeded %d hops",
+                                    slug, MAX_REDIRECTS)
+                        return slug, None, "redirect_loop"
+                    current = resp.headers["Location"]
+                    continue  # follow the next hop of the chain
+                if resp.status == 403:
+                    break  # rate limited — re-queue via the outer retry
+                text = await resp.text()
+                log.warning("%s: HTTP %d %s", slug, resp.status, text[:120])
+                return slug, None, f"http_{resp.status}"
+        # Inner loop exited without returning → transient error or 403
+        # rate-limit → back off and retry the whole chain from the start.
+        await asyncio.sleep(2 ** attempt)
     return slug, None, "error"
 
 
