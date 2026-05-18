@@ -45,14 +45,15 @@ import argparse
 import asyncio
 import csv
 import datetime
+import json
 import logging
 import math
 import os
 import random
 import shutil
 import subprocess
+import sys
 import time
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 
 import httpx
@@ -88,6 +89,15 @@ DEFAULT_LIMIT = 10
 DEFAULT_SEED = 42
 DEFAULT_CONCURRENCY = int(os.environ.get("CYCLO_WORKERS") or 4)
 DEFAULT_TTL_DAYS = 0  # 0 = always re-run
+
+# A single source file larger than this is skipped. Files this big are
+# minified bundles, generated parsers or vendored amalgamations — not
+# hand-written code (so meaningless for cyclomatic complexity) and exactly
+# what OOM-kills the lizard analysis on mega-repos.
+MAX_FILE_BYTES = 2_000_000
+
+# Wall-clock cap for one repo's isolated analysis subprocess.
+ANALYSIS_TIMEOUT = 900
 
 # Metrics this fetcher emits per snapshot to data/git/lizard.csv.
 CYCLO_METRICS: tuple[str, ...] = (
@@ -195,15 +205,26 @@ class RepoComplexity:
 # ────────────────────────────── analysis core ──────────────────────────────
 
 def _list_source_files(root: str) -> list[str]:
-    """Walk `root` and return every source file matching SOURCE_SUFFIXES."""
+    """Walk `root` and return source files matching SOURCE_SUFFIXES.
+
+    Files larger than MAX_FILE_BYTES are skipped — minified / generated /
+    vendored blobs that would OOM-kill lizard and aren't real code.
+    """
     out: list[str] = []
     for dirpath, dirnames, filenames in os.walk(root):
         # Skip VCS metadata
         dirnames[:] = [d for d in dirnames if d != ".git"]
         for fn in filenames:
             ext = os.path.splitext(fn)[1].lower()
-            if ext in SOURCE_SUFFIXES:
-                out.append(os.path.join(dirpath, fn))
+            if ext not in SOURCE_SUFFIXES:
+                continue
+            path = os.path.join(dirpath, fn)
+            try:
+                if os.path.getsize(path) > MAX_FILE_BYTES:
+                    continue
+            except OSError:
+                continue
+            out.append(path)
     return out
 
 
@@ -233,7 +254,8 @@ def analyze_directory(root: str) -> dict:
     """Run lizard over all source files under `root`.
 
     Returns a flat dict of metrics ready to attach to a RepoComplexity.
-    Pure CPU work — safe to call inside a ProcessPoolExecutor worker.
+    Pure CPU work — invoked in an isolated subprocess via `--analyze-dir`
+    so a crash/OOM on one repo can't poison the run.
     """
     files = _list_source_files(root)
     if not files:
@@ -251,13 +273,43 @@ def analyze_directory(root: str) -> dict:
     }
 
 
+def _analyze_dir_isolated(dest: str, timeout: int = ANALYSIS_TIMEOUT) -> dict:
+    """Run `analyze_directory` for one repo in an isolated subprocess.
+
+    Each repo's lizard analysis gets its own process group. A crash, an
+    OOM-kill or a hang is contained to that one process — it cannot poison
+    a shared pool or take sibling repos down with it (the bug that turned a
+    few mega-repo failures into a 67-error cascade). On timeout the whole
+    process group is SIGKILLed. Raises on timeout / non-zero exit / bad
+    output; the caller records that as the single repo's `error`.
+    """
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "src.github.fetch_advanced_complexity",
+         "--analyze-dir", dest],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True,
+    )
+    try:
+        out, err = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        os.killpg(proc.pid, 9)
+        proc.wait()
+        raise
+    if proc.returncode != 0:
+        tail = err.decode("utf-8", "replace").strip()[-160:]
+        raise RuntimeError(f"analysis subprocess exit {proc.returncode}: {tail}")
+    # The JSON result is the last non-empty stdout line — robust against any
+    # stray output from lizard or imports.
+    lines = [ln for ln in out.decode("utf-8", "replace").splitlines() if ln.strip()]
+    return json.loads(lines[-1]) if lines else {"files": 0}
+
+
 # ─────────────────────────── repo-level processing ─────────────────────────
 
 async def _fetch_and_analyze(
     repo: str, repo_id: str, sha: str, analyzed_year: str, base_dir: str,
-    sem: asyncio.Semaphore, pool: ProcessPoolExecutor, client: httpx.Client,
+    sem: asyncio.Semaphore, client: httpx.Client,
 ) -> RepoComplexity:
-    """Sparse-checkout `repo`@`sha`, run analysis in worker process, clean up."""
+    """Sparse-checkout `repo`@`sha`, analyse in an isolated subprocess, clean up."""
     rc = RepoComplexity(
         repo=repo, repo_id=repo_id,
         analyzed_sha=sha, analyzed_year=analyzed_year,
@@ -288,9 +340,12 @@ async def _fetch_and_analyze(
                 rc.error = "download failed"
                 return rc
 
-            # CPU-bound analysis runs in a worker process.
+            # CPU-bound analysis runs in an isolated subprocess (per-repo
+            # process group) so a crash/OOM can't poison sibling repos.
             t_an = time.monotonic()
-            metrics = await loop.run_in_executor(pool, analyze_directory, dest)
+            metrics = await loop.run_in_executor(
+                None, _analyze_dir_isolated, dest,
+            )
             rc.analysis_s = time.monotonic() - t_an
 
             for k, v in metrics.items():
@@ -339,10 +394,8 @@ async def analyze_repos(
 
     results: list[RepoComplexity] = []
     client = httpx.Client(http2=True)
-    # CPU-bound analysis runs in worker processes — we want at most `concurrency`
-    # concurrent analyses. Adding a couple of slack workers helps overlap analysis
-    # with downloads.
-    pool = ProcessPoolExecutor(max_workers=concurrency + 2)
+    # Each repo's analysis runs in its own isolated subprocess (see
+    # `_analyze_dir_isolated`); the `sem` caps how many run concurrently.
     try:
         with progress:
             task = progress.add_task(" " * name_width, total=len(repos))
@@ -351,7 +404,7 @@ async def analyze_repos(
                 year, sha = shas.get(repo, ("current", ""))
                 rc = await _fetch_and_analyze(
                     repo, repo_ids.get(repo, ""), sha, year,
-                    base_dir, sem, pool, client,
+                    base_dir, sem, client,
                 )
                 progress.update(task, advance=1, description=repo[:name_width].ljust(name_width))
                 return rc
@@ -368,7 +421,6 @@ async def analyze_repos(
                         aborted = True
                         break
     finally:
-        pool.shutdown(wait=True, cancel_futures=False)
         client.close()
         shutil.rmtree(base_dir, ignore_errors=True)
     return results
@@ -582,8 +634,19 @@ def main() -> None:
         help="Explicit list of repo slugs (e.g. 'owner/name'). Overrides --limit/--seed.",
     )
     parser.add_argument("--output", default=OUTPUT_FILE)
+    parser.add_argument(
+        "--analyze-dir", default=None,
+        help="Internal: analyse one already-cloned directory, print metrics "
+             "as JSON, exit. Used for isolated per-repo analysis.",
+    )
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
+
+    # Isolated-analysis subprocess entrypoint — print JSON and exit before
+    # any banner / logging / network setup.
+    if args.analyze_dir:
+        print(json.dumps(analyze_directory(args.analyze_dir)))
+        return
 
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
