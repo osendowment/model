@@ -1,42 +1,17 @@
-"""Compute *real* cyclomatic complexity (McCabe) and Halstead metrics per repo.
+"""Compute *real* cyclomatic complexity (McCabe) per repo via lizard.
 
 Why this exists:
-    `src/git/fetch_scc.py` already runs `scc` for fast LOC/branch counts, but
-    scc's "complexity" is just a count of branch-statement keywords — not real
-    McCabe per-function complexity, and it has no Halstead at all. For finer
-    sustainability/risk modelling we want both, multi-language.
+    `src/git/fetch_scc.py` runs `scc` for fast LOC/branch counts, but scc's
+    "complexity" is just a count of branch-statement keywords — not real
+    McCabe per-function complexity. For finer sustainability/risk modelling
+    we want true per-function cyclomatic complexity, multi-language.
 
-Library choice (after benchmarking on aiohttp + acorn):
-
-    * lizard (https://github.com/terryyin/lizard)
+Library:
+    lizard (https://github.com/terryyin/lizard)
         - Per-function McCabe via a fast hand-rolled tokenizer.
         - Built-in C/C++/JS/TS/Python/Rust/Java/Go/etc. support — covers all
           four ecosystems we ship (npm, pypi, crates, cpp).
-        - ~10× faster than multimetric on the same file set (0.5s vs 4.9s
-          for aiohttp's 167 .py files).
-        - **No Halstead.**
-
-    * multimetric (https://github.com/priv-kweihmann/multimetric)
-        - Multi-language via pygments lexers; produces both McCabe + Halstead.
-        - **Bug**: its repo-level `cyclomatic_complexity` is computed as
-          `sum(conditions) - sum(exits) + 2` across *all* files combined, so
-          for any non-trivial repo it clamps to 0 (e.g. aiohttp reports 0).
-          Per-file values are correct, so we sum those manually.
-        - Halstead repo-level numbers ARE correct: it concatenates per-file
-          operator/operand lists then computes V/D/E/B from the unioned
-          vocabulary. We rely on that.
-        - Slower (pygments tokenization + multiprocessing.Pool overhead).
-        - Maintainability Index: classic formula
-          `MI = max(0, 171 - 5.2*ln(V) - 0.23*CCN - 16.2*ln(LOC))` is derived
-          from per-module averages; on a whole repo it always clamps to 0
-          (e.g. aiohttp: 171 - 5.2*ln(6.25M) - 0.23*2017 - 16.2*ln(67k) → ≪ 0).
-          We instead compute MI **per-file** and average across files so the
-          number is meaningful.
-
-Hybrid strategy:
-    1. lizard → per-function McCabe → cyclomatic_total/avg/max
-    2. multimetric (Python API, in-process) → per-file Halstead, summed using
-       multimetric's own global aggregator (correct), plus per-file MI averaged.
+        - Files it doesn't understand are skipped silently.
 
 Period semantics:
     For each repo, look up `data/github/git/commits-years.csv` to find the
@@ -51,9 +26,7 @@ Output format:
     `(repo, repo_id, commit_sha, metric, value, checked_at)`.
 
     Metrics emitted by this fetcher:
-        files, cyclomatic_total, cyclomatic_avg, cyclomatic_max,
-        halstead_volume, halstead_difficulty, halstead_effort, halstead_bugs,
-        maintainability_index
+        files, cyclomatic_total, cyclomatic_avg, cyclomatic_max
 
     Order note: this fetcher and `fetch_cognitive` both write a `files`
     metric for the same (repo, sha). Whichever runs LAST wins on that key.
@@ -70,52 +43,38 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import contextlib
 import csv
 import datetime
-import io
 import logging
 import math
 import os
 import random
 import shutil
-import statistics
 import subprocess
 import tempfile
 import time
-import warnings
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 
-# requests (transitively imported by something multimetric pulls in) emits a
-# RequestsDependencyWarning at import time about urllib3/chardet versions —
-# silence it before the import cascade fires.
-warnings.filterwarnings("ignore", message=".*urllib3.*chardet.*")
-warnings.filterwarnings("ignore", message=".*RequestsDependencyWarning.*")
-
-# All third-party / project imports must come after warnings.filterwarnings()
-# above so multimetric's transitive `requests` import doesn't print a
-# RequestsDependencyWarning. ruff's E402 doesn't see warnings setup as a
-# module-level statement worth respecting, so silence it for this block.
-import httpx  # noqa: E402
-from rich.console import Console  # noqa: E402
-from rich.progress import (  # noqa: E402
+import httpx
+from rich.console import Console
+from rich.progress import (
     BarColumn,
     Progress,
     SpinnerColumn,
     TaskProgressColumn,
     TextColumn,
 )
-from rich.table import Table  # noqa: E402
+from rich.table import Table
 
-from src.git.clone import SOURCE_EXTS  # noqa: E402
-from src.git.clone import download_tarball as _download_tarball  # noqa: E402
-from src.git.clone import sparse_clone as _sparse_clone  # noqa: E402
-from src.git.disk import check_disk_or_exit, print_disk_banner  # noqa: E402
-from src.git.long_format import read as _read_long  # noqa: E402
-from src.git.long_format import upsert_snapshot  # noqa: E402
-from src.github.display import _ETAColumn  # noqa: E402
-from src.pipeline.common.repos import load_risk_repos  # noqa: E402
+from src.git.clone import SOURCE_EXTS
+from src.git.clone import download_tarball as _download_tarball
+from src.git.clone import sparse_clone as _sparse_clone
+from src.git.disk import check_disk_or_exit, print_disk_banner
+from src.git.long_format import read as _read_long
+from src.git.long_format import upsert_snapshot
+from src.github.display import _ETAColumn
+from src.pipeline.common.repos import load_risk_repos
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -124,7 +83,7 @@ DATA_DIR = "data"
 COMMITS_YEARS_FILE = f"{DATA_DIR}/github/git/commits-years.csv"
 SCC_LONG_FILE = f"{DATA_DIR}/git/scc.csv"
 OUTPUT_FILE = f"{DATA_DIR}/git/lizard.csv"
-COMPARISON_FILE = "/tmp/cyclo-halstead-vs-scc.md"
+COMPARISON_FILE = "/tmp/cyclo-vs-scc.md"
 
 DEFAULT_LIMIT = 10
 DEFAULT_SEED = 42
@@ -135,8 +94,6 @@ DEFAULT_TTL_DAYS = 0  # 0 = always re-run
 CYCLO_METRICS: tuple[str, ...] = (
     "files",
     "cyclomatic_total", "cyclomatic_avg", "cyclomatic_max",
-    "halstead_volume", "halstead_difficulty", "halstead_effort", "halstead_bugs",
-    "maintainability_index",
 )
 
 # File extensions worth analyzing — same set the sparse-checkout uses.
@@ -230,11 +187,6 @@ class RepoComplexity:
     cyclomatic_total: int = 0
     cyclomatic_avg: float = 0.0
     cyclomatic_max: int = 0
-    halstead_volume: float = 0.0
-    halstead_difficulty: float = 0.0
-    halstead_effort: float = 0.0
-    halstead_bugs: float = 0.0
-    maintainability_index: float = 0.0
     elapsed_s: float = 0.0
     download_s: float = 0.0
     analysis_s: float = 0.0
@@ -259,8 +211,8 @@ def _list_source_files(root: str) -> list[str]:
 def _run_lizard(files: list[str]) -> tuple[int, int, float, int]:
     """Return (n_funcs, total_ccn, avg_ccn, max_ccn) using lizard.
 
-    Lizard skips files it doesn't understand silently — that's fine, we'd just
-    miss them in the CCN count (they still contribute via multimetric Halstead).
+    Lizard skips files it doesn't understand silently — those just don't
+    contribute to the CCN count.
     """
     import lizard
     total = 0
@@ -278,96 +230,8 @@ def _run_lizard(files: list[str]) -> tuple[int, int, float, int]:
     return nfn, total, avg, mx
 
 
-class _MultimetricArgs:
-    """Stand-in for argparse Namespace expected by multimetric internals.
-
-    We bypass multimetric's own `parse_args()` because it installs noisy
-    StreamHandlers on the `stdout`/`stderr` loggers (those handlers capture
-    a reference to `sys.stderr` at construction, so later `redirect_stderr`
-    can't silence them). Constructing args manually keeps the logger silent.
-    """
-    halstead_bug_predict_method = "new"
-    maintenance_index_calc_method = "classic"
-    warn_compiler = warn_duplication = warn_functional = None
-    warn_standard = warn_security = coverage = None
-    dump = False
-    verbose = False
-    jobs = 1
-    files = ()
-
-
-def _run_multimetric(files: list[str]) -> dict:
-    """Run multimetric in-process (no subprocess, no logger noise).
-
-    We bypass multimetric's `run()` because it spawns an `mp.Pool` worker
-    that prints chardet UnicodeDecodeErrors to stderr from inside the
-    subprocess (where `redirect_stderr` from this process can't reach).
-    By calling `file_process` directly per file in our own process we can
-    cleanly silence per-file decode errors via redirect_stderr.
-    """
-    from multimetric.__main__ import file_process
-    from multimetric.cls.importer.pick import importer_pick
-    from multimetric.cls.modules import (
-        get_modules_calculated,
-        get_modules_metrics,
-        get_modules_stats,
-    )
-
-    args = _MultimetricArgs()
-
-    importer = {}
-    importer["import_compiler"] = importer_pick(args, args.warn_compiler)
-    importer["import_coverage"] = importer_pick(args, args.coverage)
-    importer["import_duplication"] = importer_pick(args, args.warn_duplication)
-    importer["import_functional"] = importer_pick(args, args.warn_functional)
-    importer["import_security"] = importer_pick(args, args.warn_standard)
-    importer["import_standard"] = importer_pick(args, args.warn_security)
-    importer = {k: v for k, v in importer.items() if v}
-
-    overall_metrics = get_modules_metrics(args, **importer)
-    overall_calc = get_modules_calculated(args, **importer)
-
-    out = {"files": {}, "overall": {}}
-    results = []
-    with contextlib.redirect_stdout(io.StringIO()), \
-            contextlib.redirect_stderr(io.StringIO()):
-        for fpath in files:
-            try:
-                res = file_process(fpath, args, importer)
-                results.append(res)
-                out["files"][res[1]] = res[0]
-            except Exception:  # per-file: skip and continue
-                continue
-
-        for y in overall_metrics:
-            out["overall"].update(
-                y.get_results_global([x[4] for x in results]),
-            )
-        for y in overall_calc:
-            out["overall"].update(y.get_results(out["overall"]))
-        for m in get_modules_stats(args, **importer):
-            out = m.get_results(out, "files", "overall")
-
-    return out
-
-
-def _classic_mi(volume: float, ccn: float, loc: float) -> float:
-    """Classic Maintainability Index for a single module/file, scaled 0-100.
-
-    Raw MI = 171 − 5.2·ln(V) − 0.23·CCN − 16.2·ln(LOC)
-
-    The classic formula is unbounded; we follow the Microsoft convention
-    of clamping to [0, 100] (their thresholds: 0-9 red, 10-19 yellow,
-    20+ green). Tiny files would otherwise score >100 and skew averages.
-    """
-    if volume <= 0 or loc <= 0:
-        return 0.0
-    raw = 171.0 - 5.2 * math.log(volume) - 0.23 * ccn - 16.2 * math.log(loc)
-    return max(0.0, min(100.0, raw))
-
-
 def analyze_directory(root: str) -> dict:
-    """Run lizard + multimetric over all source files under `root`.
+    """Run lizard over all source files under `root`.
 
     Returns a flat dict of metrics ready to attach to a RepoComplexity.
     Pure CPU work — safe to call inside a ProcessPoolExecutor worker.
@@ -376,37 +240,15 @@ def analyze_directory(root: str) -> dict:
     if not files:
         return {"files": 0}
 
-    # Lizard: per-function McCabe across the supported subset (the ones it
-    # doesn't understand return zero functions and contribute nothing).
+    # Lizard: per-function McCabe across the supported subset (files it
+    # doesn't understand contribute no functions).
     nfn, ccn_total, ccn_avg, ccn_max = _run_lizard(files)
 
-    # Multimetric: per-file Halstead + per-file MI (overall aggregator gives
-    # correct Halstead, broken cyclomatic — see module docstring).
-    mm = _run_multimetric(files)
-    overall = mm.get("overall", {})
-
-    # Per-file MI: average non-zero MIs for a meaningful number.
-    per_file = mm.get("files", {})
-    mi_vals: list[float] = []
-    for fpath, m in per_file.items():
-        v = m.get("halstead_volume", 0.0)
-        cc = m.get("cyclomatic_complexity", 0.0)
-        loc = m.get("loc", 0.0)
-        mi = _classic_mi(v, cc, loc)
-        if mi > 0:
-            mi_vals.append(mi)
-    mi_avg = statistics.mean(mi_vals) if mi_vals else 0.0
-
     return {
-        "files": len(per_file),
+        "files": len(files),
         "cyclomatic_total": ccn_total,
         "cyclomatic_avg": round(ccn_avg, 2),
         "cyclomatic_max": ccn_max,
-        "halstead_volume": round(overall.get("halstead_volume", 0.0), 2),
-        "halstead_difficulty": round(overall.get("halstead_difficulty", 0.0), 2),
-        "halstead_effort": round(overall.get("halstead_effort", 0.0), 2),
-        "halstead_bugs": round(overall.get("halstead_bugprop", 0.0), 2),
-        "maintainability_index": round(mi_avg, 2),
     }
 
 
@@ -482,7 +324,7 @@ async def analyze_repos(
     that threshold (waits for in-flight repos to finish).
     """
     sem = asyncio.Semaphore(concurrency)
-    base_dir = tempfile.mkdtemp(prefix="cyclo-halstead-")
+    base_dir = tempfile.mkdtemp(prefix="cyclo-")
     name_width = min(max((len(r) for r in repos), default=20), 38)
 
     progress = Progress(
@@ -612,7 +454,7 @@ def _percentile(values: list[float], pct: float) -> float:
 
 
 def _print_comparison(results: list[RepoComplexity], scc_map: dict[str, int]) -> None:
-    """Inline rich table — repo × (scc CCN, our CCN, halstead, time)."""
+    """Inline rich table — repo × (scc complexity, lizard CCN, time)."""
     ok = [r for r in results if not r.error]
     if not ok:
         console.print("[red]No successful results to display[/red]")
@@ -624,12 +466,8 @@ def _print_comparison(results: list[RepoComplexity], scc_map: dict[str, int]) ->
     tbl.add_column("Files", justify="right")
     tbl.add_column("scc", justify="right")
     tbl.add_column("CCN", justify="right")
+    tbl.add_column("avg", justify="right")
     tbl.add_column("max", justify="right")
-    tbl.add_column("V", justify="right")
-    tbl.add_column("D", justify="right")
-    tbl.add_column("E", justify="right")
-    tbl.add_column("Bugs", justify="right")
-    tbl.add_column("MI", justify="right")
     tbl.add_column("t (s)", justify="right")
 
     for rc in sorted(ok, key=lambda r: -r.elapsed_s):
@@ -640,26 +478,12 @@ def _print_comparison(results: list[RepoComplexity], scc_map: dict[str, int]) ->
             f"{rc.files:,}",
             f"{scc:,}" if scc else "-",
             f"{rc.cyclomatic_total:,}",
+            f"{rc.cyclomatic_avg:.1f}",
             f"{rc.cyclomatic_max:,}",
-            _fmt_num(rc.halstead_volume),
-            f"{rc.halstead_difficulty:.0f}",
-            _fmt_num(rc.halstead_effort),
-            f"{rc.halstead_bugs:.1f}",
-            f"{rc.maintainability_index:.1f}",
             f"{rc.elapsed_s:.1f}",
         )
 
     console.print(tbl)
-
-
-def _fmt_num(n: float) -> str:
-    if n >= 1e9:
-        return f"{n/1e9:.1f}G"
-    if n >= 1e6:
-        return f"{n/1e6:.1f}M"
-    if n >= 1e3:
-        return f"{n/1e3:.1f}k"
-    return f"{n:.0f}"
 
 
 def _write_markdown_report(
@@ -672,35 +496,27 @@ def _write_markdown_report(
     times = [r.elapsed_s for r in ok]
 
     lines: list[str] = [
-        "# Cyclomatic / Halstead vs. scc",
+        "# Cyclomatic complexity (lizard) vs. scc",
         "",
         f"Generated: {datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')}",
         "",
-        "## Library choice",
+        "## Library",
         "",
-        "Hybrid: **lizard** for per-function McCabe (multi-language, ~10× faster than",
-        "multimetric on the same files) + **multimetric** for Halstead V/D/E/B (the",
-        "only multi-language Halstead implementation on PyPI).",
-        "",
-        "**Bug found in multimetric**: its repo-level `cyclomatic_complexity` is",
-        "computed as `sum(branch_keywords) - sum(exit_keywords) + 2` across the whole",
-        "corpus — for any non-trivial repo this clamps to 0 (e.g. aiohttp reports 0).",
-        "Per-file values are correct; we only use multimetric for Halstead and",
-        "compute MI per-file before averaging.",
+        "**lizard** — per-function McCabe cyclomatic complexity, multi-language",
+        "(C/C++/JS/TS/Python/Rust/Java/Go/…). scc's `complexity` is only a",
+        "branch-keyword tally; this is the real per-function metric.",
         "",
         "## Comparison table",
         "",
-        "| Repo | Year | Files | scc CCN | CCN total | CCN max | V | D | E | Bugs | MI | t (s) |",
-        "|------|-----:|------:|--------:|----------:|--------:|--:|--:|--:|-----:|---:|-----:|",
+        "| Repo | Year | Files | scc | CCN total | CCN avg | CCN max | t (s) |",
+        "|------|-----:|------:|----:|----------:|--------:|--------:|------:|",
     ]
     for rc in sorted(ok, key=lambda r: -r.elapsed_s):
         scc = scc_map.get(rc.repo, 0)
         lines.append(
             f"| {rc.repo} | {rc.analyzed_year} | {rc.files:,} | "
-            f"{scc:,} | {rc.cyclomatic_total:,} | {rc.cyclomatic_max} | "
-            f"{rc.halstead_volume:,.0f} | {rc.halstead_difficulty:.1f} | "
-            f"{rc.halstead_effort:,.0f} | {rc.halstead_bugs:.2f} | "
-            f"{rc.maintainability_index:.1f} | {rc.elapsed_s:.1f} |"
+            f"{scc:,} | {rc.cyclomatic_total:,} | {rc.cyclomatic_avg:.1f} | "
+            f"{rc.cyclomatic_max} | {rc.elapsed_s:.1f} |"
         )
 
     lines += ["", "## Performance", ""]
@@ -734,7 +550,7 @@ def _write_markdown_report(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Compute cyclomatic complexity (McCabe) + Halstead per repo.",
+        description="Compute cyclomatic complexity (McCabe) per repo via lizard.",
     )
     parser.add_argument(
         "--limit", type=int, default=DEFAULT_LIMIT,
@@ -779,7 +595,7 @@ def main() -> None:
     started = datetime.datetime.now()
     console.print()
     console.print(
-        f"[bold]Advanced complexity[/bold] (lizard + multimetric)  "
+        f"[bold]Advanced complexity[/bold] (lizard McCabe)  "
         f"[dim]limit={args.limit or 'all'} · seed={args.seed} · "
         f"concurrency={args.concurrency} · {started:%Y-%m-%d %H:%M:%S}[/dim]"
     )
