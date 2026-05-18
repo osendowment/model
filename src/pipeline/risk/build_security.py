@@ -58,6 +58,11 @@ from rich.table import Table
 
 from src.git.long_format import read as read_long
 from src.pipeline.common.repos import canonical_repo_map, load_risk_repos
+from src.pipeline.common.stats import (
+    geometric_mean,
+    hazen_percentiles,
+    quartile_classes,
+)
 
 console = Console()
 
@@ -256,6 +261,74 @@ def _load_bestpractices_badge() -> dict[str, str]:
             badge = (row.get("bestpractices_badge_id") or "").strip()
             if badge:
                 out[slug] = badge
+    return out
+
+
+def _to_float(value: str) -> float | None:
+    """Parse a CSV cell to float; blank or unparseable → None."""
+    text = (value or "").strip()
+    if not text:
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def compute_security_classes(metrics: list[dict]) -> dict[str, dict]:
+    """Compute per-repo security risk percentiles and the A–D class.
+
+    `metrics` — one dict per repo with keys `repo`, `openssf_score`, and
+    `cve` (the 5-year CVE count). `openssf_score` and `cve` are floats or
+    None (None = the underlying metric is missing).
+
+    Returns {repo: {...}} with these keys per repo:
+        openssf_risk_pctl, cve_risk_pctl,
+        security_risk_percentile, security_class
+    A repo is classified only when BOTH `openssf_score` and `cve` are
+    present; otherwise every value is the empty string "".
+
+    Both axes are risk percentiles (higher = worse security): `cve` is
+    ranked directly (more CVEs → higher), `openssf_score` is ranked
+    negated (lower score → higher risk — the OpenSSF "higher = better"
+    convention flipped to the pipeline's "A = worst"). The composite
+    `security_risk_percentile` is their geometric mean; `security_class`
+    is its equal-count quartile (A = worst 25%).
+    """
+    keys = ("openssf_risk_pctl", "cve_risk_pctl",
+            "security_risk_percentile", "security_class")
+    out: dict[str, dict] = {m["repo"]: {k: "" for k in keys} for m in metrics}
+
+    # 1. Keep only repos with both inputs present.
+    classifiable: list[dict] = []
+    for m in metrics:
+        score, cve = m["openssf_score"], m["cve"]
+        if score is None or cve is None:
+            continue
+        classifiable.append({"repo": m["repo"], "score": score, "cve": cve})
+    if not classifiable:
+        return out
+
+    # 2. Hazen risk-percentile each axis across the classifiable set.
+    #    openssf_score is negated so a LOWER score → HIGHER risk percentile.
+    openssf_p = hazen_percentiles([-c["score"] for c in classifiable])
+    cve_p = hazen_percentiles([c["cve"] for c in classifiable])
+
+    # 3. Geometric mean of the two risk percentiles → security risk score.
+    risk = [geometric_mean([openssf_p[i], cve_p[i]])
+            for i in range(len(classifiable))]
+
+    # 4. Equal-count quartile class (A = highest risk).
+    classes = quartile_classes(risk)
+
+    # 5. Emit.
+    for i, c in enumerate(classifiable):
+        out[c["repo"]] = {
+            "openssf_risk_pctl": round(openssf_p[i], 2),
+            "cve_risk_pctl": round(cve_p[i], 2),
+            "security_risk_percentile": round(risk[i], 2),
+            "security_class": classes[i],
+        }
     return out
 
 
