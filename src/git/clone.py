@@ -77,6 +77,21 @@ def _run_git(args: list[str], timeout: int, **kwargs) -> subprocess.CompletedPro
         raise
 
 
+def _check(
+    result: subprocess.CompletedProcess, what: str,
+) -> subprocess.CompletedProcess:
+    """Raise ``RuntimeError`` if a git step failed.
+
+    A non-zero git exit must not be silently ignored: a failed sparse-clone
+    leaves an empty working tree that downstream tools (scc, semgrep) would
+    measure as a genuine empty repo — recording a fake 0-LOC snapshot.
+    """
+    if result.returncode != 0:
+        err = result.stderr.decode("utf-8", "replace").strip()[:200]
+        raise RuntimeError(f"{what} failed (rc={result.returncode}): {err}")
+    return result
+
+
 def resolve_mainline_sha(
     repo: str, branch: str, pinned_sha: str, before: str | None = None,
     *, repo_url: str | None = None, timeout: int = 120,
@@ -177,9 +192,15 @@ def download_tarball(
 
 def sparse_clone(
     repo: str, dest: str, size_kb: int = 0, ref: str | None = None,
+    *, repo_url: str | None = None,
 ) -> tuple[float, int]:
-    """Sparse checkout: clone metadata only, then fetch source code files. Returns (elapsed_s, approx_size_bytes)."""
-    url = f"https://github.com/{repo}.git"
+    """Sparse checkout: clone metadata only, then fetch source code files. Returns (elapsed_s, approx_size_bytes).
+
+    Raises ``RuntimeError`` if any git step fails — a failed fetch/checkout
+    must not be mistaken for an empty repo. ``repo_url`` overrides the
+    GitHub URL (used by tests).
+    """
+    url = repo_url or f"https://github.com/{repo}.git"
     # Scale timeout: 60s base + 60s per 100MB of repo size
     clone_timeout = 60 + (size_kb // 100_000) * 60
     t0 = time.monotonic()
@@ -192,25 +213,38 @@ def sparse_clone(
             f"git remote add origin '{url}' && "
             f"git sparse-checkout set --no-cone {exts_args}"
         )
-        _run_git(["sh", "-c", init_script], timeout=10, cwd=dest)
-        _run_git(
-            ["git", "fetch", "--depth", "1", "--quiet", "--no-tags",
-             "--filter=blob:none", "origin", ref],
-            timeout=clone_timeout, cwd=dest,
+        _check(_run_git(["sh", "-c", init_script], timeout=10, cwd=dest),
+               f"{repo}: sparse-checkout init")
+        _check(
+            _run_git(
+                ["git", "fetch", "--depth", "1", "--quiet", "--no-tags",
+                 "--filter=blob:none", "origin", ref],
+                timeout=clone_timeout, cwd=dest,
+            ),
+            f"{repo}: fetch {ref[:12]}",
         )
-        _run_git(
-            ["git", "checkout", "--quiet", "FETCH_HEAD"],
-            timeout=clone_timeout, cwd=dest,
+        _check(
+            _run_git(
+                ["git", "checkout", "--quiet", "FETCH_HEAD"],
+                timeout=clone_timeout, cwd=dest,
+            ),
+            f"{repo}: checkout",
         )
     else:
-        _run_git(
-            ["git", "clone", "--depth", "1", "--quiet", "--no-tags",
-             "--filter=blob:none", "--sparse", url, dest],
-            timeout=clone_timeout,
+        _check(
+            _run_git(
+                ["git", "clone", "--depth", "1", "--quiet", "--no-tags",
+                 "--filter=blob:none", "--sparse", url, dest],
+                timeout=clone_timeout,
+            ),
+            f"{repo}: clone",
         )
-        _run_git(
-            ["git", "sparse-checkout", "set", "--no-cone"] + SOURCE_EXTS,
-            timeout=clone_timeout, cwd=dest,
+        _check(
+            _run_git(
+                ["git", "sparse-checkout", "set", "--no-cone"] + SOURCE_EXTS,
+                timeout=clone_timeout, cwd=dest,
+            ),
+            f"{repo}: sparse-checkout set",
         )
     elapsed = time.monotonic() - t0
     size = 0

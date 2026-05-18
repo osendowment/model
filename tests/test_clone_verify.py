@@ -1,16 +1,23 @@
-"""Regression test for first-parent snapshot resolution (src/git/clone.py).
+"""Regression tests for src/git/clone.py.
 
-Reproduces the real toml-rs/toml bug: GitHub's Commits API returned a
-merged CI-template commit — reachable from the default branch but off its
-first-parent (mainline) line — as the "last 2025 commit", so scc measured
-a 25-file template tree → 11 LOC. ``resolve_mainline_sha`` must detect the
-off-mainline SHA and recompute the real last first-parent commit.
+``test_resolve_mainline_sha`` reproduces the real toml-rs/toml bug: GitHub's
+Commits API returned a merged CI-template commit — reachable from the default
+branch but off its first-parent (mainline) line — as the "last 2025 commit",
+so scc measured a 25-file template tree → 11 LOC. ``resolve_mainline_sha``
+must detect the off-mainline SHA and recompute the real last first-parent
+commit.
+
+``test_sparse_clone_raises_on_bad_ref`` reproduces the salesforce/tough-cookie
+bug: ``sparse_clone`` ignored git's return code, so a failed fetch left an
+empty working tree that downstream tools measured as a real 0-LOC snapshot.
 """
 
 import os
 import subprocess
 
-from src.git.clone import resolve_mainline_sha
+import pytest
+
+from src.git.clone import resolve_mainline_sha, sparse_clone
 
 
 def _run(cwd, *args, env=None) -> str:
@@ -61,3 +68,24 @@ def test_resolve_mainline_sha(tmp_path):
     # A SHA already on the first-parent line is returned untouched.
     assert resolve_mainline_sha("x/y", "main", sha_b, repo_url=url) == (sha_b, False)
     assert resolve_mainline_sha("x/y", "main", sha_m, repo_url=url) == (sha_m, False)
+
+
+def test_sparse_clone_raises_on_bad_ref(tmp_path):
+    # A fetch that fails (unreachable SHA) must raise — not leave an empty
+    # working tree that scc would record as a genuine 0-LOC snapshot, as
+    # happened to salesforce/tough-cookie for five consecutive years.
+    remote = tmp_path / "remote"
+    remote.mkdir()
+    _run(remote, "-c", "init.defaultBranch=main", "init", "-q")
+    _run(remote, "config", "uploadpack.allowAnySHA1InWant", "true")
+    real_sha = _commit(remote, "x.py", "2025-01-01T00:00:00")
+    url = str(remote)
+
+    # Well-formed but nonexistent SHA → the fetch fails.
+    with pytest.raises(RuntimeError):
+        sparse_clone("x/y", str(tmp_path / "bad"), ref="0" * 40, repo_url=url)
+
+    # A real ref still checks out cleanly — the fix didn't break the happy path.
+    good = tmp_path / "good"
+    sparse_clone("x/y", str(good), ref=real_sha, repo_url=url)
+    assert (good / "x.py").is_file()
