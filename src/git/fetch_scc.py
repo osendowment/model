@@ -190,19 +190,29 @@ def _already_done(
 ) -> set[str]:
     """Return the set of repos whose target (repo, sha) is fully present.
 
-    "Fully present" = all six SCC_METRICS exist with non-empty values.
-    These repos are skipped — no clone, no scc run.
+    "Fully present" = all six SCC_METRICS exist with non-empty values
+    **and** `loc` is non-zero. An all-zero snapshot means a failed or
+    empty sparse-checkout (scc saw 0 files) — it must be re-analysed, not
+    skipped, otherwise a bad snapshot is cached forever.
     """
     rows = read_long(long_path)
-    by_pair: dict[tuple[str, str], set[str]] = {}
+    by_pair: dict[tuple[str, str], dict[str, str]] = {}
     for (repo, sha, metric), row in rows.items():
-        if (row.get("value") or "") == "":
+        val = row.get("value") or ""
+        if val == "":
             continue
-        by_pair.setdefault((repo, sha), set()).add(metric)
+        by_pair.setdefault((repo, sha), {})[metric] = val
     needed = set(SCC_METRICS)
     done: set[str] = set()
     for repo, sha in targets.items():
-        if needed.issubset(by_pair.get((repo, sha), set())):
+        metrics = by_pair.get((repo, sha), {})
+        if not needed.issubset(metrics.keys()):
+            continue
+        try:
+            loc_ok = float(metrics.get("loc", "0")) > 0
+        except ValueError:
+            loc_ok = False
+        if loc_ok:
             done.add(repo)
     return done
 
