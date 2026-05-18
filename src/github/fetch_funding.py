@@ -40,6 +40,7 @@ import time
 from pathlib import Path
 
 import aiohttp
+import yaml
 from rich.console import Console
 from rich.progress import (
     Progress, SpinnerColumn, TextColumn,
@@ -92,33 +93,36 @@ query($login: String!) {
 # ── parsers ──────────────────────────────────────────────────────────────────
 
 def parse_funding_yml(text: str) -> dict[str, list[str] | str]:
-    """Minimal FUNDING.yml parser — flat key/value, GitHub's format only.
+    """Parse a `.github/FUNDING.yml` into {platform: value(s)}.
 
-    Returns {platform: value(s)}. Comments and indented lines ignored.
-    Examples handled:
-        github: username
-        github: [user1, user2]
-        custom: ['https://example.com', 'https://other.com']
+    FUNDING.yml is YAML, so we parse it as YAML — this correctly handles
+    every shape GitHub accepts: a scalar value, an inline `[a, b]` list,
+    AND a block-style list whose `- item` lines sit at column 0 under the
+    key. The old hand-rolled line parser mis-read each block-list line as
+    its own `key: value` pair (a URL's `https:` became the separator),
+    emitting a bogus `- https` platform and silently dropping the real
+    `custom:` key.
+
+    Keys whose value is empty (null / "" / []) are dropped — an unset
+    platform is not a funding signal. A file that is not a YAML mapping
+    (or fails to parse) yields an empty dict.
     """
+    try:
+        data = yaml.safe_load(text)
+    except yaml.YAMLError:
+        return {}
+    if not isinstance(data, dict):
+        return {}
     result: dict[str, list[str] | str] = {}
-    for raw in text.splitlines():
-        line = raw.split("#", 1)[0].rstrip()
-        if not line or line.startswith(" ") or line.startswith("\t"):
+    for key, val in data.items():
+        if val is None or val == "" or val == [] or val == {}:
             continue
-        if ":" not in line:
-            continue
-        key, _, val = line.partition(":")
-        key = key.strip()
-        val = val.strip()
-        if not val:
-            continue
-        if val.startswith("[") and val.endswith("]"):
-            items = [v.strip().strip("'\"") for v in val[1:-1].split(",")]
-            cleaned = [v for v in items if v]
+        if isinstance(val, list):
+            cleaned = [str(v).strip() for v in val if v not in (None, "")]
             if cleaned:
-                result[key] = cleaned
+                result[str(key)] = cleaned
         else:
-            result[key] = val.strip("'\"")
+            result[str(key)] = str(val).strip()
     return result
 
 
