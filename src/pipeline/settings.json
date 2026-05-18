@@ -55,10 +55,10 @@
       "comment": "Buckets the OpenSSF Scorecard score (0-10). A: score ≤ 3 (critical hygiene); B: ≤ 5; C: ≤ 7; D: > 7. Empty when no scorecard available."
     },
     "funding": {
-      "A": {"max_sponsors": 0, "max_sources": 0},
-      "B": {"max_sponsors": 5, "max_sources": 1},
-      "C": {"max_sponsors": 50, "max_sources": 3},
-      "comment": "Funding-risk class. A: 0 sources AND 0 sponsors. B: 1 source OR ≤5 sponsors. C: 2-3 sources OR 6-50 sponsors. D: ≥4 sources OR ≥50 sponsors OR has funding.json. funding_sources counts FUNDING.yml platforms + (1 if funding.json present)."
+      "A": 0,
+      "B": 10,
+      "C": 100,
+      "comment": "funding_class by github_sponsors count (upper bounds): A = 0 sponsors, B = 1-10, C = 11-100, D = 101+. Empty when the sponsor count is unknown."
     }
   },
   "years": [2021, 2022, 2023, 2024, 2025]

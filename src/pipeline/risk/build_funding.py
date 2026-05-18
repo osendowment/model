@@ -11,6 +11,8 @@ Writes:
     data/funding.csv  with columns:
         repo, repo_id,
         github_sponsors,           (count of accounts on GH Sponsors)
+        funding_class,             (A/B/C/D from github_sponsors — see
+                                    settings.json risk_classification.funding)
         has_funding_yml,           (bool)
         funding_yml_platforms,     (comma-sep list)
         has_funding_json,          (bool — FLOSS/fund spec)
@@ -26,11 +28,13 @@ Usage:
 """
 
 import csv
+from collections import Counter
 from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
 
+from src.pipeline.common.params import FUNDING_THRESHOLDS
 from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
@@ -42,10 +46,34 @@ OUTPUT_FILE = DATA_DIR / "funding.csv"
 
 FIELDS = [
     "repo", "repo_id",
-    "github_sponsors", "has_funding_yml", "funding_yml_platforms",
+    "github_sponsors", "funding_class",
+    "has_funding_yml", "funding_yml_platforms",
     "has_funding_json", "foundation_host",
     "fetched_at",
 ]
+
+
+def funding_class(github_sponsors: str) -> str:
+    """A/B/C/D from the github_sponsors count.
+
+    Per settings.json risk_classification.funding (upper bounds):
+    A = 0 sponsors, B = 1-10, C = 11-100, D = 101+. Returns "" when the
+    sponsor count is missing or unparseable — can't classify.
+    """
+    raw = (github_sponsors or "").strip()
+    if not raw:
+        return ""
+    try:
+        n = int(raw)
+    except ValueError:
+        return ""
+    if n <= FUNDING_THRESHOLDS["A"]:
+        return "A"
+    if n <= FUNDING_THRESHOLDS["B"]:
+        return "B"
+    if n <= FUNDING_THRESHOLDS["C"]:
+        return "C"
+    return "D"
 
 
 def _load_raw_funding() -> dict[str, dict[str, str]]:
@@ -84,10 +112,12 @@ def build() -> list[dict]:
     for entry in eligible:
         repo = entry.repo
         r = raw.get(repo, {})
+        sponsors = (r.get("github_sponsors") or "").strip()
         rows.append({
             "repo": repo,
             "repo_id": entry.repo_id,
-            "github_sponsors": (r.get("github_sponsors") or "").strip(),
+            "github_sponsors": sponsors,
+            "funding_class": funding_class(sponsors),
             "has_funding_yml": (r.get("has_funding_yml") or "").strip(),
             "funding_yml_platforms": (r.get("funding_yml_platforms") or "").strip(),
             "has_funding_json": (r.get("has_funding_json") or "").strip(),
@@ -122,8 +152,18 @@ def main() -> None:
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")
     console.print(table)
 
+    # Funding-class distribution (A/B/C/D, or — when sponsor count unknown).
+    cls = Counter(r["funding_class"] or "—" for r in rows)
+    ctable = Table(title="\n[bold]Funding class[/bold]",
+                   show_header=True, header_style="bold dim", padding=(0, 1))
+    ctable.add_column("Class", style="bold")
+    ctable.add_column("Repos", justify="right")
+    for c in ("A", "B", "C", "D", "—"):
+        if cls.get(c):
+            ctable.add_row(c, f"{cls[c]:,}")
+    console.print(ctable)
+
     # Foundation host distribution
-    from collections import Counter
     fh = Counter(r["foundation_host"] for r in rows if r["foundation_host"])
     if fh:
         ftable = Table(title="\n[bold]Foundation hosts[/bold]",
