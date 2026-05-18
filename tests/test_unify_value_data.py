@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from src.pipeline.value import (
+from src.pipeline.value.unify_value_data import (
     CLASS_RANK,
     ECOSYSTEMS,
     FIELDS,

@@ -245,7 +245,7 @@ def load_eligible_value_rows() -> list[dict]:
     if not VALUE_FILE.exists():
         raise SystemExit(
             f"missing {VALUE_FILE} — run "
-            "`uv run python -m src.pipeline.value` first"
+            "`uv run python -m src.pipeline.value.unify_value_data` first"
         )
     out: list[dict] = []
     with open(VALUE_FILE, encoding="utf-8") as f:
