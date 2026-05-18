@@ -48,7 +48,7 @@ eligible set (an unpopulated repo is neither "hot" nor "cold" — it's
 simply unmeasured).
 
 Usage:
-    uv run python -m src.pipeline.build_complexity
+    uv run python -m src.pipeline.risk.build_complexity
 """
 
 from __future__ import annotations
@@ -66,7 +66,7 @@ from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 GIT_LONG_DIR = DATA_DIR / "git"
 COMMITS_YEARS_FILE = DATA_DIR / "github" / "git" / "commits-years.csv"
 SCC_FILE = GIT_LONG_DIR / "scc.csv"

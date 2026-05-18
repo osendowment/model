@@ -4,12 +4,12 @@
 Reads the six per-dimension intermediate CSVs (each produced by its own
 `build_<dim>.py` script) and joins them on `repo` into one flat table:
 
-    data/concentration.csv     ← src.pipeline.build_concentration
-    data/complexity.csv        ← src.pipeline.build_complexity
-    data/security.csv          ← src.pipeline.build_security
-    data/funding.csv           ← src.pipeline.build_funding
-    data/visibility.csv        ← src.pipeline.build_visibility
-    data/workload.csv          ← src.pipeline.build_workload
+    data/concentration.csv     ← src.pipeline.risk.build_concentration
+    data/complexity.csv        ← src.pipeline.risk.build_complexity
+    data/security.csv          ← src.pipeline.risk.build_security
+    data/funding.csv           ← src.pipeline.risk.build_funding
+    data/visibility.csv        ← src.pipeline.risk.build_visibility
+    data/workload.csv          ← src.pipeline.risk.build_workload
 
 Writes:
     data/risk-data.csv  — one row per risk-scope repo with every metric

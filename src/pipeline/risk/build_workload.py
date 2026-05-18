@@ -38,7 +38,7 @@ Periods:
       Documented gap.
 
 Usage:
-    uv run python -m src.pipeline.build_workload
+    uv run python -m src.pipeline.risk.build_workload
 """
 
 import csv
@@ -52,7 +52,7 @@ from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 REPOS_FILE = DATA_DIR / "github" / "repos.csv"
 CONTRIB_FILE = DATA_DIR / "github" / "contributors" / "contributors.csv"
 COMMITS_YEARS_FILE = DATA_DIR / "github" / "git" / "commits-years.csv"

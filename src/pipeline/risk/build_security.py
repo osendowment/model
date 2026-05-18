@@ -44,7 +44,7 @@ fall back to any sha present in the long file for that repo (deterministic
 lexicographic pick).
 
 Usage:
-    uv run python -m src.pipeline.build_security
+    uv run python -m src.pipeline.risk.build_security
 """
 
 from __future__ import annotations
@@ -61,7 +61,7 @@ from src.pipeline.common.repos import canonical_repo_map, load_risk_repos
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 GIT_LONG_DIR = DATA_DIR / "git"
 COMMITS_YEARS_FILE = DATA_DIR / "github" / "git" / "commits-years.csv"
 OPENSSF_FILE = GIT_LONG_DIR / "openssf.csv"

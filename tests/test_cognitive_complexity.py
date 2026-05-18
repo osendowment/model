@@ -263,7 +263,7 @@ def test_lizard_aggregator_empty():
 
 def test_build_complexity_loads_cognitive(tmp_path, monkeypatch):
     """`_load_cognitive` reads cognitive.csv into the right dict shape."""
-    from src.pipeline import build_complexity
+    from src.pipeline.risk import build_complexity
 
     cog_csv = tmp_path / "cognitive.csv"
     cog_csv.write_text(
@@ -284,13 +284,13 @@ def test_build_complexity_loads_cognitive(tmp_path, monkeypatch):
 
 def test_build_complexity_loads_cognitive_missing_file(tmp_path, monkeypatch):
     """Missing cognitive.csv → empty dict, not a crash."""
-    from src.pipeline import build_complexity
+    from src.pipeline.risk import build_complexity
     monkeypatch.setattr(build_complexity, "COGNITIVE_FILE", tmp_path / "absent.csv")
     assert build_complexity._load_cognitive() == {}
 
 
 def test_build_complexity_includes_cognitive_columns():
     """FIELDS list (the CSV header order) includes the three new columns."""
-    from src.pipeline.build_complexity import FIELDS
+    from src.pipeline.risk.build_complexity import FIELDS
     for col in ("cognitive_total", "cognitive_avg", "cognitive_max"):
         assert col in FIELDS, f"{col} missing from build_complexity FIELDS"

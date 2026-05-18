@@ -124,12 +124,12 @@ def main():
         plan.append(("openssf-checks", ["uv", "run", "python", "-m", "src.openssf.extract_checks"], 0))
 
     # 5. Build category CSVs + risk
-    plan.append(("build_complexity",    ["uv", "run", "python", "-m", "src.pipeline.build_complexity"], 0))
-    plan.append(("build_security",      ["uv", "run", "python", "-m", "src.pipeline.build_security"], 0))
-    plan.append(("build_concentration", ["uv", "run", "python", "-m", "src.pipeline.build_concentration"], 0))
-    plan.append(("build_funding",       ["uv", "run", "python", "-m", "src.pipeline.build_funding"], 0))
-    plan.append(("build_visibility",    ["uv", "run", "python", "-m", "src.pipeline.build_visibility"], 0))
-    plan.append(("build_workload",      ["uv", "run", "python", "-m", "src.pipeline.build_workload"], 0))
+    plan.append(("build_complexity",    ["uv", "run", "python", "-m", "src.pipeline.risk.build_complexity"], 0))
+    plan.append(("build_security",      ["uv", "run", "python", "-m", "src.pipeline.risk.build_security"], 0))
+    plan.append(("build_concentration", ["uv", "run", "python", "-m", "src.pipeline.risk.build_concentration"], 0))
+    plan.append(("build_funding",       ["uv", "run", "python", "-m", "src.pipeline.risk.build_funding"], 0))
+    plan.append(("build_visibility",    ["uv", "run", "python", "-m", "src.pipeline.risk.build_visibility"], 0))
+    plan.append(("build_workload",      ["uv", "run", "python", "-m", "src.pipeline.risk.build_workload"], 0))
     plan.append(("risk",                ["uv", "run", "python", "-m", "src.pipeline.risk.aggregate_risk"], 0))
 
     table = Table(title="Plan", show_header=True, header_style="bold dim")

@@ -50,12 +50,12 @@ SOURCES = [
 ]
 
 PIPELINE_STAGES = [
-    "src.pipeline.build_complexity",
-    "src.pipeline.build_security",
-    "src.pipeline.build_concentration",
-    "src.pipeline.build_funding",
-    "src.pipeline.build_visibility",
-    "src.pipeline.build_workload",
+    "src.pipeline.risk.build_complexity",
+    "src.pipeline.risk.build_security",
+    "src.pipeline.risk.build_concentration",
+    "src.pipeline.risk.build_funding",
+    "src.pipeline.risk.build_visibility",
+    "src.pipeline.risk.build_workload",
     "src.pipeline.risk.aggregate_risk",
 ]
 

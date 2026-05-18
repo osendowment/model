@@ -34,7 +34,7 @@ this is effectively the 5y window; for older repos it includes earlier
 contributors. Documented gap.
 
 Usage:
-    uv run python -m src.pipeline.build_concentration
+    uv run python -m src.pipeline.risk.build_concentration
 """
 
 import csv
@@ -47,7 +47,7 @@ from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 LIFETIME_FILE = DATA_DIR / "concentration-data.csv"
 CONTRIB_DIR = DATA_DIR / "github" / "contributors"
 HHI_FILE = CONTRIB_DIR / "hhi.csv"

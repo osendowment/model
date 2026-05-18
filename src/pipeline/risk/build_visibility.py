@@ -13,7 +13,7 @@ Period: [most recent] — values reflect GitHub state at the last
 `fetch_repo_owner_data` run.
 
 Usage:
-    uv run python -m src.pipeline.build_visibility
+    uv run python -m src.pipeline.risk.build_visibility
 """
 
 import csv
@@ -26,7 +26,7 @@ from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 REPOS_FILE = DATA_DIR / "github" / "repos.csv"
 OUTPUT_FILE = DATA_DIR / "visibility.csv"
 

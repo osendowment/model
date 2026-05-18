@@ -22,7 +22,7 @@ Period: [most recent] — values reflect last fetch by the upstream
 funding/foundations collectors.
 
 Usage:
-    uv run python -m src.pipeline.build_funding
+    uv run python -m src.pipeline.risk.build_funding
 """
 
 import csv
@@ -35,7 +35,7 @@ from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 FUNDING_RAW_FILE = DATA_DIR / "funding-data.csv"
 FOUNDATIONS_FILE = DATA_DIR / "foundations" / "host-by-repo.csv"
 OUTPUT_FILE = DATA_DIR / "funding.csv"
