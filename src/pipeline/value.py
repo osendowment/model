@@ -3,7 +3,7 @@
 
 Pipeline order (each stage feeds the next):
     1. `src.pipeline.value`       → data/value-data.csv  (this script)
-    2. `src.pipeline.eligibility` → data/eligibility-data.csv
+    2. `src.pipeline.eligibility.classify_eligibility` → data/eligibility-data.csv
     3. `src.pipeline.risk.aggregate_risk`        → data/risk-data.csv
 
 Reads `data/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crates,
@@ -34,7 +34,7 @@ Rows are sorted by `top_eco_pct` desc so the highest-importance repos
 come first.
 
 EOL is intentionally **not** stored here. It's a property of the
-eligibility pipeline (license + EOL); see `src.pipeline.eligibility`,
+eligibility pipeline (license + EOL); see `src.pipeline.eligibility.classify_eligibility`,
 which joins per-ecosystem `data/{eco}/eol.csv` with
 `data/{eco}/results.csv` to compute per-repo `is_eol` directly.
 

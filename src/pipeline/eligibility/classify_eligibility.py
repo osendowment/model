@@ -28,7 +28,7 @@ from rich.table import Table
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 VALUE_FILE = DATA_DIR / "value-data.csv"
 HOST_FILE = DATA_DIR / "foundations" / "host-by-repo.csv"
 GH_REPOS_FILE = DATA_DIR / "github" / "repos.csv"

@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from src.pipeline import eligibility
+from src.pipeline.eligibility import classify_eligibility as eligibility
 
 
 # ── classify_oss ────────────────────────────────────────────────────────────

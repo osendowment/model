@@ -195,7 +195,7 @@ def load_eligible_repos(
     if not os.path.exists(eligibility_file):
         raise SystemExit(
             f"missing {eligibility_file} — run "
-            "`uv run python -m src.pipeline.eligibility` first"
+            "`uv run python -m src.pipeline.eligibility.classify_eligibility` first"
         )
     out: list[RepoEntry] = []
     with open(eligibility_file, encoding="utf-8") as f:
