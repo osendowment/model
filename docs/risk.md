@@ -181,6 +181,36 @@ geometric mean of the three percentiles. The class is its equal-count quartile:
 | **D** | comfortable | bottom 25% |
 | _empty_ | no signal | LOC, CVE, NNI, or AC missing, or AC = 0 |
 
+### Security Class
+
+Combines the two OpenSSF-rooted security signals into a single A–D tier
+using the same method as the workload class. Two risk percentiles are
+formed (▴ higher = worse security):
+
+- `openssf_risk_pctl` — percentile of `openssf_score`, **inverted**: a
+  lower Scorecard score ranks as higher risk.
+- `cve_risk_pctl` — percentile of `cve_count_5y`: more known CVEs ranks
+  as higher risk.
+
+Each axis is percentile-ranked across the classified set (Hazen position
+`100·(rank−0.5)/n`, strictly in 0–100); `security_risk_percentile` is the
+geometric mean of the two — a repo ranks worst when it is high-risk on
+**both** axes, while a low-risk score on one axis pulls the composite
+down toward the safer quartiles. The class is its equal-count quartile:
+
+| Class | Label | Criteria |
+|-------|-------|----------|
+| **A** | critical | top 25% of `security_risk_percentile` |
+| **B** | high | next 25% |
+| **C** | moderate | next 25% |
+| **D** | healthy | bottom 25% |
+| _empty_ | no signal | `openssf_score` or `cve_count_5y` missing |
+
+~78% of risk-scope repos have zero known CVEs and so share one identical
+`cve_risk_pctl`; for those repos the class is effectively driven by the
+OpenSSF Scorecard axis, with the CVE axis only re-ranking the minority
+that carry CVEs.
+
 ## Data Sources
 
 All data comes from [GitHub](sources/github.md):
@@ -273,3 +303,7 @@ Sub-100% columns (every gap is structural, not a data-collection bug):
 | `nni_per_ac_pctl` | Hazen percentile (0–100) of `nni_per_ac` |
 | `workload_burden_percentile` | Geometric mean of the three `*_pctl` values |
 | `workload_class` | A–D equal-count quartile of `workload_burden_percentile` (A = worst); empty when an input is missing |
+| `openssf_risk_pctl` | Hazen percentile (0–100) of `openssf_score`, inverted (lower score → higher risk) |
+| `cve_risk_pctl` | Hazen percentile (0–100) of `cve_count_5y` (more CVEs → higher risk) |
+| `security_risk_percentile` | Geometric mean of `openssf_risk_pctl` and `cve_risk_pctl` |
+| `security_class` | A–D equal-count quartile of `security_risk_percentile` (A = worst); empty when `openssf_score` or `cve_count_5y` is missing |
