@@ -2,8 +2,6 @@
 
 import csv
 
-import pytest
-
 from src.github.models import Contributor, RunResult, PerfStats
 from src.github.batch_runner import (
     _upsert_concentration_data,
