@@ -121,51 +121,6 @@ def _sync_request(url: str, **kwargs) -> requests.Response:
     return resp
 
 
-def fetch_contributor_stats(
-    repo: str, retries: int = 12,
-) -> list[dict]:
-    """Fetch contributor stats from GitHub API. Handles 202/204 (computing) responses.
-
-    Returns [] for repos with no contributor stats (e.g. no commits with emails).
-
-    Larger repos can take GitHub minutes to compute the stats response, returning
-    202 until done. With retries=12 and the 30s cap, we wait up to ~3.5 minutes
-    per repo before giving up — enough to catch most 202-resolutions in practice.
-    """
-    url = f"{GITHUB_API}/repos/{repo}/stats/contributors"
-
-    for attempt in range(retries):
-        log.debug("Fetching stats for %s (attempt %d)", repo, attempt + 1)
-        resp = _sync_request(url)
-
-        if resp.status_code == 200:
-            data = resp.json()
-            if data:
-                return data
-            log.debug("%s: no contributor stats available", repo)
-            return []
-
-        if resp.status_code in (202, 204):
-            wait = min(2.0 + attempt * 3, 30.0)
-            log.debug("GitHub is computing stats (%d), retrying in %.1fs...", resp.status_code, wait)
-            time.sleep(wait)
-            continue
-
-        if resp.status_code == 403:
-            remaining = resp.headers.get("X-RateLimit-Remaining", "?")
-            raise RuntimeError(
-                f"Rate limited (remaining: {remaining}). Set GITHUB_TOKENS."
-            )
-
-        if resp.status_code == 404:
-            raise RuntimeError(f"Repo not found: {repo}")
-
-        resp.raise_for_status()
-
-    log.warning("%s: no stats after %d retries, treating as empty", repo, retries)
-    return []
-
-
 # --- Async API ---
 
 
@@ -260,36 +215,6 @@ class _AsyncRateLimiter:
 
 class _Deferred(Exception):
     """Raised when GitHub returns 202/204 — repo needs retry later."""
-
-
-class _NoStats(Exception):
-    """Raised when GitHub confirms no contributor stats exist (200 with empty body)."""
-
-
-async def _fetch_stats_once(
-    session: aiohttp.ClientSession, limiter: _AsyncRateLimiter,
-    repo: str,
-) -> list[dict]:
-    """Single attempt to fetch stats. Raises _Deferred on 202/204, _NoStats on empty 200."""
-    url = f"{GITHUB_API}/repos/{repo}/stats/contributors"
-    try:
-        resp = await limiter.get(session, url)
-    except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-        raise _Deferred() from e
-    async with resp:
-        if resp.status == 200:
-            data = await resp.json()
-            if data:
-                return data
-            raise _NoStats()
-        if resp.status in (202, 204):
-            raise _Deferred()
-        if resp.status == 403:
-            remaining = resp.headers.get("X-RateLimit-Remaining", "?")
-            raise RuntimeError(f"Rate limited ({repo}, remaining: {remaining})")
-        if resp.status == 404:
-            raise RuntimeError(f"Repo not found: {repo}")
-        raise RuntimeError(f"{repo}: HTTP {resp.status}")
 
 
 def _parse_next_link(link_header: str) -> str | None:
