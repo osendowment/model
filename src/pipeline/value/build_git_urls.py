@@ -29,7 +29,7 @@ from rich.table import Table
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 
 PLATFORMS = ("github", "gitlab", "bitbucket", "sourcehut", "codeberg", "custom")
 GIT_FIELDS = ["package"] + list(PLATFORMS) + ["eco_guess", "llm_guess"]
