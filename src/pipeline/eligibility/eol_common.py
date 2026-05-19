@@ -60,6 +60,8 @@ def display_summary(console: Console, ecosystem: str, rows: list[dict]) -> None:
     t.add_row("[red]is_eol=True[/red]", f"[red]{eol_count:,}[/red]")
     for k, v in sorted(by_source.items()):
         t.add_row(f"[dim]source={k}[/dim]", f"[dim]{v:,}[/dim]")
+    for k, v in sorted(by_method.items()):
+        t.add_row(f"[dim]method={k}[/dim]", f"[dim]{v:,}[/dim]")
     console.print(t)
 
     eol_rows = [r for r in rows if r["is_eol"] in (True, "True")]
