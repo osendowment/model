@@ -15,7 +15,7 @@ in our value pipeline — we have no EOL signal for it).
 Final eligibility = is_oss AND NOT is_eol. Writes data/eligibility-data.csv.
 
 Usage:
-    python -m src.eligibility
+    uv run python -m src.pipeline.eligibility.classify_eligibility
 """
 
 import csv
@@ -25,6 +25,8 @@ from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
+
+from src.pipeline.common.tables import load_rows_by_repo
 
 console = Console()
 
@@ -193,24 +195,6 @@ def load_repo_host_index() -> dict[str, str]:
     }
 
 
-def load_repo_meta() -> dict[str, dict]:
-    """Load repo → {homepage} from github/repos.csv.
-
-    Populated by `src.github.fetch_repo_owner_data` for AB-class repos
-    (90-day TTL). Used to populate `repo_url`. Returns empty dict if file
-    doesn't exist yet — `repo_url` falls back to top-repos.csv's homepage.
-    """
-    if not GH_REPOS_FILE.exists():
-        return {}
-    out: dict[str, dict] = {}
-    with open(GH_REPOS_FILE, encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            slug = (r.get("repo") or "").strip().lower()
-            if slug:
-                out[slug] = r
-    return out
-
-
 def load_user_meta() -> dict[str, dict]:
     """Load login → {name, blog, html_url} from github/users.csv.
 
@@ -295,7 +279,6 @@ def load_repo_registry_license() -> dict[str, str]:
     Used as the **primary** license source for eligibility; GitHub API
     license falls back when no per-eco result is found.
     """
-    from collections import Counter
     by_repo: dict[str, list[str]] = {}
     for eco in ECOSYSTEMS:
         results = DATA_DIR / eco / "results.csv"
@@ -339,13 +322,7 @@ def build_eligibility() -> list[dict]:
     user_tm_idx, repo_tm_idx = load_trademarks()
 
     # GitHub API record per repo (login, ids, license fallback, homepage)
-    gh_repos: dict[str, dict] = {}
-    if GH_REPOS_FILE.exists():
-        with open(GH_REPOS_FILE, encoding="utf-8") as f:
-            for r in csv.DictReader(f):
-                slug = (r.get("repo") or "").strip().lower()
-                if slug:
-                    gh_repos[slug] = r
+    gh_repos = load_rows_by_repo(GH_REPOS_FILE)
 
     rows: list[dict] = []
     for v in load_eligible_value_rows():
