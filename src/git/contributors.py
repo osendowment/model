@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-"""Git-based contributor metrics — windowed bus factor, HHI, and active
-contributors (AC) from a local clone.
+"""Git-based contributor data fetcher — dumps long raw per-author commit data.
 
-`AC` = the count of distinct non-bot people who authored a commit within the
-window (2021-2025 by default). It is the windowed denominator the risk
-pipeline's workload class wants, and the figure GitHub's `/contributors` API
-cannot produce — its `/stats/contributors` (per-week) endpoint 202-loops for
-most repos, so the API path only ever yields a lifetime count.
+Walks `git log` on a bare treeless clone and writes two files:
 
-An alternative to the GitHub `/contributors` API path
-(`src/github/fetch_contributors_metrics.py`). It walks `git log` on a bare
-treeless clone — `bare_treeless_clone` from `src/git/clone.py`, commit graph
-only, the lightest clone that supports history walking.
+    data/git/contributor-commits.csv      long raw: one row per
+                                           (repo, author, year)
+    data/git/contributor-commits.status.csv  per-repo status sidecar
+
+Metric computation (bus factor, HHI, active contributors) has moved to
+`build_concentration.py`, which reads the long CSV and aggregates over it.
+This matches the repo's scc/lizard pattern: fetchers dump raw long data;
+builders compute derived metrics.
 
 Pipeline per repo:
 
@@ -19,30 +18,22 @@ Pipeline per repo:
       ↓
     git log --no-merges      author name/email/date, mailmap-resolved (%aN/%aE)
       ↓
-    merge_identities()       union-find over email + full-name — one person
-                             commits under many name/email pairs
-      ↓
-    drop bots                is_bot() on derived login + "[bot]" suffix
-      ↓
-    _compute_bus_factor()    shared with the API path — BF + HHI
+    bucket by (name, email, year)   Counter → long rows
 
-Author merging honours the repo's own `.mailmap` first (git applies it to
-`%aN`/`%aE`), then a union-find merges identities that share a normalised
-email or a full name. It still will not match GitHub's `/contributors` merge
-exactly — GitHub merges by *account*, resolving commit emails to GitHub users
-server-side, which cannot be reproduced locally.
+Author names/emails are the raw mailmap-resolved values from `%aN`/`%aE`.
+Identity merging (union-find over shared emails + full names) is intentionally
+deferred to the builder so it can apply globally-consistent rules. The helper
+`merge_identity_groups` is exported here for the builder and --inspect to use.
 
 Modes:
-    collect (default)  batch every A/B-class repo → data/git/contributors.csv
+    collect (default)  batch every A/B-class repo → two CSV files
                        (resumable: re-running skips status=ok rows)
-    --compare N        comparison report on N random already-collected repos
     --inspect REPO     dump one repo's merged contributor list (verify merges)
 
 Usage:
     uv run python -m src.git.contributors                       # collect all
     uv run python -m src.git.contributors --limit 20            # 20 random
     uv run python -m src.git.contributors --concurrency 8 --force
-    uv run python -m src.git.contributors --compare 20
     uv run python -m src.git.contributors --inspect curl/curl
 """
 from __future__ import annotations
@@ -79,8 +70,8 @@ from src.pipeline.common.repos import load_repo_ids, load_risk_repos
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-CONCENTRATION_FILE = DATA_DIR / "concentration-data.csv"
-OUTPUT_FILE = DATA_DIR / "git" / "contributors.csv"
+OUTPUT_FILE = DATA_DIR / "git" / "contributor-commits.csv"
+STATUS_FILE = DATA_DIR / "git" / "contributor-commits.status.csv"
 
 # Default contribution window — matches the risk pipeline's 2021-2025 frame.
 DEFAULT_WINDOW = (2021, 2025)
@@ -101,12 +92,13 @@ _BOT_EMAILS = {
     "actions@github.com",
 }
 
-# Output schema. Numeric columns are blank for non-ok rows.
-FIELDS = [
+# Long raw output: one row per (repo, author_name, author_email, year).
+LONG_FIELDS = ["repo", "author_name", "author_email", "year", "commits"]
+
+# Per-repo status sidecar.
+STATUS_FIELDS = [
     "repo", "repo_id", "status",
-    "ac_2021_2025", "bf_2021_2025", "hhi_2021_2025",
-    "contributors_lifetime", "bf_lifetime", "hhi_lifetime",
-    "commits_2021_2025", "commits_lifetime", "bots_lifetime",
+    "distinct_authors", "commits_total",
     "clone_seconds", "error", "fetched_at",
 ]
 
@@ -242,22 +234,22 @@ def _is_bot_identity(names: list[str], emails: list[str]) -> bool:
     return False
 
 
-def merge_identities(counts: dict[tuple[str, str], int]) -> list[Author]:
-    """Merge (name, email) → commit-count pairs into one record per person.
+def merge_identity_groups(pairs: list[tuple[str, str]]) -> list[list[int]]:
+    """Union-find merge of (name, email) identity pairs.
 
-    Two identities are unioned when they share a normalised email, or share a
-    *full* name (one containing a space — single-token handles like "ci" are
-    too collision-prone to merge on). Each merged person's display name is
-    taken from the identity with the most commits.
+    Returns a list of groups; each group is a list of indices into `pairs`.
+    Two pairs are unioned when they share a normalised email (`_canon_email`)
+    or a full name (lowercased, containing a space). This is the grouping
+    `merge_identities` is built on — exposed so callers that need per-group
+    metrics other than a flat commit count (e.g. windowed sums) can reuse it.
     """
-    keys = list(counts)
-    if not keys:
+    if not pairs:
         return []
 
-    uf = _UnionFind(len(keys))
+    uf = _UnionFind(len(pairs))
     first_by_email: dict[str, int] = {}
     first_by_name: dict[str, int] = {}
-    for i, (name, email) in enumerate(keys):
+    for i, (name, email) in enumerate(pairs):
         ce = _canon_email(email)
         if ce:
             if ce in first_by_email:
@@ -272,11 +264,28 @@ def merge_identities(counts: dict[tuple[str, str], int]) -> list[Author]:
                 first_by_name[nn] = i
 
     groups: dict[int, list[int]] = defaultdict(list)
-    for i in range(len(keys)):
+    for i in range(len(pairs)):
         groups[uf.find(i)].append(i)
 
+    return list(groups.values())
+
+
+def merge_identities(counts: dict[tuple[str, str], int]) -> list[Author]:
+    """Merge (name, email) → commit-count pairs into one record per person.
+
+    Two identities are unioned when they share a normalised email, or share a
+    *full* name (one containing a space — single-token handles like "ci" are
+    too collision-prone to merge on). Each merged person's display name is
+    taken from the identity with the most commits.
+    """
+    keys = list(counts)
+    if not keys:
+        return []
+
+    groups = merge_identity_groups(keys)
+
     authors: list[Author] = []
-    for members in groups.values():
+    for members in groups:
         total = sum(counts[keys[m]] for m in members)
         lead = max(members, key=lambda m: counts[keys[m]])
         lead_name, lead_email = keys[lead]
@@ -352,69 +361,80 @@ def _window_bounds(start_year: int, end_year: int) -> tuple[float, float]:
 
 # ── per-repo collection ─────────────────────────────────────────────────────
 
-def _blank_row(repo: str, repo_id: str) -> dict:
-    """A result row with every field present (numeric fields blank)."""
-    row = {f: "" for f in FIELDS}
-    row["repo"] = repo
-    row["repo_id"] = repo_id
-    row["fetched_at"] = datetime.datetime.now(
-        datetime.timezone.utc
-    ).isoformat(timespec="seconds")
-    return row
+def process_repo(repo: str, repo_id: str, base_dir: str) -> tuple[list[dict], dict]:
+    """Clone one repo, bucket commits by (author, year), clean up.
 
+    Returns (long_rows, status_row). Always returns without raising — failures
+    are recorded in status_row so the batch can carry on.
 
-def process_repo(repo: str, repo_id: str, since: float, until: float,
-                 base_dir: str) -> dict:
-    """Clone one repo, compute lifetime + windowed metrics, clean up.
-
-    Always returns a row (never raises) — failures are recorded in `status`
-    and `error` so the batch can carry on and the CSV stays a complete
-    record of what was attempted. `status` ∈ {ok, clone_failed, timeout,
-    no_commits, error}.
+    long_rows: list of dicts with LONG_FIELDS keys — one per (name, email, year).
+    status_row: dict with STATUS_FIELDS keys.
+    `status` ∈ {ok, clone_failed, timeout, no_commits, error}.
     """
-    row = _blank_row(repo, repo_id)
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+    status_row: dict = {f: "" for f in STATUS_FIELDS}
+    status_row["repo"] = repo
+    status_row["repo_id"] = repo_id
+    status_row["fetched_at"] = now
+
     dest = os.path.join(base_dir, repo.replace("/", "_"))
+    long_rows: list[dict] = []
     try:
         clone_s, _size = bare_treeless_clone(repo, dest)
-        rows = log_commits(dest)
-        if not rows:
-            row["status"] = "no_commits"
-            row["clone_seconds"] = round(clone_s, 1)
-            return row
-        life = metrics(rows)
-        win = metrics(rows, since=since, until=until)
-        row.update({
+        commit_rows = log_commits(dest)
+        if not commit_rows:
+            status_row["status"] = "no_commits"
+            status_row["clone_seconds"] = round(clone_s, 1)
+            return [], status_row
+
+        # Bucket by (name, email, year).
+        bucket: Counter[tuple[str, str, int]] = Counter()
+        for ts, name, email in commit_rows:
+            year = datetime.datetime.fromtimestamp(
+                ts, tz=datetime.timezone.utc
+            ).year
+            bucket[(name, email, year)] += 1
+
+        for (name, email, year), count in bucket.items():
+            long_rows.append({
+                "repo": repo,
+                "author_name": name,
+                "author_email": email,
+                "year": year,
+                "commits": count,
+            })
+
+        distinct_authors = len({(name, email) for name, email, _ in bucket})
+        commits_total = sum(bucket.values())
+
+        status_row.update({
             "status": "ok",
-            "ac_2021_2025": win.active_contributors,
-            "bf_2021_2025": win.bus_factor,
-            "hhi_2021_2025": round(win.hhi * 10000),
-            "contributors_lifetime": life.active_contributors,
-            "bf_lifetime": life.bus_factor,
-            "hhi_lifetime": round(life.hhi * 10000),
-            "commits_2021_2025": win.commits,
-            "commits_lifetime": life.commits,
-            "bots_lifetime": life.bots,
+            "distinct_authors": distinct_authors,
+            "commits_total": commits_total,
             "clone_seconds": round(clone_s, 1),
         })
     except subprocess.TimeoutExpired:
-        row["status"] = "timeout"
-        row["error"] = "clone or git log exceeded timeout"
+        status_row["status"] = "timeout"
+        status_row["error"] = "clone or git log exceeded timeout"
     except RuntimeError as e:
         msg = str(e)
-        row["status"] = "clone_failed" if "clone" in msg.lower() else "error"
-        row["error"] = msg[:200]
+        status_row["status"] = "clone_failed" if "clone" in msg.lower() else "error"
+        status_row["error"] = msg[:200]
     except Exception as e:  # noqa: BLE001 — batch must survive any single repo
-        row["status"] = "error"
-        row["error"] = f"{type(e).__name__}: {e}"[:200]
+        status_row["status"] = "error"
+        status_row["error"] = f"{type(e).__name__}: {e}"[:200]
     finally:
         shutil.rmtree(dest, ignore_errors=True)
-    return row
+
+    if status_row.get("status") != "ok":
+        long_rows = []
+    return long_rows, status_row
 
 
 # ── CSV I/O ─────────────────────────────────────────────────────────────────
 
-def _load_existing(path: Path) -> dict[str, dict]:
-    """Load already-collected rows keyed by repo (for resume)."""
+def _load_status(path: Path) -> dict[str, dict]:
+    """Load status sidecar keyed by repo."""
     out: dict[str, dict] = {}
     if not path.exists():
         return out
@@ -422,19 +442,45 @@ def _load_existing(path: Path) -> dict[str, dict]:
         for row in csv.DictReader(f):
             slug = (row.get("repo") or "").strip().lower()
             if slug:
-                out[slug] = {k: row.get(k, "") for k in FIELDS}
+                out[slug] = {k: row.get(k, "") for k in STATUS_FIELDS}
     return out
 
 
-def _write_csv(path: Path, rows_by_repo: dict[str, dict]) -> None:
-    """Rewrite the whole CSV, rows sorted by repo (atomic via temp + replace)."""
+def _load_long(path: Path) -> dict[str, list[dict]]:
+    """Load long CSV grouped by repo (for resume — keeps rows of non-refetched repos)."""
+    out: dict[str, list[dict]] = defaultdict(list)
+    if not path.exists():
+        return out
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            slug = (row.get("repo") or "").strip().lower()
+            if slug:
+                out[slug].append({k: row.get(k, "") for k in LONG_FIELDS})
+    return out
+
+
+def _write_long(path: Path, long_by_repo: dict[str, list[dict]]) -> None:
+    """Write all long rows sorted by repo (atomic)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=FIELDS, extrasaction="ignore")
+        w = csv.DictWriter(f, fieldnames=LONG_FIELDS, extrasaction="ignore")
         w.writeheader()
-        for repo in sorted(rows_by_repo):
-            w.writerow(rows_by_repo[repo])
+        for repo in sorted(long_by_repo):
+            for row in long_by_repo[repo]:
+                w.writerow(row)
+    os.replace(tmp, path)
+
+
+def _write_status(path: Path, status_by_repo: dict[str, dict]) -> None:
+    """Write status sidecar sorted by repo (atomic)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".csv.tmp")
+    with open(tmp, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=STATUS_FIELDS, extrasaction="ignore")
+        w.writeheader()
+        for repo in sorted(status_by_repo):
+            w.writerow(status_by_repo[repo])
     os.replace(tmp, path)
 
 
@@ -442,29 +488,25 @@ def _write_csv(path: Path, rows_by_repo: dict[str, dict]) -> None:
 
 async def run_batch(
     targets: list[tuple[str, str]],   # (repo, repo_id)
-    window: tuple[int, int],
     concurrency: int,
     output_path: Path,
+    status_path: Path,
     force: bool,
     max_disk_gb: float,
-) -> dict[str, dict]:
-    """Clone + measure every target concurrently, writing the CSV as it goes.
+) -> tuple[dict[str, list[dict]], dict[str, dict]]:
+    """Clone + bucket every target concurrently, writing CSVs as it goes.
 
     Resumable: existing `status=ok` rows are kept and skipped unless `force`.
-    Rows with any other status are retried (network blips recover; 404s just
-    fail fast again). The CSV is rewritten every `FLUSH_EVERY` completions, so
-    a crash loses at most that many repos.
+    Both files are rewritten every ~25 completions. Returns (long_by_repo,
+    status_by_repo) covering all known repos (fetched + previously collected).
     """
-    since, until = _window_bounds(*window)
-    # Always start from what's on disk so repos NOT in `targets` are
-    # preserved — `--force` re-fetches the targets, it must not discard
-    # the rest of the CSV (a `--repos X --force` run would otherwise
-    # truncate contributors.csv to just X).
-    rows_by_repo = _load_existing(output_path)
+    # Load existing data so non-targeted repos survive.
+    status_by_repo = _load_status(status_path)
+    long_by_repo = _load_long(output_path)
 
     to_fetch = [
         (repo, rid) for repo, rid in targets
-        if force or rows_by_repo.get(repo, {}).get("status") != "ok"
+        if force or status_by_repo.get(repo, {}).get("status") != "ok"
     ]
     skipped = len(targets) - len(to_fetch)
     console.print(
@@ -474,37 +516,40 @@ async def run_batch(
     )
     if not to_fetch:
         console.print("[dim]Nothing to do — all repos already collected.[/dim]")
-        return rows_by_repo
+        return long_by_repo, status_by_repo
 
-    FLUSH_EVERY = 10
+    FLUSH_EVERY = 25
     base_dir = make_clone_tmpdir("contributors")
     sem = asyncio.Semaphore(concurrency)
     loop = asyncio.get_running_loop()
     t_start = time.monotonic()
 
-    async def _one(repo: str, rid: str) -> dict:
+    async def _one(repo: str, rid: str) -> tuple[str, list[dict], dict]:
         async with sem:
-            return await loop.run_in_executor(
-                None, process_repo, repo, rid, since, until, base_dir
+            long_rows, status_row = await loop.run_in_executor(
+                None, process_repo, repo, rid, base_dir
             )
+            return repo, long_rows, status_row
 
     tasks = [asyncio.create_task(_one(repo, rid)) for repo, rid in to_fetch]
     completed = 0
     aborted = False
     try:
         for fut in asyncio.as_completed(tasks):
-            row = await fut
-            rows_by_repo[row["repo"]] = row
+            repo, long_rows, status_row = await fut
+            long_by_repo[repo] = long_rows
+            status_by_repo[repo] = status_row
             completed += 1
             if completed % FLUSH_EVERY == 0:
-                _write_csv(output_path, rows_by_repo)
+                _write_long(output_path, long_by_repo)
+                _write_status(status_path, status_by_repo)
             if completed % 25 == 0 or completed == len(to_fetch):
                 rate = completed / max(time.monotonic() - t_start, 1e-9)
                 eta = (len(to_fetch) - completed) / max(rate, 1e-9)
                 console.print(
                     f"[dim]{completed}/{len(to_fetch)} · "
                     f"{rate:.1f} repo/s · ETA {eta / 60:.1f} min · "
-                    f"last: {row['repo']} ({row['status']})[/dim]"
+                    f"last: {repo} ({status_row['status']})[/dim]"
                 )
             if max_disk_gb > 0 and not check_disk_or_exit(max_disk_gb, console=console):
                 aborted = True
@@ -513,22 +558,27 @@ async def run_batch(
         if aborted:
             for t in tasks:
                 t.cancel()
-        _write_csv(output_path, rows_by_repo)
+        _write_long(output_path, long_by_repo)
+        _write_status(status_path, status_by_repo)
         shutil.rmtree(base_dir, ignore_errors=True)
 
     if aborted:
         console.print("[yellow]Aborted on low disk — partial results saved.[/yellow]")
-    return rows_by_repo
+    return long_by_repo, status_by_repo
 
 
-def _print_summary(rows_by_repo: dict[str, dict], elapsed: float) -> None:
-    """Status breakdown + headline AC/BF stats over the collected rows."""
-    status = Counter(r.get("status", "") or "?" for r in rows_by_repo.values())
+def _print_summary(
+    long_by_repo: dict[str, list[dict]],
+    status_by_repo: dict[str, dict],
+    elapsed: float,
+) -> None:
+    """Status breakdown + aggregate stats over ok repos."""
+    status = Counter(r.get("status", "") or "?" for r in status_by_repo.values())
     table = Table(title="[bold]Collection summary[/bold]", show_header=True,
                   header_style="bold dim", padding=(0, 1))
     table.add_column("Status", style="bold")
     table.add_column("Repos", justify="right")
-    total = len(rows_by_repo)
+    total = len(status_by_repo)
     for label in ("ok", "no_commits", "clone_failed", "timeout", "error"):
         n = status.get(label, 0)
         if n:
@@ -536,111 +586,26 @@ def _print_summary(rows_by_repo: dict[str, dict], elapsed: float) -> None:
     table.add_row("[bold]total[/bold]", f"[bold]{total:,}[/bold]")
     console.print(table)
 
-    ok = [r for r in rows_by_repo.values() if r.get("status") == "ok"]
-    if ok:
-        def _ints(col: str) -> list[int]:
-            # Rows are a mix: freshly-computed rows hold ints, CSV-loaded
-            # rows hold strings — coerce through str() to handle both.
-            vals = []
-            for r in ok:
-                v = str(r.get(col) if r.get(col) is not None else "").strip()
-                if v:
-                    try:
-                        vals.append(int(float(v)))
-                    except ValueError:
-                        pass
-            return vals
-        ac = _ints("ac_2021_2025")
-        if ac:
-            ac.sort()
-            console.print(
-                f"[dim]AC 2021-2025 over {len(ac):,} ok repos — "
-                f"min {ac[0]} · median {ac[len(ac) // 2]} · max {ac[-1]:,}[/dim]"
-            )
+    ok_repos = [r for r in status_by_repo.values() if r.get("status") == "ok"]
+    if ok_repos:
+        def _int(r: dict, col: str) -> int:
+            v = str(r.get(col) or "").strip()
+            try:
+                return int(float(v))
+            except ValueError:
+                return 0
+
+        total_authors = sum(_int(r, "distinct_authors") for r in ok_repos)
+        total_commits = sum(_int(r, "commits_total") for r in ok_repos)
+        console.print(
+            f"[dim]ok repos: {len(ok_repos):,} · "
+            f"total distinct authors: {total_authors:,} · "
+            f"total commits: {total_commits:,}[/dim]"
+        )
     console.print(f"[dim]elapsed {elapsed / 60:.1f} min[/dim]")
 
 
-# ── comparison + inspection ─────────────────────────────────────────────────
-
-def _load_github_numbers() -> dict[str, dict[str, str]]:
-    """Lifetime BF/HHI/contributor counts from the API path's output.
-
-    Reads `data/concentration-data.csv` (produced by the `/contributors`
-    fetcher). `hhi` there is on a 0-10000 scale; `bus_factor` is the lifetime
-    bus factor; `active_contributors` is the non-bot contributor count.
-    """
-    out: dict[str, dict[str, str]] = {}
-    if not CONCENTRATION_FILE.exists():
-        return out
-    with open(CONCENTRATION_FILE, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if slug:
-                out[slug] = row
-    return out
-
-
-def _compare(n: int, seed: int) -> int:
-    """Print a git-vs-GitHub comparison for `n` random collected repos."""
-    collected = _load_existing(OUTPUT_FILE)
-    if not collected:
-        console.print(f"[red]No collected data at {OUTPUT_FILE} — run collection first.[/red]")
-        return 1
-    gh = _load_github_numbers()
-    ok = [r for r in collected.values()
-          if r.get("status") == "ok" and r["repo"] in gh]
-    if not ok:
-        console.print("[red]No collected repos overlap concentration-data.csv.[/red]")
-        return 1
-    random.seed(seed)
-    sample = random.sample(ok, min(n, len(ok)))
-    sample.sort(key=lambda r: r["repo"])
-
-    table = Table(
-        title=f"[bold]git vs GitHub — {len(sample)} random repos (seed {seed})[/bold]",
-        show_header=True, header_style="bold dim", padding=(0, 1),
-    )
-    table.add_column("Repo")
-    table.add_column("BF g/h", justify="right")
-    table.add_column("HHI g/h", justify="right")
-    table.add_column("Contrib g/h", justify="right")
-    table.add_column("AC 21-25", justify="right", style="yellow")
-
-    bf_exact = hhi_close = 0
-    for r in sample:
-        g = gh[r["repo"]]
-        gh_bf = (g.get("bus_factor") or "").strip()
-        gh_hhi = (g.get("hhi") or "").strip()
-        gh_c = (g.get("active_contributors") or "").strip()
-        git_bf = r["bf_lifetime"]
-        git_hhi = r["hhi_lifetime"]
-        git_c = r["contributors_lifetime"]
-        if gh_bf and git_bf and gh_bf == str(git_bf):
-            bf_exact += 1
-        try:
-            if gh_hhi and git_hhi and abs(int(gh_hhi) - int(git_hhi)) <= 500:
-                hhi_close += 1
-        except ValueError:
-            pass
-        table.add_row(
-            r["repo"],
-            f"{git_bf}/{gh_bf or '—'}",
-            f"{git_hhi}/{gh_hhi or '—'}",
-            f"{git_c}/{gh_c or '—'}",
-            str(r["ac_2021_2025"]),
-        )
-    console.print(table)
-    console.print(
-        f"[dim]BF exact match: {bf_exact}/{len(sample)} · "
-        f"HHI within 500 (0-10000 scale): {hhi_close}/{len(sample)}[/dim]"
-    )
-    console.print(
-        "[dim]Contrib g/h differs by design: git counts every distinct "
-        "identity; GitHub's /contributors merges by account and caps "
-        "the named list near 500.[/dim]"
-    )
-    return 0
-
+# ── inspection ──────────────────────────────────────────────────────────────
 
 def _inspect(repo: str, window: tuple[int, int]) -> int:
     """Clone one repo and dump its merged contributor list — to verify merges."""
@@ -688,14 +653,14 @@ def _inspect(repo: str, window: tuple[int, int]) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Git-based windowed bus factor / HHI / active contributors.",
+        description="Git-based contributor data fetcher — dumps long raw per-author commits.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("repos", nargs="*",
                         help="specific owner/name slugs to collect (default: all A/B repos)")
     parser.add_argument("--window", type=int, nargs=2, metavar=("START", "END"),
                         default=list(DEFAULT_WINDOW),
-                        help="contribution window years (default: 2021 2025)")
+                        help="window years for --inspect only (default: 2021 2025)")
     parser.add_argument("--limit", type=int, default=0,
                         help="collect only N random A/B repos (testing)")
     parser.add_argument("--concurrency", type=int, default=8,
@@ -705,9 +670,7 @@ def main() -> int:
     parser.add_argument("--max-disk-gb", type=float, default=2.0,
                         help="abort if free temp disk drops below this (default: 2.0)")
     parser.add_argument("--seed", type=int, default=42,
-                        help="random seed for --limit / --compare sampling")
-    parser.add_argument("--compare", type=int, metavar="N", default=0,
-                        help="comparison report on N random collected repos, then exit")
+                        help="random seed for --limit sampling")
     parser.add_argument("--inspect", metavar="REPO", default="",
                         help="dump one repo's merged contributor list, then exit")
     args = parser.parse_args()
@@ -716,15 +679,11 @@ def main() -> int:
     # Never let a private/credential-gated clone hang on an interactive prompt.
     os.environ.setdefault("GIT_TERMINAL_PROMPT", "0")
 
-    if args.compare:
-        return _compare(args.compare, args.seed)
     if args.inspect:
         return _inspect(args.inspect, window)
 
     # Build the target list.
     if args.repos:
-        # Ad-hoc positional repos — resolve repo_id from github/repos.csv so
-        # a re-collect doesn't blank the repo_id of an existing CSV row.
         ids = load_repo_ids()
         targets = [(s, ids.get(s, ""))
                    for s in (r.strip().lower() for r in args.repos)]
@@ -736,8 +695,7 @@ def main() -> int:
             targets = random.sample(targets, args.limit)
 
     console.print(
-        f"[bold]Git-based contributor collection[/bold] — "
-        f"window {window[0]}-{window[1]} · "
+        f"[bold]Git-based contributor data fetcher[/bold] — "
         f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S}"
     )
     sweep_stale_clone_dirs(console=console)
@@ -745,13 +703,14 @@ def main() -> int:
     console.print()
 
     t0 = time.monotonic()
-    rows_by_repo = asyncio.run(run_batch(
-        targets, window, args.concurrency, OUTPUT_FILE, args.force,
-        args.max_disk_gb,
+    long_by_repo, status_by_repo = asyncio.run(run_batch(
+        targets, args.concurrency, OUTPUT_FILE, STATUS_FILE,
+        args.force, args.max_disk_gb,
     ))
     console.print()
-    _print_summary(rows_by_repo, time.monotonic() - t0)
+    _print_summary(long_by_repo, status_by_repo, time.monotonic() - t0)
     console.print(f"[dim]Wrote {OUTPUT_FILE}[/dim]")
+    console.print(f"[dim]Wrote {STATUS_FILE}[/dim]")
     return 0
 
 
