@@ -15,11 +15,10 @@ source and the time period it represents.
 ```
 Risk
 │
-├── Concentration
-│   ├── total_commits         ← GitHub /commits Link header           [2025 EOY]
-│   ├── total_contributors    ← GitHub /contributors?anon=true        [2025 EOY]
-│   ├── hhi_commits           ← GitHub /contributors (weekly)         [2021–2025]
-│   └── bf_commits            ← GitHub /contributors (weekly)         [2021–2025]
+├── Concentration                  (two methods — see build_concentration)
+│   ├── *_commits_git             ← git log on a local clone          [lifetime]
+│   ├── *_commits_git_2021_2025   ← git log, windowed                 [2021–2025]
+│   └── *_commits_github          ← GitHub /contributors API          [lifetime]
 │
 ├── Complexity
 │   ├── loc                   ← scc (sparse checkout)                 [2025 EOY]
@@ -44,7 +43,7 @@ Risk
 │
 └── Maintainer workload
     ├── repo_age              ← GitHub /repos created_at              [2025 EOY]
-    ├── active_contributors    ← GitHub /contributors (non-bot count)    [lifetime]
+    ├── active_contributors_git_2021_2025 ← concentration.csv (git method, windowed)  [2021–2025]
     ├── openssf_maintained    ← OpenSSF Scorecard "Maintained" check  [2025 EOY]
     ├── has_issues            ← GitHub /repos has_issues              [most recent]
     ├── push_cadence          ← derived from commits-years.csv        [2021–2025]
@@ -168,7 +167,8 @@ backlog. For each repo three ratios are formed (▴ higher = more workload):
 - `cve_per_ac` — CVEs (5y) per active contributor
 - `nni_per_ac` — net new issues (opened − closed, 5y) per active contributor
 
-`AC` = `active_contributors`, the lifetime distinct non-bot contributor count.
+`AC` = `active_contributors_git_2021_2025`, the count of distinct non-bot
+contributors who authored a commit in 2021–2025 (git-clone method).
 Each ratio is percentile-ranked across the eligible set (Hazen position
 `100·(rank−0.5)/n`, strictly in 0–100); `workload_burden_percentile` is the
 geometric mean of the three percentiles. The class is its equal-count quartile:
@@ -239,7 +239,8 @@ repos. Counts reflect the last pipeline run; refresh with
 | scc | `data/git/scc.csv` | 899/899 | **100%** | sparse-checkout per year sha |
 | repos | `data/github/repos.csv` | 899/899 | **100%** | stars / forks / watchers / pushed_at |
 | openssf | `data/git/openssf.csv` | 895/899 | 99.6% | overall score + 18 checks per sha |
-| concentration | `data/concentration-data.csv` | 894/899 | 99.4% | lifetime BF / HHI / commits; contributor metrics (active_contributors) now live here — the per-year wide CSVs under `data/github/contributors/` (contributors.csv, commits.csv, hhi.csv, bus-factor.csv) have been retired |
+| concentration (git) | `data/git/contributor-commits.csv` | 898/899 | 99.9% | long raw per (repo, author, year) |
+| concentration (github) | `data/github/contributor-commits.csv` | 895/899 | 99.6% | long raw `/contributors` payload per (repo, login) |
 | lizard | `data/git/lizard.csv` | 894/899 | 99.4% | cognitive + cyclomatic + Halstead per sha |
 | semgrep | `data/git/semgrep.csv` | 892/899 | 99.2% | rulepack-prefixed SAST findings per sha |
 | cves-queried | `data/osv/queried.csv` | 888/899 | 98.8% | repos OSV was successfully asked about |
@@ -253,7 +254,7 @@ repos. Counts reflect the last pipeline run; refresh with
 
 - **depsdev (88%)** — repos that publish only via Debian / Homebrew / vcpkg / source tarballs are absent from deps.dev's index. Not fillable.
 - **Anything ~99% with 4–6 missing** — a mix of brand-new eligibility additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
-- **concentration (99.4%)** — `fetch_contributors_metrics` skips repos with > 5000 total contributors (GitHub's `/contributors` API caps results there), so a handful of mega-projects (kubernetes, ansible, llvm-project, etc.) are absent by design. Contributor metrics (including `active_contributors`) now live solely in `data/concentration-data.csv`; the `/stats/contributors` per-year breakdown has been retired.
+- **concentration** — two independent methods, each a long raw per-contributor file under `data/git/` and `data/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos. The `/stats/contributors` per-year breakdown and `data/concentration-data.csv` are retired.
 - **churn (96.7%)** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
 
 ### What this rolls up to in `risk-data.csv`
@@ -278,11 +279,13 @@ Sub-100% columns (every gap is structural, not a data-collection bug):
 |--------|-------------|
 | `repo` | GitHub repo slug (`owner/name`) |
 | `repo_id` | GitHub numeric repo ID |
-| `total_commits` | Lifetime total commits on the default branch (from `/commits` Link header) |
-| `total_contributors` | Lifetime total contributors incl. anonymous (from `/contributors?anon=true` Link header) |
-| `hhi_commits` | Herfindahl-Hirschman Index (0--10000), computed against `total_commits` |
-| `bf_commits` | Min contributors covering 50% of `total_commits` |
-| `concentration_class` | A--D |
+| `bf_commits_git` / `hhi_commits_git` | Bus factor / HHI (0--10000) — git-clone method, lifetime |
+| `contributors_git` / `total_commits_git` | Merged non-bot contributors / non-merge commits — git, lifetime |
+| `bf_commits_git_2021_2025` / `hhi_commits_git_2021_2025` | Bus factor / HHI — git, 2021--2025 window |
+| `active_contributors_git_2021_2025` / `commits_git_2021_2025` | Distinct non-bot contributors / commits — git, 2021--2025 window |
+| `bf_commits_github` / `hhi_commits_github` | Bus factor / HHI — GitHub `/contributors` method, lifetime (list capped near 500) |
+| `total_commits_github` / `total_contributors_github` / `active_contributors_github` | Commit + contributor counts — GitHub method |
+| `concentration_class` | A--D from `bf_commits_git` + `hhi_commits_git` |
 | `loc` | Lines of code (scc, most recent year) |
 | `complexity_class` | A--D |
 | `issues_opened_5y` | Sum of issues opened 2021--2025 |
@@ -293,7 +296,7 @@ Sub-100% columns (every gap is structural, not a data-collection bug):
 | `issue_trend_score` | Volume-normalised `slope_closed - slope_opened`; signed |
 | `issue_trend` | `improving` / `stable` / `deteriorating` / empty |
 | `issue_debt_class` | A--D, or empty if `opened_5y < 10` |
-| `active_contributors` | Lifetime distinct non-bot contributors (the bus-factor input set; a floor for repos with >5000 contributors) |
+| `active_contributors_git_2021_2025` | Distinct non-bot contributors active 2021--2025 — the workload class's AC denominator |
 | `net_new_issues_5y` | `issues_opened_5y` − `issues_closed_5y` (5-year issue backlog growth) |
 | `loc_per_ac` | Lines of code per active contributor |
 | `cve_per_ac` | CVEs (5y) per active contributor |
