@@ -253,7 +253,7 @@
 "252","alexcrichton/tar-rs","True","","","","crates","1","crates","tar","48.3225","B","","","B",""
 "253","beatgammit/base64-js","True","","","","npm","1","npm","base64-js","48.2299","B","B","","",""
 "254","aio-libs/aiohttp","True","","","","pypi","1","pypi","aiohttp","48.135","B","","B","",""
-"255","sinclairzx81/sinclair-typebox","True","","","","npm","1","npm","@sinclair/typebox","48.1267","B","B","","",""
+"255","sinclairzx81/typebox","True","","","","npm","1","npm","@sinclair/typebox","48.1267","B","B","","",""
 "256","ljharb/qs","True","","","","npm","1","npm","qs","48.0237","B","B","","",""
 "257","yargs/cliui","True","","","","npm","1","npm","cliui","47.9215","B","B","","",""
 "258","sindresorhus/callsites","True","","","","npm","1","npm","callsites","47.8193","B","B","","",""

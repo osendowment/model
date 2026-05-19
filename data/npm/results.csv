@@ -152,7 +152,7 @@
 "is-extendable","jonschlinkert/is-extendable","https://github.com/jonschlinkert/is-extendable.git","","","2573743693","1980305921","2782940886","2934322268","2603211704","2567937687","True","0.00104106","A","mit"
 "base64-js","beatgammit/base64-js","https://github.com/beatgammit/base64-js.git","","","1865449669","1258844408","1516521271","1779145809","2042223113","2730513747","True","0.00103843","A","mit"
 "ieee754","feross/ieee754","https://github.com/feross/ieee754.git","","","1954976964","1268766154","1660601350","1922084929","2183077425","2740354964","True","0.00103278","A","bsd-3-clause"
-"@sinclair/typebox","sinclairzx81/sinclair-typebox","https://github.com/sinclairzx81/sinclair-typebox.git","","","1060874605","606250","229202763","1061721922","1547969549","2464872545","True","0.00103213","A","mit"
+"@sinclair/typebox","sinclairzx81/typebox","https://github.com/sinclairzx81/typebox.git","","","1060874605","606250","229202763","1061721922","1547969549","2464872545","True","0.00103213","A","mit"
 "qs","ljharb/qs","https://github.com/ljharb/qs.git","","","3660152090","2724413314","3459831079","3607298597","3796166987","4713050477","True","0.00102989","A","bsd-3-clause"
 "@types/json-schema","DefinitelyTyped/DefinitelyTyped","https://github.com/definitelytyped/definitelytyped.git","","","1594756456","856364207","1307522536","1506547181","1776990524","2526357832","True","0.00102650","A","mit"
 "cliui","yargs/cliui","https://github.com/yargs/cliui.git","","","3830480299","2415327355","3043073346","3827313881","4289034970","5577651943","True","0.00102254","A","isc"
