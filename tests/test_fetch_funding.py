@@ -1,6 +1,8 @@
-"""Tests for fetch_funding.parse_funding_yml — the FUNDING.yml parser."""
+"""Tests for fetch_funding parsers — FUNDING.yml and funding.json."""
 
-from src.github.fetch_funding import parse_funding_yml
+import json
+
+from src.github.fetch_funding import parse_funding_json, parse_funding_yml
 
 
 class TestParseFundingYml:
@@ -55,3 +57,65 @@ class TestParseFundingYml:
 
     def test_empty_text(self):
         assert parse_funding_yml("") == {}
+
+
+def _manifest(history):
+    """A minimal funding.json manifest with the given funding.history."""
+    return json.dumps({"version": "v1.0.0", "funding": {"history": history}})
+
+
+class TestParseFundingJson:
+    def test_sums_income_within_2021_2025(self):
+        text = _manifest([
+            {"year": 2022, "income": 10000, "currency": "USD"},
+            {"year": 2023, "income": 25000, "currency": "USD"},
+            {"year": 2025, "income": 5000, "currency": "USD"},
+        ])
+        is_obj, funding_5y = parse_funding_json(text)
+        assert is_obj is True
+        assert funding_5y == "40000"
+
+    def test_years_outside_window_excluded(self):
+        text = _manifest([
+            {"year": 2018, "income": 999999},
+            {"year": 2020, "income": 888888},
+            {"year": 2024, "income": 7000},
+            {"year": 2030, "income": 777777},
+        ])
+        assert parse_funding_json(text)[1] == "7000"
+
+    def test_string_years_accepted(self):
+        text = _manifest([{"year": "2023", "income": "1500"}])
+        assert parse_funding_json(text)[1] == "1500"
+
+    def test_float_income_formatted(self):
+        text = _manifest([{"year": 2024, "income": 1234.5}])
+        assert parse_funding_json(text)[1] == "1234.50"
+
+    def test_entries_without_income_skipped(self):
+        text = _manifest([
+            {"year": 2023, "expenses": 5000},          # no income
+            {"year": 2024, "income": 800},
+        ])
+        assert parse_funding_json(text)[1] == "800"
+
+    def test_no_history_is_valid_but_empty(self):
+        """openssl/openssl is the real-world shape: channels+plans, no history."""
+        text = json.dumps({"version": "v1.0.0",
+                            "funding": {"channels": [], "plans": []}})
+        assert parse_funding_json(text) == (True, "")
+
+    def test_no_funding_block(self):
+        assert parse_funding_json(json.dumps({"version": "v1.0.0"})) == (True, "")
+
+    def test_history_present_but_all_out_of_window(self):
+        assert parse_funding_json(_manifest([{"year": 2019, "income": 100}])) == (True, "")
+
+    def test_malformed_json(self):
+        assert parse_funding_json("{not valid json") == (False, "")
+
+    def test_non_object_json(self):
+        assert parse_funding_json("[1, 2, 3]") == (False, "")
+
+    def test_empty_text(self):
+        assert parse_funding_json("") == (False, "")

@@ -14,7 +14,11 @@ Three signals per repo, fetched in parallel:
 2. **FUNDING.yml** — `.github/FUNDING.yml` via REST Contents API. Existence
    plus parsed list of platforms (github, patreon, opencollective, …).
 3. **funding.json** — root or `.well-known/funding.json` via raw URL. The
-   FLOSS/fund manifest format.
+   FLOSS/fund manifest format. We record both its existence and
+   `funding_5y` — the total `income` declared in the manifest's
+   `funding.history[]` for the years 2021-2025 (empty when the manifest
+   has no history block, which is the common case — `history` is an
+   optional part of the spec).
 
 `funding_class` (A/B/C/D):
 - A: 0 sources AND 0 sponsors
@@ -35,6 +39,7 @@ import asyncio
 import base64
 import csv
 import datetime
+import json
 import logging
 import time
 from pathlib import Path
@@ -43,8 +48,12 @@ import aiohttp
 import yaml
 from rich.console import Console
 from rich.progress import (
-    Progress, SpinnerColumn, TextColumn,
-    BarColumn, TaskProgressColumn, TimeElapsedColumn,
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
 )
 
 from src.github.github_client import (
@@ -67,11 +76,15 @@ FIELDS = [
     "has_funding_yml",
     "funding_yml_platforms",
     "has_funding_json",
+    "funding_5y",
     "funding_sources",
     "funding_class",
     "fetched_at",
 ]
 TTL_DAYS = 90
+
+# Years summed for funding_5y — the funding.json history window.
+FUNDING_HISTORY_YEARS = frozenset(range(2021, 2026))  # 2021..2025
 
 # GraphQL query — single login, returns User OR Organization sponsor count
 SPONSORS_QUERY = """
@@ -126,6 +139,59 @@ def parse_funding_yml(text: str) -> dict[str, list[str] | str]:
     return result
 
 
+def _format_amount(value: float) -> str:
+    """Render a money amount without spurious decimals (5000, not 5000.0)."""
+    return str(int(value)) if value == int(value) else f"{value:.2f}"
+
+
+def parse_funding_json(text: str) -> tuple[bool, str]:
+    """Parse a funding.json (FLOSS/fund manifest). Returns (is_object, funding_5y).
+
+    `is_object` is True when `text` parses as a JSON object — used as the
+    `has_funding_json` signal. `funding_5y` is the total `income` declared
+    across `funding.history[]` entries whose `year` is in 2021-2025; it is
+    the empty string when the manifest carries no usable history (the
+    common case — `history` is an optional part of the spec).
+
+    Income is summed across history entries as-is; the spec allows a
+    per-entry `currency` and most manifests use a single currency, so no
+    conversion is attempted.
+    """
+    try:
+        data = json.loads(text)
+    except (json.JSONDecodeError, ValueError):
+        return False, ""
+    if not isinstance(data, dict):
+        return False, ""
+
+    funding = data.get("funding")
+    history = funding.get("history") if isinstance(funding, dict) else None
+    if not isinstance(history, list):
+        return True, ""
+
+    total = 0.0
+    found = False
+    for entry in history:
+        if not isinstance(entry, dict):
+            continue
+        try:
+            year = int(entry.get("year"))
+        except (TypeError, ValueError):
+            continue
+        if year not in FUNDING_HISTORY_YEARS:
+            continue
+        income = entry.get("income")
+        if income is None or isinstance(income, bool):
+            continue
+        try:
+            total += float(income)
+        except (TypeError, ValueError):
+            continue
+        found = True
+
+    return True, (_format_amount(total) if found else "")
+
+
 # ── per-repo fetchers ────────────────────────────────────────────────────────
 
 async def fetch_funding_yml(
@@ -155,9 +221,11 @@ async def fetch_funding_yml(
 
 async def fetch_funding_json(
     session: aiohttp.ClientSession, repo: str,
-) -> bool:
-    """Check root or .well-known funding.json (FLOSS/fund manifest).
+) -> tuple[bool, str]:
+    """Fetch root or .well-known funding.json (FLOSS/fund manifest).
 
+    Returns (has_funding_json, funding_5y). `funding_5y` is the manifest's
+    declared 2021-2025 income (see `parse_funding_json`), empty when absent.
     Uses raw.githubusercontent.com so it doesn't burn API rate limit.
     """
     for path in ("funding.json", ".well-known/funding.json"):
@@ -167,10 +235,11 @@ async def fetch_funding_json(
                 if resp.status == 200:
                     body = (await resp.text()).strip()
                     if body and body.startswith("{"):
-                        return True
+                        _is_object, funding_5y = parse_funding_json(body)
+                        return True, funding_5y
         except (aiohttp.ClientError, asyncio.TimeoutError):
             continue
-    return False
+    return False, ""
 
 
 async def fetch_sponsors_for_login(
@@ -203,7 +272,7 @@ async def fetch_funding_for_repo(
     yml_task = asyncio.create_task(fetch_funding_yml(session, limiter, repo))
     json_task = asyncio.create_task(fetch_funding_json(session, repo))
     has_yml, yml = await yml_task
-    has_json = await json_task
+    has_json, funding_5y = await json_task
 
     # Logins to query for sponsor counts: repo owner + every github user listed
     # in FUNDING.yml's `github:` key.
@@ -237,6 +306,7 @@ async def fetch_funding_for_repo(
         "has_funding_yml": "True" if has_yml else "False",
         "funding_yml_platforms": ",".join(yml_platforms),
         "has_funding_json": "True" if has_json else "False",
+        "funding_5y": funding_5y,
         "funding_sources": funding_sources,
     }
 

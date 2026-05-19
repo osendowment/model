@@ -16,6 +16,9 @@ Writes:
         has_funding_yml,           (bool)
         funding_yml_platforms,     (comma-sep list)
         has_funding_json,          (bool — FLOSS/fund spec)
+        funding_5y,                (total income 2021-2025 declared in the
+                                    funding.json `funding.history`; empty
+                                    when the manifest carries no history)
         foundation_host,           ("apache", "lf", "lf/cncf", ... or "")
         fetched_at                 (latest of funding-data.csv `fetched_at` and
                                     foundations file)
@@ -49,7 +52,7 @@ FIELDS = [
     "repo", "repo_id",
     "github_sponsors", "funding_class",
     "has_funding_yml", "funding_yml_platforms",
-    "has_funding_json", "foundation_host",
+    "has_funding_json", "funding_5y", "foundation_host",
     "fetched_at",
 ]
 
@@ -96,6 +99,7 @@ def build() -> list[dict]:
             "has_funding_yml": (r.get("has_funding_yml") or "").strip(),
             "funding_yml_platforms": (r.get("funding_yml_platforms") or "").strip(),
             "has_funding_json": (r.get("has_funding_json") or "").strip(),
+            "funding_5y": (r.get("funding_5y") or "").strip(),
             "foundation_host": foundations.get(repo, ""),
             "fetched_at": (r.get("fetched_at") or "").strip(),
         })
@@ -120,7 +124,7 @@ def main() -> None:
     table.add_column("Coverage", justify="right")
     for col in (
         "github_sponsors", "has_funding_yml", "funding_yml_platforms",
-        "has_funding_json", "foundation_host",
+        "has_funding_json", "funding_5y", "foundation_host",
     ):
         n = sum(1 for r in rows if r[col])
         pct = 100 * n / total if total else 0
