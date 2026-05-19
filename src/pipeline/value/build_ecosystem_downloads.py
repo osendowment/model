@@ -11,7 +11,7 @@ Output:
   data/ecosystem-downloads.csv — year, npm, pypi, crates, debian, homebrew
 
 Run:
-    uv run python -m src.calculate_ecosystem_downloads
+    uv run python -m src.pipeline.value.build_ecosystem_downloads
 """
 
 import csv
@@ -82,8 +82,8 @@ def load_crates() -> dict[int, int]:
     return totals
 
 
-def load_raw_downloads(path: str, pkg_col: str) -> dict[int, int]:
-    """Sum downloads per year from a raw downloads CSV (package/formula, year, downloads)."""
+def load_raw_downloads(path: str) -> dict[int, int]:
+    """Sum downloads per year from a raw downloads CSV (year, downloads columns)."""
     totals: dict[int, int] = {}
     with open(path, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
@@ -104,8 +104,8 @@ def main():
         "npm": load_npm,
         "pypi": load_pypi,
         "crates": load_crates,
-        "debian": lambda: load_raw_downloads("data/debian/raw/downloads.csv", "package"),
-        "homebrew": lambda: load_raw_downloads("data/homebrew/raw/downloads.csv", "formula"),
+        "debian": lambda: load_raw_downloads("data/debian/raw/downloads.csv"),
+        "homebrew": lambda: load_raw_downloads("data/homebrew/raw/downloads.csv"),
     }
 
     data = {}
