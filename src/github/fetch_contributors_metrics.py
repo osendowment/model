@@ -135,7 +135,7 @@ def main() -> None:
     parser.add_argument("--include-bots", action="store_true", default=False,
                         help="Include bots as regular contributors in bus factor calculation")
     parser.add_argument("--force", action="store_true",
-                        help="Re-fetch all repos, ignoring the concentration-data.csv freshness gate")
+                        help="Re-fetch all repos, ignoring the per-repo freshness gate")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 

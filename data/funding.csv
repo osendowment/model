@@ -1,5 +1,4 @@
 repo,repo_id,github_sponsors,funding_class,has_funding_yml,funding_yml_platforms,has_funding_json,funding_5y,foundation_host,fetched_at
-10der/homeassistant-custom_components-awtrix,748539167,0,A,False,,False,,,2026-05-19T11:10:37+00:00
 7rulnik/source-map-js,330043541,1,B,False,,False,,,2026-05-19T11:10:36+00:00
 acornjs/acorn,5932749,0,A,False,,False,,,2026-05-19T11:10:35+00:00
 acornjs/acorn-jsx,22187098,0,A,False,,False,,,2026-05-19T11:10:37+00:00
@@ -32,7 +31,6 @@ antonk52/lilconfig,238967485,2,B,False,,False,,,2026-05-19T11:10:25+00:00
 apache/airflow,33884891,0,A,False,,False,,apache,2026-05-19T11:10:26+00:00
 apache/arrow,51905353,0,A,False,,False,,apache,2026-05-19T11:10:26+00:00
 apache/arrow-rs,358917250,0,A,False,,False,,apache,2026-05-19T11:10:26+00:00
-archlinux/linux,142707813,45,C,False,,False,,,2026-05-19T11:10:24+00:00
 ardatan/graphql-tools,54432168,3,B,True,github,False,,,2026-05-19T11:10:27+00:00
 ardatan/whatwg-node,429511342,3,B,True,github,False,,,2026-05-19T11:10:27+00:00
 assert-rs/snapbox,424722460,0,A,False,,False,,,2026-05-19T11:10:27+00:00
@@ -510,6 +508,7 @@ microsoft/tslib,34414315,0,A,False,,False,,,2026-05-19T11:11:12+00:00
 microsoft/typescript,20929025,0,A,False,,False,,,2026-05-19T11:11:13+00:00
 microsoft/windows-rs,208102250,0,A,False,,False,,,2026-05-19T11:11:13+00:00
 minimistjs/minimist,549230701,73,C,True,"github,tidelift",False,,,2026-05-19T11:11:14+00:00
+mirror/ncurses,22324756,,,,,,,,
 mitsuhiko/insta,165561258,23,C,True,github,False,,,2026-05-19T11:11:15+00:00
 mlocati/gettext-iconv-windows,12751919,4,B,True,"github,custom",False,,,2026-05-19T11:11:15+00:00
 mm2/little-cms,507969,0,A,False,,False,,,2026-05-19T11:11:16+00:00
@@ -627,6 +626,7 @@ python-pillow/pillow,5171600,2,B,True,"github,tidelift",False,,,2026-05-19T11:11
 python-poetry/poetry,123303402,0,A,False,,False,,,2026-05-19T11:11:08+00:00
 python-poetry/tomlkit,140365570,5,B,True,github,False,,,2026-05-19T11:11:08+00:00
 python-trio/sniffio,142657210,2,B,False,,False,,,2026-05-19T11:11:09+00:00
+python/cpython,81598961,,,,,,,psf,
 python/importlib_metadata,306448340,175,D,True,tidelift,False,,psf,2026-05-19T11:11:09+00:00
 python/importlib_resources,306147182,175,D,True,tidelift,False,,psf,2026-05-19T11:11:10+00:00
 python/mypy,7053637,175,D,False,,False,,psf,2026-05-19T11:11:10+00:00
@@ -825,7 +825,6 @@ theskumar/python-dotenv,23727790,0,A,False,,False,,,2026-05-19T11:11:12+00:00
 thkukuk/rpcsvc-proto,55140533,0,A,False,,False,,,2026-05-19T11:11:13+00:00
 thlorenz/convert-source-map,8751561,2,B,False,,False,,,2026-05-19T11:11:14+00:00
 thlorenz/deep-is,9345558,2,B,False,,False,,,2026-05-19T11:11:14+00:00
-thomasdickey/ncurses-snapshots,65149533,0,A,False,,False,,,2026-05-19T11:11:15+00:00
 tim-kos/node-retry,1738798,0,A,False,,False,,,2026-05-19T11:11:16+00:00
 time-rs/time,26459635,0,A,False,,False,,,2026-05-19T11:11:16+00:00
 tj/commander.js,2206953,17,C,True,"github,tidelift",False,,,2026-05-19T11:11:17+00:00
@@ -841,6 +840,7 @@ tokio-rs/tracing,165289175,120,D,False,,False,,,2026-05-19T11:10:22+00:00
 toml-rs/toml,95902102,0,A,True,github,False,,,2026-05-19T11:10:22+00:00
 tootallnate/proxy-agents,11293703,0,A,False,,False,,,2026-05-19T11:10:23+00:00
 tootallnate/util-deprecate,19321056,0,A,False,,False,,,2026-05-19T11:10:23+00:00
+torvalds/linux,2325298,,,,,,,,
 tower-rs/tower,98244646,0,A,False,,False,,,2026-05-19T11:10:23+00:00
 tox-dev/filelock,17098256,4,B,False,,False,,,2026-05-19T11:10:24+00:00
 tox-dev/platformdirs,367032142,4,B,False,,False,,,2026-05-19T11:10:24+00:00

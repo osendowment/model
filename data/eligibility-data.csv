@@ -3,7 +3,6 @@ acornjs/acorn,5932749,,Acorn,A,acornjs,34631683,Organization,,,Acorn,mit,True,Fa
 aio-libs/aiobotocore,36618494,https://aiobotocore.aio-libs.org,,A,aio-libs,7049303,Organization,aio-libs,https://github.com/orgs/aio-libs/discussions,,apache-2.0,True,False,,True
 ajv-validator/ajv,35914020,https://ajv.js.org,Ajv,A,ajv-validator,46839968,Organization,Ajv JSON schema validator,https://ajv.js.org/,Ajv,mit,True,False,,True
 alexeyraspopov/picocolors,410740124,,,A,alexeyraspopov,858295,User,Oleksii,attitude.dev,,isc,True,False,,True
-archlinux/linux,142707813,https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/issues,Arch Linux,A,archlinux,4673648,Organization,,,Arch Linux,noassertion,,False,,False
 ardatan/graphql-tools,54432168,https://www.graphql-tools.com,,A,ardatan,20847995,User,Arda TANRIKULU,http://the-guild.dev/,,mit,True,False,,True
 astral-sh/ruff,523043277,https://docs.astral.sh/ruff,Astral,A,astral-sh,115962839,Organization,Astral,https://astral.sh,Astral,mit,True,False,,True
 aws/aws-sdk-js-v3,87228090,,Amazon Web Services,A,aws,2232217,Organization,Amazon Web Services,https://amazon.com/aws,Amazon Web Services,apache-2.0,True,False,,True
@@ -35,7 +34,6 @@ criterion-rs/criterion.rs,1081104682,,Criterion,A,criterion-rs,239565631,Organiz
 cssnano/cssnano,33943153,https://cssnano.github.io/cssnano/,cssnano,A,cssnano,40150215,Organization,,https://cssnano.github.io/cssnano/,cssnano,mit,True,False,,True
 csstools/postcss-plugins,219192307,https://preset-env.cssdb.org/,,A,csstools,39136094,Organization,CSS Tools,https://cssdb.org/,,mit-0,True,False,,True
 dateutil/dateutil,26876372,,,A,dateutil,9849410,Organization,,,,apache-2.0,True,False,,True
-dcodeio/protobuf.js,8507859,,,A,protobufjs,24495634,Organization,The protobuf.js Project,,,bsd-3-clause,True,False,,True
 debug-js/debug,2871998,,debug,A,debug-js,45984509,Organization,Debug.js,https://npmjs.org/debug,debug,mit,True,False,,True
 definitelytyped/definitelytyped,6093316,,DefinitelyTyped,A,DefinitelyTyped,3637556,Organization,DefinitelyTyped,https://definitelytyped.org/,DefinitelyTyped,mit,True,False,,True
 dtolnay/automod,173074854,,,A,dtolnay,1940490,User,David Tolnay,,,mit or apache-2.0,True,False,,True
@@ -50,6 +48,7 @@ emotion-js/emotion,92570536,https://emotion.sh/,Emotion,A,emotion-js,31557565,Or
 epoberezkin/fast-deep-equal,94483360,,,A,epoberezkin,2769109,User,Evgeny,https://poberezkin.com,,mit,True,False,,True
 epoberezkin/json-schema-traverse,93333933,,,A,epoberezkin,2769109,User,Evgeny,https://poberezkin.com,,mit,True,False,,True
 es-shims/dunder-proto,898274312,,es-shims,A,es-shims,6288429,Organization,ECMAScript Shims,https://tc39.es/ecma262/,es-shims,mit,True,False,,True
+es-shims/es-object-atoms,773229339,,,A,es-shims,6288429,Organization,ECMAScript Shims,https://tc39.es/ecma262/,es-shims,mit,True,,,True
 eslint/js,27620277,,ESLint,A,eslint,6019716,Organization,ESLint,https://eslint.org,ESLint,bsd-2-clause,True,False,,True
 estools/estraverse,6145439,,,A,estools,9900213,Organization,ECMAScript Tooling,,,bsd-2-clause,True,False,,True
 estools/esutils,14677293,,,A,estools,9900213,Organization,ECMAScript Tooling,,,bsd-2-clause,True,False,,True
@@ -85,6 +84,7 @@ isaacs/node-glob,357681,,,A,isaacs,9287,User,isaacs,http://blog.izs.me,,blueoak-
 isaacs/node-graceful-fs,2077020,,,A,isaacs,9287,User,isaacs,http://blog.izs.me,,isc,True,False,,True
 isaacs/node-lru-cache,679662,http://isaacs.github.io/node-lru-cache/,,A,isaacs,9287,User,isaacs,http://blog.izs.me,,blueoak-1.0.0,True,False,,True
 isaacs/once,5409660,,,A,isaacs,9287,User,isaacs,http://blog.izs.me,,isc,True,False,,True
+isaacs/wrappy,24208073,,,A,isaacs,9287,User,isaacs,http://blog.izs.me,,isc,True,,,True
 isaacs/yallist,48222381,http://isaacs.github.io/yallist/,,A,isaacs,9287,User,isaacs,http://blog.izs.me,,blueoak-1.0.0,True,False,,True
 istanbuljs/istanbuljs,81482340,https://istanbul.js.org/,Istanbul,A,istanbuljs,13523395,Organization,Istanbul Code Coverage,https://istanbul.js.org/,Istanbul,bsd-3-clause,True,False,,True
 jaraco/zipp,157774633,,,A,jaraco,308610,User,Jason R. Coombs,https://www.jaraco.com,,mit,True,False,,True
@@ -93,7 +93,6 @@ jawah/charset_normalizer,200259335,https://charset-normalizer.readthedocs.io/en/
 jestjs/jest,15062869,https://jestjs.io,Jest,A,jestjs,103283236,Organization,Jest,https://jestjs.io,Jest,mit,True,False,lf/openjs,True
 jmespath/jmespath.py,8300763,http://jmespath.org,JMESPath,A,jmespath,6053930,Organization,,,JMESPath,mit,True,False,,True
 jonschlinkert/fill-range,27113310,,,A,jonschlinkert,383994,User,Jon Schlinkert,https://www.linkedin.com/in/jonschlinkert/,,mit,True,False,,True
-jonschlinkert/is-extglob,31788841,https://github.com/jonschlinkert,,A,micromatch,26890389,Organization,micromatch,https://github.com/jonschlinkert,micromatch,mit,True,False,,True
 jonschlinkert/is-number,24313173,https://github.com/jonschlinkert,,A,jonschlinkert,383994,User,Jon Schlinkert,https://www.linkedin.com/in/jonschlinkert/,,mit,True,False,,True
 jonschlinkert/is-plain-object,24306940,https://github.com/jonschlinkert,,A,jonschlinkert,383994,User,Jon Schlinkert,https://www.linkedin.com/in/jonschlinkert/,,mit,True,False,,True
 jonschlinkert/isobject,21342886,https://github.com/jonschlinkert,,A,jonschlinkert,383994,User,Jon Schlinkert,https://www.linkedin.com/in/jonschlinkert/,,mit,True,False,,True
@@ -114,7 +113,6 @@ ljharb/call-bound,898125972,,,A,ljharb,45469,User,Jordan Harband,https://linkedi
 ljharb/define-properties,28768789,,,A,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
 ljharb/es-define-property,756570458,,,A,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
 ljharb/es-errors,752160492,,,A,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
-ljharb/es-object-atoms,773229339,,,A,es-shims,6288429,Organization,ECMAScript Shims,https://tc39.es/ecma262/,es-shims,mit,True,False,,True
 ljharb/get-intrinsic,308516559,,,A,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
 ljharb/get-proto,911035271,,,A,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
 ljharb/gopd,560708130,,,A,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
@@ -125,6 +123,7 @@ madler/zlib,2359378,http://zlib.net/,,A,madler,240717,User,,,,zlib,True,False,,T
 mathiasbynens/punycode.js,2755924,https://mths.be/punycode,,A,mathiasbynens,81942,User,Mathias Bynens,https://mathiasbynens.be/,,mit,True,False,,True
 micromark/micromark,157420458,https://unifiedjs.com,micromark,A,micromark,43986119,Organization,,https://unifiedjs.com,micromark,mit,True,False,,True
 micromatch/braces,25475303,https://github.com/jonschlinkert,micromatch,A,micromatch,26890389,Organization,micromatch,https://github.com/jonschlinkert,micromatch,mit,True,False,,True
+micromatch/is-extglob,31788841,https://github.com/jonschlinkert,,A,micromatch,26890389,Organization,micromatch,https://github.com/jonschlinkert,micromatch,mit,True,,,True
 micromatch/is-glob,28179425,,micromatch,A,micromatch,26890389,Organization,micromatch,https://github.com/jonschlinkert,micromatch,mit,True,False,,True
 micromatch/picomatch,156211895,https://github.com/micromatch,micromatch,A,micromatch,26890389,Organization,micromatch,https://github.com/jonschlinkert,micromatch,mit,True,False,,True
 micromatch/to-regex-range,40355891,https://github.com/jonschlinkert,micromatch,A,micromatch,26890389,Organization,micromatch,https://github.com/jonschlinkert,micromatch,mit,True,False,,True
@@ -140,7 +139,6 @@ nodejs/undici,133092972,https://nodejs.github.io/undici,Node.js,A,nodejs,9950313
 nodelib/nodelib,129310478,,,A,nodelib,38191195,Organization,NodeLib,,,mit,True,False,,True
 npm/node-semver,1357199,https://semver.npmjs.com/,npm,A,npm,6078720,Organization,npm,https://npmjs.com,npm,isc,True,False,,True
 npm/node-which,2169708,,npm,A,npm,6078720,Organization,npm,https://npmjs.com,npm,isc,True,False,,True
-npm/wrappy,24208073,,npm,A,isaacs,9287,User,isaacs,http://blog.izs.me,,isc,True,False,,True
 numpy/numpy,908607,https://numpy.org,NumPy,A,numpy,288276,Organization,NumPy,http://www.numpy.org/,NumPy,bsd-3-clause and 0bsd and mit and zlib and cc0-1.0,True,False,numfocus,True
 open-telemetry/opentelemetry-js,185901023,https://opentelemetry.io,OpenTelemetry,A,open-telemetry,49998002,Organization,OpenTelemetry - CNCF,https://opentelemetry.io,OpenTelemetry,apache-2.0,True,False,lf/cncf,True
 open-telemetry/opentelemetry-python,185478926,https://opentelemetry.io,OpenTelemetry,A,open-telemetry,49998002,Organization,OpenTelemetry - CNCF,https://opentelemetry.io,OpenTelemetry,apache-2.0,True,False,lf/cncf,True
@@ -148,6 +146,7 @@ pallets/markupsafe,734244,https://markupsafe.palletsprojects.com,Pallets,A,palle
 paulmillr/readdirp,4494405,,,A,paulmillr,574696,User,Paul Miller,https://paulmillr.com,,mit,True,False,,True
 pillarjs/iconv-lite,2743221,,pillarjs,A,pillarjs,8441312,Organization,,https://pillarjs.github.io,pillarjs,mit,True,False,,True
 postcss/postcss-selector-parser,36500102,,PostCSS,A,postcss,8296347,Organization,PostCSS,https://postcss.org,PostCSS,mit,True,False,,True
+protobufjs/protobuf.js,8507859,,,A,protobufjs,24495634,Organization,The protobuf.js Project,,,bsd-3-clause,True,False,,True
 protocolbuffers/protobuf,23357588,http://protobuf.dev,Protocol Buffers,A,protocolbuffers,26310541,Organization,,,Protocol Buffers,noassertion,,False,,False
 psf/requests,1362490,https://requests.readthedocs.io/en/latest/,PSF,A,psf,50630501,Organization,,,PSF,apache-2.0,True,False,,True
 pyasn1/pyasn1,512723255,https://pyasn1.readthedocs.io/,pyasn1,A,pyasn1,109076791,Organization,pyasn1 maintenance organization,,pyasn1,bsd-2-clause,True,False,,True
@@ -212,6 +211,7 @@ tokio-rs/tracing,165289175,https://tracing.rs,Tokio,A,tokio-rs,20248544,Organiza
 toml-rs/toml,95902102,https://docs.rs/toml,toml,A,toml-rs,114176723,Organization,,,toml,mit or apache-2.0,True,False,,True
 tootallnate/proxy-agents,11293703,https://proxy-agents.n8.io,,A,TooTallNate,71256,User,Nathan Rajlich,https://n8.io,,mit,True,False,,True
 tootallnate/util-deprecate,19321056,,,A,TooTallNate,71256,User,Nathan Rajlich,https://n8.io,,mit,True,False,,True
+torvalds/linux,2325298,,,A,torvalds,1024025,User,,,,noassertion,,,,False
 trysound/postcss-value-parser,40920306,,,A,TrySound,5635476,User,Bogdan Chadkin,trysound.io,,mit,True,False,,True
 tukaani-project/xz,553665726,https://tukaani.org/xz/,XZ Utils,A,tukaani-project,116083088,Organization,Tukaani,https://tukaani.org,XZ Utils,0bsd and gpl-2.0-or-later,True,False,,True
 typescript-eslint/typescript-eslint,165536154,https://typescript-eslint.io,typescript-eslint,A,typescript-eslint,46634674,Organization,typescript-eslint,https://typescript-eslint.io,typescript-eslint,mit,True,False,,True
@@ -225,7 +225,6 @@ xtuc/webassemblyjs,113006071,https://webassembly.js.org,,A,xtuc,1493671,User,Sve
 yaml/pyyaml,2700147,,YAML,A,yaml,69535,Organization,The YAML Project,http://yaml.org,YAML,mit,True,False,,True
 yargs/yargs-parser,50258379,http://yargs.js.org/,yargs,A,yargs,16504989,Organization,,http://yargs.js.org/,yargs,isc,True,False,,True
 zloirock/core-js,11481338,https://core-js.io,,A,zloirock,2213682,User,Denis Pushkarev,http://zloirock.ru,,mit,True,False,,True
-10der/homeassistant-custom_components-awtrix,748539167,,,B,10der,7056498,User,,,,mit,True,False,,True
 7rulnik/source-map-js,330043541,,,B,7rulnik,5969049,User,Valentin Semirulnik,,,bsd-3-clause,True,False,,True
 acornjs/acorn-jsx,22187098,,Acorn,B,acornjs,34631683,Organization,,,Acorn,mit,True,False,,True
 adobe/react-spectrum,208362715,https://react-spectrum.adobe.com,Adobe,B,adobe,476009,Organization,"Adobe, Inc.",https://adobe.com,Adobe,apache-2.0,True,False,,True
@@ -240,6 +239,7 @@ aio-libs/multidict,51206425,https://multidict.aio-libs.org,,B,aio-libs,7049303,O
 aio-libs/propcache,866565706,,,B,aio-libs,7049303,Organization,aio-libs,https://github.com/orgs/aio-libs/discussions,,apache-2.0,True,False,,True
 aio-libs/yarl,64756820,https://yarl.aio-libs.org,,B,aio-libs,7049303,Organization,aio-libs,https://github.com/orgs/aio-libs/discussions,,apache-2.0,True,False,,True
 ajv-validator/ajv-formats,281084700,https://ajv.js.org,Ajv,B,ajv-validator,46839968,Organization,Ajv JSON schema validator,https://ajv.js.org/,Ajv,mit,True,False,,True
+ajv-validator/ajv-keywords,60477053,https://ajv.js.org,,B,ajv-validator,46839968,Organization,Ajv JSON schema validator,https://ajv.js.org/,Ajv,mit,True,,,True
 alexcrichton/tar-rs,21946092,https://docs.rs/tar,,B,alexcrichton,64996,User,Alex Crichton,,,mit or apache-2.0,True,False,,True
 alexei/sprintf.js,9175790,,,B,alexei,96283,User,Alexandru Mărășteanu,https://alexei.ro/,,bsd-3-clause,True,False,,True
 alexhuszagh/rust-lexical,155286170,,,B,Alexhuszagh,9440903,User,Alexander Huszagh,,,mit/apache-2.0,True,False,,True
@@ -255,6 +255,7 @@ apache/arrow,51905353,https://arrow.apache.org/,Apache Arrow,B,apache,47359,Orga
 apache/arrow-rs,358917250,https://arrow.apache.org/,Apache,B,apache,47359,Organization,The Apache Software Foundation,https://www.apache.org/,Apache,apache-2.0,True,False,apache,True
 ardatan/whatwg-node,429511342,,,B,ardatan,20847995,User,Arda TANRIKULU,http://the-guild.dev/,,mit,True,False,,True
 assert-rs/snapbox,424722460,https://docs.rs/snapbox,,B,assert-rs,36999732,Organization,,,,mit or apache-2.0,True,False,,True
+auth0/node-jwa,8116861,http://tools.ietf.org/id/draft-ietf-jose-json-web-algorithms-08.html,,B,auth0,2824157,Organization,Auth0,https://auth0.com,,mit,True,,,True
 autotools-mirror/autoconf,47662429,https://www.gnu.org/software/autoconf/,Autotools,B,autotools-mirror,16216702,Organization,,,Autotools,gpl-3.0-or-later and (gpl-3.0-or-later with autoconf-exception-3.0),True,False,,True
 autotools-mirror/libtool,47662711,https://www.gnu.org/software/libtool/,Autotools,B,autotools-mirror,16216702,Organization,,,Autotools,gpl-2.0-or-later,True,False,,True
 autotools-mirror/m4,66880383,,Autotools,B,autotools-mirror,16216702,Organization,,,Autotools,gpl-3.0-or-later,True,False,,True
@@ -272,10 +273,11 @@ blakeembrey/array-flatten,17789771,,,B,blakeembrey,1088987,User,Blake Embrey,htt
 bluss/bencher,65987276,https://docs.rs/bencher/,,B,bluss,3209739,User,bluss,https://social.linux.pizza/@bluss,,mit/apache-2.0,True,False,,True
 braveg1rl/performance-now,336187529,,,B,braveg1rl,72844805,User,,,,mit,True,False,,True
 brianc/node-postgres,991475,https://node-postgres.com,,B,brianc,50081,User,Brian C,,,mit,True,False,,True
-brianloveswords/node-jwa,8116861,http://tools.ietf.org/id/draft-ietf-jose-json-web-algorithms-08.html,,B,auth0,2824157,Organization,Auth0,https://auth0.com,,mit,True,False,,True
 broofa/mime,534940,,,B,broofa,164050,User,Robert Kieffer,http://broofa.com,,mit,True,False,,True
 broofa/node-int64,1208666,,,B,broofa,164050,User,Robert Kieffer,http://broofa.com,,mit,True,False,,True
+browserify/events,1649251,,,B,browserify,6320506,Organization,Browserify,https://browserify.org,Browserify,mit,True,,,True
 browserify/node-util,14568009,,Browserify,B,browserify,6320506,Organization,Browserify,https://browserify.org,Browserify,mit,True,False,,True
+browserify/randombytes,29300004,,,B,browserify,6320506,Organization,Browserify,https://browserify.org,Browserify,mit,True,,,True
 browserslist/caniuse-lite,80221890,,Browserslist,B,browserslist,37521022,Organization,Browserslist,https://browsersl.ist/,Browserslist,cc-by-4.0,False,False,,False
 browserslist/update-db,505548145,https://browsersl.ist/,Browserslist,B,browserslist,37521022,Organization,Browserslist,https://browsersl.ist/,Browserslist,mit,True,False,,True
 burntsushi/aho-corasick,37290678,,,B,BurntSushi,456674,User,Andrew Gallant,https://burntsushi.net,,unlicense or mit,True,False,,True
@@ -312,7 +314,6 @@ cosmiconfig/cosmiconfig,45750507,,,B,cosmiconfig,125766940,Organization,,,,mit,T
 coveragepy/coveragepy,138421996,https://coverage.readthedocs.io,coverage.py,B,coveragepy,216156418,Organization,Coverage.py,,coverage.py,apache-2.0,True,False,,True
 cpburnz/python-pathspec,14648551,,,B,cpburnz,2126043,User,Caleb P. Burns,,,mpl-2.0,True,False,,True
 crossbeam-rs/crossbeam,35566048,,Crossbeam,B,crossbeam-rs,26314159,Organization,Crossbeam,,Crossbeam,mit or apache-2.0,True,False,,True
-crypto-browserify/randombytes,29300004,,,B,browserify,6320506,Organization,Browserify,https://browserify.org,Browserify,mit,True,False,,True
 css-modules/icss-utils,42766912,,CSS Modules,B,css-modules,12612655,Organization,,,CSS Modules,isc,True,False,,True
 csstree/csstree,67236461,https://csstree.github.io/docs/,CSSTree,B,csstree,18097402,Organization,CSSTree,https://twitter.com/csstree,CSSTree,mit,True,False,,True
 curl/curl,569041,https://curl.se/,curl,B,curl,16928085,Organization,,,curl,curl,True,False,,True
@@ -320,11 +321,11 @@ cuviper/autocfg,135481335,,,B,cuviper,36186,User,Josh Stone,https://blog.cuviper
 cyan4973/xxhash,19330466,http://www.xxhash.com/,,B,Cyan4973,750081,User,Yann Collet,http://fastcompression.blogspot.fr/,,bsd-2-clause and gpl-2.0-or-later,True,False,,True
 daaku/nodejs-makeerror,2097803,,,B,daaku,593,User,Naitik Shah,,,bsd-3-clause,True,False,,True
 daaku/nodejs-tmpl,2171213,,,B,daaku,593,User,Naitik Shah,,,bsd-3-clause,True,False,,True
-davepacheco/node-extsprintf,4058064,,,B,TritonDataCenter,100366084,Organization,Triton Data Center,https://tritondatacenter.com/,,mit,True,False,,True
 davidhalter/parso,90668463,https://parso.readthedocs.org/en/latest/,,B,davidhalter,748594,User,Dave Halter,,,mit,True,False,,True
 davisjam/safe-regex,90781457,,,B,davisjam,22822319,User,James C. (Jamie) Davis,https://davisjam.github.io/,,mit,True,False,,True
 dchest/tweetnacl-js,15649752,https://tweetnacl.js.org,,B,dchest,52677,User,Dmitry Chestnykh,https://dchest.com,,unlicense,True,False,,True
 dcodeio/long.js,8678904,,,B,dcodeIO,1136893,User,,https://dcode.io,,apache-2.0,True,False,,True
+defunctzombie/node-process,7580644,,,B,defunctzombie,84792,User,Roman Shtylman,,,mit,True,,,True
 django/asgiref,48501860,https://asgi.readthedocs.io/en/latest/,Django,B,django,27804,Organization,Django,https://www.djangoproject.com/,Django,bsd-3-clause,True,False,,True
 djc/rustc-version-rs,41272773,,,B,djc,158471,User,Dirkjan Ochtman,https://dirkjan.ochtman.nl/,,mit or apache-2.0,True,False,,True
 dmitrysoshnikov/regexp-tree,85459304,,,B,DmitrySoshnikov,244010,User,Dmitry Soshnikov,http://dmitrysoshnikov.com,,mit,True,False,,True
@@ -347,7 +348,6 @@ eemeli/yaml,119439276,https://eemeli.org/yaml,,B,eemeli,617000,User,Eemeli Aro,,
 ehmicky/human-signals,214467546,,,B,ehmicky,8136211,User,ehmicky,https://fosstodon.org/@ehmicky,,apache-2.0,True,False,,True
 encode/httpcore,237210639,https://www.encode.io/httpcore/,,B,encode,19159390,Organization,Encode,http://www.encode.io/,,bsd-3-clause,True,False,,True
 encode/httpx,179492861,https://www.python-httpx.org/,,B,encode,19159390,Organization,Encode,http://www.encode.io/,,bsd-3-clause,True,False,,True
-epoberezkin/ajv-keywords,60477053,https://ajv.js.org,,B,ajv-validator,46839968,Organization,Ajv JSON schema validator,https://ajv.js.org/,Ajv,mit,True,False,,True
 epoberezkin/fast-json-stable-stringify,108103016,,,B,epoberezkin,2769109,User,Evgeny,https://poberezkin.com,,mit,True,False,,True
 es-shims/array-includes,28753032,https://tc39.github.io/ecma262/#sec-array.prototype.includes,es-shims,B,es-shims,6288429,Organization,ECMAScript Shims,https://tc39.es/ecma262/,es-shims,mit,True,False,,True
 es-shims/es-set-tostringtag,580683868,,es-shims,B,es-shims,6288429,Organization,ECMAScript Shims,https://tc39.es/ecma262/,es-shims,mit,True,False,,True
@@ -429,7 +429,6 @@ googleapis/google-cloud-node-core,1052931509,,Google,B,googleapis,16785467,Organ
 googleapis/google-resumable-media-python,88091939,,Google,B,googleapis,16785467,Organization,Google APIs,https://googleapis.github.io,Google,apache-2.0,True,False,,True
 googleapis/python-crc32c,159736041,,Google,B,googleapis,16785467,Organization,Google APIs,https://googleapis.github.io,Google,apache-2.0,True,False,,True
 googleapis/python-storage,226992639,,Google,B,googleapis,16785467,Organization,Google APIs,https://googleapis.github.io,Google,apache-2.0,True,False,,True
-gozala/events,1649251,,,B,browserify,6320506,Organization,Browserify,https://browserify.org,Browserify,mit,True,False,,True
 gpg/libgpg-error,42075984,https://git.gnupg.org/cgi-bin/gitweb.cgi?p=libgpg-error.git,GnuPG,B,gpg,14165990,Organization,,,GnuPG,lgpl-2.1-or-later,True,False,,True
 grahamdumpleton/wrapt,10357291,,,B,GrahamDumpleton,507637,User,Graham Dumpleton,https://grahamdumpleton.me,,bsd-2-clause,True,False,,True
 graydon/exhaustigen-rs,432630522,,,B,graydon,14097,User,Graydon Hoare,,,mit or apache-2.0,True,False,,True
@@ -453,6 +452,7 @@ inikulin/parse5,8862593,,,B,inikulin,453071,User,Ivan Nikulin,https://www.linked
 inspect-js/array-buffer-byte-length,607836784,,,B,inspect-js,54056128,Organization,Inspect JS,,,mit,True,False,,True
 inspect-js/available-typed-arrays,235965505,,,B,inspect-js,54056128,Organization,Inspect JS,,,mit,True,False,,True
 inspect-js/functions-have-names,198357138,,,B,inspect-js,54056128,Organization,Inspect JS,,,mit,True,False,,True
+inspect-js/has-bigints,201714166,,,B,inspect-js,54056128,Organization,Inspect JS,,,mit,True,,,True
 inspect-js/has-property-descriptors,481834578,,,B,inspect-js,54056128,Organization,Inspect JS,,,mit,True,False,,True
 inspect-js/has-proto,577580747,,,B,inspect-js,54056128,Organization,Inspect JS,,,mit,True,False,,True
 inspect-js/is-accessor-descriptor,41658954,,,B,inspect-js,54056128,Organization,Inspect JS,,,mit,True,False,,True
@@ -479,7 +479,9 @@ ipython/traitlets,14993021,https://traitlets.readthedocs.io/,IPython,B,ipython,2
 isaacs/chownr,3858354,,,B,isaacs,9287,User,isaacs,http://blog.izs.me,,blueoak-1.0.0,True,False,,True
 isaacs/cliui,634056857,,,B,isaacs,9287,User,isaacs,http://blog.izs.me,,blueoak-1.0.0,True,False,,True
 isaacs/core-util-is,12391440,,,B,isaacs,9287,User,isaacs,http://blog.izs.me,,mit,True,False,,True
+isaacs/fs-minipass,102982143,,,B,isaacs,9287,User,isaacs,http://blog.izs.me,,blueoak-1.0.0,True,,,True
 isaacs/fs.realpath,61231712,,,B,isaacs,9287,User,isaacs,http://blog.izs.me,,isc,True,False,,True
+isaacs/inflight-deprecated-do-not-use,19442260,,,B,isaacs,9287,User,isaacs,http://blog.izs.me,,,,,,False
 isaacs/minizlib,86429676,,,B,isaacs,9287,User,isaacs,http://blog.izs.me,,mit,True,False,,True
 isaacs/node-mkdirp,2718248,,,B,isaacs,9287,User,isaacs,http://blog.izs.me,,mit,True,False,,True
 isaacs/node-tar,1534331,,,B,isaacs,9287,User,isaacs,http://blog.izs.me,,blueoak-1.0.0,True,False,,True
@@ -541,13 +543,13 @@ jshttp/statuses,17690272,https://www.npmjs.com/package/statuses,jshttp,B,jshttp,
 jshttp/type-is,15484233,,jshttp,B,jshttp,8325802,Organization,,https://jshttp.github.io/,jshttp,mit,True,False,,True
 jshttp/vary,20498698,,jshttp,B,jshttp,8325802,Organization,,https://jshttp.github.io/,jshttp,mit,True,False,,True
 jslicense/spdx-correct.js,34817196,,,B,jslicense,12302174,Organization,jslicense,,,apache-2.0,True,False,,True
+jslicense/spdx-exceptions.json,40062896,https://npmjs.com/packages/spdx-exceptions,,B,jslicense,12302174,Organization,jslicense,,,,,,,False
 jslicense/spdx-expression-parse.js,40067336,https://npmjs.com/packages/spdx-expression-parse,,B,jslicense,12302174,Organization,jslicense,,,mit,True,False,,True
 jslicense/spdx-license-ids,26001547,https://spdx.org/licenses/,,B,jslicense,12302174,Organization,jslicense,,,cc0-1.0,False,False,,False
 justmoon/node-extend,3967764,,,B,justmoon,53233,User,Stefan Thomas,https://justmoon.com,,mit,True,False,,True
 jviereck/regjsparser,14087781,http://www.julianviereck.de/regjsparser/,,B,jviereck,191719,User,Julian Viereck,,,bsd-2-clause,True,False,,True
 ka-weihe/fastest-levenshtein,158960628,,,B,ka-weihe,16865900,User,,,,mit,True,False,,True
 kaelzhang/node-ignore,12519245,,,B,kaelzhang,352304,User,Kael,http://kael.me,,mit,True,False,,True
-kemitchell/spdx-exceptions.json,40062896,https://npmjs.com/packages/spdx-exceptions,,B,jslicense,12302174,Organization,jslicense,,,cc-by-3.0,False,False,,False
 kemitchell/validate-npm-package-license.js,35000460,https://npmjs.com/packages/validate-npm-package-license,,B,kemitchell,205760,User,Kyle E. Mitchell,https://kemitchell.com,,apache-2.0,True,False,,True
 kevinbeaty/any-promise,26247715,,,B,kevinbeaty,522231,User,Kevin Beaty,https://simplectic.com,,mit,True,False,,True
 kevva/dir-glob,49264969,,,B,kevva,709159,User,Kevin Mårtensson,,,mit,True,False,,True
@@ -579,7 +581,6 @@ ljharb/define-data-property,689109338,,,B,ljharb,45469,User,Jordan Harband,https
 ljharb/es-abstract,28995155,,,B,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
 ljharb/es-shim-unscopables,480458584,,,B,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
 ljharb/es-to-primitive,32377814,,,B,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
-ljharb/has-bigints,201714166,,,B,inspect-js,54056128,Organization,Inspect JS,,,mit,True,False,,True
 ljharb/internal-slot,216159146,,,B,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
 ljharb/object-keys,9103992,,,B,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
 ljharb/object.assign,17755831,https://tc39.es/ecma262/#sec-object.assign,,B,ljharb,45469,User,Jordan Harband,https://linkedin.com/in/ljharb,,mit,True,False,,True
@@ -610,7 +611,6 @@ mathiasbynens/unicode-canonical-property-names-ecmascript,88346537,,,B,mathiasby
 mathiasbynens/unicode-property-aliases-ecmascript,88333533,,,B,mathiasbynens,81942,User,Mathias Bynens,https://mathiasbynens.be/,,mit,True,False,,True
 matklad/once_cell,143220272,,,B,matklad,1711539,User,Alex Kladov,https://matklad.github.io/,,mit or apache-2.0,True,False,,True
 matplotlib/matplotlib,1385122,https://matplotlib.org/stable/,Matplotlib,B,matplotlib,215947,Organization,Matplotlib Developers,https://matplotlib.org,Matplotlib,python-2.0,True,False,numfocus,True
-mcavage/node-assert-plus,4767976,,,B,TritonDataCenter,100366084,Organization,Triton Data Center,https://tritondatacenter.com/,,mit,True,False,,True
 mcollina/fastq,37368217,,,B,mcollina,52195,User,Matteo Collina,nodeland.dev,,isc,True,False,,True
 mcollina/reusify,42106515,,,B,mcollina,52195,User,Matteo Collina,nodeland.dev,,mit,True,False,,True
 mdn/data,70901646,https://developer.mozilla.org,MDN,B,mdn,7565578,Organization,MDN Web Docs,https://developer.mozilla.org,MDN,cc0-1.0,False,False,,False
@@ -624,6 +624,7 @@ micromatch/anymatch,11458302,,micromatch,B,micromatch,26890389,Organization,micr
 micromatch/micromatch,27359938,https://github.com/micromatch,micromatch,B,micromatch,26890389,Organization,micromatch,https://github.com/jonschlinkert,micromatch,mit,True,False,,True
 microsoft/typescript,20929025,https://www.typescriptlang.org,TypeScript,B,microsoft,6154722,Organization,Microsoft,https://opensource.microsoft.com,Microsoft,apache-2.0,True,False,,True
 minimistjs/minimist,549230701,,minimist,B,minimistjs,115504153,Organization,,,minimist,mit,True,False,,True
+mirror/ncurses,22324756,https://www.gnu.org/software/ncurses/,,B,mirror,40007,Organization,,,,noassertion,,,,False
 mitsuhiko/insta,165561258,https://insta.rs,,B,mitsuhiko,7396,User,Armin Ronacher,https://lucumr.pocoo.org/,,apache-2.0,True,False,,True
 mm2/little-cms,507969,https://www.littlecms.com,,B,mm2,199618,User,,,,mit,True,False,,True
 moment/moment,1424470,momentjs.com,Moment,B,moment,4129662,Organization,Moment.js,http://momentjs.com,Moment,mit,True,False,lf/openjs,True
@@ -633,7 +634,6 @@ moxystudio/node-cross-spawn,21335844,,Moxy,B,moxystudio,19508739,Organization,MO
 mrabarnett/mrab-regex,309446978,,,B,mrabarnett,24500011,User,,,,apache-2.0 and cnri-python,True,False,,True
 mrmlnc/fast-glob,77467076,,,B,mrmlnc,7034281,User,Denis Malinochkin,mrmlnc.com,,mit,True,False,,True
 msgpack/msgpack-python,2242705,https://msgpack.org/,MessagePack,B,msgpack,198264,Organization,MessagePack,http://msgpack.org/,MessagePack,apache-2.0,True,False,,True
-mvdnes/spin-rs,21686666,,,B,zesterer,3268430,User,Joshua Barretto,https://blog.jsbarretto.com,,mit,True,False,,True
 mysticatea/abort-controller,105228556,,,B,mysticatea,1937871,User,Toru Nagashima,,,mit,True,False,,True
 mysticatea/event-target-shim,31137469,,,B,mysticatea,1937871,User,Toru Nagashima,,,mit,True,False,,True
 netflix/vmaf,51317975,,Netflix,B,Netflix,913567,Organization,"Netflix, Inc.",http://netflix.github.io/,Netflix,noassertion,,False,,False
@@ -646,9 +646,7 @@ nodeca/pako,16231859,http://nodeca.github.io/pako/,,B,nodeca,723678,Organization
 nodejs/node,27193779,https://nodejs.org,Node.js,B,nodejs,9950313,Organization,Node.js,https://nodejs.org,Node.js,noassertion,,False,lf/openjs,False
 npm/abbrev-js,554893,,npm,B,npm,6078720,Organization,npm,https://npmjs.com,npm,isc,True,False,,True
 npm/cacache,193812470,,npm,B,npm,6078720,Organization,npm,https://npmjs.com,npm,isc,True,False,,True
-npm/fs-minipass,102982143,,npm,B,isaacs,9287,User,isaacs,http://blog.izs.me,,isc,True,False,,True
 npm/hosted-git-info,25002984,,npm,B,npm,6078720,Organization,npm,https://npmjs.com,npm,isc,True,False,,True
-npm/inflight,19442260,,npm,B,isaacs,9287,User,isaacs,http://blog.izs.me,,isc,True,True,,False
 npm/ini,2167680,,npm,B,npm,6078720,Organization,npm,https://npmjs.com,npm,isc,True,False,,True
 npm/json-parse-even-better-errors,211384370,,npm,B,npm,6078720,Organization,npm,https://npmjs.com,npm,mit,True,False,,True
 npm/mute-stream,5159166,,npm,B,npm,6078720,Organization,npm,https://npmjs.com,npm,isc,True,False,,True
@@ -658,7 +656,7 @@ npm/ssri,193817839,,npm,B,npm,6078720,Organization,npm,https://npmjs.com,npm,isc
 npm/unique-slug,35246620,,npm,B,npm,6078720,Organization,npm,https://npmjs.com,npm,isc,True,False,,True
 npm/write-file-atomic,23896209,,npm,B,npm,6078720,Organization,npm,https://npmjs.com,npm,isc,True,False,,True
 nv/cssom,1025209,https://nv.github.io/CSSOM/docs/parse.html,,B,NV,55838,User,Nikita Vasilyev,https://n12v.com,,mit,True,False,,True
-nvzqz/static-assertions-rs,100129252,https://docs.rs/static_assertions,,B,nvzqz,10367662,User,Nikolai Vazquez,https://nikolaivazquez.com,,mit or apache-2.0,True,False,,True
+nvzqz/static-assertions,100129252,https://docs.rs/static_assertions,,B,nvzqz,10367662,User,Nikolai Vazquez,https://nikolaivazquez.com,,apache-2.0,True,,,True
 oauthlib/oauthlib,2811323,https://oauthlib.readthedocs.io/en/latest/,OAuthLib,B,oauthlib,33832354,Organization,OAuthlib,,OAuthLib,bsd-3-clause,True,False,,True
 octokit/openapi-types.ts,304109193,,Octokit,B,octokit,3430433,Organization,Octokit,http://octokit.github.io,Octokit,mit,True,False,,True
 octokit/types.ts,216109757,https://octokit.github.io/types.ts/,Octokit,B,octokit,3430433,Organization,Octokit,http://octokit.github.io,Octokit,mit,True,False,,True
@@ -693,7 +691,7 @@ prettier/prettier,75104123,https://prettier.io,Prettier,B,prettier,25822731,Orga
 primus/eventemitter3,13100677,,Primus,B,primus,5393950,Organization,Primus,,Primus,mit,True,False,,True
 proptest-rs/proptest,94702898,,proptest,B,proptest-rs,116231032,Organization,,,proptest,mit or apache-2.0,True,False,,True
 psycopg/psycopg2,7730829,https://www.psycopg.org/,Psycopg,B,psycopg,2947270,Organization,The Psycopg Team,,Psycopg,lgpl-2.1,True,False,,True
-pvorb/node-clone,2317381,https://www.npmjs.com/package/clone,,B,pvorb,183534,User,Paul Vorbach,https://paul.vorba.ch/,,mit,True,False,,True
+pvorb/clone,2317381,https://www.npmjs.com/package/clone,,B,pvorb,183534,User,Paul Vorbach,https://paul.vorba.ch/,,mit,True,,,True
 py4j/py4j,1045976,https://www.py4j.org,Py4J,B,py4j,99001623,Organization,,,Py4J,bsd-3-clause,True,False,,True
 pyasn1/pyasn1-modules,512723354,https://pyasn1.readthedocs.io/,pyasn1,B,pyasn1,109076791,Organization,pyasn1 maintenance organization,,pyasn1,bsd-3-clause,True,False,,True
 pyca/bcrypt,9993757,,pyca,B,pyca,5615737,Organization,Python Cryptographic Authority,,pyca,apache-2.0,True,False,,True
@@ -715,6 +713,7 @@ python-pillow/pillow,5171600,https://python-pillow.github.io,Pillow,B,python-pil
 python-poetry/poetry,123303402,https://python-poetry.org,Poetry,B,python-poetry,48722593,Organization,Poetry,https://python-poetry.org,Poetry,mit,True,False,,True
 python-poetry/tomlkit,140365570,,Poetry,B,python-poetry,48722593,Organization,Poetry,https://python-poetry.org,Poetry,mit,True,False,,True
 python-trio/sniffio,142657210,https://sniffio.readthedocs.io,Trio,B,python-trio,26335827,Organization,,,Trio,apache-2.0,True,False,,True
+python/cpython,81598961,https://www.python.org,,B,python,1525981,Organization,Python,https://www.python.org/,Python,noassertion,,,psf,False
 python/importlib_resources,306147182,,Python,B,python,1525981,Organization,Python,https://www.python.org/,Python,apache-2.0,True,False,psf,True
 python/mypy,7053637,https://www.mypy-lang.org/,Python,B,python,1525981,Organization,Python,https://www.python.org/,Python,mit,True,False,psf,True
 python/mypy_extensions,165752308,,Python,B,python,1525981,Organization,Python,https://www.python.org/,Python,noassertion,,False,psf,False
@@ -744,6 +743,7 @@ rust-cli/env_logger,96382888,https://docs.rs/env_logger,,B,rust-cli,37223191,Org
 rust-embedded/critical-section,365854323,,,B,rust-embedded,17707713,Organization,Rust Embedded,https://github.com/rust-embedded/wg,,mit or apache-2.0,True,False,,True
 rust-fuzz/arbitrary,90591032,https://docs.rs/arbitrary/,,B,rust-fuzz,25854843,Organization,Rust Fuzzing Authority,,,mit or apache-2.0,True,False,,True
 rust-itertools/itertools,22360263,https://docs.rs/itertools/,,B,rust-itertools,52889150,Organization,,,,mit or apache-2.0,True,False,,True
+rust-lang-deprecated/tempdir,31728565,http://doc.rust-lang.org/tempdir,,B,rust-lang-deprecated,14631472,Organization,,,,apache-2.0,True,,,True
 rust-lang-nursery/lazy-static.rs,21157492,,,B,rust-lang-nursery,14631425,Organization,,,,mit or apache-2.0,True,False,,True
 rust-lang/cc-rs,26039547,https://docs.rs/cc,Rust,B,rust-lang,5430905,Organization,The Rust Programming Language,https://www.rust-lang.org,Rust,mit or apache-2.0,True,False,,True
 rust-lang/compiler-builtins,65153793,,Rust,B,rust-lang,5430905,Organization,The Rust Programming Language,https://www.rust-lang.org,Rust,mit,True,False,,True
@@ -751,7 +751,6 @@ rust-lang/glob,23241722,https://doc.rust-lang.org/glob,Rust,B,rust-lang,5430905,
 rust-lang/hashbrown,155119796,https://rust-lang.github.io/hashbrown,Rust,B,rust-lang,5430905,Organization,The Rust Programming Language,https://www.rust-lang.org,Rust,mit or apache-2.0,True,False,,True
 rust-lang/libz-sys,26042019,,Rust,B,rust-lang,5430905,Organization,The Rust Programming Language,https://www.rust-lang.org,Rust,mit or apache-2.0,True,False,,True
 rust-lang/pkg-config-rs,26042035,https://docs.rs/pkg-config,Rust,B,rust-lang,5430905,Organization,The Rust Programming Language,https://www.rust-lang.org,Rust,mit or apache-2.0,True,False,,True
-rust-lang/tempdir,31728565,http://doc.rust-lang.org/tempdir,Rust,B,rust-lang-deprecated,14631472,Organization,,,,mit/apache-2.0,True,False,,True
 rust-num/num-traits,114705611,,,B,rust-num,15056109,Organization,,,,mit or apache-2.0,True,False,,True
 rust-phf/rust-phf,15992970,,phf,B,rust-phf,85801600,Organization,,,phf,mit,True,False,,True
 rust-random/getrandom,166545969,,rand,B,rust-random,42028081,Organization,,,rand,mit or apache-2.0,True,False,,True
@@ -760,8 +759,8 @@ rustcrypto/formats,406051759,,RustCrypto,B,RustCrypto,22351541,Organization,Rust
 rustcrypto/hashes,74106774,,RustCrypto,B,RustCrypto,22351541,Organization,Rust Crypto,,RustCrypto,mit or apache-2.0,True,False,,True
 rustcrypto/stream-ciphers,83051505,,RustCrypto,B,RustCrypto,22351541,Organization,Rust Crypto,,RustCrypto,mit or apache-2.0,True,False,,True
 rustcrypto/traits,85605821,,RustCrypto,B,RustCrypto,22351541,Organization,Rust Crypto,,RustCrypto,mit or apache-2.0,True,False,,True
+rvagg/archived-prr,9151864,,,B,rvagg,495647,User,Rod Vagg,http://r.va.gg,,mit,True,,,True
 rvagg/bl,10706095,,,B,rvagg,495647,User,Rod Vagg,http://r.va.gg,,mit,True,False,,True
-rvagg/prr,9151864,,,B,rvagg,495647,User,Rod Vagg,http://r.va.gg,,mit,True,False,,True
 rvagg/through2,11808187,,,B,rvagg,495647,User,Rod Vagg,http://r.va.gg,,mit,True,False,,True
 salesforce/tough-cookie,2606873,,Salesforce,B,salesforce,453694,Organization,Salesforce,https://opensource.salesforce.com,Salesforce,bsd-3-clause,True,False,,True
 samn/json-stable-stringify,76598131,,,B,samn,174850,User,Sam Neubardt,,,mit,True,False,,True
@@ -772,13 +771,12 @@ scipy/scipy,1460385,https://scipy.org,SciPy,B,scipy,288277,Organization,SciPy,ht
 seanmonstar/reqwest,62350380,https://docs.rs/reqwest,,B,seanmonstar,51479,User,Sean McArthur,https://seanmonstar.com,,mit or apache-2.0,True,False,,True
 sec-ant/readable-stream,569980966,https://www.npmjs.com/package/@sec-ant/readable-stream/v/latest,,B,Sec-ant,10386119,User,Ze-Zheng Wu,https://github.com/Sec-ant,,mit,True,False,,True
 selinuxproject/selinux,20648799,,SELinux,B,SELinuxProject,7838867,Organization,,,SELinux,noassertion,,False,,False
+serde-deprecated/test,670894947,,,B,serde-deprecated,36771759,Organization,,https://github.com/serde-rs,,apache-2.0,True,,,True
 serde-rs/bytes,87358441,,Serde,B,serde-rs,11965399,Organization,,https://serde.rs,Serde,mit or apache-2.0,True,False,,True
-serde-rs/test,670894947,,Serde,B,serde-deprecated,36771759,Organization,,https://github.com/serde-rs,,mit or apache-2.0,True,False,,True
 servo/rust-fnv,33499190,https://doc.servo.org/fnv/,Servo,B,servo,2566135,Organization,Servo,https://servo.org,Servo,apache-2.0 / mit,True,False,,True
 servo/rust-smallvec,33456236,,Servo,B,servo,2566135,Organization,Servo,https://servo.org,Servo,mit or apache-2.0,True,False,,True
 servo/rust-url,14934771,https://docs.rs/url/,Servo,B,servo,2566135,Organization,Servo,https://servo.org,Servo,mit or apache-2.0,True,False,,True
-shtylman/node-process,7580644,,,B,defunctzombie,84792,User,Roman Shtylman,,,mit,True,False,,True
-sinclairzx81/sinclair-typebox,1122129819,,,B,sinclairzx81,3048342,User,,,,mit,True,False,,True
+sinclairzx81/typebox,87454905,https://sinclairzx81.github.io/typebox/,,B,sinclairzx81,3048342,User,,,,mit,True,False,,True
 sindresorhus/ansi-escapes,40721875,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/array-union,21005682,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/binary-extensions,29771015,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
@@ -792,7 +790,7 @@ sindresorhus/environment,793180075,,,B,sindresorhus,170270,User,Sindre Sorhus,ht
 sindresorhus/execa,47475908,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/figures,21672939,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/file-type,19105307,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
-sindresorhus/find-cache-dir,48783244,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,True,,False
+sindresorhus/find-cache-directory,48783244,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,,,True
 sindresorhus/find-up-simple,714044439,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/get-stream,44264225,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/globals,15186239,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
@@ -812,7 +810,7 @@ sindresorhus/log-symbols,21673868,,,B,sindresorhus,170270,User,Sindre Sorhus,htt
 sindresorhus/lowercase-keys,29769737,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/make-dir,90776169,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/meow,25121561,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
-sindresorhus/mimic-fn,71381729,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,True,,False
+sindresorhus/mimic-function,71381729,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/mimic-function,71381729,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/mimic-response,93189529,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/node-defaults,7985040,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
@@ -823,16 +821,16 @@ sindresorhus/onetime,14847357,,,B,sindresorhus,170270,User,Sindre Sorhus,https:/
 sindresorhus/open,18469325,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/p-map,71526722,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/p-try,71534796,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
+sindresorhus/package-directory,41724281,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,,,True
 sindresorhus/parent-module,50187748,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/parse-json,41367145,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/path-exists,34965664,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/path-is-absolute,30900285,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,True,,False
 sindresorhus/path-type,41905436,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/pify,41585934,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
-sindresorhus/pkg-dir,41724281,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,True,,False
 sindresorhus/quick-lru,86679721,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
+sindresorhus/read-package-up,41842429,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/read-pkg,41790094,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
-sindresorhus/read-pkg-up,41842429,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,True,,False
 sindresorhus/resolve-cwd,47504070,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/restore-cursor,23512229,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
 sindresorhus/strip-bom,18444852,,,B,sindresorhus,170270,User,Sindre Sorhus,https://sindresorhus.com/apps,,mit,True,False,,True
@@ -874,9 +872,9 @@ textualize/rich,220809393,https://rich.readthedocs.io/en/latest/,Textualize,B,Te
 theskumar/python-dotenv,23727790,https://saurabh-kumar.com/python-dotenv/,,B,theskumar,236356,User,Saurabh Kumar,https://saurabh-kumar.com,,bsd-3-clause,True,False,,True
 thlorenz/convert-source-map,8751561,,,B,thlorenz,192891,User,Thorsten Lorenz,https://www.twitch.tv/thlorenz,,mit,True,False,,True
 thlorenz/deep-is,9345558,,,B,thlorenz,192891,User,Thorsten Lorenz,https://www.twitch.tv/thlorenz,,mit,True,False,,True
-thomasdickey/ncurses-snapshots,65149533,http://invisible-island.net/ncurses/ncurses.faq.html,,B,ThomasDickey,1840495,User,,,,x11-distribute-modifications-variant,False,False,,False
 tim-kos/node-retry,1738798,,,B,tim-kos,15005,User,Tim Koschuetzki,http://transloadit.com,,mit,True,False,,True
 time-rs/time,26459635,https://time-rs.github.io,time-rs,B,time-rs,55999857,Organization,Time,https://time-rs.github.io,time-rs,mit or apache-2.0,True,False,,True
+tj/node-cookie-signature,6229722,,,B,tj,25254,User,TJ,,,mit,True,,,True
 tjguk/wmi,23124645,,,B,tjguk,580948,User,,,,,,False,,False
 tkem/cachetools,18006791,,,B,tkem,2833077,User,Thomas Kemmer,,,mit,True,False,,True
 tokio-rs/bytes,30062547,,Tokio,B,tokio-rs,20248544,Organization,Tokio,,Tokio,mit,True,False,,True
@@ -887,6 +885,8 @@ tower-rs/tower,98244646,https://docs.rs/tower,Tower,B,tower-rs,26263939,Organiza
 tox-dev/filelock,17098256,https://py-filelock.readthedocs.io,tox,B,tox-dev,20345659,Organization,tox development team,https://tox.wiki,tox,mit,True,False,,True
 tox-dev/platformdirs,367032142,https://platformdirs.readthedocs.io,tox,B,tox-dev,20345659,Organization,tox development team,https://tox.wiki,tox,mit,True,False,,True
 tqdm/tqdm,36804486,https://tqdm.github.io,tqdm,B,tqdm,12731565,Organization,tqdm developers,,tqdm,noassertion,,False,,False
+tritondatacenter/node-assert-plus,4767976,,,B,TritonDataCenter,100366084,Organization,Triton Data Center,https://tritondatacenter.com/,,mit,True,,,True
+tritondatacenter/node-extsprintf,4058064,,,B,TritonDataCenter,100366084,Organization,Triton Data Center,https://tritondatacenter.com/,,mit,True,,,True
 troygoode/node-require-directory,3053807,,,B,troygoode,72844,User,Troy Goode,https://www.courier.com,,mit,True,False,,True
 tsconfig/bases,263697285,,,B,tsconfig,65304946,Organization,TSC Base,,,mit,True,False,,True
 unicode-org/icu,49244766,https://icu.unicode.org/,Unicode,B,unicode-org,13873561,Organization,The Unicode Consortium,https://www.unicode.org/,Unicode,noassertion,,False,,False
@@ -897,7 +897,6 @@ util-linux/util-linux,2339555,http://en.wikipedia.org/wiki/Util-linux,util-linux
 vercel/ai,644461337,https://ai-sdk.dev,Vercel,B,vercel,14985020,Organization,Vercel,https://vercel.com,Vercel,apache-2.0,True,False,,True
 vercel/next.js,70107786,https://nextjs.org,Vercel,B,vercel,14985020,Organization,Vercel,https://vercel.com,Vercel,mit,True,False,,True
 visionmedia/bytes.js,4626886,,,B,visionmedia,9285252,Organization,Sloth,,,mit,True,False,,True
-visionmedia/node-cookie-signature,6229722,,,B,tj,25254,User,TJ,,,mit,True,False,,True
 vitest-dev/vitest,434708679,https://vitest.dev,Vitest,B,vitest-dev,95747107,Organization,Vitest,https://vitest.dev,Vitest,mit,True,False,,True
 vorner/signal-hook,137260008,,,B,vorner,11783500,User,Michal 'vorner' Vaner,https://vorner.github.io,,mit or apache-2.0,True,False,,True
 vuejs/core,137078487,https://vuejs.org/,Vue.js,B,vuejs,6128107,Organization,Vue,https://vuejs.org,Vue.js,mit,True,False,,True
@@ -926,3 +925,4 @@ yargs/y18n,39720886,,yargs,B,yargs,16504989,Organization,,http://yargs.js.org/,y
 yargs/yargs,14210523,https://yargs.js.org/,yargs,B,yargs,16504989,Organization,,http://yargs.js.org/,yargs,mit,True,False,,True
 yuzujs/setimmediate,1981208,,,B,YuzuJS,887683,Organization,Yuzu (by Barnes & Noble Education),http://bnedloudcloud.com,,mit,True,False,,True
 zertosh/loose-envify,41947687,,,B,zertosh,830952,User,Andres Suarez,,,mit,True,False,,True
+zesterer/spin-rs,21686666,,,B,zesterer,3268430,User,Joshua Barretto,https://blog.jsbarretto.com,,mit,True,,,True
