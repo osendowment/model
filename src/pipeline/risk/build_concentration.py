@@ -18,6 +18,8 @@ Writes:
                                        where the API caps at 5 000)
         hhi_commits_lifetime,         (HHI 0-10 000 over lifetime commits)
         bf_commits_lifetime,          (bus factor over lifetime commits)
+        concentration_class,          (A/B/C/D — joint bus-factor + HHI test,
+                                       settings.json risk_classification.concentration)
         fetched_at
 
 Usage:
@@ -25,11 +27,13 @@ Usage:
 """
 
 import csv
+from collections import Counter
 from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
 
+from src.pipeline.common.params import CONCENTRATION_THRESHOLDS
 from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
@@ -43,8 +47,37 @@ FIELDS = [
     "total_commits_lifetime", "total_contributors_lifetime",
     "active_contributors",
     "hhi_commits_lifetime", "bf_commits_lifetime",
+    "concentration_class",
     "fetched_at",
 ]
+
+
+def concentration_class(bus_factor: str, hhi: str) -> str:
+    """A/B/C/D from bus factor + HHI — A is the worst (most concentrated).
+
+    Per settings.json risk_classification.concentration, a repo is class X
+    when ``bus_factor <= max_bus_factor[X]`` AND ``hhi >= min_hhi[X]``,
+    tested strictest-first (A, then B, then C); D when none match. Both
+    signals must agree: concentration risk needs a fragile bus factor *and*
+    commit-share dominance — a repo with many contributors is not flagged
+    just because one of them commits often, and vice versa.
+
+    Returns "" when either input is missing or unparseable — can't classify.
+    """
+    bf_s = (bus_factor or "").strip()
+    hhi_s = (hhi or "").strip()
+    if not bf_s or not hhi_s:
+        return ""
+    try:
+        bf = float(bf_s)
+        h = float(hhi_s)
+    except ValueError:
+        return ""
+    for cls in ("A", "B", "C"):
+        t = CONCENTRATION_THRESHOLDS[cls]
+        if bf <= t["max_bus_factor"] and h >= t["min_hhi"]:
+            return cls
+    return "D"
 
 
 def _load_lifetime() -> dict[str, dict[str, str]]:
@@ -68,14 +101,17 @@ def build() -> list[dict]:
     for entry in eligible:
         repo = entry.repo
         lt = lifetime.get(repo, {})
+        hhi = (lt.get("hhi") or "").strip()
+        bf = (lt.get("bus_factor") or "").strip()
         rows.append({
             "repo": repo,
             "repo_id": entry.repo_id,
             "total_commits_lifetime": (lt.get("total_commits") or "").strip(),
             "total_contributors_lifetime": (lt.get("total_contributors") or "").strip(),
             "active_contributors": (lt.get("active_contributors") or "").strip(),
-            "hhi_commits_lifetime": (lt.get("hhi") or "").strip(),
-            "bf_commits_lifetime": (lt.get("bus_factor") or "").strip(),
+            "hhi_commits_lifetime": hhi,
+            "bf_commits_lifetime": bf,
+            "concentration_class": concentration_class(bf, hhi),
             "fetched_at": (lt.get("fetched_at") or "").strip(),
         })
     return rows
@@ -101,11 +137,23 @@ def main() -> None:
         "total_commits_lifetime", "total_contributors_lifetime",
         "active_contributors",
         "hhi_commits_lifetime", "bf_commits_lifetime",
+        "concentration_class",
     ):
         n = sum(1 for r in rows if r[col])
         pct = 100 * n / total if total else 0
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")
     console.print(table)
+
+    # concentration_class distribution (A/B/C/D, or — when unclassifiable).
+    cls = Counter(r["concentration_class"] or "—" for r in rows)
+    ctable = Table(title="\n[bold]Concentration class[/bold]",
+                   show_header=True, header_style="bold dim", padding=(0, 1))
+    ctable.add_column("Class", style="bold")
+    ctable.add_column("Repos", justify="right")
+    for label in ("A", "B", "C", "D", "—"):
+        ctable.add_row(label, f"{cls.get(label, 0):,}")
+    console.print(ctable)
+
     console.print(f"\n[dim]Wrote {total:,} rows → {OUTPUT_FILE}[/dim]")
 
 
