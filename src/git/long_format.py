@@ -218,7 +218,7 @@ def latest_sha_per_repo(
     path: str | Path,
     sha_priority: list[str] | None = None,
 ) -> dict[str, str]:
-    """For each repo, return the commit_sha most-frequently present.
+    """For each repo, pick its preferred snapshot SHA from the long file.
 
     If `sha_priority` is given (e.g. last_sha for 2025, 2024, 2023…),
     returns the first sha from that list that has any rows for the repo.
