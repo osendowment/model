@@ -50,7 +50,7 @@ from rich.table import Table
 
 from src.pipeline.common.params import (
     TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS,
-    assign_value_class, ecosystem_avg_downloads,
+    assign_value_class,
 )
 
 console = Console()
@@ -231,17 +231,21 @@ def build_dep_tree(top_sources: set[str], edges: list[tuple[str, str]]) -> list[
 
 def step_top(raw: dict[str, dict[int, int]], cpp_srcs: set[str]) -> set[str]:
     """Take the sources covering the top TOP_THRESHOLD_PCT% of cumulative
-    installs, using the full Debian ecosystem avg dl as denominator (matches
-    the npm/pypi pattern). The C/C++ filter applies orthogonally via the
-    is_cpp column in results.csv — not at this selection step."""
+    installs. The denominator is the sum of the per-source avg installs
+    being ranked — NOT ecosystem_avg_downloads("debian"), which sums every
+    *binary* package. A source's installs are MAX-aggregated across its
+    binaries (see load_downloads_by_source), so sum-of-binaries dwarfs
+    sum-of-sources; using it as the denominator made the 95% target
+    unreachable and selected the entire long tail. The C/C++ filter applies
+    orthogonally via the is_cpp column in results.csv — not here."""
     console.rule("[bold cyan]Step 1 — top-packages.csv (per source)")
     t0 = time.perf_counter()
     all_rows = sorted(
         [wide_row(src, yv) for src, yv in raw.items() if compute_avg(yv) > 0],
         key=lambda r: r["avg_downloads"], reverse=True,
     )
-    eco_total = ecosystem_avg_downloads("debian")
-    target = eco_total * TOP_THRESHOLD_PCT / 100
+    source_total = sum(r["avg_downloads"] for r in all_rows)
+    target = source_total * TOP_THRESHOLD_PCT / 100
     cum = 0
     cutoff = len(all_rows)
     for i, r in enumerate(all_rows):
@@ -254,8 +258,8 @@ def step_top(raw: dict[str, dict[int, int]], cpp_srcs: set[str]) -> set[str]:
 
     tbl = Table(show_header=False, box=None, padding=(0, 2))
     tbl.add_column(style="dim"); tbl.add_column(justify="right")
-    tbl.add_row("Threshold",       f"top {TOP_THRESHOLD_PCT}% of ecosystem installs")
-    tbl.add_row("Ecosystem avg",   f"{eco_total:,}")
+    tbl.add_row("Threshold",       f"top {TOP_THRESHOLD_PCT}% of source install mass")
+    tbl.add_row("Source mass",     f"{source_total:,}")
     tbl.add_row("Top sources",     f"{len(rows):,}")
     tbl.add_row("Min avg DL",      f"{rows[-1]['avg_downloads']:,}" if rows else "0")
     tbl.add_row("Elapsed",         f"{time.perf_counter() - t0:.2f}s")
