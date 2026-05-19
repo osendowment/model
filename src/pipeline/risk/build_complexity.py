@@ -14,6 +14,7 @@ Writes:
         loc_2025_eoy, sloc_2025_eoy,
         scc_complexity_2025_eoy, scc_density_2025_eoy,
         cognitive_total, cognitive_avg, cognitive_max,
+        cyclomatic_total, cyclomatic_avg, cyclomatic_max,
         loc_year   (year of snapshot used: "2021"…"2025", or "" if missing)
         churn_5y_total,
         hotspot_raw,           # churn × complexity (linear)
@@ -35,6 +36,10 @@ Metric mapping:
     lizard.cognitive_total       → cognitive_total
     lizard.cognitive_avg         → cognitive_avg
     lizard.cognitive_max         → cognitive_max
+    lizard.cyclomatic_total      → cyclomatic_total
+    lizard.cyclomatic_avg        → cyclomatic_avg
+    lizard.cyclomatic_max        → cyclomatic_max  (per-function McCabe;
+                                   cyclomatic_max feeds the cc_class quartile)
 
 Hotspot folding (Adam Tornhill, "Code as a Crime Scene"):
 bug-prone code = high churn ∩ high complexity. We translate that to
@@ -75,13 +80,17 @@ CHURN_FILE = DATA_DIR / "github" / "git" / "churn.csv"
 OUTPUT_FILE = DATA_DIR / "complexity.csv"
 
 SCC_METRICS = ["loc", "sloc", "complexity", "complexity_density"]
-LIZARD_METRICS = ["cognitive_total", "cognitive_avg", "cognitive_max"]
+LIZARD_METRICS = [
+    "cognitive_total", "cognitive_avg", "cognitive_max",
+    "cyclomatic_total", "cyclomatic_avg", "cyclomatic_max",
+]
 
 FIELDS = [
     "repo", "repo_id",
     "loc_2025_eoy", "sloc_2025_eoy",
     "scc_complexity_2025_eoy", "scc_density_2025_eoy",
     "cognitive_total", "cognitive_avg", "cognitive_max",
+    "cyclomatic_total", "cyclomatic_avg", "cyclomatic_max",
     "loc_year",
     "churn_5y_total",
     "hotspot_raw", "hotspot_log", "hotspot_percentile",
@@ -274,6 +283,9 @@ def build() -> list[dict]:
             "cognitive_total": lz_vals.get("cognitive_total", ""),
             "cognitive_avg": lz_vals.get("cognitive_avg", ""),
             "cognitive_max": lz_vals.get("cognitive_max", ""),
+            "cyclomatic_total": lz_vals.get("cyclomatic_total", ""),
+            "cyclomatic_avg": lz_vals.get("cyclomatic_avg", ""),
+            "cyclomatic_max": lz_vals.get("cyclomatic_max", ""),
             "loc_year": year_label,
             "churn_5y_total": churn_out,
             "hotspot_raw": hotspot_raw_val,
@@ -309,6 +321,7 @@ def main() -> None:
     for col in ("loc_2025_eoy", "sloc_2025_eoy",
                 "scc_complexity_2025_eoy", "scc_density_2025_eoy",
                 "cognitive_total", "cognitive_avg", "cognitive_max",
+                "cyclomatic_total", "cyclomatic_avg", "cyclomatic_max",
                 "churn_5y_total",
                 "hotspot_raw", "hotspot_log", "hotspot_percentile"):
         n = sum(1 for r in rows if r[col])
