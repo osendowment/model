@@ -18,6 +18,21 @@
 - Prefer flat, explicit steps. Use abstractions only when they make the code *more* readable, not less.
 - Name things clearly. A well-named function or variable is worth more than a comment.
 
+## Auditability
+
+- **The model pipeline must be auditable end to end.** Every metric in an
+  output CSV must be traceable back to the fetch that produced it.
+- **Every fetch must record a date and a success flag** — unless both are
+  already obvious from the data itself. The date is when the value was
+  fetched (`fetched_at` / `checked_at`). The success flag distinguishes
+  "checked, genuinely absent/zero" from "fetch failed / never ran" — a
+  missing or `False`/`0` value must never silently stand in for a network
+  error or timeout.
+  - "Obvious from the data" means the value is self-evidently a real
+    measurement (e.g. a non-empty count with a `fetched_at`). When a
+    `False`/empty/`0` outcome could equally mean "failed", add an explicit
+    status column (e.g. `*_checked`, `*_status`, a sidecar `queried.csv`).
+
 ## Git
 
 - **Never push to this repo without explicit user approval in the current message.** Always commit locally and ask before pushing.
