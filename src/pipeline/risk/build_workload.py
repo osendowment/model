@@ -10,13 +10,13 @@ Reads:
                                                           (metric ∈ {opened_issues, closed_issues})
     data/complexity.csv                                 — loc_2025_eoy per repo
     data/security.csv                                   — cve_count_5y per repo
-    data/concentration.csv                              — active_contributors per repo
+    data/concentration.csv                              — active_contributors_git_2021_2025 per repo
 
 Writes:
     data/workload.csv  with columns:
         repo, repo_id,
         repo_age_years_2025_eoy,         (years between created_at and 2025-12-31)
-        active_contributors,             (from concentration.csv)
+        active_contributors_git_2021_2025,  (windowed AC — from concentration.csv)
         openssf_maintained,              (Scorecard "Maintained" sub-check, 0-10 or "")
         has_issues,                      (bool from GH /repos)
         push_cadence_years,              (count of years 2021-2025 with ≥1 commit, 0-5)
@@ -28,9 +28,9 @@ Writes:
         slope_opened,                    (OLS slope of yearly opened, 2 dp)
         slope_closed,
         issue_trend_score,               (vol-normalised slope_closed - slope_opened)
-        loc_per_ac,                      (loc_2025_eoy / active_contributors)
-        cve_per_ac,                      (cve_count_5y / active_contributors)
-        nni_per_ac,                      (net_new_issues_5y / active_contributors)
+        loc_per_ac,                      (loc_2025_eoy / active_contributors_git_2021_2025)
+        cve_per_ac,                      (cve_count_5y / active_contributors_git_2021_2025)
+        nni_per_ac,                      (net_new_issues_5y / active_contributors_git_2021_2025)
         loc_per_ac_pctl,                 (Hazen percentile of loc_per_ac)
         cve_per_ac_pctl,
         nni_per_ac_pctl,
@@ -46,8 +46,10 @@ Notes:
 Periods:
     repo_age_years_2025_eoy: years between created_at and 2025-12-31.
     push_cadence_years, issues_*: 2021-2025 window.
-    active_contributors: lifetime distinct non-bot contributors (from
-      concentration.csv) — a floor for repos with >5000 contributors.
+    active_contributors_git_2021_2025: distinct non-bot contributors who
+      authored a commit in 2021-2025, from the git-clone method (the windowed
+      AC concentration.csv now provides — GitHub's /contributors API cannot
+      window, so the earlier lifetime-AC fallback is retired).
 
 Usage:
     uv run python -m src.pipeline.risk.build_workload
@@ -86,7 +88,7 @@ EOY_2025 = datetime.date(2025, 12, 31)
 FIELDS = [
     "repo", "repo_id",
     "repo_age_years_2025_eoy",
-    "active_contributors",
+    "active_contributors_git_2021_2025",
     "openssf_maintained",
     "has_issues",
     "push_cadence_years", "pushed_at",
@@ -285,7 +287,7 @@ def build() -> list[dict]:
     # Cross-dimension inputs for the workload class.
     loc_by_repo = load_column_by_repo(COMPLEXITY_FILE, "loc_2025_eoy")
     cve_by_repo = load_column_by_repo(SECURITY_FILE, "cve_count_5y")
-    ac_by_repo = load_column_by_repo(CONCENTRATION_FILE, "active_contributors")
+    ac_by_repo = load_column_by_repo(CONCENTRATION_FILE, "active_contributors_git_2021_2025")
 
     rows: list[dict] = []
     metrics: list[dict] = []
@@ -333,7 +335,7 @@ def build() -> list[dict]:
             "repo": repo,
             "repo_id": entry.repo_id,
             "repo_age_years_2025_eoy": age,
-            "active_contributors": ac_raw,
+            "active_contributors_git_2021_2025": ac_raw,
             "openssf_maintained": openssf_maintained,
             "has_issues": has_issues,
             "push_cadence_years": cadence_val,
@@ -383,7 +385,7 @@ def main() -> None:
     table.add_column("Populated", justify="right")
     table.add_column("Coverage", justify="right")
     for col in (
-        "repo_age_years_2025_eoy", "active_contributors",
+        "repo_age_years_2025_eoy", "active_contributors_git_2021_2025",
         "openssf_maintained", "has_issues", "push_cadence_years", "pushed_at",
         "issue_close_ratio", "net_new_issues_5y", "issue_trend_score",
         "workload_burden_percentile", "workload_class",
