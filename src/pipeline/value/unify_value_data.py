@@ -59,6 +59,15 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "value-data.csv"
 
+# Curated repo overrides — forces the correct `github_repo` for packages
+# whose upstream registry metadata points at the wrong repository. This is
+# a GAP-CORRECTING layer for bad *upstream* data, not a parsing bug:
+# e.g. `@sinclair/typebox`'s latest npm version names a placeholder repo.
+# Applied as the LAST step of `aggregate_by_repo` so it survives every
+# pipeline re-run; `verify_git_urls` (the next stage) then re-derives the
+# corrected repo's `gh_repo_id` / `gh_valid` from the GitHub API.
+OVERRIDES_FILE = DATA_DIR / "value-repo-overrides.csv"
+
 ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
 CLASS_RANK = {"A": 0, "B": 1, "C": 2, "D": 3}
 
@@ -265,6 +274,81 @@ def _select_group_github_repo(members: list[dict], git_url: str) -> str:
     return min(tied)
 
 
+def _github_git_url(slug: str) -> str:
+    """Canonical lowercase `.git` clone URL for a github `owner/repo` slug."""
+    return f"https://github.com/{slug}.git"
+
+
+def load_repo_overrides(path: Path = OVERRIDES_FILE) -> dict[tuple[str, str], str]:
+    """Return {(package, ecosystem): correct_github_repo} from the curated CSV.
+
+    The override file is a hand-maintained list of `(package, ecosystem)`
+    pairs whose upstream registry metadata points at the WRONG GitHub repo
+    (bad data we cannot fix at the source). Each row also carries a free-text
+    `reason`. Missing file → no overrides.
+    """
+    if not path.exists():
+        return {}
+    out: dict[tuple[str, str], str] = {}
+    with open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            pkg = (r.get("package") or "").strip()
+            eco = (r.get("ecosystem") or "").strip()
+            repo = _normalise_repo(r.get("github_repo") or "")
+            if pkg and eco and repo:
+                out[(pkg, eco)] = repo
+    return out
+
+
+def apply_repo_overrides(
+    aggs: list[dict],
+    all_rows: list[dict],
+    overrides: dict[tuple[str, str], str] | None = None,
+) -> list[dict]:
+    """Force the correct `github_repo` / `git_url` for overridden packages.
+
+    Last step of `aggregate_by_repo`. For every repo aggregate that contains
+    a constituent package listed in `value-repo-overrides.csv`, rewrite the
+    group's `github_repo` to the curated slug and its `git_url` to the
+    matching github clone URL — overriding whatever the (wrong) registry
+    metadata produced. This is the single chokepoint: it runs after grouping
+    and class assignment, and before `verify_git_urls` re-derives
+    `gh_repo_id` / `gh_valid` for the corrected repo.
+
+    `all_rows` is the per-package input (needed to know which packages each
+    aggregate contains, since aggregates only store a `packages` count).
+    Generic — driven entirely by the override list, no per-package hardcode.
+
+    Matching is by group key: `_group_key` is deterministic and equals the
+    aggregate's `group_key` scratch field while it is still present, or the
+    aggregate's `git_url` once `_strip_internals` has run — both are the same
+    value for non-orphan groups, so this is safe before or after stripping.
+    """
+    overrides = load_repo_overrides() if overrides is None else overrides
+    if not overrides:
+        return aggs
+
+    # Map each group key → the curated slug, if any constituent package is
+    # in the override list. `_group_key` is deterministic, so we can rebuild
+    # the same keys from the per-package rows.
+    override_by_group: dict[str, str] = {}
+    for row in all_rows:
+        slug = overrides.get((row["package"], row["ecosystem"]))
+        if slug:
+            override_by_group[_group_key(row)] = slug
+
+    for a in aggs:
+        # Prefer the scratch `group_key`; fall back to `git_url` (identical
+        # for non-orphan groups) so the override still applies if called
+        # after `_strip_internals`.
+        key = a.get("group_key") or a.get("git_url") or ""
+        slug = override_by_group.get(key)
+        if slug:
+            a["github_repo"] = slug
+            a["git_url"] = _github_git_url(slug)
+    return aggs
+
+
 def _strip_internals(a: dict) -> dict:
     """Drop scratch keys before writing."""
     return {k: v for k, v in a.items() if not any(k.startswith(p) for p in _INTERNAL_PREFIXES)}
@@ -359,6 +443,13 @@ def aggregate_by_repo(all_rows: list[dict], *, drop_d_class: bool = False) -> li
     # risk. `drop_d_class` is retained for callers that want the ABC subset.
     if drop_d_class:
         aggs = [a for a in aggs if a.get("class") in ("A", "B", "C")]
+
+    # Curated repo overrides — LAST transform before sort/write. Forces the
+    # correct `github_repo` / `git_url` for packages whose upstream registry
+    # metadata names the wrong GitHub repo. Runs here (after class assignment,
+    # before sort) so the override slug is what value-data.csv ships and what
+    # the downstream `verify_git_urls` step verifies. See OVERRIDES_FILE.
+    aggs = apply_repo_overrides(aggs, all_rows)
 
     # Sort by top_eco_pct desc. Every group has a numeric percentile (set
     # above), so no special handling for missing values is needed; ties

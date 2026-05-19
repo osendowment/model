@@ -26,7 +26,9 @@ from src.pipeline.value.unify_value_data import (
     _read_top_packages,
     _strip_internals,
     aggregate_by_repo,
+    apply_repo_overrides,
     collect_ecosystem,
+    load_repo_overrides,
     write_value_data,
 )
 
@@ -498,6 +500,102 @@ class TestAggregateByRepo:
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         assert aggs[0]["ecosystems"] == "pypi,crates,cpp"
+
+
+# ── repo overrides (curated wrong-repo correction) ───────────────────────────
+
+class TestRepoOverrides:
+    """The curated `value-repo-overrides.csv` layer forces the correct
+    `github_repo` for packages whose upstream registry metadata names the
+    wrong GitHub repo (e.g. `@sinclair/typebox`, whose latest npm version
+    points at a placeholder repo). Applied as the last step of
+    `aggregate_by_repo`, it must win over the registry-derived value.
+    """
+
+    def test_load_overrides_missing_file_returns_empty(self, tmp_path):
+        assert load_repo_overrides(tmp_path / "absent.csv") == {}
+
+    def test_load_overrides_parses_and_normalises(self, tmp_path):
+        p = tmp_path / "value-repo-overrides.csv"
+        _write_csv(p, ["package", "ecosystem", "github_repo", "reason"],
+                   [["@sinclair/typebox", "npm", "SinclairZX81/TypeBox", "bad npm meta"]])
+        idx = load_repo_overrides(p)
+        # key is (package, ecosystem); slug is lowercased like the rest of the pipeline
+        assert idx == {("@sinclair/typebox", "npm"): "sinclairzx81/typebox"}
+
+    def test_override_forces_github_repo_over_registry_value(self):
+        # A package whose registry-derived github_repo / git_url point at the
+        # WRONG repo. With an explicit override list the call must rewrite
+        # both to the curated repo, beating the registry-provided value.
+        # (Uses a synthetic package not in the shipped overrides file so the
+        #  "before" state is the unmodified registry value.)
+        rows = [
+            _pkg_row("some-pkg", "npm",
+                     github_repo="evil/placeholder",
+                     git_url="https://github.com/evil/placeholder.git",
+                     pagerank="1.0", value_class="A"),
+        ]
+        overrides = {("some-pkg", "npm"): "real/upstream"}
+        aggs = aggregate_by_repo(rows, drop_d_class=False)
+        # Without the override the aggregate carries the wrong repo …
+        assert aggs[0]["github_repo"] == "evil/placeholder"
+        # … applying the override forces the correct repo + consistent git_url.
+        fixed = apply_repo_overrides(aggs, rows, overrides)
+        assert fixed[0]["github_repo"] == "real/upstream"
+        assert fixed[0]["git_url"] == "https://github.com/real/upstream.git"
+
+    def test_override_is_keyed_per_ecosystem(self):
+        # An override for npm must not touch a same-named pypi package.
+        rows = [
+            _pkg_row("typebox", "npm", github_repo="wrong/repo",
+                     git_url="https://github.com/wrong/repo.git", pagerank="1.0"),
+            _pkg_row("typebox", "pypi", github_repo="other/repo",
+                     git_url="https://github.com/other/repo.git", pagerank="1.0"),
+        ]
+        overrides = {("typebox", "npm"): "right/repo"}
+        aggs = apply_repo_overrides(
+            aggregate_by_repo(rows, drop_d_class=False), rows, overrides)
+        by_pkg = {a["top_eco_pkg"]: a for a in aggs}
+        npm_agg = next(a for a in aggs if a["git_url"].endswith("right/repo.git"))
+        assert npm_agg["github_repo"] == "right/repo"
+        # the pypi typebox group is untouched
+        pypi_agg = next(a for a in aggs if a["github_repo"] == "other/repo")
+        assert pypi_agg["git_url"] == "https://github.com/other/repo.git"
+
+    def test_no_overrides_is_a_noop(self):
+        rows = [_pkg_row("a", "npm", github_repo="x/y", pagerank="1.0")]
+        aggs = aggregate_by_repo(rows, drop_d_class=False)
+        before = aggs[0]["github_repo"]
+        after = apply_repo_overrides(aggs, rows, {})
+        assert after[0]["github_repo"] == before
+
+    def test_override_applied_end_to_end_via_aggregate_by_repo(self, tmp_path):
+        # Drives the real chokepoint: aggregate_by_repo calls apply_repo_overrides
+        # internally, loading the curated CSV from OVERRIDES_FILE. Point that at
+        # a temp file so the test is hermetic.
+        import src.pipeline.value.unify_value_data as mod
+        ov = tmp_path / "value-repo-overrides.csv"
+        _write_csv(ov, ["package", "ecosystem", "github_repo", "reason"],
+                   [["@sinclair/typebox", "npm", "sinclairzx81/typebox", "wrong upstream"]])
+        original = mod.OVERRIDES_FILE
+        mod.OVERRIDES_FILE = ov
+        try:
+            rows = [
+                _pkg_row("@sinclair/typebox", "npm",
+                         github_repo="sinclairzx81/sinclair-typebox",
+                         git_url="https://github.com/sinclairzx81/sinclair-typebox.git",
+                         pagerank="1.0", value_class="A"),
+            ]
+            aggs = aggregate_by_repo(rows, drop_d_class=False)
+        finally:
+            mod.OVERRIDES_FILE = original
+        assert aggs[0]["github_repo"] == "sinclairzx81/typebox"
+        assert aggs[0]["git_url"] == "https://github.com/sinclairzx81/typebox.git"
+
+    def test_shipped_overrides_file_includes_typebox(self):
+        # The committed override file must carry the typebox correction.
+        idx = load_repo_overrides()
+        assert idx.get(("@sinclair/typebox", "npm")) == "sinclairzx81/typebox"
 
 
 # ── _strip_internals direct test ─────────────────────────────────────────────
