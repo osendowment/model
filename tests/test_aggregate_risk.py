@@ -17,9 +17,12 @@ class TestAggregateColumns:
         dupes = [c for c, n in Counter(fieldnames).items() if n > 1]
         assert dupes == [], f"duplicate columns: {dupes}"
 
-    def test_active_contributors_present_once(self):
+    def test_shared_column_emitted_once(self):
+        """The active-contributors count lives in both concentration.csv and
+        workload.csv; the aggregator must emit the shared column exactly once.
+        """
         fieldnames, _rows = aggregate()
-        assert fieldnames.count("active_contributors") == 1
+        assert fieldnames.count("active_contributors_git_2021_2025") == 1
 
     def test_rows_have_no_extra_keys(self):
         """Every row dict's keys are a subset of the declared fieldnames."""
