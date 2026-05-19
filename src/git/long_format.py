@@ -130,6 +130,15 @@ def _atomic_write(path: str | Path, rows: list[dict[str, str]]) -> None:
     """
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
+    # Sweep orphaned temp files left by an earlier write that was SIGKILLed
+    # between mkstemp and os.replace. Safe: every caller holds the exclusive
+    # `_file_lock` for `path`, so no concurrent writer's temp is in flight —
+    # any `<name>.*.tmp` sibling here is a dead artifact.
+    for stale in p.parent.glob(p.name + ".*.tmp"):
+        try:
+            stale.unlink()
+        except OSError:
+            pass
     fd, tmp_name = tempfile.mkstemp(prefix=p.name + ".", suffix=".tmp", dir=str(p.parent))
     try:
         with os.fdopen(fd, "w", newline="", encoding="utf-8") as f:
