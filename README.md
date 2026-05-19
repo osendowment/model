@@ -20,13 +20,13 @@ It is important to trace dependencies across ecosystem boundaries, not just with
 
 Beyond dividing grants between ecosystems, we need to prioritize individual OSS projects within each one. Our goal is to make this process transparent and quantifiable, combining automated scoring with human judgment, especially in the early stages. The model is under active development; its final form will emerge from discussions with OSE donors.
 
-Our approach combines three stages:
+Our approach is a three-stage pipeline — **Value → Risk → Eligibility** — where each stage narrows the set the next one operates on:
 
 | Step | Goal | Implemented | Roadmap |
 |------|------|-------------|---------|
 | **[Value](docs/value.md)** | Find most important packages in ecosystems | Download-weighted PageRank for Python (PyPI), Rust (crates), JS/TS (npm), C/C++ (Debian, Homebrew) based on dependency trees, covering 95% downloads in each ecosystem | Community nominations, critical software lists, cross-ecosystem dependencies |
-| **[Eligibility](docs/eligibility.md)** | Filter to fundable projects | OSS license check (63 OSI-approved) | Trademark check (corporate vs community), EOL check |
 | **[Risk](docs/risk.md)** | Prioritize risky projects among most valuable | Bus factor and Herfindahl--Hirschman index for contributors, complexity metrics (LOC, etc) using [scc](https://github.com/boyter/scc) | [OpenSSF scorecard](https://scorecard.dev), active maintainers, issue activity, GitHub Sponsors |
+| **[Eligibility](docs/eligibility.md)** | Filter to fundable projects | OSS license check (63 OSI-approved) | Trademark check (corporate vs community), EOL check |
 
 
 Work is currently happening in this repo and the following places:
