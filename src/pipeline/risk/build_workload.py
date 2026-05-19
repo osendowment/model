@@ -66,6 +66,7 @@ from src.pipeline.common.stats import (
     hazen_percentiles,
     quartile_classes,
 )
+from src.pipeline.common.tables import load_column_by_repo, load_rows_by_repo
 
 console = Console()
 
@@ -160,19 +161,6 @@ def compute_workload_classes(metrics: list[dict]) -> dict[str, dict]:
     return out
 
 
-def _load_repo_meta() -> dict[str, dict]:
-    out: dict[str, dict] = {}
-    if not REPOS_FILE.exists():
-        return out
-    with open(REPOS_FILE, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if not slug:
-                continue
-            out[slug] = row
-    return out
-
-
 def _load_commits_years() -> dict[str, dict[int, int]]:
     """Return {repo: {year: commits}}."""
     out: dict[str, dict[int, int]] = {}
@@ -244,19 +232,6 @@ def _load_issues_long(path: Path) -> dict[str, dict[str, dict[int, int]]]:
     return out
 
 
-def _load_column(path: Path, column: str) -> dict[str, str]:
-    """Return {repo_lowercased: value} for one column of a wide CSV."""
-    out: dict[str, str] = {}
-    if not path.exists():
-        return out
-    with open(path, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if slug:
-                out[slug] = (row.get(column) or "").strip()
-    return out
-
-
 def _num(value: str) -> float | None:
     """Parse a CSV cell to float. Empty / unparseable → None."""
     s = (value or "").strip()
@@ -300,7 +275,7 @@ def _repo_age_years(created_at_iso: str) -> str:
 def build() -> list[dict]:
     eligible = load_risk_repos()
 
-    repos = _load_repo_meta()
+    repos = load_rows_by_repo(REPOS_FILE)
     commits_years = _load_commits_years()
     maintained = _load_openssf_maintained()
     issues = _load_issues_long(ISSUES_FILE)
@@ -308,9 +283,9 @@ def build() -> list[dict]:
     closed = issues["closed_issues"]
 
     # Cross-dimension inputs for the workload class.
-    loc_by_repo = _load_column(COMPLEXITY_FILE, "loc_2025_eoy")
-    cve_by_repo = _load_column(SECURITY_FILE, "cve_count_5y")
-    ac_by_repo = _load_column(CONCENTRATION_FILE, "active_contributors")
+    loc_by_repo = load_column_by_repo(COMPLEXITY_FILE, "loc_2025_eoy")
+    cve_by_repo = load_column_by_repo(SECURITY_FILE, "cve_count_5y")
+    ac_by_repo = load_column_by_repo(CONCENTRATION_FILE, "active_contributors")
 
     rows: list[dict] = []
     metrics: list[dict] = []

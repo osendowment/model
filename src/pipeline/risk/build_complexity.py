@@ -82,6 +82,7 @@ from src.git.long_format import read as read_long
 from src.pipeline.common.params import COMPLEXITY_LOC_THRESHOLDS
 from src.pipeline.common.repos import load_risk_repos
 from src.pipeline.common.stats import quartile_classes
+from src.pipeline.common.tables import load_rows_by_repo
 
 console = Console()
 
@@ -159,19 +160,6 @@ def _is_nonzero(val: str) -> bool:
         return float(val) != 0
     except ValueError:
         return False
-
-
-def _load_churn(path: Path) -> dict[str, dict[str, str]]:
-    """Load churn.csv keyed by repo (lowercased). Empty if file missing."""
-    out: dict[str, dict[str, str]] = {}
-    if not path.exists():
-        return out
-    with open(path, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            k = (row.get("repo") or "").strip().lower()
-            if k:
-                out[k] = row
-    return out
 
 
 def _to_int(s: str) -> int:
@@ -282,7 +270,7 @@ def build() -> list[dict]:
             lizard_idx.setdefault((r, s), {})[m] = row["value"]
 
     # 3. Load 5y churn (hotspot input).
-    churn_by_repo = _load_churn(CHURN_FILE)
+    churn_by_repo = load_rows_by_repo(CHURN_FILE)
 
     rows: list[dict] = []
     log_scores_for_pct: list[float] = []

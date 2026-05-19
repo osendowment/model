@@ -35,6 +35,7 @@ from rich.table import Table
 
 from src.pipeline.common.params import CONCENTRATION_THRESHOLDS
 from src.pipeline.common.repos import load_risk_repos
+from src.pipeline.common.tables import load_rows_by_repo
 
 console = Console()
 
@@ -80,22 +81,9 @@ def concentration_class(bus_factor: str, hhi: str) -> str:
     return "D"
 
 
-def _load_lifetime() -> dict[str, dict[str, str]]:
-    out: dict[str, dict[str, str]] = {}
-    if not LIFETIME_FILE.exists():
-        return out
-    with open(LIFETIME_FILE, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if not slug:
-                continue
-            out[slug] = row
-    return out
-
-
 def build() -> list[dict]:
     eligible = load_risk_repos()
-    lifetime = _load_lifetime()
+    lifetime = load_rows_by_repo(LIFETIME_FILE)
 
     rows: list[dict] = []
     for entry in eligible:

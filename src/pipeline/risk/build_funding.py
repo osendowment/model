@@ -36,6 +36,7 @@ from rich.table import Table
 
 from src.pipeline.common.params import FUNDING_THRESHOLDS
 from src.pipeline.common.repos import load_risk_repos
+from src.pipeline.common.tables import load_column_by_repo, load_rows_by_repo
 
 console = Console()
 
@@ -76,37 +77,11 @@ def funding_class(github_sponsors: str) -> str:
     return "D"
 
 
-def _load_raw_funding() -> dict[str, dict[str, str]]:
-    out: dict[str, dict[str, str]] = {}
-    if not FUNDING_RAW_FILE.exists():
-        return out
-    with open(FUNDING_RAW_FILE, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if not slug:
-                continue
-            out[slug] = row
-    return out
-
-
-def _load_foundations() -> dict[str, str]:
-    """Return {repo: host} — empty `host` means "not foundation-hosted but checked"."""
-    out: dict[str, str] = {}
-    if not FOUNDATIONS_FILE.exists():
-        return out
-    with open(FOUNDATIONS_FILE, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if not slug:
-                continue
-            out[slug] = (row.get("host") or "").strip()
-    return out
-
-
 def build() -> list[dict]:
     eligible = load_risk_repos()
-    raw = _load_raw_funding()
-    foundations = _load_foundations()
+    raw = load_rows_by_repo(FUNDING_RAW_FILE)
+    # foundation host — empty `host` means "checked, not foundation-hosted".
+    foundations = load_column_by_repo(FOUNDATIONS_FILE, "host")
 
     rows: list[dict] = []
     for entry in eligible:

@@ -86,6 +86,7 @@ from src.pipeline.common.stats import (
     hazen_percentiles,
     quartile_classes,
 )
+from src.pipeline.common.tables import load_column_by_repo
 
 console = Console()
 
@@ -273,22 +274,6 @@ def _load_osv_queried() -> set[str]:
     return out
 
 
-def _load_bestpractices_badge() -> dict[str, str]:
-    """Map repo → bestpractices_badge_id from the wide depsdev/repos.csv."""
-    out: dict[str, str] = {}
-    if not DEPSDEV_REPOS_FILE.exists():
-        return out
-    with open(DEPSDEV_REPOS_FILE, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if not slug:
-                continue
-            badge = (row.get("bestpractices_badge_id") or "").strip()
-            if badge:
-                out[slug] = badge
-    return out
-
-
 def _to_float(value: str) -> float | None:
     """Parse a CSV cell to float; blank or unparseable → None."""
     text = (value or "").strip()
@@ -376,7 +361,7 @@ def build() -> list[dict]:
     fuzz = _load_ossfuzz()
     cve_counts = _load_cve_counts_5y()
     queried = _load_osv_queried()
-    badges = _load_bestpractices_badge()
+    badges = load_column_by_repo(DEPSDEV_REPOS_FILE, "bestpractices_badge_id")
 
     rows: list[dict] = []
     for entry in eligible:
