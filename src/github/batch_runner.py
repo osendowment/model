@@ -5,43 +5,46 @@ import csv as csv_mod
 import datetime
 import logging
 import os
+import tempfile
 import time
 from collections import defaultdict
 from dataclasses import dataclass
 
 import aiohttp
 from rich.progress import (
-    Progress, SpinnerColumn, TextColumn,
-    BarColumn, TaskProgressColumn, TimeElapsedColumn,
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
 )
 from rich.table import Table
 
-from src.github.models import RunResult, THRESHOLD
+from src.github.display import _ETAColumn, console
 from src.github.github_client import (
     _AsyncRateLimiter,
+    _Deferred,
     _fetch_contributors_paginated,
     _fetch_total_commits,
     _fetch_total_contributors,
-    _Deferred,
 )
-from src.github.display import console, _ETAColumn, _fmt_contribs_label
+from src.github.models import THRESHOLD
 
 log = logging.getLogger(__name__)
 
 
 # --- CSV I/O ---
 #
-# Contributor metrics are persisted to a single file, data/concentration-data.csv,
-# one row per repo: repo, repo_id, total_commits, total_contributors,
-# active_contributors, bus_factor, hhi, fetched_at.
+# Raw /contributors payload is persisted to two files under data/github/:
+#   contributor-commits.csv       — long, one row per (repo, contributor)
+#   contributor-commits.status.csv — per-repo fetch status sidecar
 
-# Per-repo concentration summary
-CONCENTRATION_FILE = "data/concentration-data.csv"
-CONCENTRATION_FIELDS = [
-    "repo", "repo_id",
-    "total_commits", "total_contributors", "active_contributors",
-    "bus_factor", "hhi", "fetched_at",
-]
+GH_CONTRIB_FILE = "data/github/contributor-commits.csv"
+GH_CONTRIB_STATUS_FILE = "data/github/contributor-commits.status.csv"
+GH_CONTRIB_FIELDS = ["repo", "login", "contributions", "account_type"]
+GH_CONTRIB_STATUS_FIELDS = ["repo", "repo_id", "status", "n_contributors", "fetched_at"]
+
 CONCENTRATION_TTL_DAYS = 90  # rows older than this get re-fetched
 GH_REPOS_FILE = "data/github/repos.csv"
 
@@ -49,8 +52,7 @@ GH_REPOS_FILE = "data/github/repos.csv"
 def _load_repo_id_map() -> dict[str, str]:
     """Return {repo_lowercased: numeric_repo_id} from data/github/repos.csv.
 
-    Empty if the file doesn't exist — concentration-data.csv falls back
-    to empty string for repo_id in that case.
+    Empty if the file doesn't exist.
     """
     if not os.path.exists(GH_REPOS_FILE):
         return {}
@@ -65,17 +67,15 @@ def _load_repo_id_map() -> dict[str, str]:
 
 
 def _recently_fetched_repos(ttl_days: int = CONCENTRATION_TTL_DAYS) -> set[str]:
-    """Return repos in concentration-data.csv whose `fetched_at` is within TTL.
+    """Return repos in contributor-commits.status.csv whose `fetched_at` is within TTL.
 
-    Used as the freshness skip filter — repos with a fresh row in this file
-    are considered up-to-date and don't need to be re-fetched. Bypassed by
-    `--force` on the CLI.
+    Used as the freshness skip filter. Bypassed by `--force` on the CLI.
     """
-    if not os.path.exists(CONCENTRATION_FILE):
+    if not os.path.exists(GH_CONTRIB_STATUS_FILE):
         return set()
     cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=ttl_days)
     fresh: set[str] = set()
-    with open(CONCENTRATION_FILE, encoding="utf-8") as f:
+    with open(GH_CONTRIB_STATUS_FILE, encoding="utf-8") as f:
         for row in csv_mod.DictReader(f):
             ts_str = (row.get("fetched_at") or "").strip()
             repo = (row.get("repo") or "").strip()
@@ -92,63 +92,104 @@ def _recently_fetched_repos(ttl_days: int = CONCENTRATION_TTL_DAYS) -> set[str]:
     return fresh
 
 
-def _upsert_concentration_data(
-    batch: list[tuple[str, list[tuple[str, RunResult]]]],
-    batch_labels: list[str],
+def _upsert_contributor_commits(
+    batch: list[tuple[str, list[dict] | None]],
 ) -> None:
-    """Upsert per-repo concentration summary rows into data/concentration-data.csv.
+    """Upsert raw per-contributor rows into contributor-commits.csv and the status sidecar.
 
-    One row per repo with the bus-factor "weakest link":
-        repo, repo_id, min_commits, min_contributor, bus_factor, hhi, fetched_at
+    `batch` is a list of (repo, raw_contributors_list_or_None).
+    - None  → status "error",  no long rows written for that repo.
+    - []    → status "empty",  no long rows written.
+    - [..] → status "ok",    one long row per contributor dict.
 
-    `min_contributor` is the login of the contributor with the lowest commit
-    count among the bus-factor-many top contributors — i.e. the marginal
-    person whose departure would still leave the project viable. `min_commits`
-    is their commit count.
+    Each contributor dict from the API has at minimum: login, contributions, type.
+
+    Both files are upserts: load existing rows, replace rows for repos in this
+    batch, keep all other repos, rewrite sorted by repo. Writes are atomic
+    (temp file + os.replace).
     """
     if not batch:
-        return
-
-    agg_label = batch_labels[0] if batch_labels else None
-    if agg_label is None:
         return
 
     repo_ids = _load_repo_id_map()
     fetched_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
 
-    existing: dict[str, dict[str, str]] = {}
-    if os.path.exists(CONCENTRATION_FILE):
-        with open(CONCENTRATION_FILE, encoding="utf-8") as f:
+    # Load existing long rows (keyed by repo for replacement)
+    existing_contribs: dict[str, list[dict]] = {}
+    if os.path.exists(GH_CONTRIB_FILE):
+        with open(GH_CONTRIB_FILE, encoding="utf-8") as f:
             for row in csv_mod.DictReader(f):
-                existing[row["repo"]] = row
+                r = (row.get("repo") or "").strip()
+                if r:
+                    existing_contribs.setdefault(r, []).append(row)
 
-    for repo, year_results in batch:
-        agg = next((r for label, r in year_results if label == agg_label), None)
-        if agg is None or not agg.contributors:
-            continue
-        humans = [c for c in agg.contributors if not c.is_bot]
-        if not humans or agg.bus_factor == 0:
-            continue
-        existing[repo] = {
-            "repo": repo,
-            "repo_id": repo_ids.get(repo, existing.get(repo, {}).get("repo_id", "")),
-            "total_commits": str(agg.total_commits) if agg.total_commits is not None else "",
-            "total_contributors": (
-                str(agg.total_contributors) if agg.total_contributors is not None else ""
-            ),
-            "active_contributors": str(len(humans)),
-            "bus_factor": str(agg.bus_factor),
-            "hhi": str(round(agg.hhi * 10000)),
-            "fetched_at": fetched_at,
-        }
+    # Load existing status rows
+    existing_status: dict[str, dict] = {}
+    if os.path.exists(GH_CONTRIB_STATUS_FILE):
+        with open(GH_CONTRIB_STATUS_FILE, encoding="utf-8") as f:
+            for row in csv_mod.DictReader(f):
+                r = (row.get("repo") or "").strip()
+                if r:
+                    existing_status[r] = row
 
-    os.makedirs(os.path.dirname(CONCENTRATION_FILE) or ".", exist_ok=True)
-    with open(CONCENTRATION_FILE, "w", newline="", encoding="utf-8") as f:
-        writer = csv_mod.DictWriter(f, fieldnames=CONCENTRATION_FIELDS,
-                                    extrasaction="ignore")
-        writer.writeheader()
-        for repo in sorted(existing):
-            writer.writerow(existing[repo])
+    for repo, contributors in batch:
+        if contributors is None:
+            # error — record status, leave long rows untouched
+            existing_status[repo] = {
+                "repo": repo,
+                "repo_id": repo_ids.get(repo, existing_status.get(repo, {}).get("repo_id", "")),
+                "status": "error",
+                "n_contributors": "0",
+                "fetched_at": fetched_at,
+            }
+            existing_contribs.pop(repo, None)
+        else:
+            new_rows = [
+                {
+                    "repo": repo,
+                    "login": (c.get("login") or "").lower(),
+                    "contributions": str(int(c.get("contributions") or 0)),
+                    "account_type": c.get("type") or "",
+                }
+                for c in contributors
+            ]
+            existing_contribs[repo] = new_rows
+            status = "ok" if new_rows else "empty"
+            existing_status[repo] = {
+                "repo": repo,
+                "repo_id": repo_ids.get(repo, existing_status.get(repo, {}).get("repo_id", "")),
+                "status": status,
+                "n_contributors": str(len(new_rows)),
+                "fetched_at": fetched_at,
+            }
+
+    # Atomic write — long file
+    os.makedirs(os.path.dirname(GH_CONTRIB_FILE), exist_ok=True)
+    _atomic_write_csv(GH_CONTRIB_FILE, GH_CONTRIB_FIELDS,
+                      [row for repo in sorted(existing_contribs)
+                       for row in existing_contribs[repo]])
+
+    # Atomic write — status file
+    _atomic_write_csv(GH_CONTRIB_STATUS_FILE, GH_CONTRIB_STATUS_FIELDS,
+                      [existing_status[repo] for repo in sorted(existing_status)])
+
+
+def _atomic_write_csv(path: str, fields: list[str], rows: list[dict]) -> None:
+    """Write rows to path atomically via a temp file + os.replace."""
+    dir_ = os.path.dirname(path) or "."
+    fd, tmp = tempfile.mkstemp(dir=dir_, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", newline="", encoding="utf-8") as f:
+            writer = csv_mod.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(rows)
+        os.replace(tmp, path)
+    except Exception:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def _load_repos_from_csv(filepath: str) -> list[str]:
@@ -185,27 +226,25 @@ def _load_repos_from_csv(filepath: str) -> list[str]:
 async def batch_update(
     repos: list[str],
     threshold: float = THRESHOLD,
-    include_bots: bool = False, limit: int | None = None,
+    include_bots: bool = False,
+    limit: int | None = None,
     force: bool = False,
 ) -> None:
-    """Fetch and update metrics for multiple repos in parallel.
+    """Fetch raw /contributors payload for multiple repos in parallel.
 
     Uses GitHub's /repos/{owner}/{repo}/contributors endpoint (lifetime
-    contribution totals). The historical /stats/contributors path was
-    abandoned because it returns 202 forever for ~90% of repos, leaving
-    contributor metrics empty. Results are written to concentration-data.csv.
+    contribution totals). Results are written to data/github/contributor-commits.csv
+    and data/github/contributor-commits.status.csv.
+
+    `threshold` and `include_bots` are accepted for CLI compatibility but are
+    not used here — metric computation is delegated to build_concentration.py.
     """
     import random
-    from src.github.fetch_contributors_metrics import compute_lifetime_metrics
 
     t_start = time.monotonic()
 
-    # Freshness gate: repos with a row in concentration-data.csv that's
-    # younger than CONCENTRATION_TTL_DAYS are considered up-to-date and
-    # skipped. `--force` bypasses this. Repos missing from the file (or
-    # with stale timestamps) are re-fetched. This replaces the older
-    # "any-data-present-in-bus-factor.csv" skip — that one couldn't
-    # distinguish 1-day-old from 1-year-old data.
+    # Freshness gate: repos with a fresh status row are skipped.
+    # `--force` bypasses this.
     fresh_repos = set() if force else _recently_fetched_repos()
     to_fetch = [r for r in repos if r not in fresh_repos]
     skipped = len(repos) - len(to_fetch)
@@ -223,38 +262,32 @@ async def batch_update(
 
     limiter = _AsyncRateLimiter()
     sem = asyncio.Semaphore(10)
-    total_label = "2021-2025"
-    # /contributors doesn't have the 202-forever pathology, so we don't
-    # need multi-round retries. A single round with a small inner-retry
-    # for transient network errors is sufficient.
     MAX_ROUNDS = 2
     ROUND_DELAY = 5
 
     @dataclass
     class _RepoResult:
         repo: str
-        year_results: list[tuple[str, RunResult]] | None
+        data: list[dict] | None  # None = error; [] = empty; [...] = ok
         elapsed: float
         error: str = ""
         rounds: int = 1
 
     async def _try_one(repo: str):
-        """Fetch /contributors + total commit count + total contributor count
-        in parallel for one repo. Returns (repo, data, total_commits,
-        total_contribs, error, elapsed)."""
+        """Fetch /contributors for one repo. Returns (repo, data, error, elapsed)."""
         async with sem:
             t = time.monotonic()
             try:
-                data, total_commits, total_contribs = await asyncio.gather(
+                data, _total_commits, _total_contribs = await asyncio.gather(
                     _fetch_contributors_paginated(session, limiter, repo),
                     _fetch_total_commits(session, limiter, repo),
                     _fetch_total_contributors(session, limiter, repo),
                 )
-                return (repo, data, total_commits, total_contribs, "", time.monotonic() - t)
+                return (repo, data, "", time.monotonic() - t)
             except _Deferred:
-                return (repo, None, None, None, "", time.monotonic() - t)
+                return (repo, None, "", time.monotonic() - t)
             except RuntimeError as e:
-                return (repo, None, None, None, str(e), time.monotonic() - t)
+                return (repo, None, str(e), time.monotonic() - t)
 
     results: list[_RepoResult] = []
     repo_api_time: dict[str, float] = defaultdict(float)
@@ -275,12 +308,8 @@ async def batch_update(
             pad = " " * name_width
             task = progress.add_task(f"{pad} ...", total=len(to_fetch))
 
-            # Flush after every result so partial progress is durable on
-            # disk and visible to readers immediately. The cost is one full
-            # rewrite of each wide CSV per repo; on ~900-row files that's
-            # ~1MB × 6 files per write, dwarfed by the GitHub API wait.
             FLUSH_EVERY = 1
-            pending_flush: list[tuple[str, list[tuple[str, RunResult]]]] = []
+            pending_flush: list[tuple[str, list[dict] | None]] = []
             pending_repos = list(to_fetch)
 
             for round_num in range(MAX_ROUNDS):
@@ -296,36 +325,31 @@ async def batch_update(
                 deferred: list[str] = []
                 coros = [_try_one(repo) for repo in pending_repos]
                 for coro in asyncio.as_completed(coros):
-                    repo, data, total_commits, total_contribs, error, api_time = await coro
+                    repo, data, error, api_time = await coro
                     repo_api_time[repo] += api_time
 
                     if error:
-                        results.append(_RepoResult(repo=repo, year_results=None,
-                                                   elapsed=repo_api_time[repo], error=error,
-                                                   rounds=round_num + 1))
+                        rr = _RepoResult(repo=repo, data=None,
+                                         elapsed=repo_api_time[repo], error=error,
+                                         rounds=round_num + 1)
+                        results.append(rr)
+                        pending_flush.append((repo, None))
                     elif data is None:
                         deferred.append(repo)
                         continue
                     else:
-                        yr = compute_lifetime_metrics(
-                            data, total_commits=total_commits,
-                            total_contributors=total_contribs,
-                            label=total_label,
-                            threshold=threshold, include_bots=include_bots,
-                        )
-                        rr = _RepoResult(repo=repo, year_results=yr,
+                        rr = _RepoResult(repo=repo, data=data,
                                          elapsed=repo_api_time[repo], rounds=round_num + 1)
                         results.append(rr)
-                        pending_flush.append((rr.repo, rr.year_results))
+                        pending_flush.append((repo, data))
 
                     if len(pending_flush) >= FLUSH_EVERY:
-                        _upsert_concentration_data(pending_flush, ["2021-2025"])
+                        _upsert_contributor_commits(pending_flush)
                         pending_flush.clear()
 
                     label = repo[:name_width].ljust(name_width)
                     progress.update(task, completed=len(results),
                                     description=f"{label} ({len(results)}/{len(to_fetch)})")
-                    # Periodic stdout marker so non-TTY (background) runs show progress
                     if len(results) % 25 == 0 or len(results) == len(to_fetch):
                         console.print(
                             f"[dim]{len(results)}/{len(to_fetch)}  ({repo})[/dim]"
@@ -337,57 +361,45 @@ async def batch_update(
                              round_num + 1, len(results), len(deferred))
 
             for repo in pending_repos:
-                yr = compute_lifetime_metrics(
-                    [], total_commits=None, total_contributors=None,
-                    label=total_label,
-                    threshold=threshold, include_bots=include_bots,
-                )
-                rr = _RepoResult(repo=repo, year_results=yr,
+                rr = _RepoResult(repo=repo, data=[],
                                  elapsed=repo_api_time[repo], rounds=MAX_ROUNDS)
                 results.append(rr)
-                pending_flush.append((rr.repo, rr.year_results))
-                log.warning("%s: no contributors after %d rounds, treating as empty", repo, MAX_ROUNDS)
+                pending_flush.append((repo, []))
+                log.warning("%s: no contributors after %d rounds, treating as empty",
+                            repo, MAX_ROUNDS)
 
             if pending_flush:
-                _upsert_concentration_data(pending_flush, ["2021-2025"])
+                _upsert_contributor_commits(pending_flush)
                 pending_flush.clear()
 
     # Results table
-    errors = sum(1 for r in results if r.year_results is None)
+    errors = sum(1 for r in results if r.error)
     elapsed = time.monotonic() - t_start
 
     table = Table(show_header=True, header_style="bold dim", padding=(0, 1))
     table.add_column("Repo", min_width=20)
-    table.add_column("BF", justify="right")
-    table.add_column("HHI", justify="right")
-    table.add_column("Contribs", justify="right")
-    table.add_column("Commits", justify="right")
+    table.add_column("Contributors", justify="right")
     table.add_column("Time", justify="right", style="dim")
 
     results.sort(key=lambda r: to_fetch.index(r.repo))
 
     for i, rr in enumerate(results):
         is_last = i == len(results) - 1
-        if rr.year_results is None:
-            table.add_row(rr.repo, "[red]error[/red]", "", "", "", f"{rr.elapsed:.1f}s",
+        if rr.error:
+            table.add_row(rr.repo, "[red]error[/red]", f"{rr.elapsed:.1f}s",
                           end_section=is_last)
-            continue
-        total_r = next((r for label, r in rr.year_results if label == total_label), None)
-        if total_r is None:
-            continue
-        humans = [c for c in total_r.contributors if not c.is_bot]
-        total_commits = sum(c.commits for c in humans)
-        table.add_row(
-            rr.repo,
-            f"[yellow bold]{total_r.bus_factor}[/yellow bold]" if total_r.bus_factor > 0 else "[dim]–[/dim]",
-            f"{round(total_r.hhi * 10000):,}" if total_r.hhi > 0 else "[dim]–[/dim]",
-            _fmt_contribs_label(total_r.contributors) if humans else "[dim]–[/dim]",
-            f"{total_commits:,}" if total_commits else "[dim]–[/dim]",
-            f"{rr.elapsed:.1f}s",
-            end_section=is_last,
-        )
+        elif rr.data is not None:
+            table.add_row(
+                rr.repo,
+                str(len(rr.data)) if rr.data else "[dim]0[/dim]",
+                f"{rr.elapsed:.1f}s",
+                end_section=is_last,
+            )
+        else:
+            table.add_row(rr.repo, "[dim]–[/dim]", f"{rr.elapsed:.1f}s",
+                          end_section=is_last)
 
-    ok_results = [r for r in results if r.year_results is not None]
+    ok_results = [r for r in results if not r.error]
     times = [r.elapsed for r in results]
     avg_time = sum(times) / len(times) if times else 0
     max_time = max(times) if times else 0
@@ -395,22 +407,22 @@ async def batch_update(
 
     table.add_row(
         f"[dim]{len(ok_results)} repos[/dim]",
-        "", "", "", "",
+        "",
         f"[bold]{elapsed:.1f}s[/bold]",
     )
     table.add_row(
         "[dim]avg / min / max[/dim]",
-        "", "", "", "",
+        "",
         f"[dim]{avg_time:.1f} / {min_time:.1f} / {max_time:.1f}s[/dim]",
     )
     table.add_row(
         "[dim]API calls[/dim]",
-        "", "", "", "",
+        "",
         f"[dim]{limiter.requests_made}[/dim]",
     )
     table.add_row(
         "[dim]skipped / errors[/dim]",
-        "", "", "", "",
+        "",
         f"[dim]{skipped} / {errors}[/dim]",
     )
 
