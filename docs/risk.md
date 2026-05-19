@@ -5,7 +5,7 @@ codebase complexity, and issue-tracker dynamics over the last 5 years.
 
 ## Metrics Roadmap
 
-Target shape of inputs per dimension. Each leaf = one metric, with its data
+Inputs per dimension, current as of the last pipeline run. Each leaf = one metric, with its data
 source and the time period it represents.
 
 > **Note:** `[2025 EOY]` means *as of the last commit to the default (main)
@@ -15,44 +15,50 @@ source and the time period it represents.
 ```
 Risk
 │
-├── Concentration                  (two methods — see build_concentration)
-│   ├── *_commits_git             ← git log on a local clone          [lifetime]
-│   ├── *_commits_git_2021_2025   ← git log, windowed                 [2021–2025]
-│   └── *_commits_github          ← GitHub /contributors API          [lifetime]
+├── Concentration  →  data/concentration.csv
+│   ├── total_commits        ← git-clone log · GitHub /contributors      [lifetime]
+│   ├── active_contributors  ← derived (merged non-bot identities)       [lifetime · 2021–2025]
+│   ├── bf_commits           ← derived (bus factor)                      [lifetime · 2021–2025]
+│   └── hhi_commits          ← derived (HHI, 0–10000)                    [lifetime · 2021–2025]
+│       (every metric resolved by two methods — git-clone log and the
+│        GitHub /contributors API — kept as parallel *_git / *_github
+│        columns; the git method also carries a 2021–2025 window)
 │
-├── Complexity
-│   ├── loc                   ← scc (sparse checkout)                 [2025 EOY]
-│   ├── sloc                  ← scc (no comments/blank)               [2025 EOY]
-│   ├── scc_complexity        ← scc cyclomatic complexity total       [2025 EOY]
-│   └── scc_density           ← scc complexity per line               [2025 EOY]
+├── Complexity  →  data/complexity.csv
+│   ├── loc, sloc                     ← scc (sparse checkout)            [2025 EOY]
+│   ├── scc_complexity, scc_density   ← scc cyclomatic total + per-line  [2025 EOY]
+│   ├── cyclomatic_{total,avg,max}    ← lizard (sparse checkout)         [2025 EOY]
+│   ├── cognitive_{total,avg,max}     ← lizard cognitive complexity      [2025 EOY]
+│   ├── churn_5y_total                ← git churn (bare clone)           [2021–2025]
+│   └── hotspot_{raw,log,percentile}  ← derived (churn × complexity)     [2025 EOY]
 │
-├── Security
-│   ├── openssf_score         ← OpenSSF Scorecard                     [2025 EOY]
-│   ├── cve_count_5y          ← OSV.dev /v1/query                     [2021–2025]
-│   └── ossfuzz_enrolled      ← oss-fuzz projects index               [most recent]
+├── Security  →  data/security.csv
+│   ├── openssf_score                 ← OpenSSF Scorecard (deps.dev fb)  [2025 EOY]
+│   ├── cve_count_5y                  ← OSV.dev /v1/query                [2021–2025]
+│   ├── ossfuzz_enrolled              ← OSS-Fuzz projects index          [most recent]
+│   ├── sast_findings_{total,error,security}  ← semgrep p/default        [2025 EOY]
+│   └── bestpractices_badge_id        ← deps.dev (OpenSSF Best Practices) [most recent]
 │
-├── Funding
-│   ├── github_sponsors       ← GitHub Sponsors API                   [most recent]
-│   ├── funding.yml data      ← repo /.github/FUNDING.yml             [most recent]
-│   ├── funding.json data     ← repo /funding.json (FLOSS/fund spec)  [most recent]
-│   └── foundation_host       ← data/foundations/ (Apache/CNCF/…)     [most recent]
+├── Funding  →  data/funding.csv
+│   ├── github_sponsors               ← GitHub Sponsors API             [most recent]
+│   ├── has_funding_yml, _yml_platforms  ← repo /.github/FUNDING.yml     [most recent]
+│   ├── has_funding_json              ← repo /funding.json (FLOSS/fund)  [most recent]
+│   └── foundation_host               ← foundation rosters (Apache/CNCF/LF/…) [most recent]
 │
-├── Visibility
-│   ├── stars                 ← GitHub /repos                         [most recent]
-│   └── forks                 ← GitHub /repos                         [most recent]
+├── Visibility  →  data/visibility.csv
+│   ├── stars                         ← GitHub /repos                   [most recent]
+│   ├── forks                         ← GitHub /repos                   [most recent]
+│   └── watchers                      ← GitHub /repos                   [most recent]
 │
-└── Maintainer workload
-    ├── repo_age              ← GitHub /repos created_at              [2025 EOY]
-    ├── active_contributors_git_2021_2025 ← concentration.csv (git method, windowed)  [2021–2025]
-    ├── openssf_maintained    ← OpenSSF Scorecard "Maintained" check  [2025 EOY]
-    ├── has_issues            ← GitHub /repos has_issues              [most recent]
-    ├── push_cadence          ← derived from commits-years.csv        [2021–2025]
-    ├── issues_opened_5y      ← GitHub Search API                     [2021–2025]
-    ├── issues_closed_5y      ← GitHub Search API                     [2021–2025]
-    ├── issue_close_ratio     ← derived (closed_5y / opened_5y)       [2021–2025]
-    ├── slope_opened          ← OLS over GitHub Search yearly         [2021–2025]
-    ├── slope_closed          ← OLS over GitHub Search yearly         [2021–2025]
-    └── issue_trend_score     ← derived (vol-normalised gap)          [2021–2025]
+└── Workload  →  data/workload.csv
+    ├── repo_age_years                ← GitHub /repos created_at        [2025 EOY]
+    ├── push_cadence_years            ← commits-years.csv (years w/ commits) [2021–2025]
+    ├── openssf_maintained            ← OpenSSF Scorecard "Maintained"   [2025 EOY]
+    ├── has_issues                    ← GitHub /repos                   [most recent]
+    ├── issues_opened_5y, issues_closed_5y  ← GitHub Search API          [2021–2025]
+    ├── issue_close_ratio, net_new_issues_5y  ← derived                 [2021–2025]
+    ├── slope_opened, slope_closed, issue_trend_score  ← derived (OLS)   [2021–2025]
+    └── loc_per_ac, cve_per_ac, nni_per_ac  ← derived (per active contrib.) [2021–2025]
 ```
 
 ### Collecting `cve_count_5y`

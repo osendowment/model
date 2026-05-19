@@ -5,7 +5,7 @@ download volume with dependency graph analysis (PageRank).
 
 ## Metrics Roadmap
 
-Target shape of inputs per dimension. Each leaf = one metric, with its data
+Inputs per dimension, current as of the last pipeline run. Each leaf = one metric, with its data
 source(s) and the time period it represents. Sources differ per ecosystem
 (npm / pypi / crates / cpp) and are listed inline.
 
@@ -56,91 +56,24 @@ Value
 │   ├── value_class               ← derived                             [2021–2025]
 │   └── package→repo              ← Repology project URLs               [most recent]
 │
-└── GitHub (cross-ecosystem rollup → value-data.csv)
-    ├── github_repo               ← per-eco package→repo union          [most recent]
-    ├── git_url                   ← per-eco git.csv union               [most recent]
+└── Cross-ecosystem rollup → value-data.csv
+    ├── id                        ← derived (rank by top_eco_pct desc)    [2021–2025]
+    ├── github_repo               ← per-eco package→repo union            [most recent]
+    ├── gh_repo_id                ← GitHub Repos API (numeric repo id)     [most recent]
+    ├── gh_valid                  ← verify_git_urls (GitHub API check)     [most recent]
+    ├── git_url                   ← per-eco git.csv union                  [most recent]
     │                                (GitLab/Codeberg/Sourcehut/Bitbucket
     │                                 /custom hosts when no GH match)
-    ├── ecosystems                ← derived (eco set per repo)          [2021–2025]
-    ├── packages                  ← derived (package count per repo)    [2021–2025]
-    ├── top_eco                   ← derived (best percentile eco)       [2021–2025]
-    ├── top_eco_pkg               ← derived (highest-PR pkg in top_eco) [2021–2025]
-    ├── top_eco_pct               ← derived (100 − pr_cum_pct, 0–100)   [2021–2025]
+    ├── git_valid                 ← verify_git_urls (`git ls-remote`)      [most recent]
+    ├── llm_guess                 ← build_git_urls (LLM-resolved repo URL) [most recent]
+    ├── ecosystems                ← derived (eco set per repo)             [2021–2025]
+    ├── packages                  ← derived (package count per repo)       [2021–2025]
+    ├── top_eco                   ← derived (best percentile eco)          [2021–2025]
+    ├── top_eco_pkg               ← derived (highest-PR pkg in top_eco)    [2021–2025]
+    ├── top_eco_pct               ← derived (100 − pr_cum_pct, 0–100)      [2021–2025]
     ├── class_{npm,pypi,crates,cpp}
-    │                              ← derived (per-eco cum-PR share)     [2021–2025]
-    └── class                     ← derived (strongest across ecos)     [2021–2025]
-```
-
-```mermaid
-graph TB
-    subgraph sources ["Data sources"]
-        direction TB
-        subgraph js ["JS / TS"]
-            direction TB
-            s1["npm Registry"]
-            s8["nice-registry"]
-        end
-        subgraph py ["Python"]
-            direction TB
-            s2a["BigQuery"]
-            s2b["PyPI API"]
-        end
-        subgraph rs ["Rust"]
-            direction TB
-            s3["crates.io DB dump"]
-        end
-        subgraph cpp ["C / C++"]
-            direction TB
-            s4["Debian popcon"]
-            s5["Homebrew analytics"]
-            s6["Repology"]
-            s7["OSS-Fuzz"]
-        end
-        subgraph shared ["Shared"]
-            direction TB
-            s9["ecosystem-downloads.csv"]
-        end
-    end
-
-    params[/"settings.json"/]
-
-    subgraph pipeline ["Per-ecosystem pipeline"]
-        direction LR
-        top["1 · Top packages<br/><i>95% cumulative downloads</i>"]
-        deps["2 · Dependency tree<br/><i>transitive expansion</i>"]
-        pr["3 · PageRank<br/><i>download-weighted</i>"]
-        vc["4 · Value classes<br/><i>by cumulative PR share</i>"]
-        top --> deps --> pr --> vc
-    end
-
-    params --> pipeline
-
-    subgraph outputs ["Outputs"]
-        direction LR
-        o1[/"top-packages.csv"/]
-        o2[/"dependency-tree.csv"/]
-        o3[/"github-repos.csv"/]
-        o4[/"results.csv"/]
-        o1 ~~~ o2 ~~~ o3 ~~~ o4
-    end
-
-    sources ==> pipeline ==> outputs
-
-    classDef js fill:#fef9c3,stroke:#ca8a04,color:#713f12;
-    classDef py fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
-    classDef rs fill:#ffedd5,stroke:#ea580c,color:#7c2d12;
-    classDef cpp fill:#e0e7ff,stroke:#6366f1,color:#312e81;
-    classDef shared fill:#f3f4f6,stroke:#6b7280,color:#111827;
-    classDef step fill:#fff7ed,stroke:#f59e0b,color:#7c2d12;
-    classDef out fill:#ecfdf5,stroke:#10b981,color:#065f46;
-    class s1,s8 js;
-    class s2a,s2b py;
-    class s3 rs;
-    class s4,s5,s6,s7 cpp;
-    class s9 shared;
-    class params shared;
-    class top,deps,pr,vc step;
-    class o1,o2,o3,o4 out;
+    │                              ← derived (per-eco cum-PR share)        [2021–2025]
+    └── class                     ← derived (strongest across ecos)        [2021–2025]
 ```
 
 ## How It Works
