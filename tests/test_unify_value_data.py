@@ -463,25 +463,32 @@ class TestAggregateByRepo:
         # Tied 1-1; URL is filtered (sponsors/); alphabetic tiebreak.
         assert aggs[0]["github_repo"] == "python-attrs/attrs"
 
-    def test_majority_github_repo_wins_over_minority(self):
-        # Real pypi case: typeshed-internal/stub_uploader.git URL has
-        # both `python/typeshed` (23 packages) and
-        # `typeshed-internal/stub_uploader` (15) members. Even though
-        # the URL slug appears in members, the majority (`python/typeshed`)
-        # should win — only ties promote the URL slug.
-        rows = [_pkg_row(f"types-pkg-{i}", "pypi",
-                         github_repo="python/typeshed",
-                         git_url="https://github.com/typeshed-internal/stub_uploader.git",
-                         pagerank="1.0")
-                for i in range(23)]
-        rows += [_pkg_row(f"stub-{i}", "pypi",
-                          github_repo="typeshed-internal/stub_uploader",
-                          git_url="https://github.com/typeshed-internal/stub_uploader.git",
-                          pagerank="1.0")
-                 for i in range(15)]
+    def test_git_url_slug_is_authoritative_over_member_field(self):
+        # The git URL (ecosyste.ms-sourced) wins over the github_repo field.
+        # Real case: the `influxdb` package's github_repo field is wrong
+        # (`simplejson/simplejson`) but its git URL correctly names
+        # influxdb/influxdb-python.
+        rows = [
+            _pkg_row("influxdb", "pypi", github_repo="simplejson/simplejson",
+                     git_url="https://github.com/influxdb/influxdb-python.git",
+                     pagerank="1.0"),
+        ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         assert len(aggs) == 1
-        assert aggs[0]["github_repo"] == "python/typeshed"
+        assert aggs[0]["github_repo"] == "influxdb/influxdb-python"
+
+    def test_git_url_slug_beats_member_field_majority(self):
+        # Even a unanimous github_repo field loses to a usable git URL slug.
+        # (typeshed's stub packages name python/typeshed but their git URL
+        # is the stub_uploader repo; the URL wins here — value-repo-
+        # overrides.csv is what restores python/typeshed in production.)
+        rows = [_pkg_row(f"types-{i}", "pypi", github_repo="python/typeshed",
+                         git_url="https://github.com/typeshed-internal/stub_uploader.git",
+                         pagerank="1.0")
+                for i in range(5)]
+        aggs = aggregate_by_repo(rows, drop_d_class=False)
+        assert len(aggs) == 1
+        assert aggs[0]["github_repo"] == "typeshed-internal/stub_uploader"
 
     def test_packages_count_matches_membership(self):
         rows = [_pkg_row(f"p{i}", "npm", github_repo="x/y", pagerank=str(i))

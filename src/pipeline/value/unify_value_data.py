@@ -242,36 +242,30 @@ def _github_repo_from_url(url: str) -> str:
 def _select_group_github_repo(members: list[dict], git_url: str) -> str:
     """Pick the group's `github_repo`.
 
-    Strategy: take the most common `github_repo` among members
-    (alphabetic tiebreak), then promote the url-derived slug when it's
-    among the tied winners.
+    The `git` URL is authoritative: when it yields a parseable GitHub slug
+    (reserved namespaces filtered by `_github_repo_from_url`), that slug is
+    the repo identity. The `github_repo` field is only a fallback, for
+    groups whose `git` URL is a non-GitHub host or absent (orphans).
 
-    Why "most common" and not "first non-empty": some upstream rows
-    disagree on what the `github_repo` should be (~90 such rows in
-    pypi+cpp). When most members agree on slug X but a stray row says
-    Y, we want X — and "first non-empty" picks whatever the iteration
-    order happened to put first. Ties are broken alphabetically for
-    determinism, except when the url-derived slug is one of the tied
-    candidates: then we prefer it (e.g. for a 1-vs-1 fork-vs-main split,
-    the URL is the source of truth).
+    Rationale: `git` is backfilled from ecosyste.ms, a purpose-built
+    package→repository service; the `github_repo` field is a weaker guess
+    that is sometimes flat wrong (e.g. the `influxdb` package tagged
+    `simplejson/simplejson`). Cases where the git URL is itself stale or
+    points at a fork are corrected by `value-repo-overrides.csv`, applied
+    later in `aggregate_by_repo` — not patched here.
 
-    Real cases this disambiguates correctly:
-      - opentelemetry-python-contrib (22 right, 1 wrong) → contrib wins
-      - python/typeshed (23) vs typeshed-internal/stub_uploader (15)
-        on a stub_uploader URL → typeshed wins (majority)
-      - attrs/python-attrs (1) vs sponsors/hynek (1) on a sponsors URL
-        → python-attrs wins (URL is filtered, alphabetic tiebreak)
+    Fallback (no usable GitHub URL): the most common `github_repo` among
+    members, alphabetic tie-break.
     """
     url_slug = _github_repo_from_url(git_url)
+    if url_slug:
+        return url_slug
     member_repos = [m["github_repo"] for m in members if m.get("github_repo")]
     if not member_repos:
         return ""
     counts = Counter(member_repos)
     top_count = counts.most_common(1)[0][1]
-    tied = [slug for slug, c in counts.items() if c == top_count]
-    if url_slug and url_slug in tied:
-        return url_slug
-    return min(tied)
+    return min(slug for slug, c in counts.items() if c == top_count)
 
 
 def _github_git_url(slug: str) -> str:
