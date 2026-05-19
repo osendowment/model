@@ -221,7 +221,7 @@ def _read_csv(path: str) -> tuple[list[str], list[dict]]:
 
 def test_top_packages_columns():
     cols, _ = _read_csv(TOP_CSV)
-    assert cols == ["package", "avg_downloads"] + YEAR_COLS
+    assert cols == ["package", "avg_downloads", "avg_downloads_share"] + YEAR_COLS
 
 
 def test_top_packages_non_empty():
@@ -258,7 +258,11 @@ def test_github_repos_non_empty():
 
 def test_results_columns():
     cols, _ = _read_csv(RESULTS_CSV)
-    expected = ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank", "value_class"]
+    expected = (
+        ["package", "github_repo", "git", "eco_guess", "llm_guess", "avg_downloads"]
+        + YEAR_COLS
+        + ["top", "pagerank", "value_class", "license"]
+    )
     assert cols == expected
 
 
