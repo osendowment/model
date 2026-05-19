@@ -92,10 +92,9 @@ def compute_lifetime_metrics(
     """Compute BF/HHI from /repos/{owner}/{repo}/contributors output.
 
     `total_commits` and `total_contributors` are recorded on the
-    RunResult for downstream reporting (the lifetime-count columns in
-    concentration-data.csv) but do NOT affect BF/HHI — those are computed
-    purely from the visible non-bot contributors' own commit shares (see
-    `_compute_bus_factor`).
+    RunResult for downstream reporting but do NOT affect BF/HHI — those
+    are computed purely from the visible non-bot contributors' own commit
+    shares (see `_compute_bus_factor`).
     """
     contributors: list[Contributor] = []
     for c in contributors_data:
