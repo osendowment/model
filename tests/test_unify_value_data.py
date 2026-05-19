@@ -18,6 +18,7 @@ from src.pipeline.value.unify_value_data import (
     CLASS_RANK,
     ECOSYSTEMS,
     FIELDS,
+    _github_repo_from_url,
     _group_key,
     _normalise_repo,
     _read_dep_tree_nodes,
@@ -28,6 +29,29 @@ from src.pipeline.value.unify_value_data import (
     collect_ecosystem,
     write_value_data,
 )
+
+
+# ── _github_repo_from_url ────────────────────────────────────────────────────
+
+class TestGithubRepoFromUrl:
+    def test_extracts_owner_repo(self):
+        assert _github_repo_from_url("https://github.com/psf/requests") == "psf/requests"
+
+    def test_strips_dot_git_and_trailing_slash(self):
+        assert _github_repo_from_url("https://github.com/psf/requests.git") == "psf/requests"
+        assert _github_repo_from_url("https://github.com/psf/requests/") == "psf/requests"
+
+    def test_non_github_or_empty_returns_blank(self):
+        assert _github_repo_from_url("") == ""
+        assert _github_repo_from_url("https://gitlab.com/x/y") == ""
+
+    def test_reserved_namespaces_are_not_repos(self):
+        # owner/repo-shaped but not repositories — must not become a slug.
+        assert _github_repo_from_url("https://github.com/sponsors/hynek") == ""
+        assert _github_repo_from_url("https://github.com/orgs/scikit-build") == ""
+        assert _github_repo_from_url("https://github.com/topics/python") == ""
+        # a real repo whose owner merely resembles a reserved word is fine.
+        assert _github_repo_from_url("https://github.com/orgsync/react-list") == "orgsync/react-list"
 
 
 # ── small unit helpers ───────────────────────────────────────────────────────

@@ -199,14 +199,25 @@ def _group_key(row: dict) -> str:
 
 _GITHUB_URL_RE = re.compile(r"^https?://github\.com/([^/]+/[^/]+?)(?:\.git)?/?$")
 
+# GitHub paths shaped like `owner/repo` that are NOT repositories — some
+# package `git` URLs point at these. `sponsors/<user>` is a sponsorship
+# page; `orgs/<org>` an organisation landing page; `topics`/`collections`/
+# `marketplace` are discovery pages. Treating any as a repo slug corrupts
+# the group's `github_repo` (e.g. github.com/orgs/scikit-build would parse
+# to the bogus slug `orgs/scikit-build`).
+_GITHUB_RESERVED_NAMESPACES = frozenset(
+    {"sponsors", "orgs", "topics", "collections", "marketplace"}
+)
+
 
 def _github_repo_from_url(url: str) -> str:
     """Extract `owner/repo` from a github.com URL; '' otherwise.
 
-    `github.com/sponsors/<user>` is filtered out — that's a sponsorship
-    page, not a repo namespace, and a handful of pypi packages (`attrs`,
-    pydantic, etc.) carry such URLs in their `git` field. Treating those
-    as a repo slug would corrupt the group's `github_repo`.
+    URLs under a GitHub reserved namespace (`sponsors/`, `orgs/`, …) are
+    filtered out — they look like `owner/repo` but are not repos, and a
+    handful of pypi packages (`attrs`, pydantic, etc.) carry such URLs in
+    their `git` field. Treating those as a repo slug would corrupt the
+    group's `github_repo`.
     """
     if not url:
         return ""
@@ -214,7 +225,7 @@ def _github_repo_from_url(url: str) -> str:
     if not m:
         return ""
     slug = m.group(1)
-    if slug.startswith("sponsors/"):
+    if slug.split("/", 1)[0] in _GITHUB_RESERVED_NAMESPACES:
         return ""
     return slug
 
