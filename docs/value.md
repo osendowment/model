@@ -56,16 +56,16 @@ Value
 │   ├── value_class               ← derived                             [2021–2025]
 │   └── package→repo              ← Repology project URLs               [most recent]
 │
-└── Cross-ecosystem rollup → value-data.csv
+└── Cross-ecosystem rollup → value/value.csv
     ├── id                        ← derived (rank by top_eco_pct desc)    [2021–2025]
     ├── github_repo               ← per-eco package→repo union            [most recent]
     ├── gh_repo_id                ← GitHub Repos API (numeric repo id)     [most recent]
-    ├── gh_valid                  ← verify_git_urls (GitHub API check)     [most recent]
     ├── git_url                   ← per-eco git.csv union                  [most recent]
     │                                (GitLab/Codeberg/Sourcehut/Bitbucket
     │                                 /custom hosts when no GH match)
-    ├── git_valid                 ← verify_git_urls (`git ls-remote`)      [most recent]
-    ├── llm_guess                 ← build_git_urls (LLM-resolved repo URL) [most recent]
+    ├── valid                     ← build_validation (True/False/empty)    [most recent]
+    │                                (rollup of GitHub API + git ls-remote
+    │                                 caches → value/validation.csv)
     ├── ecosystems                ← derived (eco set per repo)             [2021–2025]
     ├── packages                  ← derived (package count per repo)       [2021–2025]
     ├── top_eco                   ← derived (best percentile eco)          [2021–2025]

@@ -91,9 +91,9 @@ def load_risk_repos(
     (default {A, B}).
 
     - Keeps rows with `class` in RISK_INPUT_CLASSES and a non-empty
-      `github_repo`. All such rows are assumed valid; `gh_valid` is not
-      gated by default. Pass `skip_invalid=True` to opt back into dropping
-      `gh_valid` != True (404) rows.
+      `github_repo`. All such rows are assumed valid; the unified `valid`
+      column is not gated by default. Pass `skip_invalid=True` to opt back
+      into dropping `valid` != True (failed/404 targets).
     - Slugs are canonicalised against `github/repos.csv` `full_name`, so a
       renamed repo (`gozala/events`) resolves to its current name
       (`browserify/events`) — the form the Search API and downstream joins need.
@@ -113,7 +113,7 @@ def load_risk_repos(
             raw = (row.get("github_repo") or "").strip().lower()
             if not raw:
                 continue
-            if skip_invalid and (row.get("gh_valid") or "").strip() != "True":
+            if skip_invalid and (row.get("valid") or "").strip() != "True":
                 continue
             slug = canon.get(raw, raw)  # resolve renamed repos to current name
             if slug not in chosen or _RANK.get(cls, 0) > _RANK.get(chosen[slug], 0):

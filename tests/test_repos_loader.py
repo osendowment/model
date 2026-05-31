@@ -14,11 +14,11 @@ def _write(path, header, rows):
 
 def test_load_risk_repos_filters_classes_and_enriches(tmp_path, monkeypatch):
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "gh_valid", "class"], [
-        {"github_repo": "Owner/A", "gh_valid": "True", "class": "A"},
-        {"github_repo": "owner/b", "gh_valid": "True", "class": "B"},
-        {"github_repo": "owner/c", "gh_valid": "True", "class": "C"},
-        {"github_repo": "", "gh_valid": "True", "class": "A"},
+    _write(value, ["github_repo", "valid", "class"], [
+        {"github_repo": "Owner/A", "valid": "True", "class": "A"},
+        {"github_repo": "owner/b", "valid": "True", "class": "B"},
+        {"github_repo": "owner/c", "valid": "True", "class": "C"},
+        {"github_repo": "", "valid": "True", "class": "A"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
@@ -33,28 +33,28 @@ def test_load_risk_repos_filters_classes_and_enriches(tmp_path, monkeypatch):
     assert out[0].value_class == "A"
 
 
-def test_load_risk_repos_ignores_gh_valid_by_default(tmp_path, monkeypatch):
-    """gh_valid is no longer gated by default — all in-class rows are kept."""
+def test_load_risk_repos_ignores_valid_by_default(tmp_path, monkeypatch):
+    """valid is no longer gated by default — all in-class rows are kept."""
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "gh_valid", "class"], [
-        {"github_repo": "owner/live", "gh_valid": "True", "class": "A"},
-        {"github_repo": "owner/dead", "gh_valid": "False", "class": "A"},
-        {"github_repo": "owner/blank", "gh_valid": "", "class": "B"},
+    _write(value, ["github_repo", "valid", "class"], [
+        {"github_repo": "owner/live", "valid": "True", "class": "A"},
+        {"github_repo": "owner/dead", "valid": "False", "class": "A"},
+        {"github_repo": "owner/blank", "valid": "", "class": "B"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [])
     monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
     out = repos.load_risk_repos(value_file=str(value), repos_file=str(gh))
     assert {e.repo for e in out} == {"owner/live", "owner/dead", "owner/blank"}
-    # opting back in still filters on gh_valid
+    # opting back in still filters on valid
     opted = repos.load_risk_repos(value_file=str(value), repos_file=str(gh), skip_invalid=True)
     assert {e.repo for e in opted} == {"owner/live"}
 
 
 def test_load_risk_repos_keeps_archived_when_flag_off(tmp_path, monkeypatch):
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "gh_valid", "class"], [
-        {"github_repo": "owner/b", "gh_valid": "True", "class": "B"},
+    _write(value, ["github_repo", "valid", "class"], [
+        {"github_repo": "owner/b", "valid": "True", "class": "B"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
@@ -67,9 +67,9 @@ def test_load_risk_repos_keeps_archived_when_flag_off(tmp_path, monkeypatch):
 
 def test_load_risk_repos_dedup_highest_class_wins(tmp_path, monkeypatch):
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "gh_valid", "class"], [
-        {"github_repo": "owner/dup", "gh_valid": "True", "class": "B"},
-        {"github_repo": "Owner/Dup", "gh_valid": "True", "class": "A"},
+    _write(value, ["github_repo", "valid", "class"], [
+        {"github_repo": "owner/dup", "valid": "True", "class": "B"},
+        {"github_repo": "Owner/Dup", "valid": "True", "class": "A"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
@@ -84,8 +84,8 @@ def test_load_risk_repos_dedup_highest_class_wins(tmp_path, monkeypatch):
 def test_load_risk_repos_canonicalises_renamed_repo(tmp_path, monkeypatch):
     """A stale slug in value-data.csv resolves to the repo's current name."""
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "gh_valid", "class"], [
-        {"github_repo": "gozala/events", "gh_valid": "True", "class": "A"},
+    _write(value, ["github_repo", "valid", "class"], [
+        {"github_repo": "gozala/events", "valid": "True", "class": "A"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "full_name", "archived", "size", "stars"], [
