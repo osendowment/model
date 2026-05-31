@@ -50,55 +50,21 @@ Source-specific details live in [`docs/sources/`](sources/) (one `.md` per sourc
 ## Metrics Roadmap
 
 Inputs per dimension, current as of the last pipeline run. Each leaf = one metric, with its data
-source(s) and the time period it represents. Sources differ per ecosystem
-(npm / pypi / crates / cpp) and are listed inline.
+source(s) and the time period it represents. **Per-language metric lineage now lives in the
+language component docs** — [JavaScript/npm](components/javascript.md),
+[Python/PyPI](components/python.md), [Rust/crates](components/rust.md), and
+[C/C++](components/cpp.md). The cross-ecosystem rollup that unifies them into
+`value/value.csv` is below.
 
-> **Note:** `[2025 EOY]` means *as of the last commit to the default (main)
-> branch in 2025* — not the calendar year-end snapshot. `[most recent]` means
-> the latest available pull of that source.
+> **Note:** `[2021–2025]` reflects the 5-year window; `[most recent]` means the
+> latest available pull of that source.
 
 ```
 Value
 │
-├── JavaScript / TypeScript (npm)
-│   ├── downloads_2021..2025      ← api.npmjs.org/downloads             [2021–2025]
-│   ├── avg_downloads             ← derived (mean over populated years) [2021–2025]
-│   ├── avg_downloads_share       ← derived (pkg / ecosystem total)     [2021–2025]
-│   ├── top                       ← derived (95% cum-download cutoff)   [2021–2025]
-│   ├── dep edges (package→dep)   ← registry.npmjs.org                  [most recent]
-│   ├── pagerank                  ← derived (DL-weighted PR, α=0.85)    [2021–2025]
-│   ├── value_class               ← derived (A/B/C/D, cum-PR share)     [2021–2025]
-│   └── package→repo              ← nice-registry                       [most recent]
-│
-├── Python (PyPI)
-│   ├── downloads_2021..2025      ← BigQuery PyPI dataset               [2021–2025]
-│   ├── avg_downloads             ← derived                             [2021–2025]
-│   ├── avg_downloads_share       ← derived                             [2021–2025]
-│   ├── top                       ← derived (95% cum-download cutoff)   [2021–2025]
-│   ├── dep edges (package→dep)   ← pypi.org/pypi/{p}/json              [most recent]
-│   ├── pagerank                  ← derived                             [2021–2025]
-│   ├── value_class               ← derived                             [2021–2025]
-│   └── package→repo              ← BigQuery github mapping             [most recent]
-│
-├── Rust (crates.io)
-│   ├── downloads_2021..2025      ← crates.io daily archives            [2021–2025]
-│   ├── avg_downloads             ← derived                             [2021–2025]
-│   ├── avg_downloads_share       ← derived                             [2021–2025]
-│   ├── top                       ← derived (95% cum-download cutoff)   [2021–2025]
-│   ├── dep edges (package→dep)   ← crates.io DB-dump dependencies      [most recent]
-│   ├── pagerank                  ← derived                             [2021–2025]
-│   ├── value_class               ← derived                             [2021–2025]
-│   └── package→repo              ← DB-dump `repository` field          [most recent]
-│
-├── C / C++ (Debian + Homebrew + Repology)
-│   ├── debian_avg_downloads      ← Debian popcon (Wayback snapshots)   [2021–2025]
-│   ├── homebrew_avg_downloads    ← Homebrew analytics (Wayback)        [2021–2025]
-│   ├── downloads_score           ← derived (debian + homebrew composite)[2021–2025]
-│   ├── dep edges (package→dep)   ← Debian Packages.xz (Depends/Pre-)   [most recent]
-│   │                                + Homebrew formula.json (runtime)  [most recent]
-│   ├── pagerank                  ← derived                             [2021–2025]
-│   ├── value_class               ← derived                             [2021–2025]
-│   └── package→repo              ← Repology project URLs               [most recent]
+├── Per-language value pipelines      → components/{javascript,python,rust,cpp}.md
+│       downloads → top (95% cum-dl) → dep tree → DL-weighted PageRank (α=0.85) → value_class
+│       (per-language metric lineage + sources live in each component doc)
 │
 └── Cross-ecosystem rollup → value/value.csv
     ├── id                        ← derived (rank by top_eco_pct desc)    [2021–2025]
@@ -201,161 +167,26 @@ numbers barely move.
 
 ## Ecosystems
 
-### npm
+Each language assembles the steps above from its own sources. The per-language
+component docs cover **what data is collected from each source and which pipeline
+stage uses it** (Value → Risk → Eligibility):
 
-**Data sources:**
-- [npm downloads API](https://api.npmjs.org/downloads/point) -- downloads per package
-- [npm registry](https://registry.npmjs.org) -- dependencies
-- [nice-registry](https://github.com/nice-registry/all-the-package-repos) -- package-to-repo mapping
+| Language | Registry / sources | Pipeline doc | Raw-fetch reference |
+|---|---|---|---|
+| JavaScript / TypeScript | npm | [components/javascript.md](components/javascript.md) | [sources/npm.md](sources/npm.md) |
+| Python | PyPI | [components/python.md](components/python.md) | [sources/pypi.md](sources/pypi.md) |
+| Rust | crates.io | [components/rust.md](components/rust.md) | [sources/crates.md](sources/crates.md) |
+| C / C++ | Debian + Homebrew + Repology + OSS-Fuzz | [components/cpp.md](components/cpp.md) | [debian](sources/debian.md) · [homebrew](sources/homebrew.md) · [repology](sources/repology.md) · [ossfuzz](sources/ossfuzz.md) |
 
-**Raw data** (`data/sources/npm/raw/`):
-- `downloads.csv` -- package, year, downloads
-- `dependencies.csv` -- package, dep_name, dep_version, fetched_at
-
-**Scripts:**
-
-| Script | Purpose |
-|--------|---------|
-| `src/sources/npm/fetch_npm_data.py` | Iterative crawler (downloads + deps) |
-| `src/sources/npm/fetch_npm_stats.py` | Ecosystem-wide annual totals |
-| `src/sources/npm/fetch_nice_registry.py` | Package-to-repo mappings |
-| `src/sources/npm/process_data.py` | Build outputs |
-
-See [sources/npm.md](sources/npm.md) for details.
-
-### PyPI
-
-**Data sources:**
-- [BigQuery PyPI dataset](https://console.cloud.google.com/marketplace/product/gcp-public-data-pypi/pypi) -- downloads (manual export, ~$235)
-- [PyPI JSON API](https://pypi.org/pypi/{package}/json) -- dependencies
-
-**Raw data** (`data/sources/pypi/`):
-- `bigquery/bq-package-downloads.csv` -- ~849K packages x 5 years
-- `raw/package-dependencies.csv` -- package, dependency, type, fetched_at
-- `raw/package-github-mapping.csv` -- package-to-GitHub URL
-
-**Scripts:**
-
-| Script | Purpose |
-|--------|---------|
-| `src/sources/pypi/fetch_pypi_data.py` | Iterative dep crawler |
-| `src/sources/pypi/process_data.py` | Build outputs |
-
-See [sources/pypi.md](sources/pypi.md) for details.
-
-### crates.io
-
-**Data sources:**
-- [crates.io DB dump](https://static.crates.io/db-dump.tar.gz) -- crate/version mappings + deps
-- [crates.io daily archives](https://static.crates.io/archive/version-downloads/) -- per-version download counts
-
-**Raw data** (`data/sources/crates/`):
-- `db-dump/` -- crates.csv, versions.csv, default_versions.csv, dependencies.csv
-- `version-downloads/YYYY-MM.csv` -- monthly per-version totals
-
-**Scripts:**
-
-| Script | Purpose |
-|--------|---------|
-| `src/sources/crates/fetch_db_dump.py` | Download + extract DB dump |
-| `src/sources/crates/fetch_version_downloads.py` | Download monthly archives |
-| `src/sources/crates/process_data.py` | Build outputs (~20s) |
-
-See [sources/crates.md](sources/crates.md) for details.
-
-### Debian
-
-**Data sources:**
-- [Debian UDD](https://udd.debian.org) -- C/C++ package list (debtags + section heuristics)
-- [Debian popcon](https://popcon.debian.org) -- install counts (via Wayback Machine)
-- [Packages.xz](https://deb.debian.org/debian/dists/stable/main/binary-amd64/Packages.xz) -- dependencies + metadata
-
-**Raw data** (`data/sources/debian/raw/`):
-- `cpp-packages.csv` -- C/C++ package universe (from UDD debtags)
-- `downloads.csv` -- package, year, downloads (from popcon snapshots)
-- `dependencies.csv` -- package, dep_name, dep_version, fetched_at
-- `package-metadata.csv` -- package, source, homepage, vcs_browser, section
-- `aliases.csv` -- t64 transition name mappings
-
-**Scripts:**
-
-| Script | Purpose |
-|--------|---------|
-| `src/sources/debian/fetch_debian_data.py` | Fetch packages, popcon, deps |
-| `src/sources/debian/process_data.py` | Build outputs |
-
-**Limitations:**
-- **Popcon is opt-in** -- only ~250K Debian machines participate, so numbers
-  are a sample of installed base, not total downloads
-- **Sparse Wayback coverage** -- only 11 snapshots available across 2021--2025,
-  with some years having only 1 snapshot (2023: Jul 2 only). Currently each
-  year picks the snapshot closest to Dec 31, but this is a rough proxy
-- **Not comparable to package manager downloads** -- popcon measures "machines
-  with package installed", not download events
-
-Available Wayback snapshots for `popcon.debian.org/by_inst.gz` (2021--2025):
-```
-2021: Sep 28, Oct 22
-2022: Sep 04, Sep 21, Sep 29, Dec 25
-2023: Jul 02
-2024: Jan 06, Dec 31
-2025: Sep 15, Nov 17
-```
-
-### Homebrew
-
-**Data sources:**
-- [Homebrew formula API](https://formulae.brew.sh/api/formula.json) -- formula list + deps
-- [Homebrew analytics](https://formulae.brew.sh/api/analytics/install/365d.json) -- 365-day rolling
-  install counts (via Wayback Machine)
-
-**Raw data** (`data/sources/homebrew/raw/`):
-- `formulas.csv` -- name, desc, homepage, source_url, license, tap, language
-- `dependencies.csv` -- formula, dep_name, dep_type, fetched_at
-- `downloads.csv` -- formula, year, downloads
-
-**Scripts:**
-
-| Script | Purpose |
-|--------|---------|
-| `src/sources/homebrew/fetch_homebrew_data.py` | Fetch formulas, analytics |
-| `src/sources/homebrew/process_data.py` | Build outputs |
-
-**Limitations:**
-- **Opt-in analytics** -- users can disable with `brew analytics off`; numbers
-  are a fraction of actual installs
-- **Rolling 365-day windows** -- each snapshot represents "installs in the 365
-  days ending at snapshot date", not a calendar year. A May 2023 snapshot is
-  used as proxy for "2022" but actually covers Jun 2022 -- May 2023
-- **Sparse + truncated snapshots** -- Wayback coverage is thin; some captures
-  are truncated at exactly 1 MB (only the high-install head is recoverable
-  via regex parsing). No usable 2021 snapshot exists
-- **Not comparable to npm/PyPI/crates** -- represents macOS install events,
-  not cross-platform package downloads
-
-Available Wayback snapshots for `analytics/install/365d.json` (2023--2026):
-```
-2023: May 09, May 31, Sep 30
-2024: May 22, Oct 07
-2025: Jan 21, Apr 27, Sep 11, Dec 05
-2026: Mar 06
-```
-No snapshots before 2023. No `install-on-request` snapshots before Sep 2022.
-
-### Other C/C++ sources
-
-- [Repology](https://repology.org) -- cross-ecosystem name mapping
-- [OSS-Fuzz](https://github.com/google/oss-fuzz) -- fuzz testing coverage
-
-**Additional raw data:**
-- `data/sources/repology/packages.csv` -- project name mappings
-- `data/sources/ossfuzz/projects.csv` -- C/C++ fuzz targets
-
-See [sources/cpp.md](sources/cpp.md), [sources/debian.md](sources/debian.md), [sources/homebrew.md](sources/homebrew.md), [sources/repology.md](sources/repology.md) for details.
+C/C++ has no single registry — it's unified from Debian and Homebrew (joined via
+Repology), which is why it has a component doc but no `sources/cpp.md`. The
+Wayback-derived install proxies (Debian popcon, Homebrew analytics) and their
+snapshot caveats are documented in the [debian](sources/debian.md) and
+[homebrew](sources/homebrew.md) source pages.
 
 ## Value data sources
 
-Compact source → extracted-fields reference for the Value stage; per-ecosystem mechanics are detailed in [Ecosystems](#ecosystems) above.
+Compact source → extracted-fields reference for the Value stage; per-language pipeline mechanics live in the [component docs](#ecosystems) linked above.
 
 | Source | Fields extracted for Value |
 |---|---|
