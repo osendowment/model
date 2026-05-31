@@ -31,16 +31,17 @@ Writes:
         loc_per_ac,                      (loc_2025_eoy / active_contributors_git_2021_2025)
         cve_per_ac,                      (cve_count_5y / active_contributors_git_2021_2025)
         nni_per_ac,                      (net_new_issues_5y / active_contributors_git_2021_2025)
-        loc_per_ac_pctl,                 (Hazen percentile of loc_per_ac)
-        cve_per_ac_pctl,
-        nni_per_ac_pctl,
-        workload_burden_percentile,      (geometric mean of the three percentiles)
-        workload_class,                  (A/B/C/D equal-count quartile; "" if unclassifiable)
+        loc_per_ac_p,                    (risk percentile of loc_per_ac)
+        cve_per_ac_p,
+        nni_per_ac_p,
+        issue_close_ratio_p,
+        issue_trend_score_p,
+        workload_p,                      (geometric mean of the three per-AC percentiles)
         fetched_at
 
 Notes:
-    workload_class is empty unless LOC, CVE, NNI, and AC are all present with
-    AC > 0. build_workload must run after build_complexity, build_security,
+    workload_p is the geometric mean of loc_per_ac_p, cve_per_ac_p, nni_per_ac_p.
+    build_workload must run after build_complexity, build_security,
     and build_concentration.
 
 Periods:
@@ -62,12 +63,8 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.pipeline.common.percentiles import add_percentiles
 from src.pipeline.common.repos import load_risk_repos
-from src.pipeline.common.stats import (
-    geometric_mean,
-    hazen_percentiles,
-    quartile_classes,
-)
 from src.pipeline.common.tables import load_column_by_repo, load_rows_by_repo
 
 console = Console()
@@ -92,75 +89,15 @@ FIELDS = [
     "openssf_maintained",
     "has_issues",
     "push_cadence_years", "pushed_at",
-    "issues_opened_5y", "issues_closed_5y", "issue_close_ratio",
+    "issues_opened_5y", "issues_closed_5y", "issue_close_ratio", "issue_close_ratio_p",
     "net_new_issues_5y",
-    "slope_opened", "slope_closed", "issue_trend_score",
-    "loc_per_ac", "cve_per_ac", "nni_per_ac",
-    "loc_per_ac_pctl", "cve_per_ac_pctl", "nni_per_ac_pctl",
-    "workload_burden_percentile", "workload_class",
+    "slope_opened", "slope_closed", "issue_trend_score", "issue_trend_score_p",
+    "loc_per_ac", "loc_per_ac_p",
+    "cve_per_ac", "cve_per_ac_p",
+    "nni_per_ac", "nni_per_ac_p",
+    "score",
     "fetched_at",
 ]
-
-
-def compute_workload_classes(metrics: list[dict]) -> dict[str, dict]:
-    """Compute per-maintainer burden ratios, percentiles, and the class.
-
-    `metrics` — one dict per repo with keys `repo`, `loc`, `cve`, `nni`,
-    `ac`. `loc`/`cve`/`ac` are floats or None (None = the underlying
-    metric is missing); `nni` is always a float and may be negative.
-
-    Returns {repo: {...}} with these keys per repo:
-        loc_per_ac, cve_per_ac, nni_per_ac,
-        loc_per_ac_pctl, cve_per_ac_pctl, nni_per_ac_pctl,
-        workload_burden_percentile, workload_class
-    A repo is classified only when loc, cve, nni, and ac are all present
-    AND ac > 0; otherwise every value is the empty string "".
-    """
-    keys = ("loc_per_ac", "cve_per_ac", "nni_per_ac",
-            "loc_per_ac_pctl", "cve_per_ac_pctl", "nni_per_ac_pctl",
-            "workload_burden_percentile", "workload_class")
-    out: dict[str, dict] = {m["repo"]: {k: "" for k in keys} for m in metrics}
-
-    # 1. Keep only repos with all four inputs present and ac > 0.
-    classifiable: list[dict] = []
-    for m in metrics:
-        loc, cve, nni, ac = m["loc"], m["cve"], m["nni"], m["ac"]
-        if loc is None or cve is None or nni is None or ac is None or ac <= 0:
-            continue
-        classifiable.append({
-            "repo": m["repo"],
-            "loc_per_ac": loc / ac,
-            "cve_per_ac": cve / ac,
-            "nni_per_ac": nni / ac,
-        })
-    if not classifiable:
-        return out
-
-    # 2. Hazen-percentile each ratio across the classifiable set.
-    loc_p = hazen_percentiles([c["loc_per_ac"] for c in classifiable])
-    cve_p = hazen_percentiles([c["cve_per_ac"] for c in classifiable])
-    nni_p = hazen_percentiles([c["nni_per_ac"] for c in classifiable])
-
-    # 3. Geometric mean of the three percentiles → burden score.
-    burden = [geometric_mean([loc_p[i], cve_p[i], nni_p[i]])
-              for i in range(len(classifiable))]
-
-    # 4. Equal-count quartile class (A = highest burden).
-    classes = quartile_classes(burden)
-
-    # 5. Emit.
-    for i, c in enumerate(classifiable):
-        out[c["repo"]] = {
-            "loc_per_ac": round(c["loc_per_ac"], 4),
-            "cve_per_ac": round(c["cve_per_ac"], 4),
-            "nni_per_ac": round(c["nni_per_ac"], 4),
-            "loc_per_ac_pctl": round(loc_p[i], 2),
-            "cve_per_ac_pctl": round(cve_p[i], 2),
-            "nni_per_ac_pctl": round(nni_p[i], 2),
-            "workload_burden_percentile": round(burden[i], 2),
-            "workload_class": classes[i],
-        }
-    return out
 
 
 def _load_commits_years() -> dict[str, dict[int, int]]:
@@ -290,7 +227,6 @@ def build() -> list[dict]:
     ac_by_repo = load_column_by_repo(CONCENTRATION_FILE, "active_contributors_git_2021_2025")
 
     rows: list[dict] = []
-    metrics: list[dict] = []
     for entry in eligible:
         repo = entry.repo
         meta = repos.get(repo, {})
@@ -330,6 +266,15 @@ def build() -> list[dict]:
             trend_score = ""
 
         ac_raw = ac_by_repo.get(repo, "")
+        ac_f = _num(ac_raw)
+        loc_f = _num(loc_by_repo.get(repo, ""))
+        cve_f = _num(cve_by_repo.get(repo, ""))
+        if ac_f and ac_f > 0:
+            row_loc_per_ac = round(loc_f / ac_f, 4) if loc_f is not None else ""
+            row_cve_per_ac = round(cve_f / ac_f, 4) if cve_f is not None else ""
+            row_nni_per_ac = round(net_new_issues / ac_f, 4)
+        else:
+            row_loc_per_ac = row_cve_per_ac = row_nni_per_ac = ""
 
         rows.append({
             "repo": repo,
@@ -347,24 +292,21 @@ def build() -> list[dict]:
             "slope_opened": (round(s_open, 2) if op_5y >= 1 else ""),
             "slope_closed": (round(s_close, 2) if op_5y >= 1 else ""),
             "issue_trend_score": trend_score,
-            # workload-class columns — filled by the second pass below.
-            "loc_per_ac": "", "cve_per_ac": "", "nni_per_ac": "",
-            "loc_per_ac_pctl": "", "cve_per_ac_pctl": "", "nni_per_ac_pctl": "",
-            "workload_burden_percentile": "", "workload_class": "",
+            "loc_per_ac": row_loc_per_ac,
+            "cve_per_ac": row_cve_per_ac,
+            "nni_per_ac": row_nni_per_ac,
             "fetched_at": (meta.get("fetched_at") or "").strip(),
         })
-        metrics.append({
-            "repo": repo,
-            "loc": _num(loc_by_repo.get(repo, "")),
-            "cve": _num(cve_by_repo.get(repo, "")),
-            "nni": float(net_new_issues),
-            "ac": _num(ac_raw),
-        })
 
-    # Second pass: percentile-rank + classify, then merge back by repo.
-    workload = compute_workload_classes(metrics)
-    for row in rows:
-        row.update(workload.get(row["repo"], {}))
+    add_percentiles(
+        rows,
+        pctl_specs=[
+            ("loc_per_ac", True), ("cve_per_ac", True), ("nni_per_ac", True),
+            ("issue_close_ratio", False), ("issue_trend_score", False),
+        ],
+        composite_cols=["loc_per_ac_p", "cve_per_ac_p", "nni_per_ac_p"],
+        dim_col="score",
+    )
     return rows
 
 
@@ -388,22 +330,13 @@ def main() -> None:
         "repo_age_years_2025_eoy", "active_contributors_git_2021_2025",
         "openssf_maintained", "has_issues", "push_cadence_years", "pushed_at",
         "issue_close_ratio", "net_new_issues_5y", "issue_trend_score",
-        "workload_burden_percentile", "workload_class",
+        "loc_per_ac", "cve_per_ac", "nni_per_ac",
+        "score",
     ):
         n = sum(1 for r in rows if r[col] not in ("", None))
         pct = 100 * n / total if total else 0
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")
     console.print(table)
-
-    from collections import Counter
-    cls = Counter(r["workload_class"] or "—" for r in rows)
-    ctable = Table(title="\n[bold]Workload class[/bold]",
-                   show_header=True, header_style="bold dim", padding=(0, 1))
-    ctable.add_column("Class", style="bold")
-    ctable.add_column("Repos", justify="right")
-    for label in ("A", "B", "C", "D", "—"):
-        ctable.add_row(label, f"{cls.get(label, 0):,}")
-    console.print(ctable)
 
     console.print(f"\n[dim]Wrote {total:,} rows → {OUTPUT_FILE}[/dim]")
 

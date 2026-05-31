@@ -19,20 +19,19 @@ Writes:
         churn_5y_total,
         hotspot_raw,           # churn × complexity (linear)
         hotspot_log,           # log10(churn+1) × log10(complexity+1)
-        hotspot_percentile     # rank-percentile of hotspot_log within
-                               # populated rows (0-100, higher = hotter)
-        loc_class              # A/B/C/D — absolute LOC bands
-        cc_class               # A/B/C/D — cyclomatic_max quartile
-        complexity_class       # A/B/C/D — worst of loc_class & cc_class
+        hotspot_log_p,         # risk percentile of hotspot_log (higher = riskier)
+        loc_2025_eoy_p,        # risk percentile of loc_2025_eoy
+        scc_complexity_2025_eoy_p,
+        cognitive_max_p,
+        cyclomatic_max_p,
+        churn_5y_total_p,
+        complexity_p           # geometric mean of loc_2025_eoy_p + cyclomatic_max_p
 
-Complexity class:
-    complexity_class = worst(loc_class, cc_class), A the worst.
-      loc_class — absolute size bands from settings.json complexity_loc
-        (A ≥ 1M LOC, B ≥ 100k, C ≥ 10k, D below).
-      cc_class  — equal-count quartiles of cyclomatic_max across the repos
-        that have it (A = worst 25%). cyclomatic_avg is informational only.
-    Either sub-class is "" when its input is missing; complexity_class is
-    "" only when both are.
+Percentile system (0-100, higher = riskier):
+    Each _p column is a worst-pinned CDF percentile within the repos that have
+    a non-missing value for that metric. The worst value maps to 100.
+    complexity_p = geometric mean of loc_2025_eoy_p and cyclomatic_max_p,
+    available only when both component _p's are present.
 
 Period: [2025 EOY] = scc / lizard analysis of the last commit on the
 default branch ≤ 2025-12-31. We pick, per repo, the most-recent year
@@ -50,8 +49,7 @@ Metric mapping:
     lizard.cognitive_max         → cognitive_max
     lizard.cyclomatic_total      → cyclomatic_total
     lizard.cyclomatic_avg        → cyclomatic_avg
-    lizard.cyclomatic_max        → cyclomatic_max  (per-function McCabe;
-                                   cyclomatic_max feeds the cc_class quartile)
+    lizard.cyclomatic_max        → cyclomatic_max  (per-function McCabe)
 
 Hotspot folding (Adam Tornhill, "Code as a Crime Scene"):
 bug-prone code = high churn ∩ high complexity. We translate that to
@@ -59,10 +57,7 @@ repo-level by joining 5y churn (added+deleted) with the EOY-2025 scc
 complexity snapshot. `hotspot_log` is the canonical Tornhill score —
 log-scaling tames the extreme right tail (apache/airflow vs
 hukkin/tomli are 4-5 orders of magnitude apart on the linear scale).
-Empty when either input is missing. `hotspot_percentile` is computed
-within populated rows only so the ranking is meaningful within the
-eligible set (an unpopulated repo is neither "hot" nor "cold" — it's
-simply unmeasured).
+Empty when either input is missing.
 
 Usage:
     uv run python -m src.pipeline.risk.build_complexity
@@ -79,9 +74,8 @@ from rich.console import Console
 from rich.table import Table
 
 from src.git.long_format import read as read_long
-from src.pipeline.common.params import COMPLEXITY_LOC_THRESHOLDS
+from src.pipeline.common.percentiles import add_percentiles
 from src.pipeline.common.repos import load_risk_repos
-from src.pipeline.common.stats import quartile_classes
 from src.pipeline.common.tables import load_rows_by_repo
 
 console = Console()
@@ -108,13 +102,11 @@ FIELDS = [
     "cyclomatic_total", "cyclomatic_avg", "cyclomatic_max",
     "loc_year",
     "churn_5y_total",
-    "hotspot_raw", "hotspot_log", "hotspot_percentile",
-    "loc_class", "cc_class", "complexity_class",
+    "hotspot_raw", "hotspot_log", "hotspot_log_p",
+    "loc_2025_eoy_p", "scc_complexity_2025_eoy_p", "cognitive_max_p",
+    "cyclomatic_max_p", "churn_5y_total_p",
+    "score",
 ]
-
-# Class precedence — A is the worst (highest-risk) class.
-_CLASS_RANK = {"A": 4, "B": 3, "C": 2, "D": 1, "": 0}
-
 
 def _per_year_shas(commits_years_file: Path) -> dict[str, dict[int, str]]:
     """Return {repo: {year_int: last_sha}} for usable (sha, year) pairs.
@@ -180,70 +172,6 @@ def _hotspot_log(churn: int, complexity: int) -> float:
     return math.log10(churn + 1) * math.log10(complexity + 1)
 
 
-def _percentile_ranks(values: list[float]) -> list[float]:
-    """Rank-percentile each value within `values` — 0..100, higher = larger.
-
-    Ties get the average of their ranks so duplicates rank identically. We
-    use the standard "percentile of the rank" formulation:
-        pct = 100 * (rank - 1) / (n - 1)
-    so the smallest value is at 0 and the largest at 100. Unpopulated
-    callers should filter to populated values *before* calling.
-    """
-    n = len(values)
-    if n == 0:
-        return []
-    if n == 1:
-        return [100.0]
-    indexed = sorted(enumerate(values), key=lambda iv: iv[1])
-    ranks = [0.0] * n
-    i = 0
-    while i < n:
-        j = i
-        while j + 1 < n and indexed[j + 1][1] == indexed[i][1]:
-            j += 1
-        avg_rank = (i + j) / 2 + 1  # 1-based
-        for k in range(i, j + 1):
-            orig_idx, _ = indexed[k]
-            ranks[orig_idx] = 100.0 * (avg_rank - 1) / (n - 1)
-        i = j + 1
-    return ranks
-
-
-def loc_class(loc: str) -> str:
-    """A/B/C/D from loc_2025_eoy — absolute codebase-size bands.
-
-    Per settings.json risk_classification.complexity_loc (lower bounds):
-    A ≥ 1,000,000 LOC, B ≥ 100,000, C ≥ 10,000, D below that. A is the
-    worst class (largest codebase = most to maintain). Returns "" when LOC
-    is missing or unparseable.
-    """
-    s = (loc or "").strip()
-    if not s:
-        return ""
-    try:
-        n = float(s)
-    except ValueError:
-        return ""
-    if n >= COMPLEXITY_LOC_THRESHOLDS["A"]:
-        return "A"
-    if n >= COMPLEXITY_LOC_THRESHOLDS["B"]:
-        return "B"
-    if n >= COMPLEXITY_LOC_THRESHOLDS["C"]:
-        return "C"
-    return "D"
-
-
-def _worst_class(*classes: str) -> str:
-    """Worst (highest-risk) of the given classes — A > B > C > D.
-
-    Empty classes are ignored; if every class is empty the result is "".
-    """
-    present = [c for c in classes if c]
-    if not present:
-        return ""
-    return max(present, key=lambda c: _CLASS_RANK[c])
-
-
 def build() -> list[dict]:
     eligible = load_risk_repos()
 
@@ -273,8 +201,6 @@ def build() -> list[dict]:
     churn_by_repo = load_rows_by_repo(CHURN_FILE)
 
     rows: list[dict] = []
-    log_scores_for_pct: list[float] = []
-    pct_indices: list[int] = []  # indices into rows where the score is populated
 
     for entry in eligible:
         repo = entry.repo
@@ -311,8 +237,6 @@ def build() -> list[dict]:
             log_val = _hotspot_log(churn_total, cx_value)
             hotspot_raw_val = str(raw)
             hotspot_log_val = f"{log_val:.4f}"
-            log_scores_for_pct.append(log_val)
-            pct_indices.append(len(rows))
 
         rows.append({
             "repo": repo,
@@ -331,30 +255,18 @@ def build() -> list[dict]:
             "churn_5y_total": churn_out,
             "hotspot_raw": hotspot_raw_val,
             "hotspot_log": hotspot_log_val,
-            "hotspot_percentile": "",  # filled below
-            "loc_class": "", "cc_class": "", "complexity_class": "",  # filled below
         })
 
-    # Second pass: percentile-rank populated hotspot rows.
-    if log_scores_for_pct:
-        ranks = _percentile_ranks(log_scores_for_pct)
-        for idx, rank in zip(pct_indices, ranks):
-            rows[idx]["hotspot_percentile"] = f"{rank:.2f}"
-
-    # Third pass: complexity_class = worst of (loc_class, cc_class).
-    #   loc_class — absolute LOC bands (settings.json complexity_loc).
-    #   cc_class  — equal-count quartiles of cyclomatic_max across the repos
-    #               that have it (A = worst 25%); cyclomatic_avg is kept as
-    #               an info column only and does not drive the class.
-    cc_rows = [r for r in rows if r["cyclomatic_max"] != ""]
-    cc_labels = quartile_classes([float(r["cyclomatic_max"]) for r in cc_rows])
-    cc_by_repo = {r["repo"]: lbl for r, lbl in zip(cc_rows, cc_labels)}
-    for r in rows:
-        lc = loc_class(r["loc_2025_eoy"])
-        cc = cc_by_repo.get(r["repo"], "")
-        r["loc_class"] = lc
-        r["cc_class"] = cc
-        r["complexity_class"] = _worst_class(lc, cc)
+    add_percentiles(
+        rows,
+        pctl_specs=[
+            ("hotspot_log", True), ("loc_2025_eoy", True),
+            ("scc_complexity_2025_eoy", True), ("cognitive_max", True),
+            ("cyclomatic_max", True), ("churn_5y_total", True),
+        ],
+        composite_cols=["loc_2025_eoy_p", "cyclomatic_max_p"],
+        dim_col="score",
+    )
 
     return rows
 
@@ -380,8 +292,8 @@ def main() -> None:
                 "cognitive_total", "cognitive_avg", "cognitive_max",
                 "cyclomatic_total", "cyclomatic_avg", "cyclomatic_max",
                 "churn_5y_total",
-                "hotspot_raw", "hotspot_log", "hotspot_percentile",
-                "loc_class", "cc_class", "complexity_class"):
+                "hotspot_raw", "hotspot_log", "hotspot_log_p",
+                "score"):
         n = sum(1 for r in rows if r[col])
         pct = 100 * n / total if total else 0
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")
@@ -399,16 +311,6 @@ def main() -> None:
         pct = 100 * n / total if total else 0
         year_dist.add_row(y, f"{n:,}", f"{pct:.1f}%")
     console.print(year_dist)
-
-    # complexity_class distribution (A/B/C/D, or — when unclassifiable).
-    cls = Counter(r["complexity_class"] or "—" for r in rows)
-    ctable = Table(title="\n[bold]Complexity class[/bold]",
-                   show_header=True, header_style="bold dim", padding=(0, 1))
-    ctable.add_column("Class", style="bold")
-    ctable.add_column("Repos", justify="right")
-    for label in ("A", "B", "C", "D", "—"):
-        ctable.add_row(label, f"{cls.get(label, 0):,}")
-    console.print(ctable)
 
     console.print(f"\n[dim]Wrote {total:,} rows → {OUTPUT_FILE}[/dim]")
 

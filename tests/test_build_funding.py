@@ -1,85 +1,56 @@
-"""Tests for src/pipeline/risk/build_funding.py — join, channels_count, oc_avg_funding."""
+"""Tests for src/pipeline/risk/build_funding.py — join, info cols, funding score."""
+
+from dataclasses import dataclass
 
 from src.pipeline.risk import build_funding as bf
 
 
-def test_assemble_row_joins_and_counts_channels():
+def test_oc_avg_funding_zero_default():
+    assert bf.oc_avg_funding("", {}) == "0"                       # no slug → $0
+    assert bf.oc_avg_funding("ghost", {"x": {"raised_2024": "5"}}) == "0"
+    assert bf.oc_avg_funding("x", {"x": {"raised_2024": "10", "raised_2025": "20"}}) == "15"
+
+
+def test_assemble_row_stars_forks_sponsorships():
     row = bf.assemble_row(
-        repo="vuejs/core", repo_id="11730342",
-        sponsors={"github_sponsors": "12", "fetched_at": "2026-05-19T10:00:00+00:00"},
-        yml={"has_funding_yml": "True", "funding_yml_platforms": "github,open_collective",
-             "open_collective": "vuejs", "fetched_at": "2026-05-19T11:00:00+00:00"},
-        export={"channel_platforms": "github,open_collective,bank", "open_collective": "vuejs"},
-        foundation_host="",
-        oc_budgets={"vuejs": {"raised_2021": "100", "raised_2022": "200",
-                              "raised_2023": "", "raised_2024": "300", "raised_2025": ""}},
+        repo="o/r", repo_id="1",
+        sponsors={"github_sponsors": "12"},
+        yml={"has_funding_yml": "True", "funding_yml_platforms": "github"},
+        export={}, foundation_host="", oc_budgets={},
+        repo_meta={"stars": "5000", "forks": "300"},
         sponsoring_count="39",
     )
-    assert row["has_funding_json"] == "True"
-    assert row["gh_sponsors_in"] == "12"        # inbound
-    assert row["gh_sponsors_out"] == "39"       # outbound (by owner)
-    assert row["gh_sponsorships"] == "51"       # 12 + 39
-    assert row["gh_sponsorships_p"] == ""       # filled by build(), not assemble_row
-    assert row["oc_avg_funding_p"] == ""        # filled by build()
-    assert row["funding_p"] == ""               # geom-mean, filled by build()
-    # union of {github, open_collective} and {github, open_collective, bank} = 3
-    assert row["channels_count"] == "3"
-    # mean of 100, 200, 300 (years with data) = 200
-    assert row["oc_avg_funding"] == "200"
-    assert "fetched_at" not in row          # per-signal timestamps live in sources
-    assert "funding_class" not in row
+    assert row["gh_sponsors_in"] == "12"
+    assert row["gh_sponsors_out"] == "39"
+    assert row["gh_sponsorships"] == "51"      # in + out
+    assert row["gh_stars"] == "5000"           # info column
+    assert row["gh_forks"] == "300"            # info column
+    assert row["oc_avg_funding"] == "0"        # no OC → $0
+    assert "score" not in row                  # filled by build()
 
 
-def test_assemble_row_no_funding_sources():
-    row = bf.assemble_row(
-        repo="acornjs/acorn", repo_id="1", sponsors={}, yml={}, export={},
-        foundation_host="apache", oc_budgets={})
-    assert row["has_funding_json"] == "False"
-    assert row["gh_sponsors_in"] == ""
-    assert row["gh_sponsors_out"] == ""
-    assert row["gh_sponsorships"] == "0"        # blank in/out treated as 0
-    assert row["channels_count"] == "0"
-    assert row["oc_avg_funding"] == "0"         # no OC presence → $0
-    assert row["foundation_host"] == "apache"
-
-
-def test_build_fills_sponsorships_percentile_low_total_high_pctl(monkeypatch):
-    """gh_sponsorships_pctl: lower total engagement (in+out) → higher risk pctl."""
-    from dataclasses import dataclass
-
+def test_build_funding_score_lower_funding_higher_score(monkeypatch):
     @dataclass
     class E:
         repo: str
         repo_id: str = ""
 
-    monkeypatch.setattr(bf, "load_risk_repos",
-                        lambda: [E("o/low"), E("o/mid"), E("o/high")])
-    # in: low=0, mid=5, high=20; every owner sponsors out=10 → totals 10/15/30
-    monkeypatch.setattr(bf, "load_rows_by_repo", lambda p: (
-        {"o/low": {"github_sponsors": "0"}, "o/mid": {"github_sponsors": "5"},
-         "o/high": {"github_sponsors": "20"}} if "sponsors" in str(p) else {}))
+    def rows_by_repo(p):
+        p = str(p)
+        if "sponsors.csv" in p:
+            return {"o/poor": {"github_sponsors": "0"}, "o/rich": {"github_sponsors": "100"}}
+        if "funding-yml" in p:
+            return {"o/rich": {"open_collective": "rich"}}
+        return {}
+
+    monkeypatch.setattr(bf, "load_risk_repos", lambda: [E("o/poor"), E("o/rich")])
+    monkeypatch.setattr(bf, "load_rows_by_repo", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
-    monkeypatch.setattr(bf, "_load_oc", lambda p: {})
-    monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {"o": "10"})
+    monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000"}})
+    monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
+
     rows = {r["repo"]: r for r in bf.build()}
-    assert rows["o/low"]["gh_sponsorships"] == "10"    # 0 + 10
-    assert rows["o/high"]["gh_sponsorships"] == "30"   # 20 + 10
-    assert rows["o/low"]["oc_avg_funding"] == "0"      # no OC → $0
-    # inverted: lowest total ranks highest risk percentile…
-    assert rows["o/low"]["gh_sponsorships_p"] > rows["o/high"]["gh_sponsorships_p"]
-    # …and funding_p (geom-mean) tracks it when OC is tied at 0 for all
-    assert rows["o/low"]["funding_p"] > rows["o/high"]["funding_p"]
-
-
-def test_assign_risk_pctl_inverted_lower_value_higher_pctl():
-    rows = [{"v": "10", "vp": ""}, {"v": "0", "vp": ""}, {"v": "100", "vp": ""}]
-    bf._assign_risk_pctl(rows, "v", "vp")
-    assert rows[1]["vp"] > rows[0]["vp"] > rows[2]["vp"]  # 0 → highest risk pctl
-
-
-def test_oc_avg_funding_missing_slug_or_data():
-    assert bf.oc_avg_funding("", {}) == "0"
-    assert bf.oc_avg_funding("ghost", {"vuejs": {"raised_2024": "5"}}) == "0"
-    assert bf.oc_avg_funding("x", {"x": {"raised_2024": "", "raised_2025": ""}}) == "0"
-    assert bf.oc_avg_funding("x", {"x": {"raised_2024": "10", "raised_2025": "20"}}) == "15"
+    # o/poor: 0 sponsors + $0 OC → worst on both axes → score 100
+    assert rows["o/poor"]["score"] == 100
+    assert int(rows["o/rich"]["score"]) < int(rows["o/poor"]["score"])

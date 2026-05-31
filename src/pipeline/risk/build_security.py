@@ -27,22 +27,22 @@ Writes:
         openssf_score_source,               "openssf_local" | "depsdev" | ""
         cve_count_5y,                       ([2021–2025], distinct CVE ids)
         ossfuzz_enrolled,                   ([most recent], "True"/"False")
-        sast_findings_total,                ([2025 EOY] semgrep p/default)
-        sast_findings_error,                ([2025 EOY] high-severity only)
-        sast_findings_security,             ([2025 EOY] security-category only)
+        sast_findings_total, sast_findings_total_p,       ([2025 EOY] semgrep p/default + pctl)
+        sast_findings_error, sast_findings_error_p,       ([2025 EOY] high-severity only + pctl)
+        sast_findings_security, sast_findings_security_p, ([2025 EOY] security-category only + pctl)
         bestpractices_badge_id,             ([2026], "passing"/"silver"/"gold"/
                                             "in_progress"/"" if not enrolled)
-        openssf_risk_pctl,                  (0–100; Hazen percentile of
-                                            openssf_score, inverted — lower
-                                            score ranks higher-risk)
-        cve_risk_pctl,                      (0–100; Hazen percentile of
+        openssf_score_p,                    (0–100 risk percentile of
+                                            openssf_score, lower-is-worse — a
+                                            lower Scorecard score ranks higher-risk)
+        cve_count_5y_p,                     (0–100 risk percentile of
                                             cve_count_5y — more CVEs higher)
-        security_risk_percentile,           (geometric mean of the two pctls)
-        security_class,                     (A–D equal-count quartile of
-                                            security_risk_percentile, A =
-                                            worst; "" if openssf_score or
-                                            cve_count_5y missing)
+        security_p,                         (geometric mean of openssf_score_p
+                                            and cve_count_5y_p; "" if either
+                                            openssf_score or cve_count_5y missing)
         fetched_at                          (checked_at of openssf row used)
+
+    The sast_*_p columns are informational and NOT part of security_p.
 
 Latest-sha picker
 -----------------
@@ -53,17 +53,15 @@ by build_complexity. If commits-years has no usable year for a repo, we
 fall back to any sha present in the long file for that repo (deterministic
 lexicographic pick).
 
-Security class
---------------
-`security_class` (A–D) is the equal-count quartile of a composite
-`security_risk_percentile` — the geometric mean of two Hazen risk
-percentiles: one over `cve_count_5y` (more CVEs → higher) and one over
-`-openssf_score` (lower Scorecard score → higher). A = worst 25%. A repo
-is classified only when both `openssf_score` and `cve_count_5y` are
-present.
+Security percentile
+-------------------
+`security_p` is the geometric mean of two direction-aware risk percentiles:
+`cve_count_5y_p` (more CVEs → higher risk) and `openssf_score_p` (lower
+Scorecard score → higher risk). It is populated only when both
+`openssf_score` and `cve_count_5y` are present.
 
 ~78% of risk-scope repos have zero CVEs and thus share one identical
-`cve_risk_pctl`; for them the class effectively tracks the OpenSSF axis,
+`cve_count_5y_p`; for them `security_p` effectively tracks the OpenSSF axis,
 with the CVE axis only re-ranking the minority that carry CVEs.
 
 Usage:
@@ -80,12 +78,8 @@ from rich.console import Console
 from rich.table import Table
 
 from src.git.long_format import read as read_long
+from src.pipeline.common.percentiles import add_percentiles
 from src.pipeline.common.repos import canonical_repo_map, load_risk_repos
-from src.pipeline.common.stats import (
-    geometric_mean,
-    hazen_percentiles,
-    quartile_classes,
-)
 from src.pipeline.common.tables import load_column_by_repo
 
 console = Console()
@@ -109,10 +103,12 @@ FIELDS = [
     "repo", "repo_id",
     "openssf_score", "openssf_score_source",
     "cve_count_5y", "ossfuzz_enrolled",
-    "sast_findings_total", "sast_findings_error", "sast_findings_security",
+    "sast_findings_total", "sast_findings_total_p",
+    "sast_findings_error", "sast_findings_error_p",
+    "sast_findings_security", "sast_findings_security_p",
     "bestpractices_badge_id",
-    "openssf_risk_pctl", "cve_risk_pctl",
-    "security_risk_percentile", "security_class",
+    "openssf_score_p", "cve_count_5y_p",
+    "score",
     "fetched_at",
 ]
 
@@ -274,74 +270,6 @@ def _load_osv_queried() -> set[str]:
     return out
 
 
-def _to_float(value: str) -> float | None:
-    """Parse a CSV cell to float; blank or unparseable → None."""
-    text = (value or "").strip()
-    if not text:
-        return None
-    try:
-        return float(text)
-    except ValueError:
-        return None
-
-
-def compute_security_classes(metrics: list[dict]) -> dict[str, dict]:
-    """Compute per-repo security risk percentiles and the A–D class.
-
-    `metrics` — one dict per repo with keys `repo`, `openssf_score`, and
-    `cve` (the 5-year CVE count). `openssf_score` and `cve` are floats or
-    None (None = the underlying metric is missing).
-
-    Returns {repo: {...}} with these keys per repo:
-        openssf_risk_pctl, cve_risk_pctl,
-        security_risk_percentile, security_class
-    A repo is classified only when BOTH `openssf_score` and `cve` are
-    present; otherwise every value is the empty string "".
-
-    Both axes are risk percentiles (higher = worse security): `cve` is
-    ranked directly (more CVEs → higher), `openssf_score` is ranked
-    negated (lower score → higher risk — the OpenSSF "higher = better"
-    convention flipped to the pipeline's "A = worst"). The composite
-    `security_risk_percentile` is their geometric mean; `security_class`
-    is its equal-count quartile (A = worst 25%).
-    """
-    keys = ("openssf_risk_pctl", "cve_risk_pctl",
-            "security_risk_percentile", "security_class")
-    out: dict[str, dict] = {m["repo"]: {k: "" for k in keys} for m in metrics}
-
-    # 1. Keep only repos with both inputs present.
-    classifiable: list[dict] = []
-    for m in metrics:
-        score, cve = m["openssf_score"], m["cve"]
-        if score is None or cve is None:
-            continue
-        classifiable.append({"repo": m["repo"], "score": score, "cve": cve})
-    if not classifiable:
-        return out
-
-    # 2. Hazen risk-percentile each axis across the classifiable set.
-    #    openssf_score is negated so a LOWER score → HIGHER risk percentile.
-    openssf_p = hazen_percentiles([-c["score"] for c in classifiable])
-    cve_p = hazen_percentiles([c["cve"] for c in classifiable])
-
-    # 3. Geometric mean of the two risk percentiles → security risk score.
-    risk = [geometric_mean([openssf_p[i], cve_p[i]])
-            for i in range(len(classifiable))]
-
-    # 4. Equal-count quartile class (A = highest risk).
-    classes = quartile_classes(risk)
-
-    # 5. Emit.
-    for i, c in enumerate(classifiable):
-        out[c["repo"]] = {
-            "openssf_risk_pctl": round(openssf_p[i], 2),
-            "cve_risk_pctl": round(cve_p[i], 2),
-            "security_risk_percentile": round(risk[i], 2),
-            "security_class": classes[i],
-        }
-    return out
-
-
 def build() -> list[dict]:
     eligible = load_risk_repos()
 
@@ -430,19 +358,17 @@ def build() -> list[dict]:
             "fetched_at": ossf_checked_at,
         })
 
-    # Second pass — security_class needs population-wide percentile
-    # ranking, so it is computed after every row's raw metrics are set.
-    metrics = [
-        {
-            "repo": r["repo"],
-            "openssf_score": _to_float(r["openssf_score"]),
-            "cve": _to_float(r["cve_count_5y"]),
-        }
-        for r in rows
-    ]
-    classes = compute_security_classes(metrics)
-    for r in rows:
-        r.update(classes[r["repo"]])
+    # Second pass — compute population-wide percentile rankings.
+    add_percentiles(
+        rows,
+        pctl_specs=[
+            ("openssf_score", False), ("cve_count_5y", True),
+            ("sast_findings_total", True), ("sast_findings_error", True),
+            ("sast_findings_security", True),
+        ],
+        composite_cols=["openssf_score_p", "cve_count_5y_p"],
+        dim_col="score",
+    )
 
     return rows
 
@@ -465,8 +391,9 @@ def main() -> None:
     table.add_column("Coverage", justify="right")
     for col in ("openssf_score", "cve_count_5y", "ossfuzz_enrolled",
                 "sast_findings_total", "sast_findings_error",
-                "sast_findings_security", "bestpractices_badge_id"):
-        n = sum(1 for r in rows if r[col])
+                "sast_findings_security", "bestpractices_badge_id",
+                "openssf_score_p", "cve_count_5y_p", "score"):
+        n = sum(1 for r in rows if r.get(col) not in ("", None))
         pct = 100 * n / total if total else 0
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")
 
@@ -483,17 +410,6 @@ def main() -> None:
 
     enrolled = sum(1 for r in rows if r["ossfuzz_enrolled"] == "True")
     console.print(f"\n[dim]OSS-Fuzz enrolled: {enrolled:,} / {total:,}[/dim]")
-
-    # Security-class distribution (A/B/C/D, or — when unclassifiable).
-    cls = Counter(r["security_class"] or "—" for r in rows)
-    ctable = Table(title="\n[bold]Security class[/bold]",
-                   show_header=True, header_style="bold dim", padding=(0, 1))
-    ctable.add_column("Class", style="bold")
-    ctable.add_column("Repos", justify="right")
-    for c in ("A", "B", "C", "D", "—"):
-        if cls.get(c):
-            ctable.add_row(c, f"{cls[c]:,}")
-    console.print(ctable)
 
     console.print(f"[dim]Wrote {total:,} rows → {OUTPUT_FILE}[/dim]")
 

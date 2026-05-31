@@ -35,7 +35,6 @@ BUILDERS = [
     Step("complexity",    "src.pipeline.risk.build_complexity"),
     Step("security",      "src.pipeline.risk.build_security"),
     Step("funding-build", "src.pipeline.risk.build_funding"),
-    Step("visibility",    "src.pipeline.risk.build_visibility"),
     Step("workload",      "src.pipeline.risk.build_workload"),
     Step("aggregate",     "src.pipeline.risk.aggregate_risk"),
 ]

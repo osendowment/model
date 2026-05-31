@@ -23,41 +23,5 @@
     "value_classes": ["A", "B"],
     "comment": "Risk pipeline runs on repos whose value/value.csv class is in this list."
   },
-  "risk_classification": {
-    "concentration": {
-      "A": {"max_bus_factor": 1, "min_hhi": 8000},
-      "B": {"max_bus_factor": 2, "min_hhi": 5000},
-      "C": {"max_bus_factor": 4, "min_hhi": 2500}
-    },
-    "complexity_loc": {
-      "A": 1000000,
-      "B": 100000,
-      "C": 10000
-    },
-    "issue_debt": {
-      "min_opened_5y": 10,
-      "A": {"max_close_ratio": 0.30, "min_opened_5y": 100},
-      "B": {"max_close_ratio": 0.60, "min_opened_5y": 30},
-      "C": {"max_close_ratio": 0.85, "min_opened_5y": 10},
-      "comment": "min_opened_5y is the master skip threshold — below this we don't classify the repo at all (issue tracker disabled / unused)"
-    },
-    "issue_trend": {
-      "min_total_for_trend": 25,
-      "min_active_years": 3,
-      "improving": 0.05,
-      "deteriorating": -0.05,
-      "comment": "trend_score = (slope_closed - slope_opened) / mean(opened_per_year). >= +0.05 → improving; <= -0.05 → deteriorating; otherwise stable. Empty if total < min_total_for_trend or fewer than min_active_years had any issues opened."
-    },
-    "security": {
-      "method": "geom_mean_quartile",
-      "metrics": ["openssf_score", "cve_count_5y"],
-      "comment": "security_class = equal-count quartiles (A = worst 25%) of the geometric mean of Hazen risk-percentiles of openssf_score (inverted — lower score ranks higher-risk) and cve_count_5y. Parameter-free; no numeric thresholds. Empty when openssf_score or cve_count_5y is missing."
-    },
-    "workload": {
-      "method": "geom_mean_quartile",
-      "ratios": ["loc_per_ac", "cve_per_ac", "nni_per_ac"],
-      "comment": "workload_class = equal-count quartiles (A = worst 25%) of the geometric mean of Hazen percentiles of LOC/AC, CVE/AC, NNI/AC. AC = active_contributors (lifetime non-bot contributors). NNI = issues_opened_5y - issues_closed_5y. Parameter-free; no numeric thresholds."
-    }
-  },
   "years": [2021, 2022, 2023, 2024, 2025]
 }

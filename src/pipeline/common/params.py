@@ -29,11 +29,8 @@ VALUE_CLASS_C: float = _P["value_classes"]["C"]
 # Years
 YEARS: list[int] = _P["years"]
 
-# Risk classification
-CONCENTRATION_THRESHOLDS: dict = _P["risk_classification"]["concentration"]
-COMPLEXITY_LOC_THRESHOLDS: dict = _P["risk_classification"]["complexity_loc"]
-ISSUE_DEBT_THRESHOLDS: dict = _P["risk_classification"]["issue_debt"]
-ISSUE_TREND_THRESHOLDS: dict = _P["risk_classification"]["issue_trend"]
+# Risk dimensions are scored by direction-aware risk percentiles
+# (src.pipeline.common.percentiles), not A/B/C/D classes — no thresholds here.
 
 # Risk-pipeline input scope — which value classes feed the risk pipeline.
 RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]

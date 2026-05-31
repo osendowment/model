@@ -1,36 +1,60 @@
-"""Shared statistics helpers for the geom_mean_quartile classifiers.
+"""Shared statistics helpers for the risk-percentile system.
 
-`build_workload.py` and `build_security.py` both classify repos A-D by
-percentile-ranking metrics, taking a geometric mean of the percentiles,
-and bucketing the result into equal-count quartiles. These three pure
-functions are the shared primitives of that method.
+Every risk dimension turns its raw metrics into direction-aware risk
+percentiles (`_p`, 0-100, higher = riskier), then combines a chosen subset
+into a per-dimension composite `<dim>_p` via a geometric mean. These pure
+functions are the shared primitives.
 """
 
+import bisect
 
-def hazen_percentiles(values: list[float]) -> list[float]:
-    """Percentile-rank each value via the Hazen plotting position.
 
-    pct = 100 * (rank - 0.5) / n, with tied values sharing the average of
-    their ranks. The result is strictly within (0, 100) - never exactly 0
-    or 100 - so a geometric mean taken over these percentiles cannot
-    collapse to 0. Higher value -> higher percentile. Empty input -> [].
+def risk_percentiles(values: list[float], higher_is_worse: bool) -> list[float | None]:
+    """Worst-pinned CDF risk percentile (0-100), direction-aware.
+
+    `values` are the present, parseable metric values being ranked. For each
+    value v_i over n values:
+
+        higher_is_worse:  P_i = 100 * #{j : v_j <= v_i} / n
+        lower_is_worse:   P_i = 100 * #{j : v_j >= v_i} / n
+
+    The single worst value maps to exactly 100; the best to >= 100/n > 0, so a
+    geometric mean over these can never collapse to 0. If every value is
+    identical the axis carries no signal -> returns [None] * n. Empty -> [].
     """
     n = len(values)
     if n == 0:
         return []
-    indexed = sorted(enumerate(values), key=lambda iv: iv[1])
-    pctls = [0.0] * n
-    i = 0
-    while i < n:
-        j = i
-        while j + 1 < n and indexed[j + 1][1] == indexed[i][1]:
-            j += 1
-        avg_rank = (i + j) / 2 + 1  # 1-based, tie-averaged
-        pct = 100.0 * (avg_rank - 0.5) / n
-        for k in range(i, j + 1):
-            pctls[indexed[k][0]] = pct
-        i = j + 1
-    return pctls
+    if min(values) == max(values):
+        return [None] * n
+    ordered = sorted(values)
+    out: list[float | None] = [0.0] * n
+    for i, v in enumerate(values):
+        if higher_is_worse:
+            count = bisect.bisect_right(ordered, v)
+        else:
+            count = n - bisect.bisect_left(ordered, v)
+        out[i] = 100.0 * count / n
+    return out
+
+
+def risk_percentiles_aligned(
+    values: list[float | None], higher_is_worse: bool
+) -> list[float | None]:
+    """`risk_percentiles` over a list that may contain None (missing) values.
+
+    Present values are ranked among themselves; missing values stay None and
+    are excluded from n. A constant present-axis yields None for every repo.
+    The result is aligned 1:1 with the input.
+    """
+    present = [(i, v) for i, v in enumerate(values) if v is not None]
+    out: list[float | None] = [None] * len(values)
+    if not present:
+        return out
+    ranked = risk_percentiles([v for _, v in present], higher_is_worse)
+    for (i, _), p in zip(present, ranked):
+        out[i] = p
+    return out
 
 
 def geometric_mean(values: list[float]) -> float:
@@ -43,19 +67,17 @@ def geometric_mean(values: list[float]) -> float:
     return product ** (1.0 / len(values))
 
 
-def quartile_classes(scores: list[float]) -> list[str]:
-    """Assign A/B/C/D by equal-count quartiles of `scores` (higher = worse).
+def geom_mean_composite(rows: list[list[float | None]]) -> list[float | None]:
+    """Per-repo geometric mean of component percentiles.
 
-    Sorted descending, the highest-scoring 25% get 'A', then 'B', 'C', 'D'.
-    When n is not divisible by 4 each class holds floor(n/4) or ceil(n/4)
-    members. Empty input -> [].
+    `rows` is one list per repo of its component `_p`s (floats or None).
+    Returns the geometric mean when the row is non-empty and every component
+    is present, else None — the per-dimension composite `<dim>_p`.
     """
-    n = len(scores)
-    if n == 0:
-        return []
-    order = sorted(range(n), key=lambda i: scores[i], reverse=True)
-    labels = ["A", "B", "C", "D"]
-    out = [""] * n
-    for p, idx in enumerate(order):  # p: 0-based rank, 0 = highest score
-        out[idx] = labels[min(3, p * 4 // n)]
+    out: list[float | None] = []
+    for comps in rows:
+        if not comps or any(c is None for c in comps):
+            out.append(None)
+        else:
+            out.append(geometric_mean(comps))
     return out

@@ -49,7 +49,6 @@ Usage:
 """
 
 import csv
-from collections import Counter
 from pathlib import Path
 
 from rich.console import Console
@@ -58,7 +57,7 @@ from rich.table import Table
 from src.git.contributors import _is_bot_identity, merge_identity_groups
 from src.github.fetch_contributors_metrics import _compute_bus_factor
 from src.github.models import Contributor, is_bot
-from src.pipeline.common.params import CONCENTRATION_THRESHOLDS
+from src.pipeline.common.percentiles import add_percentiles
 from src.pipeline.common.repos import load_risk_repos
 from src.pipeline.common.tables import load_rows_by_repo
 
@@ -76,42 +75,18 @@ WINDOW = range(2021, 2026)  # 2021..2025 inclusive
 FIELDS = [
     "repo", "repo_id",
     "total_commits_github", "total_contributors_github", "active_contributors_github",
-    "bf_commits_github", "hhi_commits_github",
+    "bf_commits_github", "bf_commits_github_p",
+    "hhi_commits_github", "hhi_commits_github_p",
     "total_commits_git", "contributors_git",
-    "bf_commits_git", "hhi_commits_git",
+    "bf_commits_git", "bf_commits_git_p",
+    "hhi_commits_git", "hhi_commits_git_p",
     "commits_git_2021_2025", "active_contributors_git_2021_2025",
-    "bf_commits_git_2021_2025", "hhi_commits_git_2021_2025",
-    "concentration_class",
+    "bf_commits_git_2021_2025", "bf_commits_git_2021_2025_p",
+    "hhi_commits_git_2021_2025", "hhi_commits_git_2021_2025_p",
+    "score",
     "github_fetched_at", "git_fetched_at",
 ]
 
-
-def concentration_class(bus_factor: str, hhi: str) -> str:
-    """A/B/C/D from bus factor + HHI — A is the worst (most concentrated).
-
-    Per settings.json risk_classification.concentration, a repo is class X
-    when ``bus_factor <= max_bus_factor[X]`` AND ``hhi >= min_hhi[X]``,
-    tested strictest-first (A, then B, then C); D when none match. Both
-    signals must agree: concentration risk needs a fragile bus factor *and*
-    commit-share dominance — a repo with many contributors is not flagged
-    just because one of them commits often, and vice versa.
-
-    Returns "" when either input is missing or unparseable — can't classify.
-    """
-    bf_s = (bus_factor or "").strip()
-    hhi_s = (hhi or "").strip()
-    if not bf_s or not hhi_s:
-        return ""
-    try:
-        bf = float(bf_s)
-        h = float(hhi_s)
-    except ValueError:
-        return ""
-    for cls in ("A", "B", "C"):
-        t = CONCENTRATION_THRESHOLDS[cls]
-        if bf <= t["max_bus_factor"] and h >= t["min_hhi"]:
-            return cls
-    return "D"
 
 
 def _load_long_grouped(path: Path) -> dict[str, list[dict]]:
@@ -250,12 +225,17 @@ def build() -> list[dict]:
             git_status.get(repo, {}).get("fetched_at") or ""
         ).strip()
 
-        # Class from the git lifetime figures — git sees every contributor
-        # (GitHub /contributors caps near 500), so it is the accurate method.
-        row["concentration_class"] = concentration_class(
-            str(row["bf_commits_git"]), str(row["hhi_commits_git"]),
-        )
         rows.append(row)
+    add_percentiles(
+        rows,
+        pctl_specs=[
+            ("bf_commits_github", False), ("hhi_commits_github", True),
+            ("bf_commits_git", False), ("hhi_commits_git", True),
+            ("bf_commits_git_2021_2025", False), ("hhi_commits_git_2021_2025", True),
+        ],
+        composite_cols=["bf_commits_git_2021_2025_p", "hhi_commits_git_2021_2025_p"],
+        dim_col="score",
+    )
     return rows
 
 
@@ -279,21 +259,12 @@ def main() -> None:
         "bf_commits_github", "hhi_commits_github", "active_contributors_github",
         "bf_commits_git", "hhi_commits_git", "contributors_git",
         "active_contributors_git_2021_2025", "bf_commits_git_2021_2025",
-        "concentration_class",
+        "score",
     ):
         n = sum(1 for r in rows if str(r[col]).strip())
         pct = 100 * n / total if total else 0
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")
     console.print(table)
-
-    cls = Counter(r["concentration_class"] or "—" for r in rows)
-    ctable = Table(title="\n[bold]Concentration class[/bold]",
-                   show_header=True, header_style="bold dim", padding=(0, 1))
-    ctable.add_column("Class", style="bold")
-    ctable.add_column("Repos", justify="right")
-    for label in ("A", "B", "C", "D", "—"):
-        ctable.add_row(label, f"{cls.get(label, 0):,}")
-    console.print(ctable)
 
     console.print(f"\n[dim]Wrote {total:,} rows → {OUTPUT_FILE}[/dim]")
 
