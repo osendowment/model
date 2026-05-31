@@ -147,7 +147,7 @@ def _is_fresh(row: dict, ttl_days: int) -> bool:
 async def batch(repos: list[str], force: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
     repo_ids = _load_map(GH_REPOS_FILE, "repo", "repo_id")
-    yml_github = _load_map(FUNDING_YML_FILE, "repo", "funding_yml_github")
+    yml_github = _load_map(FUNDING_YML_FILE, "repo", "github")
     fresh = set() if force else {r for r, row in existing.items() if _is_fresh(row, TTL_DAYS)}
     to_fetch = [r for r in repos if r not in fresh]
     if limit and limit < len(to_fetch):

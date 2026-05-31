@@ -2,11 +2,12 @@
 
 Writes data/sources/github/funding-yml.csv:
     repo, repo_id, has_funding_yml, funding_yml_platforms,
-    funding_yml_github, fetched_at
+    <one column per platform in FUNDING_PLATFORMS>, fetched_at
 
 `funding_yml_platforms` = the FUNDING.yml mapping keys (github, patreon, …).
-`funding_yml_github`    = usernames under the `github:` key (so the sponsors
-                          fetcher can count co-maintainer sponsorships).
+Each platform column holds that platform's handle(s) (comma-joined for a
+list); the `github` column is the lower-cased, deduped usernames under the
+`github:` key (so the sponsors fetcher can count co-maintainer sponsorships).
 
 TTL-controlled: re-runs only fetch repos missing or older than TTL_DAYS.
 
@@ -38,6 +39,7 @@ from rich.progress import (
 )
 
 from src.github.github_client import GITHUB_API, _AsyncRateLimiter, _Deferred
+from src.pipeline.common.funding_platforms import FUNDING_PLATFORMS
 from src.pipeline.common.repos import load_risk_repos
 
 console = Console()
@@ -46,10 +48,11 @@ log = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
-FIELDS = [
-    "repo", "repo_id", "has_funding_yml", "funding_yml_platforms",
-    "funding_yml_github", "fetched_at",
-]
+FIELDS = (
+    ["repo", "repo_id", "has_funding_yml", "funding_yml_platforms"]
+    + FUNDING_PLATFORMS
+    + ["fetched_at"]
+)
 TTL_DAYS = 90
 
 
@@ -101,6 +104,23 @@ def funding_yml_github_logins(yml: dict) -> list[str]:
     return out
 
 
+def platform_handle_value(yml: dict, platform: str) -> str:
+    """The FUNDING.yml handle(s) for one platform, comma-joined.
+
+    `github` is special-cased to the deduped, lower-cased login list. Other
+    platforms keep their raw value(s) as written (URLs/handles), stripped.
+    Returns "" when the platform key is absent.
+    """
+    if platform == "github":
+        return ",".join(funding_yml_github_logins(yml))
+    val = yml.get(platform) if isinstance(yml, dict) else None
+    if isinstance(val, list):
+        return ",".join(str(v).strip() for v in val if str(v).strip())
+    if isinstance(val, str):
+        return val.strip()
+    return ""
+
+
 async def fetch_funding_yml(session, limiter, repo: str) -> tuple[bool, dict]:
     """Return (exists, parsed_dict). parsed_dict empty if not present."""
     url = f"{GITHUB_API}/repos/{repo}/contents/.github/FUNDING.yml"
@@ -124,12 +144,14 @@ async def fetch_funding_yml(session, limiter, repo: str) -> tuple[bool, dict]:
 async def fetch_one(session, limiter, repo: str) -> dict:
     has_yml, yml = await fetch_funding_yml(session, limiter, repo)
     platforms = list(yml.keys()) if has_yml else []
-    return {
+    row = {
         "repo": repo,
         "has_funding_yml": "True" if has_yml else "False",
         "funding_yml_platforms": ",".join(platforms),
-        "funding_yml_github": ",".join(funding_yml_github_logins(yml)),
     }
+    for p in FUNDING_PLATFORMS:
+        row[p] = platform_handle_value(yml, p)
+    return row
 
 
 def _load_existing() -> dict[str, dict]:

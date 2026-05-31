@@ -1,6 +1,11 @@
-"""Tests for src/github/fetch_funding_yml.py — FUNDING.yml parsing + github logins."""
+"""Tests for src/github/fetch_funding_yml.py — FUNDING.yml parsing + per-platform handles."""
 
-from src.github.fetch_funding_yml import parse_funding_yml, funding_yml_github_logins
+from src.github.fetch_funding_yml import (
+    parse_funding_yml,
+    funding_yml_github_logins,
+    platform_handle_value,
+)
+from src.pipeline.common.funding_platforms import FUNDING_PLATFORMS
 
 
 class TestParseFundingYml:
@@ -69,3 +74,25 @@ class TestGithubLogins:
 
     def test_dedupe_preserves_order(self):
         assert funding_yml_github_logins({"github": ["a", "A", "b"]}) == ["a", "b"]
+
+
+class TestPlatformHandleValue:
+    def test_github_deduped_lowercased(self):
+        assert platform_handle_value({"github": ["Alice", "alice", "Bob"]}, "github") == "alice,bob"
+
+    def test_open_collective_scalar(self):
+        assert platform_handle_value({"open_collective": "babel"}, "open_collective") == "babel"
+
+    def test_custom_list_joined(self):
+        assert platform_handle_value(
+            {"custom": ["https://a.com", "https://b.com"]}, "custom"
+        ) == "https://a.com,https://b.com"
+
+    def test_absent_platform_is_blank(self):
+        assert platform_handle_value({"github": "x"}, "patreon") == ""
+
+    def test_every_canonical_platform_is_extractable(self):
+        # a row built for FIELDS must have a value (possibly "") for each platform
+        yml = {"github": "octocat", "open_collective": "babel", "custom": "https://x"}
+        for p in FUNDING_PLATFORMS:
+            assert isinstance(platform_handle_value(yml, p), str)
