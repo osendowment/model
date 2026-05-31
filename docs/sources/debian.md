@@ -26,12 +26,12 @@ In `data/sources/debian/raw/`:
 
 | Script | Purpose |
 |--------|---------|
-| `src/debian/fetch_debian_data.py` | Multi-step: packages, popcon, index |
-| `src/debian/process_data.py` | Build outputs (source-level aggregation) |
+| `src/sources/debian/fetch_debian_data.py` | Multi-step: packages, popcon, index |
+| `src/sources/debian/process_data.py` | Build outputs (source-level aggregation) |
 
 ```bash
-uv run src/debian/fetch_debian_data.py [--step packages|popcon|index] [--years 2023 2024 2025]
-uv run python -m src.debian.process_data
+uv run src/sources/debian/fetch_debian_data.py [--step packages|popcon|index] [--years 2023 2024 2025]
+uv run python -m src.sources.debian.process_data
 ```
 
 ## Key Design

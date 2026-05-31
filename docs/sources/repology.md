@@ -27,8 +27,8 @@ can be aggregated correctly across ecosystems.
 
 | Script | Purpose |
 |--------|---------|
-| `src/repology/fetch_repology_data.py` | Crawl project list for target repos |
+| `src/sources/repology/fetch_repology_data.py` | Crawl project list for target repos |
 
 ```bash
-uv run src/repology/fetch_repology_data.py [--repo debian_13|homebrew]
+uv run src/sources/repology/fetch_repology_data.py [--repo debian_13|homebrew]
 ```

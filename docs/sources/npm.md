@@ -28,16 +28,16 @@ In `data/sources/npm/nice-registry/`:
 
 | Script | Purpose |
 |--------|---------|
-| `src/npm/fetch_npm_data.py` | Iterative crawler -- fetches downloads + deps until graph is complete |
-| `src/npm/fetch_npm_stats.py` | Fetch ecosystem-wide annual download totals |
-| `src/npm/fetch_nice_registry.py` | Download package-to-repo mappings (one-time) |
-| `src/npm/process_data.py` | Build outputs from raw data |
+| `src/sources/npm/fetch_npm_data.py` | Iterative crawler -- fetches downloads + deps until graph is complete |
+| `src/sources/npm/fetch_npm_stats.py` | Fetch ecosystem-wide annual download totals |
+| `src/sources/npm/fetch_nice_registry.py` | Download package-to-repo mappings (one-time) |
+| `src/sources/npm/process_data.py` | Build outputs from raw data |
 
 ```bash
-uv run src/npm/fetch_nice_registry.py
-uv run src/npm/fetch_npm_data.py [--max-rounds 3] [--concurrency 20]
-uv run python -m src.npm.fetch_npm_stats
-uv run python -m src.npm.process_data [--ignore-gaps]
+uv run src/sources/npm/fetch_nice_registry.py
+uv run src/sources/npm/fetch_npm_data.py [--max-rounds 3] [--concurrency 20]
+uv run python -m src.sources.npm.fetch_npm_stats
+uv run python -m src.sources.npm.process_data [--ignore-gaps]
 ```
 
 ## Pipeline

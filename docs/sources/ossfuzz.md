@@ -17,8 +17,8 @@ No authentication required (single tarball download).
 
 | Script | Purpose |
 |--------|---------|
-| `src/ossfuzz/fetch_ossfuzz_data.py` | Extract project metadata from oss-fuzz repo |
+| `src/sources/ossfuzz/fetch_ossfuzz_data.py` | Extract project metadata from oss-fuzz repo |
 
 ```bash
-uv run src/ossfuzz/fetch_ossfuzz_data.py
+uv run src/sources/ossfuzz/fetch_ossfuzz_data.py
 ```

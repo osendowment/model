@@ -21,14 +21,14 @@ In `data/sources/crates/`:
 
 | Script | Purpose |
 |--------|---------|
-| `src/crates/fetch_db_dump.py` | Download + extract DB dump (skips if done) |
-| `src/crates/fetch_version_downloads.py` | Download monthly archives (skips complete months) |
-| `src/crates/process_data.py` | Build outputs (~20s) |
+| `src/sources/crates/fetch_db_dump.py` | Download + extract DB dump (skips if done) |
+| `src/sources/crates/fetch_version_downloads.py` | Download monthly archives (skips complete months) |
+| `src/sources/crates/process_data.py` | Build outputs (~20s) |
 
 ```bash
-uv run src/crates/fetch_db_dump.py [--chunks 16]
-uv run src/crates/fetch_version_downloads.py --years 2021 2022 2023 2024 2025 [--concurrency 128]
-uv run python -m src.crates.process_data [--min-avg N] [--alpha F]
+uv run src/sources/crates/fetch_db_dump.py [--chunks 16]
+uv run src/sources/crates/fetch_version_downloads.py --years 2021 2022 2023 2024 2025 [--concurrency 128]
+uv run python -m src.sources.crates.process_data [--min-avg N] [--alpha F]
 ```
 
 ## Pipeline

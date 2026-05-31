@@ -43,51 +43,51 @@ In `data/sources/git/` (long-format sha-pinned, schema: `repo, repo_id, commit_s
 
 | Script | Purpose |
 |--------|---------|
-| `src/github/fetch_top_repos.py` | Search repos by language/stars; backfill ecosystem repos |
-| `src/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
-| `src/git/commits_years.py` | Resolve per (repo, year) `last_sha` + `commits` |
-| `src/git/fetch_scc.py` | scc code analysis via sparse checkout (writes long format) |
-| `src/github/fetch_advanced_complexity.py` | Lizard cyclomatic + multimetric Halstead + MI |
-| `src/github/fetch_cognitive.py` | Sonar cognitive complexity (Lizard + AST) |
-| `src/github/fetch_semgrep.py` | Semgrep findings (security/correctness rulepacks) |
-| `src/github/github_client.py` | API client with token rotation + rate limiting |
-| `src/github/batch_runner.py` | Async batch processing + CSV I/O |
-| `src/github/models.py` | Data types (Contributor, RunResult, bot detection) |
-| `src/github/display.py` | Rich terminal output |
+| `src/sources/github/fetch_top_repos.py` | Search repos by language/stars; backfill ecosystem repos |
+| `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
+| `src/sources/git/commits_years.py` | Resolve per (repo, year) `last_sha` + `commits` |
+| `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (writes long format) |
+| `src/sources/github/fetch_advanced_complexity.py` | Lizard cyclomatic + multimetric Halstead + MI |
+| `src/sources/github/fetch_cognitive.py` | Sonar cognitive complexity (Lizard + AST) |
+| `src/sources/github/fetch_semgrep.py` | Semgrep findings (security/correctness rulepacks) |
+| `src/sources/github/github_client.py` | API client with token rotation + rate limiting |
+| `src/sources/github/batch_runner.py` | Async batch processing + CSV I/O |
+| `src/sources/github/models.py` | Data types (Contributor, RunResult, bot detection) |
+| `src/sources/github/display.py` | Rich terminal output |
 
 ### Repo search (by language, 1K+ stars)
 
 ```bash
-uv run python -m src.github.fetch_top_repos --language Python --min-stars 1000
-uv run python -m src.github.fetch_top_repos --language JavaScript TypeScript --min-stars 1000
-uv run python -m src.github.fetch_top_repos --language Rust --min-stars 1000
-uv run python -m src.github.fetch_top_repos --language C "C++" --min-stars 1000
+uv run python -m src.sources.github.fetch_top_repos --language Python --min-stars 1000
+uv run python -m src.sources.github.fetch_top_repos --language JavaScript TypeScript --min-stars 1000
+uv run python -m src.sources.github.fetch_top_repos --language Rust --min-stars 1000
+uv run python -m src.sources.github.fetch_top_repos --language C "C++" --min-stars 1000
 ```
 
 ### Backfill ecosystem AB repos
 
 ```bash
-uv run python -m src.github.fetch_top_repos --backfill-only
-uv run python -m src.github.fetch_top_repos --backfill-only --limit 20
+uv run python -m src.sources.github.fetch_top_repos --backfill-only
+uv run python -m src.sources.github.fetch_top_repos --backfill-only --limit 20
 ```
 
 ### Contributor metrics
 
 ```bash
-uv run python -m src.github.fetch_contributors_metrics                  # batch all
-uv run python -m src.github.fetch_contributors_metrics curl/curl        # single repo
-uv run python -m src.github.fetch_contributors_metrics --limit 10       # sample
+uv run python -m src.sources.github.fetch_contributors_metrics                  # batch all
+uv run python -m src.sources.github.fetch_contributors_metrics curl/curl        # single repo
+uv run python -m src.sources.github.fetch_contributors_metrics --limit 10       # sample
 ```
 
 ### Git metrics (scc — long format)
 
 ```bash
-uv run python -m src.git.fetch_scc --limit 40
-uv run python -m src.git.fetch_scc --force                   # bypass freshness skip
+uv run python -m src.sources.git.fetch_scc --limit 40
+uv run python -m src.sources.git.fetch_scc --force                   # bypass freshness skip
 ```
 
 Per-year `last_sha` foundation:
 
 ```bash
-uv run python -m src.git.commits_years --limit 40
+uv run python -m src.sources.git.commits_years --limit 40
 ```

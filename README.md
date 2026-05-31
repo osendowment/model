@@ -28,6 +28,7 @@ Our approach is a three-stage pipeline — **Value → Risk → Eligibility** �
 | **[Risk](docs/risk.md)** | Prioritize risky projects among most valuable | Bus factor and Herfindahl--Hirschman index for contributors, complexity metrics (LOC, etc) using [scc](https://github.com/boyter/scc) | [OpenSSF scorecard](https://scorecard.dev), active maintainers, issue activity, GitHub Sponsors |
 | **[Eligibility](docs/eligibility.md)** | Filter to fundable projects | OSS license check (63 OSI-approved) | Trademark check (corporate vs community), EOL check |
 
+Detailed methodology lives in [`docs/`](docs/): one page per stage — [value](docs/value.md), [risk](docs/risk.md), [eligibility](docs/eligibility.md) — plus [`docs/sources/`](docs/sources/) (one page per data source) and [`docs/components/`](docs/components/) (cross-cutting components, e.g. the [validation table](docs/components/validation.md)). The code mirrors this: `src/sources/<source>/` for fetch/process scripts, `src/{value,risk,eligibility}/` for the stage pipelines, and `src/common/` for shared infrastructure.
 
 Work is currently happening in this repo and the following places:
 

@@ -15,19 +15,19 @@ No authentication required.
 
 In `data/sources/homebrew/raw/`:
 - `formulas.csv` -- name, tap, desc, license, homepage, source_url, language
-- `dependencies.csv` -- formula, dep_name, dep_type, fetched_at. Both `runtime` and `build` types are captured here, but the cpp pipeline filters to `runtime` only when building its dep tree (`src/cpp/process_data.py:277`).
+- `dependencies.csv` -- formula, dep_name, dep_type, fetched_at. Both `runtime` and `build` types are captured here, but the cpp pipeline filters to `runtime` only when building its dep tree (`src/sources/cpp/process_data.py:277`).
 - `downloads.csv` -- formula, year, downloads
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `src/homebrew/fetch_homebrew_data.py` | Fetch formulas + analytics |
-| `src/homebrew/process_data.py` | Build outputs |
+| `src/sources/homebrew/fetch_homebrew_data.py` | Fetch formulas + analytics |
+| `src/sources/homebrew/process_data.py` | Build outputs |
 
 ```bash
-uv run src/homebrew/fetch_homebrew_data.py [--step formulas|analytics] [--years 2023 2024 2025]
-uv run python -m src.homebrew.process_data [--include-all-langs]
+uv run src/sources/homebrew/fetch_homebrew_data.py [--step formulas|analytics] [--years 2023 2024 2025]
+uv run python -m src.sources.homebrew.process_data [--include-all-langs]
 ```
 
 ## Outputs

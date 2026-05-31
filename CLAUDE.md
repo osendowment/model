@@ -34,6 +34,15 @@
 
 Rule: a script reading external/fetched data points at `data/sources/<source>/…`; a script reading or writing a stage result points at `data/<stage>/…`. Never write a stage output into `data/sources/`, and never write fetched source data into a stage folder.
 
+## Documentation
+
+`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md`, `eligibility.md` — with everything else in a subfolder:
+
+- `docs/sources/<source>.md` — one page per external data source.
+- `docs/components/<component>.md` — cross-cutting component docs (e.g. `validation.md`, how `data/value/validation.csv` is formed).
+
+When a doc's content spans multiple stages, fold it into the relevant stage page(s) rather than adding a new top-level overview doc.
+
 ## Philosophy
 
 - **Performance AND clarity** — scripts must be fast (async I/O, batching, concurrency) but also easy to read and audit. These are not in conflict: optimize with explicit, well-named code rather than clever tricks.

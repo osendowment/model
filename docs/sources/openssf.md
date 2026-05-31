@@ -17,9 +17,9 @@ Requires a GitHub token (`GITHUB_AUTH_TOKEN` or `GITHUB_TOKEN` env var).
 
 | Script | Purpose |
 |--------|---------|
-| `src/openssf/scorecard.py` | Run scorecard for repos, upsert results |
+| `src/sources/openssf/scorecard.py` | Run scorecard for repos, upsert results |
 
 ```bash
-uv run src/openssf/scorecard.py owner/repo [owner/repo2 ...]
-uv run src/openssf/scorecard.py --file repos.txt [--concurrency 5]
+uv run src/sources/openssf/scorecard.py owner/repo [owner/repo2 ...]
+uv run src/sources/openssf/scorecard.py --file repos.txt [--concurrency 5]
 ```

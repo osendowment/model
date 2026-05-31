@@ -94,7 +94,7 @@ graph LR
     github --> trend
 ```
 
-All thresholds are defined in `src/pipeline/settings.json`.
+All thresholds are defined in `src/settings.json`.
 
 ## How It Works
 
@@ -219,19 +219,58 @@ that carry CVEs.
 
 ## Data Sources
 
-All data comes from [GitHub](sources/github.md):
-- Contributor stats API -- per-contributor weekly commit history
-- scc code analysis -- lines of code, complexity via sparse checkout
-- Search API -- per-repo per-year issue counts (opened, closed)
+| Source | Fields extracted for Risk |
+|---|---|
+| **GitHub Contributors stats API** (`api.github.com/repos/.../stats/contributors`) | per-contributor weekly commit history → bus factor, HHI |
+| **GitHub git tree** (sparse checkout + [scc](https://github.com/boyter/scc)) | lines of code, complexity per language → `data/sources/git/scc.csv` |
+| **Lizard + multimetric** (sparse checkout) | per-function McCabe + Halstead + Sonar cognitive + maintainability index → `data/sources/git/lizard.csv` |
+| **Semgrep** (sparse checkout, `p/default` rulepack) | SAST findings → `data/sources/git/semgrep.csv` |
+| **GitHub Issues Search API** (`api.github.com/search/issues`) | per-year issue open / close counts |
+| **OpenSSF Scorecard API** (`api.securityscorecards.dev`) | security score (0–10) per repo → `data/sources/git/openssf.csv` |
+| **deps.dev API** (`api.deps.dev`) | mirrored Scorecard `score` + checks (fallback) → `data/sources/git/depsdev.csv` |
+
+## Long-format snapshot files (`data/sources/git/`)
+
+All sha-pinned raw metrics share one canonical schema:
+
+```
+repo, repo_id, commit_sha, metric, value, checked_at
+```
+
+Key = `(repo, commit_sha, metric)`. New runs upsert by key — historical snapshots for prior SHAs are preserved as a time-series. Empty `value` / empty `commit_sha` rows are dropped. Floats are written in shortest round-trip form (`42` not `42.0`, `8.5` not `8.500000000001`).
+
+Files:
+
+| File | Tool | Metrics |
+|------|------|---------|
+| `data/sources/git/scc.csv` | [scc](https://github.com/boyter/scc) | `loc`, `sloc`, `files`, `uloc`, `complexity`, `complexity_density` |
+| `data/sources/git/lizard.csv` | [lizard](https://github.com/terryyin/lizard) + [multimetric](https://github.com/priv-kweihmann/multimetric) | `cyclomatic_*`, `halstead_*`, `cognitive_*`, `maintainability_index`, `files` |
+| `data/sources/git/semgrep.csv` | [semgrep](https://semgrep.dev) | `<rulepack>.<metric>` (e.g. `p_default.total`, `p_default.error`) |
+| `data/sources/git/openssf.csv` | [scorecard CLI](https://github.com/ossf/scorecard) | `score` + 18 individual checks (`maintained`, `code_review`, …) |
+| `data/sources/git/depsdev.csv` | [deps.dev](https://api.deps.dev) | mirrored Scorecard `score` + checks |
+
+The canonical writer/reader is `src/sources/git/long_format.py` (`upsert_snapshot`, `upsert_rows`, `read`, `project_to_wide`, `latest_sha_per_repo`).
+
+### Sha-pinning convention
+
+Each repo has per-year `last_sha` resolved by `src/sources/git/commits_years.py` into `data/sources/github/git/commits-years.csv`. Fetchers walk per-repo years 2025 → 2024 → … → 2021 and pick the most-recent year with `commits > 0` and a non-empty `last_sha`. That sha is the `commit_sha` for every row the fetcher writes. No HEAD fallback persists — if no usable year exists for a repo, no row is written for it.
+
+### High-level projection (long → wide)
+
+The pipeline stages project the long files into per-repo wide rows for downstream consumers:
+
+- `data/risk/complexity.csv` ← `src.risk.build_complexity` projects `data/sources/git/scc.csv` + `data/sources/git/lizard.csv` using `commits-years.last_sha` (2025 → 2021 walk; first sha with `loc > 0`). Also folds in the **hotspot** score (Tornhill `churn × complexity`): joins `data/sources/github/git/churn.csv` (`churn_5y_total`) with the EOY-2025 scc complexity snapshot to emit `churn_5y_total`, `hotspot_raw`, `hotspot_log`, `hotspot_percentile`.
+- `data/risk/security.csv` ← `src.risk.build_security` projects `data/sources/git/openssf.csv`, `data/sources/git/depsdev.csv`, `data/sources/git/semgrep.csv` using the same per-year sha priority.
+- `data/risk/risk.csv` ← `src.risk.run_risk_pipeline` joins complexity + security + concentration + issue-debt and computes the final risk score.
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `src/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
-| `src/github/fetch_git_metrics.py` | scc code analysis via sparse checkout |
-| `src/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/pipeline/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value/value.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.pipeline.run_risk_pipeline` |
+| `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
+| `src/sources/github/fetch_git_metrics.py` | scc code analysis via sparse checkout |
+| `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
+| `src/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value/value.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.risk.run_risk_pipeline` |
 
 ## Source-file coverage
 

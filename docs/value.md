@@ -3,6 +3,50 @@
 Identifies the most important open-source packages across ecosystems by combining
 download volume with dependency graph analysis (PageRank).
 
+## Pipeline overview
+
+The three pipeline stages (run in order, each feeds the next):
+
+```
+1. **Value** (`src.value.run_value_pipeline`) → `data/value/value.csv` — picks the
+   most-depended-on packages per ecosystem and ranks them by
+   download-weighted PageRank, then unifies per-package classes into one
+   row per GitHub repo. All classes A/B/C/D are included. (this doc)
+2. **Risk** (`src.risk.run_risk_pipeline`) → `data/risk/risk.csv` — concentration
+   + complexity + issue-debt scoring for **A/B value-class repos** read
+   directly from `data/value/value.csv`. Target classes are configured in
+   `src/settings.json` under `risk_input.value_classes` (default
+   `["A", "B"]`). See [docs/risk.md](risk.md).
+3. **Eligibility** (`src.eligibility.run_eligibility_pipeline`) → `data/eligibility/eligibility.csv`
+   — restricts to AB-class repos with a fresh GitHub API record, an
+   OSI-approved license, and a non-EOL signal. Runs after Risk. See [docs/eligibility.md](eligibility.md).
+```
+
+### Dataflow at a glance
+
+```
+                Value pipeline                    Risk                Eligibility
+                ───────────────                   ────                ───────────
+ecosystem ──► top packages ──► dep tree ──► PageRank ──► A/B/C/D
+registries     (95% cum dl)    (BFS)       ↓
+                                      value-data.csv
+                                            │
+                                            ├─► A/B class repos ──► contributors + scc
+                                            │   (settings.json          │
+                                            │    risk_input.            │
+                                            │    value_classes)   risk-data.csv
+                                            │
+                                            └─► github_repo
+                                                    │
+                                                    ├──────────────► repos.csv
+                                                    │                    │
+                                                    │              license + EOL
+                                                    │                    │
+                                                    │            eligibility-data.csv
+```
+
+Source-specific details live in [`docs/sources/`](sources/) (one `.md` per source).
+
 ## Metrics Roadmap
 
 Inputs per dimension, current as of the last pipeline run. Each leaf = one metric, with its data
@@ -172,10 +216,10 @@ numbers barely move.
 
 | Script | Purpose |
 |--------|---------|
-| `src/npm/fetch_npm_data.py` | Iterative crawler (downloads + deps) |
-| `src/npm/fetch_npm_stats.py` | Ecosystem-wide annual totals |
-| `src/npm/fetch_nice_registry.py` | Package-to-repo mappings |
-| `src/npm/process_data.py` | Build outputs |
+| `src/sources/npm/fetch_npm_data.py` | Iterative crawler (downloads + deps) |
+| `src/sources/npm/fetch_npm_stats.py` | Ecosystem-wide annual totals |
+| `src/sources/npm/fetch_nice_registry.py` | Package-to-repo mappings |
+| `src/sources/npm/process_data.py` | Build outputs |
 
 See [sources/npm.md](sources/npm.md) for details.
 
@@ -194,8 +238,8 @@ See [sources/npm.md](sources/npm.md) for details.
 
 | Script | Purpose |
 |--------|---------|
-| `src/pypi/fetch_pypi_data.py` | Iterative dep crawler |
-| `src/pypi/process_data.py` | Build outputs |
+| `src/sources/pypi/fetch_pypi_data.py` | Iterative dep crawler |
+| `src/sources/pypi/process_data.py` | Build outputs |
 
 See [sources/pypi.md](sources/pypi.md) for details.
 
@@ -213,9 +257,9 @@ See [sources/pypi.md](sources/pypi.md) for details.
 
 | Script | Purpose |
 |--------|---------|
-| `src/crates/fetch_db_dump.py` | Download + extract DB dump |
-| `src/crates/fetch_version_downloads.py` | Download monthly archives |
-| `src/crates/process_data.py` | Build outputs (~20s) |
+| `src/sources/crates/fetch_db_dump.py` | Download + extract DB dump |
+| `src/sources/crates/fetch_version_downloads.py` | Download monthly archives |
+| `src/sources/crates/process_data.py` | Build outputs (~20s) |
 
 See [sources/crates.md](sources/crates.md) for details.
 
@@ -237,8 +281,8 @@ See [sources/crates.md](sources/crates.md) for details.
 
 | Script | Purpose |
 |--------|---------|
-| `src/debian/fetch_debian_data.py` | Fetch packages, popcon, deps |
-| `src/debian/process_data.py` | Build outputs |
+| `src/sources/debian/fetch_debian_data.py` | Fetch packages, popcon, deps |
+| `src/sources/debian/process_data.py` | Build outputs |
 
 **Limitations:**
 - **Popcon is opt-in** -- only ~250K Debian machines participate, so numbers
@@ -274,8 +318,8 @@ Available Wayback snapshots for `popcon.debian.org/by_inst.gz` (2021--2025):
 
 | Script | Purpose |
 |--------|---------|
-| `src/homebrew/fetch_homebrew_data.py` | Fetch formulas, analytics |
-| `src/homebrew/process_data.py` | Build outputs |
+| `src/sources/homebrew/fetch_homebrew_data.py` | Fetch formulas, analytics |
+| `src/sources/homebrew/process_data.py` | Build outputs |
 
 **Limitations:**
 - **Opt-in analytics** -- users can disable with `brew analytics off`; numbers
@@ -308,6 +352,26 @@ No snapshots before 2023. No `install-on-request` snapshots before Sep 2022.
 - `data/sources/ossfuzz/projects.csv` -- C/C++ fuzz targets
 
 See [sources/cpp.md](sources/cpp.md), [sources/debian.md](sources/debian.md), [sources/homebrew.md](sources/homebrew.md), [sources/repology.md](sources/repology.md) for details.
+
+## Value data sources
+
+Compact source → extracted-fields reference for the Value stage; per-ecosystem mechanics are detailed in [Ecosystems](#ecosystems) above.
+
+| Source | Fields extracted for Value |
+|---|---|
+| **npm registry** (`registry.npmjs.org`) | `downloads`; `dependencies` from each package's manifest |
+| **nice-registry** ([all-the-package-repos](https://github.com/nice-registry/all-the-package-repos)) | `package → repo_url` mapping |
+| **BigQuery PyPI dataset** | per-package annual downloads (5 years) |
+| **PyPI JSON API** (`pypi.org/pypi/<n>/json`) | `requires_dist`, `project_urls` |
+| **crates.io DB dump** (`static.crates.io/db-dump.tar.gz`) | crates, dependencies, `repository`, `homepage`, `description` |
+| **crates.io archives** | monthly per-version download counts |
+| **Debian UDD** (`udd.debian.org`) | C/C++ source list (debtags + section heuristics) |
+| **Debian popcon** (via Wayback Machine) | install-base counts (proxy for downloads) |
+| **Debian `Packages.xz`** | binary→source mapping, deps, `homepage`, `vcs_browser`, `section` |
+| **Homebrew formula API** (`formulae.brew.sh`) | formula list, deps, `homepage`, `source_url`, `desc`, `license`, `language` |
+| **Homebrew analytics** (via Wayback Machine) | 365-day install counts (proxy for downloads) |
+| **Repology** (`repology.org`) | cross-ecosystem name canonicalisation; upstream Git URLs |
+| **OSS-Fuzz** | C/C++ security-critical project whitelist; `main_repo` URL from `project.yaml` |
 
 ## Output Files
 
@@ -362,7 +426,7 @@ All dep-tree packages with downloads, PageRank, and value class.
 `data/value/value.csv` is the canonical per-repo table — one row per GitHub
 repo, plus one row per orphan package (no `github_repo`) so nothing is
 dropped. **All classes A/B/C/D are included** — D-class rows are no longer
-dropped. Produced by `uv run python -m src.pipeline.run_value_pipeline`, which reads each
+dropped. Produced by `uv run python -m src.value.run_value_pipeline`, which reads each
 ecosystem's `results.csv` and `eol.csv`, groups packages by repo, computes
 all per-ecosystem and cross-ecosystem aggregates, and writes the file
 sorted by `top_eco_pct` desc (most important repos first).
@@ -424,14 +488,14 @@ rows.
 both per-package and per-repo views). Group by `github_repo` (or use any
 orphan row directly) and the repo-level columns are already there.
 
-**Pipeline order**: each ecosystem's `check_eol.py` → `src.pipeline.run_value_pipeline`
-→ `aggregate_by_repo.py`. Re-running `src.pipeline.run_value_pipeline` overwrites
+**Pipeline order**: each ecosystem's `check_eol.py` → `src.value.run_value_pipeline`
+→ `aggregate_by_repo.py`. Re-running `src.value.run_value_pipeline` overwrites
 `value-data.csv` without the enriched columns; re-run `aggregate_by_repo.py`
 afterwards to restore them.
 
-**Three-stage pipeline**: `src.pipeline.run_value_pipeline` (this script) →
-`src.pipeline.run_risk_pipeline` (concentration + complexity for A/B value-class repos) →
-`src.pipeline.run_eligibility_pipeline` (filters to AB ∩ OSS ∩ alive).
+**Three-stage pipeline**: `src.value.run_value_pipeline` (this script) →
+`src.risk.run_risk_pipeline` (concentration + complexity for A/B value-class repos) →
+`src.eligibility.run_eligibility_pipeline` (filters to AB ∩ OSS ∩ alive).
 
 **Grouping**: rows sharing a non-empty `github_repo` are merged into one
 group; rows with an empty `github_repo` (e.g. cpp packages like `glibc`,
@@ -467,7 +531,7 @@ PageRank. The cpp pipeline drops them at two points:
 
 - Debian: `fetch_debian_data.py` only stores `Depends` + `Pre-Depends`.
 - Homebrew: raw deps include both `runtime` and `build`, but
-  `src/cpp/process_data.py` filters to `runtime` only.
+  `src/sources/cpp/process_data.py` filters to `runtime` only.
 
 Consequence: PageRank reflects who *runs* with whom, not who *builds*
 whom. Critical build infrastructure (cmake, pkgconf) is undervalued

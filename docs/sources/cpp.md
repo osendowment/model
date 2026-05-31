@@ -34,10 +34,10 @@ either ecosystem", not a faithful preservation of the source-side type field.
 
 | Script | Purpose |
 |--------|---------|
-| `src/cpp/process_data.py` | Unified C/C++ pipeline |
+| `src/sources/cpp/process_data.py` | Unified C/C++ pipeline |
 
 ```bash
-uv run python -m src.cpp.process_data [--top-share F] [--include-non-cpp]
+uv run python -m src.sources.cpp.process_data [--top-share F] [--include-non-cpp]
 ```
 
 ## Outputs
