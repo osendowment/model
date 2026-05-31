@@ -52,7 +52,7 @@ def test_audit_script_imports(script):
 
 
 @pytest.mark.parametrize("script", ["investigate-risk-metrics.py"])
-def test_readonly_script_runs(script, capsys):
+def test_readonly_script_runs(script):
     """Read-only scripts run end-to-end against live data without raising."""
     sys.argv = [script]
     runpy.run_path(str(SCRIPTS / script), run_name="__main__")

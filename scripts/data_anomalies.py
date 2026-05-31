@@ -32,6 +32,10 @@ sys.path.insert(0, str(ROOT))
 from src.common.repos import load_risk_repos  # noqa: E402
 
 RISK_DIR = ROOT / "data" / "risk"
+SEVERITIES = ("err", "warn", "info")
+DIMENSIONS = ("complexity", "concentration", "security", "funding", "workload")
+
+Finding = tuple[str, str, str]  # (severity, category, message)
 
 # Per-dimension detail CSVs and the year-agnostic columns we range-check.
 # scc "complexity" is a branch-keyword tally; the largest in-scope repos
@@ -84,6 +88,15 @@ def _read(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(f))
 
 
+def _to_float(repo: str, col: str, raw: str, findings: list[Finding]) -> float | None:
+    """Parse a numeric cell; on failure record a 'type' finding and return None."""
+    try:
+        return float(raw)
+    except ValueError:
+        findings.append(("err", "type", f"{repo}.{col} = {raw!r} (not numeric)"))
+        return None
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--strict", action="store_true",
@@ -91,7 +104,7 @@ def main():
     args = parser.parse_args()
 
     risk_scope = load_risk_scope()
-    findings: list[tuple[str, str, str]] = []  # (severity, category, message)
+    findings: list[Finding] = []
 
     risk_rows = _read(RISK_DIR / "risk.csv")
     in_risk = {r["repo"] for r in risk_rows}
@@ -107,17 +120,13 @@ def main():
 
     # 2. Dimension score range — risk.csv components + each detail CSV `score`
     #    are integer percentile scores floored at 1; 0 or >100 is impossible.
-    for col in ("concentration", "complexity", "security", "funding", "workload", "score"):
+    for col in (*DIMENSIONS, "score"):
         for r in risk_rows:
             v = (r.get(col) or "").strip()
             if not v:
                 continue
-            try:
-                num = float(v)
-            except ValueError:
-                findings.append(("err", "type", f"{r['repo']}.{col} = {v!r} (not numeric)"))
-                continue
-            if num < 1 or num > 100:
+            num = _to_float(r["repo"], col, v, findings)
+            if num is not None and not 1 <= num <= 100:
                 findings.append(("err", "score-range",
                                  f"{r['repo']}.{col} = {num} (outside [1, 100])"))
 
@@ -139,12 +148,8 @@ def main():
                 if v.startswith("-"):
                     findings.append(("err", "negative", f"{repo}.{col} = {v}"))
                     continue
-                try:
-                    num = float(v)
-                except ValueError:
-                    findings.append(("err", "type", f"{repo}.{col} = {v!r} (not numeric)"))
-                    continue
-                if num < lo or num > hi:
+                num = _to_float(repo, col, v, findings)
+                if num is not None and not lo <= num <= hi:
                     findings.append(("warn", "outlier",
                                      f"{repo}.{col} = {num} (outside [{lo}, {hi}])"))
             # generic percentile bound check: every *_p must be in [0, 100]
@@ -152,28 +157,21 @@ def main():
                 v = (r.get(col) or "").strip()
                 if not v:
                     continue
-                try:
-                    num = float(v)
-                except ValueError:
-                    findings.append(("err", "type", f"{repo}.{col} = {v!r} (not numeric)"))
-                    continue
-                if num < 0 or num > 100:
+                num = _to_float(repo, col, v, findings)
+                if num is not None and not 0 <= num <= 100:
                     findings.append(("err", "pct-range",
                                      f"{repo}.{col} = {num} (percentile outside [0, 100])"))
             # dimension score: floored at 1, so 0 is an anomaly
             sv = (r.get("score") or "").strip()
             if sv:
-                try:
-                    snum = float(sv)
-                    if snum < 1 or snum > 100:
-                        findings.append(("err", "score-range",
-                                         f"{repo}.{dim}.score = {snum} (outside [1, 100])"))
-                except ValueError:
-                    findings.append(("err", "type", f"{repo}.{dim}.score = {sv!r} (not numeric)"))
+                num = _to_float(repo, f"{dim}.score", sv, findings)
+                if num is not None and not 1 <= num <= 100:
+                    findings.append(("err", "score-range",
+                                     f"{repo}.{dim}.score = {num} (outside [1, 100])"))
 
     # 4. Stale fetched_at across every detail CSV.
     cutoff = (datetime.datetime.now() - datetime.timedelta(days=90)).isoformat()[:10]
-    for dim in ("complexity", "concentration", "security", "funding", "workload"):
+    for dim in DIMENSIONS:
         rows = _read(RISK_DIR / f"{dim}.csv")
         if not rows:
             continue
@@ -198,15 +196,15 @@ def main():
                              f"{r.get('repo', '?')}: {zero_count}/{populated} complexity fields = 0"))
 
     # 6. Report
-    severity_counter = {"err": 0, "warn": 0, "info": 0}
+    severity_counter = dict.fromkeys(SEVERITIES, 0)
     table = Table(title="Anomalies", show_header=True, header_style="bold dim")
     table.add_column("severity"); table.add_column("category"); table.add_column("message")
     grouped: dict[tuple[str, str], list[str]] = {}
     for sev, cat, msg in findings:
-        severity_counter[sev] = severity_counter.get(sev, 0) + 1
+        severity_counter[sev] += 1
         grouped.setdefault((sev, cat), []).append(msg)
 
-    for (sev, cat), msgs in sorted(grouped.items(), key=lambda x: ("err warn info".split().index(x[0][0]), x[0][1])):
+    for (sev, cat), msgs in sorted(grouped.items(), key=lambda x: (SEVERITIES.index(x[0][0]), x[0][1])):
         sev_style = {"err": "[red]err[/red]", "warn": "[yellow]warn[/yellow]", "info": "[dim]info[/dim]"}[sev]
         sample = msgs[0]
         if len(msgs) > 1:
