@@ -512,23 +512,45 @@ class TestAggregateByRepo:
 # ── repo overrides (curated wrong-repo correction) ───────────────────────────
 
 class TestRepoOverrides:
-    """The curated `value-repo-overrides.csv` layer forces the correct
-    `github_repo` for packages whose upstream registry metadata names the
-    wrong GitHub repo (e.g. `@sinclair/typebox`, whose latest npm version
-    points at a placeholder repo). Applied as the last step of
-    `aggregate_by_repo`, it must win over the registry-derived value.
+    """The curated `overrides.csv` layer forces the correct identity for
+    packages whose upstream registry metadata names the wrong repo (e.g.
+    `@sinclair/typebox`, whose latest npm version points at a placeholder
+    repo). Applied as the last step of `aggregate_by_repo`, it must win over
+    the registry-derived value. Each override is a dict
+    `{"github_repo", "git_url", "valid"}`; the `valid` pin is surfaced by the
+    loader but applied later by `build_validation`, not here.
     """
 
     def test_load_overrides_missing_file_returns_empty(self, tmp_path):
         assert load_repo_overrides(tmp_path / "absent.csv") == {}
 
     def test_load_overrides_parses_and_normalises(self, tmp_path):
-        p = tmp_path / "value-repo-overrides.csv"
-        _write_csv(p, ["package", "ecosystem", "github_repo", "reason"],
-                   [["@sinclair/typebox", "npm", "SinclairZX81/TypeBox", "bad npm meta"]])
+        p = tmp_path / "overrides.csv"
+        _write_csv(p, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"],
+                   [["@sinclair/typebox", "npm", "SinclairZX81/TypeBox", "", "", "bad npm meta"]])
         idx = load_repo_overrides(p)
         # key is (package, ecosystem); slug is lowercased like the rest of the pipeline
-        assert idx == {("@sinclair/typebox", "npm"): "sinclairzx81/typebox"}
+        assert idx == {("@sinclair/typebox", "npm"):
+                       {"github_repo": "sinclairzx81/typebox", "git_url": "", "valid": ""}}
+
+    def test_load_overrides_skips_blank_reason(self, tmp_path):
+        # A curated override MUST carry a reason; a blank-reason row is dropped.
+        p = tmp_path / "overrides.csv"
+        _write_csv(p, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"],
+                   [["pkg", "npm", "owner/repo", "", "", ""]])
+        assert load_repo_overrides(p) == {}
+
+    def test_load_overrides_surfaces_git_url_and_valid_pin(self, tmp_path):
+        # A git_url-only override and a valid-only pin both load (with a reason).
+        p = tmp_path / "overrides.csv"
+        _write_csv(p, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"],
+                   [["pkg-a", "pypi", "", "https://Example.com/X.git", "", "non-gh upstream"],
+                    ["pkg-b", "crates", "owner/repo", "", "True", "rescue false-negative"]])
+        idx = load_repo_overrides(p)
+        assert idx[("pkg-a", "pypi")] == {
+            "github_repo": "", "git_url": "https://example.com/x.git", "valid": ""}
+        assert idx[("pkg-b", "crates")] == {
+            "github_repo": "owner/repo", "git_url": "", "valid": "True"}
 
     def test_override_forces_github_repo_over_registry_value(self):
         # A package whose registry-derived github_repo / git_url point at the
@@ -542,7 +564,8 @@ class TestRepoOverrides:
                      git_url="https://github.com/evil/placeholder.git",
                      pagerank="1.0", value_class="A"),
         ]
-        overrides = {("some-pkg", "npm"): "real/upstream"}
+        overrides = {("some-pkg", "npm"):
+                     {"github_repo": "real/upstream", "git_url": "", "valid": ""}}
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         # Without the override the aggregate carries the wrong repo …
         assert aggs[0]["github_repo"] == "evil/placeholder"
@@ -550,6 +573,22 @@ class TestRepoOverrides:
         fixed = apply_repo_overrides(aggs, rows, overrides)
         assert fixed[0]["github_repo"] == "real/upstream"
         assert fixed[0]["git_url"] == "https://github.com/real/upstream.git"
+
+    def test_git_url_only_override_sets_url_keeps_github_repo(self):
+        # An override with only a git_url (no github_repo) rewrites the group's
+        # git_url and leaves github_repo to member derivation.
+        rows = [
+            _pkg_row("some-pkg", "pypi",
+                     github_repo="owner/repo",
+                     git_url="https://github.com/owner/repo.git",
+                     pagerank="1.0", value_class="A"),
+        ]
+        overrides = {("some-pkg", "pypi"):
+                     {"github_repo": "", "git_url": "https://example.com/x.git", "valid": ""}}
+        aggs = aggregate_by_repo(rows, drop_d_class=False)
+        fixed = apply_repo_overrides(aggs, rows, overrides)
+        assert fixed[0]["git_url"] == "https://example.com/x.git"
+        assert fixed[0]["github_repo"] == "owner/repo"
 
     def test_override_is_keyed_per_ecosystem(self):
         # An override for npm must not touch a same-named pypi package.
@@ -559,7 +598,8 @@ class TestRepoOverrides:
             _pkg_row("typebox", "pypi", github_repo="other/repo",
                      git_url="https://github.com/other/repo.git", pagerank="1.0"),
         ]
-        overrides = {("typebox", "npm"): "right/repo"}
+        overrides = {("typebox", "npm"):
+                     {"github_repo": "right/repo", "git_url": "", "valid": ""}}
         aggs = apply_repo_overrides(
             aggregate_by_repo(rows, drop_d_class=False), rows, overrides)
         by_pkg = {a["top_eco_pkg"]: a for a in aggs}
@@ -581,9 +621,9 @@ class TestRepoOverrides:
         # internally, loading the curated CSV from OVERRIDES_FILE. Point that at
         # a temp file so the test is hermetic.
         import src.pipeline.value.unify_value_data as mod
-        ov = tmp_path / "value-repo-overrides.csv"
-        _write_csv(ov, ["package", "ecosystem", "github_repo", "reason"],
-                   [["@sinclair/typebox", "npm", "sinclairzx81/typebox", "wrong upstream"]])
+        ov = tmp_path / "overrides.csv"
+        _write_csv(ov, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"],
+                   [["@sinclair/typebox", "npm", "sinclairzx81/typebox", "", "", "wrong upstream"]])
         original = mod.OVERRIDES_FILE
         mod.OVERRIDES_FILE = ov
         try:
@@ -602,7 +642,7 @@ class TestRepoOverrides:
     def test_shipped_overrides_file_includes_typebox(self):
         # The committed override file must carry the typebox correction.
         idx = load_repo_overrides()
-        assert idx.get(("@sinclair/typebox", "npm")) == "sinclairzx81/typebox"
+        assert idx[("@sinclair/typebox", "npm")]["github_repo"] == "sinclairzx81/typebox"
 
 
 # ── _strip_internals direct test ─────────────────────────────────────────────
