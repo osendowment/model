@@ -34,3 +34,26 @@ uv run python -m src.sources.homebrew.process_data [--include-all-langs]
 
 In `data/sources/homebrew/`:
 - `top-packages.csv`, `dependency-tree.csv`, `github-repos.csv`, `results.csv`
+
+## Limitations
+
+- **Opt-in analytics** -- users can disable with `brew analytics off`; numbers are a
+  fraction of actual installs.
+- **Rolling 365-day windows** -- each snapshot represents "installs in the 365 days
+  ending at snapshot date", not a calendar year. A May 2023 snapshot is used as proxy
+  for "2022" but actually covers Jun 2022 -- May 2023.
+- **Sparse + truncated snapshots** -- Wayback coverage is thin; some captures are
+  truncated at exactly 1 MB (only the high-install head is recoverable via regex
+  parsing). No usable 2021 snapshot exists.
+- **Not comparable to npm/PyPI/crates** -- represents macOS install events, not
+  cross-platform package downloads.
+
+Available Wayback snapshots for `analytics/install/365d.json` (2023--2026):
+
+```
+2023: May 09, May 31, Sep 30
+2024: May 22, Oct 07
+2025: Jan 21, Apr 27, Sep 11, Dec 05
+2026: Mar 06
+```
+No snapshots before 2023. No `install-on-request` snapshots before Sep 2022.

@@ -46,3 +46,23 @@ Aggregation is at **source package** level (not binary):
 
 In `data/sources/debian/`:
 - `top-packages.csv`, `dependency-tree.csv`, `github-repos.csv`, `results.csv`
+
+## Limitations
+
+- **Popcon is opt-in** -- only ~250K Debian machines participate, so numbers are a
+  sample of installed base, not total downloads.
+- **Sparse Wayback coverage** -- only 11 snapshots available across 2021--2025, with
+  some years having only 1 snapshot (2023: Jul 2 only). Each year picks the snapshot
+  closest to Dec 31, but this is a rough proxy.
+- **Not comparable to package-manager downloads** -- popcon measures "machines with
+  package installed", not download events.
+
+Available Wayback snapshots for `popcon.debian.org/by_inst.gz` (2021--2025):
+
+```
+2021: Sep 28, Oct 22
+2022: Sep 04, Sep 21, Sep 29, Dec 25
+2023: Jul 02
+2024: Jan 06, Dec 31
+2025: Sep 15, Nov 17
+```
