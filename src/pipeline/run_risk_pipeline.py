@@ -26,6 +26,7 @@ FETCHERS = [
     Step("depsdev",       "src.depsdev.fetch",                    fetch=True),
     Step("funding-yml",   "src.github.fetch_funding_yml",         fetch=True),
     Step("sponsors",      "src.github.fetch_sponsors",            fetch=True),
+    Step("sponsorships",  "src.github.fetch_sponsorships",        fetch=True),
     Step("floss-fund",    "src.floss_fund.funding_json",          fetch=True),
     Step("opencollective", "src.opencollective.fetch_budgets",    fetch=True),
 ]

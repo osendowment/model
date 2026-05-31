@@ -41,6 +41,7 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 SPONSORS_FILE = DATA_DIR / "sources" / "github" / "sponsors.csv"
+SPONSORSHIPS_FILE = DATA_DIR / "sources" / "github" / "sponsorships.csv"
 FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
 FLOSS_FUND_FILE = DATA_DIR / "sources" / "floss-fund" / "funding-json.csv"
 OC_BUDGETS_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
@@ -75,8 +76,12 @@ def oc_avg_funding(slug: str, oc_budgets: dict[str, dict]) -> str:
 
 
 def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dict,
-                 foundation_host: str, oc_budgets: dict) -> dict:
-    """Join one repo's funding signals into a funding.csv row."""
+                 foundation_host: str, oc_budgets: dict, sponsoring_count: str = "") -> dict:
+    """Join one repo's funding signals into a funding.csv row.
+
+    `sponsoring_count` (outbound) is looked up by owner login in `build()` —
+    it is an account-level signal, not part of the per-repo `sponsors` row.
+    """
     channels = _platform_set(yml.get("funding_yml_platforms")) | _platform_set(
         export.get("channel_platforms"))
     oc_slug = (normalize_oc_slug(yml.get("open_collective"))
@@ -85,7 +90,7 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "repo": repo,
         "repo_id": repo_id,
         "github_sponsors": (sponsors.get("github_sponsors") or "").strip(),
-        "sponsoring_count": (sponsors.get("sponsoring_count") or "").strip(),
+        "sponsoring_count": sponsoring_count,
         "has_funding_yml": (yml.get("has_funding_yml") or "").strip(),
         "funding_yml_platforms": (yml.get("funding_yml_platforms") or "").strip(),
         "has_funding_json": "True" if export else "False",
@@ -110,6 +115,18 @@ def _export_by_repo(path: Path) -> dict[str, dict]:
     return out
 
 
+def _load_sponsoring(path: Path) -> dict[str, str]:
+    """{owner_login: sponsoring_count} from sponsorships.csv."""
+    out: dict[str, str] = {}
+    if path.exists():
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                login = (row.get("login") or "").strip().lower()
+                if login:
+                    out[login] = (row.get("sponsoring_count") or "").strip()
+    return out
+
+
 def build() -> list[dict]:
     eligible = load_risk_repos()
     sponsors = load_rows_by_repo(SPONSORS_FILE)
@@ -117,16 +134,19 @@ def build() -> list[dict]:
     foundations = load_column_by_repo(FOUNDATIONS_FILE, "host")
     export = _export_by_repo(FLOSS_FUND_FILE)
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
+    sponsoring = _load_sponsoring(SPONSORSHIPS_FILE)
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
+        owner = repo.split("/", 1)[0].lower()
         rows.append(assemble_row(
             repo=repo, repo_id=entry.repo_id,
             sponsors=sponsors.get(repo, {}), yml=yml.get(repo, {}),
             export=export.get(repo.lower(), {}),
             foundation_host=foundations.get(repo, ""),
-            oc_budgets=oc_budgets))
+            oc_budgets=oc_budgets,
+            sponsoring_count=sponsoring.get(owner, "")))
     return rows
 
 
