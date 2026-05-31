@@ -14,15 +14,18 @@ Reads (all under data/sources/):
 Writes data/risk/funding.csv:
     repo, repo_id, gh_sponsors_in, gh_sponsors_out, gh_sponsorships,
     gh_sponsorships_p, has_funding_yml, funding_yml_platforms, has_funding_json,
-    channels_count, oc_avg_funding, oc_avg_funding_p, foundation_host, fetched_at
+    channels_count, oc_avg_funding, oc_avg_funding_p, funding_p, foundation_host,
+    fetched_at
 
 `has_funding_json` is True iff the repo is registered in the FLOSS Fund
 directory. `channels_count` is the number of distinct funding platforms across
 FUNDING.yml and the funding.json channels (deduped union). `oc_avg_funding` is
-the mean of the repo's Open Collective gross annual budgets (years with data).
+the mean of the repo's Open Collective gross annual budgets ($0 when none).
 `gh_sponsorships_p` / `oc_avg_funding_p` are inverted Hazen funding-risk
-percentiles (less funding → higher percentile); they are informational and not
-carried into risk.csv. `fetched_at` is the most recent contributing timestamp.
+percentiles (less funding → higher percentile); `funding_p` is their geometric
+mean (the dimension's overall funding-risk percentile). Only `oc_avg_funding`,
+`gh_sponsorships` and `funding_p` are carried into risk.csv. `fetched_at` is the
+most recent contributing timestamp.
 
 Usage:
     uv run python -m src.pipeline.risk.build_funding
@@ -38,7 +41,7 @@ from rich.table import Table
 from src.floss_fund.directory import normalize_github_repo
 from src.pipeline.common.funding_platforms import normalize_oc_slug
 from src.pipeline.common.repos import load_risk_repos
-from src.pipeline.common.stats import hazen_percentiles
+from src.pipeline.common.stats import geometric_mean, hazen_percentiles
 from src.pipeline.common.tables import load_column_by_repo, load_rows_by_repo
 
 console = Console()
@@ -55,7 +58,8 @@ OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
 FIELDS = ["repo", "repo_id", "gh_sponsors_in", "gh_sponsors_out",
           "gh_sponsorships", "gh_sponsorships_p", "has_funding_yml",
           "funding_yml_platforms", "has_funding_json", "channels_count",
-          "oc_avg_funding", "oc_avg_funding_p", "foundation_host", "fetched_at"]
+          "oc_avg_funding", "oc_avg_funding_p", "funding_p",
+          "foundation_host", "fetched_at"]
 
 
 def _latest(*timestamps: str) -> str:
@@ -68,14 +72,19 @@ def _platform_set(csv_value: str) -> set[str]:
 
 
 def oc_avg_funding(slug: str, oc_budgets: dict[str, dict]) -> str:
-    """Mean of an Open Collective slug's gross annual budgets (years with data)."""
+    """Mean of an Open Collective slug's gross annual budgets (years with data).
+
+    Returns "0" when the repo has no Open Collective presence or no recorded
+    budget — absence of OC funding is treated as $0, so the value is numeric
+    for every repo and participates in `oc_avg_funding_p`.
+    """
     row = oc_budgets.get(slug) if slug else None
     if not row:
-        return ""
+        return "0"
     vals = [float(v) for k, v in row.items()
             if k.startswith("raised_") and (v or "").strip()]
     if not vals:
-        return ""
+        return "0"
     avg = sum(vals) / len(vals)
     return str(int(avg)) if avg == int(avg) else f"{avg:.2f}"
 
@@ -95,21 +104,17 @@ def _to_float(s: str) -> float:
         return 0.0
 
 
-def _assign_risk_pctl(rows: list[dict], value_key: str, pctl_key: str,
-                      only_populated: bool) -> None:
+def _assign_risk_pctl(rows: list[dict], value_key: str, pctl_key: str) -> None:
     """Fill `pctl_key` with the inverted Hazen percentile of `value_key`.
 
     Inverted: a LOWER value (less funding) → HIGHER risk percentile (mirrors
-    the negated openssf_score in build_security). When `only_populated`, only
-    repos with a non-blank `value_key` are ranked (among themselves); the rest
-    keep an empty percentile — a repo with no OpenCollective presence isn't
-    "low-funded" on that axis, it is simply not on it.
+    the negated openssf_score in build_security). Every repo is ranked — both
+    metrics are numeric for all repos (sponsorships default to 0, OC funding
+    defaults to $0).
     """
-    idx = ([i for i, r in enumerate(rows) if (r.get(value_key) or "").strip()]
-           if only_populated else list(range(len(rows))))
-    pctls = hazen_percentiles([-_to_float(rows[i][value_key]) for i in idx])
-    for i, p in zip(idx, pctls):
-        rows[i][pctl_key] = round(p, 2)
+    pctls = hazen_percentiles([-_to_float(r[value_key]) for r in rows])
+    for r, p in zip(rows, pctls):
+        r[pctl_key] = round(p, 2)
 
 
 def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dict,
@@ -141,7 +146,8 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "has_funding_json": "True" if export else "False",
         "channels_count": str(len(channels)),
         "oc_avg_funding": oc_avg_funding(oc_slug, oc_budgets),
-        "oc_avg_funding_p": "",  # filled in build() over the OC-funded subset
+        "oc_avg_funding_p": "",  # filled in build()
+        "funding_p": "",         # geom-mean of the two _p columns, filled in build()
         "foundation_host": foundation_host,
         "fetched_at": _latest((sponsors.get("fetched_at") or "").strip(),
                               (yml.get("fetched_at") or "").strip()),
@@ -194,12 +200,14 @@ def build() -> list[dict]:
             oc_budgets=oc_budgets,
             sponsoring_count=sponsoring.get(owner, "")))
 
-    # Funding risk percentiles (inverted: less funding → higher risk).
-    # `gh_sponsorships_p` ranks every repo by total sponsorship engagement;
-    # `oc_avg_funding_p` ranks only the OpenCollective-funded subset. Both are
-    # informational — kept out of risk.csv.
-    _assign_risk_pctl(rows, "gh_sponsorships", "gh_sponsorships_p", only_populated=False)
-    _assign_risk_pctl(rows, "oc_avg_funding", "oc_avg_funding_p", only_populated=True)
+    # Funding risk percentiles (inverted: less funding → higher risk), one per
+    # channel. `funding_p` is their geometric mean — the funding dimension's
+    # overall risk percentile (low if the repo is funded on EITHER channel).
+    _assign_risk_pctl(rows, "gh_sponsorships", "gh_sponsorships_p")
+    _assign_risk_pctl(rows, "oc_avg_funding", "oc_avg_funding_p")
+    for r in rows:
+        r["funding_p"] = round(geometric_mean(
+            [float(r["gh_sponsorships_p"]), float(r["oc_avg_funding_p"])]), 2)
     return rows
 
 

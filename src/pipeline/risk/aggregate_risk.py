@@ -65,12 +65,12 @@ FETCHED_AT_COL = "fetched_at"
 
 # Columns kept in a per-dimension intermediate but deliberately NOT carried
 # into risk.csv — informational signals that must not feed risk calculation.
-# Outbound sponsoring (and the combined gh_sponsorships signal derived from it),
-# plus the funding-risk percentiles, are tracked in funding.csv only; inbound
-# `gh_sponsors_in`, raw `oc_avg_funding`, etc. still flow into risk.csv.
-RISK_EXCLUDED: dict[str, set[str]] = {
-    "funding": {"gh_sponsors_out", "gh_sponsorships",
-                "gh_sponsorships_p", "oc_avg_funding_p"},
+# For a dimension listed here, ONLY these columns are carried into risk.csv
+# (plus the always-kept `<dim>_fetched_at`). The funding dimension keeps a rich
+# set of raw signals in funding.csv but contributes just its two headline
+# metrics and the composite percentile to the risk table.
+RISK_INCLUDED: dict[str, set[str]] = {
+    "funding": {"oc_avg_funding", "gh_sponsorships", "funding_p"},
 }
 
 
@@ -98,14 +98,14 @@ def _qualify_columns(dim: str, cols: list[str]) -> list[tuple[str, str]]:
     the dimension's semantics (e.g. `loc_2025_eoy`, `bf_commits_lifetime`)
     so they pass through unchanged.
     """
-    excluded = RISK_EXCLUDED.get(dim, set())
+    included = RISK_INCLUDED.get(dim)  # None → carry every (non-id) column
     out: list[tuple[str, str]] = []
     for c in cols:
-        if c in ID_COLUMNS or c in excluded:
+        if c in ID_COLUMNS:
             continue
         if c == FETCHED_AT_COL:
-            out.append((c, f"{dim}_fetched_at"))
-        else:
+            out.append((c, f"{dim}_fetched_at"))  # always kept, per dimension
+        elif included is None or c in included:
             out.append((c, c))
     return out
 

@@ -21,6 +21,7 @@ def test_assemble_row_joins_and_counts_channels():
     assert row["gh_sponsorships"] == "51"       # 12 + 39
     assert row["gh_sponsorships_p"] == ""       # filled by build(), not assemble_row
     assert row["oc_avg_funding_p"] == ""        # filled by build()
+    assert row["funding_p"] == ""               # geom-mean, filled by build()
     # union of {github, open_collective} and {github, open_collective, bank} = 3
     assert row["channels_count"] == "3"
     # mean of 100, 200, 300 (years with data) = 200
@@ -38,7 +39,7 @@ def test_assemble_row_no_funding_sources():
     assert row["gh_sponsors_out"] == ""
     assert row["gh_sponsorships"] == "0"        # blank in/out treated as 0
     assert row["channels_count"] == "0"
-    assert row["oc_avg_funding"] == ""
+    assert row["oc_avg_funding"] == "0"         # no OC presence → $0
     assert row["foundation_host"] == "apache"
 
 
@@ -64,19 +65,21 @@ def test_build_fills_sponsorships_percentile_low_total_high_pctl(monkeypatch):
     rows = {r["repo"]: r for r in bf.build()}
     assert rows["o/low"]["gh_sponsorships"] == "10"    # 0 + 10
     assert rows["o/high"]["gh_sponsorships"] == "30"   # 20 + 10
-    # inverted: lowest total ranks highest risk percentile
+    assert rows["o/low"]["oc_avg_funding"] == "0"      # no OC → $0
+    # inverted: lowest total ranks highest risk percentile…
     assert rows["o/low"]["gh_sponsorships_p"] > rows["o/high"]["gh_sponsorships_p"]
+    # …and funding_p (geom-mean) tracks it when OC is tied at 0 for all
+    assert rows["o/low"]["funding_p"] > rows["o/high"]["funding_p"]
 
 
-def test_assign_risk_pctl_only_populated_skips_blanks():
-    rows = [{"v": "10", "vp": ""}, {"v": "", "vp": ""}, {"v": "100", "vp": ""}]
-    bf._assign_risk_pctl(rows, "v", "vp", only_populated=True)
-    assert rows[1]["vp"] == ""                 # blank value → blank percentile
-    assert rows[0]["vp"] > rows[2]["vp"]       # lower value → higher risk pctl
+def test_assign_risk_pctl_inverted_lower_value_higher_pctl():
+    rows = [{"v": "10", "vp": ""}, {"v": "0", "vp": ""}, {"v": "100", "vp": ""}]
+    bf._assign_risk_pctl(rows, "v", "vp")
+    assert rows[1]["vp"] > rows[0]["vp"] > rows[2]["vp"]  # 0 → highest risk pctl
 
 
 def test_oc_avg_funding_missing_slug_or_data():
-    assert bf.oc_avg_funding("", {}) == ""
-    assert bf.oc_avg_funding("ghost", {"vuejs": {"raised_2024": "5"}}) == ""
-    assert bf.oc_avg_funding("x", {"x": {"raised_2024": "", "raised_2025": ""}}) == ""
+    assert bf.oc_avg_funding("", {}) == "0"
+    assert bf.oc_avg_funding("ghost", {"vuejs": {"raised_2024": "5"}}) == "0"
+    assert bf.oc_avg_funding("x", {"x": {"raised_2024": "", "raised_2025": ""}}) == "0"
     assert bf.oc_avg_funding("x", {"x": {"raised_2024": "10", "raised_2025": "20"}}) == "15"
