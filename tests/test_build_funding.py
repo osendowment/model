@@ -19,7 +19,8 @@ def test_assemble_row_joins_and_counts_channels():
     assert row["gh_sponsors_in"] == "12"        # inbound
     assert row["gh_sponsors_out"] == "39"       # outbound (by owner)
     assert row["gh_sponsorships"] == "51"       # 12 + 39
-    assert row["gh_sponsorships_pctl"] == ""    # filled by build(), not assemble_row
+    assert row["gh_sponsorships_p"] == ""       # filled by build(), not assemble_row
+    assert row["oc_avg_funding_p"] == ""        # filled by build()
     # union of {github, open_collective} and {github, open_collective, bank} = 3
     assert row["channels_count"] == "3"
     # mean of 100, 200, 300 (years with data) = 200
@@ -64,7 +65,14 @@ def test_build_fills_sponsorships_percentile_low_total_high_pctl(monkeypatch):
     assert rows["o/low"]["gh_sponsorships"] == "10"    # 0 + 10
     assert rows["o/high"]["gh_sponsorships"] == "30"   # 20 + 10
     # inverted: lowest total ranks highest risk percentile
-    assert rows["o/low"]["gh_sponsorships_pctl"] > rows["o/high"]["gh_sponsorships_pctl"]
+    assert rows["o/low"]["gh_sponsorships_p"] > rows["o/high"]["gh_sponsorships_p"]
+
+
+def test_assign_risk_pctl_only_populated_skips_blanks():
+    rows = [{"v": "10", "vp": ""}, {"v": "", "vp": ""}, {"v": "100", "vp": ""}]
+    bf._assign_risk_pctl(rows, "v", "vp", only_populated=True)
+    assert rows[1]["vp"] == ""                 # blank value → blank percentile
+    assert rows[0]["vp"] > rows[2]["vp"]       # lower value → higher risk pctl
 
 
 def test_oc_avg_funding_missing_slug_or_data():

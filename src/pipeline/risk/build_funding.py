@@ -12,14 +12,17 @@ Reads (all under data/sources/):
     foundations/host-by-repo.csv — FOSS-foundation host per repo
 
 Writes data/risk/funding.csv:
-    repo, repo_id, github_sponsors, has_funding_yml, funding_yml_platforms,
-    has_funding_json, channels_count, oc_avg_funding, foundation_host, fetched_at
+    repo, repo_id, gh_sponsors_in, gh_sponsors_out, gh_sponsorships,
+    gh_sponsorships_p, has_funding_yml, funding_yml_platforms, has_funding_json,
+    channels_count, oc_avg_funding, oc_avg_funding_p, foundation_host, fetched_at
 
 `has_funding_json` is True iff the repo is registered in the FLOSS Fund
 directory. `channels_count` is the number of distinct funding platforms across
 FUNDING.yml and the funding.json channels (deduped union). `oc_avg_funding` is
 the mean of the repo's Open Collective gross annual budgets (years with data).
-`fetched_at` is the most recent of the contributing source rows' timestamps.
+`gh_sponsorships_p` / `oc_avg_funding_p` are inverted Hazen funding-risk
+percentiles (less funding → higher percentile); they are informational and not
+carried into risk.csv. `fetched_at` is the most recent contributing timestamp.
 
 Usage:
     uv run python -m src.pipeline.risk.build_funding
@@ -50,9 +53,9 @@ FOUNDATIONS_FILE = DATA_DIR / "sources" / "foundations" / "host-by-repo.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
 
 FIELDS = ["repo", "repo_id", "gh_sponsors_in", "gh_sponsors_out",
-          "gh_sponsorships", "gh_sponsorships_pctl", "has_funding_yml",
+          "gh_sponsorships", "gh_sponsorships_p", "has_funding_yml",
           "funding_yml_platforms", "has_funding_json", "channels_count",
-          "oc_avg_funding", "foundation_host", "fetched_at"]
+          "oc_avg_funding", "oc_avg_funding_p", "foundation_host", "fetched_at"]
 
 
 def _latest(*timestamps: str) -> str:
@@ -85,6 +88,30 @@ def _to_int(s: str) -> int:
         return 0
 
 
+def _to_float(s: str) -> float:
+    try:
+        return float((s or "").strip())
+    except ValueError:
+        return 0.0
+
+
+def _assign_risk_pctl(rows: list[dict], value_key: str, pctl_key: str,
+                      only_populated: bool) -> None:
+    """Fill `pctl_key` with the inverted Hazen percentile of `value_key`.
+
+    Inverted: a LOWER value (less funding) → HIGHER risk percentile (mirrors
+    the negated openssf_score in build_security). When `only_populated`, only
+    repos with a non-blank `value_key` are ranked (among themselves); the rest
+    keep an empty percentile — a repo with no OpenCollective presence isn't
+    "low-funded" on that axis, it is simply not on it.
+    """
+    idx = ([i for i, r in enumerate(rows) if (r.get(value_key) or "").strip()]
+           if only_populated else list(range(len(rows))))
+    pctls = hazen_percentiles([-_to_float(rows[i][value_key]) for i in idx])
+    for i, p in zip(idx, pctls):
+        rows[i][pctl_key] = round(p, 2)
+
+
 def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dict,
                  foundation_host: str, oc_budgets: dict, sponsoring_count: str = "") -> dict:
     """Join one repo's funding signals into a funding.csv row.
@@ -93,8 +120,8 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
     `gh_sponsors_out` = the owner's outbound sponsoring (looked up by login in
                         `build()` — an account-level signal, not per-repo).
     `gh_sponsorships` = in + out: total GitHub-sponsorship engagement (either
-                        direction signals a resourced project). `_pctl` is
-                        filled by `build()` once every repo's total is known.
+                        direction signals a resourced project). `_p` percentiles
+                        are filled by `build()` once every repo's value is known.
     """
     channels = _platform_set(yml.get("funding_yml_platforms")) | _platform_set(
         export.get("channel_platforms"))
@@ -108,12 +135,13 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "gh_sponsors_in": gh_in,
         "gh_sponsors_out": gh_out,
         "gh_sponsorships": str(_to_int(gh_in) + _to_int(gh_out)),
-        "gh_sponsorships_pctl": "",  # filled in build() once all totals are known
+        "gh_sponsorships_p": "",  # filled in build() once all totals are known
         "has_funding_yml": (yml.get("has_funding_yml") or "").strip(),
         "funding_yml_platforms": (yml.get("funding_yml_platforms") or "").strip(),
         "has_funding_json": "True" if export else "False",
         "channels_count": str(len(channels)),
         "oc_avg_funding": oc_avg_funding(oc_slug, oc_budgets),
+        "oc_avg_funding_p": "",  # filled in build() over the OC-funded subset
         "foundation_host": foundation_host,
         "fetched_at": _latest((sponsors.get("fetched_at") or "").strip(),
                               (yml.get("fetched_at") or "").strip()),
@@ -166,14 +194,12 @@ def build() -> list[dict]:
             oc_budgets=oc_budgets,
             sponsoring_count=sponsoring.get(owner, "")))
 
-    # Funding risk percentile: Hazen-rank total sponsorship engagement
-    # (in + out), NEGATED so a LOWER total (no sponsorship activity either
-    # direction) → HIGHER risk percentile (mirrors the inverted openssf_score
-    # in build_security). Informational — kept out of risk.csv.
-    totals = [_to_int(r["gh_sponsorships"]) for r in rows]
-    pctls = hazen_percentiles([-t for t in totals])
-    for r, p in zip(rows, pctls):
-        r["gh_sponsorships_pctl"] = round(p, 2)
+    # Funding risk percentiles (inverted: less funding → higher risk).
+    # `gh_sponsorships_p` ranks every repo by total sponsorship engagement;
+    # `oc_avg_funding_p` ranks only the OpenCollective-funded subset. Both are
+    # informational — kept out of risk.csv.
+    _assign_risk_pctl(rows, "gh_sponsorships", "gh_sponsorships_p", only_populated=False)
+    _assign_risk_pctl(rows, "oc_avg_funding", "oc_avg_funding_p", only_populated=True)
     return rows
 
 
