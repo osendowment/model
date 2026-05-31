@@ -3,11 +3,12 @@
 Writes data/sources/github/sponsors.csv:
     repo, repo_id, github_sponsors, sponsors_status, fetched_at
 
-Counts public sponsorships of the repo owner plus every `github:` login in
-the repo's FUNDING.yml (read from data/sources/github/funding-yml.csv — run
-fetch_funding_yml first). `sponsors_status`: "ok" if every queried login
-resolved, "error" if any GraphQL query failed (so a 0 from a failure is not
-mistaken for a genuine 0).
+`github_sponsors` (inbound) = public sponsorships *received* by the repo owner
+plus every `github:` login in the repo's FUNDING.yml (read from
+data/sources/github/funding-yml.csv — run fetch_funding_yml first). Outbound
+sponsoring is a separate signal — see src.github.fetch_sponsorships.
+`sponsors_status`: "ok" if every queried login resolved, "error" if any GraphQL
+query failed (so a 0 from a failure is not mistaken for a genuine 0).
 
 Usage:
     uv run python -m src.github.fetch_sponsors

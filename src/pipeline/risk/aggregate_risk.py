@@ -63,6 +63,16 @@ ID_COLUMNS = ("repo", "repo_id")
 # metric's freshness is traceable.
 FETCHED_AT_COL = "fetched_at"
 
+# Columns kept in a per-dimension intermediate but deliberately NOT carried
+# into risk.csv — informational signals that must not feed risk calculation.
+# For a dimension listed here, ONLY these columns are carried into risk.csv
+# (plus the always-kept `<dim>_fetched_at`). The funding dimension keeps a rich
+# set of raw signals in funding.csv but contributes just its two headline
+# metrics and the composite percentile to the risk table.
+RISK_INCLUDED: dict[str, set[str]] = {
+    "funding": {"oc_avg_funding", "gh_sponsorships", "funding_p"},
+}
+
 
 def _load_intermediate(path: Path) -> tuple[list[str], dict[str, dict[str, str]]]:
     """Return (column_order, {repo: row_dict}). Empty if file missing."""
@@ -88,14 +98,16 @@ def _qualify_columns(dim: str, cols: list[str]) -> list[tuple[str, str]]:
     the dimension's semantics (e.g. `loc_2025_eoy`, `bf_commits_lifetime`)
     so they pass through unchanged.
     """
+    included = RISK_INCLUDED.get(dim)  # None → carry every (non-id) column
     out: list[tuple[str, str]] = []
     for c in cols:
         if c in ID_COLUMNS:
             continue
-        if c == FETCHED_AT_COL:
-            out.append((c, f"{dim}_fetched_at"))
-        else:
-            out.append((c, c))
+        if included is not None and c not in included:
+            continue  # whitelisted dim carries ONLY its listed columns
+        # `fetched_at` → `<dim>_fetched_at` so freshness is traceable; a
+        # whitelisted dim that omits it (e.g. funding) drops it above.
+        out.append((c, f"{dim}_fetched_at" if c == FETCHED_AT_COL else c))
     return out
 
 
