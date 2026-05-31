@@ -108,8 +108,15 @@ TTL_DAYS_DEFAULT = 7
 YEAR_MIN = 2021
 YEAR_MAX = 2025
 
+# Curated override: for a listed repo, REPLACE its OSV package list with these
+# (ecosystem, package) rows. Fixes repos the auto-derived mapping gets wrong —
+# e.g. python/cpython, which cpp/results.csv maps to the removed Debian
+# `python` (Py2) package, missing all interpreter CVEs.
+CVE_PKG_OVERRIDES_FILE = DATA_DIR / "risk" / "cve-package-overrides.csv"
+
 REQUEST_TIMEOUT_S = 30
 MAX_RETRIES = 3
+MAX_PAGES = 50  # OSV returns ≤1000 vulns/page; 50 pages = 50k vuln safety cap
 WORKER_MIN_INTERVAL_S = 1.0  # ~1 req/sec per worker → polite throttle
 
 
@@ -148,23 +155,49 @@ def load_repo_package_mapping() -> dict[str, list[tuple[str, str]]]:
                     continue
                 bucket.add(key)
                 mapping.setdefault(ghr, []).append(key)
+
+    # Apply curated overrides last — replace the repo's package list wholesale.
+    for repo, packages in _load_cve_pkg_overrides().items():
+        mapping[repo] = packages
     return mapping
+
+
+def _load_cve_pkg_overrides() -> dict[str, list[tuple[str, str]]]:
+    """Read cve-package-overrides.csv → {repo → [(ecosystem, package), ...]}.
+
+    Each listed repo's auto-derived OSV package list is REPLACED wholesale by
+    its override rows (so a repo can map to several packages, e.g. the
+    per-version python3.x Debian packages for python/cpython). Empty if missing.
+    """
+    out: dict[str, list[tuple[str, str]]] = {}
+    if not CVE_PKG_OVERRIDES_FILE.exists():
+        return out
+    canon = canonical_repo_map()
+    with open(CVE_PKG_OVERRIDES_FILE, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            raw = (row.get("github_repo") or "").strip().lower()
+            ghr = canon.get(raw, raw)
+            eco = (row.get("ecosystem") or "").strip()
+            pkg = (row.get("package") or "").strip()
+            if not ghr or not eco or not pkg:
+                continue
+            key = (eco, pkg)
+            bucket = out.setdefault(ghr, [])
+            if key not in bucket:
+                bucket.append(key)
+    return out
 
 
 # ── OSV fetch ────────────────────────────────────────────────────────────────
 
 
-async def fetch_package_vulns(
-    session: aiohttp.ClientSession, ecosystem: str, package: str
-) -> list[dict] | None:
-    """POST OSV query for one (ecosystem, package) → vulns list, or None on failure.
+async def _fetch_vulns_page(
+    session: aiohttp.ClientSession, payload: dict, ecosystem: str, package: str
+) -> dict | None:
+    """POST one OSV query page → parsed JSON dict, or None on failure.
 
     Retries 429/5xx with exponential backoff (1s, 2s, 4s, 8s) up to MAX_RETRIES.
-    Returns [] when OSV legitimately reports zero vulns. Returns None when we
-    couldn't get an answer — the caller decides what to do (we treat any
-    None among a repo's packages as "this repo's lookup is incomplete").
     """
-    payload = {"package": {"name": package, "ecosystem": ecosystem}}
     backoff = 1.0
     for attempt in range(1, MAX_RETRIES + 1):
         try:
@@ -174,8 +207,7 @@ async def fetch_package_vulns(
                 timeout=aiohttp.ClientTimeout(total=REQUEST_TIMEOUT_S),
             ) as resp:
                 if resp.status == 200:
-                    data = await resp.json()
-                    return data.get("vulns") or []
+                    return await resp.json()
                 if resp.status == 429 or 500 <= resp.status < 600:
                     log.debug(
                         "osv %s/%s status=%d (attempt %d/%d) — backing off %.1fs",
@@ -200,6 +232,37 @@ async def fetch_package_vulns(
             backoff = min(backoff * 2, 8.0)
     log.warning("osv %s/%s failed after %d retries", ecosystem, package, MAX_RETRIES)
     return None
+
+
+async def fetch_package_vulns(
+    session: aiohttp.ClientSession, ecosystem: str, package: str
+) -> list[dict] | None:
+    """POST OSV query for one (ecosystem, package) → vulns list, or None on failure.
+
+    OSV `/v1/query` caps each response at 1000 results and returns a
+    `next_page_token` when more exist; we follow it so packages with >1000
+    vulns (e.g. Debian `linux`) aren't silently truncated. Returns [] when
+    OSV legitimately reports zero vulns. Returns None if any page failed.
+    """
+    all_vulns: list[dict] = []
+    page_token: str | None = None
+    for _page in range(MAX_PAGES):
+        payload: dict = {"package": {"name": package, "ecosystem": ecosystem}}
+        if page_token:
+            payload["page_token"] = page_token
+        data = await _fetch_vulns_page(session, payload, ecosystem, package)
+        if data is None:
+            return None
+        all_vulns.extend(data.get("vulns") or [])
+        page_token = data.get("next_page_token")
+        if not page_token:
+            return all_vulns
+        await asyncio.sleep(0.5)  # polite pause between pages
+    log.warning(
+        "osv %s/%s hit MAX_PAGES=%d — results may be truncated",
+        ecosystem, package, MAX_PAGES,
+    )
+    return all_vulns
 
 
 # ── parsing ──────────────────────────────────────────────────────────────────
@@ -510,6 +573,7 @@ async def batch_fetch(
     limit: int | None,
     ttl_days: int,
     concurrency: int,
+    only_repos: set[str] | None = None,
 ) -> tuple[
     dict[str, list[dict[str, str]]],  # final cve_rows by repo
     dict[str, dict[str, str]],        # final queried rows
@@ -532,8 +596,13 @@ async def batch_fetch(
     mapped_repos = [r for r in all_repos if r in repo_pkg_map]
     unmapped_skipped = len(all_repos) - len(mapped_repos)
 
-    candidates = [r for r in mapped_repos if r not in fresh]
-    fresh_skipped = len(mapped_repos) - len(candidates)
+    if only_repos is not None:
+        # Targeted re-fetch: just the named repos (bypasses TTL/fresh).
+        candidates = [r for r in mapped_repos if r in only_repos]
+        fresh_skipped = 0
+    else:
+        candidates = [r for r in mapped_repos if r not in fresh]
+        fresh_skipped = len(mapped_repos) - len(candidates)
     if limit and limit < len(candidates):
         to_fetch = random.sample(candidates, limit)
         limit_skipped = len(candidates) - limit
@@ -711,6 +780,9 @@ def main() -> None:
                    help="Max concurrent HTTP workers (default: 10)")
     p.add_argument("--force", action="store_true",
                    help="Ignore TTL — refetch every risk repo")
+    p.add_argument("--repos", nargs="+", default=None, metavar="owner/repo",
+                   help="Fetch only these repos (bypasses TTL) — e.g. a targeted "
+                        "re-fetch after a mapping/override change")
     p.add_argument("-v", "--verbose", action="store_true",
                    help="DEBUG-level logging")
     args = p.parse_args()
@@ -751,6 +823,7 @@ def main() -> None:
     banner.add_row("started", started)
     console.print(banner)
 
+    only_repos = {r.strip().lower() for r in args.repos} if args.repos else None
     final_cves, final_queried, processed, unmapped_skipped = asyncio.run(batch_fetch(
         repos_with_ids,
         repo_pkg_map,
@@ -758,6 +831,7 @@ def main() -> None:
         limit=args.limit,
         ttl_days=args.ttl_days,
         concurrency=args.concurrency,
+        only_repos=only_repos,
     ))
 
     print_summary(
