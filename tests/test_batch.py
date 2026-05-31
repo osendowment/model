@@ -2,7 +2,7 @@
 
 import csv
 
-from src.github.batch_runner import (
+from src.sources.github.batch_runner import (
     _upsert_contributor_commits,
     _load_repos_from_csv,
     GH_CONTRIB_FIELDS,
@@ -22,11 +22,11 @@ class TestContribFields:
 
 class TestUpsertContributorCommits:
     def test_writes_long_rows(self, tmp_path, monkeypatch):
-        monkeypatch.setattr("src.github.batch_runner.GH_CONTRIB_FILE",
+        monkeypatch.setattr("src.sources.github.batch_runner.GH_CONTRIB_FILE",
                             str(tmp_path / "contributor-commits.csv"))
-        monkeypatch.setattr("src.github.batch_runner.GH_CONTRIB_STATUS_FILE",
+        monkeypatch.setattr("src.sources.github.batch_runner.GH_CONTRIB_STATUS_FILE",
                             str(tmp_path / "contributor-commits.status.csv"))
-        monkeypatch.setattr("src.github.batch_runner._load_repo_id_map", lambda: {})
+        monkeypatch.setattr("src.sources.github.batch_runner._load_repo_id_map", lambda: {})
 
         raw = [
             {"login": "Alice", "contributions": 100, "type": "User"},
@@ -45,11 +45,11 @@ class TestUpsertContributorCommits:
         assert rows[1]["account_type"] == "Bot"
 
     def test_status_ok(self, tmp_path, monkeypatch):
-        monkeypatch.setattr("src.github.batch_runner.GH_CONTRIB_FILE",
+        monkeypatch.setattr("src.sources.github.batch_runner.GH_CONTRIB_FILE",
                             str(tmp_path / "contributor-commits.csv"))
-        monkeypatch.setattr("src.github.batch_runner.GH_CONTRIB_STATUS_FILE",
+        monkeypatch.setattr("src.sources.github.batch_runner.GH_CONTRIB_STATUS_FILE",
                             str(tmp_path / "contributor-commits.status.csv"))
-        monkeypatch.setattr("src.github.batch_runner._load_repo_id_map", lambda: {})
+        monkeypatch.setattr("src.sources.github.batch_runner._load_repo_id_map", lambda: {})
 
         _upsert_contributor_commits([("owner/repo", [{"login": "a", "contributions": 1, "type": "User"}])])
 
@@ -59,11 +59,11 @@ class TestUpsertContributorCommits:
         assert rows[0]["n_contributors"] == "1"
 
     def test_status_empty(self, tmp_path, monkeypatch):
-        monkeypatch.setattr("src.github.batch_runner.GH_CONTRIB_FILE",
+        monkeypatch.setattr("src.sources.github.batch_runner.GH_CONTRIB_FILE",
                             str(tmp_path / "contributor-commits.csv"))
-        monkeypatch.setattr("src.github.batch_runner.GH_CONTRIB_STATUS_FILE",
+        monkeypatch.setattr("src.sources.github.batch_runner.GH_CONTRIB_STATUS_FILE",
                             str(tmp_path / "contributor-commits.status.csv"))
-        monkeypatch.setattr("src.github.batch_runner._load_repo_id_map", lambda: {})
+        monkeypatch.setattr("src.sources.github.batch_runner._load_repo_id_map", lambda: {})
 
         _upsert_contributor_commits([("owner/empty", [])])
 
@@ -73,11 +73,11 @@ class TestUpsertContributorCommits:
         assert rows[0]["n_contributors"] == "0"
 
     def test_status_error(self, tmp_path, monkeypatch):
-        monkeypatch.setattr("src.github.batch_runner.GH_CONTRIB_FILE",
+        monkeypatch.setattr("src.sources.github.batch_runner.GH_CONTRIB_FILE",
                             str(tmp_path / "contributor-commits.csv"))
-        monkeypatch.setattr("src.github.batch_runner.GH_CONTRIB_STATUS_FILE",
+        monkeypatch.setattr("src.sources.github.batch_runner.GH_CONTRIB_STATUS_FILE",
                             str(tmp_path / "contributor-commits.status.csv"))
-        monkeypatch.setattr("src.github.batch_runner._load_repo_id_map", lambda: {})
+        monkeypatch.setattr("src.sources.github.batch_runner._load_repo_id_map", lambda: {})
 
         _upsert_contributor_commits([("owner/errored", None)])
 
@@ -106,9 +106,9 @@ class TestUpsertContributorCommits:
             encoding="utf-8",
         )
 
-        monkeypatch.setattr("src.github.batch_runner.GH_CONTRIB_FILE", str(contrib_file))
-        monkeypatch.setattr("src.github.batch_runner.GH_CONTRIB_STATUS_FILE", str(status_file))
-        monkeypatch.setattr("src.github.batch_runner._load_repo_id_map", lambda: {})
+        monkeypatch.setattr("src.sources.github.batch_runner.GH_CONTRIB_FILE", str(contrib_file))
+        monkeypatch.setattr("src.sources.github.batch_runner.GH_CONTRIB_STATUS_FILE", str(status_file))
+        monkeypatch.setattr("src.sources.github.batch_runner._load_repo_id_map", lambda: {})
 
         _upsert_contributor_commits([("new/repo", [{"login": "bob", "contributions": 10, "type": "User"}])])
 

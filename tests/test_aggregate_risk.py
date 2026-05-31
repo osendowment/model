@@ -2,7 +2,7 @@
 
 from collections import Counter
 
-from src.pipeline.risk.aggregate_risk import aggregate
+from src.risk.aggregate_risk import aggregate
 
 
 class TestAggregateColumns:

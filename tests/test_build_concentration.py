@@ -1,8 +1,8 @@
-"""Tests for src/pipeline/risk/build_concentration.py concentration_class."""
+"""Tests for src/risk/build_concentration.py concentration_class."""
 
 import pytest
 
-from src.pipeline.risk.build_concentration import concentration_class
+from src.risk.build_concentration import concentration_class
 
 
 @pytest.mark.parametrize("bus_factor, hhi, expected", [

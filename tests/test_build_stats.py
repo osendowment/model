@@ -1,4 +1,4 @@
-"""Tests for src/pipeline/value/build_stats.py + the stats.csv reader.
+"""Tests for src/value/build_stats.py + the stats.csv reader.
 
 Covers the metric-row × ecosystem-column assembly, the per-ecosystem
 count helpers, and `params.ecosystem_avg_downloads` reading the new
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import csv
 
-from src.pipeline.value import build_stats as bs
+from src.value import build_stats as bs
 
 
 def _write(path, header, rows):
@@ -29,7 +29,7 @@ class TestBuildStatsRows:
                   for e in bs.ALL_ECOSYSTEMS}
         rows = bs.build_stats_rows(downloads, counts)
         by_metric = {r["metric"]: r for r in rows}
-        from src.pipeline.common.params import YEARS
+        from src.common.params import YEARS
         for y in YEARS:
             assert f"downloads_{y}" in by_metric
         for m in ("packages_top", "packages_with_deps", "github_repos"):
@@ -83,7 +83,7 @@ class TestCounts:
 
 class TestAvgDownloadsReader:
     def test_reads_metric_rows_and_skips_zero_years(self, tmp_path, monkeypatch):
-        import src.pipeline.common.params as params
+        import src.common.params as params
         stats = tmp_path / "stats.csv"
         # homebrew 2021 == 0 (missing) must be excluded from the average.
         _write(stats, ["metric", "npm", "homebrew", "cpp"],

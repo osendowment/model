@@ -1,6 +1,6 @@
-"""Tests for src/floss_fund/funding_json.py channel→platform parsing."""
+"""Tests for src/sources/floss_fund/funding_json.py channel→platform parsing."""
 
-from src.floss_fund.funding_json import parse_channels
+from src.sources.floss_fund.funding_json import parse_channels
 
 
 def test_parse_channels_maps_platforms():

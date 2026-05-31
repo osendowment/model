@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.pipeline.common.pipeline_runner import Step, select_steps
+from src.common.pipeline_runner import Step, select_steps
 
 STEPS = [
     Step("a", "m.a", fetch=True),

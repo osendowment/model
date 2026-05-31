@@ -1,4 +1,4 @@
-"""Unit and integration tests for PyPI pipeline (src/pypi/process_data.py)."""
+"""Unit and integration tests for PyPI pipeline (src/sources/pypi/process_data.py)."""
 
 import csv
 import re

@@ -1,4 +1,4 @@
-from src.floss_fund.directory import normalize_github_repo, load_directory_repos
+from src.sources.floss_fund.directory import normalize_github_repo, load_directory_repos
 
 
 def test_normalize_basic():

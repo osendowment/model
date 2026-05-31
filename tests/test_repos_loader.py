@@ -1,8 +1,8 @@
-"""Tests for the risk-pipeline repo loaders in src/pipeline/repos.py."""
+"""Tests for the risk-pipeline repo loaders in src/common/repos.py."""
 
 import csv
 
-from src.pipeline.common import repos
+from src.common import repos
 
 
 def _write(path, header, rows):

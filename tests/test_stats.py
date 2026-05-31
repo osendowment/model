@@ -1,8 +1,8 @@
-"""Tests for src/pipeline/common/stats.py — shared geom_mean_quartile helpers."""
+"""Tests for src/common/stats.py — shared geom_mean_quartile helpers."""
 
 import pytest
 
-from src.pipeline.common.stats import (
+from src.common.stats import (
     geometric_mean,
     hazen_percentiles,
     quartile_classes,

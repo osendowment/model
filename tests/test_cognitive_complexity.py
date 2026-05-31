@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from src.github.fetch_cognitive import (
+from src.sources.github.fetch_cognitive import (
     SonarCognitiveExt,
     _python_cognitive,
     _run_lizard_cognitive,
@@ -268,8 +268,8 @@ def test_build_complexity_reads_cognitive_from_lizard(tmp_path, monkeypatch):
     into the long-format data/sources/git/lizard.csv; build_complexity picks them
     up at the same snapshot sha it uses for scc.
     """
-    from src.pipeline.common.repos import RepoEntry
-    from src.pipeline.risk import build_complexity
+    from src.common.repos import RepoEntry
+    from src.risk import build_complexity
 
     sha = "a" * 40
     (tmp_path / "commits-years.csv").write_text(
@@ -305,6 +305,6 @@ def test_build_complexity_reads_cognitive_from_lizard(tmp_path, monkeypatch):
 
 def test_build_complexity_includes_cognitive_columns():
     """FIELDS list (the CSV header order) includes the three new columns."""
-    from src.pipeline.risk.build_complexity import FIELDS
+    from src.risk.build_complexity import FIELDS
     for col in ("cognitive_total", "cognitive_avg", "cognitive_max"):
         assert col in FIELDS, f"{col} missing from build_complexity FIELDS"

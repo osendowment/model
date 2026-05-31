@@ -1,6 +1,6 @@
-"""Tests for src/pipeline/risk/build_funding.py — join, channels_count, oc_avg_funding."""
+"""Tests for src/risk/build_funding.py — join, channels_count, oc_avg_funding."""
 
-from src.pipeline.risk import build_funding as bf
+from src.risk import build_funding as bf
 
 
 def test_assemble_row_joins_and_counts_channels():

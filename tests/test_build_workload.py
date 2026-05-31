@@ -1,8 +1,8 @@
-"""Tests for src/pipeline/risk/build_workload.py — workload class logic."""
+"""Tests for src/risk/build_workload.py — workload class logic."""
 
 import pytest
 
-from src.pipeline.risk.build_workload import compute_workload_classes
+from src.risk.build_workload import compute_workload_classes
 
 
 class TestComputeWorkloadClasses:

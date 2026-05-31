@@ -1,8 +1,8 @@
-"""Regression tests for src/git/fetch_scc.py skip logic."""
+"""Regression tests for src/sources/git/fetch_scc.py skip logic."""
 
 import csv
 
-from src.git.fetch_scc import SCC_METRICS, _already_done
+from src.sources.git.fetch_scc import SCC_METRICS, _already_done
 
 _HEADER = ["repo", "repo_id", "commit_sha", "metric", "value", "checked_at"]
 

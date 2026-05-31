@@ -1,8 +1,8 @@
-"""Tests for src/pipeline/risk/build_complexity.py classification helpers."""
+"""Tests for src/risk/build_complexity.py classification helpers."""
 
 import pytest
 
-from src.pipeline.risk.build_complexity import _worst_class, loc_class
+from src.risk.build_complexity import _worst_class, loc_class
 
 
 @pytest.mark.parametrize("loc, expected", [

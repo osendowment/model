@@ -1,11 +1,11 @@
-"""Tests for src/github/fetch_funding_yml.py — FUNDING.yml parsing + per-platform handles."""
+"""Tests for src/sources/github/fetch_funding_yml.py — FUNDING.yml parsing + per-platform handles."""
 
-from src.github.fetch_funding_yml import (
+from src.sources.github.fetch_funding_yml import (
     parse_funding_yml,
     funding_yml_github_logins,
     platform_handle_value,
 )
-from src.pipeline.common.funding_platforms import FUNDING_PLATFORMS
+from src.common.funding_platforms import FUNDING_PLATFORMS
 
 
 class TestParseFundingYml:

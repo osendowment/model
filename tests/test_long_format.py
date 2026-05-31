@@ -1,6 +1,6 @@
-"""Tests for src/git/long_format.py."""
+"""Tests for src/sources/git/long_format.py."""
 
-from src.git.long_format import read, upsert_rows, upsert_snapshot, write_all
+from src.sources.git.long_format import read, upsert_rows, upsert_snapshot, write_all
 
 
 def _row(repo, sha, metric, value, repo_id="1", checked_at="2026-01-01T00:00:00Z"):

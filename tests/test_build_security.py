@@ -1,8 +1,8 @@
-"""Tests for src/pipeline/risk/build_security.py — security class logic."""
+"""Tests for src/risk/build_security.py — security class logic."""
 
 import pytest
 
-from src.pipeline.risk.build_security import compute_security_classes
+from src.risk.build_security import compute_security_classes
 
 
 def _metric(repo, openssf_score, cve):

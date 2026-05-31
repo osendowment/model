@@ -1,6 +1,6 @@
-"""Tests for src/github/fetch_advanced_complexity.py."""
+"""Tests for src/sources/github/fetch_advanced_complexity.py."""
 
-from src.github.fetch_advanced_complexity import (
+from src.sources.github.fetch_advanced_complexity import (
     LIZARD_SKIP_SUFFIXES,
     MAX_FILE_BYTES,
     _list_source_files,
@@ -84,7 +84,7 @@ def test_run_lizard_excludes_fortran(tmp_path):
 def test_fortran_skip_set_covers_source_exts():
     """Every Fortran extension in the sparse-checkout set is on the skip list —
     otherwise a Fortran file could slip through to lizard and OOM the run."""
-    from src.git.clone import SOURCE_EXTS
+    from src.sources.git.clone import SOURCE_EXTS
 
     fortran_source_exts = {
         ext.lstrip("*").lower()

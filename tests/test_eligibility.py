@@ -1,4 +1,4 @@
-"""Tests for src/pipeline/eligibility.py — focused on EOL exclusion and
+"""Tests for src/eligibility.py — focused on EOL exclusion and
 license classification, the two pieces of business logic that decide
 whether a repo lands in `eligibility-data.csv` as eligible.
 
@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from src.pipeline.eligibility import classify_eligibility as eligibility
+from src.eligibility import classify_eligibility as eligibility
 
 
 # ── classify_oss ────────────────────────────────────────────────────────────
