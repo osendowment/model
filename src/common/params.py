@@ -35,6 +35,11 @@ YEARS: list[int] = _P["years"]
 # Risk-pipeline input scope — which value classes feed the risk pipeline.
 RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]
 
+# Concentration window length (complete years). The bus-factor/HHI '_5y'
+# columns cover the last CONCENTRATION_WINDOW_YEARS complete years, anchored
+# to max(YEARS) (the last complete year); '_full' caps at max(YEARS).
+CONCENTRATION_WINDOW_YEARS: int = _P["concentration"]["window_years"]
+
 
 _STATS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "value", "stats.csv")
 

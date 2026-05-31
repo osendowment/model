@@ -173,7 +173,7 @@ backlog. For each repo three ratios are formed (▴ higher = more workload):
 - `cve_per_ac` — CVEs (5y) per active contributor
 - `nni_per_ac` — net new issues (opened − closed, 5y) per active contributor
 
-`AC` = `active_contributors_git_2021_2025`, the count of distinct non-bot
+`AC` = `active_contributors_git_5y`, the count of distinct non-bot
 contributors who authored a commit in 2021–2025 (git-clone method).
 Each ratio is percentile-ranked across the eligible set (Hazen position
 `100·(rank−0.5)/n`, strictly in 0–100); `workload_burden_percentile` is the
@@ -324,13 +324,12 @@ Sub-100% columns (every gap is structural, not a data-collection bug):
 |--------|-------------|
 | `repo` | GitHub repo slug (`owner/name`) |
 | `repo_id` | GitHub numeric repo ID |
-| `bf_commits_git` / `hhi_commits_git` | Bus factor / HHI (0--10000) — git-clone method, lifetime |
-| `contributors_git` / `total_commits_git` | Merged non-bot contributors / non-merge commits — git, lifetime |
-| `bf_commits_git_2021_2025` / `hhi_commits_git_2021_2025` | Bus factor / HHI — git, 2021--2025 window |
-| `active_contributors_git_2021_2025` / `commits_git_2021_2025` | Distinct non-bot contributors / commits — git, 2021--2025 window |
-| `bf_commits_github` / `hhi_commits_github` | Bus factor / HHI — GitHub `/contributors` method, lifetime (list capped near 500) |
-| `total_commits_github` / `total_contributors_github` / `active_contributors_github` | Commit + contributor counts — GitHub method |
-| `concentration_class` | A--D from `bf_commits_git` + `hhi_commits_git` |
+| `bf_commits_git_full` / `hhi_commits_git_full` | Bus factor / HHI (0--10000) — git-clone method, `_full` (all commits through the last complete year = `max(settings.years)`) |
+| `contributors_git_full` / `total_commits_git_full` | Merged non-bot contributors / non-merge commits — git, `_full` |
+| `bf_commits_git_5y` / `hhi_commits_git_5y` | Bus factor / HHI — git, `_5y` window (last `concentration.window_years` complete years; **the only axis that feeds `score`**) |
+| `active_contributors_git_5y` / `commits_git_5y` | Distinct non-bot contributors / commits — git, `_5y` window |
+| `bf_commits_gh_alltime` / `hhi_commits_gh_alltime` | Bus factor / HHI — GitHub `/contributors` method, `_gh_alltime` (uncapped API lifetime as of `github_fetched_at`; no per-year data, list capped near 500) |
+| `total_commits_gh_alltime` / `total_contributors_gh_alltime` / `active_contributors_gh_alltime` | Commit + contributor counts — GitHub method, `_gh_alltime` |
 | `loc` | Lines of code (scc, most recent year) |
 | `complexity_class` | A--D |
 | `issues_opened_5y` | Sum of issues opened 2021--2025 |
@@ -341,7 +340,7 @@ Sub-100% columns (every gap is structural, not a data-collection bug):
 | `issue_trend_score` | Volume-normalised `slope_closed - slope_opened`; signed |
 | `issue_trend` | `improving` / `stable` / `deteriorating` / empty |
 | `issue_debt_class` | A--D, or empty if `opened_5y < 10` |
-| `active_contributors_git_2021_2025` | Distinct non-bot contributors active 2021--2025 — the workload class's AC denominator |
+| `active_contributors_git_5y` | Distinct non-bot contributors active 2021--2025 — the workload class's AC denominator |
 | `net_new_issues_5y` | `issues_opened_5y` − `issues_closed_5y` (5-year issue backlog growth) |
 | `loc_per_ac` | Lines of code per active contributor |
 | `cve_per_ac` | CVEs (5y) per active contributor |

@@ -23,5 +23,9 @@
     "value_classes": ["A", "B"],
     "comment": "Risk pipeline runs on repos whose value/value.csv class is in this list."
   },
+  "concentration": {
+    "window_years": 5,
+    "comment": "Bus-factor/HHI '_5y' window length, in complete years anchored to max(years) (the last complete year). '_full' = all commits through max(years). concentration.csv column names stay year-agnostic (_5y / _full); the actual year boundary lives here, not in the schema."
+  },
   "years": [2021, 2022, 2023, 2024, 2025]
 }

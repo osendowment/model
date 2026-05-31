@@ -1,22 +1,22 @@
-"""Tests for src/pipeline/risk/build_concentration.py."""
+"""Tests for src/risk/build_concentration.py."""
 
 
 def test_bus_factor_one_scores_100_concentration():
     from src.common.percentiles import add_percentiles
     rows = [
-        {"bf_commits_git_2021_2025": "1", "hhi_commits_git_2021_2025": "9000"},
-        {"bf_commits_git_2021_2025": "5", "hhi_commits_git_2021_2025": "2000"},
-        {"bf_commits_git_2021_2025": "3", "hhi_commits_git_2021_2025": "5000"},
+        {"bf_commits_git_5y": "1", "hhi_commits_git_5y": "9000"},
+        {"bf_commits_git_5y": "5", "hhi_commits_git_5y": "2000"},
+        {"bf_commits_git_5y": "3", "hhi_commits_git_5y": "5000"},
     ]
     add_percentiles(
         rows,
-        pctl_specs=[("bf_commits_git_2021_2025", False),
-                    ("hhi_commits_git_2021_2025", True)],
-        composite_cols=["bf_commits_git_2021_2025_p", "hhi_commits_git_2021_2025_p"],
+        pctl_specs=[("bf_commits_git_5y", False),
+                    ("hhi_commits_git_5y", True)],
+        composite_cols=["bf_commits_git_5y_p", "hhi_commits_git_5y_p"],
         dim_col="score",
     )
-    assert rows[0]["bf_commits_git_2021_2025_p"] == 100.0
-    assert rows[0]["hhi_commits_git_2021_2025_p"] == 100.0
+    assert rows[0]["bf_commits_git_5y_p"] == 100.0
+    assert rows[0]["hhi_commits_git_5y_p"] == 100.0
     assert rows[0]["score"] == 100.0
 
 
@@ -39,24 +39,24 @@ def test_github_metrics_blank_bf_for_bot_only_repo():
     """A repo whose only /contributors rows are bots -> bf/hhi blank, not 0.
 
     The raw commit count stays real; only the (undefined) concentration
-    metrics blank out.
+    metrics blank out. GitHub columns are `_gh_alltime` (uncapped API lifetime).
     """
     from src.risk.build_concentration import github_metrics
     m = github_metrics([
         {"login": "dependabot[bot]", "contributions": "7", "account_type": "Bot"},
     ])
-    assert m["bf_commits_github"] == ""
-    assert m["hhi_commits_github"] == ""
-    assert m["active_contributors_github"] == 0
-    assert m["total_commits_github"] == 7
+    assert m["bf_commits_gh_alltime"] == ""
+    assert m["hhi_commits_gh_alltime"] == ""
+    assert m["active_contributors_gh_alltime"] == 0
+    assert m["total_commits_gh_alltime"] == 7
 
 
 def test_git_metrics_blank_window_when_no_recent_human_commits():
-    """Repo with human commits only before the 2021-2025 window.
+    """Repo with human commits only before the _5y window.
 
     Regression for the dormant-window / bot-only-window rows that were
-    emitting bf_commits_git_2021_2025=0 (-> percentile 100). Lifetime is
-    computable; the empty window must be blank, not 0.
+    emitting bf_commits_git_5y=0 (-> percentile 100). _full is computable;
+    the empty window must be blank, not 0.
     """
     from src.risk.build_concentration import git_metrics
     m = git_metrics([
@@ -65,8 +65,28 @@ def test_git_metrics_blank_window_when_no_recent_human_commits():
         {"author_name": "Bob", "author_email": "bob@example.com",
          "year": "2019", "commits": "10"},
     ])
-    assert m["bf_commits_git"] != ""            # lifetime computable
-    assert m["commits_git_2021_2025"] == 0      # genuinely no window commits
-    assert m["active_contributors_git_2021_2025"] == 0
-    assert m["bf_commits_git_2021_2025"] == ""  # window bus factor undefined
-    assert m["hhi_commits_git_2021_2025"] == ""
+    assert m["bf_commits_git_full"] != ""        # _full computable
+    assert m["commits_git_5y"] == 0              # genuinely no window commits
+    assert m["active_contributors_git_5y"] == 0
+    assert m["bf_commits_git_5y"] == ""          # window bus factor undefined
+    assert m["hhi_commits_git_5y"] == ""
+
+
+def test_git_metrics_full_caps_at_last_complete_year():
+    """_full excludes commits in a not-yet-complete year (> last complete year).
+
+    A commit in the partial current year must not inflate total_commits_git_full
+    or count its author as a _full contributor — keeps _full reproducible.
+    """
+    from src.risk.build_concentration import LAST_COMPLETE_YEAR, git_metrics
+    future = LAST_COMPLETE_YEAR + 1
+    m = git_metrics([
+        {"author_name": "Alice", "author_email": "a@x.com",
+         "year": str(LAST_COMPLETE_YEAR), "commits": "40"},
+        {"author_name": "Alice", "author_email": "a@x.com",
+         "year": str(future), "commits": "5"},
+        {"author_name": "Bob", "author_email": "b@x.com",
+         "year": str(future), "commits": "10"},
+    ])
+    assert m["total_commits_git_full"] == 40   # the future-year commits excluded
+    assert m["contributors_git_full"] == 1     # Bob (future-only) is not a _full contributor

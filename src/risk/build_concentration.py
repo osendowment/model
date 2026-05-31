@@ -23,22 +23,32 @@ cross-checking.
 Writes:
     data/risk/concentration.csv  with columns:
         repo, repo_id,
-        total_commits_github,              (sum of /contributors `contributions`)
-        total_contributors_github,         (all /contributors rows, incl. bots)
-        active_contributors_github,        (non-bot /contributors rows)
-        bf_commits_github,                 (bus factor over non-bot, GitHub method)
-        hhi_commits_github,                (HHI 0-10000 over non-bot, GitHub method)
-        total_commits_git,                 (lifetime non-merge commits, git method)
-        contributors_git,                  (merged non-bot identities, lifetime)
-        bf_commits_git,                    (bus factor, git method, lifetime)
-        hhi_commits_git,                   (HHI 0-10000, git method, lifetime)
-        commits_git_2021_2025,             (non-merge commits in 2021-2025)
-        active_contributors_git_2021_2025, (merged non-bot identities active 2021-2025 — the AC)
-        bf_commits_git_2021_2025,          (bus factor, git method, 2021-2025 window)
-        hhi_commits_git_2021_2025,         (HHI 0-10000, git method, 2021-2025 window)
+        total_commits_gh_alltime,          (sum of /contributors `contributions`)
+        total_contributors_gh_alltime,     (all /contributors rows, incl. bots)
+        active_contributors_gh_alltime,    (non-bot /contributors rows)
+        bf_commits_gh_alltime,             (bus factor over non-bot, GitHub method)
+        hhi_commits_gh_alltime,            (HHI 0-10000 over non-bot, GitHub method)
+        total_commits_git_full,            (non-merge commits through last complete year)
+        contributors_git_full,             (merged non-bot identities, _full)
+        bf_commits_git_full,               (bus factor, git method, _full)
+        hhi_commits_git_full,              (HHI 0-10000, git method, _full)
+        commits_git_5y,                    (non-merge commits in the _5y window)
+        active_contributors_git_5y,        (merged non-bot identities active in _5y — the AC)
+        bf_commits_git_5y,                 (bus factor, git method, _5y window)
+        hhi_commits_git_5y,                (HHI 0-10000, git method, _5y window)
         score,                             (0-100 concentration risk = geometric mean of the
-                                            windowed bf + hhi risk percentiles)
+                                            _5y bf + hhi risk percentiles)
         github_fetched_at, git_fetched_at
+
+Periods (year-agnostic column names; the boundary lives in settings.json):
+    _full    = all commits through the last complete year = max(settings `years`).
+    _5y      = the last `concentration.window_years` complete years, anchored to
+               that same last complete year (currently 2021-2025).
+    The GitHub `/contributors` API exposes only a cumulative lifetime count with
+    no per-year breakdown, so its columns are `_gh_alltime` — an uncapped
+    all-time figure as of `github_fetched_at` (may include the partial current
+    year), deliberately NOT labelled `_full`/`_5y` which it cannot honour.
+    Only the git `_5y` axis feeds `score`.
 
 Identity merging (git method): the repo's own `.mailmap` is already applied at
 fetch time (`%aN`/`%aE`); this builder additionally union-finds identities that
@@ -55,6 +65,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.params import CONCENTRATION_WINDOW_YEARS, YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_risk_repos
 from src.common.tables import load_rows_by_repo
@@ -71,19 +82,23 @@ GH_LONG_FILE = DATA_DIR / "sources" / "github" / "contributor-commits.csv"
 GH_STATUS_FILE = DATA_DIR / "sources" / "github" / "contributor-commits.status.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "concentration.csv"
 
-WINDOW = range(2021, 2026)  # 2021..2025 inclusive
+# Last complete year = the newest year in settings `years`; _full caps here and
+# the _5y window is the last CONCENTRATION_WINDOW_YEARS complete years anchored
+# to it. Both live in settings.json so the schema below stays year-agnostic.
+LAST_COMPLETE_YEAR = max(YEARS)
+WINDOW = range(LAST_COMPLETE_YEAR - CONCENTRATION_WINDOW_YEARS + 1, LAST_COMPLETE_YEAR + 1)
 
 FIELDS = [
     "repo", "repo_id",
-    "total_commits_github", "total_contributors_github", "active_contributors_github",
-    "bf_commits_github", "bf_commits_github_p",
-    "hhi_commits_github", "hhi_commits_github_p",
-    "total_commits_git", "contributors_git",
-    "bf_commits_git", "bf_commits_git_p",
-    "hhi_commits_git", "hhi_commits_git_p",
-    "commits_git_2021_2025", "active_contributors_git_2021_2025",
-    "bf_commits_git_2021_2025", "bf_commits_git_2021_2025_p",
-    "hhi_commits_git_2021_2025", "hhi_commits_git_2021_2025_p",
+    "total_commits_gh_alltime", "total_contributors_gh_alltime", "active_contributors_gh_alltime",
+    "bf_commits_gh_alltime", "bf_commits_gh_alltime_p",
+    "hhi_commits_gh_alltime", "hhi_commits_gh_alltime_p",
+    "total_commits_git_full", "contributors_git_full",
+    "bf_commits_git_full", "bf_commits_git_full_p",
+    "hhi_commits_git_full", "hhi_commits_git_full_p",
+    "commits_git_5y", "active_contributors_git_5y",
+    "bf_commits_git_5y", "bf_commits_git_5y_p",
+    "hhi_commits_git_5y", "hhi_commits_git_5y_p",
     "score",
     "github_fetched_at", "git_fetched_at",
 ]
@@ -146,11 +161,11 @@ def github_metrics(rows: list[dict]) -> dict:
               if atype != "Bot" and not is_bot(login)]
     bf, hhi = _bus_factor_hhi([c for _login, c in nonbot])
     return {
-        "total_commits_github": sum(c for _l, c, _t in parsed),
-        "total_contributors_github": len(parsed),
-        "active_contributors_github": len(nonbot),
-        "bf_commits_github": bf,
-        "hhi_commits_github": hhi,
+        "total_commits_gh_alltime": sum(c for _l, c, _t in parsed),
+        "total_contributors_gh_alltime": len(parsed),
+        "active_contributors_gh_alltime": len(nonbot),
+        "bf_commits_gh_alltime": bf,
+        "hhi_commits_gh_alltime": hhi,
     }
 
 
@@ -158,8 +173,10 @@ def git_metrics(rows: list[dict]) -> dict:
     """Concentration metrics for one repo from the git contributor-commit rows.
 
     Identities (raw name+email pairs) are union-find merged; bots dropped;
-    bus factor / HHI / contributor counts computed for both the full lifetime
-    and the 2021-2025 window.
+    bus factor / HHI / contributor counts computed for both the _full period
+    (all commits through LAST_COMPLETE_YEAR) and the _5y window. Commits in a
+    not-yet-complete year (> LAST_COMPLETE_YEAR) are excluded from both, so the
+    figures are stable within a year and reproducible across reruns.
     """
     # {(name, email): {year: commits}}
     by_identity: dict[tuple[str, str], dict[int, int]] = {}
@@ -175,37 +192,39 @@ def git_metrics(rows: list[dict]) -> dict:
     if not pairs:
         return {}
 
-    total_life = total_win = 0
-    life_humans: list[int] = []   # per merged non-bot person, lifetime commits
-    win_humans: list[int] = []    # per merged non-bot person, 2021-2025 commits
+    total_full = total_win = 0
+    full_humans: list[int] = []   # per merged non-bot person, _full commits
+    win_humans: list[int] = []    # per merged non-bot person, _5y commits
     for group in merge_identity_groups(pairs):
         names = [pairs[i][0] for i in group]
         emails = [pairs[i][1] for i in group]
-        life = win = 0
+        full = win = 0
         for i in group:
             for year, commits in by_identity[pairs[i]].items():
-                life += commits
+                if year <= LAST_COMPLETE_YEAR:   # _full caps at the last complete year
+                    full += commits
                 if year in WINDOW:
                     win += commits
-        total_life += life
+        total_full += full
         total_win += win
         if _is_bot_identity(names, emails):
             continue
-        life_humans.append(life)
+        if full > 0:
+            full_humans.append(full)
         if win > 0:
             win_humans.append(win)
 
-    bf_l, hhi_l = _bus_factor_hhi(life_humans)
+    bf_l, hhi_l = _bus_factor_hhi(full_humans)
     bf_w, hhi_w = _bus_factor_hhi(win_humans)
     return {
-        "total_commits_git": total_life,
-        "contributors_git": len(life_humans),
-        "bf_commits_git": bf_l,
-        "hhi_commits_git": hhi_l,
-        "commits_git_2021_2025": total_win,
-        "active_contributors_git_2021_2025": len(win_humans),
-        "bf_commits_git_2021_2025": bf_w,
-        "hhi_commits_git_2021_2025": hhi_w,
+        "total_commits_git_full": total_full,
+        "contributors_git_full": len(full_humans),
+        "bf_commits_git_full": bf_l,
+        "hhi_commits_git_full": hhi_l,
+        "commits_git_5y": total_win,
+        "active_contributors_git_5y": len(win_humans),
+        "bf_commits_git_5y": bf_w,
+        "hhi_commits_git_5y": hhi_w,
     }
 
 
@@ -239,11 +258,11 @@ def build() -> list[dict]:
     add_percentiles(
         rows,
         pctl_specs=[
-            ("bf_commits_github", False), ("hhi_commits_github", True),
-            ("bf_commits_git", False), ("hhi_commits_git", True),
-            ("bf_commits_git_2021_2025", False), ("hhi_commits_git_2021_2025", True),
+            ("bf_commits_gh_alltime", False), ("hhi_commits_gh_alltime", True),
+            ("bf_commits_git_full", False), ("hhi_commits_git_full", True),
+            ("bf_commits_git_5y", False), ("hhi_commits_git_5y", True),
         ],
-        composite_cols=["bf_commits_git_2021_2025_p", "hhi_commits_git_2021_2025_p"],
+        composite_cols=["bf_commits_git_5y_p", "hhi_commits_git_5y_p"],
         dim_col="score",
     )
     return rows
@@ -266,9 +285,9 @@ def main() -> None:
     table.add_column("Populated", justify="right")
     table.add_column("Coverage", justify="right")
     for col in (
-        "bf_commits_github", "hhi_commits_github", "active_contributors_github",
-        "bf_commits_git", "hhi_commits_git", "contributors_git",
-        "active_contributors_git_2021_2025", "bf_commits_git_2021_2025",
+        "bf_commits_gh_alltime", "hhi_commits_gh_alltime", "active_contributors_gh_alltime",
+        "bf_commits_git_full", "hhi_commits_git_full", "contributors_git_full",
+        "active_contributors_git_5y", "bf_commits_git_5y",
         "score",
     ):
         n = sum(1 for r in rows if str(r[col]).strip())
