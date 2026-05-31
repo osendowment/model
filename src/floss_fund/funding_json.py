@@ -22,6 +22,11 @@ import requests
 from rich.console import Console
 from rich.table import Table
 
+from src.pipeline.common.funding_platforms import (
+    FUNDING_PLATFORMS,
+    platform_handle_from_url,
+)
+
 log = logging.getLogger(__name__)
 console = Console()
 
@@ -35,9 +40,43 @@ OUTPUT_FIELDS = [
     "project_name", "project_guid", "project_description",
     "project_licenses", "project_tags",
     "project_webpage", "project_repository",
-    "funding_channels", "funding_plans_count",
+    "funding_channels", "channel_platforms", "funding_plans_count",
+] + FUNDING_PLATFORMS + [
     "created_at", "updated_at",
 ]
+
+
+def parse_channels(channels: list) -> tuple[dict[str, str], str]:
+    """Map a manifest's funding.channels to (per-platform handles, channel_platforms).
+
+    Each channel's `address` URL is resolved to a canonical platform + handle
+    (see `platform_handle_from_url`); an address with no recognised host lands
+    under `custom`. `channel_platforms` is the comma-joined distinct platform
+    names, falling back to the channel `type` (e.g. `bank`) when a channel has
+    no usable address — the union key the funding builder counts.
+    """
+    handles: dict[str, list[str]] = {}
+    seen_platforms: list[str] = []
+
+    def _note(name: str) -> None:
+        if name and name not in seen_platforms:
+            seen_platforms.append(name)
+
+    for ch in channels or []:
+        if not isinstance(ch, dict):
+            continue
+        address = (ch.get("address") or "").strip()
+        platform, handle = platform_handle_from_url(address) if address else (None, "")
+        if platform:
+            handles.setdefault(platform, []).append(handle)
+            _note(platform)
+        elif address:
+            handles.setdefault("custom", []).append(handle)
+            _note("custom")
+        else:
+            _note((ch.get("type") or "").strip())  # e.g. bank — no address
+    cols = {p: ",".join(handles[p]) for p in handles}
+    return cols, ",".join(seen_platforms)
 
 
 def _is_fresh(filepath: str, ttl_days: int) -> bool:
@@ -82,6 +121,8 @@ def _parse_manifests(raw_csv: str) -> list[dict]:
         funding = manifest.get("funding", {})
         projects = manifest.get("projects", [])
 
+        platform_handles, channel_platforms = parse_channels(funding.get("channels") or [])
+
         base = {
             "id": raw.get("id", ""),
             "url": raw.get("url", ""),
@@ -93,7 +134,9 @@ def _parse_manifests(raw_csv: str) -> list[dict]:
             "funding_channels": ",".join(
                 c.get("type", "") for c in (funding.get("channels") or [])
             ),
+            "channel_platforms": channel_platforms,
             "funding_plans_count": len(funding.get("plans") or []),
+            **{p: platform_handles.get(p, "") for p in FUNDING_PLATFORMS},
             "created_at": raw.get("created_at", ""),
             "updated_at": raw.get("updated_at", ""),
         }
