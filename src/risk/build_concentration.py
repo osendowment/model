@@ -36,7 +36,8 @@ Writes:
         active_contributors_git_2021_2025, (merged non-bot identities active 2021-2025 — the AC)
         bf_commits_git_2021_2025,          (bus factor, git method, 2021-2025 window)
         hhi_commits_git_2021_2025,         (HHI 0-10000, git method, 2021-2025 window)
-        concentration_class,               (A/B/C/D from bf_commits_git + hhi_commits_git)
+        score,                             (0-100 concentration risk = geometric mean of the
+                                            windowed bf + hhi risk percentiles)
         github_fetched_at, git_fetched_at
 
 Identity merging (git method): the repo's own `.mailmap` is already applied at
@@ -54,16 +55,16 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.sources.git.contributors import _is_bot_identity, merge_identity_groups
-from src.sources.github.fetch_contributors_metrics import _compute_bus_factor
-from src.sources.github.models import Contributor, is_bot
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_risk_repos
 from src.common.tables import load_rows_by_repo
+from src.sources.git.contributors import _is_bot_identity, merge_identity_groups
+from src.sources.github.fetch_contributors_metrics import _compute_bus_factor
+from src.sources.github.models import Contributor, is_bot
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 GIT_LONG_FILE = DATA_DIR / "sources" / "git" / "contributor-commits.csv"
 GIT_STATUS_FILE = DATA_DIR / "sources" / "git" / "contributor-commits.status.csv"
 GH_LONG_FILE = DATA_DIR / "sources" / "github" / "contributor-commits.csv"
@@ -113,14 +114,23 @@ def _int(value: object) -> int:
         return 0
 
 
-def _bus_factor_hhi(commit_counts: list[int]) -> tuple[int, int]:
+def _bus_factor_hhi(commit_counts: list[int]) -> tuple[int | str, int | str]:
     """Bus factor + HHI (0-10000) over a list of per-contributor commit counts.
 
     Reuses the shared `_compute_bus_factor` (login is irrelevant here — bots
     are already dropped, so `include_bots=True` stops it re-filtering).
+
+    Returns ("", "") when there is no contributor with a positive commit
+    count: bus factor and HHI are *undefined* for an empty population, not
+    zero. Emitting a real 0 would be a lack-of-data value masquerading as a
+    measurement — and worse, it would rank as maximum concentration risk
+    (bus factor 0 < 1) while simultaneously ranking as minimum HHI risk.
+    A blank keeps the repo out of both percentile rankings.
     """
     objs = [Contributor(login="", lines_changed=0, commits=c)
             for c in commit_counts if c > 0]
+    if not objs:
+        return "", ""
     bf, _sorted, hhi = _compute_bus_factor(objs, include_bots=True)
     return bf, round(hhi * 10000)
 
