@@ -50,7 +50,7 @@ FOUNDATIONS_FILE = DATA_DIR / "sources" / "foundations" / "host-by-repo.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
 
 FIELDS = ["repo", "repo_id", "gh_sponsors_in", "gh_sponsors_out",
-          "gh_sponsors_net", "gh_sponsors_net_pctl", "has_funding_yml",
+          "gh_sponsorships", "gh_sponsorships_pctl", "has_funding_yml",
           "funding_yml_platforms", "has_funding_json", "channels_count",
           "oc_avg_funding", "foundation_host", "fetched_at"]
 
@@ -92,8 +92,9 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
     `gh_sponsors_in`  = inbound GitHub sponsors received (from sponsors.csv).
     `gh_sponsors_out` = the owner's outbound sponsoring (looked up by login in
                         `build()` — an account-level signal, not per-repo).
-    `gh_sponsors_net` = in − out. `gh_sponsors_net_pctl` is filled by `build()`
-                        in a second pass (needs every repo's net to rank).
+    `gh_sponsorships` = in + out: total GitHub-sponsorship engagement (either
+                        direction signals a resourced project). `_pctl` is
+                        filled by `build()` once every repo's total is known.
     """
     channels = _platform_set(yml.get("funding_yml_platforms")) | _platform_set(
         export.get("channel_platforms"))
@@ -106,8 +107,8 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "repo_id": repo_id,
         "gh_sponsors_in": gh_in,
         "gh_sponsors_out": gh_out,
-        "gh_sponsors_net": str(_to_int(gh_in) - _to_int(gh_out)),
-        "gh_sponsors_net_pctl": "",  # filled in build() once all nets are known
+        "gh_sponsorships": str(_to_int(gh_in) + _to_int(gh_out)),
+        "gh_sponsorships_pctl": "",  # filled in build() once all totals are known
         "has_funding_yml": (yml.get("has_funding_yml") or "").strip(),
         "funding_yml_platforms": (yml.get("funding_yml_platforms") or "").strip(),
         "has_funding_json": "True" if export else "False",
@@ -165,13 +166,14 @@ def build() -> list[dict]:
             oc_budgets=oc_budgets,
             sponsoring_count=sponsoring.get(owner, "")))
 
-    # Funding risk percentile: Hazen-rank net sponsors, NEGATED so a LOWER net
-    # (less community funding) → HIGHER risk percentile (mirrors the inverted
-    # openssf_score in build_security). Informational — kept out of risk.csv.
-    nets = [_to_int(r["gh_sponsors_net"]) for r in rows]
-    pctls = hazen_percentiles([-n for n in nets])
+    # Funding risk percentile: Hazen-rank total sponsorship engagement
+    # (in + out), NEGATED so a LOWER total (no sponsorship activity either
+    # direction) → HIGHER risk percentile (mirrors the inverted openssf_score
+    # in build_security). Informational — kept out of risk.csv.
+    totals = [_to_int(r["gh_sponsorships"]) for r in rows]
+    pctls = hazen_percentiles([-t for t in totals])
     for r, p in zip(rows, pctls):
-        r["gh_sponsors_net_pctl"] = round(p, 2)
+        r["gh_sponsorships_pctl"] = round(p, 2)
     return rows
 
 

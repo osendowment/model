@@ -6,19 +6,19 @@ from src.pipeline.risk.aggregate_risk import aggregate, _qualify_columns
 
 
 class TestRiskExclusions:
-    def test_outbound_and_net_excluded_from_funding(self):
+    def test_outbound_and_sponsorships_excluded_from_funding(self):
         cols = ["repo", "repo_id", "gh_sponsors_in", "gh_sponsors_out",
-                "gh_sponsors_net", "gh_sponsors_net_pctl", "fetched_at"]
+                "gh_sponsorships", "gh_sponsorships_pctl", "fetched_at"]
         out = [out_col for _, out_col in _qualify_columns("funding", cols)]
-        assert "gh_sponsors_in" in out             # inbound stays in risk.csv
-        assert "gh_sponsors_out" not in out         # outbound excluded
-        assert "gh_sponsors_net" not in out         # net (uses outbound) excluded
-        assert "gh_sponsors_net_pctl" not in out    # funding P excluded
+        assert "gh_sponsors_in" in out              # inbound stays in risk.csv
+        assert "gh_sponsors_out" not in out          # outbound excluded
+        assert "gh_sponsorships" not in out          # in+out (uses outbound) excluded
+        assert "gh_sponsorships_pctl" not in out     # funding P excluded
         assert "funding_fetched_at" in out
 
     def test_no_exclusions_for_other_dims(self):
-        out = [out_col for _, out_col in _qualify_columns("concentration", ["repo", "gh_sponsors_net"])]
-        assert "gh_sponsors_net" in out  # exclusions only apply to the funding dim
+        out = [out_col for _, out_col in _qualify_columns("concentration", ["repo", "gh_sponsorships"])]
+        assert "gh_sponsorships" in out  # exclusions only apply to the funding dim
 
 
 class TestAggregateColumns:

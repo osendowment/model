@@ -65,11 +65,11 @@ FETCHED_AT_COL = "fetched_at"
 
 # Columns kept in a per-dimension intermediate but deliberately NOT carried
 # into risk.csv — informational signals that must not feed risk calculation.
-# Outbound sponsoring (and the net signal derived from it, plus its risk
-# percentile) is tracked in funding.csv only; inbound `gh_sponsors_in` still
-# flows into risk.csv as before.
+# Outbound sponsoring (and the combined gh_sponsorships signal derived from it,
+# plus its risk percentile) is tracked in funding.csv only; inbound
+# `gh_sponsors_in` still flows into risk.csv as before.
 RISK_EXCLUDED: dict[str, set[str]] = {
-    "funding": {"gh_sponsors_out", "gh_sponsors_net", "gh_sponsors_net_pctl"},
+    "funding": {"gh_sponsors_out", "gh_sponsorships", "gh_sponsorships_pctl"},
 }
 
 

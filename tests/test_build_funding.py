@@ -18,8 +18,8 @@ def test_assemble_row_joins_and_counts_channels():
     assert row["has_funding_json"] == "True"
     assert row["gh_sponsors_in"] == "12"        # inbound
     assert row["gh_sponsors_out"] == "39"       # outbound (by owner)
-    assert row["gh_sponsors_net"] == "-27"      # 12 - 39
-    assert row["gh_sponsors_net_pctl"] == ""    # filled by build(), not assemble_row
+    assert row["gh_sponsorships"] == "51"       # 12 + 39
+    assert row["gh_sponsorships_pctl"] == ""    # filled by build(), not assemble_row
     # union of {github, open_collective} and {github, open_collective, bank} = 3
     assert row["channels_count"] == "3"
     # mean of 100, 200, 300 (years with data) = 200
@@ -35,14 +35,14 @@ def test_assemble_row_no_funding_sources():
     assert row["has_funding_json"] == "False"
     assert row["gh_sponsors_in"] == ""
     assert row["gh_sponsors_out"] == ""
-    assert row["gh_sponsors_net"] == "0"        # blank in/out treated as 0
+    assert row["gh_sponsorships"] == "0"        # blank in/out treated as 0
     assert row["channels_count"] == "0"
     assert row["oc_avg_funding"] == ""
     assert row["foundation_host"] == "apache"
 
 
-def test_build_fills_net_percentile_low_net_high_pctl(monkeypatch, tmp_path):
-    """gh_sponsors_net_pctl: lower net → higher (risk) percentile."""
+def test_build_fills_sponsorships_percentile_low_total_high_pctl(monkeypatch):
+    """gh_sponsorships_pctl: lower total engagement (in+out) → higher risk pctl."""
     from dataclasses import dataclass
 
     @dataclass
@@ -52,20 +52,19 @@ def test_build_fills_net_percentile_low_net_high_pctl(monkeypatch, tmp_path):
 
     monkeypatch.setattr(bf, "load_risk_repos",
                         lambda: [E("o/low"), E("o/mid"), E("o/high")])
-    # in - out nets: low=-10, mid=0, high=+10
+    # in: low=0, mid=5, high=20; every owner sponsors out=10 → totals 10/15/30
     monkeypatch.setattr(bf, "load_rows_by_repo", lambda p: (
         {"o/low": {"github_sponsors": "0"}, "o/mid": {"github_sponsors": "5"},
          "o/high": {"github_sponsors": "20"}} if "sponsors" in str(p) else {}))
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {})
-    monkeypatch.setattr(bf, "_load_sponsoring",
-                        lambda p: {"o": "10"})  # every owner sponsors 10 → out=10
+    monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {"o": "10"})
     rows = {r["repo"]: r for r in bf.build()}
-    assert rows["o/low"]["gh_sponsors_net"] == "-10"   # 0 - 10
-    assert rows["o/high"]["gh_sponsors_net"] == "10"   # 20 - 10
-    # inverted: lowest net ranks highest risk percentile
-    assert rows["o/low"]["gh_sponsors_net_pctl"] > rows["o/high"]["gh_sponsors_net_pctl"]
+    assert rows["o/low"]["gh_sponsorships"] == "10"    # 0 + 10
+    assert rows["o/high"]["gh_sponsorships"] == "30"   # 20 + 10
+    # inverted: lowest total ranks highest risk percentile
+    assert rows["o/low"]["gh_sponsorships_pctl"] > rows["o/high"]["gh_sponsorships_pctl"]
 
 
 def test_oc_avg_funding_missing_slug_or_data():
