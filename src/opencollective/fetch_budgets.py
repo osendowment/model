@@ -13,7 +13,10 @@ Writes data/sources/opencollective/budgets.csv:
 "error" (request failed — distinguishes a real 0 from a fetch failure).
 Amounts are major currency units (USD etc.); a year with no data is blank.
 
-The API needs no token but rejects the default user-agent, so we send one.
+The API works unauthenticated but rate-limits hard (HTTP 429); set
+`OPENCOLLECTIVE_PERSONAL_TOKEN` (in `.env`) to lift the limit — it is sent as
+the `Personal-Token` header and loaded via python-dotenv. The default
+user-agent is rejected, so we always send a custom one.
 
 Usage:
     uv run python -m src.opencollective.fetch_budgets
@@ -31,6 +34,7 @@ import os
 from pathlib import Path
 
 import aiohttp
+from dotenv import load_dotenv
 from rich.console import Console
 from rich.progress import (
     BarColumn,
@@ -221,6 +225,7 @@ async def batch(slugs: list[str], force: bool, limit: int | None, concurrency: i
     query = build_query()
     sem = asyncio.Semaphore(concurrency)
     headers = {"Content-Type": "application/json", "User-Agent": USER_AGENT}
+    load_dotenv()
     token = os.environ.get("OPENCOLLECTIVE_PERSONAL_TOKEN") or os.environ.get("OC_PERSONAL_TOKEN")
     if token:
         headers["Personal-Token"] = token
