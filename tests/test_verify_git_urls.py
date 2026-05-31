@@ -47,12 +47,14 @@ class TestGhRepoId:
                  "top_eco_pkg": "react"}]
         out, _ = verify_urls_in_aggregates(aggs)
         assert out[0].get("gh_repo_id") == "10270250"
+        assert out[0]["gh_valid"] is True
 
     def test_invalid_repo_has_blank_id(self, tmp_path, monkeypatch):
         # A 404'd repo has no numeric id.
         _patch(tmp_path, monkeypatch, [["dead/repo", "False", "", ""]])
         aggs = [{"github_repo": "dead/repo", "git_url": "", "top_eco_pkg": "p"}]
         out, _ = verify_urls_in_aggregates(aggs)
+        assert out[0]["gh_valid"] is False
         assert out[0].get("gh_repo_id") == ""
 
     def test_no_github_repo_has_blank_id(self, tmp_path, monkeypatch):
