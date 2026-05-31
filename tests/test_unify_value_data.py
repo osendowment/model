@@ -765,6 +765,20 @@ class TestInvariants:
         i = FIELDS.index("github_repo")
         assert FIELDS[i + 1] == "gh_repo_id"
 
+    def test_valid_column_present_and_legacy_columns_dropped(self):
+        # The unified `valid` column replaces the old gh_valid/git_valid pair;
+        # llm_guess is removed entirely. Verdicts now live in validation.csv.
+        assert "valid" in FIELDS
+        assert FIELDS[FIELDS.index("git_url") + 1] == "valid"
+        for dropped in ("gh_valid", "git_valid", "llm_guess"):
+            assert dropped not in FIELDS
+
+    def test_aggregate_emits_empty_valid_placeholder(self):
+        # unify leaves `valid` empty on every aggregate; build_validation fills it.
+        rows = [_pkg_row("a", "npm", github_repo="x/y", pagerank="1.0")]
+        aggs = aggregate_by_repo(rows, drop_d_class=False)
+        assert aggs[0]["valid"] == ""
+
 
 if __name__ == "__main__":  # pragma: no cover
     pytest.main([__file__, "-v"])
