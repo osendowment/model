@@ -24,7 +24,9 @@ FETCHERS = [
     Step("cves",          "src.osv.fetch_cves",                   fetch=True),
     Step("scorecard",     "src.openssf.scorecard",                fetch=True),
     Step("depsdev",       "src.depsdev.fetch",                    fetch=True),
-    Step("funding",       "src.github.fetch_funding",             fetch=True),
+    Step("funding-yml",   "src.github.fetch_funding_yml",         fetch=True),
+    Step("sponsors",      "src.github.fetch_sponsors",            fetch=True),
+    Step("floss-fund",    "src.floss_fund.funding_json",          fetch=True),
 ]
 BUILDERS = [
     Step("concentration", "src.pipeline.risk.build_concentration"),

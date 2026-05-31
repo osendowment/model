@@ -53,12 +53,6 @@
       "metrics": ["openssf_score", "cve_count_5y"],
       "comment": "security_class = equal-count quartiles (A = worst 25%) of the geometric mean of Hazen risk-percentiles of openssf_score (inverted — lower score ranks higher-risk) and cve_count_5y. Parameter-free; no numeric thresholds. Empty when openssf_score or cve_count_5y is missing."
     },
-    "funding": {
-      "A": 0,
-      "B": 10,
-      "C": 100,
-      "comment": "funding_class by github_sponsors count (upper bounds): A = 0 sponsors, B = 1-10, C = 11-100, D = 101+. Empty when the sponsor count is unknown."
-    },
     "workload": {
       "method": "geom_mean_quartile",
       "ratios": ["loc_per_ac", "cve_per_ac", "nni_per_ac"],

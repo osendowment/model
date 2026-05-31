@@ -3,8 +3,8 @@
 Source: https://dir.floss.fund/funding-manifests.tar.gz
 
 Usage:
-    python -m src.funding.funding_json
-    python -m src.funding.funding_json --ttl 0   # force refresh
+    python -m src.floss_fund.funding_json
+    python -m src.floss_fund.funding_json --ttl 0   # force refresh
 """
 from __future__ import annotations
 

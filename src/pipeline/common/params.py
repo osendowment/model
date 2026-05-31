@@ -34,7 +34,6 @@ CONCENTRATION_THRESHOLDS: dict = _P["risk_classification"]["concentration"]
 COMPLEXITY_LOC_THRESHOLDS: dict = _P["risk_classification"]["complexity_loc"]
 ISSUE_DEBT_THRESHOLDS: dict = _P["risk_classification"]["issue_debt"]
 ISSUE_TREND_THRESHOLDS: dict = _P["risk_classification"]["issue_trend"]
-FUNDING_THRESHOLDS: dict = _P["risk_classification"]["funding"]
 
 # Risk-pipeline input scope — which value classes feed the risk pipeline.
 RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]
