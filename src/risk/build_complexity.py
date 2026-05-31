@@ -80,7 +80,7 @@ from src.common.tables import load_rows_by_repo
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 GIT_LONG_DIR = DATA_DIR / "sources" / "git"
 COMMITS_YEARS_FILE = DATA_DIR / "sources" / "github" / "git" / "commits-years.csv"
 SCC_FILE = GIT_LONG_DIR / "scc.csv"
@@ -93,6 +93,17 @@ LIZARD_METRICS = [
     "cognitive_total", "cognitive_avg", "cognitive_max",
     "cyclomatic_total", "cyclomatic_avg", "cyclomatic_max",
 ]
+
+# False-zero guard: lizard is keyed on the same commits-years SHA as scc, but
+# historically did not apply the off-mainline (CI/template commit) correction
+# that scc does — so it can report 0 functions for a repo whose real code scc
+# measured fine. When scc found real branching (complexity >= this) but lizard
+# reports zero functions, lizard analysed the wrong tree; we treat its metrics
+# as MISSING rather than let a false cyclomatic_max=0 deflate the score. A
+# genuinely function-free repo (data/config module) has near-zero scc
+# complexity too, so the threshold spares it. See fetch_advanced_complexity /
+# fetch_cognitive `corrected_clone_sha` for the upstream fix.
+LIZARD_FALSE_ZERO_MIN_SCC_CX = 5
 
 FIELDS = [
     "repo", "repo_id",
@@ -172,6 +183,22 @@ def _hotspot_log(churn: int, complexity: int) -> float:
     return math.log10(churn + 1) * math.log10(complexity + 1)
 
 
+def _is_lizard_false_zero(scc_vals: dict, lz_vals: dict) -> bool:
+    """True when lizard reports zero functions for a repo whose code scc
+    measured real branching for — i.e. lizard analysed an off-mainline
+    (CI/template) tree while scc corrected to the real commit.
+
+    A genuinely function-free repo (pure data/config module) has near-zero scc
+    complexity too, so the ``LIZARD_FALSE_ZERO_MIN_SCC_CX`` threshold spares it.
+    Absent lizard data (``lz_vals == {}``) is already "missing", not a zero.
+    """
+    return (
+        bool(lz_vals)
+        and _to_int(scc_vals.get("complexity")) >= LIZARD_FALSE_ZERO_MIN_SCC_CX
+        and _to_int(lz_vals.get("cyclomatic_total")) == 0
+    )
+
+
 def build() -> list[dict]:
     eligible = load_risk_repos()
 
@@ -221,6 +248,12 @@ def build() -> list[dict]:
                 lz_vals = lizard_idx.get((repo, sha), {})
                 year_label = "HEAD" if y == 0 else str(y)
                 break
+
+        # False-zero guard: scc measured real branching but lizard found zero
+        # functions → lizard analysed an off-mainline (template) tree. Drop the
+        # bogus lizard metrics so they read as missing, not a real zero.
+        if _is_lizard_false_zero(scc_vals, lz_vals):
+            lz_vals = {}
 
         # Hotspot: combine churn × scc_complexity_2025_eoy.
         churn_row = churn_by_repo.get(repo, {})
