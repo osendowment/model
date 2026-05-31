@@ -104,7 +104,7 @@ from src.common.repos import load_default_branches, load_risk_repos
 log = logging.getLogger(__name__)
 console = Console()
 
-DATA_DIR = "data"
+DATA_DIR = "data/sources"
 COMMITS_YEARS_FILE = f"{DATA_DIR}/github/git/commits-years.csv"
 SCC_LONG_FILE = f"{DATA_DIR}/git/scc.csv"
 LIZARD_LONG_FILE = f"{DATA_DIR}/git/lizard.csv"

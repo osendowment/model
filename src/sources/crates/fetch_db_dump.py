@@ -30,7 +30,7 @@ from rich.console import Console
 from rich.table import Table
 
 DUMP_URL  = "https://static.crates.io/db-dump.tar.gz"
-DATA_DIR  = "data/crates"
+DATA_DIR  = "data/sources/crates"
 DUMP_DIR  = f"{DATA_DIR}/db-dump"
 DUMP_TAR  = f"{DATA_DIR}/db-dump.tar.gz"
 

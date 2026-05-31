@@ -43,7 +43,7 @@ from src.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_v
 
 DUMP_DIR    = "data/sources/crates/db-dump"
 MONTHLY_DIR = "data/sources/crates/version-downloads"
-DATA_DIR    = "data/crates"
+DATA_DIR    = "data/sources/crates"
 
 TOP_CSV     = f"{DATA_DIR}/top-packages.csv"
 DEPS_CSV    = f"{DATA_DIR}/dependency-tree.csv"

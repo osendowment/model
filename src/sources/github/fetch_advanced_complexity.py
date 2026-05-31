@@ -80,7 +80,7 @@ from src.sources.github.display import _ETAColumn
 log = logging.getLogger(__name__)
 console = Console()
 
-DATA_DIR = "data"
+DATA_DIR = "data/sources"
 COMMITS_YEARS_FILE = f"{DATA_DIR}/github/git/commits-years.csv"
 SCC_LONG_FILE = f"{DATA_DIR}/git/scc.csv"
 OUTPUT_FILE = f"{DATA_DIR}/git/lizard.csv"

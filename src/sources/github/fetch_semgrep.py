@@ -95,7 +95,7 @@ from src.common.repos import load_risk_repos
 log = logging.getLogger(__name__)
 console = Console()
 
-DATA_DIR = "data"
+DATA_DIR = "data/sources"
 COMMITS_YEARS_FILE = f"{DATA_DIR}/github/git/commits-years.csv"
 OUTPUT_FILE = f"{DATA_DIR}/git/semgrep.csv"
 
