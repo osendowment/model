@@ -69,7 +69,7 @@ from src.common.tables import load_column_by_repo, load_rows_by_repo
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 COMMITS_YEARS_FILE = DATA_DIR / "sources" / "github" / "git" / "commits-years.csv"
 OPENSSF_CHECKS_FILE = DATA_DIR / "sources" / "openssf" / "checks.csv"
@@ -247,23 +247,30 @@ def build() -> list[dict]:
         # OpenSSF maintained
         openssf_maintained = maintained.get(repo, "")
 
-        # Issues
+        # Issues. A repo present in issues.csv (even with all-zero counts) was
+        # genuinely fetched — a real 0. A repo absent from issues.csv was never
+        # fetched: every issue figure must stay blank, never 0, so a fetch gap
+        # can't masquerade as "zero issues" and skew the per-AC percentiles.
         op = opened.get(repo, {})
         cl = closed.get(repo, {})
-        op_5y = sum(op.values())
-        cl_5y = sum(cl.values())
-        ratio = round(cl_5y / op_5y, 3) if op_5y > 0 else ""
-        net_new_issues = op_5y - cl_5y
+        issues_fetched = (repo in opened) or (repo in closed)
+        if issues_fetched:
+            op_5y = sum(op.values())
+            cl_5y = sum(cl.values())
+            ratio = round(cl_5y / op_5y, 3) if op_5y > 0 else ""
+            net_new_issues = op_5y - cl_5y
 
-        op_vals = [op.get(y, 0) for y in YEARS]
-        cl_vals = [cl.get(y, 0) for y in YEARS]
-        s_open = _ols_slope(YEARS, op_vals)
-        s_close = _ols_slope(YEARS, cl_vals)
-        mean_op = op_5y / len(YEARS) if op_5y else 0
-        if mean_op >= 1:
-            trend_score = round((s_close - s_open) / mean_op, 4)
+            op_vals = [op.get(y, 0) for y in YEARS]
+            cl_vals = [cl.get(y, 0) for y in YEARS]
+            s_open = _ols_slope(YEARS, op_vals)
+            s_close = _ols_slope(YEARS, cl_vals)
+            mean_op = op_5y / len(YEARS) if op_5y else 0
+            trend_score = round((s_close - s_open) / mean_op, 4) if mean_op >= 1 else ""
+            slope_opened_out = round(s_open, 2) if op_5y >= 1 else ""
+            slope_closed_out = round(s_close, 2) if op_5y >= 1 else ""
         else:
-            trend_score = ""
+            op_5y = cl_5y = net_new_issues = ""
+            ratio = trend_score = slope_opened_out = slope_closed_out = ""
 
         ac_raw = ac_by_repo.get(repo, "")
         ac_f = _num(ac_raw)
@@ -272,7 +279,7 @@ def build() -> list[dict]:
         if ac_f and ac_f > 0:
             row_loc_per_ac = round(loc_f / ac_f, 4) if loc_f is not None else ""
             row_cve_per_ac = round(cve_f / ac_f, 4) if cve_f is not None else ""
-            row_nni_per_ac = round(net_new_issues / ac_f, 4)
+            row_nni_per_ac = round(net_new_issues / ac_f, 4) if issues_fetched else ""
         else:
             row_loc_per_ac = row_cve_per_ac = row_nni_per_ac = ""
 
@@ -289,8 +296,8 @@ def build() -> list[dict]:
             "issues_closed_5y": cl_5y,
             "issue_close_ratio": ratio,
             "net_new_issues_5y": net_new_issues,
-            "slope_opened": (round(s_open, 2) if op_5y >= 1 else ""),
-            "slope_closed": (round(s_close, 2) if op_5y >= 1 else ""),
+            "slope_opened": slope_opened_out,
+            "slope_closed": slope_closed_out,
             "issue_trend_score": trend_score,
             "loc_per_ac": row_loc_per_ac,
             "cve_per_ac": row_cve_per_ac,
