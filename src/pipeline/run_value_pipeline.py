@@ -2,9 +2,9 @@
 
 Runs the four ecosystem pipelines (npm, crates, pypi, cpp — cpp itself
 composes Debian + Homebrew), then the cross-ecosystem value steps:
-ecosystem-download totals, git-URL classification, the unified per-repo
-value table, git-URL verification, and the validation rollup
-(`validation.csv` + the per-repo `valid` column).
+per-ecosystem stats (data/value/stats.csv), git-URL classification, the
+unified per-repo value table, git-URL verification, and the validation
+rollup (`validation.csv` + the per-repo `valid` column).
 
 Usage:
     uv run python -m src.pipeline.run_value_pipeline
@@ -18,9 +18,9 @@ STEPS = [
     Step("npm",       "src.pipeline.value.npm_pipeline",     fetch=True, pipeline=True),
     Step("crates",    "src.pipeline.value.crates_pipeline",  fetch=True, pipeline=True),
     Step("pypi",      "src.pipeline.value.pypi_pipeline",    fetch=True, pipeline=True),
-    Step("cpp",       "src.pipeline.value.cpp_pipeline",     fetch=True, pipeline=True),
-    Step("downloads", "src.pipeline.value.build_ecosystem_downloads"),
-    Step("git-urls",  "src.pipeline.value.build_git_urls"),
+    Step("cpp",        "src.pipeline.value.cpp_pipeline",     fetch=True, pipeline=True),
+    Step("stats",      "src.pipeline.value.build_stats"),
+    Step("git-urls",   "src.pipeline.value.build_git_urls"),
     Step("unify",      "src.pipeline.value.unify_value_data"),
     Step("verify",     "src.pipeline.value.verify_git_urls"),
     Step("validation", "src.pipeline.value.build_validation"),

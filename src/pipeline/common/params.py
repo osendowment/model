@@ -39,23 +39,25 @@ ISSUE_TREND_THRESHOLDS: dict = _P["risk_classification"]["issue_trend"]
 RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]
 
 
-_ECOSYSTEM_DL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "value", "ecosystem-downloads.csv")
+_STATS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "value", "stats.csv")
 
 
 def ecosystem_avg_downloads(ecosystem: str) -> int:
     """Return the average annual total downloads for an ecosystem across YEARS.
 
-    Years with 0 recorded downloads are treated as missing data (not zero)
-    and excluded from both numerator and denominator. Otherwise a gap in the
-    source (e.g. no Wayback snapshot for Homebrew 2021) would deflate the
-    average by ~20% for each missing year.
+    Reads the `downloads_<year>` rows of `data/value/stats.csv` (a metric-row
+    × ecosystem-column matrix). Years with 0 (or blank) recorded downloads are
+    treated as missing data, not zero, and excluded from both numerator and
+    denominator — otherwise a gap in the source (e.g. no Wayback snapshot for
+    Homebrew 2021) would deflate the average by ~20% for each missing year.
     """
-    with open(_ECOSYSTEM_DL_PATH, encoding="utf-8") as f:
-        rows = list(csv.DictReader(f))
-    populated = [
-        int(row[ecosystem]) for row in rows
-        if int(row["year"]) in YEARS and int(row[ecosystem]) > 0
-    ]
+    with open(_STATS_PATH, encoding="utf-8") as f:
+        by_metric = {row["metric"]: row for row in csv.DictReader(f)}
+    populated = []
+    for y in YEARS:
+        cell = (by_metric.get(f"downloads_{y}", {}).get(ecosystem) or "").strip()
+        if cell and int(cell) > 0:
+            populated.append(int(cell))
     return sum(populated) // len(populated) if populated else 0
 
 

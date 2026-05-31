@@ -86,7 +86,7 @@ Value
 
 Packages sorted by avg annual downloads (descending). Walking down the list,
 accumulate downloads until the running total reaches 95% of the **ecosystem-wide
-total** (from `data/value/ecosystem-downloads.csv`). Every package above that cutoff is "top".
+total** (from the `downloads_<year>` rows of `data/value/stats.csv`). Every package above that cutoff is "top".
 
 ### PageRank
 
