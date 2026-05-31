@@ -5,7 +5,7 @@ import random
 
 import httpx
 
-DATA_FILE = "data/npm/top-packages.csv"
+DATA_FILE = "data/sources/npm/top-packages.csv"
 
 
 def _load_packages() -> tuple[list[dict], list[str]]:

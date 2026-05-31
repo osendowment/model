@@ -8,10 +8,10 @@ Pipeline:
   4. results.csv         — pagerank with install signals + value classes
 
 Inputs:
-  data/homebrew/raw/formulas.csv        — name, tap, desc, license, homepage,
+  data/sources/homebrew/raw/formulas.csv        — name, tap, desc, license, homepage,
                                           source_url, language
-  data/homebrew/raw/dependencies.csv    — formula, dep_name, dep_type, fetched_at
-  data/homebrew/raw/downloads.csv       — formula, year, downloads
+  data/sources/homebrew/raw/dependencies.csv    — formula, dep_name, dep_type, fetched_at
+  data/sources/homebrew/raw/downloads.csv       — formula, year, downloads
 
 Run:
     uv run src/homebrew/process_data.py
@@ -38,14 +38,14 @@ from src.pipeline.common.params import (
 
 console = Console()
 
-RAW_FORMULAS = "data/homebrew/raw/formulas.csv"
-RAW_DEPS = "data/homebrew/raw/dependencies.csv"
-RAW_DOWNLOADS = "data/homebrew/raw/downloads.csv"
-OSSFUZZ_PROJECTS = "data/ossfuzz/projects.csv"
-OUT_TOP = "data/homebrew/top-packages.csv"
-OUT_DEP_TREE = "data/homebrew/dependency-tree.csv"
-OUT_GITHUB = "data/homebrew/github-repos.csv"
-OUT_RESULTS = "data/homebrew/results.csv"
+RAW_FORMULAS = "data/sources/homebrew/raw/formulas.csv"
+RAW_DEPS = "data/sources/homebrew/raw/dependencies.csv"
+RAW_DOWNLOADS = "data/sources/homebrew/raw/downloads.csv"
+OSSFUZZ_PROJECTS = "data/sources/ossfuzz/projects.csv"
+OUT_TOP = "data/sources/homebrew/top-packages.csv"
+OUT_DEP_TREE = "data/sources/homebrew/dependency-tree.csv"
+OUT_GITHUB = "data/sources/homebrew/github-repos.csv"
+OUT_RESULTS = "data/sources/homebrew/results.csv"
 
 WIDE_FIELDS = ["package", "avg_downloads"] + [str(y) for y in YEARS]
 GITHUB_RE = re.compile(r"github\.com/([^/\s#?]+)/([^/\s#?.]+)", re.IGNORECASE)

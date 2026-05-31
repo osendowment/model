@@ -1,6 +1,6 @@
 """Fetch deps.dev project + Best-Practices badge data per risk repo.
 
-For each risk repo (A/B value-class repos from `data/value-data.csv`), we
+For each risk repo (A/B value-class repos from `data/value/value.csv`), we
 hit two free APIs:
 
 1. **deps.dev** (https://api.deps.dev) — Google's dependency-graph index.
@@ -8,7 +8,7 @@ hit two free APIs:
      a mirrored OpenSSF Scorecard (`scorecard.overallScore`, `scorecard.date`,
      plus a `scorecard.repository.commit` SHA and a list of per-check scores
      under `scorecard.checks[]`). Typically fresher than our local
-     `data/git/openssf.csv` (long-format, sha-pinned).
+     `data/sources/git/openssf.csv` (long-format, sha-pinned).
    - `GET /v3alpha/systems/{ECO}/packages/{pkg}/versions/{default}:dependents`
      → `dependentCount` for a package. We sum across all (eco, pkg) pairs
      mapped to the repo via `data/{npm,pypi,crates}/results.csv`. Debian
@@ -21,7 +21,7 @@ hit two free APIs:
 
 Two output files are written:
 
-- `data/depsdev/repos.csv` — wide, one row per repo, NON-sha-pinned fields:
+- `data/sources/depsdev/repos.csv` — wide, one row per repo, NON-sha-pinned fields:
     depsdev_scorecard_overall   (0..10, fresh OpenSSF mirror — kept for legacy
                                  dashboard consumers; ALSO written as `score`
                                  in the long file pinned to the snapshot SHA)
@@ -34,7 +34,7 @@ Two output files are written:
     bestpractices_tiered_percentage  (0..300, sum across tiers)
     fetched_at                  (ISO timestamp, this run)
 
-- `data/git/depsdev.csv` — long, sha-pinned (repo, repo_id, commit_sha, metric,
+- `data/sources/git/depsdev.csv` — long, sha-pinned (repo, repo_id, commit_sha, metric,
    value, checked_at). One row per check + one `score` row per repo, anchored
    to `scorecard.repository.commit` and dated `scorecard.date`. Written via
    the shared `src.git.long_format.upsert_rows` so historical snapshots for
@@ -85,8 +85,8 @@ console = Console()
 log = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-OUTPUT_FILE = DATA_DIR / "depsdev" / "repos.csv"
-LONG_FILE = DATA_DIR / "git" / "depsdev.csv"
+OUTPUT_FILE = DATA_DIR / "sources" / "depsdev" / "repos.csv"
+LONG_FILE = DATA_DIR / "sources" / "git" / "depsdev.csv"
 
 FIELDS = [
     "repo", "repo_id",
@@ -372,8 +372,8 @@ async def _process_repo(
     """Fetch project info + dependents (per package) + best-practices badge.
 
     Returns `(wide_row, long_rows)`:
-    - `wide_row` populates `data/depsdev/repos.csv`
-    - `long_rows` are sha-pinned scorecard rows for `data/git/depsdev.csv`
+    - `wide_row` populates `data/sources/depsdev/repos.csv`
+    - `long_rows` are sha-pinned scorecard rows for `data/sources/git/depsdev.csv`
       (empty list when deps.dev has no scorecard mirror for the repo, or
       the mirror lacks a commit SHA — a legitimate "no data" outcome).
 
@@ -542,7 +542,7 @@ async def _worker(
     """Pull repos off the queue, fetch deps.dev + best-practices, write to results.
 
     Long-format scorecard rows (when deps.dev has a mirror) are stashed per
-    repo in `long_rows_by_repo` and flushed to `data/git/depsdev.csv` either
+    repo in `long_rows_by_repo` and flushed to `data/sources/git/depsdev.csv` either
     by the periodic flusher or at end-of-run.
     """
     last_request_ref = [0.0]

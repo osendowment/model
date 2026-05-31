@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Build data/visibility.csv — visibility metrics per risk-scope repo.
+"""Build data/risk/visibility.csv — visibility metrics per risk-scope repo.
 
 Reads:
-    data/value-data.csv         — A/B value-class set
-    data/github/repos.csv       — stars, forks, watchers, fetched_at
+    data/value/value.csv         — A/B value-class set
+    data/sources/github/repos.csv       — stars, forks, watchers, fetched_at
 
 Writes:
-    data/visibility.csv  with columns:
+    data/risk/visibility.csv  with columns:
         repo, repo_id, stars, forks, watchers, fetched_at
 
 Period: [most recent] — values reflect GitHub state at the last
@@ -27,8 +27,8 @@ from src.pipeline.common.repos import load_risk_repos
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
-REPOS_FILE = DATA_DIR / "github" / "repos.csv"
-OUTPUT_FILE = DATA_DIR / "visibility.csv"
+REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
+OUTPUT_FILE = DATA_DIR / "risk" / "visibility.csv"
 
 FIELDS = ["repo", "repo_id", "stars", "forks", "watchers", "fetched_at"]
 

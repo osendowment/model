@@ -4,10 +4,10 @@ OSV.dev does not index `pkg:github/*` purls — they return zero results. So
 instead, we look up each repo by the (ecosystem, package_name) tuples that
 map to it across our per-ecosystem `results.csv` files:
 
-    data/npm/results.csv     → ecosystem `npm`
-    data/pypi/results.csv    → ecosystem `PyPI`
-    data/crates/results.csv  → ecosystem `crates.io`
-    data/cpp/results.csv     → ecosystem `Debian` (binary package name)
+    data/sources/npm/results.csv     → ecosystem `npm`
+    data/sources/pypi/results.csv    → ecosystem `PyPI`
+    data/sources/crates/results.csv  → ecosystem `crates.io`
+    data/sources/cpp/results.csv     → ecosystem `Debian` (binary package name)
 
 C/C++ packages are queried against OSV's `Debian` ecosystem — a query
 without a release suffix (e.g. `Debian` vs `Debian:13`) aggregates across
@@ -25,7 +25,7 @@ Then we filter to `published` year ∈ 2021–2025 inclusive.
 
 Output (long format, one row per (repo × CVE) pair):
 
-    data/osv/cves.csv      cols: repo, repo_id, date, cve
+    data/sources/osv/cves.csv      cols: repo, repo_id, date, cve
 
 …where `date` is the CVE's `published` date as ISO `YYYY-MM-DD` and
 `cve` is the canonical id (lex-smallest of `{id} ∪ aliases`). Repos
@@ -33,7 +33,7 @@ with zero CVEs in the 5-year window contribute zero rows.
 
 Sidecar (so downstream can distinguish "scanned, 0 CVEs" from "never queried"):
 
-    data/osv/queried.csv   cols: repo, repo_id, packages_queried, fetched_at
+    data/sources/osv/queried.csv   cols: repo, repo_id, packages_queried, fetched_at
 
 Each successful repo lookup writes one row here. Failed lookups (any
 package returned None) do NOT update the sidecar — so a re-run retries.
@@ -82,8 +82,8 @@ console = Console()
 log = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-OUTPUT_FILE = DATA_DIR / "osv" / "cves.csv"
-QUERIED_FILE = DATA_DIR / "osv" / "queried.csv"
+OUTPUT_FILE = DATA_DIR / "sources" / "osv" / "cves.csv"
+QUERIED_FILE = DATA_DIR / "sources" / "osv" / "queried.csv"
 
 # Long-format CVE rows: one (repo × CVE) pair per row.
 CVE_FIELDS = ["repo", "repo_id", "date", "cve"]
@@ -97,10 +97,10 @@ QUERIED_FIELDS = ["repo", "repo_id", "packages_queried", "fetched_at"]
 # `Debian` (no release suffix) aggregates vulns across all Debian
 # releases — gives broader coverage than e.g. `Debian:13` alone.
 ECOSYSTEM_FILES: list[tuple[Path, str]] = [
-    (DATA_DIR / "npm" / "results.csv", "npm"),
-    (DATA_DIR / "pypi" / "results.csv", "PyPI"),
-    (DATA_DIR / "crates" / "results.csv", "crates.io"),
-    (DATA_DIR / "cpp" / "results.csv", "Debian"),
+    (DATA_DIR / "sources" / "npm" / "results.csv", "npm"),
+    (DATA_DIR / "sources" / "pypi" / "results.csv", "PyPI"),
+    (DATA_DIR / "sources" / "crates" / "results.csv", "crates.io"),
+    (DATA_DIR / "sources" / "cpp" / "results.csv", "Debian"),
 ]
 
 OSV_QUERY_URL = "https://api.osv.dev/v1/query"

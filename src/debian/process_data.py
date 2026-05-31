@@ -19,17 +19,17 @@ Aggregation rules:
                           (Homepage / Vcs-Browser)
 
 Inputs:
-  data/debian/raw/cpp-packages.csv       — package, tag, via
-  data/debian/raw/downloads.csv          — package, year, downloads
-  data/debian/raw/dependencies.csv       — package, dep_name, dep_version, fetched_at
-  data/debian/raw/package-metadata.csv   — package, source, homepage, vcs_browser, section
-  data/debian/raw/aliases.csv            — current, old  (t64 rename map)
+  data/sources/debian/raw/cpp-packages.csv       — package, tag, via
+  data/sources/debian/raw/downloads.csv          — package, year, downloads
+  data/sources/debian/raw/dependencies.csv       — package, dep_name, dep_version, fetched_at
+  data/sources/debian/raw/package-metadata.csv   — package, source, homepage, vcs_browser, section
+  data/sources/debian/raw/aliases.csv            — current, old  (t64 rename map)
 
 Outputs (now per source):
-  data/debian/top-packages.csv           — source, avg_downloads, per-year
-  data/debian/dependency-tree.csv        — source, dependency, type
-  data/debian/github-repos.csv           — source, github_repo
-  data/debian/results.csv                — source, github_repo, per-year, top, is_cpp, pagerank, value_class
+  data/sources/debian/top-packages.csv           — source, avg_downloads, per-year
+  data/sources/debian/dependency-tree.csv        — source, dependency, type
+  data/sources/debian/github-repos.csv           — source, github_repo
+  data/sources/debian/results.csv                — source, github_repo, per-year, top, is_cpp, pagerank, value_class
 
 Run:
     uv run src/debian/process_data.py
@@ -55,16 +55,16 @@ from src.pipeline.common.params import (
 
 console = Console()
 
-RAW_PACKAGES = "data/debian/raw/cpp-packages.csv"
-RAW_DOWNLOADS = "data/debian/raw/downloads.csv"
-RAW_DEPS = "data/debian/raw/dependencies.csv"
-RAW_METADATA = "data/debian/raw/package-metadata.csv"
-RAW_ALIASES = "data/debian/raw/aliases.csv"
-OSSFUZZ_PROJECTS = "data/ossfuzz/projects.csv"
-OUT_TOP = "data/debian/top-packages.csv"
-OUT_DEP_TREE = "data/debian/dependency-tree.csv"
-OUT_GITHUB = "data/debian/github-repos.csv"
-OUT_RESULTS = "data/debian/results.csv"
+RAW_PACKAGES = "data/sources/debian/raw/cpp-packages.csv"
+RAW_DOWNLOADS = "data/sources/debian/raw/downloads.csv"
+RAW_DEPS = "data/sources/debian/raw/dependencies.csv"
+RAW_METADATA = "data/sources/debian/raw/package-metadata.csv"
+RAW_ALIASES = "data/sources/debian/raw/aliases.csv"
+OSSFUZZ_PROJECTS = "data/sources/ossfuzz/projects.csv"
+OUT_TOP = "data/sources/debian/top-packages.csv"
+OUT_DEP_TREE = "data/sources/debian/dependency-tree.csv"
+OUT_GITHUB = "data/sources/debian/github-repos.csv"
+OUT_RESULTS = "data/sources/debian/results.csv"
 
 WIDE_FIELDS = ["package", "avg_downloads"] + [str(y) for y in YEARS]
 GITHUB_RE = re.compile(r"github\.com/([^/\s#?]+)/([^/\s#?.]+)", re.IGNORECASE)

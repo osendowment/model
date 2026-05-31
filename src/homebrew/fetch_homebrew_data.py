@@ -10,9 +10,9 @@ Run:
     uv run src/homebrew/fetch_homebrew_data.py --years 2023 2024 2025
 
 Outputs:
-    data/homebrew/raw/formulas.csv        name, desc, homepage, source_url, license, tap, language
-    data/homebrew/raw/dependencies.csv    formula, dep_name, dep_type, fetched_at
-    data/homebrew/raw/downloads.csv       formula, year, downloads
+    data/sources/homebrew/raw/formulas.csv        name, desc, homepage, source_url, license, tap, language
+    data/sources/homebrew/raw/dependencies.csv    formula, dep_name, dep_type, fetched_at
+    data/sources/homebrew/raw/downloads.csv       formula, year, downloads
 """
 
 import argparse
@@ -29,9 +29,9 @@ from rich.table import Table
 
 # ── config ────────────────────────────────────────────────────────────────────
 
-RAW_FORMULAS = "data/homebrew/raw/formulas.csv"
-RAW_DEPS = "data/homebrew/raw/dependencies.csv"
-RAW_DOWNLOADS = "data/homebrew/raw/downloads.csv"
+RAW_FORMULAS = "data/sources/homebrew/raw/formulas.csv"
+RAW_DEPS = "data/sources/homebrew/raw/dependencies.csv"
+RAW_DOWNLOADS = "data/sources/homebrew/raw/downloads.csv"
 
 FORMULA_URL = "https://formulae.brew.sh/api/formula.json"
 ANALYTICS_URL = "https://formulae.brew.sh/api/analytics/install/365d.json"

@@ -1,6 +1,6 @@
-"""One-shot migration: OpenSSF Scorecard data.json → data/git/openssf.csv.
+"""One-shot migration: OpenSSF Scorecard data.json → data/sources/git/openssf.csv.
 
-Reads the canonical raw cache `data/openssf/data.json` (a JSON object
+Reads the canonical raw cache `data/sources/openssf/data.json` (a JSON object
 keyed by `owner/repo`, each value a Scorecard scan result) and writes
 the long-format file:
 
@@ -16,11 +16,11 @@ Check scores of -1 are kept (they're a real signal: "check not applicable").
 Only None/null/missing scores are skipped.
 
 Source files (read-only):
-  - data/openssf/data.json       (canonical raw scorecard cache)
-  - data/eligibility-data.csv    (repo → repo_id lookup)
+  - data/sources/openssf/data.json       (canonical raw scorecard cache)
+  - data/eligibility/eligibility.csv    (repo → repo_id lookup)
 
 Destination:
-  - data/git/openssf.csv (created fresh; aborts if it already exists)
+  - data/sources/git/openssf.csv (created fresh; aborts if it already exists)
 
 Run:
   uv run python -m src.git.migrations.migrate_openssf
@@ -41,9 +41,9 @@ from src.git.long_format import read as read_long
 from src.git.long_format import upsert_rows
 
 ROOT = Path(__file__).resolve().parents[3]
-DATA_JSON = ROOT / "data" / "openssf" / "data.json"
-ELIGIBILITY_CSV = ROOT / "data" / "eligibility-data.csv"
-DEST_CSV = ROOT / "data" / "git" / "openssf.csv"
+DATA_JSON = ROOT / "data" / "sources" / "openssf" / "data.json"
+ELIGIBILITY_CSV = ROOT / "data" / "eligibility" / "eligibility.csv"
+DEST_CSV = ROOT / "data" / "sources" / "git" / "openssf.csv"
 
 
 def load_repo_ids(path: Path) -> dict[str, str]:
@@ -218,7 +218,7 @@ def main() -> int:
 
     # First 5 rows of the new CSV.
     console.print()
-    console.rule("[bold]sample (first 5 rows of data/git/openssf.csv)[/]")
+    console.rule("[bold]sample (first 5 rows of data/sources/git/openssf.csv)[/]")
     with DEST_CSV.open(encoding="utf-8") as f:
         for i, line in enumerate(f):
             console.print(line.rstrip())

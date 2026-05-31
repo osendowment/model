@@ -1,6 +1,6 @@
-"""Run scc on per-(repo, sha) sparse-checkouts and write to data/git/scc.csv.
+"""Run scc on per-(repo, sha) sparse-checkouts and write to data/sources/git/scc.csv.
 
-Long-format output schema is the standard ``data/git/<tool>.csv`` shape:
+Long-format output schema is the standard ``data/sources/git/<tool>.csv`` shape:
 
     repo, repo_id, commit_sha, metric, value, checked_at
 
@@ -8,12 +8,12 @@ Six metrics emitted per snapshot:
     files, loc, sloc, uloc, complexity, complexity_density
 
 Strategy:
-    1. Read ``data/github/git/commits-years.csv`` → per-repo list of
+    1. Read ``data/sources/github/git/commits-years.csv`` → per-repo list of
        ``last_sha`` per year. We pin scc to the **most recent** populated
        last_sha (cascading back across earlier years if needed) so each
        repo is analysed once at its newest known snapshot.
     2. Smart upsert: skip repos whose ``(repo, sha)`` already has all 6
-       metrics in ``data/git/scc.csv`` with non-empty values.
+       metrics in ``data/sources/git/scc.csv`` with non-empty values.
     3. For each remaining repo, sparse-clone at its target SHA via
        ``src.git.clone.sparse_clone`` (filtered to source-code globs).
     4. Run ``scc --uloc --format json`` and parse the per-language output;
@@ -65,9 +65,9 @@ from src.pipeline.common.repos import (
 log = logging.getLogger(__name__)
 console = Console()
 
-REPOS_FILE = "data/value-data.csv"
-SHA_FILE = "data/github/git/commits-years.csv"
-OUTPUT_FILE = "data/git/scc.csv"
+REPOS_FILE = "data/value/value.csv"
+SHA_FILE = "data/sources/github/git/commits-years.csv"
+OUTPUT_FILE = "data/sources/git/scc.csv"
 
 DEFAULT_YEARS = [2021, 2022, 2023, 2024, 2025]
 DEFAULT_CONCURRENCY = int(os.environ.get("SCC_WORKERS") or 4)
@@ -224,7 +224,7 @@ def _already_done(
 
 
 def _load_repo_id_map() -> dict[str, str]:
-    """Map ``repo`` → ``repo_id`` from data/github/repos.csv (best-effort)."""
+    """Map ``repo`` → ``repo_id`` from data/sources/github/repos.csv (best-effort)."""
     return load_repo_ids()
 
 
@@ -434,7 +434,7 @@ def _print_results(results: list[SccResult]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run scc per (repo, sha) → data/git/scc.csv (long format).",
+        description="Run scc per (repo, sha) → data/sources/git/scc.csv (long format).",
     )
     parser.add_argument("--input", default=REPOS_FILE,
                         help=f"value-data CSV (default: {REPOS_FILE})")

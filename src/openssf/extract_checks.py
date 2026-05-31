@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""Extract per-check sub-scores from data/openssf/data.json into a wide CSV.
+"""Extract per-check sub-scores from data/sources/openssf/data.json into a wide CSV.
 
 OpenSSF Scorecard returns a top-level aggregate `score` (0-10) plus per-check
 scores for ~18 individual checks (Maintained, Code-Review, CI-Tests,
 Branch-Protection, Vulnerabilities, etc.). The aggregate is in the
-sha-pinned long file `data/git/openssf.csv`; the per-check breakdown also
+sha-pinned long file `data/sources/git/openssf.csv`; the per-check breakdown also
 lives in `data.json`.
 
 This script flattens the JSON into a wide CSV so downstream pipeline stages
 can join per-check scores by repo without parsing JSON.
 
 Reads:
-    data/openssf/data.json   {repo: {checks: [{name, score}, ...], ...}}
+    data/sources/openssf/data.json   {repo: {checks: [{name, score}, ...], ...}}
 
 Writes:
-    data/openssf/checks.csv  with columns:
+    data/sources/openssf/checks.csv  with columns:
         repo, score, <Check-Name-1>, <Check-Name-2>, ..., date
 
 Where each check column is the integer score 0..10, or `-1` (the upstream
@@ -35,8 +35,8 @@ from rich.table import Table
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-INPUT_FILE = DATA_DIR / "openssf" / "data.json"
-OUTPUT_FILE = DATA_DIR / "openssf" / "checks.csv"
+INPUT_FILE = DATA_DIR / "sources" / "openssf" / "data.json"
+OUTPUT_FILE = DATA_DIR / "sources" / "openssf" / "checks.csv"
 
 # Standard scorecard checks (stable ordering for the wide CSV).
 CHECK_NAMES = [

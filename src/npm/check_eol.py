@@ -10,10 +10,10 @@ Uses the abbreviated metadata endpoint (`application/vnd.npm.install-v1+json`)
 which is much smaller than the full one but still includes `deprecated`.
 
 Reads:
-    data/npm/results.csv — packages we care about
+    data/sources/npm/results.csv — packages we care about
 
 Writes:
-    data/npm/eol.csv
+    data/sources/npm/eol.csv
 
 Usage:
     uv run python -m src.npm.check_eol
@@ -42,8 +42,8 @@ log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-RESULTS_FILE = DATA_DIR / "npm" / "results.csv"
-OUTPUT_FILE = DATA_DIR / "npm" / "eol.csv"
+RESULTS_FILE = DATA_DIR / "sources" / "npm" / "results.csv"
+OUTPUT_FILE = DATA_DIR / "sources" / "npm" / "eol.csv"
 
 REGISTRY = "https://registry.npmjs.org"
 ABBREV_HEADER = "application/vnd.npm.install-v1+json"

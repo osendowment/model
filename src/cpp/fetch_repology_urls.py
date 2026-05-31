@@ -7,12 +7,12 @@ packages the project. The JSON API doesn't carry these URLs -- they only
 appear in the rendered HTML.
 
 For each cpp project that doesn't already have a `git` URL in
-`data/cpp/results.csv`, this script fetches the information HTML, pulls
+`data/sources/cpp/results.csv`, this script fetches the information HTML, pulls
 every `href="..."` out of it, and runs them through the classifier in
 `src.build_git`. Only URLs recognised as Git endpoints are kept.
 
-Caches per-project HTML in `data/repology/html-cache/<name>.html` so
-re-runs are free. Output: `data/repology/project-urls.csv` with columns
+Caches per-project HTML in `data/sources/repology/html-cache/<name>.html` so
+re-runs are free. Output: `data/sources/repology/project-urls.csv` with columns
 `project, candidate_url, platform`.
 
 Usage:
@@ -43,9 +43,9 @@ from src.pipeline.value.build_git_urls import classify
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-RESULTS = DATA_DIR / "cpp" / "results.csv"
-CACHE_DIR = DATA_DIR / "repology" / "html-cache"
-OUTPUT = DATA_DIR / "repology" / "project-urls.csv"
+RESULTS = DATA_DIR / "sources" / "cpp" / "results.csv"
+CACHE_DIR = DATA_DIR / "sources" / "repology" / "html-cache"
+OUTPUT = DATA_DIR / "sources" / "repology" / "project-urls.csv"
 
 INFO_URL = "https://repology.org/project/{name}/information"
 HREF_RE = re.compile(r'href="([^"]+)"')

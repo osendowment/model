@@ -19,10 +19,10 @@ We hit a handful of these per repo and roll the month-by-month series into a
   * ``analyze-repo-top-contributors``        — top-N contributors by event count (lifetime)
   * ``analyze-recent-pull-requests``         — 28-day-window PR throughput (informational)
 
-Numeric ``repo_id`` is taken from ``data/value-data.csv`` (A/B risk repos) when
+Numeric ``repo_id`` is taken from ``data/value/value.csv`` (A/B risk repos) when
 present; otherwise resolved via OSSInsight's GitHub proxy (``/gh/repo/{owner}/{repo}``).
 
-Output: ``data/ossinsight/repos.csv`` (one row per repo).
+Output: ``data/sources/ossinsight/repos.csv`` (one row per repo).
 
 Gaps (not available from OSSInsight's free public queries):
   * ``unique_committers_5y`` — no per-repo PushEvent contributor count by window
@@ -68,8 +68,8 @@ log = logging.getLogger(__name__)
 console = Console()
 
 OSSINSIGHT_API = "https://api.ossinsight.io"
-DEFAULT_OUTPUT = Path("data/ossinsight/repos.csv")
-RAW_CACHE_DIR = Path("data/ossinsight/raw")
+DEFAULT_OUTPUT = Path("data/sources/ossinsight/repos.csv")
+RAW_CACHE_DIR = Path("data/sources/ossinsight/raw")
 
 REQUEST_TIMEOUT_S = 30  # OSSInsight queries usually return in <2s; wide margin
 RETRY_ATTEMPTS = 3

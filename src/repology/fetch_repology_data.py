@@ -10,7 +10,7 @@ Run:
     uv run src/repology/fetch_repology_data.py --repo debian_13  # just Debian
 
 Output:
-    data/repology/packages.csv   project, repo, srcname, binname, visiblename,
+    data/sources/repology/packages.csv   project, repo, srcname, binname, visiblename,
                                  version, status, categories, licenses
 
 Respects Repology's ~1 rps fair-use limit. Full run ≈ 3 min.
@@ -29,7 +29,7 @@ from rich.table import Table
 
 # ── config ────────────────────────────────────────────────────────────────────
 
-OUT_PATH = "data/repology/packages.csv"
+OUT_PATH = "data/sources/repology/packages.csv"
 API = "https://repology.org/api/v1/projects"
 DEFAULT_REPOS = ["debian_13", "homebrew"]
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"

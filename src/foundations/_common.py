@@ -13,7 +13,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "foundations"
+DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "sources" / "foundations"
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"
 
 # Browser-like UA — some foundation sites (numfocus, sfc) block default httpx UA.
@@ -36,7 +36,7 @@ _GITHUB_NON_REPO_OWNERS = {
 }
 
 # Package-registry URL patterns we recognise. These produce
-# (ecosystem, package) pairs we can join against `data/value-data.csv`.
+# (ecosystem, package) pairs we can join against `data/value/value.csv`.
 _PACKAGE_PATTERNS: list[tuple[re.Pattern, str]] = [
     # npm: https://www.npmjs.com/package/foo  OR  /package/@scope/bar
     (re.compile(r"npmjs\.com/package/(@[a-z0-9._-]+/[a-z0-9._-]+|[a-z0-9._-]+)",
@@ -78,7 +78,7 @@ def extract_package(*texts: str) -> tuple[str, str]:
     """Find the first npm/pypi/crates/cpp package URL in any of `texts`.
 
     Returns `(ecosystem, package)`, or `("", "")` if none match. Used to
-    join foundation projects against `data/value-data.csv` even when the
+    join foundation projects against `data/value/value.csv` even when the
     project's homepage is just a github URL (so its `domain` is useless).
     """
     for text in texts:
@@ -93,7 +93,7 @@ def extract_package(*texts: str) -> tuple[str, str]:
 
 
 def out_path(slug: str) -> Path:
-    """Standard output path: data/foundations/{slug}/projects.csv."""
+    """Standard output path: data/sources/foundations/{slug}/projects.csv."""
     p = DATA_DIR / slug / "projects.csv"
     p.parent.mkdir(parents=True, exist_ok=True)
     return p

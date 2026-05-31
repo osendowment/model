@@ -20,13 +20,13 @@ analysis. A future signal could parse `ftp-master.debian.org/removals.txt`
 and filter for `Reason: RoQA; Dead upstream`, but that's deferred.
 
 Reads:
-    data/cpp/results.csv               — cpp packages we care about
-    data/repology/packages.csv         — cpp project ↔ homebrew formula
-    data/homebrew/raw/formula-api.json — cached Homebrew API (auto-fetched)
-    data/endoflife/<product>.json      — cached endoflife.date per product
+    data/sources/cpp/results.csv               — cpp packages we care about
+    data/sources/repology/packages.csv         — cpp project ↔ homebrew formula
+    data/sources/homebrew/raw/formula-api.json — cached Homebrew API (auto-fetched)
+    data/sources/endoflife/<product>.json      — cached endoflife.date per product
 
 Writes:
-    data/cpp/eol.csv
+    data/sources/cpp/eol.csv
 
 Usage:
     uv run python -m src.cpp.check_eol
@@ -53,11 +53,11 @@ log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-RESULTS_FILE = DATA_DIR / "cpp" / "results.csv"
-REPOLOGY_FILE = DATA_DIR / "repology" / "packages.csv"
-OUTPUT_FILE = DATA_DIR / "cpp" / "eol.csv"
-HOMEBREW_CACHE = DATA_DIR / "homebrew" / "raw" / "formula-api.json"
-ENDOFLIFE_DIR = DATA_DIR / "endoflife"
+RESULTS_FILE = DATA_DIR / "sources" / "cpp" / "results.csv"
+REPOLOGY_FILE = DATA_DIR / "sources" / "repology" / "packages.csv"
+OUTPUT_FILE = DATA_DIR / "sources" / "cpp" / "eol.csv"
+HOMEBREW_CACHE = DATA_DIR / "sources" / "homebrew" / "raw" / "formula-api.json"
+ENDOFLIFE_DIR = DATA_DIR / "sources" / "endoflife"
 
 HOMEBREW_API = "https://formulae.brew.sh/api/formula.json"
 ENDOFLIFE_API = "https://endoflife.date/api/{product}.json"

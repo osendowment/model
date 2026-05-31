@@ -40,8 +40,8 @@ def load_risk_scope() -> set[str]:
     false-positive gap.
     """
     entries = load_risk_repos(
-        value_file=str(ROOT / "data/value-data.csv"),
-        repos_file=str(ROOT / "data/github/repos.csv"),
+        value_file=str(ROOT / "data/value/value.csv"),
+        repos_file=str(ROOT / "data/sources/github/repos.csv"),
     )
     return {e.repo for e in entries}
 
@@ -56,7 +56,7 @@ def main():
 
     findings: list[tuple[str, str, str]] = []  # (severity, category, message)
 
-    risk_path = ROOT / "data/risk-data.csv"
+    risk_path = ROOT / "data/risk/risk.csv"
     with risk_path.open() as f:
         rows = list(csv.DictReader(f))
 

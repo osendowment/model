@@ -14,14 +14,14 @@ Library:
         - Files it doesn't understand are skipped silently.
 
 Period semantics:
-    For each repo, look up `data/github/git/commits-years.csv` to find the
+    For each repo, look up `data/sources/github/git/commits-years.csv` to find the
     most recent year ≤ 2025 with commits>0; use that year's `last_sha`. If
     no per-year SHA is recorded fall back to HEAD (and we DO NOT persist
     HEAD-resolved snapshots — without a pinned sha we can't key them in the
     long format). Same logic as `src.pipeline.risk.build_complexity._load_target_year()`.
 
 Output format:
-    Writes long-format rows to `data/git/lizard.csv` (shared with
+    Writes long-format rows to `data/sources/git/lizard.csv` (shared with
     `fetch_cognitive`) via `src.git.long_format.upsert_snapshot`. Each row is
     `(repo, repo_id, commit_sha, metric, value, checked_at)`.
 
@@ -99,7 +99,7 @@ MAX_FILE_BYTES = 2_000_000
 # Wall-clock cap for one repo's isolated analysis subprocess.
 ANALYSIS_TIMEOUT = 900
 
-# Metrics this fetcher emits per snapshot to data/git/lizard.csv.
+# Metrics this fetcher emits per snapshot to data/sources/git/lizard.csv.
 CYCLO_METRICS: tuple[str, ...] = (
     "files",
     "cyclomatic_total", "cyclomatic_avg", "cyclomatic_max",
@@ -175,7 +175,7 @@ def _load_target_year_shas() -> dict[str, tuple[str, str]]:
 def _load_scc_complexity() -> dict[str, int]:
     """Map repo → scc complexity for the comparison table.
 
-    Reads the long-format `data/git/scc.csv`. For repos with multiple
+    Reads the long-format `data/sources/git/scc.csv`. For repos with multiple
     snapshots takes the lexicographically-largest sha (deterministic).
     """
     if not os.path.exists(SCC_LONG_FILE):
@@ -487,7 +487,7 @@ def _filter_by_ttl(
 
 
 def _write_results(path: str, results: list[RepoComplexity]) -> None:
-    """Upsert each successful result into `data/git/lizard.csv`.
+    """Upsert each successful result into `data/sources/git/lizard.csv`.
 
     Drops results without an `analyzed_sha` (HEAD-resolved snapshots can't be
     pinned in the long format). `elapsed_s` is logged separately, never

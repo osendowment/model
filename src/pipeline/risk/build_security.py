@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
-"""Build data/security.csv — security metrics per risk-scope repo.
+"""Build data/risk/security.csv — security metrics per risk-scope repo.
 
 Reads (long-format, sha-pinned where applicable):
-    data/value-data.csv                     — A/B value-class set
-    data/github/git/commits-years.csv       — per (repo, year) last_sha
-    data/git/openssf.csv                    — long: scorecard `score` + 18
+    data/value/value.csv                     — A/B value-class set
+    data/sources/github/git/commits-years.csv       — per (repo, year) last_sha
+    data/sources/git/openssf.csv                    — long: scorecard `score` + 18
                                               individual checks per (repo, sha)
-    data/git/depsdev.csv                    — long: deps.dev-mirrored Scorecard
+    data/sources/git/depsdev.csv                    — long: deps.dev-mirrored Scorecard
                                               `score` + checks per (repo, sha);
                                               fall-back when local row missing
-    data/git/semgrep.csv                    — long: semgrep findings per
+    data/sources/git/semgrep.csv                    — long: semgrep findings per
                                               (repo, sha, rulepack-prefixed
                                               metric); locked to p_default
-    data/osv/cves.csv                       — per-CVE rows (repo, date, cve);
+    data/sources/osv/cves.csv                       — per-CVE rows (repo, date, cve);
                                               5y count = distinct CVEs in
                                               2021..2025
-    data/ossfuzz/projects.csv               — projects enrolled in OSS-Fuzz
-    data/depsdev/repos.csv                  — non-sha enrichment
+    data/sources/ossfuzz/projects.csv               — projects enrolled in OSS-Fuzz
+    data/sources/depsdev/repos.csv                  — non-sha enrichment
                                               (bestpractices_badge_id)
 
 Writes:
-    data/security.csv  with columns:
+    data/risk/security.csv  with columns:
         repo, repo_id,
         openssf_score,                      ([2025 EOY], 0..10) — local first,
                                             falls back to deps.dev mirror
@@ -91,15 +91,15 @@ from src.pipeline.common.tables import load_column_by_repo
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
-GIT_LONG_DIR = DATA_DIR / "git"
-COMMITS_YEARS_FILE = DATA_DIR / "github" / "git" / "commits-years.csv"
+GIT_LONG_DIR = DATA_DIR / "sources" / "git"
+COMMITS_YEARS_FILE = DATA_DIR / "sources" / "github" / "git" / "commits-years.csv"
 OPENSSF_FILE = GIT_LONG_DIR / "openssf.csv"
 DEPSDEV_LONG_FILE = GIT_LONG_DIR / "depsdev.csv"
 SEMGREP_FILE = GIT_LONG_DIR / "semgrep.csv"
-OSV_FILE = DATA_DIR / "osv" / "cves.csv"
-OSSFUZZ_FILE = DATA_DIR / "ossfuzz" / "projects.csv"
-DEPSDEV_REPOS_FILE = DATA_DIR / "depsdev" / "repos.csv"
-OUTPUT_FILE = DATA_DIR / "security.csv"
+OSV_FILE = DATA_DIR / "sources" / "osv" / "cves.csv"
+OSSFUZZ_FILE = DATA_DIR / "sources" / "ossfuzz" / "projects.csv"
+DEPSDEV_REPOS_FILE = DATA_DIR / "sources" / "depsdev" / "repos.csv"
+OUTPUT_FILE = DATA_DIR / "risk" / "security.csv"
 
 # Semgrep rule pack to surface in the build. Same lock as before — risk.py
 # expects p_default values across runs.
@@ -263,7 +263,7 @@ def _load_osv_queried() -> set[str]:
     queried.csv is a confirmed zero.
     """
     out: set[str] = set()
-    queried_file = DATA_DIR / "osv" / "queried.csv"
+    queried_file = DATA_DIR / "sources" / "osv" / "queried.csv"
     if not queried_file.exists():
         return out
     with open(queried_file, encoding="utf-8") as f:

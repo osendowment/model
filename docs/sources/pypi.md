@@ -26,9 +26,9 @@ No authentication required (except BigQuery for download data).
 
 ## Raw Data
 
-- `data/pypi/bigquery/bq-package-downloads.csv` -- ~849K packages x 5 years (manual export)
-- `data/pypi/raw/package-dependencies.csv` -- package, dependency, type, fetched_at
-- `data/pypi/raw/package-github-mapping.csv` -- package-to-GitHub URL (manual)
+- `data/sources/pypi/bigquery/bq-package-downloads.csv` -- ~849K packages x 5 years (manual export)
+- `data/sources/pypi/raw/package-dependencies.csv` -- package, dependency, type, fetched_at
+- `data/sources/pypi/raw/package-github-mapping.csv` -- package-to-GitHub URL (manual)
 
 ## Scripts
 
@@ -53,7 +53,7 @@ uv run python -m src.pypi.process_data [--min-avg N] [--alpha F]
 
 ## Outputs
 
-In `data/pypi/`:
+In `data/sources/pypi/`:
 
 | File | Rows | Description |
 |------|------|-------------|

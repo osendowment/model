@@ -5,7 +5,7 @@ lives in the Cross-Project Council README as a markdown table grouped by
 stage (Impact / At-Large / Incubation / Emeritus).
 
 Source: https://raw.githubusercontent.com/openjs-foundation/cross-project-council/main/README.md
-Output: data/foundations/openjs/projects.csv
+Output: data/sources/foundations/openjs/projects.csv
 
 Note: OpenJS is hosted under the Linux Foundation, so its projects also
 appear in the LF landscape. We tag them as `openjs` (more specific) and

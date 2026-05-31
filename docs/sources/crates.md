@@ -10,7 +10,7 @@ Package downloads, dependencies, and repository mappings for the Rust ecosystem.
 
 ## Raw Data
 
-In `data/crates/`:
+In `data/sources/crates/`:
 - `db-dump/crates.csv` -- crate ID, name, repository URL
 - `db-dump/versions.csv` -- version ID, crate ID
 - `db-dump/default_versions.csv` -- current (non-yanked) version per crate
@@ -42,7 +42,7 @@ uv run python -m src.crates.process_data [--min-avg N] [--alpha F]
 
 ## Outputs
 
-In `data/crates/`:
+In `data/sources/crates/`:
 
 | File | Rows | Description |
 |------|------|-------------|

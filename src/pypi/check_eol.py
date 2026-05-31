@@ -10,10 +10,10 @@ There is no separate per-project deprecation flag on PyPI; classifiers are
 the canonical way maintainers declare a package's lifecycle.
 
 Reads:
-    data/pypi/results.csv
+    data/sources/pypi/results.csv
 
 Writes:
-    data/pypi/eol.csv
+    data/sources/pypi/eol.csv
 
 Usage:
     uv run python -m src.pypi.check_eol
@@ -41,8 +41,8 @@ log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-RESULTS_FILE = DATA_DIR / "pypi" / "results.csv"
-OUTPUT_FILE = DATA_DIR / "pypi" / "eol.csv"
+RESULTS_FILE = DATA_DIR / "sources" / "pypi" / "results.csv"
+OUTPUT_FILE = DATA_DIR / "sources" / "pypi" / "eol.csv"
 
 PYPI_JSON = "https://pypi.org/pypi/{name}/json"
 INACTIVE_CLASSIFIER = "Development Status :: 7 - Inactive"

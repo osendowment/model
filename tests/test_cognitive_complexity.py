@@ -265,7 +265,7 @@ def test_build_complexity_reads_cognitive_from_lizard(tmp_path, monkeypatch):
     """build_complexity surfaces cognitive_* from the sha-pinned lizard.csv.
 
     Cognitive metrics were consolidated out of a standalone cognitive.csv
-    into the long-format data/git/lizard.csv; build_complexity picks them
+    into the long-format data/sources/git/lizard.csv; build_complexity picks them
     up at the same snapshot sha it uses for scc.
     """
     from src.pipeline.common.repos import RepoEntry

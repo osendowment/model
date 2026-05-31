@@ -9,7 +9,7 @@ Each round:
 State is persisted every SAVE_INTERVAL packages — safe to interrupt and resume.
 
 Output:
-  data/pypi/raw/package-dependencies.csv  — package, dependency, type, fetched_at
+  data/sources/pypi/raw/package-dependencies.csv  — package, dependency, type, fetched_at
 
 Run:
     uv run src/pypi/fetch_pypi_data.py
@@ -33,8 +33,8 @@ from rich.table import Table
 from tqdm import tqdm
 
 PYPI_JSON     = "https://pypi.org/pypi"
-TOP_PACKAGES  = "data/pypi/top-packages.csv"
-RAW_DEPS      = "data/pypi/raw/package-dependencies.csv"
+TOP_PACKAGES  = "data/sources/pypi/top-packages.csv"
+RAW_DEPS      = "data/sources/pypi/raw/package-dependencies.csv"
 CONCURRENCY   = 20
 MAX_RETRIES   = 4
 RETRY_BACKOFF = [2, 5, 15, 30]

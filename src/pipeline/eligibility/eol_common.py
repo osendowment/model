@@ -1,6 +1,6 @@
 """Shared schema, I/O, and display for per-ecosystem EOL checks.
 
-Each ecosystem has its own `check_eol.py` that produces `data/{eco}/eol.csv`
+Each ecosystem has its own `check_eol.py` that produces `data/sources/{eco}/eol.csv`
 keyed by package name. The schema is uniform so `src.pipeline.value.unify_value_data` can
 merge a single `is_eol` column into `value-data.csv`.
 

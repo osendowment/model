@@ -26,7 +26,7 @@ tooling (cmake, pkgconf, autoconf, gettext, etc.) and Debian
 | Homebrew (`fetch_homebrew_data.py`) | both `runtime` and `build` types stored in raw deps | `cpp/process_data.py:277` — `if dep_type != "runtime": continue` |
 
 Result: PageRank reflects who *runs* with whom, not who *builds* whom. The
-`type` column in `data/cpp/dependency-tree.csv` is uniformly `"declared"` —
+`type` column in `data/sources/cpp/dependency-tree.csv` is uniformly `"declared"` —
 that label is the cpp pipeline's own term meaning "runtime dep declared by
 either ecosystem", not a faithful preservation of the source-side type field.
 
@@ -42,7 +42,7 @@ uv run python -m src.cpp.process_data [--top-share F] [--include-non-cpp]
 
 ## Outputs
 
-In `data/cpp/`:
+In `data/sources/cpp/`:
 - `raw/packages.csv` -- per-project join with aggregated signals
 - `top-packages.csv` -- top C/C++ projects by download mass
 - `dependency-tree.csv` -- project-to-project dependency edges

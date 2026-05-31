@@ -9,7 +9,7 @@
 This proves the auto-orchestrator detects and self-heals data gaps.
 
 Usage:
-    uv run python -m tests.robustness.test_auto_refill --source data/git/scc.csv --n 5
+    uv run python -m tests.robustness.test_auto_refill --source data/sources/git/scc.csv --n 5
 """
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 def coverage_in_risk(field: str, repos: set[str]) -> dict[str, str]:
     """Return {repo: value} for the given field, only for `repos`."""
     out: dict[str, str] = {}
-    with (ROOT / "data/risk-data.csv").open() as f:
+    with (ROOT / "data/risk/risk.csv").open() as f:
         for r in csv.DictReader(f):
             if r["repo"] in repos:
                 out[r["repo"]] = (r.get(field) or "").strip()
@@ -38,7 +38,7 @@ def coverage_in_risk(field: str, repos: set[str]) -> dict[str, str]:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", default="data/git/scc.csv")
+    parser.add_argument("--source", default="data/sources/git/scc.csv")
     parser.add_argument("--field", default="loc_2025_eoy",
                         help="Field in risk-data.csv to check")
     parser.add_argument("--n", type=int, default=5,

@@ -13,7 +13,7 @@ No authentication required.
 
 ## Raw Data
 
-In `data/homebrew/raw/`:
+In `data/sources/homebrew/raw/`:
 - `formulas.csv` -- name, tap, desc, license, homepage, source_url, language
 - `dependencies.csv` -- formula, dep_name, dep_type, fetched_at. Both `runtime` and `build` types are captured here, but the cpp pipeline filters to `runtime` only when building its dep tree (`src/cpp/process_data.py:277`).
 - `downloads.csv` -- formula, year, downloads
@@ -32,5 +32,5 @@ uv run python -m src.homebrew.process_data [--include-all-langs]
 
 ## Outputs
 
-In `data/homebrew/`:
+In `data/sources/homebrew/`:
 - `top-packages.csv`, `dependency-tree.csv`, `github-repos.csv`, `results.csv`

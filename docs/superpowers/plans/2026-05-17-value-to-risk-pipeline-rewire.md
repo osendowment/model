@@ -4,11 +4,11 @@
 
 **Goal:** Make the risk pipeline consume A/B value-class repos straight from `value-data.csv` (target classes configured in the renamed `settings.json`) instead of `eligibility-data.csv`, include all classes in `value-data.csv`, update docs, then run the full risk pipeline and fix anomalies.
 
-**Architecture:** One shared loader `load_risk_repos()` in `src/pipeline/repos.py` reads `value-data.csv`, filters `class ∈ settings.risk_input.value_classes`, enriches `repo_id`/`archived` from `data/github/repos.csv`. Every risk script calls it. Config file `params.json` → `settings.json` (module `params.py` unchanged).
+**Architecture:** One shared loader `load_risk_repos()` in `src/pipeline/repos.py` reads `value-data.csv`, filters `class ∈ settings.risk_input.value_classes`, enriches `repo_id`/`archived` from `data/sources/github/repos.csv`. Every risk script calls it. Config file `params.json` → `settings.json` (module `params.py` unchanged).
 
 **Tech Stack:** Python 3, `uv`, `rich`, `pytest`. Spec: `docs/superpowers/specs/2026-05-17-value-to-risk-pipeline-rewire-design.md`.
 
-**Facts:** `value-data.csv` = 2564 rows (A=226, B=728, C=1610, D dropped). A/B with `github_repo` = 929 (2 invalid). `data/github/repos.csv` = 2465 rows, 2451 with `repo_id`, 90 archived. `.env` has `GITHUB_TOKENS`.
+**Facts:** `value-data.csv` = 2564 rows (A=226, B=728, C=1610, D dropped). A/B with `github_repo` = 929 (2 invalid). `data/sources/github/repos.csv` = 2465 rows, 2451 with `repo_id`, 90 archived. `.env` has `GITHUB_TOKENS`.
 
 ---
 
@@ -106,11 +106,11 @@ def test_load_repo_ids(tmp_path):
 
 - [ ] **Step 2: Run test, verify it fails** — `uv run pytest tests/test_repos_loader.py -q` → FAIL (`load_risk_repos` / `load_repo_ids` not defined).
 
-- [ ] **Step 3: Implement** in `src/pipeline/repos.py`. Add at top: `from src.pipeline.params import RISK_INPUT_CLASSES`. Add `REPOS_FILE = "data/github/repos.csv"`. Change `_RANK` to all classes: `_RANK = {"A": 4, "B": 3, "C": 2, "D": 1}`. Add:
+- [ ] **Step 3: Implement** in `src/pipeline/repos.py`. Add at top: `from src.pipeline.params import RISK_INPUT_CLASSES`. Add `REPOS_FILE = "data/sources/github/repos.csv"`. Change `_RANK` to all classes: `_RANK = {"A": 4, "B": 3, "C": 2, "D": 1}`. Add:
 
 ```python
 def _load_repos_meta(path: str) -> dict[str, RepoEntry]:
-    """Map lowercased repo slug → RepoEntry enriched from data/github/repos.csv."""
+    """Map lowercased repo slug → RepoEntry enriched from data/sources/github/repos.csv."""
     out: dict[str, RepoEntry] = {}
     if not os.path.exists(path):
         return out
@@ -145,7 +145,7 @@ def load_risk_repos(
     - Keeps rows with `class` in RISK_INPUT_CLASSES and a non-empty
       `github_repo`. `skip_invalid` drops `gh_valid` != True (404 repos).
     - Deduped by lowercased `github_repo`; highest class wins (A > B > C > D).
-    - repo_id / archived / size_kb / stars enriched from `data/github/repos.csv`.
+    - repo_id / archived / size_kb / stars enriched from `data/sources/github/repos.csv`.
       `skip_archived` drops archived repos.
     """
     chosen: dict[str, str] = {}
@@ -185,7 +185,7 @@ def load_risk_slugs(*args, **kwargs) -> list[str]:
 
 
 def load_repo_ids(repos_file: str = REPOS_FILE) -> dict[str, str]:
-    """Map lowercased repo slug → repo_id from data/github/repos.csv."""
+    """Map lowercased repo slug → repo_id from data/sources/github/repos.csv."""
     out: dict[str, str] = {}
     if not os.path.exists(repos_file):
         return out
@@ -218,7 +218,7 @@ Delete the old `load_ab_repos` / `load_ab_slugs` function bodies and the now-unu
 For **every** task below the mechanical change is identical:
 1. Import: `load_eligible_repos` → `load_risk_repos` (or `load_risk_slugs`).
 2. Call sites: `load_eligible_repos()` → `load_risk_repos()`.
-3. Any `repo→repo_id` map built by reading `data/eligibility-data.csv` → use `load_repo_ids()` from `src.pipeline.repos` (reads `data/github/repos.csv`). Delete the local `ELIGIBILITY*` constant + reader.
+3. Any `repo→repo_id` map built by reading `data/eligibility/eligibility.csv` → use `load_repo_ids()` from `src.pipeline.repos` (reads `data/sources/github/repos.csv`). Delete the local `ELIGIBILITY*` constant + reader.
 4. Reword "eligible" → "risk-scope" / "A/B value-class" in module docstring, `rich` banners, and `argparse` help. `--eligibility` CLI args become `--input` pointing at `value-data.csv` (keep the old flag name as a hidden alias only if already documented).
 5. Smoke-test with the script's existing `--limit`/`--random` flag (N=3) — must run without error and report ~3 repos.
 6. Commit per file or per small group.
@@ -229,7 +229,7 @@ For **every** task below the mechanical change is identical:
 
 **Files (Modify):** `src/pipeline/build_concentration.py`, `build_complexity.py`, `build_funding.py`, `build_security.py`, `build_visibility.py`, `build_workload.py`, `risk.py`
 
-- [ ] Apply the mechanical change to all 7. None of these build a repo_id map from eligibility-data.csv (they get repo_id from the `RepoEntry`) — only docstring "data/eligibility-data.csv — eligible set" lines need updating to "data/value-data.csv — A/B value-class set".
+- [ ] Apply the mechanical change to all 7. None of these build a repo_id map from eligibility-data.csv (they get repo_id from the `RepoEntry`) — only docstring "data/eligibility/eligibility.csv — eligible set" lines need updating to "data/value/value.csv — A/B value-class set".
 - [ ] `risk.py`: also update `--random` help and the two banner strings ("eligible repos" → "risk-scope repos").
 - [ ] Smoke-test each: `uv run python -m src.pipeline.build_concentration` etc. need their intermediates — instead run `uv run python -c "from src.pipeline.build_concentration import *"` import-check, and for `risk.py` run `uv run python -m src.pipeline.risk --random 3`.
 - [ ] Commit: `refactor: pipeline builders read risk-scope (A/B value classes)`
@@ -248,7 +248,7 @@ For **every** task below the mechanical change is identical:
 **Files (Modify):** `src/github/fetch_cognitive.py`, `fetch_advanced_complexity.py`, `fetch_issue_metrics.py`
 
 - [ ] `fetch_cognitive.py`, `fetch_advanced_complexity.py`: loader swap + replace `ELIGIBILITY_FILE` repo_id usage. They build `repo_ids = {e.repo: e.repo_id for e in eligible}` from the loader entries — that still works (entries carry `repo_id`); just delete the unused `ELIGIBILITY_FILE` constant.
-- [ ] `fetch_issue_metrics.py`: `load_ab_slugs` → `load_risk_slugs`; replace `_load_repo_ids(ELIGIBILITY_FILE)` with `load_repo_ids()` from `src.pipeline.repos`; drop `ELIGIBILITY_FILE` and the local `_load_repo_ids`; update `--eligibility` arg → `--input` default `data/value-data.csv`.
+- [ ] `fetch_issue_metrics.py`: `load_ab_slugs` → `load_risk_slugs`; replace `_load_repo_ids(ELIGIBILITY_FILE)` with `load_repo_ids()` from `src.pipeline.repos`; drop `ELIGIBILITY_FILE` and the local `_load_repo_ids`; update `--eligibility` arg → `--input` default `data/value/value.csv`.
 - [ ] Smoke-test each with `--limit 3` / `--random 3`.
 - [ ] Commit: `refactor: github fetchers use repos.csv for repo_id`
 
@@ -257,7 +257,7 @@ For **every** task below the mechanical change is identical:
 **Files (Modify):** `src/git/fetch_scc.py`, `src/git/commits_years.py`, `src/git/resolve_head.py`
 
 - [ ] All three: import `load_risk_repos` (drop `load_eligible_repos` and, in fetch_scc/commits_years, the now-redundant separate `load_ab_repos` import — use `load_risk_repos` for both the fetch list and size data).
-- [ ] `fetch_scc.py`: replace the `_repo_id_map()` that reads `data/eligibility-data.csv` with `load_repo_ids()`.
+- [ ] `fetch_scc.py`: replace the `_repo_id_map()` that reads `data/eligibility/eligibility.csv` with `load_repo_ids()`.
 - [ ] Update the comments at `commits_years.py:318-321` and `fetch_scc.py:438` that explain "use the eligibility set" → "use the risk-scope set".
 - [ ] Smoke-test each with its smoke-test flag (N=3).
 - [ ] Commit: `refactor: git fetchers read risk-scope`
@@ -283,7 +283,7 @@ For **every** task below the mechanical change is identical:
 - [ ] Update the docstring of `aggregate_by_repo` and the comment block at lines ~352-357 ("value-data.csv stores only ABC-class repos") → "value-data.csv stores all classes A/B/C/D".
 - [ ] Update the module docstring line ~27-28 ("≤90% C, rest D" already correct; remove any "only ABC" claim).
 - [ ] Verify call site `value.py:942` `aggregate_by_repo(all_rows)` now keeps D.
-- [ ] Run `uv run python -m src.pipeline.value` then `uv run python -c "import csv,collections;print(collections.Counter(r['class'] for r in csv.DictReader(open('data/value-data.csv'))))"` — Expected: A/B/C **and D** present.
+- [ ] Run `uv run python -m src.pipeline.value` then `uv run python -c "import csv,collections;print(collections.Counter(r['class'] for r in csv.DictReader(open('data/value/value.csv'))))"` — Expected: A/B/C **and D** present.
 - [ ] Commit: `feat: value-data.csv includes all classes (A/B/C/D)`
 
 ### Task 9: Update docs

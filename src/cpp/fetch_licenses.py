@@ -1,4 +1,4 @@
-"""Add a `license` column to `data/cpp/results.csv` by joining Homebrew.
+"""Add a `license` column to `data/sources/cpp/results.csv` by joining Homebrew.
 
 `cpp` is a synthetic ecosystem unifying Debian + Homebrew C/C++ packages.
 Debian's `debian/copyright` files are unstructured prose and don't yield
@@ -32,8 +32,8 @@ log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
-CPP_RESULTS = DATA_DIR / "cpp" / "results.csv"
-HOMEBREW_RESULTS = DATA_DIR / "homebrew" / "results.csv"
+CPP_RESULTS = DATA_DIR / "sources" / "cpp" / "results.csv"
+HOMEBREW_RESULTS = DATA_DIR / "sources" / "homebrew" / "results.csv"
 
 
 def load_homebrew_licenses() -> dict[str, str]:

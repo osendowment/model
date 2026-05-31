@@ -20,7 +20,7 @@ Why SPDX (and not `api.opensource.org/licenses`):
   • SPDX includes the `isOsiApproved` flag and a `seeAlso` list that
     typically contains the OSI license page URL — best of both.
 
-Output: `data/osi/oss-licenses.csv`. Columns:
+Output: `data/sources/osi/oss-licenses.csv`. Columns:
 
   spdx_id           — lowercased SPDX ID (the join key, e.g. `apache-2.0`)
   spdx_id_canonical — original SPDX casing (`Apache-2.0`)
@@ -53,7 +53,7 @@ logging.basicConfig(level="INFO")
 log = logging.getLogger(__name__)
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "osi"
+DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "sources" / "osi"
 OUT = DATA_DIR / "oss-licenses.csv"
 
 SPDX_LIST_URL = (
@@ -301,7 +301,7 @@ def _write(rows: list[dict]) -> None:
 
 
 def ensure(force: bool = False, verbose: bool = True) -> Path:
-    """Ensure `data/osi/oss-licenses.csv` exists and is fresh.
+    """Ensure `data/sources/osi/oss-licenses.csv` exists and is fresh.
 
     Called by `pipeline.eligibility` at startup so the pipeline is
     self-bootstrapping — no need to remember to run the fetcher first.

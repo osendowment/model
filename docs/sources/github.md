@@ -16,11 +16,11 @@ Repository metadata, contributor metrics, and code complexity for open-source pr
 
 ## Raw Data
 
-In `data/github/search/`:
+In `data/sources/github/search/`:
 - `top-repos.csv` -- ~32K repos with metadata (stars, forks, license, language, etc.)
 - `repo-counts.csv` -- cached search API counts (skip repeat queries)
 
-In `data/github/contributors/` (wide format: `repo, 2021...2025, 2021-2025`):
+In `data/sources/github/contributors/` (wide format: `repo, 2021...2025, 2021-2025`):
 - `bus-factor.csv` -- minimum contributors for 50% of commits
 - `hhi.csv` -- Herfindahl-Hirschman Index (0-10000)
 - `contributors.csv` -- human contributor count
@@ -28,11 +28,11 @@ In `data/github/contributors/` (wide format: `repo, 2021...2025, 2021-2025`):
 - `commits.csv` -- human commit count
 - `years.csv` -- long format: repo, year, first_date, last_date
 
-In `data/github/git/`:
+In `data/sources/github/git/`:
 - `commits-years.csv` -- per (repo, year) `last_sha` + `commits` (foundation for sha-pinned snapshots)
 - `churn.csv` -- 5y added/deleted lines per repo (range-based)
 
-In `data/git/` (long-format sha-pinned, schema: `repo, repo_id, commit_sha, metric, value, checked_at`):
+In `data/sources/git/` (long-format sha-pinned, schema: `repo, repo_id, commit_sha, metric, value, checked_at`):
 - `scc.csv` -- scc metrics: `loc`, `sloc`, `files`, `uloc`, `complexity`, `complexity_density`
 - `lizard.csv` -- lizard cognitive + cyclomatic + halstead + maintainability_index
 - `semgrep.csv` -- semgrep findings (rulepack-prefixed metrics, e.g. `p_default.total`)

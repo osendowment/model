@@ -5,16 +5,16 @@ Cells list the **specific fields** we extract -- not the entire dataset.
 
 Pipelines (run in this order — each stage feeds the next):
 
-1. **Value** (`src.pipeline.run_value_pipeline`) → `data/value-data.csv` — picks the
+1. **Value** (`src.pipeline.run_value_pipeline`) → `data/value/value.csv` — picks the
    most-depended-on packages per ecosystem and ranks them by
    download-weighted PageRank, then unifies per-package classes into one
    row per GitHub repo. All classes A/B/C/D are included. See [docs/value.md](value.md).
-2. **Risk** (`src.pipeline.run_risk_pipeline`) → `data/risk-data.csv` — concentration
+2. **Risk** (`src.pipeline.run_risk_pipeline`) → `data/risk/risk.csv` — concentration
    + complexity + issue-debt scoring for **A/B value-class repos** read
-   directly from `data/value-data.csv`. Target classes are configured in
+   directly from `data/value/value.csv`. Target classes are configured in
    `src/pipeline/settings.json` under `risk_input.value_classes` (default
    `["A", "B"]`). See [docs/risk.md](risk.md).
-3. **Eligibility** (`src.pipeline.run_eligibility_pipeline`) → `data/eligibility-data.csv`
+3. **Eligibility** (`src.pipeline.run_eligibility_pipeline`) → `data/eligibility/eligibility.csv`
    — restricts to AB-class repos with a fresh GitHub API record, an
    OSI-approved license, and a non-EOL signal. Runs after Risk; its
    intended scope (future work) is repos that are `value_class=A` AND
@@ -37,7 +37,7 @@ stages and refresh this table when scope or thresholds change.
 |   | ↳ many-pkgs-per-repo collapse: babel/babel = ~140 npm pkgs, isaacs/glob ships under several names, etc. |  |  |  |  |
 | 3 | AB ∩ fetched in `github/repos.csv` | repo has a GitHub API record (run `src.github.fetch_repo_owner_data`) | 892 | −2.7% | 5.1% |
 | 4 | AB ∩ valid (not 404) | `valid=True` in `repos.csv` (repo still exists) | 892 | 0.0% | 5.1% |
-| 5 | `is_oss=True` | strict OSI membership against `data/osi/oss-licenses.csv` (handles SPDX expressions) | 875 | −1.9% | 5.0% |
+| 5 | `is_oss=True` | strict OSI membership against `data/sources/osi/oss-licenses.csv` (handles SPDX expressions) | 875 | −1.9% | 5.0% |
 | 6 | NOT `is_eol` | every constituent package alive on its registry | 868 | −0.8% | 4.9% |
 | **7** | **Risk-scope (A/B)** | `value_class ∈ {A, B}` repos after dropping archived/invalid — input to the Risk pipeline (~224 A + ~676 B ≈ 900 repos; refresh by re-running the pipeline) | **~900** | — | — |
 | **8** | **ELIGIBLE** | `valid_repo AND is_oss=True AND NOT is_eol` — runs after Risk; future scope narrows to `value_class=A` ∩ highest risk class | **868** | **0.0%** | **4.9%** |
@@ -78,19 +78,19 @@ Then re-count and update the table.
 | **Repology** (`repology.org`) | cross-ecosystem project-name canonicalisation; per-project info HTML scraped for upstream Git URLs | — | — |
 | **OSS-Fuzz** ([github.com/google/oss-fuzz](https://github.com/google/oss-fuzz)) | C/C++ security-critical project whitelist; `main_repo` URL from `project.yaml` | — | — |
 | **endoflife.date** (`endoflife.date/api/<product>.json`) | — | — | EOL cycle dates for ~20 well-known products (openssl, postgresql, python, ruby, php, ...) → `endoflife_date` overlay |
-| **Foundation rosters** (Apache, CNCF, Eclipse, LF, NumFocus, OpenJS, PSF, SFC) | — | — | `repo → host` (foundation slug) via `data/foundations/host-by-repo.csv` |
+| **Foundation rosters** (Apache, CNCF, Eclipse, LF, NumFocus, OpenJS, PSF, SFC) | — | — | `repo → host` (foundation slug) via `data/sources/foundations/host-by-repo.csv` |
 | **FLOSS Fund manifests** (`dir.floss.fund/funding-manifests.tar.gz`) | — | — | `funding.json` entity, project metadata, `funding_channels` *(fetched, integration TBD)* |
 | **GitHub Repos API** (`api.github.com/repos/<owner>/<repo>`) | — | — | `license`, `owner`, `valid_repo`, `repo_url` |
 | **GitHub Users API** (`api.github.com/users/<login>`) | — | — | owner display name + `blog` URL → `repo_owner`, `repo_owner_url` |
 | **GitHub Contributors stats API** (`api.github.com/repos/.../stats/contributors`) | — | per-contributor weekly commit history → bus factor, HHI | — |
-| **GitHub git tree** (sparse checkout + [scc](https://github.com/boyter/scc)) | — | lines of code, complexity per language → `data/git/scc.csv` | — |
-| **Lizard + multimetric** (sparse checkout) | — | per-function McCabe + Halstead + Sonar cognitive + maintainability index → `data/git/lizard.csv` | — |
-| **Semgrep** (sparse checkout, `p/default` rulepack) | — | SAST findings → `data/git/semgrep.csv` | — |
+| **GitHub git tree** (sparse checkout + [scc](https://github.com/boyter/scc)) | — | lines of code, complexity per language → `data/sources/git/scc.csv` | — |
+| **Lizard + multimetric** (sparse checkout) | — | per-function McCabe + Halstead + Sonar cognitive + maintainability index → `data/sources/git/lizard.csv` | — |
+| **Semgrep** (sparse checkout, `p/default` rulepack) | — | SAST findings → `data/sources/git/semgrep.csv` | — |
 | **GitHub Issues Search API** (`api.github.com/search/issues`) | — | per-year issue open / close counts | — |
-| **OpenSSF Scorecard API** (`api.securityscorecards.dev`) | — | security score (0–10) per repo → `data/git/openssf.csv` | — |
-| **deps.dev API** (`api.deps.dev`) | — | mirrored Scorecard `score` + checks (fall-back) → `data/git/depsdev.csv` | — |
+| **OpenSSF Scorecard API** (`api.securityscorecards.dev`) | — | security score (0–10) per repo → `data/sources/git/openssf.csv` | — |
+| **deps.dev API** (`api.deps.dev`) | — | mirrored Scorecard `score` + checks (fall-back) → `data/sources/git/depsdev.csv` | — |
 
-## Long-format snapshot files (`data/git/`)
+## Long-format snapshot files (`data/sources/git/`)
 
 All sha-pinned raw metrics share one canonical schema:
 
@@ -107,11 +107,11 @@ Files:
 
 | File | Tool | Metrics |
 |------|------|---------|
-| `data/git/scc.csv` | [scc](https://github.com/boyter/scc) | `loc`, `sloc`, `files`, `uloc`, `complexity`, `complexity_density` |
-| `data/git/lizard.csv` | [lizard](https://github.com/terryyin/lizard) + [multimetric](https://github.com/priv-kweihmann/multimetric) | `cyclomatic_*`, `halstead_*`, `cognitive_*`, `maintainability_index`, `files` |
-| `data/git/semgrep.csv` | [semgrep](https://semgrep.dev) | `<rulepack>.<metric>` (e.g. `p_default.total`, `p_default.error`) |
-| `data/git/openssf.csv` | [scorecard CLI](https://github.com/ossf/scorecard) | `score` + 18 individual checks (`maintained`, `code_review`, …) |
-| `data/git/depsdev.csv` | [deps.dev](https://api.deps.dev) | mirrored Scorecard `score` + checks |
+| `data/sources/git/scc.csv` | [scc](https://github.com/boyter/scc) | `loc`, `sloc`, `files`, `uloc`, `complexity`, `complexity_density` |
+| `data/sources/git/lizard.csv` | [lizard](https://github.com/terryyin/lizard) + [multimetric](https://github.com/priv-kweihmann/multimetric) | `cyclomatic_*`, `halstead_*`, `cognitive_*`, `maintainability_index`, `files` |
+| `data/sources/git/semgrep.csv` | [semgrep](https://semgrep.dev) | `<rulepack>.<metric>` (e.g. `p_default.total`, `p_default.error`) |
+| `data/sources/git/openssf.csv` | [scorecard CLI](https://github.com/ossf/scorecard) | `score` + 18 individual checks (`maintained`, `code_review`, …) |
+| `data/sources/git/depsdev.csv` | [deps.dev](https://api.deps.dev) | mirrored Scorecard `score` + checks |
 
 The canonical writer/reader is `src/git/long_format.py` (`upsert_snapshot`,
 `upsert_rows`, `read`, `project_to_wide`, `latest_sha_per_repo`).
@@ -119,7 +119,7 @@ The canonical writer/reader is `src/git/long_format.py` (`upsert_snapshot`,
 ### Sha-pinning convention
 
 Each repo has per-year `last_sha` resolved by `src/git/commits_years.py`
-into `data/github/git/commits-years.csv`. Fetchers walk per-repo years
+into `data/sources/github/git/commits-years.csv`. Fetchers walk per-repo years
 2025 → 2024 → … → 2021 and pick the most-recent year with `commits > 0`
 and a non-empty `last_sha`. That sha is the `commit_sha` for every row
 the fetcher writes. No HEAD fallback persists — if no usable year exists
@@ -130,17 +130,17 @@ for a repo, no row is written for it.
 The pipeline stages project the long files into per-repo wide rows for
 downstream consumers:
 
-- `data/complexity.csv` ← `src.pipeline.risk.build_complexity` projects
-  `data/git/scc.csv` + `data/git/lizard.csv` using
+- `data/risk/complexity.csv` ← `src.pipeline.risk.build_complexity` projects
+  `data/sources/git/scc.csv` + `data/sources/git/lizard.csv` using
   `commits-years.last_sha` (2025 → 2021 walk; first sha with `loc > 0`).
   Also folds in the **hotspot** score (Tornhill `churn × complexity`):
-  joins `data/github/git/churn.csv` (`churn_5y_total`) with the EOY-2025
+  joins `data/sources/github/git/churn.csv` (`churn_5y_total`) with the EOY-2025
   scc complexity snapshot to emit `churn_5y_total`, `hotspot_raw`,
   `hotspot_log`, `hotspot_percentile`.
-- `data/security.csv` ← `src.pipeline.risk.build_security` projects
-  `data/git/openssf.csv`, `data/git/depsdev.csv`, `data/git/semgrep.csv`
+- `data/risk/security.csv` ← `src.pipeline.risk.build_security` projects
+  `data/sources/git/openssf.csv`, `data/sources/git/depsdev.csv`, `data/sources/git/semgrep.csv`
   using the same per-year sha priority.
-- `data/risk-data.csv` ← `src.pipeline.run_risk_pipeline` joins complexity + security
+- `data/risk/risk.csv` ← `src.pipeline.run_risk_pipeline` joins complexity + security
   + concentration + issue-debt and computes the final risk score.
 
 ## Dataflow at a glance

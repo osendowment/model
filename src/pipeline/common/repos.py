@@ -1,9 +1,9 @@
 """Shared repo loaders for the risk pipeline.
 
-Source of truth: `data/value-data.csv` — the risk pipeline runs on repos
+Source of truth: `data/value/value.csv` — the risk pipeline runs on repos
 whose `class` is one of `settings.json risk_input.value_classes`
 (default {A, B}). Repo metadata (`repo_id`, `archived`, `size`, `stars`)
-is enriched from `data/github/repos.csv`, the authoritative GitHub-API
+is enriched from `data/sources/github/repos.csv`, the authoritative GitHub-API
 record populated by `src.github.fetch_repo_owner_data`.
 
 `load_eligible_repos` (eligibility-data.csv) is retained for the
@@ -21,9 +21,9 @@ from src.pipeline.common.params import RISK_INPUT_CLASSES
 
 log = logging.getLogger(__name__)
 
-VALUE_FILE = "data/value-data.csv"
-REPOS_FILE = "data/github/repos.csv"
-ELIGIBILITY_FILE = "data/eligibility-data.csv"
+VALUE_FILE = "data/value/value.csv"
+REPOS_FILE = "data/sources/github/repos.csv"
+ELIGIBILITY_FILE = "data/eligibility/eligibility.csv"
 
 # Class precedence — highest class wins if a repo has multiple rows.
 _RANK = {"A": 4, "B": 3, "C": 2, "D": 1}
@@ -42,7 +42,7 @@ class RepoEntry:
 
 
 def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]:
-    """Read data/github/repos.csv → (canon, meta).
+    """Read data/sources/github/repos.csv → (canon, meta).
 
     GitHub's `/repos/{owner}/{repo}` endpoint follows renames, so a repo
     whose slug in value-data.csv is stale (e.g. `gozala/events`) was still
@@ -96,7 +96,7 @@ def load_risk_repos(
       renamed repo (`gozala/events`) resolves to its current name
       (`browserify/events`) — the form the Search API and downstream joins need.
     - Deduped by canonical slug; highest class wins (A > B > C > D).
-    - repo_id / archived / size_kb / stars enriched from `data/github/repos.csv`.
+    - repo_id / archived / size_kb / stars enriched from `data/sources/github/repos.csv`.
       `skip_archived` drops archived repos.
     - Repos missing from github/repos.csv are returned with `enriched=False`
       and default metadata; those still get processed.
@@ -152,7 +152,7 @@ def canonical_repo_map(repos_file: str = REPOS_FILE) -> dict[str, str]:
 
 
 def load_repo_ids(repos_file: str = REPOS_FILE) -> dict[str, str]:
-    """Map repo slug -> repo_id from data/github/repos.csv.
+    """Map repo slug -> repo_id from data/sources/github/repos.csv.
 
     Replaces the old per-script `repo -> repo_id` readers that keyed off
     `eligibility-data.csv`. Both the looked-up `repo` slug and the
@@ -178,7 +178,7 @@ def load_repo_ids(repos_file: str = REPOS_FILE) -> dict[str, str]:
 
 
 def load_default_branches(repos_file: str = REPOS_FILE) -> dict[str, str]:
-    """Map repo slug -> default_branch from data/github/repos.csv.
+    """Map repo slug -> default_branch from data/sources/github/repos.csv.
 
     Both the looked-up `repo` slug and the rename-resolved `full_name` are
     keyed to the same branch, so callers resolve whether they hold a stale

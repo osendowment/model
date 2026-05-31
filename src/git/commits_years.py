@@ -1,6 +1,6 @@
 """Fetch per-(repo, year) first/last commit SHAs from the GitHub Commits API.
 
-Output: ``data/github/git/commits-years.csv`` with columns
+Output: ``data/sources/github/git/commits-years.csv`` with columns
 
     repo, year, first_sha, last_sha, commits, fetched_at
 
@@ -50,8 +50,8 @@ from src.pipeline.common.repos import load_default_branches, load_risk_repos
 log = logging.getLogger(__name__)
 console = Console()
 
-REPOS_FILE = "data/value-data.csv"
-SHA_FILE = "data/github/git/commits-years.csv"
+REPOS_FILE = "data/value/value.csv"
+SHA_FILE = "data/sources/github/git/commits-years.csv"
 DEFAULT_YEARS = [2021, 2022, 2023, 2024, 2025]
 DEFAULT_CONCURRENCY = 32
 FLUSH_EVERY = 500

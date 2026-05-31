@@ -1,15 +1,15 @@
-"""One-shot migration: lizard cognitive + cyclo-halstead → data/git/lizard.csv.
+"""One-shot migration: lizard cognitive + cyclo-halstead → data/sources/git/lizard.csv.
 
 Reads two sha-pinned raw metric files and rewrites them in long format
 (`repo, repo_id, commit_sha, metric, value, checked_at`) using
 `src.git.long_format.upsert_snapshot`.
 
 Source files (read-only):
-  - data/github/git/cognitive.csv      (~895 rows, cognitive complexity)
-  - data/github/git/cyclo-halstead.csv (~21 rows, cyclomatic + halstead)
+  - data/sources/github/git/cognitive.csv      (~895 rows, cognitive complexity)
+  - data/sources/github/git/cyclo-halstead.csv (~21 rows, cyclomatic + halstead)
 
 Destination:
-  - data/git/lizard.csv (created fresh; aborts if it already exists)
+  - data/sources/git/lizard.csv (created fresh; aborts if it already exists)
 
 Run:
   uv run python -m src.git.migrations.migrate_lizard
@@ -27,10 +27,10 @@ from src.git.long_format import read as read_long
 from src.git.long_format import upsert_snapshot
 
 ROOT = Path(__file__).resolve().parents[3]
-COGNITIVE_CSV = ROOT / "data" / "github" / "git" / "cognitive.csv"
-CYCLO_CSV = ROOT / "data" / "github" / "git" / "cyclo-halstead.csv"
-ELIGIBILITY_CSV = ROOT / "data" / "eligibility-data.csv"
-DEST_CSV = ROOT / "data" / "git" / "lizard.csv"
+COGNITIVE_CSV = ROOT / "data" / "sources" / "github" / "git" / "cognitive.csv"
+CYCLO_CSV = ROOT / "data" / "sources" / "github" / "git" / "cyclo-halstead.csv"
+ELIGIBILITY_CSV = ROOT / "data" / "eligibility" / "eligibility.csv"
+DEST_CSV = ROOT / "data" / "sources" / "git" / "lizard.csv"
 
 # Metric columns to emit per source. Order is intentional: shared `files`
 # first so it gets upserted (overwritten) by the cyclo-halstead pass when
@@ -215,7 +215,7 @@ def main() -> int:
 
     # First 5 rows of the new CSV.
     console.print()
-    console.rule("[bold]sample (first 5 rows of data/git/lizard.csv)[/]")
+    console.rule("[bold]sample (first 5 rows of data/sources/git/lizard.csv)[/]")
     with DEST_CSV.open(encoding="utf-8") as f:
         for i, line in enumerate(f):
             console.print(line.rstrip())

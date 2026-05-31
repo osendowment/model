@@ -1,7 +1,7 @@
 """Fetch Apache Software Foundation projects from projects.apache.org.
 
 Source: https://projects.apache.org/json/foundation/projects.json
-Output: data/foundations/apache/projects.csv
+Output: data/sources/foundations/apache/projects.csv
 
 Usage:
     uv run python -m src.foundations.apache

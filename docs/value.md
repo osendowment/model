@@ -86,7 +86,7 @@ Value
 
 Packages sorted by avg annual downloads (descending). Walking down the list,
 accumulate downloads until the running total reaches 95% of the **ecosystem-wide
-total** (from `data/ecosystem-downloads.csv`). Every package above that cutoff is "top".
+total** (from `data/value/ecosystem-downloads.csv`). Every package above that cutoff is "top".
 
 ### PageRank
 
@@ -164,7 +164,7 @@ numbers barely move.
 - [npm registry](https://registry.npmjs.org) -- dependencies
 - [nice-registry](https://github.com/nice-registry/all-the-package-repos) -- package-to-repo mapping
 
-**Raw data** (`data/npm/raw/`):
+**Raw data** (`data/sources/npm/raw/`):
 - `downloads.csv` -- package, year, downloads
 - `dependencies.csv` -- package, dep_name, dep_version, fetched_at
 
@@ -185,7 +185,7 @@ See [sources/npm.md](sources/npm.md) for details.
 - [BigQuery PyPI dataset](https://console.cloud.google.com/marketplace/product/gcp-public-data-pypi/pypi) -- downloads (manual export, ~$235)
 - [PyPI JSON API](https://pypi.org/pypi/{package}/json) -- dependencies
 
-**Raw data** (`data/pypi/`):
+**Raw data** (`data/sources/pypi/`):
 - `bigquery/bq-package-downloads.csv` -- ~849K packages x 5 years
 - `raw/package-dependencies.csv` -- package, dependency, type, fetched_at
 - `raw/package-github-mapping.csv` -- package-to-GitHub URL
@@ -205,7 +205,7 @@ See [sources/pypi.md](sources/pypi.md) for details.
 - [crates.io DB dump](https://static.crates.io/db-dump.tar.gz) -- crate/version mappings + deps
 - [crates.io daily archives](https://static.crates.io/archive/version-downloads/) -- per-version download counts
 
-**Raw data** (`data/crates/`):
+**Raw data** (`data/sources/crates/`):
 - `db-dump/` -- crates.csv, versions.csv, default_versions.csv, dependencies.csv
 - `version-downloads/YYYY-MM.csv` -- monthly per-version totals
 
@@ -226,7 +226,7 @@ See [sources/crates.md](sources/crates.md) for details.
 - [Debian popcon](https://popcon.debian.org) -- install counts (via Wayback Machine)
 - [Packages.xz](https://deb.debian.org/debian/dists/stable/main/binary-amd64/Packages.xz) -- dependencies + metadata
 
-**Raw data** (`data/debian/raw/`):
+**Raw data** (`data/sources/debian/raw/`):
 - `cpp-packages.csv` -- C/C++ package universe (from UDD debtags)
 - `downloads.csv` -- package, year, downloads (from popcon snapshots)
 - `dependencies.csv` -- package, dep_name, dep_version, fetched_at
@@ -265,7 +265,7 @@ Available Wayback snapshots for `popcon.debian.org/by_inst.gz` (2021--2025):
 - [Homebrew analytics](https://formulae.brew.sh/api/analytics/install/365d.json) -- 365-day rolling
   install counts (via Wayback Machine)
 
-**Raw data** (`data/homebrew/raw/`):
+**Raw data** (`data/sources/homebrew/raw/`):
 - `formulas.csv` -- name, desc, homepage, source_url, license, tap, language
 - `dependencies.csv` -- formula, dep_name, dep_type, fetched_at
 - `downloads.csv` -- formula, year, downloads
@@ -304,14 +304,14 @@ No snapshots before 2023. No `install-on-request` snapshots before Sep 2022.
 - [OSS-Fuzz](https://github.com/google/oss-fuzz) -- fuzz testing coverage
 
 **Additional raw data:**
-- `data/repology/packages.csv` -- project name mappings
-- `data/ossfuzz/projects.csv` -- C/C++ fuzz targets
+- `data/sources/repology/packages.csv` -- project name mappings
+- `data/sources/ossfuzz/projects.csv` -- C/C++ fuzz targets
 
 See [sources/cpp.md](sources/cpp.md), [sources/debian.md](sources/debian.md), [sources/homebrew.md](sources/homebrew.md), [sources/repology.md](sources/repology.md) for details.
 
 ## Output Files
 
-Each ecosystem produces four files in `data/{ecosystem}/`:
+Each ecosystem produces four files in `data/sources/{ecosystem}/`:
 
 ### top-packages.csv
 
@@ -359,7 +359,7 @@ All dep-tree packages with downloads, PageRank, and value class.
 
 ## Unified output
 
-`data/value-data.csv` is the canonical per-repo table — one row per GitHub
+`data/value/value.csv` is the canonical per-repo table — one row per GitHub
 repo, plus one row per orphan package (no `github_repo`) so nothing is
 dropped. **All classes A/B/C/D are included** — D-class rows are no longer
 dropped. Produced by `uv run python -m src.pipeline.run_value_pipeline`, which reads each
@@ -381,7 +381,7 @@ subgraphs.
 |--------|-------------|
 | `id` | Sequential numeric id (sorted by `top_eco_pct` desc) |
 | `github_repo` | Lowercase `owner/repo` slug; empty for orphans |
-| `git_url` | Canonical git URL — GitHub when available, otherwise GitLab / Codeberg / Sourcehut / Bitbucket / custom (sourceware.org, savannah, gitlab.gnome.org, etc.). First non-empty value from per-ecosystem `data/{eco}/git.csv`, picked in priority order. Empty when none of the per-eco files have a git URL for any constituent package. |
+| `git_url` | Canonical git URL — GitHub when available, otherwise GitLab / Codeberg / Sourcehut / Bitbucket / custom (sourceware.org, savannah, gitlab.gnome.org, etc.). First non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, picked in priority order. Empty when none of the per-eco files have a git URL for any constituent package. |
 | `ecosystems` | Comma-separated list of ecosystems where the repo has packages (e.g. `crates,npm`) |
 | `packages` | Total package count in the repo |
 | `top_eco` | Ecosystem where the repo is highest-ranked (max PR percentile). `npm` / `pypi` / `crates` / `cpp`. |
@@ -410,16 +410,16 @@ so nothing is dropped.
 
 EOL information is intentionally **not** stored here — it belongs to the
 eligibility pipeline. `src/eligibility.py` joins per-ecosystem
-`data/{eco}/eol.csv` with `data/{eco}/results.csv` directly to compute
-per-repo `is_eol`, and writes it to `data/eligibility-data.csv`.
+`data/sources/{eco}/eol.csv` with `data/sources/{eco}/results.csv` directly to compute
+per-repo `is_eol`, and writes it to `data/eligibility/eligibility.csv`.
 
 Per-package data isn't preserved here either — see each ecosystem's
-`data/{eco}/results.csv` and `data/{eco}/eol.csv` for the package-level
+`data/sources/{eco}/results.csv` and `data/sources/{eco}/eol.csv` for the package-level
 rows.
 
 ## Repo-level enrichment of value-data.csv
 
-`src/aggregate_by_repo.py` adds repo-level columns to `data/value-data.csv`
+`src/aggregate_by_repo.py` adds repo-level columns to `data/value/value.csv`
 (no separate per-repo file — value-data is the single source of truth for
 both per-package and per-repo views). Group by `github_repo` (or use any
 orphan row directly) and the repo-level columns are already there.

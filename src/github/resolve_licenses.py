@@ -11,7 +11,7 @@ That bar is too strict for the typical OSS repo:
 All three are unambiguously OSS but show up as `NOASSERTION` (or 404 from
 the /license endpoint). This script does the same thing a human would:
 
-  1. For every repo in `data/github/repos.csv` whose `license` is empty or
+  1. For every repo in `data/sources/github/repos.csv` whose `license` is empty or
      `NOASSERTION`, fetch `/repos/{slug}/license`.
   2. If the API still says NOASSERTION, decode the file content and run a
      keyword/SPDX pattern classifier to pick the most likely SPDX ID.

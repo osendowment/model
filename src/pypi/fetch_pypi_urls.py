@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Fetch project URLs from PyPI JSON API for every package in results.csv.
 
-The legacy `data/pypi/raw/package-github-mapping.csv` was a one-shot BigQuery
+The legacy `data/sources/pypi/raw/package-github-mapping.csv` was a one-shot BigQuery
 extract pre-filtered to `github.com` URLs at SQL time. Anything hosted
 elsewhere (GitLab, Heptapod, Codeberg, Launchpad, sourceforge) was lost.
 
 This script queries `pypi.org/pypi/<name>/json` for every package and writes
 the full set of URLs (`info.project_urls` + `info.home_page`) to
-`data/pypi/raw/package-urls.csv` -- to be classified by `build_git.py` by
+`data/sources/pypi/raw/package-urls.csv` -- to be classified by `build_git.py` by
 host (github / gitlab / bitbucket / sourcehut / codeberg / custom).
 
-Per-package responses are cached to `data/pypi/raw/api-cache/<name>.json`.
+Per-package responses are cached to `data/sources/pypi/raw/api-cache/<name>.json`.
 
 Usage:
     uv run -m src.pypi.fetch_pypi_urls               # all packages in results.csv
@@ -38,9 +38,9 @@ from rich.progress import (
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-RESULTS = DATA_DIR / "pypi" / "results.csv"
-CACHE_DIR = DATA_DIR / "pypi" / "raw" / "api-cache"
-OUTPUT = DATA_DIR / "pypi" / "raw" / "package-urls.csv"
+RESULTS = DATA_DIR / "sources" / "pypi" / "results.csv"
+CACHE_DIR = DATA_DIR / "sources" / "pypi" / "raw" / "api-cache"
+OUTPUT = DATA_DIR / "sources" / "pypi" / "raw" / "package-urls.csv"
 
 API_URL = "https://pypi.org/pypi/{name}/json"
 HEADERS = {"User-Agent": "ose-model fetch_pypi_urls.py"}

@@ -11,7 +11,7 @@ No authentication required (single tarball download).
 
 ## Raw Data
 
-- `data/ossfuzz/projects.csv` -- project, language, github_repo, main_repo, homepage
+- `data/sources/ossfuzz/projects.csv` -- project, language, github_repo, main_repo, homepage
 
 ## Scripts
 

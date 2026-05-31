@@ -21,7 +21,7 @@ Rule pack:
     delta is documented before committing to a full rerun.
 
 Period semantics:
-    For each repo, look up `data/github/git/commits-years.csv` to find the
+    For each repo, look up `data/sources/github/git/commits-years.csv` to find the
     most recent year ≤ 2025 with commits>0; use that year's `last_sha`.
     Same logic as `src.pipeline.risk.build_complexity._load_target_year` and
     `src.github.fetch_advanced_complexity._load_target_year_shas`. If no
@@ -31,7 +31,7 @@ Reuse: clones via `_download_tarball` / `_sparse_clone` from
 `src.git.clone`. Sparse-checkout is fine — semgrep only needs the source
 files, not git history.
 
-Output: data/git/semgrep.csv (long format, shared schema)
+Output: data/sources/git/semgrep.csv (long format, shared schema)
 
     repo, repo_id, commit_sha, metric, value, checked_at
 
@@ -46,7 +46,7 @@ findings_info, findings_security, findings_correctness, findings_performance,
 top_rule_count. The `top_rule` string is logged but NOT persisted (long
 format is numeric-only). `analyzed_year`, `elapsed_s`, and `rulepack` are
 not persisted either — rulepack is encoded in the metric name prefix and
-year metadata can be reconstructed from `data/github/git/commits-years.csv`.
+year metadata can be reconstructed from `data/sources/github/git/commits-years.csv`.
 
 Usage:
     uv run python -m src.github.fetch_semgrep --limit 10

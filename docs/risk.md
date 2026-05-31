@@ -15,7 +15,7 @@ source and the time period it represents.
 ```
 Risk
 │
-├── Concentration  →  data/concentration.csv
+├── Concentration  →  data/risk/concentration.csv
 │   ├── total_commits        ← git-clone log · GitHub /contributors      [lifetime]
 │   ├── active_contributors  ← derived (merged non-bot identities)       [lifetime · 2021–2025]
 │   ├── bf_commits           ← derived (bus factor)                      [lifetime · 2021–2025]
@@ -24,7 +24,7 @@ Risk
 │        GitHub /contributors API — kept as parallel *_git / *_github
 │        columns; the git method also carries a 2021–2025 window)
 │
-├── Complexity  →  data/complexity.csv
+├── Complexity  →  data/risk/complexity.csv
 │   ├── loc, sloc                     ← scc (sparse checkout)            [2025 EOY]
 │   ├── scc_complexity, scc_density   ← scc cyclomatic total + per-line  [2025 EOY]
 │   ├── cyclomatic_{total,avg,max}    ← lizard (sparse checkout)         [2025 EOY]
@@ -32,25 +32,25 @@ Risk
 │   ├── churn_5y_total                ← git churn (bare clone)           [2021–2025]
 │   └── hotspot_{raw,log,percentile}  ← derived (churn × complexity)     [2025 EOY]
 │
-├── Security  →  data/security.csv
+├── Security  →  data/risk/security.csv
 │   ├── openssf_score                 ← OpenSSF Scorecard (deps.dev fb)  [2025 EOY]
 │   ├── cve_count_5y                  ← OSV.dev /v1/query                [2021–2025]
 │   ├── ossfuzz_enrolled              ← OSS-Fuzz projects index          [most recent]
 │   ├── sast_findings_{total,error,security}  ← semgrep p/default        [2025 EOY]
 │   └── bestpractices_badge_id        ← deps.dev (OpenSSF Best Practices) [most recent]
 │
-├── Funding  →  data/funding.csv
+├── Funding  →  data/risk/funding.csv
 │   ├── github_sponsors               ← GitHub Sponsors API             [most recent]
 │   ├── has_funding_yml, _yml_platforms  ← repo /.github/FUNDING.yml     [most recent]
 │   ├── has_funding_json              ← repo /funding.json (FLOSS/fund)  [most recent]
 │   └── foundation_host               ← foundation rosters (Apache/CNCF/LF/…) [most recent]
 │
-├── Visibility  →  data/visibility.csv
+├── Visibility  →  data/risk/visibility.csv
 │   ├── stars                         ← GitHub /repos                   [most recent]
 │   ├── forks                         ← GitHub /repos                   [most recent]
 │   └── watchers                      ← GitHub /repos                   [most recent]
 │
-└── Workload  →  data/workload.csv
+└── Workload  →  data/risk/workload.csv
     ├── repo_age_years                ← GitHub /repos created_at        [2025 EOY]
     ├── push_cadence_years            ← commits-years.csv (years w/ commits) [2021–2025]
     ├── openssf_maintained            ← OpenSSF Scorecard "Maintained"   [2025 EOY]
@@ -231,7 +231,7 @@ All data comes from [GitHub](sources/github.md):
 | `src/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
 | `src/github/fetch_git_metrics.py` | scc code analysis via sparse checkout |
 | `src/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/pipeline/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value-data.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.pipeline.run_risk_pipeline` |
+| `src/pipeline/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value/value.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.pipeline.run_risk_pipeline` |
 
 ## Source-file coverage
 
@@ -241,26 +241,26 @@ repos. Counts reflect the last pipeline run; refresh with
 
 | Source | File | Risk-scope covered | Coverage | Notes |
 |---|---|---:|---:|---|
-| commits-years (foundation) | `data/github/git/commits-years.csv` | 899/899 | **100%** | per-(repo, year) `last_sha`; foundation file |
-| scc | `data/git/scc.csv` | 899/899 | **100%** | sparse-checkout per year sha |
-| repos | `data/github/repos.csv` | 899/899 | **100%** | stars / forks / watchers / pushed_at |
-| openssf | `data/git/openssf.csv` | 895/899 | 99.6% | overall score + 18 checks per sha |
-| concentration (git) | `data/git/contributor-commits.csv` | 898/899 | 99.9% | long raw per (repo, author, year) |
-| concentration (github) | `data/github/contributor-commits.csv` | 895/899 | 99.6% | long raw `/contributors` payload per (repo, login) |
-| lizard | `data/git/lizard.csv` | 894/899 | 99.4% | cognitive + cyclomatic + Halstead per sha |
-| semgrep | `data/git/semgrep.csv` | 892/899 | 99.2% | rulepack-prefixed SAST findings per sha |
-| cves-queried | `data/osv/queried.csv` | 888/899 | 98.8% | repos OSV was successfully asked about |
-| funding | `data/funding-data.csv` | 888/899 | 98.8% | github_sponsors + FUNDING.yml |
-| openssf-checks | `data/openssf/checks.csv` | 881/899 | 98.0% | per-check Scorecard scores (used by build_workload) |
-| issues | `data/github/issues.csv` | 878/899 | 97.7% | opened/closed per year |
-| churn | `data/github/git/churn.csv` | 869/899 | 96.7% | 5y added+deleted lines (heavy bare-clone) |
-| depsdev | `data/git/depsdev.csv` | 791/899 | 88.0% | structural — deps.dev only indexes npm / pypi / cargo / maven / go / nuget / rubygems (Debian, cpp, Homebrew unsupported) |
+| commits-years (foundation) | `data/sources/github/git/commits-years.csv` | 899/899 | **100%** | per-(repo, year) `last_sha`; foundation file |
+| scc | `data/sources/git/scc.csv` | 899/899 | **100%** | sparse-checkout per year sha |
+| repos | `data/sources/github/repos.csv` | 899/899 | **100%** | stars / forks / watchers / pushed_at |
+| openssf | `data/sources/git/openssf.csv` | 895/899 | 99.6% | overall score + 18 checks per sha |
+| concentration (git) | `data/sources/git/contributor-commits.csv` | 898/899 | 99.9% | long raw per (repo, author, year) |
+| concentration (github) | `data/sources/github/contributor-commits.csv` | 895/899 | 99.6% | long raw `/contributors` payload per (repo, login) |
+| lizard | `data/sources/git/lizard.csv` | 894/899 | 99.4% | cognitive + cyclomatic + Halstead per sha |
+| semgrep | `data/sources/git/semgrep.csv` | 892/899 | 99.2% | rulepack-prefixed SAST findings per sha |
+| cves-queried | `data/sources/osv/queried.csv` | 888/899 | 98.8% | repos OSV was successfully asked about |
+| funding | `data/risk/funding-data.csv` | 888/899 | 98.8% | github_sponsors + FUNDING.yml |
+| openssf-checks | `data/sources/openssf/checks.csv` | 881/899 | 98.0% | per-check Scorecard scores (used by build_workload) |
+| issues | `data/sources/github/issues.csv` | 878/899 | 97.7% | opened/closed per year |
+| churn | `data/sources/github/git/churn.csv` | 869/899 | 96.7% | 5y added+deleted lines (heavy bare-clone) |
+| depsdev | `data/sources/git/depsdev.csv` | 791/899 | 88.0% | structural — deps.dev only indexes npm / pypi / cargo / maven / go / nuget / rubygems (Debian, cpp, Homebrew unsupported) |
 
 ### Why the remaining gaps
 
 - **depsdev (88%)** — repos that publish only via Debian / Homebrew / vcpkg / source tarballs are absent from deps.dev's index. Not fillable.
 - **Anything ~99% with 4–6 missing** — a mix of brand-new eligibility additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
-- **concentration** — two independent methods, each a long raw per-contributor file under `data/git/` and `data/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos. The `/stats/contributors` per-year breakdown and `data/concentration-data.csv` are retired.
+- **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos. The `/stats/contributors` per-year breakdown and `data/concentration-data.csv` are retired.
 - **churn (96.7%)** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
 
 ### What this rolls up to in `risk-data.csv`

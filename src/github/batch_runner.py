@@ -36,21 +36,21 @@ log = logging.getLogger(__name__)
 
 # --- CSV I/O ---
 #
-# Raw /contributors payload is persisted to two files under data/github/:
+# Raw /contributors payload is persisted to two files under data/sources/github/:
 #   contributor-commits.csv       — long, one row per (repo, contributor)
 #   contributor-commits.status.csv — per-repo fetch status sidecar
 
-GH_CONTRIB_FILE = "data/github/contributor-commits.csv"
-GH_CONTRIB_STATUS_FILE = "data/github/contributor-commits.status.csv"
+GH_CONTRIB_FILE = "data/sources/github/contributor-commits.csv"
+GH_CONTRIB_STATUS_FILE = "data/sources/github/contributor-commits.status.csv"
 GH_CONTRIB_FIELDS = ["repo", "login", "contributions", "account_type"]
 GH_CONTRIB_STATUS_FIELDS = ["repo", "repo_id", "status", "n_contributors", "fetched_at"]
 
 CONCENTRATION_TTL_DAYS = 90  # rows older than this get re-fetched
-GH_REPOS_FILE = "data/github/repos.csv"
+GH_REPOS_FILE = "data/sources/github/repos.csv"
 
 
 def _load_repo_id_map() -> dict[str, str]:
-    """Return {repo_lowercased: numeric_repo_id} from data/github/repos.csv.
+    """Return {repo_lowercased: numeric_repo_id} from data/sources/github/repos.csv.
 
     Empty if the file doesn't exist.
     """
@@ -233,8 +233,8 @@ async def batch_update(
     """Fetch raw /contributors payload for multiple repos in parallel.
 
     Uses GitHub's /repos/{owner}/{repo}/contributors endpoint (lifetime
-    contribution totals). Results are written to data/github/contributor-commits.csv
-    and data/github/contributor-commits.status.csv.
+    contribution totals). Results are written to data/sources/github/contributor-commits.csv
+    and data/sources/github/contributor-commits.status.csv.
 
     `threshold` and `include_bots` are accepted for CLI compatibility but are
     not used here — metric computation is delegated to build_concentration.py.

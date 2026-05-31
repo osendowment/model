@@ -33,7 +33,7 @@ captures different signal (nesting penalty, logical-operator chain toggles)
 that the cyclo-halstead pass already covers separately.
 
 Period semantics:
-    For each repo, look up `data/github/git/commits-years.csv` to find the
+    For each repo, look up `data/sources/github/git/commits-years.csv` to find the
     most recent year ≤ 2025 with commits>0; use that year's `last_sha`. If
     no per-year SHA is recorded fall back to HEAD (and we DO NOT persist
     HEAD-resolved snapshots — without a pinned sha we can't key them in the
@@ -41,7 +41,7 @@ Period semantics:
     outputs share `analyzed_year`.
 
 Output format:
-    Writes long-format rows to `data/git/lizard.csv` (shared with
+    Writes long-format rows to `data/sources/git/lizard.csv` (shared with
     `fetch_advanced_complexity`) via `src.git.long_format.upsert_snapshot`.
     Each row is `(repo, repo_id, commit_sha, metric, value, checked_at)`.
 
@@ -114,7 +114,7 @@ DEFAULT_SEED = 42
 DEFAULT_CONCURRENCY = int(os.environ.get("COGNITIVE_WORKERS") or 4)
 DEFAULT_TTL_DAYS = 30
 
-# Metrics this fetcher emits per snapshot to data/git/lizard.csv.
+# Metrics this fetcher emits per snapshot to data/sources/git/lizard.csv.
 COGNITIVE_METRICS: tuple[str, ...] = (
     "files",
     "cognitive_total", "cognitive_avg", "cognitive_max",
@@ -176,7 +176,7 @@ def _load_target_year_shas() -> dict[str, tuple[str, str]]:
 def _load_scc_complexity() -> dict[str, int]:
     """Map repo → scc complexity (the keyword-count proxy) for comparison.
 
-    Reads the long-format `data/git/scc.csv`. For repos with multiple
+    Reads the long-format `data/sources/git/scc.csv`. For repos with multiple
     snapshots takes the lexicographically-largest sha (deterministic).
     """
     if not os.path.exists(SCC_LONG_FILE):
@@ -203,7 +203,7 @@ def _load_scc_complexity() -> dict[str, int]:
 def _load_cyclo_totals() -> dict[str, int]:
     """Map repo → cyclomatic_total from the parallel cyclo-halstead pass.
 
-    Reads the long-format `data/git/lizard.csv` (writers share the file).
+    Reads the long-format `data/sources/git/lizard.csv` (writers share the file).
     For repos with multiple snapshots takes the lexicographically-largest
     sha — used only for the display comparison table, so exact tie-breaking
     doesn't matter.
@@ -620,7 +620,7 @@ def _filter_by_ttl(
 
 
 def _write_results(path: str, results: list[RepoCognitive]) -> None:
-    """Upsert each successful result into `data/git/lizard.csv`.
+    """Upsert each successful result into `data/sources/git/lizard.csv`.
 
     Drops results without an `analyzed_sha` (HEAD-resolved snapshots can't be
     pinned in the long format), and results that analyzed **zero files** —

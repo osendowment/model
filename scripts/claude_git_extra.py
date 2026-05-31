@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-TARGET = DATA_DIR / "llms" / "claude-git-data.csv"
+TARGET = DATA_DIR / "sources" / "llms" / "claude-git-data.csv"
 
 NOW = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 MODEL = "claude-opus-4-7-training-knowledge+http-verify"

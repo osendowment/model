@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Build data/complexity.csv — codebase complexity per risk-scope repo.
+"""Build data/risk/complexity.csv — codebase complexity per risk-scope repo.
 
 Reads (long-format, sha-pinned):
-    data/value-data.csv                     — A/B value-class set
-    data/github/git/commits-years.csv       — per (repo, year) last_sha + commits
-    data/git/scc.csv                        — long: scc metrics per (repo, sha)
-    data/git/lizard.csv                     — long: lizard metrics per (repo, sha)
-    data/github/git/churn.csv               — for `churn_5y_total` (hotspot inputs)
+    data/value/value.csv                     — A/B value-class set
+    data/sources/github/git/commits-years.csv       — per (repo, year) last_sha + commits
+    data/sources/git/scc.csv                        — long: scc metrics per (repo, sha)
+    data/sources/git/lizard.csv                     — long: lizard metrics per (repo, sha)
+    data/sources/github/git/churn.csv               — for `churn_5y_total` (hotspot inputs)
 
 Writes:
-    data/complexity.csv  with columns:
+    data/risk/complexity.csv  with columns:
         repo, repo_id,
         loc_2025_eoy, sloc_2025_eoy,
         scc_complexity_2025_eoy, scc_density_2025_eoy,
@@ -87,12 +87,12 @@ from src.pipeline.common.tables import load_rows_by_repo
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
-GIT_LONG_DIR = DATA_DIR / "git"
-COMMITS_YEARS_FILE = DATA_DIR / "github" / "git" / "commits-years.csv"
+GIT_LONG_DIR = DATA_DIR / "sources" / "git"
+COMMITS_YEARS_FILE = DATA_DIR / "sources" / "github" / "git" / "commits-years.csv"
 SCC_FILE = GIT_LONG_DIR / "scc.csv"
 LIZARD_FILE = GIT_LONG_DIR / "lizard.csv"
-CHURN_FILE = DATA_DIR / "github" / "git" / "churn.csv"
-OUTPUT_FILE = DATA_DIR / "complexity.csv"
+CHURN_FILE = DATA_DIR / "sources" / "github" / "git" / "churn.csv"
+OUTPUT_FILE = DATA_DIR / "risk" / "complexity.csv"
 
 SCC_METRICS = ["loc", "sloc", "complexity", "complexity_density"]
 LIZARD_METRICS = [

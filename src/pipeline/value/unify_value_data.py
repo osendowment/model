@@ -2,13 +2,13 @@
 """Stage 1 of the pipeline — unified per-repo value table.
 
 Pipeline order (each stage feeds the next):
-    1. `src.pipeline.value.unify_value_data`       → data/value-data.csv  (this script)
-    2. `src.pipeline.eligibility.classify_eligibility` → data/eligibility-data.csv
-    3. `src.pipeline.risk.aggregate_risk`        → data/risk-data.csv
+    1. `src.pipeline.value.unify_value_data`       → data/value/value.csv  (this script)
+    2. `src.pipeline.eligibility.classify_eligibility` → data/eligibility/eligibility.csv
+    3. `src.pipeline.risk.aggregate_risk`        → data/risk/risk.csv
 
-Reads `data/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crates,
+Reads `data/sources/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crates,
 cpp), groups packages by canonical `git_url` (or by a per-package synthetic
-key for orphans), and writes `data/value-data.csv` with **one row per repo**:
+key for orphans), and writes `data/value/value.csv` with **one row per repo**:
 
     id, github_repo, gh_repo_id, gh_valid, git_url, git_valid,
     llm_guess, ecosystems, packages, top_eco, top_eco_pkg,
@@ -35,8 +35,8 @@ come first.
 
 EOL is intentionally **not** stored here. It's a property of the
 eligibility pipeline (license + EOL); see `src.pipeline.eligibility.classify_eligibility`,
-which joins per-ecosystem `data/{eco}/eol.csv` with
-`data/{eco}/results.csv` to compute per-repo `is_eol` directly.
+which joins per-ecosystem `data/sources/{eco}/eol.csv` with
+`data/sources/{eco}/results.csv` to compute per-repo `is_eol` directly.
 
 Usage:
     uv run python -m src.pipeline.value.unify_value_data
@@ -57,7 +57,7 @@ from src.pipeline.common.params import assign_value_class
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
-OUTPUT_FILE = DATA_DIR / "value-data.csv"
+OUTPUT_FILE = DATA_DIR / "value" / "value.csv"
 
 # Curated repo overrides — forces the correct `github_repo` for packages
 # whose upstream registry metadata points at the wrong repository. This is
@@ -66,7 +66,7 @@ OUTPUT_FILE = DATA_DIR / "value-data.csv"
 # Applied as the LAST step of `aggregate_by_repo` so it survives every
 # pipeline re-run; `verify_git_urls` (the next stage) then re-derives the
 # corrected repo's `gh_repo_id` / `gh_valid` from the GitHub API.
-OVERRIDES_FILE = DATA_DIR / "value-repo-overrides.csv"
+OVERRIDES_FILE = DATA_DIR / "value" / "value-repo-overrides.csv"
 
 ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
 CLASS_RANK = {"A": 0, "B": 1, "C": 2, "D": 3}

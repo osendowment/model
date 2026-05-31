@@ -40,7 +40,7 @@ FUNDING_THRESHOLDS: dict = _P["risk_classification"]["funding"]
 RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]
 
 
-_ECOSYSTEM_DL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "ecosystem-downloads.csv")
+_ECOSYSTEM_DL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "value", "ecosystem-downloads.csv")
 
 
 def ecosystem_avg_downloads(ecosystem: str) -> int:

@@ -23,7 +23,7 @@ We deliberately don't try to identify the *default* branch — a bare
 clone from a fresh URL has its HEAD pointing at whatever the remote's
 default is, which is exactly what we want.
 
-Output: data/github/git/churn.csv
+Output: data/sources/github/git/churn.csv
 
 Columns:
   repo, analyzed_through_year, commits_5y_examined,
@@ -67,7 +67,7 @@ from src.pipeline.common.repos import load_risk_repos
 log = logging.getLogger(__name__)
 console = Console()
 
-OUTPUT_FILE = "data/github/git/churn.csv"
+OUTPUT_FILE = "data/sources/github/git/churn.csv"
 
 PERIOD_START = "2021-01-01"
 PERIOD_END_EXCLUSIVE = "2026-01-01"  # git log --until is exclusive at midnight UTC

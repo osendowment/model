@@ -28,8 +28,8 @@ from rich.console import Console
 from rich.table import Table
 from tqdm import tqdm
 
-RAW_DOWNLOADS = "data/npm/raw/downloads.csv"
-RAW_DEPS      = "data/npm/raw/dependencies.csv"
+RAW_DOWNLOADS = "data/sources/npm/raw/downloads.csv"
+RAW_DEPS      = "data/sources/npm/raw/dependencies.csv"
 NPM_DOWNLOADS = "https://api.npmjs.org/downloads/point"
 NPM_REGISTRY  = "https://registry.npmjs.org"
 YEARS         = [2021, 2022, 2023, 2024, 2025]

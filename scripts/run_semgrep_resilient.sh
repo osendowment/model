@@ -11,9 +11,9 @@ while true; do
     # Count eligible repos via Python (CSV with quoted fields breaks awk)
     elig=$(uv run python -c "
 import csv
-n = sum(1 for r in csv.DictReader(open('data/eligibility-data.csv')) if (r.get('eligibility') or '').strip()=='True')
+n = sum(1 for r in csv.DictReader(open('data/eligibility/eligibility.csv')) if (r.get('eligibility') or '').strip()=='True')
 print(n)" 2>/dev/null)
-    have=$(tail -n +2 data/git/semgrep.csv 2>/dev/null | cut -d, -f1 | sort -u | wc -l | tr -d ' ')
+    have=$(tail -n +2 data/sources/git/semgrep.csv 2>/dev/null | cut -d, -f1 | sort -u | wc -l | tr -d ' ')
     miss=$(( elig - have ))
     echo "[$(date +%H:%M:%S)] attempt=$attempt have=$have miss=$miss" >> "$LOG"
     if [ "$miss" -le 5 ]; then

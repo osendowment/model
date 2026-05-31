@@ -3,9 +3,9 @@
 
 Walks `git log` on a bare treeless clone and writes two files:
 
-    data/git/contributor-commits.csv      long raw: one row per
+    data/sources/git/contributor-commits.csv      long raw: one row per
                                            (repo, author, year)
-    data/git/contributor-commits.status.csv  per-repo status sidecar
+    data/sources/git/contributor-commits.status.csv  per-repo status sidecar
 
 Metric computation (bus factor, HHI, active contributors) has moved to
 `build_concentration.py`, which reads the long CSV and aggregates over it.
@@ -70,8 +70,8 @@ from src.pipeline.common.repos import load_repo_ids, load_risk_repos
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-OUTPUT_FILE = DATA_DIR / "git" / "contributor-commits.csv"
-STATUS_FILE = DATA_DIR / "git" / "contributor-commits.status.csv"
+OUTPUT_FILE = DATA_DIR / "sources" / "git" / "contributor-commits.csv"
+STATUS_FILE = DATA_DIR / "sources" / "git" / "contributor-commits.status.csv"
 
 # Default contribution window — matches the risk pipeline's 2021-2025 frame.
 DEFAULT_WINDOW = (2021, 2025)

@@ -7,10 +7,10 @@ per-source below — anything else is flagged as an anomaly and the
 script exits non-zero.
 
 Sources validated:
-  - data/git/lizard.csv  ← cognitive.csv + cyclo-halstead.csv
-  - data/git/semgrep.csv ← github/git/semgrep.csv
-  - data/git/scc.csv     ← 6 wide files + commits-years.csv (sha lookup)
-  - data/git/openssf.csv ← openssf/data.json
+  - data/sources/git/lizard.csv  ← cognitive.csv + cyclo-halstead.csv
+  - data/sources/git/semgrep.csv ← github/git/semgrep.csv
+  - data/sources/git/scc.csv     ← 6 wide files + commits-years.csv (sha lookup)
+  - data/sources/git/openssf.csv ← openssf/data.json
 
 Run:
   uv run python -m src.git.migrations.validate
@@ -34,18 +34,18 @@ from src.git.long_format import read as read_long
 ROOT = Path(__file__).resolve().parents[3]
 
 # Source paths.
-COGNITIVE_CSV = ROOT / "data" / "github" / "git" / "cognitive.csv"
-CYCLO_CSV = ROOT / "data" / "github" / "git" / "cyclo-halstead.csv"
-SEMGREP_SRC = ROOT / "data" / "github" / "git" / "semgrep.csv"
-SCC_DIR = ROOT / "data" / "github" / "git"
-COMMITS_YEARS_CSV = ROOT / "data" / "github" / "git" / "commits-years.csv"
-OPENSSF_JSON = ROOT / "data" / "openssf" / "data.json"
+COGNITIVE_CSV = ROOT / "data" / "sources" / "github" / "git" / "cognitive.csv"
+CYCLO_CSV = ROOT / "data" / "sources" / "github" / "git" / "cyclo-halstead.csv"
+SEMGREP_SRC = ROOT / "data" / "sources" / "github" / "git" / "semgrep.csv"
+SCC_DIR = ROOT / "data" / "sources" / "github" / "git"
+COMMITS_YEARS_CSV = ROOT / "data" / "sources" / "github" / "git" / "commits-years.csv"
+OPENSSF_JSON = ROOT / "data" / "sources" / "openssf" / "data.json"
 
 # Long-format destinations.
-LIZARD_LONG = ROOT / "data" / "git" / "lizard.csv"
-SEMGREP_LONG = ROOT / "data" / "git" / "semgrep.csv"
-SCC_LONG = ROOT / "data" / "git" / "scc.csv"
-OPENSSF_LONG = ROOT / "data" / "git" / "openssf.csv"
+LIZARD_LONG = ROOT / "data" / "sources" / "git" / "lizard.csv"
+SEMGREP_LONG = ROOT / "data" / "sources" / "git" / "semgrep.csv"
+SCC_LONG = ROOT / "data" / "sources" / "git" / "scc.csv"
+OPENSSF_LONG = ROOT / "data" / "sources" / "git" / "openssf.csv"
 
 YEARS = ["2021", "2022", "2023", "2024", "2025"]
 SCC_SOURCES: list[tuple[str, str]] = [

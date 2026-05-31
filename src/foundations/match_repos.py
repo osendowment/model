@@ -1,11 +1,11 @@
 """Determine which foundation hosts each repo.
 
-Reads every `data/foundations/{slug}/projects.csv` and builds three indexes:
+Reads every `data/sources/foundations/{slug}/projects.csv` and builds three indexes:
   1. github_slug → host (e.g. `apache/kafka` → apache)
   2. github_org  → host (e.g. `apache/*`    → apache)
   3. apex_domain → host (e.g. `numpy.org`   → numfocus)
 
-…and writes `data/foundations/host-by-repo.csv` with one row per repo:
+…and writes `data/sources/foundations/host-by-repo.csv` with one row per repo:
   repo, host, host_source
 
 Matching priority (highest specificity wins):
@@ -33,7 +33,7 @@ from src.foundations._common import DATA_DIR
 
 console = Console()
 
-REPOS_FILE = Path(__file__).resolve().parents[2] / "data" / "github" / "search" / "top-repos.csv"
+REPOS_FILE = Path(__file__).resolve().parents[2] / "data" / "sources" / "github" / "search" / "top-repos.csv"
 OUT_FILE = DATA_DIR / "host-by-repo.csv"
 
 # Priority order — first match wins. More specific foundations come before

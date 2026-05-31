@@ -1,7 +1,7 @@
 """One-shot: backfill contributor metrics for the 22 archived-but-eligible repos.
 
 Background: load_ab_repos() filters out archived repos by default, but they
-remain in the eligibility set, leaving holes in data/concentration.csv. This
+remain in the eligibility set, leaving holes in data/risk/concentration.csv. This
 script calls batch_update directly with a hand-curated slug list, bypassing
 the loader's archived filter.
 
@@ -45,7 +45,7 @@ async def main() -> None:
         REPOS,
         year_start=2021,
         year_end=2025,
-        output="data/github/contributors",
+        output="data/sources/github/contributors",
         force=True,  # bypass 90-day TTL gate (these have no row, but be safe)
     )
 

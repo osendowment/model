@@ -7,7 +7,7 @@
 
 The risk pipeline classifies repos A–D on several dimensions —
 concentration, complexity, issue debt, funding, and (planned) workload.
-The **Security** dimension produces raw metrics in `data/security.csv`
+The **Security** dimension produces raw metrics in `data/risk/security.csv`
 but **no class**.
 
 This work adds a `security_class`: a per-repo A–D tier built from the two
@@ -31,7 +31,7 @@ when it is bad on *both* axes — one extreme axis alone cannot dominate.
 
 ### Inputs
 
-Both columns already exist in `data/security.csv` — `build_security.py`
+Both columns already exist in `data/risk/security.csv` — `build_security.py`
 needs no new file reads:
 
 | Axis | Column | Direction |

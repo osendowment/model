@@ -10,15 +10,15 @@ Steps:
   6  Build results.csv            — all dep-tree packages with downloads + PageRank
 
 Reads:
-  data/pypi/bigquery/bq-package-downloads.csv
-  data/pypi/raw/package-dependencies.csv
-  data/pypi/raw/package-github-mapping.csv
+  data/sources/pypi/bigquery/bq-package-downloads.csv
+  data/sources/pypi/raw/package-dependencies.csv
+  data/sources/pypi/raw/package-github-mapping.csv
 
 Outputs:
-  data/pypi/top-packages.csv
-  data/pypi/dependency-tree.csv
-  data/pypi/github-repos.csv
-  data/pypi/results.csv
+  data/sources/pypi/top-packages.csv
+  data/sources/pypi/dependency-tree.csv
+  data/sources/pypi/github-repos.csv
+  data/sources/pypi/results.csv
 
 Run:
     uv run src/pypi/process_data.py
@@ -39,9 +39,9 @@ from rich.table import Table
 
 from src.pipeline.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
-BQ_CSV      = "data/pypi/bigquery/bq-package-downloads.csv"
-DEPS_CSV    = "data/pypi/raw/package-dependencies.csv"
-GITHUB_CSV_RAW = "data/pypi/raw/package-github-mapping.csv"
+BQ_CSV      = "data/sources/pypi/bigquery/bq-package-downloads.csv"
+DEPS_CSV    = "data/sources/pypi/raw/package-dependencies.csv"
+GITHUB_CSV_RAW = "data/sources/pypi/raw/package-github-mapping.csv"
 DATA_DIR    = "data/pypi"
 
 TOP_CSV     = f"{DATA_DIR}/top-packages.csv"

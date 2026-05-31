@@ -12,22 +12,22 @@ Outputs mirror the pypi/ and npm/ layouts so downstream analysis works the
 same way for every ecosystem.
 
 Inputs:
-  data/repology/packages.csv              project ↔ (repo, srcname, binname, visiblename)
-  data/debian/raw/dependencies.csv        binary, dep_name   (raw edges — results.csv
+  data/sources/repology/packages.csv              project ↔ (repo, srcname, binname, visiblename)
+  data/sources/debian/raw/dependencies.csv        binary, dep_name   (raw edges — results.csv
                                                               drops the unreachable ones)
-  data/debian/raw/package-metadata.csv    binary → source    (for t64 aliases)
-  data/debian/raw/aliases.csv             current ↔ old      (t64 rename map)
-  data/debian/results.csv                 per-source: avg, yearly, is_cpp, github, is_oss_fuzz
-  data/homebrew/raw/dependencies.csv      formula, dep_name, dep_type
-  data/homebrew/results.csv               per-formula: avg, yearly, is_cpp, github, is_oss_fuzz
+  data/sources/debian/raw/package-metadata.csv    binary → source    (for t64 aliases)
+  data/sources/debian/raw/aliases.csv             current ↔ old      (t64 rename map)
+  data/sources/debian/results.csv                 per-source: avg, yearly, is_cpp, github, is_oss_fuzz
+  data/sources/homebrew/raw/dependencies.csv      formula, dep_name, dep_type
+  data/sources/homebrew/results.csv               per-formula: avg, yearly, is_cpp, github, is_oss_fuzz
 
 Outputs:
-  data/cpp/raw/packages.csv               per-project join + aggregated signals
-  data/cpp/top-packages.csv               package, debian_avg_downloads, debian_share,
+  data/sources/cpp/raw/packages.csv               per-project join + aggregated signals
+  data/sources/cpp/top-packages.csv               package, debian_avg_downloads, debian_share,
                                           homebrew_avg_downloads, homebrew_share
-  data/cpp/dependency-tree.csv            package, dependency, type
-  data/cpp/github-repos.csv               package, github_repo
-  data/cpp/results.csv                    package, github_repo, debian_avg_downloads,
+  data/sources/cpp/dependency-tree.csv            package, dependency, type
+  data/sources/cpp/github-repos.csv               package, github_repo
+  data/sources/cpp/results.csv                    package, github_repo, debian_avg_downloads,
                                           homebrew_avg_downloads, downloads_score,
                                           pagerank, value_class
 
@@ -67,26 +67,26 @@ console = Console()
 
 # ── paths / config ────────────────────────────────────────────────────────────
 
-REPOLOGY_CSV       = "data/repology/packages.csv"
+REPOLOGY_CSV       = "data/sources/repology/packages.csv"
 
 # Pre-aggregated per-ecosystem results (source for signals + percentile pools)
-DEBIAN_RESULTS     = "data/debian/results.csv"
-HOMEBREW_RESULTS   = "data/homebrew/results.csv"
+DEBIAN_RESULTS     = "data/sources/debian/results.csv"
+HOMEBREW_RESULTS   = "data/sources/homebrew/results.csv"
 
 # Raw files — only needed for raw-level dep edges (the per-ecosystem pipelines
 # don't export unfiltered source/formula edges, only BFS-trimmed trees)
-DEBIAN_DEPS        = "data/debian/raw/dependencies.csv"
-DEBIAN_METADATA    = "data/debian/raw/package-metadata.csv"
-DEBIAN_ALIASES     = "data/debian/raw/aliases.csv"
-HOMEBREW_DEPS      = "data/homebrew/raw/dependencies.csv"
+DEBIAN_DEPS        = "data/sources/debian/raw/dependencies.csv"
+DEBIAN_METADATA    = "data/sources/debian/raw/package-metadata.csv"
+DEBIAN_ALIASES     = "data/sources/debian/raw/aliases.csv"
+HOMEBREW_DEPS      = "data/sources/homebrew/raw/dependencies.csv"
 
-OSSFUZZ_PROJECTS   = "data/ossfuzz/projects.csv"
+OSSFUZZ_PROJECTS   = "data/sources/ossfuzz/projects.csv"
 
-OUT_RAW_PACKAGES   = "data/cpp/raw/packages.csv"
-OUT_TOP            = "data/cpp/top-packages.csv"
-OUT_DEP_TREE       = "data/cpp/dependency-tree.csv"
-OUT_GITHUB         = "data/cpp/github-repos.csv"
-OUT_RESULTS        = "data/cpp/results.csv"
+OUT_RAW_PACKAGES   = "data/sources/cpp/raw/packages.csv"
+OUT_TOP            = "data/sources/cpp/top-packages.csv"
+OUT_DEP_TREE       = "data/sources/cpp/dependency-tree.csv"
+OUT_GITHUB         = "data/sources/cpp/github-repos.csv"
+OUT_RESULTS        = "data/sources/cpp/results.csv"
 
 # A package is "top" if it is among those responsible for the top X% of
 # cumulative download mass in Debian or Homebrew (not a count percentile).
@@ -692,7 +692,7 @@ def load_ossfuzz_slugs() -> set[str]:
 def _enrich_deb_map(deb_map: dict[str, str], bin_to_src: dict[str, str]) -> int:
     """Add binary → project entries derived from (binary → source → project).
 
-    Catches the case where `data/debian/results.csv` has a 'source' that's
+    Catches the case where `data/sources/debian/results.csv` has a 'source' that's
     really a binary name — happens when a binary's metadata row is missing
     or for pre-t64 aliases that leaked into raw deps. Without this,
     `libcurl3-gnutls`, `libxmlsec1-openssl`, etc. stay as orphan `debian:…`

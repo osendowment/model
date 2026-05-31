@@ -12,10 +12,10 @@ Run:
     uv run src/debian/fetch_debian_data.py --limit 100  # test mode
 
 Outputs:
-    data/debian/raw/cpp-packages.csv       package, tag
-    data/debian/raw/downloads.csv          package, year, downloads
-    data/debian/raw/dependencies.csv       package, dep_name, dep_version, fetched_at
-    data/debian/raw/package-metadata.csv   package, homepage, vcs_browser, section
+    data/sources/debian/raw/cpp-packages.csv       package, tag
+    data/sources/debian/raw/downloads.csv          package, year, downloads
+    data/sources/debian/raw/dependencies.csv       package, dep_name, dep_version, fetched_at
+    data/sources/debian/raw/package-metadata.csv   package, homepage, vcs_browser, section
 """
 
 import argparse
@@ -36,11 +36,11 @@ from tqdm import tqdm
 
 # ── config ────────────────────────────────────────────────────────────────────
 
-RAW_PACKAGES = "data/debian/raw/cpp-packages.csv"
-RAW_DOWNLOADS = "data/debian/raw/downloads.csv"
-RAW_DEPS = "data/debian/raw/dependencies.csv"
-RAW_METADATA = "data/debian/raw/package-metadata.csv"
-RAW_ALIASES = "data/debian/raw/aliases.csv"
+RAW_PACKAGES = "data/sources/debian/raw/cpp-packages.csv"
+RAW_DOWNLOADS = "data/sources/debian/raw/downloads.csv"
+RAW_DEPS = "data/sources/debian/raw/dependencies.csv"
+RAW_METADATA = "data/sources/debian/raw/package-metadata.csv"
+RAW_ALIASES = "data/sources/debian/raw/aliases.csv"
 
 UDD_DSN = "host=udd-mirror.debian.net port=5432 user=udd-mirror password=udd-mirror dbname=udd"
 

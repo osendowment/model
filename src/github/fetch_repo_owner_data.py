@@ -1,6 +1,6 @@
 """Fetch raw GitHub repo + owner metadata for AB-class projects.
 
-Reads `data/value-data.csv`, takes every repo whose `value_class` is A or B
+Reads `data/value/value.csv`, takes every repo whose `value_class` is A or B
 (roughly the top ~1.2k OSS projects across npm/pypi/crates/cpp), then:
 
   1. Hits `GET /repos/{owner}/{repo}` for each unique repo.
@@ -10,7 +10,7 @@ Reads `data/value-data.csv`, takes every repo whose `value_class` is A or B
      `top-repos.csv`, so this is the only way to populate `repo_owner_url`
      in the eligibility table.
 
-Cached: rows in `data/github/repos.csv` / `data/github/users.csv` whose
+Cached: rows in `data/sources/github/repos.csv` / `data/sources/github/users.csv` whose
 `fetched_at` is within 90 days are skipped. Use `--force` to refetch.
 
 Async with 10-way concurrency + token rotation (reuses the same rate
@@ -50,9 +50,9 @@ logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(message)s")
 console = Console()
 
 REPO = Path(__file__).resolve().parents[2]
-VALUE_FILE = REPO / "data" / "value-data.csv"
-REPOS_OUT = REPO / "data" / "github" / "repos.csv"
-USERS_OUT = REPO / "data" / "github" / "users.csv"
+VALUE_FILE = REPO / "data" / "value" / "value.csv"
+REPOS_OUT = REPO / "data" / "sources" / "github" / "repos.csv"
+USERS_OUT = REPO / "data" / "sources" / "github" / "users.csv"
 
 GITHUB_API = "https://api.github.com"
 TTL_DAYS = 90
@@ -177,7 +177,7 @@ def _now_iso() -> str:
 def load_ab_repos(classes: set[str]) -> list[str]:
     """Return unique repo slugs (lowercased, sorted) whose `class` is in `classes`.
 
-    Note: `data/value-data.csv` uses column name `class`; per-ecosystem
+    Note: `data/value/value.csv` uses column name `class`; per-ecosystem
     `results.csv` files use `value_class`. We read the unified file here.
     """
     seen: set[str] = set()

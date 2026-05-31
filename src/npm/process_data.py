@@ -10,9 +10,9 @@ Pipeline:
   6. results.csv         — pagerank over dep graph with download signals
 
 Inputs:
-  data/npm/raw/downloads.csv          — package, year, downloads
-  data/npm/raw/dependencies.csv       — package, dep_name, dep_version, fetched_at
-  data/npm/nice-registry/packages.csv — package, repo_url
+  data/sources/npm/raw/downloads.csv          — package, year, downloads
+  data/sources/npm/raw/dependencies.csv       — package, dep_name, dep_version, fetched_at
+  data/sources/npm/nice-registry/packages.csv — package, repo_url
 
 Run:
     uv run src/npm/process_data.py
@@ -40,13 +40,13 @@ from src.pipeline.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS,
 
 console = Console()
 
-RAW_DOWNLOADS = "data/npm/raw/downloads.csv"
-RAW_DEPS      = "data/npm/raw/dependencies.csv"
-NICE_REGISTRY = "data/npm/nice-registry/packages.csv"
-OUT_TOP       = "data/npm/top-packages.csv"
-OUT_DEP_TREE  = "data/npm/dependency-tree.csv"
-OUT_GITHUB    = "data/npm/github-repos.csv"
-OUT_RESULTS   = "data/npm/results.csv"
+RAW_DOWNLOADS = "data/sources/npm/raw/downloads.csv"
+RAW_DEPS      = "data/sources/npm/raw/dependencies.csv"
+NICE_REGISTRY = "data/sources/npm/nice-registry/packages.csv"
+OUT_TOP       = "data/sources/npm/top-packages.csv"
+OUT_DEP_TREE  = "data/sources/npm/dependency-tree.csv"
+OUT_GITHUB    = "data/sources/npm/github-repos.csv"
+OUT_RESULTS   = "data/sources/npm/results.csv"
 WIDE_FIELDS   = ["package", "avg_downloads", "avg_downloads_share"] + [str(y) for y in YEARS]
 
 

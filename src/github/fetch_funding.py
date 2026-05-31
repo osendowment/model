@@ -1,6 +1,6 @@
 """Fetch funding signals (GitHub Sponsors, FUNDING.yml, funding.json) per risk-scope repo.
 
-Writes data/funding-data.csv with one row per repo. TTL-controlled refresh
+Writes data/risk/funding-data.csv with one row per repo. TTL-controlled refresh
 so re-runs only fetch repos missing from the file or older than the TTL
 (see CONCENTRATION_TTL_DAYS pattern in batch_runner).
 
@@ -68,8 +68,8 @@ console = Console()
 log = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-OUTPUT_FILE = DATA_DIR / "funding-data.csv"
-GH_REPOS_FILE = DATA_DIR / "github" / "repos.csv"
+OUTPUT_FILE = DATA_DIR / "risk" / "funding-data.csv"
+GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 FIELDS = [
     "repo", "repo_id",
     "github_sponsors",
@@ -346,7 +346,7 @@ def _load_existing() -> dict[str, dict[str, str]]:
 
 
 def _load_repo_id_map() -> dict[str, str]:
-    """{repo_lowercased: numeric_repo_id} from data/github/repos.csv."""
+    """{repo_lowercased: numeric_repo_id} from data/sources/github/repos.csv."""
     if not GH_REPOS_FILE.exists():
         return {}
     out: dict[str, str] = {}

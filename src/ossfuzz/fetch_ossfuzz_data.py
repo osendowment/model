@@ -9,7 +9,7 @@ projects considered important enough to fuzz — strong signal for
 Source: github.com/google/oss-fuzz/projects/<name>/project.yaml
 
 Output:
-    data/ossfuzz/projects.csv    project, language, github_repo, main_repo, homepage
+    data/sources/ossfuzz/projects.csv    project, language, github_repo, main_repo, homepage
 
 Run:
     uv run src/ossfuzz/fetch_ossfuzz_data.py
@@ -31,7 +31,7 @@ from rich.table import Table
 
 # ── config ────────────────────────────────────────────────────────────────────
 
-OUT_PATH = "data/ossfuzz/projects.csv"
+OUT_PATH = "data/sources/ossfuzz/projects.csv"
 TARBALL = "https://codeload.github.com/google/oss-fuzz/tar.gz/refs/heads/master"
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"
 TIMEOUT = 300

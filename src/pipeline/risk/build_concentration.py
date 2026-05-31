@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Build data/concentration.csv — contributor-concentration metrics per risk-scope repo.
+"""Build data/risk/concentration.csv — contributor-concentration metrics per risk-scope repo.
 
 Two independent methods measure contributor concentration, each with its own
 raw long-format source. This builder merges identities, drops bots, and
 computes bus factor / HHI / contributor counts from both:
 
 Reads:
-    data/value-data.csv                          — A/B value-class set (load_risk_repos)
-    data/git/contributor-commits.csv             — git-clone method, long raw:
+    data/value/value.csv                          — A/B value-class set (load_risk_repos)
+    data/sources/git/contributor-commits.csv             — git-clone method, long raw:
                                                    repo, author_name, author_email, year, commits
-    data/git/contributor-commits.status.csv      — per-repo git fetch status / fetched_at
-    data/github/contributor-commits.csv          — GitHub /contributors method, long raw:
+    data/sources/git/contributor-commits.status.csv      — per-repo git fetch status / fetched_at
+    data/sources/github/contributor-commits.csv          — GitHub /contributors method, long raw:
                                                    repo, login, contributions, account_type
-    data/github/contributor-commits.status.csv   — per-repo GitHub fetch status / fetched_at
+    data/sources/github/contributor-commits.status.csv   — per-repo GitHub fetch status / fetched_at
 
 The git method walks `git log` on a local clone — it sees every contributor
 and carries author dates, so it yields both a lifetime figure and a windowed
@@ -21,7 +21,7 @@ the contributor list near 500, so it under-counts big repos; it is kept for
 cross-checking.
 
 Writes:
-    data/concentration.csv  with columns:
+    data/risk/concentration.csv  with columns:
         repo, repo_id,
         total_commits_github,              (sum of /contributors `contributions`)
         total_contributors_github,         (all /contributors rows, incl. bots)
@@ -65,11 +65,11 @@ from src.pipeline.common.tables import load_rows_by_repo
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
-GIT_LONG_FILE = DATA_DIR / "git" / "contributor-commits.csv"
-GIT_STATUS_FILE = DATA_DIR / "git" / "contributor-commits.status.csv"
-GH_LONG_FILE = DATA_DIR / "github" / "contributor-commits.csv"
-GH_STATUS_FILE = DATA_DIR / "github" / "contributor-commits.status.csv"
-OUTPUT_FILE = DATA_DIR / "concentration.csv"
+GIT_LONG_FILE = DATA_DIR / "sources" / "git" / "contributor-commits.csv"
+GIT_STATUS_FILE = DATA_DIR / "sources" / "git" / "contributor-commits.status.csv"
+GH_LONG_FILE = DATA_DIR / "sources" / "github" / "contributor-commits.csv"
+GH_STATUS_FILE = DATA_DIR / "sources" / "github" / "contributor-commits.status.csv"
+OUTPUT_FILE = DATA_DIR / "risk" / "concentration.csv"
 
 WINDOW = range(2021, 2026)  # 2021..2025 inclusive
 

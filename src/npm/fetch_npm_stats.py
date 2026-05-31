@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch total npm download counts per year and save to data/npm/raw/npm-stats.csv.
+"""Fetch total npm download counts per year and save to data/sources/npm/raw/npm-stats.csv.
 
 Skips years that already have data. npm registry launched in 2010.
 
@@ -23,7 +23,7 @@ console = Console()
 
 API_URL = "https://api.npmjs.org/downloads/point"
 START_YEAR = 2015  # npm API data starts Jan 10, 2015
-OUTPUT = os.path.join(os.path.dirname(__file__), "..", "..", "data", "npm", "raw", "npm-stats.csv")
+OUTPUT = os.path.join(os.path.dirname(__file__), "..", "..", "data", "sources", "npm", "raw", "npm-stats.csv")
 FIELDS = ["year", "downloads"]
 
 

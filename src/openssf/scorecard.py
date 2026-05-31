@@ -1,15 +1,15 @@
 """Fetch OpenSSF Scorecard results and upsert them into two output files.
 
 Outputs:
-    data/openssf/data.json  — full API response per repo (keyed by owner/repo).
+    data/sources/openssf/data.json  — full API response per repo (keyed by owner/repo).
                               Canonical raw cache; preserved as-is.
-    data/git/openssf.csv    — long-format sha-pinned snapshot rows
+    data/sources/git/openssf.csv    — long-format sha-pinned snapshot rows
                               (repo, repo_id, commit_sha, metric, value, checked_at).
                               One row per check (`binary_artifacts`, `ci_tests`, …)
                               plus one for the overall `score`.
 
-`data/git/openssf.csv` is the canonical sha-pinned long-format output;
-the legacy wide `data/openssf/scores.csv` summary has been removed.
+`data/sources/git/openssf.csv` is the canonical sha-pinned long-format output;
+the legacy wide `data/sources/openssf/scores.csv` summary has been removed.
 
 Usage:
     # Single repo
@@ -21,7 +21,7 @@ Usage:
     # Batch from file (one "owner/repo" per line, or a JSON array of strings)
     uv run src/openssf/scorecard.py --file repos.txt
 
-    # All risk repos (A/B value-class, from data/value-data.csv) — default when no args
+    # All risk repos (A/B value-class, from data/value/value.csv) — default when no args
     uv run src/openssf/scorecard.py
 
     # Set concurrency limit (default: 10)
@@ -51,8 +51,8 @@ log = logging.getLogger(__name__)
 console = Console()
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_DATA_OUTPUT = ROOT / "data" / "openssf" / "data.json"
-DEFAULT_LONG_OUTPUT = ROOT / "data" / "git" / "openssf.csv"
+DEFAULT_DATA_OUTPUT = ROOT / "data" / "sources" / "openssf" / "data.json"
+DEFAULT_LONG_OUTPUT = ROOT / "data" / "sources" / "git" / "openssf.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -218,8 +218,8 @@ async def fetch_all(
     """Run scorecard CLI for all repos with bounded concurrency.
 
     Upserts each result to disk as soon as it completes:
-      - data/openssf/data.json (raw cache, keyed by owner/repo)
-      - data/git/openssf.csv (long-format sha-pinned metric rows)
+      - data/sources/openssf/data.json (raw cache, keyed by owner/repo)
+      - data/sources/git/openssf.csv (long-format sha-pinned metric rows)
 
     Returns a mapping of repo -> full scorecard result.
 
@@ -370,9 +370,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Fetch and upsert OpenSSF Scorecard scores for risk repos "
-            "(A/B value-class from data/value-data.csv). "
-            "Writes raw JSON to data/openssf/data.json and long-format rows "
-            "to data/git/openssf.csv."
+            "(A/B value-class from data/value/value.csv). "
+            "Writes raw JSON to data/sources/openssf/data.json and long-format rows "
+            "to data/sources/git/openssf.csv."
         ),
     )
     parser.add_argument("repos", nargs="*", help="One or more owner/repo identifiers (default: all risk repos)")
@@ -381,7 +381,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Re-scan repos even if they already have a score row in data/git/openssf.csv",
+        help="Re-scan repos even if they already have a score row in data/sources/git/openssf.csv",
     )
     return parser
 
@@ -397,7 +397,7 @@ async def main() -> None:
     if not repos:
         repos = load_risk_slugs()
         if not repos:
-            parser.error("No repos found — provide positional args, --file, or populate data/value-data.csv")
+            parser.error("No repos found — provide positional args, --file, or populate data/value/value.csv")
 
     repos = list(dict.fromkeys(repos))  # deduplicate, preserve order
 

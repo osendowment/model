@@ -16,8 +16,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-INPUT = DATA_DIR / "value-data.csv"
-OUTPUT = DATA_DIR / "llms" / "claude-git-guess.csv"
+INPUT = DATA_DIR / "value" / "value.csv"
+OUTPUT = DATA_DIR / "sources" / "llms" / "claude-git-guess.csv"
 
 NOW = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 MODEL = "claude-opus-4-7-training-knowledge+http-verify"

@@ -2,8 +2,8 @@
 """Determine eligibility for GitHub repos based on OSS license + EOL status.
 
 Reads:
-- data/github/search/top-repos.csv — license per GitHub repo
-- data/{eco}/results.csv + data/{eco}/eol.csv for each of npm/pypi/crates/cpp
+- data/sources/github/search/top-repos.csv — license per GitHub repo
+- data/sources/{eco}/results.csv + data/sources/{eco}/eol.csv for each of npm/pypi/crates/cpp
   — joined to map github_repo → list of constituent packages and their
   is_eol flags. A repo is is_eol=True iff *every* package mapped to it is
   is_eol=True (handles monorepos / cross-ecosystem polyglot projects).
@@ -12,7 +12,7 @@ A repo is treated as alive (is_eol=False) if it has no constituent
 packages in any per-eco results.csv (e.g. it's a random GitHub repo not
 in our value pipeline — we have no EOL signal for it).
 
-Final eligibility = is_oss AND NOT is_eol. Writes data/eligibility-data.csv.
+Final eligibility = is_oss AND NOT is_eol. Writes data/eligibility/eligibility.csv.
 
 Usage:
     uv run python -m src.pipeline.eligibility.classify_eligibility
@@ -31,17 +31,17 @@ from src.pipeline.common.tables import load_rows_by_repo
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
-VALUE_FILE = DATA_DIR / "value-data.csv"
-HOST_FILE = DATA_DIR / "foundations" / "host-by-repo.csv"
-GH_REPOS_FILE = DATA_DIR / "github" / "repos.csv"
-GH_USERS_FILE = DATA_DIR / "github" / "users.csv"
-OSI_FILE = DATA_DIR / "osi" / "oss-licenses.csv"
-LLM_OWNERSHIP_FILE = DATA_DIR / "llms" / "claude-github-ownership.csv"
-OUTPUT_FILE = DATA_DIR / "eligibility-data.csv"
+VALUE_FILE = DATA_DIR / "value" / "value.csv"
+HOST_FILE = DATA_DIR / "sources" / "foundations" / "host-by-repo.csv"
+GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
+GH_USERS_FILE = DATA_DIR / "sources" / "github" / "users.csv"
+OSI_FILE = DATA_DIR / "sources" / "osi" / "oss-licenses.csv"
+LLM_OWNERSHIP_FILE = DATA_DIR / "sources" / "llms" / "claude-github-ownership.csv"
+OUTPUT_FILE = DATA_DIR / "eligibility" / "eligibility.csv"
 
 ECOSYSTEMS = ("npm", "pypi", "crates", "cpp")
 
-# `data/github/repos.csv` is the sole source of repo-level truth — no
+# `data/sources/github/repos.csv` is the sole source of repo-level truth — no
 # fallbacks to top-repos.csv. Run `src.github.fetch_repo_owner_data` first
 # to populate it. Repos absent from that file are absent from eligibility.
 # Schema: input is already AB ∩ gh_valid=True from value-data.csv,
@@ -58,7 +58,7 @@ FIELDS = [
     "eligibility",
 ]
 
-# OSS-approved licenses are loaded from `data/osi/oss-licenses.csv`,
+# OSS-approved licenses are loaded from `data/sources/osi/oss-licenses.csv`,
 # produced by `src.osi.fetch_licenses`. Strict OSS only — the file is
 # the union of SPDX `isOsiApproved` and a small hand-curated extras
 # list (curl, ftl, libpng-2.0, mit-cmu, psf-2.0, blessing) for
@@ -160,8 +160,8 @@ def load_repo_eol_index() -> dict[str, bool]:
     """
     by_repo: dict[str, list[bool]] = {}
     for eco in ECOSYSTEMS:
-        results = DATA_DIR / eco / "results.csv"
-        eol = DATA_DIR / eco / "eol.csv"
+        results = DATA_DIR / "sources" / eco / "results.csv"
+        eol = DATA_DIR / "sources" / eco / "eol.csv"
         if not results.exists() or not eol.exists():
             continue
         repo_by_pkg: dict[str, str] = {}
@@ -271,7 +271,7 @@ def load_trademarks() -> tuple[dict[str, str], dict[str, str]]:
 def load_repo_registry_license() -> dict[str, str]:
     """Aggregate per-eco results.csv `license` columns into a per-repo SPDX.
 
-    For each ecosystem (npm/pypi/crates/cpp), reads `data/{eco}/results.csv`
+    For each ecosystem (npm/pypi/crates/cpp), reads `data/sources/{eco}/results.csv`
     and joins package → github_repo → license. Multiple packages map to the
     same repo (monorepos, multiple-bind crates) — we pick the most common
     SPDX value across them, breaking ties alphabetically.
@@ -281,7 +281,7 @@ def load_repo_registry_license() -> dict[str, str]:
     """
     by_repo: dict[str, list[str]] = {}
     for eco in ECOSYSTEMS:
-        results = DATA_DIR / eco / "results.csv"
+        results = DATA_DIR / "sources" / eco / "results.csv"
         if not results.exists():
             continue
         with open(results, encoding="utf-8") as f:
@@ -373,7 +373,7 @@ def build_eligibility() -> list[dict]:
 def write_eligibility(new_rows: list[dict]) -> None:
     """Write `eligibility-data.csv` from scratch.
 
-    Source of truth is `data/github/repos.csv`, so each run produces the
+    Source of truth is `data/sources/github/repos.csv`, so each run produces the
     complete table — no upsert/merge with prior eligibility output.
 
     Sort: by `value_class` ascending (A → B → C → D), then by repo slug.

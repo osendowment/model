@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One-off: investigate largest / smallest / missing risk metrics.
 
-For every metric column in data/risk-data.csv, report the top-5 and
+For every metric column in data/risk/risk.csv, report the top-5 and
 bottom-5 repos by value, the missing count, and flag anomalies (negative
 values where they shouldn't be, zero where suspicious, duplicate columns).
 
@@ -13,7 +13,7 @@ from collections import Counter
 from pathlib import Path
 
 DATA = Path(__file__).resolve().parent.parent / "data"
-RISK = DATA / "risk-data.csv"
+RISK = DATA / "risk" / "risk.csv"
 
 # Columns that should hold a number; everything else is identity/text/bool.
 NUMERIC = {

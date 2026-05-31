@@ -1,10 +1,10 @@
-"""Fetch SPDX licenses for every package in `data/pypi/results.csv`.
+"""Fetch SPDX licenses for every package in `data/sources/pypi/results.csv`.
 
 Two-stage flow so the data survives `process_data.py` re-runs:
 
-  1. Fetch → `data/pypi/raw/licenses.csv` (persistent cache, 90-day TTL).
+  1. Fetch → `data/sources/pypi/raw/licenses.csv` (persistent cache, 90-day TTL).
      Schema: package, license, fetched_at.
-  2. Apply → joins the raw cache into `data/pypi/results.csv` as a
+  2. Apply → joins the raw cache into `data/sources/pypi/results.csv` as a
      `license` column. Re-runs after `process_data.py` rewrites
      `results.csv` cost zero API calls — the apply step pulls from raw.
 
@@ -54,8 +54,8 @@ log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
-RESULTS = DATA_DIR / "pypi" / "results.csv"
-RAW = DATA_DIR / "pypi" / "raw" / "licenses.csv"
+RESULTS = DATA_DIR / "sources" / "pypi" / "results.csv"
+RAW = DATA_DIR / "sources" / "pypi" / "raw" / "licenses.csv"
 
 PYPI_JSON = "https://pypi.org/pypi/{name}/json"
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"

@@ -14,13 +14,13 @@ default version is yanked, every published version of that crate is yanked
 signal of EOL.
 
 Reads:
-    data/crates/results.csv         — crates we care about
-    data/crates/db-dump/crates.csv  — crate_id ↔ name
-    data/crates/db-dump/default_versions.csv — crate_id → default version_id
-    data/crates/db-dump/versions.csv — version_id → yanked
+    data/sources/crates/results.csv         — crates we care about
+    data/sources/crates/db-dump/crates.csv  — crate_id ↔ name
+    data/sources/crates/db-dump/default_versions.csv — crate_id → default version_id
+    data/sources/crates/db-dump/versions.csv — version_id → yanked
 
 Writes:
-    data/crates/eol.csv
+    data/sources/crates/eol.csv
 
 Usage:
     uv run python -m src.crates.check_eol
@@ -49,9 +49,9 @@ log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-RESULTS_FILE = DATA_DIR / "crates" / "results.csv"
-DUMP_DIR = DATA_DIR / "crates" / "db-dump"
-OUTPUT_FILE = DATA_DIR / "crates" / "eol.csv"
+RESULTS_FILE = DATA_DIR / "sources" / "crates" / "results.csv"
+DUMP_DIR = DATA_DIR / "sources" / "crates" / "db-dump"
+OUTPUT_FILE = DATA_DIR / "sources" / "crates" / "eol.csv"
 
 EOL_METHOD = "crates_yanked"
 

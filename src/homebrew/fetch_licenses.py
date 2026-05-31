@@ -1,11 +1,11 @@
-"""Plumb licenses from `data/homebrew/raw/formulas.csv` into `results.csv`.
+"""Plumb licenses from `data/sources/homebrew/raw/formulas.csv` into `results.csv`.
 
 Homebrew formulas declare an SPDX license natively (`Formula#license` in
-the Ruby DSL). It's already collected — `data/homebrew/raw/formulas.csv`
+the Ruby DSL). It's already collected — `data/sources/homebrew/raw/formulas.csv`
 has the column. This script just joins it into the per-formula results
 table and lower-cases for consistency.
 
-Output: `data/homebrew/results.csv` gains a `license` column.
+Output: `data/sources/homebrew/results.csv` gains a `license` column.
 
 Usage:
     uv run python -m src.homebrew.fetch_licenses
@@ -26,8 +26,8 @@ log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
-RESULTS = DATA_DIR / "homebrew" / "results.csv"
-RAW = DATA_DIR / "homebrew" / "raw" / "formulas.csv"
+RESULTS = DATA_DIR / "sources" / "homebrew" / "results.csv"
+RAW = DATA_DIR / "sources" / "homebrew" / "raw" / "formulas.csv"
 
 
 def load_license_index() -> dict[str, str]:

@@ -15,7 +15,7 @@ No authentication required. Wayback snapshots may be sparse for some years.
 
 ## Raw Data
 
-In `data/debian/raw/`:
+In `data/sources/debian/raw/`:
 - `downloads.csv` -- binary, year, downloads (from popcon)
 - `dependencies.csv` -- binary, dep_name. **Runtime only**: combines `Depends` + `Pre-Depends` from each binary's stanza. `Build-Depends`, `Recommends`, `Suggests` are intentionally not collected.
 - `package-metadata.csv` -- binary, source, homepage, vcs_browser, section
@@ -44,5 +44,5 @@ Aggregation is at **source package** level (not binary):
 
 ## Outputs
 
-In `data/debian/`:
+In `data/sources/debian/`:
 - `top-packages.csv`, `dependency-tree.csv`, `github-repos.csv`, `results.csv`

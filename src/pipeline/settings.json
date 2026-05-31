@@ -21,7 +21,7 @@
   },
   "risk_input": {
     "value_classes": ["A", "B"],
-    "comment": "Risk pipeline runs on repos whose value-data.csv class is in this list."
+    "comment": "Risk pipeline runs on repos whose value/value.csv class is in this list."
   },
   "risk_classification": {
     "concentration": {

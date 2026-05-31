@@ -21,7 +21,7 @@ can be aggregated correctly across ecosystems.
 
 ## Raw Data
 
-- `data/repology/packages.csv` -- project, repo, srcname, binname, visiblename, version, status, categories, licenses
+- `data/sources/repology/packages.csv` -- project, repo, srcname, binname, visiblename, version, status, categories, licenses
 
 ## Scripts
 

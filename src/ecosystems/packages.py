@@ -6,11 +6,11 @@ used by the value pipeline to fill URLs the native registry crawl didn't
 surface. Runs BEFORE the claude-generated `llm_guess` fallback so we prefer
 ecosyste.ms's cross-registry consensus over LLM guesses.
 
-For each ecosystem (npm, pypi, crates, cpp), reads `data/{eco}/results.csv`
+For each ecosystem (npm, pypi, crates, cpp), reads `data/sources/{eco}/results.csv`
 and finds packages with empty `github_repo` AND empty `git`. Queries
 ecosyste.ms for those packages, caches the full raw JSON response under
-`data/{eco}/raw/ecosystems/{package}.json` (90-day TTL), and writes a
-downstream-consumable index at `data/{eco}/raw/ecosystems.csv`:
+`data/sources/{eco}/raw/ecosystems/{package}.json` (90-day TTL), and writes a
+downstream-consumable index at `data/sources/{eco}/raw/ecosystems.csv`:
 
     package, registry_hit, repository_url, homepage, fetched_at
 
@@ -83,7 +83,7 @@ class FetchResult:
 
 def _missing_url_packages(eco: str) -> list[str]:
     """Return packages from results.csv with empty github_repo AND empty git."""
-    path = DATA_DIR / eco / "results.csv"
+    path = DATA_DIR / "sources" / eco / "results.csv"
     if not path.exists():
         log.warning("%s/results.csv missing", eco)
         return []
@@ -124,7 +124,7 @@ def _cache_path(eco: str, pkg: str) -> Path:
     # Some package names contain '/' (npm scopes like @babel/core). Replace with
     # '__' to keep one file per package without nested directories.
     safe = pkg.replace("/", "__")
-    return DATA_DIR / eco / "raw" / "ecosystems" / f"{safe}.json"
+    return DATA_DIR / "sources" / eco / "raw" / "ecosystems" / f"{safe}.json"
 
 
 def _read_cached(path: Path) -> dict | None:
@@ -146,7 +146,7 @@ def _write_cached(path: Path, payload: dict) -> None:
 
 
 def _read_index(eco: str) -> dict[str, dict[str, str]]:
-    path = DATA_DIR / eco / "raw" / "ecosystems.csv"
+    path = DATA_DIR / "sources" / eco / "raw" / "ecosystems.csv"
     if not path.exists():
         return {}
     out: dict[str, dict[str, str]] = {}
@@ -157,7 +157,7 @@ def _read_index(eco: str) -> dict[str, dict[str, str]]:
 
 
 def _write_index(eco: str, rows: dict[str, dict[str, str]]) -> None:
-    path = DATA_DIR / eco / "raw" / "ecosystems.csv"
+    path = DATA_DIR / "sources" / eco / "raw" / "ecosystems.csv"
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=INDEX_FIELDS,

@@ -7,7 +7,7 @@
 
 The risk pipeline measures sustainability risk across six dimensions. The
 "Maintainer workload" dimension currently produces raw metrics in
-`data/workload.csv` but **no class** — unlike concentration, complexity,
+`data/risk/workload.csv` but **no class** — unlike concentration, complexity,
 security, and funding, which each carry an A–D class.
 
 This work adds a `workload_class`: a per-repo A–D tier capturing how much
@@ -105,13 +105,13 @@ would collapse to a single `2021-2025` column already duplicated in
 `concentration-data.csv`.
 
 **Delete** (via `git rm`):
-- `data/github/contributors/bus-factor.csv`
-- `data/github/contributors/hhi.csv`
-- `data/github/contributors/contributors.csv`
-- `data/github/contributors/bots.csv`
-- `data/github/contributors/commits.csv`
-- `data/github/contributors/years.csv`
-- the now-empty `data/github/contributors/` directory
+- `data/sources/github/contributors/bus-factor.csv`
+- `data/sources/github/contributors/hhi.csv`
+- `data/sources/github/contributors/contributors.csv`
+- `data/sources/github/contributors/bots.csv`
+- `data/sources/github/contributors/commits.csv`
+- `data/sources/github/contributors/years.csv`
+- the now-empty `data/sources/github/contributors/` directory
 
 **Before deleting `contributors.csv`**, run a one-time migration
 (Part 3) to carry its `2021-2025` column into `concentration-data.csv` —
@@ -181,9 +181,9 @@ named results) it is a **floor**, not exact.
 
 | Input | Source file | Column |
 |---|---|---|
-| LOC | `data/complexity.csv` | `loc_2025_eoy` |
-| CVE | `data/security.csv` | `cve_count_5y` |
-| AC | `data/concentration.csv` | `active_contributors` |
+| LOC | `data/risk/complexity.csv` | `loc_2025_eoy` |
+| CVE | `data/risk/security.csv` | `cve_count_5y` |
+| AC | `data/risk/concentration.csv` | `active_contributors` |
 
 NNI is computed in-script from values `build_workload` already loads:
 `NNI = issues_opened_5y − issues_closed_5y` (net new issues, 2021–2025).
@@ -269,7 +269,7 @@ intermediate, so the new columns flow into `risk-data.csv` automatically.
   `[2021–2025]` aspiration and the per-year note).
 - Update the `risk-data.csv` output-column table with the new columns.
 - Update the "Source-file coverage" table — the
-  `data/github/contributors/*.csv` wide files no longer exist;
+  `data/sources/github/contributors/*.csv` wide files no longer exist;
   `concentration-data.csv` is the single contributor source.
 
 ### `src/pipeline/settings.json`
@@ -330,5 +330,5 @@ New regression tests (follow existing `tests/` conventions):
 | `src/pipeline/settings.json` | add `risk_classification.workload` |
 | `docs/risk.md` | workload class table; roadmap + coverage + output updates |
 | `data/concentration-data.csv` | add `active_contributors` column (one-time migration) |
-| `data/github/contributors/*.csv` | **deleted** (6 files + dir) |
+| `data/sources/github/contributors/*.csv` | **deleted** (6 files + dir) |
 | `tests/` | new regression tests (Parts 1, 3, 4) |

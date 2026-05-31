@@ -5,7 +5,7 @@ external website + GitHub link. NumFOCUS doesn't expose a JSON API, so
 this is regex-based HTML scraping. Small list (~60 projects) so it runs
 in a few seconds.
 
-Output: data/foundations/numfocus/projects.csv
+Output: data/sources/foundations/numfocus/projects.csv
 
 Usage:
     uv run python -m src.foundations.numfocus

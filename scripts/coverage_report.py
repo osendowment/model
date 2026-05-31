@@ -26,38 +26,38 @@ ROOT = Path(__file__).resolve().parent.parent
 #   expectation_per_repo = how many rows per repo we expect at minimum.
 #   For long-format sha-pinned files it's the metric count for one snapshot.
 SOURCES = [
-    ("commits-years", "data/github/git/commits-years.csv", "repo", 1),
-    ("scc",           "data/git/scc.csv",                    "repo", 6),  # 6 metrics
-    ("lizard",        "data/git/lizard.csv",                 "repo", 4),  # min: cognitive set
-    ("openssf",       "data/git/openssf.csv",                "repo", 19), # score+18 checks
-    ("depsdev",       "data/git/depsdev.csv",                "repo", 1),
-    ("semgrep",       "data/git/semgrep.csv",                "repo", 8),  # findings_*
-    ("churn",         "data/github/git/churn.csv",           "repo", 1),
-    ("issues",        "data/github/issues.csv",              "repo", 1),
-    ("cves-queried",  "data/osv/queried.csv",                "repo", 1),
-    ("repos",         "data/github/repos.csv",               "repo", 1),
-    ("contributors",  "data/github/contributors/contributors.csv", "repo", 1),
-    ("commits-wide",  "data/github/contributors/commits.csv", "repo", 1),
-    ("hhi",           "data/github/contributors/hhi.csv",     "repo", 1),
-    ("bus-factor",    "data/github/contributors/bus-factor.csv","repo", 1),
+    ("commits-years", "data/sources/github/git/commits-years.csv", "repo", 1),
+    ("scc",           "data/sources/git/scc.csv",                    "repo", 6),  # 6 metrics
+    ("lizard",        "data/sources/git/lizard.csv",                 "repo", 4),  # min: cognitive set
+    ("openssf",       "data/sources/git/openssf.csv",                "repo", 19), # score+18 checks
+    ("depsdev",       "data/sources/git/depsdev.csv",                "repo", 1),
+    ("semgrep",       "data/sources/git/semgrep.csv",                "repo", 8),  # findings_*
+    ("churn",         "data/sources/github/git/churn.csv",           "repo", 1),
+    ("issues",        "data/sources/github/issues.csv",              "repo", 1),
+    ("cves-queried",  "data/sources/osv/queried.csv",                "repo", 1),
+    ("repos",         "data/sources/github/repos.csv",               "repo", 1),
+    ("contributors",  "data/sources/github/contributors/contributors.csv", "repo", 1),
+    ("commits-wide",  "data/sources/github/contributors/commits.csv", "repo", 1),
+    ("hhi",           "data/sources/github/contributors/hhi.csv",     "repo", 1),
+    ("bus-factor",    "data/sources/github/contributors/bus-factor.csv","repo", 1),
     ("concentration", "data/concentration-data.csv",         "repo", 1),
-    ("funding",       "data/funding-data.csv",               "repo", 1),
-    ("openssf-checks","data/openssf/checks.csv",             "repo", 1),
+    ("funding",       "data/risk/funding-data.csv",               "repo", 1),
+    ("openssf-checks","data/sources/openssf/checks.csv",             "repo", 1),
 ]
 
 CATEGORY_FILES = [
-    ("complexity",    "data/complexity.csv"),
-    ("security",      "data/security.csv"),
-    ("concentration", "data/concentration.csv"),
-    ("funding",       "data/funding.csv"),
-    ("visibility",    "data/visibility.csv"),
-    ("workload",      "data/workload.csv"),
+    ("complexity",    "data/risk/complexity.csv"),
+    ("security",      "data/risk/security.csv"),
+    ("concentration", "data/risk/concentration.csv"),
+    ("funding",       "data/risk/funding.csv"),
+    ("visibility",    "data/risk/visibility.csv"),
+    ("workload",      "data/risk/workload.csv"),
 ]
 
 
 def load_eligible() -> set[str]:
     out = set()
-    with open(ROOT / "data/eligibility-data.csv") as f:
+    with open(ROOT / "data/eligibility/eligibility.csv") as f:
         for r in csv.DictReader(f):
             if (r.get("eligibility") or "").strip() == "True":
                 out.add(r["repo"])
@@ -177,7 +177,7 @@ def main():
         console.print(miss_table)
 
     # Final risk-data.csv shape
-    risk_path = ROOT / "data/risk-data.csv"
+    risk_path = ROOT / "data/risk/risk.csv"
     if risk_path.exists():
         with risk_path.open() as f:
             reader = csv.DictReader(f)

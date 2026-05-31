@@ -7,7 +7,7 @@ full value→eligibility→risk regeneration cascade.
 
 ## Problem
 
-`data/{eco}/results.csv` carries two repo signals per package, from two
+`data/sources/{eco}/results.csv` carries two repo signals per package, from two
 different resolvers:
 
 - **`github_repo`** — written by `src/pypi/process_data.py`'s `github_map`
@@ -72,7 +72,7 @@ Each must get a verdict:
 Verdict method, per relabel (4 fixes + 8 regressions + 11 verify = 23):
 1. The 4 confirmed fixes — keep (no override).
 2. The 8 confirmed regressions — add override rows.
-3. The 11 "verify" cases — check each against GitHub (`data/github/repos.csv`
+3. The 11 "verify" cases — check each against GitHub (`data/sources/github/repos.csv`
    `full_name` resolves renames; the package's own registry identity
    confirms which repo it belongs to). Regression → override; otherwise keep.
 
@@ -111,9 +111,9 @@ Verify against GitHub (keep or override per finding):
 ### 4. Regeneration cascade
 
 After the code + override changes:
-1. `unify_value_data` → `data/value-data.csv`
+1. `unify_value_data` → `data/value/value.csv`
 2. `verify_git_urls` → re-derives `gh_valid` / `gh_repo_id` for changed repos
-3. `classify_eligibility` → `data/eligibility-data.csv`
+3. `classify_eligibility` → `data/eligibility/eligibility.csv`
 4. `run_risk_pipeline` (builders + aggregate) → all risk CSVs + `risk-data.csv`
 
 Then `scripts/pipeline_health.py` + `scripts/data_anomalies.py` must pass,
@@ -144,7 +144,7 @@ label resolution) — a separate design. This spec does not change `_group_key`.
 ## Files touched
 
 - `src/pipeline/value/unify_value_data.py` — `_select_group_github_repo`.
-- `data/value-repo-overrides.csv` — curated regression entries.
+- `data/value/value-repo-overrides.csv` — curated regression entries.
 - `tests/test_unify_value_data.py` — updated/added tests.
 - Regenerated data: `value-data.csv`, `eligibility-data.csv`, the risk CSVs,
   `risk-data.csv` (cascade).

@@ -1,13 +1,13 @@
-"""One-shot migration: data/github/issues/{opened,closed}.csv (wide per-year)
-→ data/github/issues.csv (long per (repo, year, metric)).
+"""One-shot migration: data/sources/github/issues/{opened,closed}.csv (wide per-year)
+→ data/sources/github/issues.csv (long per (repo, year, metric)).
 
 Source files (read-only):
-  - data/github/issues/opened.csv     (repo, 2021..2025)
-  - data/github/issues/closed.csv     (repo, 2021..2025)
-  - data/eligibility-data.csv         (repo → repo_id lookup)
+  - data/sources/github/issues/opened.csv     (repo, 2021..2025)
+  - data/sources/github/issues/closed.csv     (repo, 2021..2025)
+  - data/eligibility/eligibility.csv         (repo → repo_id lookup)
 
 Destination:
-  - data/github/issues.csv with header:
+  - data/sources/github/issues.csv with header:
       repo, repo_id, year, metric, value
     where metric ∈ {opened_issues, closed_issues}, one row per non-blank
     cell. Stable sort by (repo, year, metric).
@@ -28,10 +28,10 @@ from rich.console import Console
 from rich.table import Table
 
 ROOT = Path(__file__).resolve().parents[3]
-OPENED_CSV = ROOT / "data" / "github" / "issues" / "opened.csv"
-CLOSED_CSV = ROOT / "data" / "github" / "issues" / "closed.csv"
-ELIGIBILITY_CSV = ROOT / "data" / "eligibility-data.csv"
-DEST_CSV = ROOT / "data" / "github" / "issues.csv"
+OPENED_CSV = ROOT / "data" / "sources" / "github" / "issues" / "opened.csv"
+CLOSED_CSV = ROOT / "data" / "sources" / "github" / "issues" / "closed.csv"
+ELIGIBILITY_CSV = ROOT / "data" / "eligibility" / "eligibility.csv"
+DEST_CSV = ROOT / "data" / "sources" / "github" / "issues.csv"
 
 FIELDS = ["repo", "repo_id", "year", "metric", "value"]
 SOURCES = (

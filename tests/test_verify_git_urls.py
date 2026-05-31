@@ -1,6 +1,6 @@
 """Tests for src/pipeline/value/verify_git_urls.py.
 
-Focus: `verify_urls_in_aggregates` reading back `data/github/repos.csv`
+Focus: `verify_urls_in_aggregates` reading back `data/sources/github/repos.csv`
 to annotate each value-data row with the GitHub repo's stable numeric id
 (`gh_repo_id`) and its *current* name (renamed repos are canonicalised).
 
@@ -19,7 +19,7 @@ from src.pipeline.value.verify_git_urls import verify_urls_in_aggregates
 
 
 def _write_repos_csv(path: Path, rows: list[list[str]]) -> None:
-    """Materialise a minimal data/github/repos.csv (the columns the
+    """Materialise a minimal data/sources/github/repos.csv (the columns the
     read-back actually consults)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", newline="", encoding="utf-8") as f:

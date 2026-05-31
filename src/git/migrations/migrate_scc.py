@@ -1,4 +1,4 @@
-"""One-shot migration: 6 wide-format scc files → data/git/scc.csv (long format).
+"""One-shot migration: 6 wide-format scc files → data/sources/git/scc.csv (long format).
 
 Reads six wide CSVs (one column per year 2021..2025) and rewrites them in
 long format (`repo, repo_id, commit_sha, metric, value, checked_at`) using
@@ -10,19 +10,19 @@ skipped if `last_sha` is empty (we can't pin to a commit) or the cell
 itself is blank. A measured value of 0 IS preserved.
 
 Source files (read-only):
-  - data/github/git/loc.csv             → metric `loc`
-  - data/github/git/sloc.csv            → metric `sloc`
-  - data/github/git/files.csv           → metric `files`
-  - data/github/git/uloc.csv            → metric `uloc`
-  - data/github/git/scc-complexity.csv  → metric `complexity`
-  - data/github/git/scc-density.csv     → metric `complexity_density`
+  - data/sources/github/git/loc.csv             → metric `loc`
+  - data/sources/github/git/sloc.csv            → metric `sloc`
+  - data/sources/github/git/files.csv           → metric `files`
+  - data/sources/github/git/uloc.csv            → metric `uloc`
+  - data/sources/github/git/scc-complexity.csv  → metric `complexity`
+  - data/sources/github/git/scc-density.csv     → metric `complexity_density`
 
 Lookup tables:
-  - data/github/git/commits-years.csv   → (repo, year) → last_sha + fetched_at
-  - data/eligibility-data.csv           → repo → repo_id (best-effort, may be empty)
+  - data/sources/github/git/commits-years.csv   → (repo, year) → last_sha + fetched_at
+  - data/eligibility/eligibility.csv           → repo → repo_id (best-effort, may be empty)
 
 Destination:
-  - data/git/scc.csv (created fresh; aborts if it already exists)
+  - data/sources/git/scc.csv (created fresh; aborts if it already exists)
 
 Run:
   uv run python -m src.git.migrations.migrate_scc
@@ -40,10 +40,10 @@ from src.git.long_format import read as read_long
 from src.git.long_format import upsert_rows
 
 ROOT = Path(__file__).resolve().parents[3]
-GIT_DIR = ROOT / "data" / "github" / "git"
-ELIGIBILITY_CSV = ROOT / "data" / "eligibility-data.csv"
+GIT_DIR = ROOT / "data" / "sources" / "github" / "git"
+ELIGIBILITY_CSV = ROOT / "data" / "eligibility" / "eligibility.csv"
 COMMITS_YEARS_CSV = GIT_DIR / "commits-years.csv"
-DEST_CSV = ROOT / "data" / "git" / "scc.csv"
+DEST_CSV = ROOT / "data" / "sources" / "git" / "scc.csv"
 
 YEARS = ["2021", "2022", "2023", "2024", "2025"]
 
@@ -249,7 +249,7 @@ def main() -> int:
 
     # Sample 5 rows of the destination CSV.
     console.print()
-    console.rule("[bold]sample (first 5 rows of data/git/scc.csv)[/]")
+    console.rule("[bold]sample (first 5 rows of data/sources/git/scc.csv)[/]")
     with DEST_CSV.open(encoding="utf-8") as f:
         for i, line in enumerate(f):
             console.print(line.rstrip())

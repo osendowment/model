@@ -10,14 +10,14 @@ Steps:
   6  Build results.csv            — all dep-tree packages with downloads + PageRank
 
 Reads:
-  data/crates/db-dump/{crates,versions,default_versions,dependencies}.csv
-  data/crates/version-downloads/YYYY-MM.csv
+  data/sources/crates/db-dump/{crates,versions,default_versions,dependencies}.csv
+  data/sources/crates/version-downloads/YYYY-MM.csv
 
 Outputs:
-  data/crates/top-packages.csv
-  data/crates/dependency-tree.csv
-  data/crates/github-repos.csv
-  data/crates/results.csv
+  data/sources/crates/top-packages.csv
+  data/sources/crates/dependency-tree.csv
+  data/sources/crates/github-repos.csv
+  data/sources/crates/results.csv
 
 Run:
     uv run src/crates/process_data.py
@@ -41,8 +41,8 @@ from rich.table import Table
 
 from src.pipeline.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
-DUMP_DIR    = "data/crates/db-dump"
-MONTHLY_DIR = "data/crates/version-downloads"
+DUMP_DIR    = "data/sources/crates/db-dump"
+MONTHLY_DIR = "data/sources/crates/version-downloads"
 DATA_DIR    = "data/crates"
 
 TOP_CSV     = f"{DATA_DIR}/top-packages.csv"

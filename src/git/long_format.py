@@ -1,4 +1,4 @@
-"""Long-format CSV helpers for `data/git/{tool}.csv`.
+"""Long-format CSV helpers for `data/sources/git/{tool}.csv`.
 
 All sha-pinned raw metric files share one schema:
 
@@ -20,7 +20,7 @@ Usage:
     from src.git.long_format import upsert_snapshot
 
     upsert_snapshot(
-        "data/git/lizard.csv",
+        "data/sources/git/lizard.csv",
         repo="aiohttp/aiohttp",
         repo_id="13392388",
         commit_sha="abc123…",

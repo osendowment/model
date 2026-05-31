@@ -1,14 +1,14 @@
 """Calculate total ecosystem downloads per year.
 
 Sources:
-  npm      — npm downloads API (fetches missing years, caches in data/npm/raw/npm-stats.csv)
-  pypi     — BigQuery export (data/pypi/bigquery/bq-package-downloads.csv)
-  crates   — monthly version-download CSVs (data/crates/version-downloads/YYYY-MM.csv)
-  debian   — popcon install counts (data/debian/raw/downloads.csv)
-  homebrew — Wayback analytics snapshots (data/homebrew/raw/downloads.csv)
+  npm      — npm downloads API (fetches missing years, caches in data/sources/npm/raw/npm-stats.csv)
+  pypi     — BigQuery export (data/sources/pypi/bigquery/bq-package-downloads.csv)
+  crates   — monthly version-download CSVs (data/sources/crates/version-downloads/YYYY-MM.csv)
+  debian   — popcon install counts (data/sources/debian/raw/downloads.csv)
+  homebrew — Wayback analytics snapshots (data/sources/homebrew/raw/downloads.csv)
 
 Output:
-  data/ecosystem-downloads.csv — year, npm, pypi, crates, debian, homebrew
+  data/value/ecosystem-downloads.csv — year, npm, pypi, crates, debian, homebrew
 
 Run:
     uv run python -m src.pipeline.value.build_ecosystem_downloads
@@ -27,14 +27,14 @@ from src.pipeline.common.params import YEARS
 
 console = Console()
 
-OUTPUT = "data/ecosystem-downloads.csv"
+OUTPUT = "data/value/ecosystem-downloads.csv"
 
 
 def load_npm() -> dict[int, int]:
     """Load npm total downloads per year, fetching missing years from API."""
     from src.npm.fetch_npm_stats import _load_existing, _fetch_year
 
-    stats_file = "data/npm/raw/npm-stats.csv"
+    stats_file = "data/sources/npm/raw/npm-stats.csv"
     existing = _load_existing()
 
     to_fetch = [y for y in YEARS if y not in existing]
@@ -56,7 +56,7 @@ def load_npm() -> dict[int, int]:
 
 def load_pypi() -> dict[int, int]:
     """Sum all package downloads per year from BigQuery export."""
-    bq_csv = "data/pypi/bigquery/bq-package-downloads.csv"
+    bq_csv = "data/sources/pypi/bigquery/bq-package-downloads.csv"
     totals = {y: 0 for y in YEARS}
 
     with open(bq_csv, newline="", encoding="utf-8") as f:
@@ -69,7 +69,7 @@ def load_pypi() -> dict[int, int]:
 
 def load_crates() -> dict[int, int]:
     """Sum all version downloads per year from monthly CSVs."""
-    monthly_dir = "data/crates/version-downloads"
+    monthly_dir = "data/sources/crates/version-downloads"
     totals = {y: 0 for y in YEARS}
 
     for year in YEARS:
@@ -104,8 +104,8 @@ def main():
         "npm": load_npm,
         "pypi": load_pypi,
         "crates": load_crates,
-        "debian": lambda: load_raw_downloads("data/debian/raw/downloads.csv"),
-        "homebrew": lambda: load_raw_downloads("data/homebrew/raw/downloads.csv"),
+        "debian": lambda: load_raw_downloads("data/sources/debian/raw/downloads.csv"),
+        "homebrew": lambda: load_raw_downloads("data/sources/homebrew/raw/downloads.csv"),
     }
 
     data = {}

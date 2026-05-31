@@ -32,10 +32,10 @@ def parse_owner_repo(url: str) -> "str | None":
 # Paths to generated output files
 # ---------------------------------------------------------------------------
 
-TOP_CSV     = "data/crates/top-packages.csv"
-DEPS_CSV    = "data/crates/dependency-tree.csv"
-GITHUB_CSV  = "data/crates/github-repos.csv"
-RESULTS_CSV = "data/crates/results.csv"
+TOP_CSV     = "data/sources/crates/top-packages.csv"
+DEPS_CSV    = "data/sources/crates/dependency-tree.csv"
+GITHUB_CSV  = "data/sources/crates/github-repos.csv"
+RESULTS_CSV = "data/sources/crates/results.csv"
 
 YEAR_COLS = ["2021", "2022", "2023", "2024", "2025"]
 

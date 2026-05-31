@@ -5,7 +5,7 @@ Also backfills repo data for high-value ecosystem packages (npm/pypi/crates/cpp 
 that aren't yet in top-repos.csv.
 
 Uses async HTTP with serialized rate limiter driven by GitHub's X-RateLimit headers.
-Caches search counts in data/github/search/repo-counts.csv to skip range-building on repeat runs.
+Caches search counts in data/sources/github/search/repo-counts.csv to skip range-building on repeat runs.
 
 Usage:
     python -m src.github.fetch_top_repos --language Python --min-stars 10000
@@ -50,7 +50,7 @@ FIELDS = [
     # timestamps
     "created_at", "updated_at", "pushed_at", "fetched_at",
 ]
-DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
+DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "sources")
 COUNTS_FILE = os.path.join(DATA_DIR, "github", "search", "repo-counts.csv")
 REPOS_FILE = os.path.join(DATA_DIR, "github", "search", "top-repos.csv")
 COUNTS_FIELDS = ["language", "min_stars", "date_from", "date_to", "count", "fetched_at"]
@@ -328,7 +328,7 @@ async def _fetch_range(session: aiohttp.ClientSession, language: str, min_stars:
 
 
 def _upsert_repos(new_repos: dict[str, dict]) -> tuple[int, int, int]:
-    """Upsert repos into data/github/search/top-repos.csv, keyed by repo_id.
+    """Upsert repos into data/sources/github/search/top-repos.csv, keyed by repo_id.
 
     Returns (total, added, updated).
     """

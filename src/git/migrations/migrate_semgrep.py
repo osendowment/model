@@ -1,5 +1,5 @@
-"""Migrate `data/github/git/semgrep.csv` (sha-pinned, wide) into the
-unified long format at `data/git/semgrep.csv`.
+"""Migrate `data/sources/github/git/semgrep.csv` (sha-pinned, wide) into the
+unified long format at `data/sources/git/semgrep.csv`.
 
 Schema in the destination (per `src.git.long_format`):
 
@@ -9,7 +9,7 @@ Mapping
 -------
 - commit_sha  ← analyzed_sha
 - checked_at  ← fetched_at
-- repo_id     ← lookup in `data/eligibility-data.csv` (empty if missing)
+- repo_id     ← lookup in `data/eligibility/eligibility.csv` (empty if missing)
 - metric name is prefixed with the rulepack so multiple rulepacks for
   the same (repo, sha) coexist in one long file:
       p/default         → p_default
@@ -39,9 +39,9 @@ from src.git.long_format import read as read_long
 from src.git.long_format import upsert_snapshot
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SOURCE = REPO_ROOT / "data" / "github" / "git" / "semgrep.csv"
-DEST = REPO_ROOT / "data" / "git" / "semgrep.csv"
-ELIGIBILITY = REPO_ROOT / "data" / "eligibility-data.csv"
+SOURCE = REPO_ROOT / "data" / "sources" / "github" / "git" / "semgrep.csv"
+DEST = REPO_ROOT / "data" / "sources" / "git" / "semgrep.csv"
+ELIGIBILITY = REPO_ROOT / "data" / "eligibility" / "eligibility.csv"
 
 NUMERIC_METRICS: tuple[str, ...] = (
     "findings_total",
@@ -209,7 +209,7 @@ def migrate() -> None:
 
     # Sample 5 output rows for the report.
     sample_keys = sorted(reloaded.keys())[:5]
-    sample = Table(title="sample rows (data/git/semgrep.csv)", header_style="dim")
+    sample = Table(title="sample rows (data/sources/git/semgrep.csv)", header_style="dim")
     for col in ("repo", "repo_id", "commit_sha", "metric", "value", "checked_at"):
         sample.add_column(col)
     for k in sample_keys:

@@ -3,7 +3,7 @@
 
 The existing pipeline only kept `github_repo` and discarded everything else.
 This script re-scans the same raw inputs and writes a richer table per
-ecosystem at `data/{ecosystem}/git.csv` with the schema:
+ecosystem at `data/sources/{ecosystem}/git.csv` with the schema:
 
     package, github, gitlab, bitbucket, sourcehut, codeberg, custom
 
@@ -158,8 +158,8 @@ def merge_urls(urls: list[str]) -> dict[str, str]:
 # the cache will inform the next build.
 #
 # Two caches feed this lookup:
-#   • data/git/urls.csv          — non-github URLs (ls-remote results, by URL)
-#   • data/github/repos.csv      — github repos (API results, by owner/repo slug)
+#   • data/sources/git/urls.csv          — non-github URLs (ls-remote results, by URL)
+#   • data/sources/github/repos.csv      — github repos (API results, by owner/repo slug)
 
 
 def _load_invalid_lookup():
@@ -168,7 +168,7 @@ def _load_invalid_lookup():
     invalid_urls: set[str] = set()
     invalid_slugs: set[str] = set()
 
-    nongh = DATA_DIR / "git" / "urls.csv"
+    nongh = DATA_DIR / "sources" / "git" / "urls.csv"
     if nongh.exists():
         with open(nongh, encoding="utf-8") as f:
             for r in csv.DictReader(f):
@@ -177,7 +177,7 @@ def _load_invalid_lookup():
                     if url:
                         invalid_urls.add(url)
 
-    gh_repos = DATA_DIR / "github" / "repos.csv"
+    gh_repos = DATA_DIR / "sources" / "github" / "repos.csv"
     if gh_repos.exists():
         with open(gh_repos, encoding="utf-8") as f:
             for r in csv.DictReader(f):
@@ -245,7 +245,7 @@ def merge_urls_with_source(
 
 def npm_urls() -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
-    path = DATA_DIR / "npm" / "nice-registry" / "packages.csv"
+    path = DATA_DIR / "sources" / "npm" / "nice-registry" / "packages.csv"
     if not path.exists():
         return out
     with open(path, encoding="utf-8") as f:
@@ -261,13 +261,13 @@ def pypi_urls() -> dict[str, list[str]]:
     Run `uv run -m src.pypi.fetch_pypi_urls` to populate the rich source.
     """
     out: dict[str, list[str]] = {}
-    rich = DATA_DIR / "pypi" / "raw" / "package-urls.csv"
+    rich = DATA_DIR / "sources" / "pypi" / "raw" / "package-urls.csv"
     if rich.exists():
         with open(rich, encoding="utf-8") as f:
             for r in csv.DictReader(f):
                 out.setdefault(r["package"], []).append(r["url"])
         return out
-    legacy = DATA_DIR / "pypi" / "raw" / "package-github-mapping.csv"
+    legacy = DATA_DIR / "sources" / "pypi" / "raw" / "package-github-mapping.csv"
     if not legacy.exists():
         return out
     with open(legacy, encoding="utf-8") as f:
@@ -278,7 +278,7 @@ def pypi_urls() -> dict[str, list[str]]:
 
 def crates_urls() -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
-    path = DATA_DIR / "crates" / "db-dump" / "crates.csv"
+    path = DATA_DIR / "sources" / "crates" / "db-dump" / "crates.csv"
     if not path.exists():
         return out
     df = pl.read_csv(path, columns=["name", "homepage", "repository"],
@@ -291,7 +291,7 @@ def crates_urls() -> dict[str, list[str]]:
 def debian_urls() -> dict[str, list[str]]:
     """Aggregate by source package: union of homepage + vcs_browser across binaries."""
     out: dict[str, list[str]] = {}
-    path = DATA_DIR / "debian" / "raw" / "package-metadata.csv"
+    path = DATA_DIR / "sources" / "debian" / "raw" / "package-metadata.csv"
     if not path.exists():
         return out
     by_source: dict[str, list[str]] = {}
@@ -308,7 +308,7 @@ def debian_urls() -> dict[str, list[str]]:
 
 def homebrew_urls() -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
-    path = DATA_DIR / "homebrew" / "raw" / "formulas.csv"
+    path = DATA_DIR / "sources" / "homebrew" / "raw" / "formulas.csv"
     if not path.exists():
         return out
     with open(path, encoding="utf-8") as f:
@@ -320,7 +320,7 @@ def homebrew_urls() -> dict[str, list[str]]:
 def ossfuzz_main_repos() -> dict[str, str]:
     """{project: main_repo} from OSS-Fuzz. Many C/C++ projects only publish git via OSS-Fuzz."""
     out: dict[str, str] = {}
-    path = DATA_DIR / "ossfuzz" / "projects.csv"
+    path = DATA_DIR / "sources" / "ossfuzz" / "projects.csv"
     if not path.exists():
         return out
     with open(path, encoding="utf-8") as f:
@@ -334,7 +334,7 @@ def ossfuzz_main_repos() -> dict[str, str]:
 def repology_urls_lookup() -> dict[str, list[str]]:
     """{project: [candidate_url, ...]} from Repology HTML scrape (`fetch_repology_urls.py`)."""
     out: dict[str, list[str]] = {}
-    path = DATA_DIR / "repology" / "project-urls.csv"
+    path = DATA_DIR / "sources" / "repology" / "project-urls.csv"
     if not path.exists():
         return out
     with open(path, encoding="utf-8") as f:
@@ -355,7 +355,7 @@ def claude_git_lookup() -> dict[tuple[str, str], list[str]]:
     is emitted first so it wins the host-priority merge.
     """
     out: dict[tuple[str, str], list[str]] = {}
-    path = DATA_DIR / "llms" / "claude-git-data.csv"
+    path = DATA_DIR / "sources" / "llms" / "claude-git-data.csv"
     if not path.exists():
         return out
     with open(path, encoding="utf-8") as f:
@@ -385,7 +385,7 @@ claude_repo_lookup = claude_git_lookup
 def cpp_urls() -> dict[str, list[str]]:
     """For the unified C/C++ ecosystem, collect URLs from debian + homebrew + oss-fuzz."""
     out: dict[str, list[str]] = {}
-    path = DATA_DIR / "cpp" / "raw" / "packages.csv"
+    path = DATA_DIR / "sources" / "cpp" / "raw" / "packages.csv"
     if not path.exists():
         return out
 
@@ -438,7 +438,7 @@ PKG_COL = {
 
 
 def universe(ecosystem: str) -> set[str]:
-    path = DATA_DIR / ecosystem / "results.csv"
+    path = DATA_DIR / "sources" / ecosystem / "results.csv"
     if not path.exists():
         return set()
     col = PKG_COL[ecosystem]
@@ -448,7 +448,7 @@ def universe(ecosystem: str) -> set[str]:
 
 def before_github_count(ecosystem: str) -> int:
     """How many rows in current results.csv have a non-empty github_repo."""
-    path = DATA_DIR / ecosystem / "results.csv"
+    path = DATA_DIR / "sources" / ecosystem / "results.csv"
     if not path.exists():
         return 0
     with open(path, encoding="utf-8") as f:
@@ -477,12 +477,12 @@ def _pick_git(merged: dict[str, str]) -> str:
 
 
 def _load_ecosystems_urls(ecosystem: str) -> dict[str, list[str]]:
-    """Load ecosyste.ms-derived URLs from data/{eco}/raw/ecosystems.csv.
+    """Load ecosyste.ms-derived URLs from data/sources/{eco}/raw/ecosystems.csv.
 
     Returns {package: [repository_url, homepage]} skipping empty values.
     `merge_urls()` will classify each URL into the right platform slot.
     """
-    path = DATA_DIR / ecosystem / "raw" / "ecosystems.csv"
+    path = DATA_DIR / "sources" / ecosystem / "raw" / "ecosystems.csv"
     if not path.exists():
         return {}
     out: dict[str, list[str]] = {}
@@ -558,7 +558,7 @@ def build(ecosystem: str, get_urls, llm_cache: dict[tuple[str, str], list[str]] 
         if has_any:
             any_count += 1
 
-    out_path = DATA_DIR / ecosystem / "git.csv"
+    out_path = DATA_DIR / "sources" / ecosystem / "git.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=GIT_FIELDS, quoting=csv.QUOTE_ALL)
@@ -658,8 +658,8 @@ def update_results_csv(ecosystem: str) -> tuple[int, int]:
     gitlab/bitbucket/sourcehut/codeberg/custom in priority order. Idempotent.
     Returns (rows_with_git, total_rows).
     """
-    results_path = DATA_DIR / ecosystem / "results.csv"
-    git_path = DATA_DIR / ecosystem / "git.csv"
+    results_path = DATA_DIR / "sources" / ecosystem / "results.csv"
+    git_path = DATA_DIR / "sources" / ecosystem / "git.csv"
     if not results_path.exists() or not git_path.exists():
         return (0, 0)
 
@@ -754,7 +754,7 @@ def main() -> None:
     import argparse
     p = argparse.ArgumentParser()
     p.add_argument("--no-llm", action="store_true",
-                   help="Skip the LLM data (data/llms/claude-git-data.csv) for this run")
+                   help="Skip the LLM data (data/sources/llms/claude-git-data.csv) for this run")
     args = p.parse_args()
 
     console.rule("[bold white]build_git.py[/bold white]")

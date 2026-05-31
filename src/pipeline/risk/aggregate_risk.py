@@ -4,15 +4,15 @@
 Reads the six per-dimension intermediate CSVs (each produced by its own
 `build_<dim>.py` script) and joins them on `repo` into one flat table:
 
-    data/concentration.csv     ← src.pipeline.risk.build_concentration
-    data/complexity.csv        ← src.pipeline.risk.build_complexity
-    data/security.csv          ← src.pipeline.risk.build_security
-    data/funding.csv           ← src.pipeline.risk.build_funding
-    data/visibility.csv        ← src.pipeline.risk.build_visibility
-    data/workload.csv          ← src.pipeline.risk.build_workload
+    data/risk/concentration.csv     ← src.pipeline.risk.build_concentration
+    data/risk/complexity.csv        ← src.pipeline.risk.build_complexity
+    data/risk/security.csv          ← src.pipeline.risk.build_security
+    data/risk/funding.csv           ← src.pipeline.risk.build_funding
+    data/risk/visibility.csv        ← src.pipeline.risk.build_visibility
+    data/risk/workload.csv          ← src.pipeline.risk.build_workload
 
 Writes:
-    data/risk-data.csv  — one row per risk-scope repo with every metric
+    data/risk/risk.csv  — one row per risk-scope repo with every metric
                           column from the six intermediates.
 
 This script does **no classification** (no A/B/C/D classes). Class
@@ -46,15 +46,15 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 
 # Intermediate CSVs feeding the aggregator. Each has its own builder.
 INTERMEDIATES = {
-    "concentration": DATA_DIR / "concentration.csv",
-    "complexity":    DATA_DIR / "complexity.csv",
-    "security":      DATA_DIR / "security.csv",
-    "funding":       DATA_DIR / "funding.csv",
-    "visibility":    DATA_DIR / "visibility.csv",
-    "workload":      DATA_DIR / "workload.csv",
+    "concentration": DATA_DIR / "risk" / "concentration.csv",
+    "complexity":    DATA_DIR / "risk" / "complexity.csv",
+    "security":      DATA_DIR / "risk" / "security.csv",
+    "funding":       DATA_DIR / "risk" / "funding.csv",
+    "visibility":    DATA_DIR / "risk" / "visibility.csv",
+    "workload":      DATA_DIR / "risk" / "workload.csv",
 }
 
-OUTPUT_FILE = DATA_DIR / "risk-data.csv"
+OUTPUT_FILE = DATA_DIR / "risk" / "risk.csv"
 
 # Identity columns shared across all intermediates — emitted once.
 ID_COLUMNS = ("repo", "repo_id")

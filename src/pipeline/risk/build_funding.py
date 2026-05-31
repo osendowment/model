@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Build data/funding.csv — funding signals per risk-scope repo.
+"""Build data/risk/funding.csv — funding signals per risk-scope repo.
 
 Reads:
-    data/value-data.csv                     — A/B value-class set
-    data/funding-data.csv                   — github_sponsors / FUNDING.yml
+    data/value/value.csv                     — A/B value-class set
+    data/risk/funding-data.csv                   — github_sponsors / FUNDING.yml
                                               / funding.json (raw collector output)
-    data/foundations/host-by-repo.csv       — FOSS-foundation host per repo
+    data/sources/foundations/host-by-repo.csv       — FOSS-foundation host per repo
 
 Writes:
-    data/funding.csv  with columns:
+    data/risk/funding.csv  with columns:
         repo, repo_id,
         github_sponsors,           (count of accounts on GH Sponsors)
         funding_class,             (A/B/C/D from github_sponsors — see
@@ -46,9 +46,9 @@ from src.pipeline.common.tables import load_column_by_repo, load_rows_by_repo
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
-FUNDING_RAW_FILE = DATA_DIR / "funding-data.csv"
-FOUNDATIONS_FILE = DATA_DIR / "foundations" / "host-by-repo.csv"
-OUTPUT_FILE = DATA_DIR / "funding.csv"
+FUNDING_RAW_FILE = DATA_DIR / "risk" / "funding-data.csv"
+FOUNDATIONS_FILE = DATA_DIR / "sources" / "foundations" / "host-by-repo.csv"
+OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
 
 FIELDS = [
     "repo", "repo_id",

@@ -41,7 +41,7 @@ def _run(cmd: list[str], log_path: Path) -> int:
 
 def _eligible() -> set[str]:
     out = set()
-    with (ROOT / "data/eligibility-data.csv").open() as f:
+    with (ROOT / "data/eligibility/eligibility.csv").open() as f:
         for r in csv.DictReader(f):
             if (r.get("eligibility") or "").strip() == "True":
                 out.add(r["repo"])
@@ -69,7 +69,7 @@ def main():
 
     if not args.build_only:
         # 1. Foundation: commits-years for any repos missing
-        missing = eligible - _covered(ROOT / "data/github/git/commits-years.csv")
+        missing = eligible - _covered(ROOT / "data/sources/github/git/commits-years.csv")
         if missing:
             plan.append(("commits-years", ["uv", "run", "python", "-m", "src.git.commits_years", "--concurrency", "10"], len(missing)))
 
@@ -79,7 +79,7 @@ def main():
 
         # 2. Resolve HEAD for dormant repos (no last_sha at any year)
         sha_data: dict[str, set[str]] = {}
-        with (ROOT / "data/github/git/commits-years.csv").open() as f:
+        with (ROOT / "data/sources/github/git/commits-years.csv").open() as f:
             for r in csv.DictReader(f):
                 if (r.get("last_sha") or "").strip():
                     sha_data.setdefault(r["repo"], set()).add(r.get("year", ""))
@@ -88,35 +88,35 @@ def main():
             plan.append(("resolve-head", ["uv", "run", "python", "-m", "src.git.resolve_head", "--concurrency", "8"], len(dormant)))
 
         # 3. Sha-pinned fetchers
-        scc_missing = eligible - _covered(ROOT / "data/git/scc.csv")
+        scc_missing = eligible - _covered(ROOT / "data/sources/git/scc.csv")
         if scc_missing:
             plan.append(("scc", ["uv", "run", "python", "-m", "src.git.fetch_scc", "--concurrency", "4"], len(scc_missing)))
 
-        lizard_missing = eligible - _covered(ROOT / "data/git/lizard.csv")
+        lizard_missing = eligible - _covered(ROOT / "data/sources/git/lizard.csv")
         if lizard_missing:
             plan.append(("cognitive", ["uv", "run", "python", "-m", "src.github.fetch_cognitive", "--concurrency", "3"], len(lizard_missing)))
             plan.append(("cyclo-halstead", ["uv", "run", "python", "-m", "src.github.fetch_advanced_complexity", "--limit", "0", "--concurrency", "3"], len(lizard_missing)))
 
-        openssf_missing = sorted(eligible - _covered(ROOT / "data/git/openssf.csv"))
+        openssf_missing = sorted(eligible - _covered(ROOT / "data/sources/git/openssf.csv"))
         if openssf_missing:
             tmp = ROOT / "/tmp/missing-openssf.txt"
             tmp.write_text("\n".join(openssf_missing) + "\n")
             plan.append(("openssf", ["uv", "run", "python", "-m", "src.openssf.scorecard", "--file", str(tmp), "--concurrency", "5"], len(openssf_missing)))
 
-        depsdev_missing = eligible - _covered(ROOT / "data/git/depsdev.csv")
+        depsdev_missing = eligible - _covered(ROOT / "data/sources/git/depsdev.csv")
         if depsdev_missing:
             plan.append(("depsdev", ["uv", "run", "python", "-m", "src.depsdev.fetch", "--concurrency", "20"], len(depsdev_missing)))
 
-        churn_missing = eligible - _covered(ROOT / "data/github/git/churn.csv")
+        churn_missing = eligible - _covered(ROOT / "data/sources/github/git/churn.csv")
         if churn_missing:
             plan.append(("churn", ["uv", "run", "python", "-m", "src.github.fetch_churn", "--concurrency", "4"], len(churn_missing)))
 
-        issues_missing = eligible - _covered(ROOT / "data/github/issues.csv")
+        issues_missing = eligible - _covered(ROOT / "data/sources/github/issues.csv")
         if issues_missing:
             plan.append(("issues", ["uv", "run", "python", "-m", "src.github.fetch_issue_metrics"], len(issues_missing)))
 
         if not args.skip_semgrep:
-            semgrep_missing = eligible - _covered(ROOT / "data/git/semgrep.csv")
+            semgrep_missing = eligible - _covered(ROOT / "data/sources/git/semgrep.csv")
             if semgrep_missing:
                 plan.append(("semgrep", ["uv", "run", "python", "-m", "src.github.fetch_semgrep", "--limit", "0", "--rulepack", "p/default", "--concurrency", "4"], len(semgrep_missing)))
 

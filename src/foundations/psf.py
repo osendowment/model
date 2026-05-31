@@ -11,7 +11,7 @@ that matter most for this corpus:
   • Python core (`github.com/python/*`): cpython, peps, mypy, etc.
     Source: GitHub `/orgs/python/repos`.
 
-Output: data/foundations/psf/projects.csv
+Output: data/sources/foundations/psf/projects.csv
 
 Authenticated with the same token revolver as the other scrapers
 (`src.github.github_client`). Unauthenticated runs work but burn the 60

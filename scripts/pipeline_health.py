@@ -101,7 +101,7 @@ def check_risk_data() -> list[Result]:
 
     _fields, rows = aggregate()
     built = _norm(rows)
-    disk = _read_csv_by_repo(ROOT / "data" / "risk-data.csv")
+    disk = _read_csv_by_repo(ROOT / "data" / "risk" / "risk.csv")
     if set(built) != set(disk):
         return [("risk-data.csv", False,
                  f"repo set differs (builder {len(built)}, disk {len(disk)})")]
@@ -124,7 +124,7 @@ def check_value_data() -> list[Result]:
         rows, _ = collect_ecosystem(eco)
         all_rows.extend(rows)
     built = aggregate_by_repo(all_rows)
-    disk = list(csv.DictReader(open(ROOT / "data" / "value-data.csv", encoding="utf-8")))
+    disk = list(csv.DictReader(open(ROOT / "data" / "value" / "value.csv", encoding="utf-8")))
 
     if len(built) != len(disk):
         return [("value-data.csv", False,
@@ -149,7 +149,7 @@ def check_value_data() -> list[Result]:
 def check_long_format_keys() -> list[Result]:
     """Long-format git files must have unique (repo, sha, metric) keys."""
     out: list[Result] = []
-    for path in sorted(glob.glob(str(ROOT / "data" / "git" / "*.csv"))):
+    for path in sorted(glob.glob(str(ROOT / "data" / "sources" / "git" / "*.csv"))):
         rows = list(csv.DictReader(open(path, encoding="utf-8")))
         if not rows or not {"repo", "commit_sha", "metric"} <= set(rows[0]):
             continue  # not a long-format file

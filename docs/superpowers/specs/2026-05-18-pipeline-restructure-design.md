@@ -62,7 +62,7 @@ folders. Nothing else.
 - **`value/verify_git_urls.py`** — the ls-remote git-URL verifier (value.py
   lines ~493-930): `_lsremote_pass`, `_canonicalize_git_url`, `_verify_non_github`,
   `verify_urls_in_aggregates`, `_host`, the validity-cache helpers, and the
-  `_print_git_validity_table` display. Has its own cache `data/git/urls.csv`.
+  `_print_git_validity_table` display. Has its own cache `data/sources/git/urls.csv`.
 
 A finer split (separate `collect`/`aggregate` scripts) was rejected — those
 sub-steps share in-memory structures, so splitting them would require new

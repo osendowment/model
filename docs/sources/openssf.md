@@ -10,8 +10,8 @@ Requires a GitHub token (`GITHUB_AUTH_TOKEN` or `GITHUB_TOKEN` env var).
 
 ## Raw Data
 
-- `data/openssf/data.json` -- full scorecard API response per repo (13.7 MB; canonical raw cache)
-- `data/git/openssf.csv` -- long-format sha-pinned snapshot (`repo, repo_id, commit_sha, metric, value, checked_at`); one row per check + one for `score`
+- `data/sources/openssf/data.json` -- full scorecard API response per repo (13.7 MB; canonical raw cache)
+- `data/sources/git/openssf.csv` -- long-format sha-pinned snapshot (`repo, repo_id, commit_sha, metric, value, checked_at`); one row per check + one for `score`
 
 ## Scripts
 

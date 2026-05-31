@@ -16,12 +16,12 @@ No authentication required. npm downloads API is rate-limited to ~5 req/s.
 
 ## Raw Data
 
-In `data/npm/raw/`:
+In `data/sources/npm/raw/`:
 - `downloads.csv` -- package, year, downloads
 - `dependencies.csv` -- package, dep_name, dep_version, fetched_at
 - `npm-stats.csv` -- year, downloads (ecosystem-wide totals)
 
-In `data/npm/nice-registry/`:
+In `data/sources/npm/nice-registry/`:
 - `packages.csv` -- package, repo_url
 
 ## Scripts
@@ -51,7 +51,7 @@ uv run python -m src.npm.process_data [--ignore-gaps]
 
 ## Outputs
 
-In `data/npm/`:
+In `data/sources/npm/`:
 
 | File | Rows | Description |
 |------|------|-------------|

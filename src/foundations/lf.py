@@ -1,7 +1,7 @@
 """Fetch Linux Foundation landscape projects.
 
 Source: https://github.com/jmertic/lf-landscape (landscape.yml)
-Output: data/foundations/lf/projects.csv
+Output: data/sources/foundations/lf/projects.csv
 
 Note: CNCF projects also appear here (CNCF is hosted under LF). The
 matcher prefers the more specific `cncf` slug when a repo matches both.

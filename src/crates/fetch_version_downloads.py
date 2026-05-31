@@ -1,11 +1,11 @@
 """
 Download and aggregate daily crates.io download archives for a given year,
-writing one file per month into data/crates/version-downloads/.
+writing one file per month into data/sources/crates/version-downloads/.
 
 Each monthly file is written atomically only after all daily files for that
 month are successfully fetched. Already-complete months are skipped on re-run.
 
-Output: data/crates/version-downloads/YYYY-MM.csv
+Output: data/sources/crates/version-downloads/YYYY-MM.csv
 Schema: version_id, downloads  (total for that month)
 
 Run:
@@ -28,7 +28,7 @@ from rich.table import Table
 
 ARCHIVE_INDEX = "https://static.crates.io/archive/version-downloads/index.json"
 ARCHIVE_BASE  = "https://static.crates.io/archive/version-downloads"
-OUT_DIR       = "data/crates/version-downloads"
+OUT_DIR       = "data/sources/crates/version-downloads"
 CONCURRENCY   = 64
 
 console = Console()

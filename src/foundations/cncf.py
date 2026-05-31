@@ -5,7 +5,7 @@ separately because that's the most specific (and the more useful) host
 when classifying a repo. The matcher prefers `cncf` over `lf` on overlap.
 
 Source: https://github.com/cncf/landscape (landscape.yml)
-Output: data/foundations/cncf/projects.csv
+Output: data/sources/foundations/cncf/projects.csv
 
 Only rows with `maturity` set (sandbox / incubating / graduated / archived)
 are kept — those are actual CNCF projects, not just landscape entries.

@@ -5,12 +5,12 @@ Strategy: parallel byte-range requests (server supports Accept-Ranges).
 Downloads N chunks concurrently, assembles into final file, then extracts.
 
 Extracts only:
-  data/crates/db-dump/crates.csv
-  data/crates/db-dump/versions.csv
-  data/crates/db-dump/dependencies.csv
-  data/crates/db-dump/default_versions.csv
+  data/sources/crates/db-dump/crates.csv
+  data/sources/crates/db-dump/versions.csv
+  data/sources/crates/db-dump/dependencies.csv
+  data/sources/crates/db-dump/default_versions.csv
 
-  - Skips download+extraction if data/crates/db-dump/ already exists
+  - Skips download+extraction if data/sources/crates/db-dump/ already exists
   - Deletes archive after extraction
   - Prints throughput and timing stats at each step
 

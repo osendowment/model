@@ -33,20 +33,20 @@ BACKUP_DIR = Path("/tmp/robustness-backup")
 # `also_remove_from` lists peer sources that would fill the same field via
 # fallback — they must be removed too for the test to verify true emptiness.
 SOURCES = [
-    ("data/git/scc.csv", "repo", ["loc_2025_eoy", "sloc_2025_eoy"], []),
-    ("data/git/lizard.csv", "repo", ["cognitive_total"], []),
-    ("data/git/openssf.csv", "repo", ["openssf_score"], ["data/git/depsdev.csv"]),
-    ("data/git/depsdev.csv", "repo", ["bestpractices_badge_id"], []),
-    ("data/git/semgrep.csv", "repo", ["sast_findings_total"], []),
-    ("data/osv/cves.csv", "repo", ["cve_count_5y"], []),
-    ("data/github/issues.csv", "repo", ["issues_opened_5y", "issues_closed_5y"], []),
-    ("data/github/git/churn.csv", "repo", ["churn_5y_total"], []),
+    ("data/sources/git/scc.csv", "repo", ["loc_2025_eoy", "sloc_2025_eoy"], []),
+    ("data/sources/git/lizard.csv", "repo", ["cognitive_total"], []),
+    ("data/sources/git/openssf.csv", "repo", ["openssf_score"], ["data/sources/git/depsdev.csv"]),
+    ("data/sources/git/depsdev.csv", "repo", ["bestpractices_badge_id"], []),
+    ("data/sources/git/semgrep.csv", "repo", ["sast_findings_total"], []),
+    ("data/sources/osv/cves.csv", "repo", ["cve_count_5y"], []),
+    ("data/sources/github/issues.csv", "repo", ["issues_opened_5y", "issues_closed_5y"], []),
+    ("data/sources/github/git/churn.csv", "repo", ["churn_5y_total"], []),
     ("data/concentration-data.csv", "repo",
      ["bf_commits_lifetime", "hhi_commits_lifetime"],
-     ["data/github/contributors/bus-factor.csv",
-      "data/github/contributors/hhi.csv",
-      "data/github/contributors/commits.csv"]),
-    ("data/github/repos.csv", "repo", ["stars", "forks"], []),
+     ["data/sources/github/contributors/bus-factor.csv",
+      "data/sources/github/contributors/hhi.csv",
+      "data/sources/github/contributors/commits.csv"]),
+    ("data/sources/github/repos.csv", "repo", ["stars", "forks"], []),
 ]
 
 PIPELINE_STAGES = [
@@ -114,7 +114,7 @@ def run_pipeline() -> bool:
 
 def load_risk_data() -> dict[str, dict[str, str]]:
     out: dict[str, dict[str, str]] = {}
-    with open("data/risk-data.csv") as f:
+    with open("data/risk/risk.csv") as f:
         for r in csv.DictReader(f):
             out[r["repo"]] = r
     return out

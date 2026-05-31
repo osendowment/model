@@ -28,7 +28,7 @@
 | `src/pipeline/settings.json` | pipeline config | add `risk_classification.workload` |
 | `docs/risk.md` | risk-pipeline docs | workload class table + roadmap/output updates |
 | `data/concentration-data.csv` | contributor metrics | add `active_contributors` column (one-time migration) |
-| `data/github/contributors/*.csv` | stale per-year metrics | **deleted** (6 files) |
+| `data/sources/github/contributors/*.csv` | stale per-year metrics | **deleted** (6 files) |
 | `tests/test_contrib_metrics.py` | — | drop tests for removed functions |
 | `tests/test_contributors.py` | — | drop tests for removed functions |
 | `tests/test_batch.py` | — | replace yearly-CSV tests with concentration-data tests |
@@ -408,7 +408,7 @@ git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit
 - [ ] **Step 1: Run the migration**
 
 The non-bot contributor count is already stored in
-`data/github/contributors/contributors.csv` under the `2021-2025` column.
+`data/sources/github/contributors/contributors.csv` under the `2021-2025` column.
 Carry it into `concentration-data.csv` so no multi-hour re-fetch is needed.
 Run this exact command:
 
@@ -417,7 +417,7 @@ uv run python - <<'EOF'
 import csv
 
 contrib = {}
-with open("data/github/contributors/contributors.csv", encoding="utf-8") as f:
+with open("data/sources/github/contributors/contributors.csv", encoding="utf-8") as f:
     for row in csv.DictReader(f):
         slug = (row.get("repo") or "").strip().lower()
         if slug:
@@ -462,30 +462,30 @@ git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit
 ## Task 8: Delete the stale wide CSVs
 
 **Files:**
-- Delete: `data/github/contributors/{bus-factor,hhi,contributors,bots,commits}.csv`, `years.csv`
+- Delete: `data/sources/github/contributors/{bus-factor,hhi,contributors,bots,commits}.csv`, `years.csv`
 
 - [ ] **Step 1: Remove the files**
 
 ```bash
-git rm data/github/contributors/bus-factor.csv \
-       data/github/contributors/hhi.csv \
-       data/github/contributors/contributors.csv \
-       data/github/contributors/bots.csv \
-       data/github/contributors/commits.csv \
-       data/github/contributors/years.csv
+git rm data/sources/github/contributors/bus-factor.csv \
+       data/sources/github/contributors/hhi.csv \
+       data/sources/github/contributors/contributors.csv \
+       data/sources/github/contributors/bots.csv \
+       data/sources/github/contributors/commits.csv \
+       data/sources/github/contributors/years.csv
 ```
 
 (If `git rm` reports a file is not tracked, delete it with plain `rm` instead.)
 
 - [ ] **Step 2: Verify the directory is empty, then remove it**
 
-Run: `ls -A data/github/contributors 2>/dev/null`
-Expected: empty output. Then: `rmdir data/github/contributors 2>/dev/null || true`
+Run: `ls -A data/sources/github/contributors 2>/dev/null`
+Expected: empty output. Then: `rmdir data/sources/github/contributors 2>/dev/null || true`
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add -A data/github/contributors
+git add -A data/sources/github/contributors
 git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit -m "data: delete stale per-year contributor CSVs (consolidated to concentration-data.csv)"
 ```
 
@@ -554,15 +554,15 @@ contributors — a floor for repos with >5000 contributors).
 
 Run: `uv run python -m src.pipeline.risk.build_concentration`
 Expected: prints a coverage table; `active_contributors` row shows ~99% coverage;
-writes `data/concentration.csv`.
+writes `data/risk/concentration.csv`.
 
-Run: `head -1 data/concentration.csv`
+Run: `head -1 data/risk/concentration.csv`
 Expected: header contains `active_contributors`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/pipeline/risk/build_concentration.py data/concentration.csv
+git add src/pipeline/risk/build_concentration.py data/risk/concentration.csv
 git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit -m "feat(risk): build_concentration emits active_contributors from concentration-data.csv"
 ```
 
@@ -989,16 +989,16 @@ git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit
 
 - [ ] **Step 1: Add the new input-file constants**
 
-After the existing `OUTPUT_FILE = DATA_DIR / "workload.csv"` line, add:
+After the existing `OUTPUT_FILE = DATA_DIR / "risk" / "workload.csv"` line, add:
 
 ```python
-COMPLEXITY_FILE = DATA_DIR / "complexity.csv"
-SECURITY_FILE = DATA_DIR / "security.csv"
-CONCENTRATION_FILE = DATA_DIR / "concentration.csv"
+COMPLEXITY_FILE = DATA_DIR / "risk" / "complexity.csv"
+SECURITY_FILE = DATA_DIR / "risk" / "security.csv"
+CONCENTRATION_FILE = DATA_DIR / "risk" / "concentration.csv"
 ```
 
 Remove the now-obsolete `CONTRIB_FILE` constant (it pointed at the deleted
-`data/github/contributors/contributors.csv`). Also delete the
+`data/sources/github/contributors/contributors.csv`). Also delete the
 `_load_wide_year` function — after the `build()` rewrite in Step 4 nothing
 calls it (it only ever loaded the deleted `contributors.csv`).
 
@@ -1188,8 +1188,8 @@ imported at the top (they are).
 
 - [ ] **Step 7: Update the module docstring**
 
-Update the `Reads:` block to add `data/complexity.csv`, `data/security.csv`,
-`data/concentration.csv`; update the `Writes:` block to list the new columns
+Update the `Reads:` block to add `data/risk/complexity.csv`, `data/risk/security.csv`,
+`data/risk/concentration.csv`; update the `Writes:` block to list the new columns
 (`active_contributors`, `net_new_issues_5y`, the three `*_per_ac`, the three
 `*_per_ac_pctl`, `workload_burden_percentile`, `workload_class`); note that
 `workload_class` is empty unless LOC, CVE, NNI, and AC are all present with
@@ -1205,9 +1205,9 @@ and `uv run python -m src.pipeline.risk.build_security` first.)
 Run: `uv run python -m src.pipeline.risk.build_workload`
 Expected: prints the coverage table + a "Workload class" table where A/B/C/D
 each hold roughly a quarter of the classified repos and `—` holds the
-unclassified remainder; writes `data/workload.csv`.
+unclassified remainder; writes `data/risk/workload.csv`.
 
-Run: `head -1 data/workload.csv`
+Run: `head -1 data/risk/workload.csv`
 Expected: header ends with `...workload_burden_percentile,workload_class,fetched_at`.
 
 - [ ] **Step 9: Run the workload tests again (regression)**
@@ -1218,7 +1218,7 @@ Expected: PASS.
 - [ ] **Step 10: Commit**
 
 ```bash
-git add src/pipeline/risk/build_workload.py data/workload.csv
+git add src/pipeline/risk/build_workload.py data/risk/workload.csv
 git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit -m "feat(risk): add workload_class to build_workload (LOC/CVE/NNI per contributor)"
 ```
 
@@ -1311,7 +1311,7 @@ description matching the definitions above.
 - [ ] **Step 4: Update the "Source-file coverage" section**
 
 In the source-file coverage table, remove the
-`data/github/contributors/contributors.csv` row (and any `bus-factor` /
+`data/sources/github/contributors/contributors.csv` row (and any `bus-factor` /
 `hhi` / `commits` wide-file rows). Note in the surrounding prose that
 contributor metrics now live solely in `data/concentration-data.csv`, and that
 the `/stats/contributors` per-year breakdown has been retired.
@@ -1351,7 +1351,7 @@ uv run python -m src.pipeline.risk.aggregate_risk
 ```
 Expected: each completes; `aggregate_risk` prints a coverage table that now
 includes `active_contributors`, `workload_burden_percentile`, and
-`workload_class`; `data/risk-data.csv` is written.
+`workload_class`; `data/risk/risk.csv` is written.
 
 - [ ] **Step 4: Spot-check the joined output**
 
@@ -1360,7 +1360,7 @@ Run:
 uv run python - <<'EOF'
 import csv
 from collections import Counter
-with open("data/risk-data.csv", encoding="utf-8") as f:
+with open("data/risk/risk.csv", encoding="utf-8") as f:
     rows = list(csv.DictReader(f))
 cls = Counter(r.get("workload_class") or "—" for r in rows)
 print("workload_class:", dict(cls))
@@ -1374,7 +1374,7 @@ unclassified remainder; `active_contributors` populated for ~99% of rows.
 - [ ] **Step 5: Commit any regenerated data**
 
 ```bash
-git add data/risk-data.csv data/concentration.csv data/workload.csv
+git add data/risk/risk.csv data/risk/concentration.csv data/risk/workload.csv
 git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit -m "data: regenerate risk intermediates with workload_class" || echo "nothing to commit"
 ```
 

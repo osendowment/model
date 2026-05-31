@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Build data/workload.csv — maintainer-workload metrics per risk-scope repo.
+"""Build data/risk/workload.csv — maintainer-workload metrics per risk-scope repo.
 
 Reads:
-    data/value-data.csv                                 — A/B value-class set
-    data/github/repos.csv                               — created_at, has_issues, pushed_at
-    data/github/git/commits-years.csv                   — per (repo, year) commits
-    data/openssf/checks.csv                             — per-check Scorecard scores
-    data/github/issues.csv                              — long: repo, repo_id, year, metric, value
+    data/value/value.csv                                 — A/B value-class set
+    data/sources/github/repos.csv                               — created_at, has_issues, pushed_at
+    data/sources/github/git/commits-years.csv                   — per (repo, year) commits
+    data/sources/openssf/checks.csv                             — per-check Scorecard scores
+    data/sources/github/issues.csv                              — long: repo, repo_id, year, metric, value
                                                           (metric ∈ {opened_issues, closed_issues})
-    data/complexity.csv                                 — loc_2025_eoy per repo
-    data/security.csv                                   — cve_count_5y per repo
-    data/concentration.csv                              — active_contributors_git_2021_2025 per repo
+    data/risk/complexity.csv                                 — loc_2025_eoy per repo
+    data/risk/security.csv                                   — cve_count_5y per repo
+    data/risk/concentration.csv                              — active_contributors_git_2021_2025 per repo
 
 Writes:
-    data/workload.csv  with columns:
+    data/risk/workload.csv  with columns:
         repo, repo_id,
         repo_age_years_2025_eoy,         (years between created_at and 2025-12-31)
         active_contributors_git_2021_2025,  (windowed AC — from concentration.csv)
@@ -73,14 +73,14 @@ from src.pipeline.common.tables import load_column_by_repo, load_rows_by_repo
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
-REPOS_FILE = DATA_DIR / "github" / "repos.csv"
-COMMITS_YEARS_FILE = DATA_DIR / "github" / "git" / "commits-years.csv"
-OPENSSF_CHECKS_FILE = DATA_DIR / "openssf" / "checks.csv"
-ISSUES_FILE = DATA_DIR / "github" / "issues.csv"
-OUTPUT_FILE = DATA_DIR / "workload.csv"
-COMPLEXITY_FILE = DATA_DIR / "complexity.csv"
-SECURITY_FILE = DATA_DIR / "security.csv"
-CONCENTRATION_FILE = DATA_DIR / "concentration.csv"
+REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
+COMMITS_YEARS_FILE = DATA_DIR / "sources" / "github" / "git" / "commits-years.csv"
+OPENSSF_CHECKS_FILE = DATA_DIR / "sources" / "openssf" / "checks.csv"
+ISSUES_FILE = DATA_DIR / "sources" / "github" / "issues.csv"
+OUTPUT_FILE = DATA_DIR / "risk" / "workload.csv"
+COMPLEXITY_FILE = DATA_DIR / "risk" / "complexity.csv"
+SECURITY_FILE = DATA_DIR / "risk" / "security.csv"
+CONCENTRATION_FILE = DATA_DIR / "risk" / "concentration.csv"
 
 YEARS = list(range(2021, 2026))  # 2021..2025
 EOY_2025 = datetime.date(2025, 12, 31)

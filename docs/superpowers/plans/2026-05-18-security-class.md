@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a per-repo `security_class` (A–D) to `data/security.csv`, derived from the OpenSSF Scorecard score and the 5-year CVE count via the `geom_mean_quartile` method.
+**Goal:** Add a per-repo `security_class` (A–D) to `data/risk/security.csv`, derived from the OpenSSF Scorecard score and the 5-year CVE count via the `geom_mean_quartile` method.
 
 **Architecture:** Two risk percentiles (Hazen plotting position) — one over `cve_count_5y` (more = worse), one over `-openssf_score` (lower score = worse) — are combined with a geometric mean into `security_risk_percentile`, then bucketed into equal-count quartiles (A = worst 25%). The three generic helpers this needs (`hazen_percentiles`, `geometric_mean`, `quartile_classes`) already live inside `build_workload.py`; they are first extracted into a shared `src/pipeline/common/stats.py` so both builders import them.
 
@@ -868,7 +868,7 @@ Usage:
 Run: `uv run python -m src.pipeline.risk.build_security`
 Expected: completes without error; prints the existing coverage table **and** a new `Security class` table with four rows `A`/`B`/`C`/`D` of roughly equal size (~225 repos each) plus a small `—` row for repos missing a metric.
 
-Run: `head -1 data/security.csv`
+Run: `head -1 data/risk/security.csv`
 Expected: header ends with `...,bestpractices_badge_id,openssf_risk_pctl,cve_risk_pctl,security_risk_percentile,security_class,fetched_at`
 
 - [ ] **Step 7: Run the full test suite**
@@ -958,12 +958,12 @@ git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit
 
 ---
 
-## Task 7: Regenerate `data/security.csv` with the new columns
+## Task 7: Regenerate `data/risk/security.csv` with the new columns
 
 Commit the regenerated data file so the checked-in `security.csv` matches the new code.
 
 **Files:**
-- Modify: `data/security.csv`
+- Modify: `data/risk/security.csv`
 
 - [ ] **Step 1: Regenerate the file**
 
@@ -972,15 +972,15 @@ Expected: completes; prints the `Security class` table.
 
 - [ ] **Step 2: Sanity-check the result**
 
-Run: `uv run python -c "import csv; rows=list(csv.DictReader(open('data/security.csv'))); from collections import Counter; print(Counter(r['security_class'] or '—' for r in rows))"`
+Run: `uv run python -c "import csv; rows=list(csv.DictReader(open('data/risk/security.csv'))); from collections import Counter; print(Counter(r['security_class'] or '—' for r in rows))"`
 Expected: a `Counter` whose `A`/`B`/`C`/`D` counts differ by at most 1 from each other (equal-count quartiles), plus a small `—` bucket; all counts sum to the risk-scope total (~899).
 
-- [ ] **Step 3: Commit only `data/security.csv`**
+- [ ] **Step 3: Commit only `data/risk/security.csv`**
 
-Other data files may carry unrelated uncommitted edits — stage **only** `data/security.csv`:
+Other data files may carry unrelated uncommitted edits — stage **only** `data/risk/security.csv`:
 
 ```bash
-git add data/security.csv
+git add data/risk/security.csv
 git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit -m "data: add security_class columns to security.csv
 
 risk-data.csv will pick up the four new columns on the next full
@@ -996,5 +996,5 @@ After all tasks:
 - [ ] `uv run pytest tests/test_stats.py tests/test_build_workload.py tests/test_build_security.py -v` — all green.
 - [ ] `grep -rn "SECURITY_THRESHOLDS" src/ tests/` — no output.
 - [ ] `grep -rn "_hazen_percentiles\|_geometric_mean\|_quartile_classes" src/` — no output (all renamed to the public `common.stats` names).
-- [ ] `head -1 data/security.csv` ends with `openssf_risk_pctl,cve_risk_pctl,security_risk_percentile,security_class,fetched_at`.
+- [ ] `head -1 data/risk/security.csv` ends with `openssf_risk_pctl,cve_risk_pctl,security_risk_percentile,security_class,fetched_at`.
 - [ ] `uv run python -m src.pipeline.risk.build_security` prints a `Security class` table summing to 899.

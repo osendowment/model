@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 console = Console()
 
 SOURCE_URL = "https://dir.floss.fund/funding-manifests.tar.gz"
-OUTPUT_FILE = "data/floss-fund/funding-json.csv"
+OUTPUT_FILE = "data/sources/floss-fund/funding-json.csv"
 DEFAULT_TTL_DAYS = 30
 
 OUTPUT_FIELDS = [

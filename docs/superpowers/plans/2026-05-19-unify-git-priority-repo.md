@@ -121,13 +121,13 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 ### Task 2: Curate `value-repo-overrides.csv`
 
 **Files:**
-- Modify: `data/value-repo-overrides.csv` (append rows; header `package,ecosystem,github_repo,reason` already present, currently 1 row)
+- Modify: `data/value/value-repo-overrides.csv` (append rows; header `package,ecosystem,github_repo,reason` already present, currently 1 row)
 
 The git-priority rule relabels 23 repo groups. 4 are correct fixes (no action). 8 are confirmed regressions (add override rows). 11 need a GitHub check.
 
 - [ ] **Step 1: Append the 8 confirmed-regression override rows**
 
-Append these rows to `data/value-repo-overrides.csv` (one representative package per group — `apply_repo_overrides` relabels the whole group from any one member, keyed by `_group_key`):
+Append these rows to `data/value/value-repo-overrides.csv` (one representative package per group — `apply_repo_overrides` relabels the whole group from any one member, keyed by `_group_key`):
 
 ```csv
 filelock,pypi,tox-dev/filelock,"git URL is the pre-rename name tox-dev/py-filelock; the repo was renamed to tox-dev/filelock"
@@ -179,7 +179,7 @@ Expected: all PASS (the override mechanism is unchanged; only data added).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add data/value-repo-overrides.csv
+git add data/value/value-repo-overrides.csv
 git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit -m "data: curate value-repo-overrides for git-priority regressions
 
 The git-priority rule relabels 23 repo groups; these override rows
@@ -195,13 +195,13 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 ### Task 3: Regenerate the value→eligibility→risk cascade
 
 **Files:**
-- Regenerated: `data/value-data.csv`, `data/eligibility-data.csv`, `data/{complexity,concentration,funding,security,visibility,workload}.csv`, `data/risk-data.csv`
+- Regenerated: `data/value/value.csv`, `data/eligibility/eligibility.csv`, `data/{complexity,concentration,funding,security,visibility,workload}.csv`, `data/risk/risk.csv`
 
 - [ ] **Step 1: Snapshot the pre-change state for impact measurement**
 
 ```bash
-cp data/value-data.csv /tmp/value-data.before.csv
-cp data/risk-data.csv /tmp/risk-data.before.csv
+cp data/value/value.csv /tmp/value-data.before.csv
+cp data/risk/risk.csv /tmp/risk-data.before.csv
 ```
 
 - [ ] **Step 2: Regenerate value-data.csv and verify the duplicates are gone**
@@ -213,7 +213,7 @@ Then verify the simplejson cluster collapsed:
 uv run python -c "
 import csv
 from collections import Counter
-rows=list(csv.DictReader(open('data/value-data.csv')))
+rows=list(csv.DictReader(open('data/value/value.csv')))
 dups={k:v for k,v in Counter((r['github_repo'] or '').strip().lower() for r in rows if (r['github_repo'] or '').strip()).items() if v>1}
 print('duplicate github_repo:', dups)
 "
@@ -223,12 +223,12 @@ Expected: `simplejson/simplejson` no longer duplicated (it drops from x4 to x1).
 - [ ] **Step 3: Re-verify git URLs**
 
 Run: `uv run python -m src.pipeline.value.verify_git_urls`
-Expected: completes; re-derives `gh_valid` / `gh_repo_id` for the changed repos (cached via `data/git/urls.csv`, so only new URLs are queried).
+Expected: completes; re-derives `gh_valid` / `gh_repo_id` for the changed repos (cached via `data/sources/git/urls.csv`, so only new URLs are queried).
 
 - [ ] **Step 4: Regenerate eligibility**
 
 Run: `uv run python -m src.pipeline.eligibility.classify_eligibility`
-Expected: writes `data/eligibility-data.csv`; prints the eligibility summary table.
+Expected: writes `data/eligibility/eligibility.csv`; prints the eligibility summary table.
 
 - [ ] **Step 5: Regenerate the risk pipeline**
 
@@ -246,10 +246,10 @@ Expected: both exit 0 — all pipeline_health checks pass, `data_anomalies` repo
 uv run python -c "
 import csv
 def repos(p,col='repo'): return {r[col] for r in csv.DictReader(open(p))}
-vb=repos('/tmp/value-data.before.csv','github_repo'); va=repos('data/value-data.csv','github_repo')
+vb=repos('/tmp/value-data.before.csv','github_repo'); va=repos('data/value/value.csv','github_repo')
 print('value-data github_repo — added:', len(va-vb), 'removed:', len(vb-va))
 rb={r['repo'] for r in csv.DictReader(open('/tmp/risk-data.before.csv'))}
-ra={r['repo'] for r in csv.DictReader(open('data/risk-data.csv'))}
+ra={r['repo'] for r in csv.DictReader(open('data/risk/risk.csv'))}
 print('risk scope — entered:', sorted(ra-rb), 'left:', sorted(rb-ra))
 "
 ```
@@ -258,7 +258,7 @@ Record the output in the commit message.
 - [ ] **Step 8: Commit the regenerated data**
 
 ```bash
-git add data/value-data.csv data/eligibility-data.csv data/complexity.csv data/concentration.csv data/funding.csv data/security.csv data/visibility.csv data/risk-data.csv data/workload.csv
+git add data/value/value.csv data/eligibility/eligibility.csv data/risk/complexity.csv data/risk/concentration.csv data/risk/funding.csv data/risk/security.csv data/risk/visibility.csv data/risk/risk.csv data/risk/workload.csv
 git -c user.email=kv@kvinogradov.com -c user.name="Konstantin Vinogradov" commit -m "data: regenerate value→eligibility→risk after git-priority repo fix
 
 <paste the Step 7 impact summary here>
@@ -273,5 +273,5 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 ## Notes for the implementer
 
 - Do **not** change `_group_key` — orphan-split duplicates are explicitly out of scope (see spec).
-- `data/funding.csv` may already show as modified from before this work; only `git add` the files listed in each task's commit step — never `git add -A`.
+- `data/risk/funding.csv` may already show as modified from before this work; only `git add` the files listed in each task's commit step — never `git add -A`.
 - The override file uses `csv.QUOTE_MINIMAL`-compatible rows; the `reason` field contains commas so it must stay double-quoted (as shown).

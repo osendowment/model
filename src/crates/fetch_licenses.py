@@ -1,4 +1,4 @@
-"""Add a `license` column to `data/crates/results.csv` from the local DB dump.
+"""Add a `license` column to `data/sources/crates/results.csv` from the local DB dump.
 
 `crates.io` requires every published crate to declare a license — it lives
 on each version, in the `license` field of `versions.csv`. We use the
@@ -30,8 +30,8 @@ log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
-RESULTS = DATA_DIR / "crates" / "results.csv"
-DUMP = DATA_DIR / "crates" / "db-dump"
+RESULTS = DATA_DIR / "sources" / "crates" / "results.csv"
+DUMP = DATA_DIR / "sources" / "crates" / "db-dump"
 
 
 def load_license_index() -> dict[str, str]:

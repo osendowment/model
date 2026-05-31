@@ -2,7 +2,7 @@
 Fetch all-the-package-repos from nice-registry and save as CSV.
 
 Downloads packages.json (212 MB): {package_name: repo_url | null}
-Saves non-null entries to data/npm/nice-registry/packages.csv.
+Saves non-null entries to data/sources/npm/nice-registry/packages.csv.
 
 Run:
     uv run src/npm/fetch_nice_registry.py
@@ -19,7 +19,7 @@ from rich.console import Console
 from rich.table import Table
 
 PACKAGES_URL = "https://media.githubusercontent.com/media/nice-registry/all-the-package-repos/master/data/packages.json"
-OUT_DIR      = "data/npm/nice-registry"
+OUT_DIR      = "data/sources/npm/nice-registry"
 OUT_CSV      = f"{OUT_DIR}/packages.csv"
 
 console = Console()

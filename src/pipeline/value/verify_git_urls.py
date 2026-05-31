@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Value pipeline step — verify every repo's git URL accepts a connection.
 
-Runs after `unify_value_data` has written `data/value-data.csv`. Reads that
+Runs after `unify_value_data` has written `data/value/value.csv`. Reads that
 file back, populates the `gh_valid` / `git_valid` / `gh_repo_id` columns,
 canonicalises `github_repo` to each repo's current (post-rename) name, and
 rewrites it.
@@ -10,10 +10,10 @@ Two strategies, chosen per URL:
 
   1. github_repo present → `src.github.fetch_repo_owner_data.fetch_and_persist`
      hits `/repos/{owner}/{repo}` via the GitHub API. Persists richer
-     metadata to `data/github/repos.csv` (license, owner, stars, …) so
+     metadata to `data/sources/github/repos.csv` (license, owner, stars, …) so
      downstream pipelines (eligibility) don't re-fetch.
   2. non-github canonical git URL → `git ls-remote --exit-code` against the
-     URL itself. Persists OK/FAIL to `data/git/urls.csv`.
+     URL itself. Persists OK/FAIL to `data/sources/git/urls.csv`.
 
 Both layers are TTL'd by `GIT_URL_TTL_DAYS`. A repo without any URL gets
 `gh_valid="" / git_valid=""` (unknown).
@@ -41,7 +41,7 @@ from src.pipeline.value.unify_value_data import OUTPUT_FILE, write_value_data
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
-GIT_VALIDITY_CACHE = DATA_DIR / "git" / "urls.csv"
+GIT_VALIDITY_CACHE = DATA_DIR / "sources" / "git" / "urls.csv"
 
 GIT_URL_TTL_DAYS = 365
 LS_REMOTE_TIMEOUT = 25
@@ -323,8 +323,8 @@ def verify_urls_in_aggregates(aggs: list[dict],
     """Populate `gh_valid` and `git_valid` on every row. Two strategies:
 
       • github_repo set → trigger `fetch_repo_owner_data.fetch_and_persist`,
-        then look up `valid` in `data/github/repos.csv` (→ `gh_valid`).
-      • non-github git_url → `git ls-remote`, cached in `data/git/urls.csv`
+        then look up `valid` in `data/sources/github/repos.csv` (→ `gh_valid`).
+      • non-github git_url → `git ls-remote`, cached in `data/sources/git/urls.csv`
         (→ `git_valid`).
 
     Returns (aggs, summary_stats). Mutates `aggs` in place.
@@ -380,7 +380,7 @@ def verify_urls_in_aggregates(aggs: list[dict],
         force=force,
         quiet=False,
     )
-    # Read back validity + identity. `data/github/repos.csv` is keyed by the
+    # Read back validity + identity. `data/sources/github/repos.csv` is keyed by the
     # slug we *asked* for (`repo`); `full_name` is the repo's current name
     # (differs when GitHub redirected us through a rename) and `repo_id` its
     # stable numeric id.

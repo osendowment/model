@@ -4,14 +4,14 @@ Uses /search/issues with `is:issue created:Y-01-01..Y-12-31` and
 `is:issue closed:Y-01-01..Y-12-31` qualifiers to get total_count directly.
 Excludes pull requests via `is:issue`.
 
-Filtered to repos with value_class A or B in data/value-data.csv that have a
+Filtered to repos with value_class A or B in data/value/value.csv that have a
 non-empty github_repo. Only fetches missing (repo, year, state) cells unless
 `--force` is given.
 
 Search API rate limit: 30 requests/min/token. Multiple tokens are rotated.
 
 Output (long format):
-    data/github/issues.csv  — header: repo, repo_id, year, metric, value
+    data/sources/github/issues.csv  — header: repo, repo_id, year, metric, value
     where metric ∈ {opened_issues, closed_issues}. One row per (repo, year,
     metric). Stable-sorted by (repo, year, metric). Smart upsert keyed on
     (repo, year, metric) — re-fetching a cell overwrites in place.
@@ -44,10 +44,10 @@ from src.pipeline.common.repos import VALUE_FILE, load_repo_ids, load_risk_slugs
 
 log = logging.getLogger(__name__)
 
-# Source of truth for the A/B universe is data/value-data.csv (handled by
+# Source of truth for the A/B universe is data/value/value.csv (handled by
 # src.repos.load_ab_slugs, which also skips archived repos).
 INPUT_FILE = VALUE_FILE
-OUTPUT_FILE = "data/github/issues.csv"
+OUTPUT_FILE = "data/sources/github/issues.csv"
 # Internal "state" name → long-format metric name.
 STATE_METRICS = {"opened": "opened_issues", "closed": "closed_issues"}
 LONG_FIELDS = ["repo", "repo_id", "year", "metric", "value"]
@@ -422,8 +422,8 @@ def main() -> None:
                              f"filters to value_class A/B with non-empty github_repo)")
     parser.add_argument("--output", default=OUTPUT_FILE,
                         help=f"Output long-format CSV (default: {OUTPUT_FILE})")
-    parser.add_argument("--repos-file", default="data/github/repos.csv",
-                        help="repos.csv for repo→repo_id lookup (default: data/github/repos.csv)")
+    parser.add_argument("--repos-file", default="data/sources/github/repos.csv",
+                        help="repos.csv for repo→repo_id lookup (default: data/sources/github/repos.csv)")
     parser.add_argument("--years", type=int, nargs=2, metavar=("START", "END"),
                         default=list(DEFAULT_YEARS),
                         help=f"Year range, inclusive (default: {DEFAULT_YEARS[0]}–{DEFAULT_YEARS[1]})")

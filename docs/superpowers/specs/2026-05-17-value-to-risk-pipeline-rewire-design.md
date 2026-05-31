@@ -46,12 +46,12 @@ target state, code is left runnable as-is.
 Lives in `src/pipeline/repos.py` (the risk-pipeline shared module). One
 canonical loader every risk script calls.
 
-- Reads `data/value-data.csv`; keeps rows whose `class ∈ RISK_INPUT_CLASSES`.
+- Reads `data/value/value.csv`; keeps rows whose `class ∈ RISK_INPUT_CLASSES`.
 - Dedups by lowercased `github_repo`, highest class wins (A > B).
 - Drops orphan rows (empty `github_repo`) and `gh_valid=False` (404) repos —
   metrics can't be fetched for them.
 - Resolves `repo_id` + `archived` + `size`/`stars` from
-  `data/github/repos.csv` (the new authoritative repo-metadata source,
+  `data/sources/github/repos.csv` (the new authoritative repo-metadata source,
   replacing both `top-repos.csv` enrichment and `eligibility-data.csv`
   repo_id lookups). `skip_archived=True` default.
 - Returns `list[RepoEntry]` sorted by slug.
