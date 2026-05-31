@@ -74,7 +74,7 @@ graph LR
         cpp_eol["cpp/check_eol.py<br/>unsupported"]
     end
 
-    npm --> npm_eol --> unify["src.pipeline.run_value_pipeline"]
+    npm --> npm_eol --> unify["src.value.run_value_pipeline"]
     pypi --> pypi_eol --> unify
     crates --> crates_eol --> unify
     cpp --> cpp_eol --> unify
@@ -106,7 +106,7 @@ graph LR
 ### Source of truth and scope
 
 Eligibility reads exclusively from `data/sources/github/repos.csv` (populated by
-`src.github.fetch_repo_owner_data`). No fallback to discovery data: a repo
+`src.sources.github.fetch_repo_owner_data`). No fallback to discovery data: a repo
 must have a fresh GitHub API record to appear in eligibility at all.
 
 **Scope is AB-class only.** A repo must satisfy all three:
@@ -204,26 +204,69 @@ and filter to entries with `Reason:` containing `RoQA`, `Dead upstream`,
 FTP-team statement of upstream EOL with very low FP rate. Deferred for now
 since it requires parsing an unstructured log.
 
+## Pipeline funnel
+
+End-to-end conversion counts and drop-rates across all three pipeline stages,
+as of the last full run. Re-run the stages and refresh when scope or
+thresholds change.
+
+| # | Stage | Filter applied | Count | Δ from prev | % of input |
+|---|---|---|---:|---:|---:|
+| 0 | Package discovery (4 ecos) | all packages from npm/pypi/crates/cpp `results.csv` | 17,609 | — | 100.0% |
+|   | ↳ npm | | 6,370 | | 36.2% |
+|   | ↳ crates | | 6,218 | | 35.3% |
+|   | ↳ pypi | | 3,139 | | 17.8% |
+|   | ↳ cpp (Debian + Homebrew) | | 1,882 | | 10.7% |
+| 1 | **AB-class packages** | `value_class ∈ {A, B}` (top ~75% of cumulative downloads × pagerank) | **1,628** | **−90.8%** | 9.2% |
+| 2 | **Unique GitHub repos (AB)** | dedup packages → repos via `value-data.csv` | **917** | **−43.7%** | 5.2% |
+|   | ↳ many-pkgs-per-repo collapse: babel/babel = ~140 npm pkgs, isaacs/glob ships under several names, etc. | | | | |
+| 3 | AB ∩ fetched in `github/repos.csv` | repo has a GitHub API record (run `src.sources.github.fetch_repo_owner_data`) | 892 | −2.7% | 5.1% |
+| 4 | AB ∩ valid (not 404) | `valid=True` in `repos.csv` (repo still exists) | 892 | 0.0% | 5.1% |
+| 5 | `is_oss=True` | strict OSI membership against `data/sources/osi/oss-licenses.csv` (handles SPDX expressions) | 875 | −1.9% | 5.0% |
+| 6 | NOT `is_eol` | every constituent package alive on its registry | 868 | −0.8% | 4.9% |
+| **7** | **Risk-scope (A/B)** | `value_class ∈ {A, B}` repos after dropping archived/invalid — input to the Risk pipeline (~224 A + ~676 B ≈ 900 repos) | **~900** | — | — |
+| **8** | **ELIGIBLE** | `valid_repo AND is_oss=True AND NOT is_eol` — runs after Risk; future scope narrows to `value_class=A` ∩ highest risk class | **868** | **0.0%** | **4.9%** |
+
+### Key drop points
+
+- **Stage 0 → 1 (−91%)**: the pareto cut. We deliberately keep only the top-of-pagerank packages in the funding scope. Everything else is fetched & classified for completeness but not eligible.
+- **Stage 1 → 2 (−44%)**: monorepo collapse. `babel/babel`, `isaacs/*`, `python/*` etc. ship many AB-class packages from a single GitHub repo. This is normal — the funding decision is per-repo, not per-package.
+- **Stage 2 → 3 (−3%)**: GitHub fetch coverage. Closes to ~0% after a refresh of `src.sources.github.fetch_repo_owner_data`.
+- **Stage 4 → 5 (−2%)**: license check. The few remaining are `noassertion` (cpp libs without Homebrew formula match) plus genuine non-OSS rows (CC-BY data packages, MIT-CMU variant, etc.).
+- **Stage 5 → 6 (−1%)**: EOL — small absolute number (~7 archived projects).
+- **Stage 7 (Risk-scope)**: Risk runs on A/B value-class repos directly from `value-data.csv`, skipping archived and invalid repos.
+- **Stage 8 (ELIGIBLE)**: Eligibility runs after Risk. The 868 count reflects the last full eligibility run; re-run `src.eligibility.run_eligibility_pipeline` to refresh.
+
+### How to refresh these numbers
+
+```
+uv run python -m src.value.run_value_pipeline         # rebuilds value-data.csv
+uv run python -m src.risk.run_risk_pipeline           # rebuilds risk-data.csv
+uv run python -m src.eligibility.run_eligibility_pipeline   # rebuilds eligibility-data.csv
+```
+
+Then re-count and update the table.
+
 ## Scripts
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `src/{eco}/check_eol.py` | Flag EOL packages → `data/sources/{eco}/eol.csv` | `uv run python -m src.npm.check_eol` |
-| `src/{eco}/fetch_licenses.py` | Add `license` (lowercase SPDX) to `data/sources/{eco}/results.csv` from each registry (npm/PyPI live API; crates DB dump; Homebrew raw cache; cpp joined from Homebrew) | `uv run python -m src.npm.fetch_licenses` |
-| `src/osi/fetch_licenses.py` | Refresh the OSI-approved SPDX list (90-day TTL) → `data/sources/osi/oss-licenses.csv`. Sourced from the SPDX license list filtered by `isOsiApproved=true`. | `uv run python -m src.osi.fetch_licenses` |
-| `src/github/fetch_repo_owner_data.py` | Authoritative repo + owner data → `data/sources/github/{repos,users}.csv` | `uv run python -m src.github.fetch_repo_owner_data` |
-| `src/foundations/match_repos.py` | Determine FOSS-foundation host per repo → `data/sources/foundations/host-by-repo.csv` | `uv run python -m src.foundations.match_repos` |
-| `src/pipeline/value/unify_value_data.py` | Unify per-eco results into `data/value/value.csv` | `uv run python -m src.pipeline.run_value_pipeline` |
-| `src/pipeline/eligibility/classify_eligibility.py` | Final eligibility per repo → `data/eligibility/eligibility.csv` | `uv run python -m src.pipeline.run_eligibility_pipeline` |
+| `src/{eco}/check_eol.py` | Flag EOL packages → `data/sources/{eco}/eol.csv` | `uv run python -m src.sources.npm.check_eol` |
+| `src/{eco}/fetch_licenses.py` | Add `license` (lowercase SPDX) to `data/sources/{eco}/results.csv` from each registry (npm/PyPI live API; crates DB dump; Homebrew raw cache; cpp joined from Homebrew) | `uv run python -m src.sources.npm.fetch_licenses` |
+| `src/sources/osi/fetch_licenses.py` | Refresh the OSI-approved SPDX list (90-day TTL) → `data/sources/osi/oss-licenses.csv`. Sourced from the SPDX license list filtered by `isOsiApproved=true`. | `uv run python -m src.sources.osi.fetch_licenses` |
+| `src/sources/github/fetch_repo_owner_data.py` | Authoritative repo + owner data → `data/sources/github/{repos,users}.csv` | `uv run python -m src.sources.github.fetch_repo_owner_data` |
+| `src/sources/foundations/match_repos.py` | Determine FOSS-foundation host per repo → `data/sources/foundations/host-by-repo.csv` | `uv run python -m src.sources.foundations.match_repos` |
+| `src/value/unify_value_data.py` | Unify per-eco results into `data/value/value.csv` | `uv run python -m src.value.run_value_pipeline` |
+| `src/eligibility/classify_eligibility.py` | Final eligibility per repo → `data/eligibility/eligibility.csv` | `uv run python -m src.eligibility.run_eligibility_pipeline` |
 
 Run order:
 1. per-ecosystem `check_eol.py` and `fetch_licenses.py` (parallelisable)
-2. `src.osi.fetch_licenses` (refreshes the OSI list — TTL'd, usually a no-op)
-3. `src.pipeline.run_value_pipeline` (unifies per-eco results → `value-data.csv`)
-4. `src.pipeline.run_risk_pipeline` (scores A/B repos → `risk-data.csv`)
-5. `src.github.fetch_repo_owner_data` (populates the repo-level source of truth)
-6. `src.foundations.match_repos` (host classification)
-7. `src.pipeline.run_eligibility_pipeline` (joins everything → `eligibility-data.csv`)
+2. `src.sources.osi.fetch_licenses` (refreshes the OSI list — TTL'd, usually a no-op)
+3. `src.value.run_value_pipeline` (unifies per-eco results → `value-data.csv`)
+4. `src.risk.run_risk_pipeline` (scores A/B repos → `risk-data.csv`)
+5. `src.sources.github.fetch_repo_owner_data` (populates the repo-level source of truth)
+6. `src.sources.foundations.match_repos` (host classification)
+7. `src.eligibility.run_eligibility_pipeline` (joins everything → `eligibility-data.csv`)
 
 License priority inside `eligibility.py`:
 1. **Per-eco `results.csv`** — registry-declared SPDX (most authoritative; the package author set it).
@@ -236,6 +279,22 @@ License priority inside `eligibility.py`:
 - **`""` (empty)** — license is **unknown**: GitHub returned `noassertion` and we have no per-eco registry data to disambiguate, or no license declared anywhere.
 
 **Eligibility requires `is_oss=True`** — both `False` and `""` produce `eligibility=False`. We won't fund a repo we can't verify is OSS.
+
+## Eligibility data sources
+
+Source → signal extracted for the Eligibility stage.
+
+| Source | Signal extracted for Eligibility |
+|---|---|
+| **npm registry** | latest version's `deprecated` flag → `npm_deprecated` |
+| **PyPI JSON API** | `Development Status :: 7 - Inactive` Trove classifier → `pypi_inactive` |
+| **crates.io DB dump** | default version's `yanked` flag → `crates_yanked` |
+| **Homebrew formula API** | per-formula `disabled` / `deprecated` flags → `homebrew_disabled` / `homebrew_deprecated` |
+| **endoflife.date** (`endoflife.date/api/<product>.json`) | EOL cycle dates for ~20 well-known products (openssl, postgresql, python, ruby, php, ...) → `endoflife_date` overlay |
+| **Foundation rosters** (Apache, CNCF, Eclipse, LF, NumFocus, OpenJS, PSF, SFC) | `repo → host` (foundation slug) via `data/sources/foundations/host-by-repo.csv` |
+| **FLOSS Fund manifests** (`dir.floss.fund/funding-manifests.tar.gz`) | `funding.json` entity, project metadata, `funding_channels` *(fetched, integration TBD)* |
+| **GitHub Repos API** (`api.github.com/repos/<owner>/<repo>`) | `license`, `owner`, `valid_repo`, `repo_url` |
+| **GitHub Users API** (`api.github.com/users/<login>`) | owner display name + `blog` URL → `repo_owner`, `repo_owner_url` |
 
 ## Output
 

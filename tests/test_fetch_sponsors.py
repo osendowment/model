@@ -1,4 +1,4 @@
-from src.github.fetch_sponsors import logins_for_repo, status_from_counts
+from src.sources.github.fetch_sponsors import logins_for_repo, status_from_counts
 
 
 def test_logins_owner_plus_yml():

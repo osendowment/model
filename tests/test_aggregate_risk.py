@@ -2,7 +2,7 @@
 
 import math
 
-from src.pipeline.risk.aggregate_risk import overall_score, FIELDS, COMPONENTS
+from src.risk.aggregate_risk import overall_score, FIELDS, COMPONENTS
 
 
 def test_risk_csv_is_narrow():

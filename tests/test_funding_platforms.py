@@ -1,4 +1,4 @@
-from src.pipeline.common.funding_platforms import (
+from src.common.funding_platforms import (
     FUNDING_PLATFORMS,
     platform_handle_from_url,
     normalize_oc_slug,

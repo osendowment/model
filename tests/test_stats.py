@@ -1,6 +1,6 @@
 """Tests for the shared risk-percentile statistics helpers."""
 
-from src.pipeline.common.stats import (
+from src.common.stats import (
     geom_mean_composite,
     geometric_mean,
     risk_percentiles,

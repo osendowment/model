@@ -2,13 +2,26 @@
 
 ## Code Organization
 
-- All scripts must live in `src/` under the relevant ecosystem folder:
-  - `src/npm/` — npm/JavaScript ecosystem scripts
-  - `src/crates/` — crates.io/Rust ecosystem scripts
-  - `src/pypi/` — PyPI/Python ecosystem scripts
-  - `src/github/` — GitHub API scripts
-- Only truly general-purpose scripts (not tied to any one ecosystem) go in a top-level `scripts/` folder
-- Never leave scripts in a bare `scripts/` folder if they belong to a specific ecosystem
+`src/` is organized by **role**, mirroring the Value → Risk → Eligibility pipeline
+(and the `data/` layout). A script's location tells you what it is:
+
+- `src/sources/<source>/` — source-related scripts: everything that fetches or
+  processes data from one external source. One folder per source — ecosystem
+  registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git
+  analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`,
+  `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `floss_fund/`,
+  `opencollective/`, `foundations/`, `llms/`, `ecosystems/`). Module folders use
+  underscores (importable); the matching `data/sources/` folder may use a hyphen
+  (e.g. code `floss_fund/` ↔ data `floss-fund/`).
+- `src/common/` — shared infrastructure used across stages: `params.py`, `repos.py`,
+  `tables.py`, `stats.py`, `pipeline_runner.py`, `funding_platforms.py`.
+- `src/value/`, `src/risk/`, `src/eligibility/` — pipeline-stage scripts: the
+  per-dimension builders for that stage **plus** its orchestrator
+  (`run_<stage>_pipeline.py`, run via `uv run python -m src.<stage>.run_<stage>_pipeline`).
+- `src/settings.json` — model parameters/config at the `src/` root (loaded by `src/common/params.py`).
+- Only truly general-purpose scripts (tied to no source or stage) go in a top-level
+  `scripts/` folder. Never leave a script in a bare `scripts/` folder if it belongs
+  to a specific source or stage.
 
 ## Data Organization
 
@@ -20,6 +33,15 @@
 - `data/eligibility/` — Eligibility-stage output: `eligibility.csv`.
 
 Rule: a script reading external/fetched data points at `data/sources/<source>/…`; a script reading or writing a stage result points at `data/<stage>/…`. Never write a stage output into `data/sources/`, and never write fetched source data into a stage folder.
+
+## Documentation
+
+`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md`, `eligibility.md` — with everything else in a subfolder:
+
+- `docs/sources/<source>.md` — one page per external data source.
+- `docs/components/<component>.md` — cross-cutting component docs (e.g. `validation.md`, how `data/value/validation.csv` is formed).
+
+When a doc's content spans multiple stages, fold it into the relevant stage page(s) rather than adding a new top-level overview doc.
 
 ## Philosophy
 

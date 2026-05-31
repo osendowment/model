@@ -1,4 +1,4 @@
-"""Tests for src/pipeline/value.py — covers helper readers, per-ecosystem
+"""Tests for src/value.py — covers helper readers, per-ecosystem
 collection, repo-level aggregation, sort/grouping invariants, and the
 end-to-end CSV writer.
 
@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from src.pipeline.value.unify_value_data import (
+from src.value.unify_value_data import (
     CLASS_RANK,
     ECOSYSTEMS,
     FIELDS,
@@ -234,7 +234,7 @@ class TestCollectEcosystem:
         # since the data-layout refactor. The default data_dir must point
         # there (not data/), or unify silently reads nothing and writes an
         # empty value.csv. Guard the default + the shipped results.csv path.
-        import src.pipeline.value.unify_value_data as mod
+        import src.value.unify_value_data as mod
         assert mod.SOURCES_DIR == mod.DATA_DIR / "sources"
         assert (mod.SOURCES_DIR / "npm" / "results.csv").exists()
 
@@ -629,7 +629,7 @@ class TestRepoOverrides:
         # Drives the real chokepoint: aggregate_by_repo calls apply_repo_overrides
         # internally, loading the curated CSV from OVERRIDES_FILE. Point that at
         # a temp file so the test is hermetic.
-        import src.pipeline.value.unify_value_data as mod
+        import src.value.unify_value_data as mod
         ov = tmp_path / "overrides.csv"
         _write_csv(ov, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"],
                    [["@sinclair/typebox", "npm", "sinclairzx81/typebox", "", "", "wrong upstream"]])

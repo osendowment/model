@@ -1,4 +1,4 @@
-"""Tests for src/github/fetch_repo_owner_data.py.
+"""Tests for src/sources/github/fetch_repo_owner_data.py.
 
 Focus: `_fetch_repo`'s handling of GitHub's 301/302 rename redirects.
 A repo can be renamed more than once, so the redirect may be a *chain* —
@@ -10,7 +10,7 @@ The GitHub API is faked: `FakeLimiter` serves a scripted sequence of
 
 from __future__ import annotations
 
-from src.github.fetch_repo_owner_data import _fetch_repo
+from src.sources.github.fetch_repo_owner_data import _fetch_repo
 
 
 class FakeResponse:

@@ -1,4 +1,4 @@
-"""Tests for src/pipeline/value/build_validation.py — the validation rollup.
+"""Tests for src/value/build_validation.py — the validation rollup.
 
 Covers target extraction from value rows, per-target source aggregation,
 the cache→verdict load (with rename double-keying), override `valid` pins,
@@ -12,7 +12,7 @@ import csv
 
 import pytest
 
-from src.pipeline.value import build_validation as bv
+from src.value import build_validation as bv
 
 
 def _write(path, header, rows):

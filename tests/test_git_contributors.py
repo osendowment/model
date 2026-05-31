@@ -1,9 +1,9 @@
-"""Tests for src/git/contributors.py — identity merging, bot detection, BF/HHI."""
+"""Tests for src/sources/git/contributors.py — identity merging, bot detection, BF/HHI."""
 
 import subprocess
 from unittest.mock import patch
 
-from src.git.contributors import (
+from src.sources.git.contributors import (
     _canon_email,
     _derive_login,
     _is_bot_identity,
@@ -147,7 +147,7 @@ class TestLogCommits:
                b"1600000001\x1fAlice\x1falice@x.com")
         fake = subprocess.CompletedProcess(args=[], returncode=0,
                                            stdout=raw, stderr=b"")
-        with patch("src.git.contributors.subprocess.run", return_value=fake):
+        with patch("src.sources.git.contributors.subprocess.run", return_value=fake):
             rows = log_commits("/fake/clone")
         assert len(rows) == 2
         assert rows[0][0] == 1600000000.0 and rows[0][2] == "jose@x.com"

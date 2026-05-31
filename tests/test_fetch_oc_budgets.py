@@ -1,6 +1,6 @@
-"""Tests for src/opencollective/fetch_budgets.py response parsing."""
+"""Tests for src/sources/opencollective/fetch_budgets.py response parsing."""
 
-from src.opencollective.fetch_budgets import YEARS, parse_oc_account, _is_fresh
+from src.sources.opencollective.fetch_budgets import YEARS, parse_oc_account, _is_fresh
 
 
 def test_parse_ok_with_per_year_amounts():

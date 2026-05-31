@@ -1,4 +1,4 @@
-"""Regression tests for src/git/clone.py.
+"""Regression tests for src/sources/git/clone.py.
 
 ``test_resolve_mainline_sha`` reproduces the real toml-rs/toml bug: GitHub's
 Commits API returned a merged CI-template commit — reachable from the default
@@ -17,7 +17,7 @@ import subprocess
 
 import pytest
 
-from src.git.clone import resolve_mainline_sha, sparse_clone
+from src.sources.git.clone import resolve_mainline_sha, sparse_clone
 
 
 def _run(cwd, *args, env=None) -> str:

@@ -1,4 +1,4 @@
-"""Unit and integration tests for crates pipeline (src/crates/process_data.py)."""
+"""Unit and integration tests for crates pipeline (src/sources/crates/process_data.py)."""
 
 import csv
 import re

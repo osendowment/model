@@ -1,6 +1,6 @@
 """Tests for src/github/fetch_sponsorships.py — outbound sponsoring extraction."""
 
-from src.github.fetch_sponsorships import sponsoring_count, _is_fresh
+from src.sources.github.fetch_sponsorships import sponsoring_count, _is_fresh
 
 
 def test_sponsoring_count_from_org():

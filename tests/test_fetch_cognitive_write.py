@@ -1,7 +1,7 @@
 """Regression tests for fetch_cognitive._write_results — no fake zeros."""
 
-from src.git.long_format import read as read_long
-from src.github.fetch_cognitive import RepoCognitive, _write_results
+from src.sources.git.long_format import read as read_long
+from src.sources.github.fetch_cognitive import RepoCognitive, _write_results
 
 
 class TestWriteResults:

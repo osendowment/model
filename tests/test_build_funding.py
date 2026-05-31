@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from src.pipeline.risk import build_funding as bf
+from src.risk import build_funding as bf
 
 
 def test_oc_avg_funding_zero_default():

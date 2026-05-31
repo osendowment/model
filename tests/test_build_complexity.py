@@ -2,7 +2,7 @@
 
 
 def test_scoreercentile_columns():
-    from src.pipeline.common.percentiles import add_percentiles
+    from src.common.percentiles import add_percentiles
     rows = [
         {"loc_2025_eoy": "2000000", "cyclomatic_max": "90"},
         {"loc_2025_eoy": "5000", "cyclomatic_max": "8"},

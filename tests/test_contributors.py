@@ -2,11 +2,11 @@
 
 import pytest
 
-from src.github.fetch_contributors_metrics import (
+from src.sources.github.fetch_contributors_metrics import (
     _compute_bus_factor,
     compute_lifetime_metrics,
 )
-from src.github.models import Contributor, is_bot
+from src.sources.github.models import Contributor, is_bot
 
 
 class TestComputeBusFactor:

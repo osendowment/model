@@ -2,7 +2,7 @@
 
 
 def test_bus_factor_one_scores_100_concentration():
-    from src.pipeline.common.percentiles import add_percentiles
+    from src.common.percentiles import add_percentiles
     rows = [
         {"bf_commits_git_2021_2025": "1", "hhi_commits_git_2021_2025": "9000"},
         {"bf_commits_git_2021_2025": "5", "hhi_commits_git_2021_2025": "2000"},

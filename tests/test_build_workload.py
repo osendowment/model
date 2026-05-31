@@ -2,7 +2,7 @@
 
 
 def test_scoreercentile_columns():
-    from src.pipeline.common.percentiles import add_percentiles
+    from src.common.percentiles import add_percentiles
     rows = [
         {"loc_per_ac": "100000", "cve_per_ac": "5", "nni_per_ac": "50"},
         {"loc_per_ac": "100", "cve_per_ac": "0", "nni_per_ac": "1"},

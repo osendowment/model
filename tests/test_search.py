@@ -4,7 +4,7 @@ import csv
 import os
 import tempfile
 
-from src.github.fetch_top_repos import _parse_item, _cache_key, _initial_periods, _upsert_repos, FIELDS
+from src.sources.github.fetch_top_repos import _parse_item, _cache_key, _initial_periods, _upsert_repos, FIELDS
 
 
 class TestParseItem:
@@ -134,7 +134,7 @@ class TestUpsertRepos:
 
     def test_adds_new_repos(self, tmp_path, monkeypatch):
         repos_file = str(tmp_path / "repos.csv")
-        monkeypatch.setattr("src.github.fetch_top_repos.REPOS_FILE", repos_file)
+        monkeypatch.setattr("src.sources.github.fetch_top_repos.REPOS_FILE", repos_file)
 
         new = {
             "a/b": self._make_row(1, "a/b", 500),
@@ -151,7 +151,7 @@ class TestUpsertRepos:
 
     def test_updates_existing_repos(self, tmp_path, monkeypatch):
         repos_file = str(tmp_path / "repos.csv")
-        monkeypatch.setattr("src.github.fetch_top_repos.REPOS_FILE", repos_file)
+        monkeypatch.setattr("src.sources.github.fetch_top_repos.REPOS_FILE", repos_file)
 
         self._write_csv(repos_file, [self._make_row(1, "a/b", 500)])
 
@@ -166,7 +166,7 @@ class TestUpsertRepos:
 
     def test_preserves_existing_and_adds_new(self, tmp_path, monkeypatch):
         repos_file = str(tmp_path / "repos.csv")
-        monkeypatch.setattr("src.github.fetch_top_repos.REPOS_FILE", repos_file)
+        monkeypatch.setattr("src.sources.github.fetch_top_repos.REPOS_FILE", repos_file)
 
         self._write_csv(repos_file, [self._make_row(1, "a/b", 500)])
 
@@ -178,7 +178,7 @@ class TestUpsertRepos:
 
     def test_sorted_by_stars_descending(self, tmp_path, monkeypatch):
         repos_file = str(tmp_path / "repos.csv")
-        monkeypatch.setattr("src.github.fetch_top_repos.REPOS_FILE", repos_file)
+        monkeypatch.setattr("src.sources.github.fetch_top_repos.REPOS_FILE", repos_file)
 
         new = {
             "low/stars": self._make_row(1, "low/stars", 100),

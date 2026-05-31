@@ -4,8 +4,8 @@ import datetime
 
 import pytest
 
-from src.github.fetch_contributors_metrics import parse_repo
-from src.github.models import DateRange
+from src.sources.github.fetch_contributors_metrics import parse_repo
+from src.sources.github.models import DateRange
 
 
 class TestParseRepo:

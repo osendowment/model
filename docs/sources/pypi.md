@@ -34,12 +34,12 @@ No authentication required (except BigQuery for download data).
 
 | Script | Purpose |
 |--------|---------|
-| `src/pypi/fetch_pypi_data.py` | Iterative dep crawler (~45 pkg/s) |
-| `src/pypi/process_data.py` | Build outputs from raw data |
+| `src/sources/pypi/fetch_pypi_data.py` | Iterative dep crawler (~45 pkg/s) |
+| `src/sources/pypi/process_data.py` | Build outputs from raw data |
 
 ```bash
-uv run src/pypi/fetch_pypi_data.py [--concurrency 30] [--limit 50]
-uv run python -m src.pypi.process_data [--min-avg N] [--alpha F]
+uv run src/sources/pypi/fetch_pypi_data.py [--concurrency 30] [--limit 50]
+uv run python -m src.sources.pypi.process_data [--min-avg N] [--alpha F]
 ```
 
 ## Pipeline

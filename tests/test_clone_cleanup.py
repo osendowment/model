@@ -1,10 +1,10 @@
-"""Tests for clone temp-dir auto-cleanup in src/git/disk.py."""
+"""Tests for clone temp-dir auto-cleanup in src/sources/git/disk.py."""
 
 import os
 import shutil
 import time
 
-from src.git.disk import CLONE_TMP_PREFIX, make_clone_tmpdir, sweep_stale_clone_dirs
+from src.sources.git.disk import CLONE_TMP_PREFIX, make_clone_tmpdir, sweep_stale_clone_dirs
 
 
 def _aged_dir(parent, name, age_minutes):

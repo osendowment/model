@@ -1,8 +1,8 @@
-"""Tests for src/pipeline/common/tables.py — shared wide-CSV loaders."""
+"""Tests for src/common/tables.py — shared wide-CSV loaders."""
 
 import csv
 
-from src.pipeline.common.tables import load_column_by_repo, load_rows_by_repo
+from src.common.tables import load_column_by_repo, load_rows_by_repo
 
 
 def _write(path, header, rows):

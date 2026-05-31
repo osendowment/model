@@ -2,7 +2,7 @@
 
 
 def test_security_percentile_columns():
-    from src.pipeline.common.percentiles import add_percentiles
+    from src.common.percentiles import add_percentiles
     rows = [
         {"openssf_score": "2", "cve_count_5y": "10"},   # low score + many CVEs = worst
         {"openssf_score": "9", "cve_count_5y": "0"},

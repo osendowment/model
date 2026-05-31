@@ -1,4 +1,4 @@
-"""Tests for src/pipeline/value/verify_git_urls.py.
+"""Tests for src/value/verify_git_urls.py.
 
 Focus: `verify_urls_in_aggregates` reading back `data/sources/github/repos.csv`
 to annotate each value-data row with the GitHub repo's stable numeric id
@@ -13,9 +13,9 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
-import src.github.fetch_repo_owner_data as gh_mod
-import src.pipeline.value.verify_git_urls as vgu
-from src.pipeline.value.verify_git_urls import verify_urls_in_aggregates
+import src.sources.github.fetch_repo_owner_data as gh_mod
+import src.value.verify_git_urls as vgu
+from src.value.verify_git_urls import verify_urls_in_aggregates
 
 
 def _write_repos_csv(path: Path, rows: list[list[str]]) -> None:
