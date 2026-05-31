@@ -5,6 +5,7 @@ __pycache__/
 .cache/
 .DS_Store
 .pytest_cache/
+.ruff_cache/
 .claude/
 .coverage
 tasks/
