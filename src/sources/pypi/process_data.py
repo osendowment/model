@@ -42,7 +42,7 @@ from src.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_v
 BQ_CSV      = "data/sources/pypi/bigquery/bq-package-downloads.csv"
 DEPS_CSV    = "data/sources/pypi/raw/package-dependencies.csv"
 GITHUB_CSV_RAW = "data/sources/pypi/raw/package-github-mapping.csv"
-DATA_DIR    = "data/pypi"
+DATA_DIR    = "data/sources/pypi"
 
 TOP_CSV     = f"{DATA_DIR}/top-packages.csv"
 DEPTREE_CSV = f"{DATA_DIR}/dependency-tree.csv"

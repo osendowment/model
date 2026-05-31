@@ -11,20 +11,31 @@ For each cpp project that doesn't already have a `git` URL in
 every `href="..."` out of it, and runs them through the classifier in
 `src.build_git`. Only URLs recognised as Git endpoints are kept.
 
-Caches per-project HTML in `data/sources/repology/html-cache/<name>.html` so
-re-runs are free. Output: `data/sources/repology/project-urls.csv` with columns
-`project, candidate_url, platform`.
+The HTML is parsed in memory and discarded — never persisted. Instead the
+parsed result is cached in a CSV so re-runs skip already-checked projects:
+
+    `data/sources/repology/project-urls.csv`
+    columns: project, candidate_url, platform, status, fetched_at
+
+A project that yields git URLs gets one `status=ok` row per URL. A project
+that was checked but yielded nothing gets a single sentinel row (blank URL)
+with `status=none` (HTTP 200, no upstream git link) or `not_found` (HTTP 4xx)
+— this is what lets the cache skip them next run. `status=error` rows (network
+/ timeout) are recorded for audit but always retried, so a transient failure
+is never mistaken for "checked, nothing there".
 
 Usage:
     uv run -m src.sources.cpp.fetch_repology_urls
-    uv run -m src.sources.cpp.fetch_repology_urls --ab-only   # only AB-class cpp projects
-    uv run -m src.sources.cpp.fetch_repology_urls --refresh   # re-fetch even cached
+    uv run -m src.sources.cpp.fetch_repology_urls --classes A,B   # only A/B-class cpp projects
+    uv run -m src.sources.cpp.fetch_repology_urls --limit 20      # fetch first 20 uncached (testing)
+    uv run -m src.sources.cpp.fetch_repology_urls --refresh       # re-fetch even cached projects
 """
 
 import argparse
 import asyncio
 import csv
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 
 import aiohttp
@@ -44,8 +55,11 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 RESULTS = DATA_DIR / "sources" / "cpp" / "results.csv"
-CACHE_DIR = DATA_DIR / "sources" / "repology" / "html-cache"
-OUTPUT = DATA_DIR / "sources" / "repology" / "project-urls.csv"
+CACHE = DATA_DIR / "sources" / "repology" / "project-urls.csv"
+FIELDNAMES = ["project", "candidate_url", "platform", "status", "fetched_at"]
+# A project with any of these statuses has been definitively checked — re-runs
+# skip it. 'error' is intentionally absent: transient failures must be retried.
+DONE_STATUSES = frozenset({"ok", "none", "not_found"})
 
 INFO_URL = "https://repology.org/project/{name}/information"
 HREF_RE = re.compile(r'href="([^"]+)"')
@@ -79,32 +93,49 @@ def load_cpp_targets(classes: tuple[str, ...]) -> list[str]:
     return out
 
 
-async def fetch_one(
-    session: aiohttp.ClientSession,
-    project: str,
-    refresh: bool,
-) -> str:
-    """Return cached or freshly fetched HTML for `project`'s information page. '' on error."""
-    cache_path = CACHE_DIR / f"{project.replace('/', '_')}.html"
-    if not refresh and cache_path.exists():
-        return cache_path.read_text()
+def load_cache(path: Path) -> tuple[dict[str, list[dict]], set[str]]:
+    """Load the URL cache → (rows_by_project, done_projects).
 
+    `done_projects` are those already definitively checked (`status` in
+    DONE_STATUSES); re-runs skip them. Rows with `status=error`, or a legacy
+    file with no `status` column, are handled gracefully — legacy rows are all
+    real URLs so they count as `ok`, while errors are left out of `done` so
+    they get retried.
+    """
+    rows_by_project: dict[str, list[dict]] = {}
+    done: set[str] = set()
+    if not path.exists():
+        return rows_by_project, done
+    with open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            project = r["project"]
+            status = (r.get("status") or "ok").strip()  # legacy rows → ok
+            rows_by_project.setdefault(project, []).append({
+                "project": project,
+                "candidate_url": r.get("candidate_url", ""),
+                "platform": r.get("platform", ""),
+                "status": status,
+                "fetched_at": r.get("fetched_at", ""),
+            })
+            if status in DONE_STATUSES:
+                done.add(project)
+    return rows_by_project, done
+
+
+async def fetch_one(session: aiohttp.ClientSession, project: str) -> tuple[str, str]:
+    """Fetch `project`'s Repology information page. Returns (html, fetch_status).
+
+    fetch_status is 'ok' (HTTP 200, html returned), 'not_found' (any non-200),
+    or 'error' (network failure / timeout). The HTML is never persisted.
+    """
     url = INFO_URL.format(name=project)
     try:
         async with session.get(url, headers=HEADERS, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as r:
-            if r.status == 404:
-                CACHE_DIR.mkdir(parents=True, exist_ok=True)
-                cache_path.write_text("")
-                return ""
             if r.status != 200:
-                return ""
-            html = await r.text()
+                return "", "not_found"
+            return await r.text(), "ok"
     except (aiohttp.ClientError, asyncio.TimeoutError):
-        return ""
-
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cache_path.write_text(html)
-    return html
+        return "", "error"
 
 
 def extract_git_urls(html: str) -> list[tuple[str, str]]:
@@ -129,18 +160,42 @@ def extract_git_urls(html: str) -> list[tuple[str, str]]:
     return out
 
 
+def rows_for(project: str, git_urls: list[tuple[str, str]], fetch_status: str, date: str) -> list[dict]:
+    """Build the cache rows for one fetched project.
+
+    One `ok` row per git URL, or a single sentinel row recording why nothing
+    was found (`none` = page had no git link, else the fetch_status).
+    """
+    if git_urls:
+        return [{"project": project, "candidate_url": url, "platform": platform,
+                 "status": "ok", "fetched_at": date} for url, platform in git_urls]
+    status = "none" if fetch_status == "ok" else fetch_status
+    return [{"project": project, "candidate_url": "", "platform": "",
+             "status": status, "fetched_at": date}]
+
+
 async def main_async(args: argparse.Namespace) -> None:
     classes = tuple(c.strip().upper() for c in args.classes.split(",") if c.strip())
+    date = datetime.now(timezone.utc).date().isoformat()
+
+    rows_by_project, done = load_cache(CACHE)
     targets = load_cpp_targets(classes)
+    if args.limit:
+        targets = targets[: args.limit]
+    to_fetch = list(targets) if args.refresh else [t for t in targets if t not in done]
+    fetch_set = set(to_fetch)
+
     console.rule("[bold white]fetch_repology_urls.py[/bold white]")
     console.print(f"  Targets   : [cyan]{len(targets):,}[/cyan] cpp projects "
                   f"(classes={','.join(classes)}) without git URL")
-    console.print(f"  Cache     : [cyan]{CACHE_DIR}[/cyan]")
-    console.print(f"  Output    : [cyan]{OUTPUT}[/cyan]")
+    console.print(f"  Cached    : [cyan]{len(targets) - len(to_fetch):,}[/cyan] skipped "
+                  f"(already checked){' — ignored (--refresh)' if args.refresh else ''}")
+    console.print(f"  Fetching  : [cyan]{len(to_fetch):,}[/cyan] this run")
+    console.print(f"  Cache     : [cyan]{CACHE}[/cyan]")
     console.print()
 
     sem = asyncio.Semaphore(CONCURRENCY)
-    rows: list[dict] = []
+    new_rows: list[dict] = []
     found_any_git = 0
 
     progress = Progress(
@@ -155,23 +210,17 @@ async def main_async(args: argparse.Namespace) -> None:
 
     async with aiohttp.ClientSession() as session:
         with progress:
-            task_id = progress.add_task("starting…", total=len(targets))
+            task_id = progress.add_task("starting…", total=len(to_fetch))
 
             async def process(project: str) -> None:
                 nonlocal found_any_git
                 async with sem:
                     progress.update(task_id, description=f"[cyan]{project[:36]}[/cyan]")
-                    html = await fetch_one(session, project, args.refresh)
+                    html, fetch_status = await fetch_one(session, project)
                     git_urls = extract_git_urls(html)
+                    new_rows.extend(rows_for(project, git_urls, fetch_status, date))
                     if git_urls:
                         found_any_git += 1
-                    for url, platform in git_urls:
-                        rows.append({
-                            "project": project,
-                            "candidate_url": url,
-                            "platform": platform,
-                        })
-                    if git_urls:
                         best = git_urls[0]
                         progress.console.print(
                             f"  [green]{project:<32}[/green] → "
@@ -179,27 +228,37 @@ async def main_async(args: argparse.Namespace) -> None:
                         )
                     progress.advance(task_id)
 
-            await asyncio.gather(*(process(p) for p in targets))
+            await asyncio.gather(*(process(p) for p in to_fetch))
 
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(
-            f, fieldnames=["project", "candidate_url", "platform"],
-            quoting=csv.QUOTE_ALL,
-        )
+    # Carry forward every cached row we did not just re-fetch, then add the new
+    # ones. Sort by (project, url) so the committed cache has stable diffs.
+    keep_rows = [row for p, rows in rows_by_project.items() if p not in fetch_set for row in rows]
+    final_rows = keep_rows + new_rows
+    final_rows.sort(key=lambda r: (r["project"], r["candidate_url"]))
+
+    CACHE.parent.mkdir(parents=True, exist_ok=True)
+    with open(CACHE, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES, quoting=csv.QUOTE_ALL)
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(final_rows)
 
+    n_url_rows = sum(1 for r in final_rows if r["candidate_url"])
+    n_projects_with_git = len({r["project"] for r in final_rows if r["status"] == "ok"})
     console.print()
-    console.print(f"[green]✓[/green] {found_any_git:,}/{len(targets):,} projects yielded a git URL")
-    console.print(f"[green]✓[/green] {len(rows):,} candidate URLs → {OUTPUT}")
+    console.print(f"[green]✓[/green] fetched {len(to_fetch):,} this run, "
+                  f"{found_any_git:,} yielded a git URL")
+    console.print(f"[green]✓[/green] cache now: {n_projects_with_git:,} projects with git "
+                  f"({n_url_rows:,} candidate URLs) → {CACHE}")
 
 
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--classes", default="A,B,C",
                    help="Comma-separated value_class filter (default A,B,C — D excluded)")
-    p.add_argument("--refresh", action="store_true", help="Re-fetch even when cached")
+    p.add_argument("--limit", type=int, default=0,
+                   help="Only process the first N targets (0 = all). For testing.")
+    p.add_argument("--refresh", action="store_true",
+                   help="Re-fetch even projects already cached")
     asyncio.run(main_async(p.parse_args()))
 
 

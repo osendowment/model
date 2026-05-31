@@ -32,6 +32,7 @@ runner that kills the whole process group on timeout.
 from __future__ import annotations
 
 import io
+import logging
 import os
 import subprocess
 import tarfile
@@ -41,6 +42,8 @@ import time
 import httpx
 
 from src.sources.git.disk import CLONE_TMP_PREFIX
+
+log = logging.getLogger(__name__)
 
 
 # Glob patterns for sparse-checkout — one per source-file extension.
@@ -153,6 +156,45 @@ def resolve_mainline_sha(
         if not sha:
             raise RuntimeError(f"no first-parent commit on {branch!r} before {before}")
         return sha, True
+
+
+def corrected_clone_sha(
+    repo: str, branch: str | None, pinned_sha: str,
+    cutoff: str | None = None, *, what: str = "",
+) -> str:
+    """The SHA to actually check out for a snapshot, correcting off-mainline pins.
+
+    GitHub's Commits API — and fork-network object sharing — can pin a
+    snapshot to a commit that is *not* on the default branch's first-parent
+    line. The worst case is a shared CI/template commit that several
+    unrelated repos all merge: one such commit (``4253271e…``, "chore(ci):
+    Attempt to auto-update pre-commit") is the newest-by-date 2025 commit for
+    five of epage's Rust repos (clap, toml, anstyle, env_logger, snapbox) and
+    a sibling one for five jaraco/pypa Python repos. Checking it out measures
+    the template (≈0 functions), not the repo.
+
+    ``resolve_mainline_sha`` detects this and returns the real mainline commit
+    at/before ``cutoff``. This wrapper applies it, logging a correction, and
+    degrades to ``pinned_sha`` when the branch is unknown or unfetchable.
+
+    Callers must still RECORD results under ``pinned_sha`` (the
+    ``commits-years.csv`` join key) — only the *checkout* is corrected.
+    ``what`` is a short tag (e.g. "lizard") for the log line.
+    """
+    if not branch or not pinned_sha:
+        return pinned_sha
+    tag = f"{what}: " if what else ""
+    try:
+        effective, corrected = resolve_mainline_sha(repo, branch, pinned_sha, cutoff)
+    except Exception as e:
+        log.warning("%s%s mainline check unavailable (%s) — using pinned SHA",
+                    tag, repo, e)
+        return pinned_sha
+    if corrected:
+        log.warning("%s%s pinned SHA %s is off-mainline (merged side branch) "
+                    "— measuring mainline commit %s instead",
+                    tag, repo, pinned_sha[:12], effective[:12])
+    return effective
 
 
 def download_tarball(
