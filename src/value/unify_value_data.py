@@ -77,7 +77,7 @@ ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
 CLASS_RANK = {"A": 0, "B": 1, "C": 2, "D": 3}
 
 FIELDS = (
-    ["id", "github_repo", "gh_repo_id", "git_url", "valid",
+    ["github_repo", "gh_repo_id", "git_url", "valid",
      "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
@@ -382,7 +382,12 @@ def apply_repo_overrides(
             a["github_repo"] = ov["github_repo"]
             a["git_url"] = _github_git_url(ov["github_repo"])
         elif ov.get("git_url"):
+            # A git_url-only override declares a non-GitHub canonical source, so
+            # also clear any (often wrong/dead) member-derived github_repo —
+            # otherwise it would still win as the validation target. This is how
+            # a dead GitHub slug is removed via override.
             a["git_url"] = ov["git_url"]
+            a["github_repo"] = ""
     return aggs
 
 
@@ -483,8 +488,6 @@ def aggregate_by_repo(all_rows: list[dict], *, drop_d_class: bool = False) -> li
     # above), so no special handling for missing values is needed; ties
     # broken by repo name for stability.
     aggs.sort(key=lambda a: (-a["top_eco_pct"], a["github_repo"] or a["group_key"]))
-    for i, a in enumerate(aggs, 1):
-        a["id"] = i
     return [_strip_internals(a) for a in aggs]
 
 

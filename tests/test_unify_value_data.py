@@ -273,7 +273,6 @@ class TestAggregateByRepo:
         ], drop_d_class=False)
         assert len(aggs) == 1
         a = aggs[0]
-        assert a["id"] == 1
         assert a["github_repo"] == "x/y"
         assert a["git_url"] == "https://github.com/x/y.git"
         assert a["packages"] == 1
@@ -360,9 +359,8 @@ class TestAggregateByRepo:
             _pkg_row("mid", "npm", github_repo="m/m", pagerank="10.0"),
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
-        # `hi` should be id=1, `low` last.
+        # `hi` (highest PR) sorts first, `low` last.
         assert [a["github_repo"] for a in aggs] == ["a/a", "m/m", "z/z"]
-        assert [a["id"] for a in aggs] == [1, 2, 3]
 
     def test_sort_pushes_no_pr_groups_to_end(self):
         rows = [
@@ -377,11 +375,6 @@ class TestAggregateByRepo:
         # The no-PR group has total=0 path; it still gets a class (D) but is sorted after.
         assert second["github_repo"] == "b/b"
 
-    def test_id_is_sequential_starting_at_1(self):
-        rows = [_pkg_row(f"p{i}", "npm", github_repo=f"r/{i}", pagerank=str(10 - i))
-                for i in range(5)]
-        aggs = aggregate_by_repo(rows, drop_d_class=False)
-        assert [a["id"] for a in aggs] == [1, 2, 3, 4, 5]
 
     def test_internals_are_stripped_from_output(self):
         rows = [_pkg_row("a", "npm", github_repo="x/y", pagerank="1.0")]
@@ -583,9 +576,10 @@ class TestRepoOverrides:
         assert fixed[0]["github_repo"] == "real/upstream"
         assert fixed[0]["git_url"] == "https://github.com/real/upstream.git"
 
-    def test_git_url_only_override_sets_url_keeps_github_repo(self):
-        # An override with only a git_url (no github_repo) rewrites the group's
-        # git_url and leaves github_repo to member derivation.
+    def test_git_url_only_override_sets_url_and_clears_github_repo(self):
+        # A git_url-only override declares a non-GitHub canonical source: it
+        # rewrites git_url AND clears any member-derived github_repo so the
+        # git_url becomes the validation target.
         rows = [
             _pkg_row("some-pkg", "pypi",
                      github_repo="owner/repo",
@@ -597,7 +591,7 @@ class TestRepoOverrides:
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         fixed = apply_repo_overrides(aggs, rows, overrides)
         assert fixed[0]["git_url"] == "https://example.com/x.git"
-        assert fixed[0]["github_repo"] == "owner/repo"
+        assert fixed[0]["github_repo"] == ""
 
     def test_override_is_keyed_per_ecosystem(self):
         # An override for npm must not touch a same-named pypi package.
@@ -659,12 +653,12 @@ class TestRepoOverrides:
 class TestStripInternals:
     def test_drops_scratch_keys(self):
         d = {
-            "id": 1, "github_repo": "x/y", "_pkgs_npm": 5,
+            "github_repo": "x/y", "_pkgs_npm": 5,
             "_pr_sum_npm": 1.0, "_pr_pct_npm": 99.0, "_top_pkg_npm": "x",
             "group_key": "x/y", "class": "A",
         }
         clean = _strip_internals(d)
-        assert clean == {"id": 1, "github_repo": "x/y", "class": "A"}
+        assert clean == {"github_repo": "x/y", "class": "A"}
 
 
 # ── write_value_data ─────────────────────────────────────────────────────────
@@ -731,8 +725,6 @@ class TestEndToEnd:
         with open(out, encoding="utf-8") as f:
             written = list(csv.DictReader(f))
 
-        # Sorted by top_eco_pct desc; ids sequential
-        assert [int(r["id"]) for r in written] == [1, 2, 3]
         # All written rows have exactly the canonical FIELDS, in order
         with open(out, encoding="utf-8") as f:
             assert csv.DictReader(f).fieldnames == FIELDS
@@ -757,7 +749,7 @@ class TestInvariants:
         assert CLASS_RANK == {"A": 0, "B": 1, "C": 2, "D": 3}
 
     def test_fields_contains_required_columns(self):
-        for col in ("id", "github_repo", "git_url", "ecosystems", "packages",
+        for col in ("github_repo", "git_url", "ecosystems", "packages",
                     "top_eco", "top_eco_pkg", "top_eco_pct", "class"):
             assert col in FIELDS
         for eco in ECOSYSTEMS:

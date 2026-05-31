@@ -13,3 +13,14 @@ aiodns,pypi,aio-libs/aiodns,,,git URL slug saghul/aiodns redirects to aio-libs/a
 oauth2client,pypi,googleapis/oauth2client,,,git URL slug google/oauth2client redirects to googleapis/oauth2client; the old field value googleapis/oauth2client is the canonical name
 webencodings,pypi,gsnedders/python-webencodings,,,git URL slug simonsapin/python-webencodings redirects to gsnedders/python-webencodings; the old field value gsnedders/python-webencodings is the canonical name
 pickleshare,pypi,ipython/pickleshare,,,git URL slug pickleshare/pickleshare redirects to ipython/pickleshare; the old field value ipython/pickleshare is the canonical name
+binutils,cpp,,https://sourceware.org/git/binutils-gdb.git,,"dead GitHub slug bminor/binutils-gdb (404) removed; binutils-gdb is canonically hosted at sourceware.org (verified git ls-remote OK)"
+xorgproto,cpp,,https://gitlab.freedesktop.org/xorg/proto/xorgproto.git,,"dead GitHub slug freedesktop/xorg-xorgproto (404) removed; xorgproto lives on freedesktop GitLab (verified git ls-remote OK)"
+libunistring,cpp,,https://git.savannah.gnu.org/git/libunistring.git,,"no GitHub repo; canonical GNU source on Savannah (replaces dead git.jff.email cgit mirror; verified ls-remote OK)"
+mpfr,cpp,,https://gitlab.inria.fr/mpfr/mpfr.git,,"no GitHub repo; canonical source on gitlab.inria.fr (verified ls-remote OK)"
+gnumpc,cpp,,https://gitlab.inria.fr/mpc/mpc.git,,"no GitHub repo; GNU MPC canonical source on gitlab.inria.fr (verified ls-remote OK)"
+readline,cpp,,https://git.savannah.gnu.org/git/readline.git,,"no GitHub repo; canonical GNU source on Savannah (verified ls-remote OK)"
+tiff,cpp,,https://gitlab.com/libtiff/libtiff.git,,"no GitHub repo; libtiff canonical source on gitlab.com (verified ls-remote OK)"
+acl,cpp,,https://git.savannah.nongnu.org/git/acl.git,,"no GitHub repo; canonical source on Savannah nongnu (replaces dead git.hadrons.org Debian cgit; verified ls-remote OK)"
+libgpg-error,cpp,,git://git.gnupg.org/libgpg-error.git,,"no GitHub repo; canonical GnuPG source over git:// (dev.gnupg.org smart-http is broken; verified ls-remote OK)"
+isl,cpp,Meinersbur/isl,,,"no reachable canonical git source (repo.or.cz serves no smart-http); Meinersbur/isl is the maintained GitHub mirror (verified)"
+docutils,pypi,docutils/docutils,,,"upstream is SourceForge SVN (no git); docutils/docutils is the official read-only Git mirror on GitHub (verified)"
