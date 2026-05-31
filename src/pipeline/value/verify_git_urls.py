@@ -2,21 +2,23 @@
 """Value pipeline step — verify every repo's git URL accepts a connection.
 
 Runs after `unify_value_data` has written `data/value/value.csv`. Reads that
-file back, populates the `gh_valid` / `git_valid` / `gh_repo_id` columns,
-canonicalises `github_repo` to each repo's current (post-rename) name, and
-rewrites it.
+file back, refreshes the two validation caches, sets the `gh_repo_id`
+(identity) column, canonicalises `github_repo` to each repo's current
+(post-rename) name, and rewrites the file.
 
 Two strategies, chosen per URL:
 
   1. github_repo present → `src.github.fetch_repo_owner_data.fetch_and_persist`
      hits `/repos/{owner}/{repo}` via the GitHub API. Persists richer
-     metadata to `data/sources/github/repos.csv` (license, owner, stars, …) so
-     downstream pipelines (eligibility) don't re-fetch.
+     metadata to `data/sources/github/repos.csv` (valid, license, owner,
+     stars, …) so downstream pipelines (eligibility) don't re-fetch.
   2. non-github canonical git URL → `git ls-remote --exit-code` against the
      URL itself. Persists OK/FAIL to `data/sources/git/urls.csv`.
 
-Both layers are TTL'd by `GIT_URL_TTL_DAYS`. A repo without any URL gets
-`gh_valid="" / git_valid=""` (unknown).
+Both layers are TTL'd by `GIT_URL_TTL_DAYS`. This step does NOT write a
+validity verdict onto value.csv — the per-repo `valid` column is produced by
+the separate `build_validation` step, which rolls these two caches up into
+`data/value/validation.csv` and joins the verdict back.
 
 Usage:
     uv run python -m src.pipeline.value.verify_git_urls
@@ -320,14 +322,18 @@ def _verify_non_github(urls: list[str],
 
 def verify_urls_in_aggregates(aggs: list[dict],
                               force: bool = False) -> tuple[list[dict], dict]:
-    """Populate `gh_valid` and `git_valid` on every row. Two strategies:
+    """Refresh the validation caches and set `gh_repo_id` on every row.
 
+    Two strategies, one per row's target:
       • github_repo set → trigger `fetch_repo_owner_data.fetch_and_persist`,
-        then look up `valid` in `data/sources/github/repos.csv` (→ `gh_valid`).
-      • non-github git_url → `git ls-remote`, cached in `data/sources/git/urls.csv`
-        (→ `git_valid`).
+        refreshing `data/sources/github/repos.csv` (`valid` + metadata).
+      • non-github git_url → `git ls-remote`, cached in
+        `data/sources/git/urls.csv`.
 
-    Returns (aggs, summary_stats). Mutates `aggs` in place.
+    Sets `gh_repo_id` (identity) and canonicalises `github_repo` to its
+    current post-rename name. Does NOT write a validity verdict onto the rows
+    — that is `build_validation`'s job. Returns (aggs, summary_stats); the
+    summary counts are derived directly from the caches. Mutates `aggs`.
     """
     # Lazy import: keeps CLI startup snappy when not actually verifying.
     from src.github.fetch_repo_owner_data import (
@@ -393,18 +399,19 @@ def verify_urls_in_aggregates(aggs: list[dict],
                     gh_meta[slug] = r
 
     # --- Non-github side ---
-    nongh_valid = _verify_non_github(sorted(nongithub_urls), force=force)
+    nongithub_ok = _verify_non_github(sorted(nongithub_urls), force=force)
 
-    # --- Annotate gh_valid + git_valid ---
-    # gh_valid: True/False from the GitHub API; "" if no github_repo.
-    # git_valid: True/False from `git ls-remote`; "" if no git_url *or*
-    #   if the row already has a github_repo (only one side is verified —
-    #   the same elif intent as where URLs were queued above).
-    # Note: `_canonicalize_git_url` already strips github.com URLs from
-    # `git_url` (they're tracked via `github_repo`), so we never need to
-    # cross-reference gh_valid from git_valid.
-    invalid_examples: list[tuple[str, str, str]] = []  # (kind, key, url)
+    # --- Annotate identity (gh_repo_id) + canonicalise renamed slugs ---
+    # Validity verdicts are NOT written onto the rows here — they live in
+    # `validation.csv` / the `valid` column produced by the separate
+    # `build_validation` step (which rolls up the two caches refreshed above).
+    # This loop only sets `gh_repo_id` (identity), rewrites `github_repo` to
+    # its current post-rename name, and tallies the summary counts directly
+    # from the caches (gh_meta / nongithub_ok). The tally is done before the
+    # slug rewrite so gh_meta — keyed by the queried slug — still matches.
     renamed = 0
+    valid_rows = invalid_rows = no_url = 0
+    invalid_examples: list[tuple[str, str, str]] = []  # (kind, key, url)
     for a in aggs:
         gh = (a.get("github_repo") or "").strip().lower()
         gu = (a.get("git_url") or "").strip()
@@ -413,10 +420,27 @@ def verify_urls_in_aggregates(aggs: list[dict],
         meta = gh_meta.get(gh) if has_gh else None
         is_valid = bool(meta) and meta.get("valid", "").lower() == "true"
 
-        a["gh_valid"] = is_valid if has_gh else ""
         # gh_repo_id: GitHub's stable numeric repo id. Only a repo that
         # resolved (HTTP 200) carries one — sparse 404 rows have none.
         a["gh_repo_id"] = (meta.get("repo_id") or "") if is_valid else ""
+
+        # Tally by the row's single target. github rows by the GitHub API
+        # verdict; non-github rows by the ls-remote result; the rest no-URL.
+        if has_gh:
+            if is_valid:
+                valid_rows += 1
+            else:
+                invalid_rows += 1
+                invalid_examples.append(("gh", gh, gu))
+        elif gu:
+            if nongithub_ok.get(gu, False):
+                valid_rows += 1
+            else:
+                invalid_rows += 1
+                invalid_examples.append(("git", a.get("top_eco_pkg", ""), gu))
+        else:
+            no_url += 1
+
         # github_repo: rewrite to the repo's *current* name. The GitHub API
         # follows renames, so `full_name` is the live owner/repo even when we
         # queried a stale slug. Only a validated repo is canonicalised.
@@ -426,30 +450,10 @@ def verify_urls_in_aggregates(aggs: list[dict],
                 a["github_repo"] = full
                 renamed += 1
 
-        a["git_valid"] = nongh_valid.get(gu, False) if gu and not has_gh else ""
-
-        # Track invalids for the summary table. After the fix, gh_valid
-        # and git_valid are never both False on the same row — only the
-        # verified side can fail.
-        if a["gh_valid"] is False:
-            invalid_examples.append(("gh", gh, gu))
-        elif a["git_valid"] is False:
-            invalid_examples.append(("git", a.get("top_eco_pkg", ""), gu))
-
     if renamed:
         console.print(f"  [dim]github_repo canonicalised to current "
                       f"name:[/dim] [cyan]{renamed}[/cyan]")
 
-    # Stats: a row is "valid" if BOTH columns are True (or one is True and the
-    # other is empty). A row is "invalid" if either is explicitly False.
-    valid_rows = sum(1 for a in aggs
-                     if (a["gh_valid"] is True or a["gh_valid"] == "") and
-                        (a["git_valid"] is True or a["git_valid"] == "") and
-                        (a["gh_valid"] is True or a["git_valid"] is True))
-    invalid_rows = sum(1 for a in aggs
-                       if a["gh_valid"] is False or a["git_valid"] is False)
-    no_url = sum(1 for a in aggs
-                 if a["gh_valid"] == "" and a["git_valid"] == "")
     return aggs, {
         "valid": valid_rows, "invalid": invalid_rows, "no_url": no_url,
         "invalid_examples": invalid_examples[:30],
