@@ -14,8 +14,7 @@ Reads (all under data/sources/):
 Writes data/risk/funding.csv:
     repo, repo_id, gh_sponsors_in, gh_sponsors_out, gh_sponsorships,
     gh_sponsorships_p, has_funding_yml, funding_yml_platforms, has_funding_json,
-    channels_count, oc_avg_funding, oc_avg_funding_p, funding_p, foundation_host,
-    fetched_at
+    channels_count, oc_avg_funding, oc_avg_funding_p, funding_p, foundation_host
 
 `has_funding_json` is True iff the repo is registered in the FLOSS Fund
 directory. `channels_count` is the number of distinct funding platforms across
@@ -24,8 +23,8 @@ the mean of the repo's Open Collective gross annual budgets ($0 when none).
 `gh_sponsorships_p` / `oc_avg_funding_p` are inverted Hazen funding-risk
 percentiles (less funding → higher percentile); `funding_p` is their geometric
 mean (the dimension's overall funding-risk percentile). Only `oc_avg_funding`,
-`gh_sponsorships` and `funding_p` are carried into risk.csv. `fetched_at` is the
-most recent contributing timestamp.
+`gh_sponsorships` and `funding_p` are carried into risk.csv. Per-signal fetch
+timestamps live in each source file, not here.
 
 Usage:
     uv run python -m src.pipeline.risk.build_funding
@@ -59,12 +58,11 @@ FIELDS = ["repo", "repo_id", "gh_sponsors_in", "gh_sponsors_out",
           "gh_sponsorships", "gh_sponsorships_p", "has_funding_yml",
           "funding_yml_platforms", "has_funding_json", "channels_count",
           "oc_avg_funding", "oc_avg_funding_p", "funding_p",
-          "foundation_host", "fetched_at"]
-
-
-def _latest(*timestamps: str) -> str:
-    """Most recent ISO timestamp among the args (lexical order works for ISO)."""
-    return max((t for t in timestamps if t), default="")
+          "foundation_host"]
+# No `fetched_at`: each funding signal's fetch timestamp lives in its own
+# source file (github/sponsors.csv, github/sponsorships.csv, github/funding-yml.csv,
+# opencollective/budgets.csv, floss-fund/funding-json.csv). A combined roll-up
+# here would be lossy, so we don't carry one into funding.csv or risk.csv.
 
 
 def _platform_set(csv_value: str) -> set[str]:
@@ -149,8 +147,6 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "oc_avg_funding_p": "",  # filled in build()
         "funding_p": "",         # geom-mean of the two _p columns, filled in build()
         "foundation_host": foundation_host,
-        "fetched_at": _latest((sponsors.get("fetched_at") or "").strip(),
-                              (yml.get("fetched_at") or "").strip()),
     }
 
 

@@ -103,10 +103,11 @@ def _qualify_columns(dim: str, cols: list[str]) -> list[tuple[str, str]]:
     for c in cols:
         if c in ID_COLUMNS:
             continue
-        if c == FETCHED_AT_COL:
-            out.append((c, f"{dim}_fetched_at"))  # always kept, per dimension
-        elif included is None or c in included:
-            out.append((c, c))
+        if included is not None and c not in included:
+            continue  # whitelisted dim carries ONLY its listed columns
+        # `fetched_at` → `<dim>_fetched_at` so freshness is traceable; a
+        # whitelisted dim that omits it (e.g. funding) drops it above.
+        out.append((c, f"{dim}_fetched_at" if c == FETCHED_AT_COL else c))
     return out
 
 

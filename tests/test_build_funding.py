@@ -26,7 +26,7 @@ def test_assemble_row_joins_and_counts_channels():
     assert row["channels_count"] == "3"
     # mean of 100, 200, 300 (years with data) = 200
     assert row["oc_avg_funding"] == "200"
-    assert row["fetched_at"] == "2026-05-19T11:00:00+00:00"
+    assert "fetched_at" not in row          # per-signal timestamps live in sources
     assert "funding_class" not in row
 
 
