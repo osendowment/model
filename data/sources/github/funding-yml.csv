@@ -60,6 +60,7 @@ bitflags/bitflags,29287955,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
 blakeembrey/array-flatten,17789771,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
 blakeembrey/change-case,9440238,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
 bluss/bencher,65987276,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
+bminor/binutils-gdb,,False,,,,,,,,,,,,,,,,2026-05-31T18:21:22+00:00
 bminor/glibc,13868694,False,,,,,,,,,,,,,,,,2026-04-28T00:15:41+00:00
 boto/boto3,24774658,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
 boto/botocore,6670942,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
@@ -243,6 +244,7 @@ fontconfig/fontconfig,926884194,False,,,,,,,,,,,,,,,,2026-05-19T11:10:54+00:00
 form-data/form-data,1755793,False,,,,,,,,,,,,,,,,2026-05-31T15:56:42+00:00
 formatjs/formatjs,19117456,False,,,,,,,,,,,,,,,,2026-05-31T15:56:42+00:00
 freedesktop-unofficial-mirror/cairo,34372735,False,,,,,,,,,,,,,,,,2026-05-19T11:10:56+00:00
+freedesktop/xorg-xorgproto,,False,,,,,,,,,,,,,,,,2026-05-31T18:21:22+00:00
 freetype/freetype,187000659,False,,,,,,,,,,,,,,,,2026-05-19T11:10:56+00:00
 frenic/csstype,104001328,False,,,,,,,,,,,,,,,,2026-05-31T15:56:42+00:00
 frommi/miniz_oxide,96124162,False,,,,,,,,,,,,,,,,2026-05-31T15:56:43+00:00
@@ -540,6 +542,7 @@ microsoft/tslib,34414315,False,,,,,,,,,,,,,,,,2026-05-31T15:56:44+00:00
 microsoft/typescript,20929025,False,,,,,,,,,,,,,,,,2026-05-31T15:56:44+00:00
 microsoft/windows-rs,208102250,False,,,,,,,,,,,,,,,,2026-05-31T15:56:44+00:00
 minimistjs/minimist,549230701,True,"github,tidelift","ljharb,shadowspawn",,,,npm/minimist,,,,,,,,,,2026-05-31T15:56:44+00:00
+mirror/ncurses,22324756,False,,,,,,,,,,,,,,,,2026-05-31T18:21:22+00:00
 mitsuhiko/insta,165561258,True,github,mitsuhiko,,,,,,,,,,,,,,2026-05-31T15:56:44+00:00
 mlocati/gettext-iconv-windows,12751919,True,"github,custom",,,,,,,,,,,,,,,2026-05-19T11:11:15+00:00
 mm2/little-cms,507969,False,,,,,,,,,,,,,,,,2026-05-19T11:11:16+00:00
@@ -665,6 +668,7 @@ python-poetry/poetry,123303402,False,,,,,,,,,,,,,,,,2026-05-31T15:56:49+00:00
 python-poetry/poetry-core,238972646,False,,,,,,,,,,,,,,,,2026-04-28T00:16:07+00:00
 python-poetry/tomlkit,140365570,True,github,sdispater,,,,,,,,,,,,,,2026-05-31T15:56:50+00:00
 python-trio/sniffio,142657210,False,,,,,,,,,,,,,,,,2026-05-31T15:56:50+00:00
+python/cpython,81598961,False,,,,,,,,,,,,,,,,2026-05-31T18:21:22+00:00
 python/importlib_metadata,306448340,True,tidelift,,,,,pypi/importlib-metadata,,,,,,,,,,2026-05-31T15:56:50+00:00
 python/importlib_resources,306147182,True,tidelift,,,,,pypi/importlib-resources,,,,,,,,,,2026-05-31T15:56:50+00:00
 python/mypy,7053637,False,,,,,,,,,,,,,,,,2026-05-31T15:56:50+00:00
@@ -891,6 +895,7 @@ tokio-rs/tracing,165289175,False,,,,,,,,,,,,,,,,2026-05-31T15:56:44+00:00
 toml-rs/toml,95902102,True,github,epage,,,,,,,,,,,,,,2026-05-31T15:56:44+00:00
 tootallnate/proxy-agents,11293703,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
 tootallnate/util-deprecate,19321056,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
+torvalds/linux,2325298,False,,,,,,,,,,,,,,,,2026-05-31T18:21:22+00:00
 tower-rs/tower,98244646,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
 tox-dev/filelock,17098256,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
 tox-dev/platformdirs,367032142,False,,,,,,,,,,,,,,,,2026-05-31T15:56:45+00:00
