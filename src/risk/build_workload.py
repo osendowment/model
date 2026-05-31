@@ -69,7 +69,7 @@ from src.common.tables import load_column_by_repo, load_rows_by_repo
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 COMMITS_YEARS_FILE = DATA_DIR / "sources" / "github" / "git" / "commits-years.csv"
 OPENSSF_CHECKS_FILE = DATA_DIR / "sources" / "openssf" / "checks.csv"

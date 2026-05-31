@@ -63,7 +63,7 @@ from src.common.tables import load_rows_by_repo
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 GIT_LONG_FILE = DATA_DIR / "sources" / "git" / "contributor-commits.csv"
 GIT_STATUS_FILE = DATA_DIR / "sources" / "git" / "contributor-commits.status.csv"
 GH_LONG_FILE = DATA_DIR / "sources" / "github" / "contributor-commits.csv"

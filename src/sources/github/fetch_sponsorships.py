@@ -46,7 +46,7 @@ from src.common.repos import load_risk_repos
 console = Console()
 log = logging.getLogger(__name__)
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "sponsorships.csv"
 FIELDS = ["login", "sponsoring_count", "sponsoring_status", "fetched_at"]
 TTL_DAYS = 90

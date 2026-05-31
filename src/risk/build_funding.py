@@ -38,7 +38,7 @@ from src.common.tables import load_column_by_repo, load_rows_by_repo
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 SPONSORS_FILE = DATA_DIR / "sources" / "github" / "sponsors.csv"
 SPONSORSHIPS_FILE = DATA_DIR / "sources" / "github" / "sponsorships.csv"
 FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"

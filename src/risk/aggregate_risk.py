@@ -29,7 +29,7 @@ from src.common.stats import geometric_mean
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
 # Component name (= its risk.csv column) → per-dimension CSV.
 COMPONENTS = {
