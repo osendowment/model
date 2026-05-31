@@ -27,6 +27,7 @@ FETCHERS = [
     Step("funding-yml",   "src.github.fetch_funding_yml",         fetch=True),
     Step("sponsors",      "src.github.fetch_sponsors",            fetch=True),
     Step("floss-fund",    "src.floss_fund.funding_json",          fetch=True),
+    Step("opencollective", "src.opencollective.fetch_budgets",    fetch=True),
 ]
 BUILDERS = [
     Step("concentration", "src.pipeline.risk.build_concentration"),

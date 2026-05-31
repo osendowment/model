@@ -14,7 +14,7 @@
 
 `data/` mirrors the three-stage pipeline (Value → Risk → Eligibility), with all external-source data isolated under `data/sources/`:
 
-- `data/sources/<source>/` — raw + intermediate data fetched from external sources. One folder per source: ecosystem registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`, `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `endoflife/`, `floss-fund/`, `foundations/`, `llms/`).
+- `data/sources/<source>/` — raw + intermediate data fetched from external sources. One folder per source: ecosystem registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`, `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `endoflife/`, `floss-fund/`, `opencollective/`, `foundations/`, `llms/`).
 - `data/value/` — Value-stage outputs: `value.csv` (the unified per-repo value table), `ecosystem-downloads.csv`, `value-repo-overrides.csv`.
 - `data/risk/` — Risk-stage outputs: `risk.csv` (final aggregated risk table) plus the per-dimension builds (`concentration.csv`, `complexity.csv`, `security.csv`, `funding.csv`, `visibility.csv`, `workload.csv`). Raw funding signals live under `data/sources/github/` (`sponsors.csv`, `funding-yml.csv`) and `data/sources/floss-fund/` (`funding-json.csv`).
 - `data/eligibility/` — Eligibility-stage output: `eligibility.csv`.
