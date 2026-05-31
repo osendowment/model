@@ -6,7 +6,8 @@ from src.pipeline.risk import build_funding as bf
 def test_assemble_row_joins_and_counts_channels():
     row = bf.assemble_row(
         repo="vuejs/core", repo_id="11730342",
-        sponsors={"github_sponsors": "12", "fetched_at": "2026-05-19T10:00:00+00:00"},
+        sponsors={"github_sponsors": "12", "sponsoring_count": "39",
+                  "fetched_at": "2026-05-19T10:00:00+00:00"},
         yml={"has_funding_yml": "True", "funding_yml_platforms": "github,open_collective",
              "open_collective": "vuejs", "fetched_at": "2026-05-19T11:00:00+00:00"},
         export={"channel_platforms": "github,open_collective,bank", "open_collective": "vuejs"},
@@ -15,6 +16,8 @@ def test_assemble_row_joins_and_counts_channels():
                               "raised_2023": "", "raised_2024": "300", "raised_2025": ""}},
     )
     assert row["has_funding_json"] == "True"
+    assert row["github_sponsors"] == "12"      # inbound
+    assert row["sponsoring_count"] == "39"     # outbound (carried through)
     # union of {github, open_collective} and {github, open_collective, bank} = 3
     assert row["channels_count"] == "3"
     # mean of 100, 200, 300 (years with data) = 200

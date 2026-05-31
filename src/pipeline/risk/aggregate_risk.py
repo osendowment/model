@@ -63,6 +63,11 @@ ID_COLUMNS = ("repo", "repo_id")
 # metric's freshness is traceable.
 FETCHED_AT_COL = "fetched_at"
 
+# Columns kept in a per-dimension intermediate but deliberately NOT carried
+# into risk.csv — informational signals that must not feed risk calculation.
+# `sponsoring_count` (outbound sponsoring) is tracked in funding.csv only.
+RISK_EXCLUDED: dict[str, set[str]] = {"funding": {"sponsoring_count"}}
+
 
 def _load_intermediate(path: Path) -> tuple[list[str], dict[str, dict[str, str]]]:
     """Return (column_order, {repo: row_dict}). Empty if file missing."""
@@ -88,9 +93,10 @@ def _qualify_columns(dim: str, cols: list[str]) -> list[tuple[str, str]]:
     the dimension's semantics (e.g. `loc_2025_eoy`, `bf_commits_lifetime`)
     so they pass through unchanged.
     """
+    excluded = RISK_EXCLUDED.get(dim, set())
     out: list[tuple[str, str]] = []
     for c in cols:
-        if c in ID_COLUMNS:
+        if c in ID_COLUMNS or c in excluded:
             continue
         if c == FETCHED_AT_COL:
             out.append((c, f"{dim}_fetched_at"))

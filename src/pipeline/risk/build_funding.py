@@ -47,9 +47,9 @@ OC_BUDGETS_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
 FOUNDATIONS_FILE = DATA_DIR / "sources" / "foundations" / "host-by-repo.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
 
-FIELDS = ["repo", "repo_id", "github_sponsors", "has_funding_yml",
-          "funding_yml_platforms", "has_funding_json", "channels_count",
-          "oc_avg_funding", "foundation_host", "fetched_at"]
+FIELDS = ["repo", "repo_id", "github_sponsors", "sponsoring_count",
+          "has_funding_yml", "funding_yml_platforms", "has_funding_json",
+          "channels_count", "oc_avg_funding", "foundation_host", "fetched_at"]
 
 
 def _latest(*timestamps: str) -> str:
@@ -85,6 +85,7 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "repo": repo,
         "repo_id": repo_id,
         "github_sponsors": (sponsors.get("github_sponsors") or "").strip(),
+        "sponsoring_count": (sponsors.get("sponsoring_count") or "").strip(),
         "has_funding_yml": (yml.get("has_funding_yml") or "").strip(),
         "funding_yml_platforms": (yml.get("funding_yml_platforms") or "").strip(),
         "has_funding_json": "True" if export else "False",
@@ -157,9 +158,9 @@ def main() -> None:
     table.add_column("Field", style="bold")
     table.add_column("Populated", justify="right")
     table.add_column("Coverage", justify="right")
-    for col in ("github_sponsors", "has_funding_yml", "funding_yml_platforms",
-                "has_funding_json", "channels_count", "oc_avg_funding",
-                "foundation_host"):
+    for col in ("github_sponsors", "sponsoring_count", "has_funding_yml",
+                "funding_yml_platforms", "has_funding_json", "channels_count",
+                "oc_avg_funding", "foundation_host"):
         n = sum(1 for r in rows if r[col] and r[col] not in ("False", "0"))
         pct = 100 * n / total if total else 0
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")

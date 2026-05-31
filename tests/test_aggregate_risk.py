@@ -2,7 +2,20 @@
 
 from collections import Counter
 
-from src.pipeline.risk.aggregate_risk import aggregate
+from src.pipeline.risk.aggregate_risk import aggregate, _qualify_columns
+
+
+class TestRiskExclusions:
+    def test_sponsoring_count_excluded_from_funding(self):
+        cols = ["repo", "repo_id", "github_sponsors", "sponsoring_count", "fetched_at"]
+        out = [out_col for _, out_col in _qualify_columns("funding", cols)]
+        assert "github_sponsors" in out       # inbound stays
+        assert "sponsoring_count" not in out   # outbound excluded from risk.csv
+        assert "funding_fetched_at" in out
+
+    def test_no_exclusions_for_other_dims(self):
+        out = [out_col for _, out_col in _qualify_columns("concentration", ["repo", "sponsoring_count"])]
+        assert "sponsoring_count" in out  # only excluded for the funding dim
 
 
 class TestAggregateColumns:

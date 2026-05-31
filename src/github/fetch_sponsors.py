@@ -1,13 +1,15 @@
 """Fetch GitHub Sponsors counts per risk-scope repo.
 
 Writes data/sources/github/sponsors.csv:
-    repo, repo_id, github_sponsors, sponsors_status, fetched_at
+    repo, repo_id, github_sponsors, sponsoring_count, sponsors_status, fetched_at
 
-Counts public sponsorships of the repo owner plus every `github:` login in
-the repo's FUNDING.yml (read from data/sources/github/funding-yml.csv — run
-fetch_funding_yml first). `sponsors_status`: "ok" if every queried login
-resolved, "error" if any GraphQL query failed (so a 0 from a failure is not
-mistaken for a genuine 0).
+`github_sponsors` (inbound) = public sponsorships *received* by the repo owner
+plus every `github:` login in the repo's FUNDING.yml (read from
+data/sources/github/funding-yml.csv — run fetch_funding_yml first).
+`sponsoring_count` (outbound) = how many accounts the repo *owner* sponsors
+(the org's "Sponsoring N") — a backer / corporate-funding signal, not inbound
+funding. `sponsors_status`: "ok" if every queried login resolved, "error" if
+any GraphQL query failed (so a 0 from a failure is not mistaken for a genuine 0).
 
 Usage:
     uv run python -m src.github.fetch_sponsors
@@ -44,13 +46,22 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "sponsors.csv"
 FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
-FIELDS = ["repo", "repo_id", "github_sponsors", "sponsors_status", "fetched_at"]
+FIELDS = ["repo", "repo_id", "github_sponsors", "sponsoring_count",
+          "sponsors_status", "fetched_at"]
 TTL_DAYS = 90
 
+# sponsorshipsAsMaintainer = sponsors received (inbound);
+# sponsorshipsAsSponsor   = accounts this login sponsors (outbound).
 SPONSORS_QUERY = """
 query($login: String!) {
-  user(login: $login) { sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount } }
-  organization(login: $login) { sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount } }
+  user(login: $login) {
+    sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount }
+    sponsorshipsAsSponsor(first: 1) { totalCount }
+  }
+  organization(login: $login) {
+    sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount }
+    sponsorshipsAsSponsor(first: 1) { totalCount }
+  }
 }
 """
 
@@ -73,32 +84,51 @@ def status_from_counts(counts: list[int], any_error: bool) -> str:
     return "error" if any_error else "ok"
 
 
-async def fetch_sponsors_for_login(session, limiter, login: str) -> tuple[int, bool]:
-    """(public sponsor count, ok). ok=False on a failed/deferred query."""
+def _count(node: dict, field: str) -> int:
+    return int(((node or {}).get(field) or {}).get("totalCount") or 0)
+
+
+async def fetch_sponsors_for_login(session, limiter, login: str) -> tuple[int, int, bool]:
+    """(sponsors_received, accounts_sponsored, ok). ok=False on a failed query."""
     if not login:
-        return 0, True
+        return 0, 0, True
     try:
         result = await _graphql(session, limiter, SPONSORS_QUERY, {"login": login})
     except _Deferred:
-        return 0, False
+        return 0, 0, False
     except RuntimeError as e:
         log.warning("graphql failed for %s: %s", login, e)
-        return 0, False
+        return 0, 0, False
     data = result.get("data") or {}
-    user = (data.get("user") or {}).get("sponsorshipsAsMaintainer") or {}
-    org = (data.get("organization") or {}).get("sponsorshipsAsMaintainer") or {}
-    return int(user.get("totalCount") or 0) + int(org.get("totalCount") or 0), True
+    node = data.get("user") or data.get("organization") or {}
+    received = _count(node, "sponsorshipsAsMaintainer")
+    sponsoring = _count(node, "sponsorshipsAsSponsor")
+    return received, sponsoring, True
+
+
+def combine_results(results: list[tuple[int, int, bool]]) -> tuple[int, int, bool]:
+    """Aggregate per-login results into (inbound, outbound, any_error).
+
+    Inbound (`github_sponsors`) sums sponsors received across every queried
+    login. Outbound (`sponsoring_count`) is the repo *owner's* count only —
+    the owner is the first login (see `logins_for_repo`); co-maintainers'
+    personal sponsoring is not the project's outbound.
+    """
+    inbound = sum(received for received, _, _ in results)
+    any_error = any(not ok for _, _, ok in results)
+    outbound = results[0][1] if results else 0
+    return inbound, outbound, any_error
 
 
 async def fetch_one(session, limiter, repo: str, yml_github: dict[str, str]) -> dict:
     logins = logins_for_repo(repo, yml_github)
     results = await asyncio.gather(*(fetch_sponsors_for_login(session, limiter, l) for l in logins))
-    total = sum(c for c, _ in results)
-    any_error = any(not ok for _, ok in results)
+    inbound, outbound, any_error = combine_results(results)
     return {
         "repo": repo,
-        "github_sponsors": str(total),
-        "sponsors_status": status_from_counts([c for c, _ in results], any_error),
+        "github_sponsors": str(inbound),
+        "sponsoring_count": str(outbound),
+        "sponsors_status": status_from_counts([], any_error),
     }
 
 
