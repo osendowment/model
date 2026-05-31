@@ -8,18 +8,18 @@ Reads:
     data/sources/openssf/checks.csv                             — per-check Scorecard scores
     data/sources/github/issues.csv                              — long: repo, repo_id, year, metric, value
                                                           (metric ∈ {opened_issues, closed_issues})
-    data/risk/complexity.csv                                 — loc_2025_eoy per repo
+    data/risk/complexity.csv                                 — loc_eoy per repo
     data/risk/security.csv                                   — cve_count_5y per repo
     data/risk/concentration.csv                              — active_contributors_git_5y per repo
 
 Writes:
     data/risk/workload.csv  with columns:
         repo, repo_id,
-        repo_age_years_2025_eoy,         (years between created_at and 2025-12-31)
+        repo_age_years,         (years between created_at and EOY of the last complete year)
         active_contributors_git_5y,  (windowed AC — from concentration.csv)
         openssf_maintained,              (Scorecard "Maintained" sub-check, 0-10 or "")
         has_issues,                      (bool from GH /repos)
-        push_cadence_years,              (count of years 2021-2025 with ≥1 commit, 0-5)
+        push_cadence_years,              (count of window years with ≥1 commit, 0..len(years))
         pushed_at,                       (ISO 8601, GH API)
         issues_opened_5y,
         issues_closed_5y,
@@ -28,7 +28,7 @@ Writes:
         slope_opened,                    (OLS slope of yearly opened, 2 dp)
         slope_closed,
         issue_trend_score,               (vol-normalised slope_closed - slope_opened)
-        loc_per_ac,                      (loc_2025_eoy / active_contributors_git_5y)
+        loc_per_ac,                      (loc_eoy / active_contributors_git_5y)
         cve_per_ac,                      (cve_count_5y / active_contributors_git_5y)
         nni_per_ac,                      (net_new_issues_5y / active_contributors_git_5y)
         loc_per_ac_p,                    (risk percentile of loc_per_ac)
@@ -44,12 +44,12 @@ Notes:
     build_workload must run after build_complexity, build_security,
     and build_concentration.
 
-Periods:
-    repo_age_years_2025_eoy: years between created_at and 2025-12-31.
-    push_cadence_years, issues_*: 2021-2025 window.
-    active_contributors_git_5y: distinct non-bot contributors who
-      authored a commit in 2021-2025, from the git-clone method (the windowed
-      AC concentration.csv now provides — GitHub's /contributors API cannot
+Periods (the window + EOY anchor come from settings.json `years`):
+    repo_age_years: years between created_at and EOY of LAST_COMPLETE_YEAR.
+    push_cadence_years, issues_*: the settings `years` window.
+    active_contributors_git_5y: distinct non-bot contributors who authored a
+      commit in the window, from the git-clone method (the windowed AC
+      concentration.csv now provides — GitHub's /contributors API cannot
       window, so the earlier lifetime-AC fallback is retired).
 
 Usage:
@@ -63,6 +63,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.params import LAST_COMPLETE_YEAR, YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_risk_repos
 from src.common.tables import load_column_by_repo, load_rows_by_repo
@@ -79,12 +80,12 @@ COMPLEXITY_FILE = DATA_DIR / "risk" / "complexity.csv"
 SECURITY_FILE = DATA_DIR / "risk" / "security.csv"
 CONCENTRATION_FILE = DATA_DIR / "risk" / "concentration.csv"
 
-YEARS = list(range(2021, 2026))  # 2021..2025
-EOY_2025 = datetime.date(2025, 12, 31)
+# Risk-stage window + EOY snapshot anchor — both from settings (src/settings.json).
+EOY = datetime.date(LAST_COMPLETE_YEAR, 12, 31)
 
 FIELDS = [
     "repo", "repo_id",
-    "repo_age_years_2025_eoy",
+    "repo_age_years",
     "active_contributors_git_5y",
     "openssf_maintained",
     "has_issues",
@@ -205,7 +206,7 @@ def _repo_age_years(created_at_iso: str) -> str:
         d = datetime.datetime.fromisoformat(created_at_iso.replace("Z", "+00:00")).date()
     except ValueError:
         return ""
-    days = (EOY_2025 - d).days
+    days = (EOY - d).days
     if days < 0:
         return "0"
     return f"{days / 365.25:.1f}"
@@ -222,7 +223,7 @@ def build() -> list[dict]:
     closed = issues["closed_issues"]
 
     # Cross-dimension inputs for the workload class.
-    loc_by_repo = load_column_by_repo(COMPLEXITY_FILE, "loc_2025_eoy")
+    loc_by_repo = load_column_by_repo(COMPLEXITY_FILE, "loc_eoy")
     cve_by_repo = load_column_by_repo(SECURITY_FILE, "cve_count_5y")
     ac_by_repo = load_column_by_repo(CONCENTRATION_FILE, "active_contributors_git_5y")
 
@@ -286,7 +287,7 @@ def build() -> list[dict]:
         rows.append({
             "repo": repo,
             "repo_id": entry.repo_id,
-            "repo_age_years_2025_eoy": age,
+            "repo_age_years": age,
             "active_contributors_git_5y": ac_raw,
             "openssf_maintained": openssf_maintained,
             "has_issues": has_issues,
@@ -334,7 +335,7 @@ def main() -> None:
     table.add_column("Populated", justify="right")
     table.add_column("Coverage", justify="right")
     for col in (
-        "repo_age_years_2025_eoy", "active_contributors_git_5y",
+        "repo_age_years", "active_contributors_git_5y",
         "openssf_maintained", "has_issues", "push_cadence_years", "pushed_at",
         "issue_close_ratio", "net_new_issues_5y", "issue_trend_score",
         "loc_per_ac", "cve_per_ac", "nni_per_ac",

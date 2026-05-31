@@ -33,7 +33,7 @@ BACKUP_DIR = Path("/tmp/robustness-backup")
 # `also_remove_from` lists peer sources that would fill the same field via
 # fallback — they must be removed too for the test to verify true emptiness.
 SOURCES = [
-    ("data/sources/git/scc.csv", "repo", ["loc_2025_eoy", "sloc_2025_eoy"], []),
+    ("data/sources/git/scc.csv", "repo", ["loc_eoy", "sloc_eoy"], []),
     ("data/sources/git/lizard.csv", "repo", ["cognitive_total"], []),
     ("data/sources/git/openssf.csv", "repo", ["openssf_score"], ["data/sources/git/depsdev.csv"]),
     ("data/sources/git/depsdev.csv", "repo", ["bestpractices_badge_id"], []),

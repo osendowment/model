@@ -39,7 +39,7 @@ def coverage_in_risk(field: str, repos: set[str]) -> dict[str, str]:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", default="data/sources/git/scc.csv")
-    parser.add_argument("--field", default="loc_2025_eoy",
+    parser.add_argument("--field", default="loc_eoy",
                         help="Field in risk-data.csv to check")
     parser.add_argument("--n", type=int, default=5,
                         help="Random repos to delete")

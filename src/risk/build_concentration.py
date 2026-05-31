@@ -65,7 +65,11 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.common.params import CONCENTRATION_WINDOW_YEARS, YEARS
+from src.common.params import (
+    BUS_FACTOR_THRESHOLD,
+    CONCENTRATION_WINDOW_YEARS,
+    LAST_COMPLETE_YEAR,
+)
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_risk_repos
 from src.common.tables import load_rows_by_repo
@@ -82,10 +86,9 @@ GH_LONG_FILE = DATA_DIR / "sources" / "github" / "contributor-commits.csv"
 GH_STATUS_FILE = DATA_DIR / "sources" / "github" / "contributor-commits.status.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "concentration.csv"
 
-# Last complete year = the newest year in settings `years`; _full caps here and
-# the _5y window is the last CONCENTRATION_WINDOW_YEARS complete years anchored
-# to it. Both live in settings.json so the schema below stays year-agnostic.
-LAST_COMPLETE_YEAR = max(YEARS)
+# _full caps at LAST_COMPLETE_YEAR (settings `max(years)`); the _5y window is the
+# last CONCENTRATION_WINDOW_YEARS complete years anchored to it. Both live in
+# settings.json so the schema below stays year-agnostic.
 WINDOW = range(LAST_COMPLETE_YEAR - CONCENTRATION_WINDOW_YEARS + 1, LAST_COMPLETE_YEAR + 1)
 
 FIELDS = [
@@ -146,7 +149,8 @@ def _bus_factor_hhi(commit_counts: list[int]) -> tuple[int | str, int | str]:
             for c in commit_counts if c > 0]
     if not objs:
         return "", ""
-    bf, _sorted, hhi = _compute_bus_factor(objs, include_bots=True)
+    bf, _sorted, hhi = _compute_bus_factor(
+        objs, threshold=BUS_FACTOR_THRESHOLD, include_bots=True)
     return bf, round(hhi * 10000)
 
 

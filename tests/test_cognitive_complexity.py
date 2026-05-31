@@ -300,7 +300,7 @@ def test_build_complexity_reads_cognitive_from_lizard(tmp_path, monkeypatch):
     assert row["cognitive_total"] == "42"
     assert row["cognitive_avg"] == "4.2"
     assert row["cognitive_max"] == "15"
-    assert row["loc_2025_eoy"] == "5000"
+    assert row["loc_eoy"] == "5000"
 
 
 def test_build_complexity_includes_cognitive_columns():

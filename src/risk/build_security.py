@@ -77,10 +77,11 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.sources.git.long_format import read as read_long
+from src.common.params import YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import canonical_repo_map, load_risk_repos
 from src.common.tables import load_column_by_repo
+from src.sources.git.long_format import read as read_long
 
 console = Console()
 
@@ -114,10 +115,10 @@ FIELDS = [
 
 
 def _per_year_shas(commits_years_file: Path) -> dict[str, list[str]]:
-    """Return {repo: [sha_2025, sha_2024, ..., sha_2021]} (newest first).
+    """Return {repo: [sha, …]} newest-first across the settings `years` window.
 
     Only includes years with non-empty `last_sha` AND `commits > 0`.
-    Years 2021..2025 only. Repos with no usable year get no key.
+    Repos with no usable year get no key.
     """
     by_repo: dict[str, dict[int, str]] = {}
     if not commits_years_file.exists():
@@ -137,7 +138,7 @@ def _per_year_shas(commits_years_file: Path) -> dict[str, list[str]]:
                 continue
             if commits <= 0:
                 continue
-            if 2021 <= year <= 2025:
+            if min(YEARS) <= year <= max(YEARS):
                 by_repo.setdefault(slug, {})[year] = last_sha
 
     out: dict[str, list[str]] = {}
@@ -145,7 +146,7 @@ def _per_year_shas(commits_years_file: Path) -> dict[str, list[str]]:
         # Walk newest → oldest; keep order, skip duplicates.
         ordered: list[str] = []
         seen: set[str] = set()
-        for y in (2025, 2024, 2023, 2022, 2021):
+        for y in sorted(YEARS, reverse=True):
             sha = year_map.get(y)
             if sha and sha not in seen:
                 ordered.append(sha)
@@ -226,7 +227,7 @@ def _load_ossfuzz() -> set[str]:
 
 
 def _load_cve_counts_5y() -> dict[str, int]:
-    """Count distinct CVE ids per repo in 2021..2025.
+    """Count distinct CVE ids per repo within the settings `years` window.
 
     Each row in osv/cves.csv is one (repo, cve, package-source) tuple.
     Multiple package mappings can produce duplicate (repo, cve) pairs —
@@ -244,7 +245,7 @@ def _load_cve_counts_5y() -> dict[str, int]:
             if not slug or not cve or len(date) < 4:
                 continue
             year = date[:4]
-            if year < "2021" or year > "2025":
+            if year < str(min(YEARS)) or year > str(max(YEARS)):
                 continue
             counts.setdefault(slug, set()).add(cve)
     return {slug: len(cves) for slug, cves in counts.items()}

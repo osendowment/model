@@ -26,8 +26,12 @@ VALUE_CLASS_A: float = _P["value_classes"]["A"]
 VALUE_CLASS_B: float = _P["value_classes"]["B"]
 VALUE_CLASS_C: float = _P["value_classes"]["C"]
 
-# Years
+# Years — the risk-stage window. The whole risk pipeline (concentration,
+# complexity, security, workload) shares this window; LAST_COMPLETE_YEAR is the
+# EOY-snapshot anchor and the '_full' cap. Year boundaries live here, never in
+# output column names.
 YEARS: list[int] = _P["years"]
+LAST_COMPLETE_YEAR: int = max(YEARS)
 
 # Risk dimensions are scored by direction-aware risk percentiles
 # (src.pipeline.common.percentiles), not A/B/C/D classes — no thresholds here.
@@ -37,8 +41,12 @@ RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]
 
 # Concentration window length (complete years). The bus-factor/HHI '_5y'
 # columns cover the last CONCENTRATION_WINDOW_YEARS complete years, anchored
-# to max(YEARS) (the last complete year); '_full' caps at max(YEARS).
+# to LAST_COMPLETE_YEAR; '_full' caps at LAST_COMPLETE_YEAR.
 CONCENTRATION_WINDOW_YEARS: int = _P["concentration"]["window_years"]
+
+# Bus-factor ownership threshold — the commit share that defines the bus
+# factor (fewest contributors whose combined commits reach this fraction).
+BUS_FACTOR_THRESHOLD: float = _P["concentration"]["bus_factor_threshold"]
 
 
 _STATS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "value", "stats.csv")

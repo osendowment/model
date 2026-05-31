@@ -51,7 +51,7 @@ Risk
 │   └── watchers                      ← GitHub /repos                   [most recent]
 │
 └── Workload  →  data/risk/workload.csv
-    ├── repo_age_years                ← GitHub /repos created_at        [2025 EOY]
+    ├── repo_age_years                ← GitHub /repos created_at        [EOY, last complete yr]
     ├── push_cadence_years            ← commits-years.csv (years w/ commits) [2021–2025]
     ├── openssf_maintained            ← OpenSSF Scorecard "Maintained"   [2025 EOY]
     ├── has_issues                    ← GitHub /repos                   [most recent]
@@ -330,17 +330,17 @@ Sub-100% columns (every gap is structural, not a data-collection bug):
 | `active_contributors_git_5y` / `commits_git_5y` | Distinct non-bot contributors / commits — git, `_5y` window |
 | `bf_commits_gh_alltime` / `hhi_commits_gh_alltime` | Bus factor / HHI — GitHub `/contributors` method, `_gh_alltime` (uncapped API lifetime as of `github_fetched_at`; no per-year data, list capped near 500) |
 | `total_commits_gh_alltime` / `total_contributors_gh_alltime` / `active_contributors_gh_alltime` | Commit + contributor counts — GitHub method, `_gh_alltime` |
-| `loc` | Lines of code (scc, most recent year) |
+| `loc_eoy` | Lines of code (scc, EOY snapshot; snapshot year in `loc_year`) |
 | `complexity_class` | A--D |
-| `issues_opened_5y` | Sum of issues opened 2021--2025 |
-| `issues_closed_5y` | Sum of issues closed 2021--2025 |
+| `issues_opened_5y` | Sum of issues opened over the settings window |
+| `issues_closed_5y` | Sum of issues closed over the settings window |
 | `issue_close_ratio` | `closed_5y / opened_5y`, rounded to 3 decimals |
 | `slope_opened` | OLS slope of yearly opened counts (issues/yr) |
 | `slope_closed` | OLS slope of yearly closed counts (issues/yr) |
 | `issue_trend_score` | Volume-normalised `slope_closed - slope_opened`; signed |
 | `issue_trend` | `improving` / `stable` / `deteriorating` / empty |
 | `issue_debt_class` | A--D, or empty if `opened_5y < 10` |
-| `active_contributors_git_5y` | Distinct non-bot contributors active 2021--2025 — the workload class's AC denominator |
+| `active_contributors_git_5y` | Distinct non-bot contributors active in the settings window — the workload class's AC denominator |
 | `net_new_issues_5y` | `issues_opened_5y` − `issues_closed_5y` (5-year issue backlog growth) |
 | `loc_per_ac` | Lines of code per active contributor |
 | `cve_per_ac` | CVEs (5y) per active contributor |
