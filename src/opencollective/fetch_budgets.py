@@ -1,0 +1,231 @@
+"""Fetch annual Open Collective budgets (gross raised) for funded repos.
+
+For every Open Collective handle declared by a risk-scope repo — in
+`data/sources/github/funding-yml.csv` (`open_collective` column) or the FLOSS
+Fund export (`data/sources/floss-fund/funding-json.csv`) — query the public
+Open Collective GraphQL API for `totalAmountReceived` (gross incoming
+donations) in each calendar year 2021-2025.
+
+Writes data/sources/opencollective/budgets.csv:
+    slug, raised_2021..raised_2025, currency, oc_status, fetched_at
+
+`oc_status`: "ok" (account resolved), "not_found" (no such collective),
+"error" (request failed — distinguishes a real 0 from a fetch failure).
+Amounts are major currency units (USD etc.); a year with no data is blank.
+
+The API needs no token but rejects the default user-agent, so we send one.
+
+Usage:
+    uv run python -m src.opencollective.fetch_budgets
+    uv run python -m src.opencollective.fetch_budgets --limit 10
+    uv run python -m src.opencollective.fetch_budgets --force
+"""
+from __future__ import annotations
+
+import argparse
+import asyncio
+import csv
+import datetime
+import logging
+from pathlib import Path
+
+import aiohttp
+from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
+
+from src.floss_fund.directory import normalize_github_repo
+from src.pipeline.common.funding_platforms import normalize_oc_slug
+from src.pipeline.common.repos import load_risk_repos
+
+console = Console()
+log = logging.getLogger(__name__)
+
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+OUTPUT_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
+FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
+FLOSS_FUND_FILE = DATA_DIR / "sources" / "floss-fund" / "funding-json.csv"
+
+API_URL = "https://api.opencollective.com/graphql/v2"
+USER_AGENT = "Mozilla/5.0 (research; endowment.dev funding model)"
+YEARS = list(range(2021, 2026))  # 2021..2025
+FIELDS = ["slug"] + [f"raised_{y}" for y in YEARS] + ["currency", "oc_status", "fetched_at"]
+TTL_DAYS = 30
+
+
+def _money(cents) -> str:
+    """Integer-cent amount → major-unit string without spurious decimals."""
+    v = cents / 100
+    return str(int(v)) if v == int(v) else f"{v:.2f}"
+
+
+def build_query() -> str:
+    """5-year aliased query: one `totalAmountReceived` window per year."""
+    fields = "\n".join(
+        f'y{y}: totalAmountReceived('
+        f'dateFrom: "{y}-01-01T00:00:00Z", dateTo: "{y}-12-31T23:59:59Z") '
+        f"{{ valueInCents currency }}"
+        for y in YEARS
+    )
+    return f"query($slug: String!) {{ account(slug: $slug) {{ slug name currency stats {{ {fields} }} }} }}"
+
+
+def parse_oc_account(slug: str, account: dict | None) -> dict:
+    """Turn a GraphQL `account` payload into a budgets.csv row (no fetched_at)."""
+    if account is None:
+        return {"slug": slug, "oc_status": "not_found", "currency": "",
+                **{f"raised_{y}": "" for y in YEARS}}
+    stats = account.get("stats") or {}
+    currency = account.get("currency") or ""
+    row = {"slug": slug, "oc_status": "ok"}
+    for y in YEARS:
+        amt = stats.get(f"y{y}") or {}
+        cents = amt.get("valueInCents")
+        row[f"raised_{y}"] = _money(cents) if cents is not None else ""
+        if amt.get("currency"):
+            currency = amt["currency"]
+    row["currency"] = currency
+    return row
+
+
+# ── slug discovery ───────────────────────────────────────────────────────────
+
+def _oc_slugs(cell: str) -> set[str]:
+    return {s for h in (cell or "").split(",") if (s := normalize_oc_slug(h))}
+
+
+def _slugs_from_yml(path: Path) -> set[str]:
+    """OC slugs from funding-yml.csv (already keyed to risk-scope repos)."""
+    out: set[str] = set()
+    if path.exists():
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                out |= _oc_slugs(row.get("open_collective"))
+    return out
+
+
+def _slugs_from_export(path: Path, scope: set[str]) -> set[str]:
+    """OC slugs from the FLOSS Fund export, restricted to in-scope repos.
+
+    The export is the global directory, so we keep only manifests whose
+    `project_repository` resolves to a repo in the risk scope — otherwise we'd
+    fetch budgets for hundreds of collectives we don't track.
+    """
+    out: set[str] = set()
+    if path.exists():
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                if normalize_github_repo(row.get("project_repository")) in scope:
+                    out |= _oc_slugs(row.get("open_collective"))
+    return out
+
+
+def collect_slugs() -> list[str]:
+    """Distinct Open Collective slugs referenced by risk-scope repos."""
+    scope = {e.repo for e in load_risk_repos()}
+    return sorted(_slugs_from_yml(FUNDING_YML_FILE) | _slugs_from_export(FLOSS_FUND_FILE, scope))
+
+
+# ── CSV I/O ──────────────────────────────────────────────────────────────────
+
+def _load_existing() -> dict[str, dict]:
+    out: dict[str, dict] = {}
+    if OUTPUT_FILE.exists():
+        with open(OUTPUT_FILE, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                out[row["slug"]] = row
+    return out
+
+
+def _write(rows: dict[str, dict]) -> None:
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=FIELDS, extrasaction="ignore")
+        w.writeheader()
+        for slug in sorted(rows):
+            w.writerow(rows[slug])
+
+
+def _is_fresh(row: dict, ttl_days: int) -> bool:
+    ts = (row.get("fetched_at") or "").strip()
+    if not ts:
+        return False
+    try:
+        dt = datetime.datetime.fromisoformat(ts)
+    except ValueError:
+        return False
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=datetime.timezone.utc)
+    return dt >= datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=ttl_days)
+
+
+# ── fetch ────────────────────────────────────────────────────────────────────
+
+async def fetch_one(session: aiohttp.ClientSession, query: str, slug: str) -> dict:
+    payload = {"query": query, "variables": {"slug": slug}}
+    try:
+        async with session.post(API_URL, json=payload, timeout=30) as resp:
+            if resp.status != 200:
+                return {"slug": slug, "oc_status": "error"}
+            data = await resp.json()
+    except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+        log.warning("oc fetch failed for %s: %s", slug, e)
+        return {"slug": slug, "oc_status": "error"}
+    account = (data.get("data") or {}).get("account")
+    return parse_oc_account(slug, account)
+
+
+async def batch(slugs: list[str], force: bool, limit: int | None, concurrency: int) -> None:
+    existing = _load_existing()
+    fresh = set() if force else {s for s, row in existing.items() if _is_fresh(row, TTL_DAYS)}
+    to_fetch = [s for s in slugs if s not in fresh]
+    if limit and limit < len(to_fetch):
+        to_fetch = to_fetch[:limit]
+    console.print(f"[bold]opencollective[/bold]: {len(slugs)} slugs, {len(to_fetch)} to fetch")
+    if not to_fetch:
+        console.print("[dim]Nothing to fetch.[/dim]")
+        return
+
+    query = build_query()
+    sem = asyncio.Semaphore(concurrency)
+    headers = {"Content-Type": "application/json", "User-Agent": USER_AGENT}
+
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async def one(slug: str) -> dict:
+            async with sem:
+                return await fetch_one(session, query, slug)
+
+        with Progress(SpinnerColumn(), TextColumn("{task.description}"), BarColumn(),
+                      TaskProgressColumn(), TimeElapsedColumn(), console=console) as prog:
+            task = prog.add_task("opencollective", total=len(to_fetch))
+            for coro in asyncio.as_completed([one(s) for s in to_fetch]):
+                res = await coro
+                prog.advance(task)
+                res["fetched_at"] = datetime.datetime.now(
+                    datetime.timezone.utc
+                ).isoformat(timespec="seconds")
+                existing[res["slug"]] = res
+                _write(existing)
+    console.print(f"[green]done[/green] → {OUTPUT_FILE}")
+
+
+def main() -> None:
+    p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    p.add_argument("--limit", type=int, default=None)
+    p.add_argument("--concurrency", type=int, default=4)
+    p.add_argument("--force", action="store_true")
+    p.add_argument("-v", "--verbose", action="store_true")
+    args = p.parse_args()
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
+    slugs = collect_slugs()
+    asyncio.run(batch(slugs, args.force, args.limit, args.concurrency))
+
+
+if __name__ == "__main__":
+    main()
