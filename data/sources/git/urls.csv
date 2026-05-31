@@ -44,6 +44,7 @@ git://git.savannah.gnu.org/bash.git,True,ls-remote,2026-04-27T20:41:04Z
 git://git.savannah.gnu.org/cpio.git,True,ls-remote,2026-04-27T20:41:04Z
 git://git.savannah.gnu.org/diffutils.git,True,ls-remote,2026-04-27T20:41:04Z
 git://git.savannah.gnu.org/findutils.git,True,ls-remote,2026-04-27T20:41:04Z
+git://git.savannah.gnu.org/gettext.git,True,ls-remote,2026-05-31T17:41:31Z
 git://git.savannah.gnu.org/grep.git,True,ls-remote,2026-04-27T20:41:04Z
 git://git.savannah.gnu.org/groff.git,True,ls-remote,2026-04-27T20:41:04Z
 git://git.savannah.gnu.org/grub.git,True,ls-remote,2026-04-27T20:41:04Z
@@ -215,7 +216,9 @@ https://gitlab.com/tspiteri/fixed.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/tspiteri/gmp-mpfr-sys.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/tspiteri/rug.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/ubports/development/core/gsettings-qt.git,True,ls-remote,2026-05-17T23:15:11Z
+https://gitlab.com/warsaw/flufl.lock.git,True,ls-remote,2026-05-31T17:41:31Z
 https://gitlab.com/warsaw/flufl.lock/issues.git,False,ls-remote,2026-05-17T23:15:11Z
+https://gitlab.com/warsaw/public.git,True,ls-remote,2026-05-31T17:41:31Z
 https://gitlab.com/warsaw/public/issues.git,False,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/wireshark/wireshark.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/wufz/io-close.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -460,6 +463,7 @@ https://invent.kde.org/system/kpmcore,True,ls-remote,2026-05-17T23:15:11Z
 https://pagure.io/libaio,True,ls-remote,2026-05-17T23:15:11Z
 https://pagure.io/libuser/,True,ls-remote,2026-05-17T23:15:11Z
 https://pagure.io/newt,True,ls-remote,2026-04-27T20:41:04Z
+https://pagure.io/python-daemon/,True,ls-remote,2026-05-31T17:41:31Z
 https://pagure.io/python-daemon/blob/main/f/changelog,False,ls-remote,2026-05-17T23:15:11Z
 https://pagure.io/volume_key,True,ls-remote,2026-05-17T23:15:11Z
 https://pagure.io/xmlto/,True,ls-remote,2026-05-17T23:15:11Z
@@ -522,6 +526,7 @@ https://salsa.debian.org/debian/babeltrace.git,True,ls-remote,2026-05-17T23:15:1
 https://salsa.debian.org/debian/base-passwd.git,True,ls-remote,2026-04-27T20:50:59Z
 https://salsa.debian.org/debian/boost-defaults.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/debian/btrfs-progs.git,True,ls-remote,2026-05-17T23:15:11Z
+https://salsa.debian.org/debian/ca-certificates.git,True,ls-remote,2026-05-31T17:41:31Z
 https://salsa.debian.org/debian/ccid.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/debian/cdrkit.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/debian/chafa.git,True,ls-remote,2026-05-17T23:15:11Z

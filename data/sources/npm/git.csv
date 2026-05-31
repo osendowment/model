@@ -1310,7 +1310,7 @@
 "@simple-libs/child-process-utils","https://github.com/trigensoftware/simple-libs.git","","","","","","",""
 "@simple-libs/hosted-git-info","https://github.com/trigensoftware/simple-libs.git","","","","","","",""
 "@simple-libs/stream-utils","https://github.com/trigensoftware/simple-libs.git","","","","","","",""
-"@sinclair/typebox","https://github.com/sinclairzx81/sinclair-typebox.git","","","","","","",""
+"@sinclair/typebox","https://github.com/sinclairzx81/typebox.git","","","","","","",""
 "@sindresorhus/base62","https://github.com/sindresorhus/base62.git","","","","","","",""
 "@sindresorhus/is","https://github.com/sindresorhus/is.git","","","","","","",""
 "@sindresorhus/merge-streams","https://github.com/sindresorhus/merge-streams.git","","","","","","",""
