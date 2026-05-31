@@ -12,3 +12,6 @@ __pycache__/
 tasks/
 *.lock
 docs/superpowers/
+
+# Repology HTML scrape cache — regenerable, never commit (parsed output is project-urls.csv)
+data/sources/repology/html-cache/

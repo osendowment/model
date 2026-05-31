@@ -11,14 +11,13 @@ For each cpp project that doesn't already have a `git` URL in
 every `href="..."` out of it, and runs them through the classifier in
 `src.build_git`. Only URLs recognised as Git endpoints are kept.
 
-Caches per-project HTML in `data/sources/repology/html-cache/<name>.html` so
-re-runs are free. Output: `data/sources/repology/project-urls.csv` with columns
+Pages are parsed in memory and discarded — the raw HTML is never persisted.
+Output: `data/sources/repology/project-urls.csv` with columns
 `project, candidate_url, platform`.
 
 Usage:
     uv run -m src.sources.cpp.fetch_repology_urls
-    uv run -m src.sources.cpp.fetch_repology_urls --ab-only   # only AB-class cpp projects
-    uv run -m src.sources.cpp.fetch_repology_urls --refresh   # re-fetch even cached
+    uv run -m src.sources.cpp.fetch_repology_urls --classes A,B   # only A/B-class cpp projects
 """
 
 import argparse
@@ -44,7 +43,6 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 RESULTS = DATA_DIR / "sources" / "cpp" / "results.csv"
-CACHE_DIR = DATA_DIR / "sources" / "repology" / "html-cache"
 OUTPUT = DATA_DIR / "sources" / "repology" / "project-urls.csv"
 
 INFO_URL = "https://repology.org/project/{name}/information"
@@ -79,32 +77,20 @@ def load_cpp_targets(classes: tuple[str, ...]) -> list[str]:
     return out
 
 
-async def fetch_one(
-    session: aiohttp.ClientSession,
-    project: str,
-    refresh: bool,
-) -> str:
-    """Return cached or freshly fetched HTML for `project`'s information page. '' on error."""
-    cache_path = CACHE_DIR / f"{project.replace('/', '_')}.html"
-    if not refresh and cache_path.exists():
-        return cache_path.read_text()
+async def fetch_one(session: aiohttp.ClientSession, project: str) -> str:
+    """Fetch `project`'s Repology information page HTML. '' on 404/error.
 
+    The HTML is parsed in memory and discarded — only the extracted git URLs
+    (`project-urls.csv`) are stored, never the raw pages.
+    """
     url = INFO_URL.format(name=project)
     try:
         async with session.get(url, headers=HEADERS, timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as r:
-            if r.status == 404:
-                CACHE_DIR.mkdir(parents=True, exist_ok=True)
-                cache_path.write_text("")
-                return ""
             if r.status != 200:
                 return ""
-            html = await r.text()
+            return await r.text()
     except (aiohttp.ClientError, asyncio.TimeoutError):
         return ""
-
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cache_path.write_text(html)
-    return html
 
 
 def extract_git_urls(html: str) -> list[tuple[str, str]]:
@@ -135,7 +121,6 @@ async def main_async(args: argparse.Namespace) -> None:
     console.rule("[bold white]fetch_repology_urls.py[/bold white]")
     console.print(f"  Targets   : [cyan]{len(targets):,}[/cyan] cpp projects "
                   f"(classes={','.join(classes)}) without git URL")
-    console.print(f"  Cache     : [cyan]{CACHE_DIR}[/cyan]")
     console.print(f"  Output    : [cyan]{OUTPUT}[/cyan]")
     console.print()
 
@@ -161,7 +146,7 @@ async def main_async(args: argparse.Namespace) -> None:
                 nonlocal found_any_git
                 async with sem:
                     progress.update(task_id, description=f"[cyan]{project[:36]}[/cyan]")
-                    html = await fetch_one(session, project, args.refresh)
+                    html = await fetch_one(session, project)
                     git_urls = extract_git_urls(html)
                     if git_urls:
                         found_any_git += 1
@@ -199,7 +184,6 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--classes", default="A,B,C",
                    help="Comma-separated value_class filter (default A,B,C — D excluded)")
-    p.add_argument("--refresh", action="store_true", help="Re-fetch even when cached")
     asyncio.run(main_async(p.parse_args()))
 
 
