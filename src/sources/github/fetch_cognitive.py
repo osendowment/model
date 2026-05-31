@@ -91,13 +91,14 @@ from rich.progress import (
 from rich.table import Table
 
 from src.sources.git.clone import SOURCE_EXTS
+from src.sources.git.clone import corrected_clone_sha
 from src.sources.git.clone import download_tarball as _download_tarball
 from src.sources.git.clone import sparse_clone as _sparse_clone
 from src.sources.git.disk import check_disk_or_exit, make_clone_tmpdir, print_disk_banner, sweep_stale_clone_dirs
 from src.sources.git.long_format import read as _read_long
 from src.sources.git.long_format import upsert_snapshot
 from src.sources.github.display import _ETAColumn
-from src.common.repos import load_risk_repos
+from src.common.repos import load_default_branches, load_risk_repos
 
 
 log = logging.getLogger(__name__)
@@ -459,13 +460,15 @@ def _python_cognitive_batch(files: list[str]) -> tuple[int, int, int]:
 async def _fetch_and_analyze(
     repo: str, repo_id: str, sha: str, analyzed_year: str, base_dir: str,
     sem: asyncio.Semaphore, pool: ProcessPoolExecutor, client: httpx.Client,
+    branch: str | None = None, cutoff: str | None = None, size_kb: int = 0,
 ) -> RepoCognitive:
     """Sparse-checkout `repo`@`sha`, run analysis in worker process, clean up.
 
-    Same shape as the cyclo-halstead pass so running both back-to-back is a
-    safe O(2*download) operation. (We can refactor the two to share a
-    checkout cache later — see fetch_advanced_complexity.py for the same
-    `_download_tarball` / `_sparse_clone` reuse pattern.)
+    The pinned ``sha`` is corrected to the default branch's first-parent
+    mainline via ``corrected_clone_sha`` before checkout (an off-mainline
+    CI/template commit would measure the template, not the repo); metrics are
+    still keyed under the original ``sha``. Same shape as the cyclo-halstead
+    pass so running both back-to-back is a safe O(2*download) operation.
     """
     rc = RepoCognitive(
         repo=repo, repo_id=repo_id,
@@ -477,9 +480,16 @@ async def _fetch_and_analyze(
     async with sem:
         t0 = time.monotonic()
         try:
+            # Correct an off-mainline pinned SHA (fork-network / CI-template
+            # leak) to the real mainline commit. Records key on original `sha`.
+            clone_sha = sha
+            if sha and branch:
+                clone_sha = await loop.run_in_executor(
+                    None, corrected_clone_sha, repo, branch, sha, cutoff,
+                ) or sha
             try:
                 dl_elapsed, _ = await loop.run_in_executor(
-                    None, _download_tarball, repo, dest, client, sha or "HEAD",
+                    None, _download_tarball, repo, dest, client, clone_sha or "HEAD",
                 )
                 rc.download_s = dl_elapsed
             except Exception as e:
@@ -487,7 +497,7 @@ async def _fetch_and_analyze(
                 if os.path.isdir(dest):
                     shutil.rmtree(dest, ignore_errors=True)
                 dl_elapsed, _ = await loop.run_in_executor(
-                    None, _sparse_clone, repo, dest, 0, sha or None,
+                    None, _sparse_clone, repo, dest, size_kb, clone_sha or None,
                 )
                 rc.download_s = dl_elapsed
 
@@ -520,14 +530,22 @@ async def analyze_repos(
     repo_ids: dict[str, str], concurrency: int,
     output_path: str | None = None, flush_every: int = 25,
     max_disk_gb: float = 0.0,
+    branches: dict[str, str] | None = None,
+    cutoffs: dict[str, str] | None = None,
+    sizes: dict[str, int] | None = None,
 ) -> list[RepoCognitive]:
     """Process every repo concurrently. `shas` maps repo → (year, sha).
 
-    If `output_path` is given, persist a partial CSV every `flush_every` repos
-    so a long run can survive a crash mid-way. The final write at the end of
-    `main()` is still authoritative. If ``max_disk_gb`` > 0, abort gracefully
-    when free /tmp dips below the threshold.
+    ``branches``/``cutoffs`` drive the off-mainline SHA correction (see
+    ``corrected_clone_sha``); ``sizes`` (repo KB) sizes the sparse-clone
+    fallback. If `output_path` is given, persist a partial CSV every
+    `flush_every` repos so a long run can survive a crash mid-way. The final
+    write at the end of `main()` is still authoritative. If ``max_disk_gb`` >
+    0, abort gracefully when free /tmp dips below the threshold.
     """
+    branches = branches or {}
+    cutoffs = cutoffs or {}
+    sizes = sizes or {}
     sem = asyncio.Semaphore(concurrency)
     base_dir = make_clone_tmpdir("cognitive")
     name_width = min(max((len(r) for r in repos), default=20), 38)
@@ -555,6 +573,8 @@ async def analyze_repos(
                 rc = await _fetch_and_analyze(
                     repo, repo_ids.get(repo, ""), sha, year,
                     base_dir, sem, pool, client,
+                    branch=branches.get(repo), cutoff=cutoffs.get(repo),
+                    size_kb=sizes.get(repo, 0),
                 )
                 progress.update(task, advance=1, description=repo[:name_width].ljust(name_width))
                 return rc
@@ -796,6 +816,14 @@ def main() -> None:
         r: sha_map.get(r, ("current", "")) for r in repos
     }
 
+    # Off-mainline SHA correction inputs (default branch + year-end cutoff).
+    branches = load_default_branches()
+    cutoffs: dict[str, str] = {
+        r: f"{int(year) + 1}-01-01T00:00:00"
+        for r, (year, _sha) in targets.items() if year.isdigit()
+    }
+    sizes: dict[str, int] = {e.repo: e.size_kb for e in risk_repos if e.size_kb}
+
     ttl = 0 if args.force else args.ttl_days
     repos, ttl_skipped = _filter_by_ttl(repos, args.output, ttl, targets)
     if not repos:
@@ -813,6 +841,7 @@ def main() -> None:
         repos, targets, repo_ids, args.concurrency,
         output_path=args.output, flush_every=25,
         max_disk_gb=args.max_disk_gb,
+        branches=branches, cutoffs=cutoffs, sizes=sizes,
     ))
     elapsed = time.monotonic() - t_start
 

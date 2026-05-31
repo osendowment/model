@@ -67,8 +67,9 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from src.common.repos import load_risk_repos
+from src.common.repos import load_default_branches, load_risk_repos
 from src.sources.git.clone import SOURCE_EXTS
+from src.sources.git.clone import corrected_clone_sha
 from src.sources.git.clone import download_tarball as _download_tarball
 from src.sources.git.clone import sparse_clone as _sparse_clone
 from src.sources.git.disk import check_disk_or_exit, make_clone_tmpdir, print_disk_banner, sweep_stale_clone_dirs
@@ -96,8 +97,20 @@ DEFAULT_TTL_DAYS = 0  # 0 = always re-run
 # what OOM-kills the lizard analysis on mega-repos.
 MAX_FILE_BYTES = 2_000_000
 
-# Wall-clock cap for one repo's isolated analysis subprocess.
+# Wall-clock cap for one repo's isolated analysis subprocess. Scaled up for
+# very large repos by `_analysis_timeout` so mega-repos (linux 6 GB, gcc 4 GB)
+# get the wall-clock they need instead of a spurious "timeout" error.
 ANALYSIS_TIMEOUT = 900
+
+
+def _analysis_timeout(size_kb: int) -> int:
+    """Per-repo lizard timeout, scaled by repo size (+base per ~1 GB).
+
+    Small repos keep the 900 s base; linux (~6 GB) gets ~6300 s, gcc (~4 GB)
+    ~4500 s. The cap only needs to be generous enough not to falsely kill a
+    slow-but-progressing analysis — a genuinely hung repo still dies.
+    """
+    return ANALYSIS_TIMEOUT + (max(0, size_kb) // 1_000_000) * ANALYSIS_TIMEOUT
 
 # Metrics this fetcher emits per snapshot to data/sources/git/lizard.csv.
 CYCLO_METRICS: tuple[str, ...] = (
@@ -329,8 +342,15 @@ def _analyze_dir_isolated(dest: str, timeout: int = ANALYSIS_TIMEOUT) -> dict:
 async def _fetch_and_analyze(
     repo: str, repo_id: str, sha: str, analyzed_year: str, base_dir: str,
     sem: asyncio.Semaphore, client: httpx.Client,
+    branch: str | None = None, cutoff: str | None = None, size_kb: int = 0,
 ) -> RepoComplexity:
-    """Sparse-checkout `repo`@`sha`, analyse in an isolated subprocess, clean up."""
+    """Sparse-checkout `repo`@`sha`, analyse in an isolated subprocess, clean up.
+
+    The pinned ``sha`` (from commits-years.csv) is corrected to the default
+    branch's first-parent mainline via ``corrected_clone_sha`` before checkout
+    — an off-mainline CI/template commit would otherwise measure the template,
+    not the repo. Metrics are still keyed under the original ``sha``.
+    """
     rc = RepoComplexity(
         repo=repo, repo_id=repo_id,
         analyzed_sha=sha, analyzed_year=analyzed_year,
@@ -341,11 +361,20 @@ async def _fetch_and_analyze(
     async with sem:
         t0 = time.monotonic()
         try:
+            # Correct an off-mainline pinned SHA (fork-network / CI-template
+            # leak) to the real mainline commit — measure the repo, not a
+            # shared template tree. Records still key on the original `sha`.
+            clone_sha = sha
+            if sha and branch:
+                clone_sha = await loop.run_in_executor(
+                    None, corrected_clone_sha, repo, branch, sha, cutoff,
+                ) or sha
+
             # Try tarball first (fast for any size — we don't have repo size
             # here so always try tarball before falling back to sparse-clone).
             try:
                 dl_elapsed, _ = await loop.run_in_executor(
-                    None, _download_tarball, repo, dest, client, sha or "HEAD",
+                    None, _download_tarball, repo, dest, client, clone_sha or "HEAD",
                 )
                 rc.download_s = dl_elapsed
             except Exception as e:
@@ -353,7 +382,7 @@ async def _fetch_and_analyze(
                 if os.path.isdir(dest):
                     shutil.rmtree(dest, ignore_errors=True)
                 dl_elapsed, _ = await loop.run_in_executor(
-                    None, _sparse_clone, repo, dest, 0, sha or None,
+                    None, _sparse_clone, repo, dest, size_kb, clone_sha or None,
                 )
                 rc.download_s = dl_elapsed
 
@@ -362,10 +391,11 @@ async def _fetch_and_analyze(
                 return rc
 
             # CPU-bound analysis runs in an isolated subprocess (per-repo
-            # process group) so a crash/OOM can't poison sibling repos.
+            # process group) so a crash/OOM can't poison sibling repos. The
+            # timeout scales with repo size so mega-repos aren't false-killed.
             t_an = time.monotonic()
             metrics = await loop.run_in_executor(
-                None, _analyze_dir_isolated, dest,
+                None, _analyze_dir_isolated, dest, _analysis_timeout(size_kb),
             )
             rc.analysis_s = time.monotonic() - t_an
 
@@ -390,14 +420,22 @@ async def analyze_repos(
     repo_ids: dict[str, str], concurrency: int,
     output_path: str | None = None, flush_every: int = 25,
     max_disk_gb: float = 0.0,
+    branches: dict[str, str] | None = None,
+    cutoffs: dict[str, str] | None = None,
+    sizes: dict[str, int] | None = None,
 ) -> list[RepoComplexity]:
     """Process every repo concurrently. `shas` maps repo → (year, sha).
 
-    If `output_path` is given, persist each successful result via
-    `upsert_snapshot` so a long run can survive a crash mid-way.
+    ``branches``/``cutoffs`` drive the off-mainline SHA correction (see
+    ``corrected_clone_sha``); ``sizes`` (repo size in KB) scales the per-repo
+    analysis timeout. If `output_path` is given, persist each successful
+    result via `upsert_snapshot` so a long run can survive a crash mid-way.
     If ``max_disk_gb`` > 0, abort gracefully when free /tmp drops below
     that threshold (waits for in-flight repos to finish).
     """
+    branches = branches or {}
+    cutoffs = cutoffs or {}
+    sizes = sizes or {}
     sem = asyncio.Semaphore(concurrency)
     base_dir = make_clone_tmpdir("cyclo")
     name_width = min(max((len(r) for r in repos), default=20), 38)
@@ -426,6 +464,8 @@ async def analyze_repos(
                 rc = await _fetch_and_analyze(
                     repo, repo_ids.get(repo, ""), sha, year,
                     base_dir, sem, client,
+                    branch=branches.get(repo), cutoff=cutoffs.get(repo),
+                    size_kb=sizes.get(repo, 0),
                 )
                 progress.update(task, advance=1, description=repo[:name_width].ljust(name_width))
                 return rc
@@ -711,6 +751,16 @@ def main() -> None:
         r: sha_map.get(r, ("current", "")) for r in repos
     }
 
+    # Off-mainline SHA correction inputs: default branch + year-end cutoff.
+    # The cutoff lets resolve_mainline_sha recompute the real last first-parent
+    # commit of the target year when the pinned SHA is off-mainline.
+    branches = load_default_branches()
+    cutoffs: dict[str, str] = {
+        r: f"{int(year) + 1}-01-01T00:00:00"
+        for r, (year, _sha) in targets.items() if year.isdigit()
+    }
+    sizes: dict[str, int] = {e.repo: e.size_kb for e in risk_repos if e.size_kb}
+
     ttl = 0 if args.force else args.ttl_days
     repos, ttl_skipped = _filter_by_ttl(repos, args.output, ttl, targets)
     if not repos:
@@ -728,6 +778,7 @@ def main() -> None:
         repos, targets, repo_ids, args.concurrency,
         output_path=args.output, flush_every=25,
         max_disk_gb=args.max_disk_gb,
+        branches=branches, cutoffs=cutoffs, sizes=sizes,
     ))
     elapsed = time.monotonic() - t_start
 
