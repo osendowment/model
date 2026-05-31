@@ -56,7 +56,6 @@ bitflags/bitflags,29287955,0,0,0,100.0,1124,163,False,,False,0,0,100.0,,100
 blakeembrey/array-flatten,17789771,9,3,12,35.67,86,20,False,,False,0,0,100.0,,60
 blakeembrey/change-case,9440238,9,3,12,35.67,2402,102,False,,False,0,0,100.0,,60
 bluss/bencher,65987276,0,0,0,100.0,92,16,False,,False,0,0,100.0,,100
-bminor/binutils-gdb,,0,0,0,100.0,,,False,,False,0,0,100.0,,100
 boto/boto3,24774658,0,0,0,100.0,9775,1968,False,,False,0,0,100.0,,100
 boto/botocore,6670942,0,0,0,100.0,1613,1153,False,,False,0,0,100.0,,100
 boto/s3transfer,49535299,0,0,0,100.0,232,152,False,,False,0,0,100.0,,100
@@ -137,6 +136,7 @@ defunctzombie/node-process,7580644,0,0,0,100.0,129,67,False,,False,0,0,100.0,,10
 django/asgiref,48501860,149,0,149,10.26,1619,241,False,,False,0,0,100.0,,32
 djc/rustc-version-rs,41272773,30,0,30,24.64,64,23,True,"github,patreon",False,2,0,100.0,,50
 dmitrysoshnikov/regexp-tree,85459304,0,0,0,100.0,423,46,False,,False,0,0,100.0,,100
+docutils/docutils,44840244,,,0,100.0,67,31,,,False,0,0,100.0,,100
 doowb/ansi-colors,47135420,3,0,3,47.83,453,35,False,,False,0,0,100.0,,69
 douglasdwyer/wasm_sync,668034655,0,0,0,100.0,16,1,False,,False,0,0,100.0,,100
 dougwilson/nodejs-depd,20848667,0,0,0,100.0,329,40,False,,False,0,0,100.0,,100
@@ -226,7 +226,6 @@ fontconfig/fontconfig,926884194,0,0,0,100.0,0,1,False,,False,0,0,100.0,,100
 form-data/form-data,1755793,0,0,0,100.0,2347,390,False,,False,0,0,100.0,,100
 formatjs/formatjs,19117456,0,0,0,100.0,14707,1385,False,,False,0,0,100.0,,100
 freedesktop-unofficial-mirror/cairo,34372735,0,0,0,100.0,0,0,False,,False,0,0,100.0,,100
-freedesktop/xorg-xorgproto,,0,0,0,100.0,,,False,,False,0,0,100.0,,100
 freetype/freetype,187000659,0,0,0,100.0,816,402,False,,False,0,0,100.0,,100
 frenic/csstype,104001328,0,0,0,100.0,1815,75,False,,False,0,0,100.0,,100
 frommi/miniz_oxide,96124162,0,0,0,100.0,233,71,False,,False,0,0,100.0,,100
@@ -494,6 +493,7 @@ medikoo/d,10817569,3,6,9,37.46,44,24,True,"github,tidelift",False,2,0,100.0,,61
 medikoo/es5-ext,1792941,3,6,9,37.46,179,102,True,"github,tidelift",False,2,0,100.0,,61
 medikoo/es6-symbol,14423385,3,6,9,37.46,178,17,True,"github,tidelift",False,2,0,100.0,,61
 medikoo/type,177198492,3,6,9,37.46,37,4,True,github,False,1,0,100.0,,61
+meinersbur/isl,37677854,,,0,100.0,76,28,,,False,0,0,100.0,,100
 mhammond/pywin32,108187130,0,0,0,100.0,5551,851,False,,False,0,0,100.0,,100
 micheles/decorator,14656555,0,0,0,100.0,906,115,False,,False,0,0,100.0,,100
 micromark/micromark,157420458,0,0,0,100.0,2169,77,False,,False,0,0,100.0,,100
