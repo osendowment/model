@@ -35,6 +35,7 @@ from rich.table import Table
 from src.floss_fund.directory import normalize_github_repo
 from src.pipeline.common.funding_platforms import normalize_oc_slug
 from src.pipeline.common.repos import load_risk_repos
+from src.pipeline.common.stats import hazen_percentiles
 from src.pipeline.common.tables import load_column_by_repo, load_rows_by_repo
 
 console = Console()
@@ -48,9 +49,10 @@ OC_BUDGETS_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
 FOUNDATIONS_FILE = DATA_DIR / "sources" / "foundations" / "host-by-repo.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
 
-FIELDS = ["repo", "repo_id", "github_sponsors", "sponsoring_count",
-          "has_funding_yml", "funding_yml_platforms", "has_funding_json",
-          "channels_count", "oc_avg_funding", "foundation_host", "fetched_at"]
+FIELDS = ["repo", "repo_id", "gh_sponsors_in", "gh_sponsors_out",
+          "gh_sponsors_net", "gh_sponsors_net_pctl", "has_funding_yml",
+          "funding_yml_platforms", "has_funding_json", "channels_count",
+          "oc_avg_funding", "foundation_host", "fetched_at"]
 
 
 def _latest(*timestamps: str) -> str:
@@ -75,22 +77,37 @@ def oc_avg_funding(slug: str, oc_budgets: dict[str, dict]) -> str:
     return str(int(avg)) if avg == int(avg) else f"{avg:.2f}"
 
 
+def _to_int(s: str) -> int:
+    s = (s or "").strip()
+    try:
+        return int(s)
+    except ValueError:
+        return 0
+
+
 def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dict,
                  foundation_host: str, oc_budgets: dict, sponsoring_count: str = "") -> dict:
     """Join one repo's funding signals into a funding.csv row.
 
-    `sponsoring_count` (outbound) is looked up by owner login in `build()` —
-    it is an account-level signal, not part of the per-repo `sponsors` row.
+    `gh_sponsors_in`  = inbound GitHub sponsors received (from sponsors.csv).
+    `gh_sponsors_out` = the owner's outbound sponsoring (looked up by login in
+                        `build()` — an account-level signal, not per-repo).
+    `gh_sponsors_net` = in − out. `gh_sponsors_net_pctl` is filled by `build()`
+                        in a second pass (needs every repo's net to rank).
     """
     channels = _platform_set(yml.get("funding_yml_platforms")) | _platform_set(
         export.get("channel_platforms"))
     oc_slug = (normalize_oc_slug(yml.get("open_collective"))
                or normalize_oc_slug(export.get("open_collective")))
+    gh_in = (sponsors.get("github_sponsors") or "").strip()
+    gh_out = (sponsoring_count or "").strip()
     return {
         "repo": repo,
         "repo_id": repo_id,
-        "github_sponsors": (sponsors.get("github_sponsors") or "").strip(),
-        "sponsoring_count": sponsoring_count,
+        "gh_sponsors_in": gh_in,
+        "gh_sponsors_out": gh_out,
+        "gh_sponsors_net": str(_to_int(gh_in) - _to_int(gh_out)),
+        "gh_sponsors_net_pctl": "",  # filled in build() once all nets are known
         "has_funding_yml": (yml.get("has_funding_yml") or "").strip(),
         "funding_yml_platforms": (yml.get("funding_yml_platforms") or "").strip(),
         "has_funding_json": "True" if export else "False",
@@ -147,6 +164,14 @@ def build() -> list[dict]:
             foundation_host=foundations.get(repo, ""),
             oc_budgets=oc_budgets,
             sponsoring_count=sponsoring.get(owner, "")))
+
+    # Funding risk percentile: Hazen-rank net sponsors, NEGATED so a LOWER net
+    # (less community funding) → HIGHER risk percentile (mirrors the inverted
+    # openssf_score in build_security). Informational — kept out of risk.csv.
+    nets = [_to_int(r["gh_sponsors_net"]) for r in rows]
+    pctls = hazen_percentiles([-n for n in nets])
+    for r, p in zip(rows, pctls):
+        r["gh_sponsors_net_pctl"] = round(p, 2)
     return rows
 
 
@@ -178,7 +203,7 @@ def main() -> None:
     table.add_column("Field", style="bold")
     table.add_column("Populated", justify="right")
     table.add_column("Coverage", justify="right")
-    for col in ("github_sponsors", "sponsoring_count", "has_funding_yml",
+    for col in ("gh_sponsors_in", "gh_sponsors_out", "has_funding_yml",
                 "funding_yml_platforms", "has_funding_json", "channels_count",
                 "oc_avg_funding", "foundation_host"):
         n = sum(1 for r in rows if r[col] and r[col] not in ("False", "0"))
