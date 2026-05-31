@@ -1,11 +1,14 @@
-"""Detect data anomalies in risk-data.csv and category CSVs.
+"""Detect data anomalies in the risk-stage CSVs.
 
-Looks for:
-- Eligible repos missing from category outputs
-- Numeric outliers (negative complexity, very large LOC, percentile out of range)
-- Inconsistent data across categories (e.g. eligible but missing in concentration)
-- Stale fetched_at timestamps (data > 90 days old)
-- Repos with same value across many fields (sentinel/placeholder fill)
+Reads the narrow aggregate `data/risk/risk.csv` plus the per-dimension detail
+CSVs under `data/risk/` (`complexity.csv`, `concentration.csv`, `security.csv`,
+`funding.csv`, `workload.csv`). Looks for:
+- Risk-scope repos missing from `risk.csv` (stale aggregate)
+- Numeric outliers (negative complexity, very large LOC, out-of-range values)
+- Percentile columns (`*_p`) outside [0, 100]
+- Dimension `score` columns outside [1, 100] (a 0 score is impossible by design)
+- Stale `*_fetched_at` timestamps (data > 90 days old)
+- Sentinel/placeholder fill (a repo with 0 across many numeric fields)
 
 Usage:
     uv run python scripts/data_anomalies.py
@@ -26,24 +29,59 @@ console = Console()
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.pipeline.common.repos import load_risk_repos  # noqa: E402
+from src.common.repos import load_risk_repos  # noqa: E402
+
+RISK_DIR = ROOT / "data" / "risk"
+
+# Per-dimension detail CSVs and the year-agnostic columns we range-check.
+# scc "complexity" is a branch-keyword tally; the largest in-scope repos
+# (e.g. torvalds/linux) legitimately exceed 1M, so the bound only needs to
+# catch a parse blow-up, not flag monorepos. issue_close_ratio > 1 is healthy
+# (closes faster than opens); only a negative value is impossible.
+DIMENSION_RANGES: dict[str, dict[str, tuple[float, float]]] = {
+    "complexity": {
+        "loc_eoy": (0, 50_000_000),
+        "sloc_eoy": (0, 50_000_000),
+        "scc_complexity_eoy": (0, 10_000_000),
+        "cognitive_total": (0, 50_000_000),
+        "cyclomatic_total": (0, 50_000_000),
+    },
+    "concentration": {
+        "hhi_commits_git_5y": (0, 10_000),
+        "hhi_commits_git_full": (0, 10_000),
+        "hhi_commits_gh_alltime": (0, 10_000),
+    },
+    "security": {
+        "openssf_score": (0, 10),
+        # torvalds/linux legitimately has ~10k CVEs in a 5y window; the cap
+        # only needs to catch a parse blow-up, not flag the kernel.
+        "cve_count_5y": (0, 50_000),
+    },
+    "workload": {
+        "issue_close_ratio": (0, 100),
+    },
+}
 
 
 def load_risk_scope() -> set[str]:
     """Repos the risk pipeline runs on — value-class A/B, non-archived, valid.
 
-    risk-data.csv is generated from exactly this set (see
-    `src.pipeline.risk.aggregate_risk`), so any repo here that is *missing*
-    from risk-data.csv means the file is stale and needs a re-run. The old
-    check compared against the *eligible* set (eligibility-data.csv), which
-    after the value→risk rewire flagged every eligible-but-not-A/B repo as a
-    false-positive gap.
+    `risk.csv` is generated from exactly this set (see
+    `src.risk.aggregate_risk`), so any repo here that is *missing* from
+    `risk.csv` means the file is stale and needs a re-run.
     """
     entries = load_risk_repos(
         value_file=str(ROOT / "data/value/value.csv"),
         repos_file=str(ROOT / "data/sources/github/repos.csv"),
     )
     return {e.repo for e in entries}
+
+
+def _read(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    with path.open() as f:
+        return list(csv.DictReader(f))
 
 
 def main():
@@ -53,85 +91,111 @@ def main():
     args = parser.parse_args()
 
     risk_scope = load_risk_scope()
-
     findings: list[tuple[str, str, str]] = []  # (severity, category, message)
 
-    risk_path = ROOT / "data/risk/risk.csv"
-    with risk_path.open() as f:
-        rows = list(csv.DictReader(f))
+    risk_rows = _read(RISK_DIR / "risk.csv")
+    in_risk = {r["repo"] for r in risk_rows}
 
-    in_risk = {r["repo"] for r in rows}
-
-    # 1. Risk-scope coverage — a risk-scope repo absent from risk-data.csv
-    #    means the file is stale (re-run src.pipeline.risk.aggregate_risk).
+    # 1. Risk-scope coverage — a risk-scope repo absent from risk.csv means
+    #    the aggregate is stale (re-run src.risk.aggregate_risk).
     missing = risk_scope - in_risk
     if missing:
         findings.append(("warn", "coverage",
-                         f"{len(missing)} risk-scope repos missing from risk-data.csv: "
-                         + ", ".join(sorted(missing)[:5]) +
-                         ("..." if len(missing) > 5 else "")))
+                         f"{len(missing)} risk-scope repos missing from risk.csv: "
+                         + ", ".join(sorted(missing)[:5])
+                         + ("..." if len(missing) > 5 else "")))
 
-    # 2. Numeric outliers
-    for r in rows:
-        for f, ok_range in [
-            ("loc_2025_eoy", (0, 50_000_000)),
-            # scc "complexity" is a branch-keyword tally; the largest repos
-            # in scope (archlinux/linux ≈ 2.6M) legitimately exceed 1M. The
-            # bound only needs to catch a parse blow-up, not flag monorepos.
-            ("scc_complexity_2025_eoy", (0, 10_000_000)),
-            ("hhi_commits_lifetime", (0, 10_000)),
-            ("openssf_score", (0, 10)),
-            ("cve_count_5y", (0, 1000)),
-            ("hotspot_percentile", (0, 100)),
-            # issue_close_ratio > 1 is healthy — the repo closes faster than
-            # issues open, or is clearing a pre-window backlog (observed up
-            # to ~5 for quiet repos). Only a negative ratio is impossible;
-            # the wide cap just catches a divide-by-near-zero blow-up.
-            ("issue_close_ratio", (0, 100)),
-        ]:
-            v = (r.get(f) or "").strip()
+    # 2. Dimension score range — risk.csv components + each detail CSV `score`
+    #    are integer percentile scores floored at 1; 0 or >100 is impossible.
+    for col in ("concentration", "complexity", "security", "funding", "workload", "score"):
+        for r in risk_rows:
+            v = (r.get(col) or "").strip()
             if not v:
                 continue
             try:
                 num = float(v)
             except ValueError:
-                findings.append(("err", "type",
-                                 f"{r['repo']}.{f} = {v!r} (not numeric)"))
+                findings.append(("err", "type", f"{r['repo']}.{col} = {v!r} (not numeric)"))
                 continue
-            lo, hi = ok_range
-            if num < lo or num > hi:
-                findings.append(("warn", "outlier",
-                                 f"{r['repo']}.{f} = {num} (outside [{lo}, {hi}])"))
+            if num < 1 or num > 100:
+                findings.append(("err", "score-range",
+                                 f"{r['repo']}.{col} = {num} (outside [1, 100])"))
 
-    # 3. Stale fetched_at
-    cutoff = (datetime.datetime.now() - datetime.timedelta(days=90)).isoformat()
-    for r in rows:
-        for f in [c for c in r if c.endswith("fetched_at")]:
-            v = (r.get(f) or "").strip()[:10]
-            if not v:
-                continue
-            if v < cutoff[:10]:
-                findings.append(("info", "staleness",
-                                 f"{r['repo']}.{f} = {v} (> 90 days old)"))
+    # 3. Per-dimension detail CSVs: numeric ranges, percentile bounds, scores.
+    for dim, ranges in DIMENSION_RANGES.items():
+        rows = _read(RISK_DIR / f"{dim}.csv")
+        if not rows:
+            findings.append(("warn", "missing-file", f"data/risk/{dim}.csv not found or empty"))
+            continue
+        header = rows[0].keys()
+        pct_cols = [c for c in header if c.endswith("_p")]
+        for r in rows:
+            repo = r.get("repo", "?")
+            # explicit numeric ranges
+            for col, (lo, hi) in ranges.items():
+                v = (r.get(col) or "").strip()
+                if not v:
+                    continue
+                if v.startswith("-"):
+                    findings.append(("err", "negative", f"{repo}.{col} = {v}"))
+                    continue
+                try:
+                    num = float(v)
+                except ValueError:
+                    findings.append(("err", "type", f"{repo}.{col} = {v!r} (not numeric)"))
+                    continue
+                if num < lo or num > hi:
+                    findings.append(("warn", "outlier",
+                                     f"{repo}.{col} = {num} (outside [{lo}, {hi}])"))
+            # generic percentile bound check: every *_p must be in [0, 100]
+            for col in pct_cols:
+                v = (r.get(col) or "").strip()
+                if not v:
+                    continue
+                try:
+                    num = float(v)
+                except ValueError:
+                    findings.append(("err", "type", f"{repo}.{col} = {v!r} (not numeric)"))
+                    continue
+                if num < 0 or num > 100:
+                    findings.append(("err", "pct-range",
+                                     f"{repo}.{col} = {num} (percentile outside [0, 100])"))
+            # dimension score: floored at 1, so 0 is an anomaly
+            sv = (r.get("score") or "").strip()
+            if sv:
+                try:
+                    snum = float(sv)
+                    if snum < 1 or snum > 100:
+                        findings.append(("err", "score-range",
+                                         f"{repo}.{dim}.score = {snum} (outside [1, 100])"))
+                except ValueError:
+                    findings.append(("err", "type", f"{repo}.{dim}.score = {sv!r} (not numeric)"))
 
-    # 4. Negative scc complexity (logically impossible)
-    for r in rows:
-        v = (r.get("scc_complexity_2025_eoy") or "").strip()
-        if v and v.startswith("-"):
-            findings.append(("err", "negative", f"{r['repo']} scc_complexity={v}"))
+    # 4. Stale fetched_at across every detail CSV.
+    cutoff = (datetime.datetime.now() - datetime.timedelta(days=90)).isoformat()[:10]
+    for dim in ("complexity", "concentration", "security", "funding", "workload"):
+        rows = _read(RISK_DIR / f"{dim}.csv")
+        if not rows:
+            continue
+        ts_cols = [c for c in rows[0] if c.endswith("fetched_at")]
+        for r in rows:
+            for col in ts_cols:
+                v = (r.get(col) or "").strip()[:10]
+                if v and v < cutoff:
+                    findings.append(("info", "staleness",
+                                     f"{r.get('repo', '?')}.{dim}.{col} = {v} (> 90 days old)"))
 
-    # 5. Same-value sentinel detection (repo with 0 in many numeric fields)
+    # 5. Sentinel detection — a repo with 0 across many complexity numeric fields.
     numeric_fields = [
-        "loc_2025_eoy", "sloc_2025_eoy", "scc_complexity_2025_eoy",
-        "cognitive_total", "cyclomatic_total", "stars", "forks",
-        "total_commits_lifetime", "active_contributors",
+        "loc_eoy", "sloc_eoy", "scc_complexity_eoy",
+        "cognitive_total", "cyclomatic_total", "churn_5y_total",
     ]
-    for r in rows:
+    for r in _read(RISK_DIR / "complexity.csv"):
         zero_count = sum(1 for f in numeric_fields if (r.get(f) or "").strip() == "0")
         populated = sum(1 for f in numeric_fields if (r.get(f) or "").strip())
         if populated >= 5 and zero_count >= 5:
             findings.append(("info", "many-zeros",
-                             f"{r['repo']}: {zero_count}/{populated} numeric fields = 0"))
+                             f"{r.get('repo', '?')}: {zero_count}/{populated} complexity fields = 0"))
 
     # 6. Report
     severity_counter = {"err": 0, "warn": 0, "info": 0}

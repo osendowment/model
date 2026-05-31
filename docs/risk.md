@@ -45,11 +45,6 @@ Risk
 │   ├── has_funding_json              ← repo /funding.json (FLOSS/fund)  [most recent]
 │   └── foundation_host               ← foundation rosters (Apache/CNCF/LF/…) [most recent]
 │
-├── Visibility  →  data/risk/visibility.csv
-│   ├── stars                         ← GitHub /repos                   [most recent]
-│   ├── forks                         ← GitHub /repos                   [most recent]
-│   └── watchers                      ← GitHub /repos                   [most recent]
-│
 └── Workload  →  data/risk/workload.csv
     ├── repo_age_years                ← GitHub /repos created_at        [EOY, last complete yr]
     ├── push_cadence_years            ← commits-years.csv (years w/ commits) [2021–2025]
@@ -289,7 +284,7 @@ repos. Counts reflect the last pipeline run; refresh with
 | lizard | `data/sources/git/lizard.csv` | 894/899 | 99.4% | cognitive + cyclomatic + Halstead per sha |
 | semgrep | `data/sources/git/semgrep.csv` | 892/899 | 99.2% | rulepack-prefixed SAST findings per sha |
 | cves-queried | `data/sources/osv/queried.csv` | 888/899 | 98.8% | repos OSV was successfully asked about |
-| funding | `data/risk/funding-data.csv` | 888/899 | 98.8% | github_sponsors + FUNDING.yml |
+| funding | `data/risk/funding.csv` | 888/899 | 98.8% | github_sponsors + FUNDING.yml |
 | openssf-checks | `data/sources/openssf/checks.csv` | 881/899 | 98.0% | per-check Scorecard scores (used by build_workload) |
 | issues | `data/sources/github/issues.csv` | 878/899 | 97.7% | opened/closed per year |
 | churn | `data/sources/github/git/churn.csv` | 869/899 | 96.7% | 5y added+deleted lines (heavy bare-clone) |
@@ -302,7 +297,7 @@ repos. Counts reflect the last pipeline run; refresh with
 - **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos. The `/stats/contributors` per-year breakdown and `data/concentration-data.csv` are retired.
 - **churn (96.7%)** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
 
-### What this rolls up to in `risk-data.csv`
+### What this rolls up to in `risk.csv`
 
 **899 rows × 51 columns · 100% risk-scope (A/B) repos populated · median per-column coverage 98.8%.** Counts refresh on re-run.
 
@@ -318,7 +313,7 @@ Sub-100% columns (every gap is structural, not a data-collection bug):
 
 ## Output
 
-### risk-data.csv
+### risk.csv
 
 | Column | Description |
 |--------|-------------|

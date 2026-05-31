@@ -1,4 +1,4 @@
-"""Tests for src/pipeline/risk/build_workload.py — workload percentile logic."""
+"""Tests for src/risk/build_workload.py — workload percentile logic."""
 
 
 def test_scoreercentile_columns():

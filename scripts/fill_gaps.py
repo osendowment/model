@@ -29,6 +29,9 @@ from rich.table import Table
 
 console = Console()
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from src.common.repos import load_risk_repos  # noqa: E402
 
 
 def _run(cmd: list[str], log_path: Path) -> int:
@@ -40,12 +43,12 @@ def _run(cmd: list[str], log_path: Path) -> int:
 
 
 def _eligible() -> set[str]:
-    out = set()
-    with (ROOT / "data/eligibility/eligibility.csv").open() as f:
-        for r in csv.DictReader(f):
-            if (r.get("eligibility") or "").strip() == "True":
-                out.add(r["repo"])
-    return out
+    """Risk-scope set (value-class A/B, non-archived, valid) — the repos the
+    risk fetchers/builders run on."""
+    return {e.repo for e in load_risk_repos(
+        value_file=str(ROOT / "data/value/value.csv"),
+        repos_file=str(ROOT / "data/sources/github/repos.csv"),
+    ) if e.repo}
 
 
 def _covered(path: Path, repo_col: str = "repo") -> set[str]:
@@ -63,7 +66,7 @@ def main():
     args = parser.parse_args()
 
     eligible = _eligible()
-    console.print(f"[bold]Eligible:[/bold] {len(eligible)} repos\n")
+    console.print(f"[bold]Risk-scope:[/bold] {len(eligible)} repos\n")
 
     plan: list[tuple[str, list[str], int]] = []  # (label, cmd, missing_count)
 
@@ -71,11 +74,11 @@ def main():
         # 1. Foundation: commits-years for any repos missing
         missing = eligible - _covered(ROOT / "data/sources/github/git/commits-years.csv")
         if missing:
-            plan.append(("commits-years", ["uv", "run", "python", "-m", "src.git.commits_years", "--concurrency", "10"], len(missing)))
+            plan.append(("commits-years", ["uv", "run", "python", "-m", "src.sources.git.commits_years", "--concurrency", "10"], len(missing)))
 
         # 1b. After commits-years, resolve HEAD for repos with no usable per-year sha
         # (run unconditionally — it's cheap and skips already-resolved repos)
-        plan.append(("resolve-head", ["uv", "run", "python", "-m", "src.git.resolve_head", "--concurrency", "8"], 0))
+        plan.append(("resolve-head", ["uv", "run", "python", "-m", "src.sources.git.resolve_head", "--concurrency", "8"], 0))
 
         # 2. Resolve HEAD for dormant repos (no last_sha at any year)
         sha_data: dict[str, set[str]] = {}
@@ -85,52 +88,51 @@ def main():
                     sha_data.setdefault(r["repo"], set()).add(r.get("year", ""))
         dormant = eligible - set(sha_data.keys())
         if dormant:
-            plan.append(("resolve-head", ["uv", "run", "python", "-m", "src.git.resolve_head", "--concurrency", "8"], len(dormant)))
+            plan.append(("resolve-head", ["uv", "run", "python", "-m", "src.sources.git.resolve_head", "--concurrency", "8"], len(dormant)))
 
         # 3. Sha-pinned fetchers
         scc_missing = eligible - _covered(ROOT / "data/sources/git/scc.csv")
         if scc_missing:
-            plan.append(("scc", ["uv", "run", "python", "-m", "src.git.fetch_scc", "--concurrency", "4"], len(scc_missing)))
+            plan.append(("scc", ["uv", "run", "python", "-m", "src.sources.git.fetch_scc", "--concurrency", "4"], len(scc_missing)))
 
         lizard_missing = eligible - _covered(ROOT / "data/sources/git/lizard.csv")
         if lizard_missing:
-            plan.append(("cognitive", ["uv", "run", "python", "-m", "src.github.fetch_cognitive", "--concurrency", "3"], len(lizard_missing)))
-            plan.append(("cyclo-halstead", ["uv", "run", "python", "-m", "src.github.fetch_advanced_complexity", "--limit", "0", "--concurrency", "3"], len(lizard_missing)))
+            plan.append(("cognitive", ["uv", "run", "python", "-m", "src.sources.github.fetch_cognitive", "--concurrency", "3"], len(lizard_missing)))
+            plan.append(("cyclo-halstead", ["uv", "run", "python", "-m", "src.sources.github.fetch_advanced_complexity", "--limit", "0", "--concurrency", "3"], len(lizard_missing)))
 
         openssf_missing = sorted(eligible - _covered(ROOT / "data/sources/git/openssf.csv"))
         if openssf_missing:
             tmp = ROOT / "/tmp/missing-openssf.txt"
             tmp.write_text("\n".join(openssf_missing) + "\n")
-            plan.append(("openssf", ["uv", "run", "python", "-m", "src.openssf.scorecard", "--file", str(tmp), "--concurrency", "5"], len(openssf_missing)))
+            plan.append(("openssf", ["uv", "run", "python", "-m", "src.sources.openssf.scorecard", "--file", str(tmp), "--concurrency", "5"], len(openssf_missing)))
 
         depsdev_missing = eligible - _covered(ROOT / "data/sources/git/depsdev.csv")
         if depsdev_missing:
-            plan.append(("depsdev", ["uv", "run", "python", "-m", "src.depsdev.fetch", "--concurrency", "20"], len(depsdev_missing)))
+            plan.append(("depsdev", ["uv", "run", "python", "-m", "src.sources.depsdev.fetch", "--concurrency", "20"], len(depsdev_missing)))
 
         churn_missing = eligible - _covered(ROOT / "data/sources/github/git/churn.csv")
         if churn_missing:
-            plan.append(("churn", ["uv", "run", "python", "-m", "src.github.fetch_churn", "--concurrency", "4"], len(churn_missing)))
+            plan.append(("churn", ["uv", "run", "python", "-m", "src.sources.github.fetch_churn", "--concurrency", "4"], len(churn_missing)))
 
         issues_missing = eligible - _covered(ROOT / "data/sources/github/issues.csv")
         if issues_missing:
-            plan.append(("issues", ["uv", "run", "python", "-m", "src.github.fetch_issue_metrics"], len(issues_missing)))
+            plan.append(("issues", ["uv", "run", "python", "-m", "src.sources.github.fetch_issue_metrics"], len(issues_missing)))
 
         if not args.skip_semgrep:
             semgrep_missing = eligible - _covered(ROOT / "data/sources/git/semgrep.csv")
             if semgrep_missing:
-                plan.append(("semgrep", ["uv", "run", "python", "-m", "src.github.fetch_semgrep", "--limit", "0", "--rulepack", "p/default", "--concurrency", "4"], len(semgrep_missing)))
+                plan.append(("semgrep", ["uv", "run", "python", "-m", "src.sources.github.fetch_semgrep", "--limit", "0", "--rulepack", "p/default", "--concurrency", "4"], len(semgrep_missing)))
 
         # 4. Regenerate openssf/checks.csv from data.json (free, fast)
-        plan.append(("openssf-checks", ["uv", "run", "python", "-m", "src.openssf.extract_checks"], 0))
+        plan.append(("openssf-checks", ["uv", "run", "python", "-m", "src.sources.openssf.extract_checks"], 0))
 
     # 5. Build category CSVs + risk
-    plan.append(("build_complexity",    ["uv", "run", "python", "-m", "src.pipeline.risk.build_complexity"], 0))
-    plan.append(("build_security",      ["uv", "run", "python", "-m", "src.pipeline.risk.build_security"], 0))
-    plan.append(("build_concentration", ["uv", "run", "python", "-m", "src.pipeline.risk.build_concentration"], 0))
-    plan.append(("build_funding",       ["uv", "run", "python", "-m", "src.pipeline.risk.build_funding"], 0))
-    plan.append(("build_visibility",    ["uv", "run", "python", "-m", "src.pipeline.risk.build_visibility"], 0))
-    plan.append(("build_workload",      ["uv", "run", "python", "-m", "src.pipeline.risk.build_workload"], 0))
-    plan.append(("risk",                ["uv", "run", "python", "-m", "src.pipeline.risk.aggregate_risk"], 0))
+    plan.append(("build_complexity",    ["uv", "run", "python", "-m", "src.risk.build_complexity"], 0))
+    plan.append(("build_security",      ["uv", "run", "python", "-m", "src.risk.build_security"], 0))
+    plan.append(("build_concentration", ["uv", "run", "python", "-m", "src.risk.build_concentration"], 0))
+    plan.append(("build_funding",       ["uv", "run", "python", "-m", "src.risk.build_funding"], 0))
+    plan.append(("build_workload",      ["uv", "run", "python", "-m", "src.risk.build_workload"], 0))
+    plan.append(("risk",                ["uv", "run", "python", "-m", "src.risk.aggregate_risk"], 0))
 
     table = Table(title="Plan", show_header=True, header_style="bold dim")
     table.add_column("step")

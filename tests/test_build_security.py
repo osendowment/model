@@ -1,4 +1,4 @@
-"""Tests for src/pipeline/risk/build_security.py — security percentile logic."""
+"""Tests for src/risk/build_security.py — security percentile logic."""
 
 
 def test_security_percentile_columns():

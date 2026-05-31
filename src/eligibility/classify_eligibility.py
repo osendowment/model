@@ -26,6 +26,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.repos import load_risk_repos
 from src.common.tables import load_rows_by_repo
 
 console = Console()
@@ -44,8 +45,8 @@ ECOSYSTEMS = ("npm", "pypi", "crates", "cpp")
 # `data/sources/github/repos.csv` is the sole source of repo-level truth — no
 # fallbacks to top-repos.csv. Run `src.sources.github.fetch_repo_owner_data` first
 # to populate it. Repos absent from that file are absent from eligibility.
-# Schema: input is already AB ∩ gh_valid=True from value-data.csv,
-# so `valid_repo` is implicit and dropped. `is_eol` is reserved but
+# Schema: input is the shared risk scope (A/B ∩ valid=True) from value.csv
+# via load_risk_repos, so `valid_repo` is implicit and dropped. `is_eol` is reserved but
 # left empty until the per-eco EOL signals are wired through.
 FIELDS = [
     # repo identity + project trademark
@@ -212,36 +213,36 @@ def load_user_meta() -> dict[str, dict]:
     return out
 
 
-# Eligibility is scoped to AB-class repos only. C/D have an order of
-# magnitude more rows but proportionally less funding-decision value, and
-# extending coverage there blows up the GitHub API budget without changing
-# the funding shortlist. Tighten/loosen here if the model's scope shifts.
-ELIGIBLE_CLASSES: frozenset[str] = frozenset({"A", "B"})
+# Eligibility is scoped to the exact same set the risk pipeline runs on:
+# value-class A/B, non-archived, valid==True (see src.common.repos.
+# load_risk_repos). C/D have an order of magnitude more rows but
+# proportionally less funding-decision value, and extending coverage there
+# blows up the GitHub API budget without changing the funding shortlist.
+# Scope is governed centrally by settings.json risk_input.value_classes.
 
 
 def load_eligible_value_rows() -> list[dict]:
-    """Load the AB ∩ gh_valid=True rows from value-data.csv.
+    """Load the risk-scope repos (value-class A/B ∩ valid=True) from value.csv.
 
-    The value pipeline's final step has already verified each row's
-    GitHub repo via the API and set `gh_valid` accordingly. We just
-    consume that here — no further validity check.
+    Uses the shared `load_risk_repos` loader so eligibility runs on exactly
+    the same canonical, deduped, non-archived, valid A/B set as the risk
+    pipeline — a single source of truth for scope. Each returned dict carries
+    the canonical `github_repo` slug and its value `class`.
     """
     if not VALUE_FILE.exists():
         raise SystemExit(
             f"missing {VALUE_FILE} — run "
             "`uv run python -m src.value.unify_value_data` first"
         )
-    out: list[dict] = []
-    with open(VALUE_FILE, encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            if (r.get("class") or "").strip() not in ELIGIBLE_CLASSES:
-                continue
-            if (r.get("gh_valid") or "").strip().lower() != "true":
-                continue
-            slug = (r.get("github_repo") or "").strip().lower()
-            if slug and "/" in slug:
-                out.append(r)
-    return out
+    entries = load_risk_repos(
+        value_file=str(VALUE_FILE),
+        repos_file=str(GH_REPOS_FILE),
+    )
+    return [
+        {"github_repo": e.repo, "class": e.value_class}
+        for e in entries
+        if e.repo and "/" in e.repo
+    ]
 
 
 def load_trademarks() -> tuple[dict[str, str], dict[str, str]]:
@@ -302,12 +303,12 @@ def load_repo_registry_license() -> dict[str, str]:
 
 
 def build_eligibility() -> list[dict]:
-    """Build eligibility for AB ∩ gh_valid=True repos from value-data.
+    """Build eligibility for the risk-scope (A/B ∩ valid=True) repos.
 
-    Input is already pre-validated by the value pipeline's final step
-    (it ran `fetch_and_persist` against the GitHub API and set
-    `gh_valid` per row). Eligibility just consumes those rows and joins
-    in the licence / EOL / foundation-host / trademark info.
+    Input is the shared risk scope (`load_risk_repos`): value-class A/B,
+    non-archived, with the unified `valid` column True — identical to the
+    set the risk pipeline runs on. Eligibility just consumes those repos and
+    joins in the licence / EOL / foundation-host / trademark info.
 
     `is_eol` is True/False/"" — True iff every constituent package across
     every ecosystem is is_eol=True; False if any is alive; "" if the repo
@@ -401,8 +402,8 @@ def main():
     write_eligibility(rows)
 
     total = len(rows)
-    # Input is already AB ∩ gh_valid=True, so no `valid_repo` to count.
-    # is_oss is ternary: True / False / "" (unknown).
+    # Input is already A/B ∩ valid=True (shared risk scope), so no
+    # `valid_repo` to count. is_oss is ternary: True / False / "" (unknown).
     oss_rows = [r for r in rows if r["is_oss"] is True]
     non_oss_rows = [r for r in rows if r["is_oss"] is False]
     unknown_oss_rows = [r for r in rows if r["is_oss"] == ""]
