@@ -80,7 +80,7 @@ from src.common.tables import load_rows_by_repo
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 GIT_LONG_DIR = DATA_DIR / "sources" / "git"
 COMMITS_YEARS_FILE = DATA_DIR / "sources" / "github" / "git" / "commits-years.csv"
 SCC_FILE = GIT_LONG_DIR / "scc.csv"
