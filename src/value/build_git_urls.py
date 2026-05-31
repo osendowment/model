@@ -332,14 +332,21 @@ def ossfuzz_main_repos() -> dict[str, str]:
 
 
 def repology_urls_lookup() -> dict[str, list[str]]:
-    """{project: [candidate_url, ...]} from Repology HTML scrape (`fetch_repology_urls.py`)."""
+    """{project: [candidate_url, ...]} from the Repology scrape (`fetch_repology_urls.py`).
+
+    The CSV doubles as a fetch cache, so it also holds sentinel rows (blank
+    `candidate_url`, `status` in none/not_found/error) recording checked-but-
+    empty projects — skip those, keep only real URLs.
+    """
     out: dict[str, list[str]] = {}
     path = DATA_DIR / "sources" / "repology" / "project-urls.csv"
     if not path.exists():
         return out
     with open(path, encoding="utf-8") as f:
         for r in csv.DictReader(f):
-            out.setdefault(r["project"], []).append(r["candidate_url"])
+            url = (r.get("candidate_url") or "").strip()
+            if url:
+                out.setdefault(r["project"], []).append(url)
     return out
 
 
