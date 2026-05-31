@@ -30,11 +30,11 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.sources.floss_fund.directory import normalize_github_repo
 from src.common.funding_platforms import normalize_oc_slug
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_risk_repos
 from src.common.tables import load_column_by_repo, load_rows_by_repo
+from src.sources.floss_fund.directory import normalize_github_repo
 
 console = Console()
 
