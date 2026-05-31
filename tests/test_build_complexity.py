@@ -1,4 +1,4 @@
-"""Tests for src/pipeline/risk/build_complexity.py."""
+"""Tests for src/risk/build_complexity.py."""
 
 
 def test_scoreercentile_columns():

@@ -1,4 +1,4 @@
-"""Tests for src/pipeline/risk/build_funding.py — join, info cols, funding score."""
+"""Tests for src/risk/build_funding.py — join, info cols, funding score."""
 
 from dataclasses import dataclass
 

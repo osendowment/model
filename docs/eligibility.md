@@ -109,10 +109,13 @@ Eligibility reads exclusively from `data/sources/github/repos.csv` (populated by
 `src.sources.github.fetch_repo_owner_data`). No fallback to discovery data: a repo
 must have a fresh GitHub API record to appear in eligibility at all.
 
-**Scope is AB-class only.** A repo must satisfy all three:
+**Scope is the shared risk scope (A/B ∩ valid).** Eligibility consumes the
+exact same set the risk pipeline runs on, via `src.common.repos.load_risk_repos`
+(single source of truth — governed by `settings.json risk_input.value_classes`).
+A repo must satisfy all three:
 
-1. Be in `value-data.csv` with `class ∈ {A, B}` (`ELIGIBLE_CLASSES` in
-   `eligibility.py` — adjust there if scope changes).
+1. Be in `value.csv` with `class ∈ {A, B}` **and** the unified `valid` column
+   `True` (`load_risk_repos` gates on `valid` by default, `skip_invalid=True`).
 2. Be in `data/sources/github/repos.csv` (we have a fresh GitHub API record).
 3. Pass the OSS license + EOL checks below.
 
@@ -241,7 +244,7 @@ thresholds change.
 
 ```
 uv run python -m src.value.run_value_pipeline         # rebuilds value-data.csv
-uv run python -m src.risk.run_risk_pipeline           # rebuilds risk-data.csv
+uv run python -m src.risk.run_risk_pipeline           # rebuilds risk.csv
 uv run python -m src.eligibility.run_eligibility_pipeline   # rebuilds eligibility-data.csv
 ```
 
@@ -263,7 +266,7 @@ Run order:
 1. per-ecosystem `check_eol.py` and `fetch_licenses.py` (parallelisable)
 2. `src.sources.osi.fetch_licenses` (refreshes the OSI list — TTL'd, usually a no-op)
 3. `src.value.run_value_pipeline` (unifies per-eco results → `value-data.csv`)
-4. `src.risk.run_risk_pipeline` (scores A/B repos → `risk-data.csv`)
+4. `src.risk.run_risk_pipeline` (scores A/B repos → `risk.csv`)
 5. `src.sources.github.fetch_repo_owner_data` (populates the repo-level source of truth)
 6. `src.sources.foundations.match_repos` (host classification)
 7. `src.eligibility.run_eligibility_pipeline` (joins everything → `eligibility-data.csv`)

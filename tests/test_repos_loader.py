@@ -33,8 +33,8 @@ def test_load_risk_repos_filters_classes_and_enriches(tmp_path, monkeypatch):
     assert out[0].value_class == "A"
 
 
-def test_load_risk_repos_ignores_valid_by_default(tmp_path, monkeypatch):
-    """valid is no longer gated by default — all in-class rows are kept."""
+def test_load_risk_repos_filters_valid_by_default(tmp_path, monkeypatch):
+    """valid is gated by default — only valid==True in-class rows are kept."""
     value = tmp_path / "value.csv"
     _write(value, ["github_repo", "valid", "class"], [
         {"github_repo": "owner/live", "valid": "True", "class": "A"},
@@ -45,10 +45,10 @@ def test_load_risk_repos_ignores_valid_by_default(tmp_path, monkeypatch):
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [])
     monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
     out = repos.load_risk_repos(value_file=str(value), repos_file=str(gh))
-    assert {e.repo for e in out} == {"owner/live", "owner/dead", "owner/blank"}
-    # opting back in still filters on valid
-    opted = repos.load_risk_repos(value_file=str(value), repos_file=str(gh), skip_invalid=True)
-    assert {e.repo for e in opted} == {"owner/live"}
+    assert {e.repo for e in out} == {"owner/live"}
+    # opting out includes invalid/blank rows again
+    opted = repos.load_risk_repos(value_file=str(value), repos_file=str(gh), skip_invalid=False)
+    assert {e.repo for e in opted} == {"owner/live", "owner/dead", "owner/blank"}
 
 
 def test_load_risk_repos_keeps_archived_when_flag_off(tmp_path, monkeypatch):

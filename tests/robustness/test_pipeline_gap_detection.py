@@ -41,11 +41,9 @@ SOURCES = [
     ("data/sources/osv/cves.csv", "repo", ["cve_count_5y"], []),
     ("data/sources/github/issues.csv", "repo", ["issues_opened_5y", "issues_closed_5y"], []),
     ("data/sources/github/git/churn.csv", "repo", ["churn_5y_total"], []),
-    ("data/concentration-data.csv", "repo",
-     ["bf_commits_lifetime", "hhi_commits_lifetime"],
-     ["data/sources/github/contributors/bus-factor.csv",
-      "data/sources/github/contributors/hhi.csv",
-      "data/sources/github/contributors/commits.csv"]),
+    ("data/sources/git/contributor-commits.csv", "repo",
+     ["bf_commits_git_5y", "hhi_commits_git_5y"],
+     ["data/sources/github/contributor-commits.csv"]),
     ("data/sources/github/repos.csv", "repo", ["stars", "forks"], []),
 ]
 

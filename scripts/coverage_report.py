@@ -12,8 +12,9 @@ from __future__ import annotations
 
 import argparse
 import csv
-from pathlib import Path
+import sys
 from collections import Counter, defaultdict
+from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
@@ -21,6 +22,9 @@ from rich.table import Table
 console = Console()
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from src.common.repos import load_risk_repos  # noqa: E402
 
 # (label, path, repo_col, expectation_per_repo)
 #   expectation_per_repo = how many rows per repo we expect at minimum.
@@ -36,12 +40,13 @@ SOURCES = [
     ("issues",        "data/sources/github/issues.csv",              "repo", 1),
     ("cves-queried",  "data/sources/osv/queried.csv",                "repo", 1),
     ("repos",         "data/sources/github/repos.csv",               "repo", 1),
-    ("contributors",  "data/sources/github/contributors/contributors.csv", "repo", 1),
-    ("commits-wide",  "data/sources/github/contributors/commits.csv", "repo", 1),
-    ("hhi",           "data/sources/github/contributors/hhi.csv",     "repo", 1),
-    ("bus-factor",    "data/sources/github/contributors/bus-factor.csv","repo", 1),
-    ("concentration", "data/concentration-data.csv",         "repo", 1),
-    ("funding",       "data/risk/funding-data.csv",               "repo", 1),
+    ("contrib-commits-git", "data/sources/git/contributor-commits.csv",    "repo", 1),
+    ("contrib-commits-gh",  "data/sources/github/contributor-commits.csv", "repo", 1),
+    ("sponsors",      "data/sources/github/sponsors.csv",            "repo", 1),
+    ("sponsorships",  "data/sources/github/sponsorships.csv",        "repo", 1),
+    ("funding-yml",   "data/sources/github/funding-yml.csv",         "repo", 1),
+    ("funding-json",  "data/sources/floss-fund/funding-json.csv",    "repo", 1),
+    ("oc-budgets",    "data/sources/opencollective/budgets.csv",     "repo", 1),
     ("openssf-checks","data/sources/openssf/checks.csv",             "repo", 1),
 ]
 
@@ -50,18 +55,17 @@ CATEGORY_FILES = [
     ("security",      "data/risk/security.csv"),
     ("concentration", "data/risk/concentration.csv"),
     ("funding",       "data/risk/funding.csv"),
-    ("visibility",    "data/risk/visibility.csv"),
     ("workload",      "data/risk/workload.csv"),
 ]
 
 
 def load_eligible() -> set[str]:
-    out = set()
-    with open(ROOT / "data/eligibility/eligibility.csv") as f:
-        for r in csv.DictReader(f):
-            if (r.get("eligibility") or "").strip() == "True":
-                out.add(r["repo"])
-    return out
+    """Risk-scope set (value-class A/B, non-archived, valid) — the same set
+    the risk fetchers/builders run on, and now also the eligibility input."""
+    return {e.repo for e in load_risk_repos(
+        value_file=str(ROOT / "data/value/value.csv"),
+        repos_file=str(ROOT / "data/sources/github/repos.csv"),
+    ) if e.repo}
 
 
 def count_rows_per_repo(path: Path, repo_col: str) -> Counter[str]:
@@ -107,7 +111,7 @@ def main():
     args = parser.parse_args()
 
     eligible = load_eligible()
-    console.print(f"[bold]Eligible repos:[/bold] {len(eligible)}\n")
+    console.print(f"[bold]Risk-scope repos:[/bold] {len(eligible)}\n")
 
     # Source-level table
     src_table = Table(title="Source coverage", show_header=True, header_style="bold dim")
@@ -189,15 +193,15 @@ def main():
         if per_col:
             covs = sorted(100 * v / len(eligible) for v in per_col.values())
             console.print(
-                f"\n[bold]risk-data.csv:[/bold] {len(risk_rows)} rows · "
-                f"{elig_in_risk}/{len(eligible)} eligible populated · "
+                f"\n[bold]risk.csv:[/bold] {len(risk_rows)} rows · "
+                f"{elig_in_risk}/{len(eligible)} risk-scope populated · "
                 f"{len(cols)} cols · "
                 f"min col coverage {covs[0]:.1f}% · "
                 f"median {covs[len(covs)//2]:.1f}%"
             )
             # 10 worst columns
             worst = sorted(per_col.items(), key=lambda x: x[1])[:10]
-            wt = Table(title="Lowest-coverage columns in risk-data.csv",
+            wt = Table(title="Lowest-coverage columns in risk.csv",
                        show_header=True, header_style="bold dim")
             wt.add_column("column"); wt.add_column("populated", justify="right")
             wt.add_column("coverage %", justify="right")

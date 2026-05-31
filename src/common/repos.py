@@ -82,18 +82,19 @@ def load_risk_repos(
     value_file: str = VALUE_FILE,
     repos_file: str = REPOS_FILE,
     skip_archived: bool = True,
-    skip_invalid: bool = False,
+    skip_invalid: bool = True,
 ) -> list[RepoEntry]:
     """Return repos in the risk-input value classes, sorted by slug.
 
     The risk pipeline runs on this set: repos whose `class` in
     `value-data.csv` is one of `settings.json risk_input.value_classes`
-    (default {A, B}).
+    (default {A, B}) AND whose unified `valid` column is `True`.
 
-    - Keeps rows with `class` in RISK_INPUT_CLASSES and a non-empty
-      `github_repo`. All such rows are assumed valid; the unified `valid`
-      column is not gated by default. Pass `skip_invalid=True` to opt back
-      into dropping `valid` != True (failed/404 targets).
+    - Keeps rows with `class` in RISK_INPUT_CLASSES, a non-empty
+      `github_repo`, and `valid == "True"`. The `valid` gate is on by
+      default (drops failed/404/invalid targets); pass `skip_invalid=False`
+      to include rows regardless of validity. The eligibility stage shares
+      this exact scope (A/B ∩ valid).
     - Slugs are canonicalised against `github/repos.csv` `full_name`, so a
       renamed repo (`gozala/events`) resolves to its current name
       (`browserify/events`) — the form the Search API and downstream joins need.

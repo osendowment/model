@@ -34,7 +34,7 @@ registries     (95% cum dl)    (BFS)       ↓
                                             ├─► A/B class repos ──► contributors + scc
                                             │   (settings.json          │
                                             │    risk_input.            │
-                                            │    value_classes)   risk-data.csv
+                                            │    value_classes)   risk.csv
                                             │
                                             └─► github_repo
                                                     │

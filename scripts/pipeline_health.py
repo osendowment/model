@@ -10,9 +10,9 @@ outliers/types; this script checks *consistency*.
 
 Checks:
   1. Each risk dimension CSV (complexity / concentration / funding /
-     security / visibility / workload) matches its `build_<dim>.build()`.
-  2. risk-data.csv matches `aggregate_risk.aggregate()`.
-  3. value-data.csv matches `unify_value_data` (class assignments).
+     security / workload) matches its `build_<dim>.build()`.
+  2. data/risk/risk.csv matches `aggregate_risk.aggregate()`.
+  3. data/value/value.csv matches `unify_value_data` (class assignments).
   4. Long-format git files have no duplicate (repo, sha, metric) keys.
 
 Usage:
@@ -63,12 +63,11 @@ def _cell_diffs(built: dict, disk: dict) -> int:
 
 def check_dimension_csvs() -> list[Result]:
     """Each dimension CSV must equal its builder's current output."""
-    from src.pipeline.risk import (
+    from src.risk import (
         build_complexity,
         build_concentration,
         build_funding,
         build_security,
-        build_visibility,
         build_workload,
     )
 
@@ -77,13 +76,12 @@ def check_dimension_csvs() -> list[Result]:
         ("concentration", build_concentration),
         ("funding", build_funding),
         ("security", build_security),
-        ("visibility", build_visibility),
         ("workload", build_workload),
     ]
     out: list[Result] = []
     for name, mod in builders:
         built = _norm(mod.build())
-        disk = _read_csv_by_repo(ROOT / "data" / f"{name}.csv")
+        disk = _read_csv_by_repo(ROOT / "data" / "risk" / f"{name}.csv")
         if set(built) != set(disk):
             out.append((f"{name}.csv", False,
                         f"repo set differs (builder {len(built)}, disk {len(disk)})"))
@@ -96,24 +94,24 @@ def check_dimension_csvs() -> list[Result]:
 
 
 def check_risk_data() -> list[Result]:
-    """risk-data.csv must equal aggregate_risk's join of the dimension CSVs."""
-    from src.pipeline.risk.aggregate_risk import aggregate
+    """risk.csv must equal aggregate_risk's join of the dimension CSVs."""
+    from src.risk.aggregate_risk import aggregate
 
-    _fields, rows = aggregate()
+    rows = aggregate()
     built = _norm(rows)
     disk = _read_csv_by_repo(ROOT / "data" / "risk" / "risk.csv")
     if set(built) != set(disk):
-        return [("risk-data.csv", False,
+        return [("risk.csv", False,
                  f"repo set differs (builder {len(built)}, disk {len(disk)})")]
     diffs = _cell_diffs(built, disk)
-    return [("risk-data.csv", diffs == 0,
+    return [("risk.csv", diffs == 0,
              "in sync" if diffs == 0
              else f"{diffs} stale cells — re-run aggregate_risk")]
 
 
 def check_value_data() -> list[Result]:
-    """value-data.csv class assignments must match a fresh unify run."""
-    from src.pipeline.value.unify_value_data import (
+    """value.csv class assignments must match a fresh unify run."""
+    from src.value.unify_value_data import (
         ECOSYSTEMS,
         aggregate_by_repo,
         collect_ecosystem,
@@ -127,7 +125,7 @@ def check_value_data() -> list[Result]:
     disk = list(csv.DictReader(open(ROOT / "data" / "value" / "value.csv", encoding="utf-8")))
 
     if len(built) != len(disk):
-        return [("value-data.csv", False,
+        return [("value.csv", False,
                  f"row count differs (unify {len(built)}, disk {len(disk)})")]
 
     def cls_by_gh(rows: list[dict]) -> dict[str, str]:
@@ -141,7 +139,7 @@ def check_value_data() -> list[Result]:
 
     b, d = cls_by_gh(built), cls_by_gh(disk)
     mismatch = sum(1 for g in set(b) & set(d) if b[g] != d[g])
-    return [("value-data.csv", mismatch == 0,
+    return [("value.csv", mismatch == 0,
              f"class assignments in sync ({len(set(b) & set(d)):,} repos)"
              if mismatch == 0 else f"{mismatch} class mismatches — re-run unify")]
 
