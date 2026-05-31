@@ -1,6 +1,6 @@
 """Tests for src/opencollective/fetch_budgets.py response parsing."""
 
-from src.opencollective.fetch_budgets import YEARS, parse_oc_account
+from src.opencollective.fetch_budgets import YEARS, parse_oc_account, _is_fresh
 
 
 def test_parse_ok_with_per_year_amounts():
@@ -21,6 +21,13 @@ def test_parse_not_found():
     assert row["oc_status"] == "not_found"
     assert row["raised_2024"] == ""
     assert row["currency"] == ""
+
+
+def test_error_rows_are_never_fresh():
+    # a recent timestamp must not shield an errored row from a retry
+    recent = "2999-01-01T00:00:00+00:00"
+    assert _is_fresh({"oc_status": "error", "fetched_at": recent}, 30) is False
+    assert _is_fresh({"oc_status": "ok", "fetched_at": recent}, 30) is True
 
 
 def test_parse_missing_year_is_blank():

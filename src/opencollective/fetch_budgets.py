@@ -27,6 +27,7 @@ import asyncio
 import csv
 import datetime
 import logging
+import os
 from pathlib import Path
 
 import aiohttp
@@ -153,6 +154,9 @@ def _write(rows: dict[str, dict]) -> None:
 
 
 def _is_fresh(row: dict, ttl_days: int) -> bool:
+    # A failed fetch is never "fresh" — always retry errored rows.
+    if (row.get("oc_status") or "").strip() == "error":
+        return False
     ts = (row.get("fetched_at") or "").strip()
     if not ts:
         return False
@@ -167,18 +171,40 @@ def _is_fresh(row: dict, ttl_days: int) -> bool:
 
 # ── fetch ────────────────────────────────────────────────────────────────────
 
-async def fetch_one(session: aiohttp.ClientSession, query: str, slug: str) -> dict:
+def _retry_after(resp: aiohttp.ClientResponse, attempt: int) -> float:
+    """Seconds to wait before retry — honour Retry-After, else capped backoff."""
+    hdr = resp.headers.get("Retry-After")
+    if hdr and hdr.strip().isdigit():
+        return min(float(hdr), 90.0)
+    return min(15.0 * (attempt + 1), 90.0)
+
+
+async def fetch_one(session: aiohttp.ClientSession, query: str, slug: str,
+                    max_retries: int = 6) -> dict:
+    """Fetch one slug, retrying on 429 (rate limit) / transient errors."""
     payload = {"query": query, "variables": {"slug": slug}}
-    try:
-        async with session.post(API_URL, json=payload, timeout=30) as resp:
-            if resp.status != 200:
-                return {"slug": slug, "oc_status": "error"}
-            data = await resp.json()
-    except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-        log.warning("oc fetch failed for %s: %s", slug, e)
-        return {"slug": slug, "oc_status": "error"}
-    account = (data.get("data") or {}).get("account")
-    return parse_oc_account(slug, account)
+    for attempt in range(max_retries + 1):
+        try:
+            async with session.post(API_URL, json=payload, timeout=30) as resp:
+                if resp.status == 429:
+                    if attempt < max_retries:
+                        wait = _retry_after(resp, attempt)
+                        log.info("oc 429 for %s — waiting %.0fs (retry %d)", slug, wait, attempt + 1)
+                        await asyncio.sleep(wait)
+                        continue
+                    return {"slug": slug, "oc_status": "error"}
+                if resp.status != 200:
+                    return {"slug": slug, "oc_status": "error"}
+                data = await resp.json()
+        except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+            if attempt < max_retries:
+                await asyncio.sleep(min(5.0 * (attempt + 1), 30.0))
+                continue
+            log.warning("oc fetch failed for %s: %s", slug, e)
+            return {"slug": slug, "oc_status": "error"}
+        account = (data.get("data") or {}).get("account")
+        return parse_oc_account(slug, account)
+    return {"slug": slug, "oc_status": "error"}
 
 
 async def batch(slugs: list[str], force: bool, limit: int | None, concurrency: int) -> None:
@@ -195,6 +221,10 @@ async def batch(slugs: list[str], force: bool, limit: int | None, concurrency: i
     query = build_query()
     sem = asyncio.Semaphore(concurrency)
     headers = {"Content-Type": "application/json", "User-Agent": USER_AGENT}
+    token = os.environ.get("OPENCOLLECTIVE_PERSONAL_TOKEN") or os.environ.get("OC_PERSONAL_TOKEN")
+    if token:
+        headers["Personal-Token"] = token
+        console.print("[dim]Using OpenCollective Personal-Token (higher rate limit).[/dim]")
 
     async with aiohttp.ClientSession(headers=headers) as session:
         async def one(slug: str) -> dict:
@@ -218,7 +248,8 @@ async def batch(slugs: list[str], force: bool, limit: int | None, concurrency: i
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--limit", type=int, default=None)
-    p.add_argument("--concurrency", type=int, default=4)
+    p.add_argument("--concurrency", type=int, default=2,
+                   help="keep low — the unauthenticated OC API rate-limits hard")
     p.add_argument("--force", action="store_true")
     p.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args()
