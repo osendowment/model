@@ -18,7 +18,6 @@ def test_load_risk_repos_filters_classes_and_enriches(tmp_path, monkeypatch):
         {"github_repo": "Owner/A", "gh_valid": "True", "class": "A"},
         {"github_repo": "owner/b", "gh_valid": "True", "class": "B"},
         {"github_repo": "owner/c", "gh_valid": "True", "class": "C"},
-        {"github_repo": "owner/dead", "gh_valid": "False", "class": "A"},
         {"github_repo": "", "gh_valid": "True", "class": "A"},
     ])
     gh = tmp_path / "repos.csv"
@@ -28,10 +27,28 @@ def test_load_risk_repos_filters_classes_and_enriches(tmp_path, monkeypatch):
     ])
     monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
     out = repos.load_risk_repos(value_file=str(value), repos_file=str(gh))
-    # owner/b archived, owner/c out of classes, owner/dead invalid, "" orphan.
+    # owner/b archived, owner/c out of classes, "" orphan.
     assert {e.repo for e in out} == {"owner/a"}
     assert out[0].repo_id == "11"
     assert out[0].value_class == "A"
+
+
+def test_load_risk_repos_ignores_gh_valid_by_default(tmp_path, monkeypatch):
+    """gh_valid is no longer gated by default — all in-class rows are kept."""
+    value = tmp_path / "value.csv"
+    _write(value, ["github_repo", "gh_valid", "class"], [
+        {"github_repo": "owner/live", "gh_valid": "True", "class": "A"},
+        {"github_repo": "owner/dead", "gh_valid": "False", "class": "A"},
+        {"github_repo": "owner/blank", "gh_valid": "", "class": "B"},
+    ])
+    gh = tmp_path / "repos.csv"
+    _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [])
+    monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
+    out = repos.load_risk_repos(value_file=str(value), repos_file=str(gh))
+    assert {e.repo for e in out} == {"owner/live", "owner/dead", "owner/blank"}
+    # opting back in still filters on gh_valid
+    opted = repos.load_risk_repos(value_file=str(value), repos_file=str(gh), skip_invalid=True)
+    assert {e.repo for e in opted} == {"owner/live"}
 
 
 def test_load_risk_repos_keeps_archived_when_flag_off(tmp_path, monkeypatch):

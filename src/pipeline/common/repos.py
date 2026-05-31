@@ -82,7 +82,7 @@ def load_risk_repos(
     value_file: str = VALUE_FILE,
     repos_file: str = REPOS_FILE,
     skip_archived: bool = True,
-    skip_invalid: bool = True,
+    skip_invalid: bool = False,
 ) -> list[RepoEntry]:
     """Return repos in the risk-input value classes, sorted by slug.
 
@@ -91,7 +91,9 @@ def load_risk_repos(
     (default {A, B}).
 
     - Keeps rows with `class` in RISK_INPUT_CLASSES and a non-empty
-      `github_repo`. `skip_invalid` drops `gh_valid` != True (404 repos).
+      `github_repo`. All such rows are assumed valid; `gh_valid` is not
+      gated by default. Pass `skip_invalid=True` to opt back into dropping
+      `gh_valid` != True (404) rows.
     - Slugs are canonicalised against `github/repos.csv` `full_name`, so a
       renamed repo (`gozala/events`) resolves to its current name
       (`browserify/events`) — the form the Search API and downstream joins need.
