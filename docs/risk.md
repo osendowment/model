@@ -3,6 +3,18 @@
 Measures sustainability risk for GitHub repos using contributor concentration,
 codebase complexity, and issue-tracker dynamics over the last 5 years.
 
+Each of the five dimensions has its own component doc — how it collects its
+sources, derives metrics, and produces the `score` it contributes to
+`risk.csv`:
+
+| Component | Doc | Score (0–100, higher = riskier) |
+|---|---|---|
+| Concentration | [components/concentration.md](components/concentration.md) | geom-mean of 5y bus-factor + HHI percentiles |
+| Complexity | [components/complexity.md](components/complexity.md) | geom-mean of LOC + cyclomatic-max percentiles |
+| Security | [components/security.md](components/security.md) | geom-mean of OpenSSF-score + CVE-count percentiles |
+| Funding | [components/funding.md](components/funding.md) | geom-mean of GitHub-sponsorship + OpenCollective percentiles |
+| Workload | [components/workload.md](components/workload.md) | geom-mean of LOC/CVE/net-issues-per-contributor percentiles |
+
 ## Metrics Roadmap
 
 Inputs per dimension, current as of the last pipeline run. Each leaf = one metric, with its data
