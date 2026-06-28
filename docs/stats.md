@@ -21,20 +21,16 @@ How the package universe narrows from raw registries to the per-repo
 
 Packages remaining after each Value stage, plus the share with a known upstream repo.
 
-- *Top packages* — covers 95% of cumulative downloads.
-- *After dep tree* — `|top ∪ transitive deps|` after the `is_cpp` filter, the universe analysed for PageRank (cpp: 2,368 pre-filter → 1,639, dropping language-agnostic distro packages).
-- *Git URL* — results with any git host (gitlab/bitbucket/sourcehut/codeberg + `custom`: savannah, sourceware, kernel.org); *GitHub repo* — a github.com repo; *Active GH* — its mirror isn't archived. The `%` rows are shares of *After dep tree*.
-
-| Metric | npm | pypi | crates | cpp | Total |
-|---|--:|--:|--:|--:|--:|
-| Top packages | 5,765 | 2,460 | 3,719 | 1,329 | 13,273 |
-| **After dep tree** | **6,370** | **3,139** | **6,218** | **1,639** | **17,366** |
-| Git URL | 6,305 | 2,850 | 6,130 | 1,240 | 16,525 |
-| GitHub repo | 6,297 | 2,821 | 6,000 | 508 | 15,626 |
-| **Active GH** | **6,032** | **2,728** | **5,842** | **500** | **15,102** |
-| Git % | 99% | 91% | 99% | 76% | 95% |
-| GitHub % | 99% | 90% | 96% | 31% | 90% |
-| **Active GH %** | **95%** | **87%** | **94%** | **31%** | **87%** |
+| Metric | npm | pypi | crates | cpp | Total | Comment |
+|---|--:|--:|--:|--:|--:|---|
+| Top packages | 5,765 | 2,460 | 3,719 | 1,329 | 13,273 | 95% of downloads |
+| **After dep tree** | **6,370** | **3,139** | **6,218** | **1,639** | **17,366** | top ∪ deps, post-`is_cpp`; PageRank + % base |
+| Git URL | 6,305 | 2,850 | 6,130 | 1,240 | 16,525 | any git host |
+| GitHub repo | 6,297 | 2,821 | 6,000 | 508 | 15,626 | github.com repo |
+| **Active GH** | **6,032** | **2,728** | **5,842** | **500** | **15,102** | mirror not archived |
+| Git % | 99% | 91% | 99% | 76% | 95% | of After dep tree |
+| GitHub % | 99% | 90% | 96% | 31% | 90% | |
+| **Active GH %** | **95%** | **87%** | **94%** | **31%** | **87%** | |
 
 - *After dep tree* is de-duplicated (`unify_value_data.py:150`); cpp unions the Debian + Homebrew graphs, Repology-canonicalised to one name each, then drops 729 non-cpp distro packages (2,368 → 1,639) via the `is_cpp` filter.
 - cpp has the lowest GitHub coverage (31%) but 76% Git via non-GitHub upstreams (sourceware, savannah, gitlab.gnome.org) resolved through per-eco `git.csv`.
