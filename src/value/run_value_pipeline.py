@@ -9,6 +9,7 @@ rollup (`validation.csv` + the per-repo `valid` column).
 Usage:
     uv run python -m src.value.run_value_pipeline
     uv run python -m src.value.run_value_pipeline --skip-fetch
+    uv run python -m src.value.run_value_pipeline --rollup
     uv run python -m src.value.run_value_pipeline --from unify
     uv run python -m src.value.run_value_pipeline --list
 """
@@ -26,9 +27,25 @@ STEPS = [
     Step("validation", "src.value.build_validation"),
 ]
 
+# The cross-ecosystem rollup that turns existing per-ecosystem results.csv into
+# value.csv. Reads only the per-eco results.csv + the validation caches +
+# overrides.csv — no raw ecosystem data (e.g. the crates db-dump), so it runs
+# even when those large inputs are unmaterialised LFS pointers.
+ROLLUP_LABELS = ("unify", "verify", "validation")
+
 
 def main() -> int:
-    return run_pipeline(STEPS, build_parser("value pipeline runner").parse_args())
+    parser = build_parser("value pipeline runner")
+    parser.add_argument(
+        "--rollup", action="store_true",
+        help="Run only the cross-ecosystem rollup (unify -> verify -> validation) "
+             "that turns existing per-eco results.csv into value.csv. Skips the "
+             "ecosystem sub-pipelines, stats, and URL re-derivation, so no raw "
+             "ecosystem data is needed.",
+    )
+    args = parser.parse_args()
+    steps = [s for s in STEPS if s.label in ROLLUP_LABELS] if args.rollup else STEPS
+    return run_pipeline(steps, args)
 
 
 if __name__ == "__main__":
