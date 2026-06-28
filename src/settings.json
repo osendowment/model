@@ -14,9 +14,10 @@
     "comment": "downloads_score = debian_weight*debian_avg + homebrew_weight*homebrew_avg. Default ratio 1.39:1 is inverse of ecosystem totals (debian ~181.9M vs homebrew ~252.8M annual installs) so a 'typical' package from either ecosystem contributes equally."
   },
   "value_classes": {
-    "A": 0.75,
-    "B": 0.95,
-    "comment": "Cumulative PageRank share cutoffs: A <= 75%, B <= 95%, C > 95%"
+    "A": [0, 0.75],
+    "B": [0.75, 0.95],
+    "C": [0.95, 1],
+    "comment": "Cumulative PageRank share intervals [lo, hi] per class (upper bound inclusive). Class A (<=75%) is also the risk-pipeline input scope; see risk_input.value_classes."
   },
   "risk_input": {
     "value_classes": ["A"],
