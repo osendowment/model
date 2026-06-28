@@ -310,19 +310,19 @@ subgraphs.
 ### Repo class distribution
 
 After grouping packages by `github_repo` (or as orphans), `value.csv`
-collapses 17,609 package rows into 12,096 repo rows. Counts below are the
+collapses 17,609 package rows into 12,117 repo rows. Counts below are the
 current 3-class distribution, derived directly from the regenerated `value.csv`.
 
 | | npm | PyPI | crates.io | C/C++ | Strongest |
 |---|---:|---:|---:|---:|---:|
-| A | 571 | 163 | 132 | 89 | **953** |
-| B | 1,414 | 638 | 533 | 570 | **3,148** |
-| C | 2,428 | 1,726 | 2,911 | 961 | **7,995** |
+| A | 574 | 165 | 133 | 89 | **959** |
+| B | 1,418 | 641 | 534 | 571 | **3,160** |
+| C | 2,428 | 1,726 | 2,911 | 962 | **7,998** |
 
 *Strongest* is the count of repos for which the column is the highest
 class achieved across any of its ecosystems (`class` column in
-`value.csv`). 10,529 of the 12,096 rows are github groups; the other
-1,567 are orphan packages (no `github_repo`) kept under sequential ids
+`value.csv`). 10,446 of the 12,117 rows are github groups; the other
+1,671 are orphan packages (no `github_repo`) kept under sequential ids
 so nothing is dropped.
 
 EOL information is intentionally **not** stored here — it feeds the manual
