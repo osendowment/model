@@ -263,6 +263,15 @@ def _pkg_row(package, ecosystem, github_repo="", git_url=_AUTO_GIT,
 
 
 class TestAggregateByRepo:
+    @pytest.fixture(autouse=True)
+    def _isolate_overrides(self, monkeypatch):
+        """aggregate_by_repo applies the curated overrides.csv as its last
+        step; isolate these pure-aggregation tests from it, since fixtures use
+        real package names (glibc, gcc, …) that may appear in overrides.csv."""
+        monkeypatch.setattr(
+            "src.value.unify_value_data.load_repo_overrides", lambda *a, **k: {}
+        )
+
     def test_empty_input(self):
         assert aggregate_by_repo([], drop_d_class=False) == []
 
@@ -690,6 +699,14 @@ class TestWriteValueData:
 # ── end-to-end via collect + aggregate + write ───────────────────────────────
 
 class TestEndToEnd:
+    @pytest.fixture(autouse=True)
+    def _isolate_overrides(self, monkeypatch):
+        """Isolate the end-to-end aggregation from the curated overrides.csv
+        (the `glibc` fixture below would otherwise pick up a real override)."""
+        monkeypatch.setattr(
+            "src.value.unify_value_data.load_repo_overrides", lambda *a, **k: {}
+        )
+
     def test_full_pipeline_two_ecosystems(self, tmp_path):
         # npm: babel monorepo (2 packages, 1 repo) + lodash (1 pkg, 1 repo)
         npm = _eco_dir(tmp_path, "npm")
