@@ -43,7 +43,7 @@ JavaScript / TypeScript (npm)
 ├── top                    ← derived (95% cum-download cutoff)   [2021–2025]
 ├── dep edges (package→dep)← registry.npmjs.org                  [most recent]
 ├── pagerank               ← derived (DL-weighted PR, α=0.85)    [2021–2025]
-├── value_class            ← derived (A/B/C/D, cum-PR share)     [2021–2025]
+├── value_class            ← derived (A/B/C, cum-PR share)       [2021–2025]
 └── package→repo           ← nice-registry                       [most recent]
 ```
 
@@ -52,9 +52,9 @@ JavaScript / TypeScript (npm)
 - **Value** — each package's `value_class` is grouped by repo into
   `data/value/value.csv` as the `class_npm` column; the strongest class across
   ecosystems becomes `class`.
-- **Risk** — A/B-class npm repos enter `src.risk.run_risk_pipeline` (scope set by
+- **Risk** — class-A npm repos enter `src.risk.run_risk_pipeline` (scope set by
   `risk_input.value_classes` in `src/settings.json`).
-- **Eligibility** — A/B repos that also pass the OSI-license and non-EOL gates
+- **Eligibility** — class-A repos that also pass the OSI-license and non-EOL gates
   reach `data/eligibility/eligibility.csv`.
 
 ## Outputs
@@ -68,7 +68,7 @@ JavaScript / TypeScript (npm)
 | `avg_downloads`, `2021`–`2025` | Downloads |
 | `top` | `True` if in the 95% cumulative set |
 | `pagerank` | Download-weighted PageRank score |
-| `value_class` | A/B/C/D |
+| `value_class` | A/B/C |
 
 ### npm funnel & classes
 
@@ -81,11 +81,13 @@ Carried from the cross-ecosystem tables in [`value.md`](../value.md):
 | Results | 6,370 |
 | With GitHub repo | 6,281 (99%) |
 
-| Class | A | B | C | D | Total |
-|---|--:|--:|--:|--:|--:|
-| Packages | 331 | 748 | 1,183 | 4,108 | 6,370 |
-| Repos (`value.csv`) | 144 | 430 | 769 | 3,087 | — |
+| Class (`value.csv`) | A | B | C | Total |
+|---|--:|--:|--:|--:|
+| Repos (`class_npm`) | 571 | 1,414 | 2,428 | 4,413 |
 
-A+B repos with a GitHub repo: **100%** — npm has the cleanest upstream identity of
+Per-package class counts await the next full pipeline run — the per-package
+`results.csv` `value_class` is still on the legacy 4-class scheme.
+
+class-A repos with a GitHub repo: **100%** — npm has the cleanest upstream identity of
 the four ecosystems, so essentially all load-bearing npm packages reach Risk and
 Eligibility.

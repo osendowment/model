@@ -114,12 +114,14 @@ Carried from the cross-ecosystem tables in [`value.md`](../value.md):
 `Results` (1,882) < `After dep tree` (2,648) because the `is_cpp` filter drops
 language-agnostic distro packages that rode in as dependencies.
 
-| Class | A | B | C | D | Total |
-|---|--:|--:|--:|--:|--:|
-| Packages | 10 | 82 | 291 | 1,499 | 1,882 |
-| Repos (`value.csv`) | 10 | 81 | 291 | 1,491 | — |
+| Class (`value.csv`) | A | B | C | Total |
+|---|--:|--:|--:|--:|
+| Repos (`class_cpp`) | 89 | 570 | 961 | 1,620 |
 
-A+B repos: 32% have a GitHub repo, **95%** have some Git URL.
+Per-package class counts await the next full pipeline run — the per-package
+`results.csv` `value_class` is still on the legacy 4-class scheme.
+
+class-A repos: 32% have a GitHub repo, **95%** have some Git URL.
 
 ## Limitations
 

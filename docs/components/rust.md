@@ -77,11 +77,13 @@ Carried from the cross-ecosystem tables in [`value.md`](../value.md):
 | With GitHub repo | 5,967 (96%) |
 | With any Git URL | 6,130 (99%) |
 
-| Class | A | B | C | D | Total |
-|---|--:|--:|--:|--:|--:|
-| Packages | 49 | 197 | 449 | 5,523 | 6,218 |
-| Repos (`value.csv`) | 31 | 102 | 256 | 3,231 | — |
+| Class (`value.csv`) | A | B | C | Total |
+|---|--:|--:|--:|--:|
+| Repos (`class_crates`) | 132 | 533 | 2,911 | 3,576 |
 
-A+B repos: 99% have a GitHub repo, 100% have some Git URL. The crates.io
+Per-package class counts await the next full pipeline run — the per-package
+`results.csv` `value_class` is still on the legacy 4-class scheme.
+
+class-A repos: 99% have a GitHub repo, 100% have some Git URL. The crates.io
 `repository` field also resolves non-GitHub Git hosts, so Git coverage (99%)
 slightly exceeds GitHub (96%).

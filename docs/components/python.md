@@ -51,9 +51,9 @@ Python (PyPI)
 - **Value** — each package's `value_class` is grouped by repo into
   `data/value/value.csv` as the `class_pypi` column; the strongest class across
   ecosystems becomes `class`.
-- **Risk** — A/B-class PyPI repos enter `src.risk.run_risk_pipeline` (scope set by
+- **Risk** — class-A PyPI repos enter `src.risk.run_risk_pipeline` (scope set by
   `risk_input.value_classes` in `src/settings.json`).
-- **Eligibility** — A/B repos that also pass the OSI-license and non-EOL gates
+- **Eligibility** — class-A repos that also pass the OSI-license and non-EOL gates
   reach `data/eligibility/eligibility.csv`.
 
 ## Outputs
@@ -73,12 +73,14 @@ Carried from the cross-ecosystem tables in [`value.md`](../value.md):
 | Results | 3,139 |
 | With GitHub repo | 1,728 (55%) |
 
-| Class | A | B | C | D | Total |
-|---|--:|--:|--:|--:|--:|
-| Packages | 54 | 157 | 414 | 2,514 | 3,139 |
-| Repos (`value.csv`) | 53 | 151 | 389 | 2,347 | — |
+| Class (`value.csv`) | A | B | C | Total |
+|---|--:|--:|--:|--:|
+| Repos (`class_pypi`) | 163 | 638 | 1,726 | 2,527 |
 
-A+B repos with a GitHub repo: **76%**.
+Per-package class counts await the next full pipeline run — the per-package
+`results.csv` `value_class` is still on the legacy 4-class scheme.
+
+class-A repos with a GitHub repo: **76%**.
 
 ## Limitations
 
@@ -86,4 +88,4 @@ A+B repos with a GitHub repo: **76%**.
   carried only GitHub URLs at fetch time, so non-GitHub upstreams (GitLab,
   self-hosted) have no `package → repo` link. Because Risk and Eligibility key off
   `github_repo`, this caps how many PyPI repos those stages can score, even for
-  A/B-class packages (A+B GitHub coverage is 76%, not ~100% like npm/crates).
+  class-A packages (class-A GitHub coverage is 76%, not ~100% like npm/crates).
