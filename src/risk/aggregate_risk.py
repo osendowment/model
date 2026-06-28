@@ -6,8 +6,15 @@ dimension's risk score (integer 0-100, higher = riskier). This aggregator joins
 the five component scores per repo and computes the overall `score` =
 geometric mean of the available component scores.
 
-Writes data/risk/risk.csv with ONLY:
-    repo, repo_id, concentration, complexity, security, funding, workload, score
+Writes data/risk/risk.csv with:
+    repo, repo_id, concentration, complexity, security, funding, workload,
+    score, dims_scored, concentration_imputed
+
+`dims_scored` (0-5) counts how many of the five component scores are present for
+the repo — it surfaces under-measured repos whose overall `score` rests on only a
+partial set of dimensions. `concentration_imputed` flags repos whose concentration
+row was worst-case imputed (no active human contributor in the 5y window), so the
+ceiling-tied (score=100) concentration repos stay auditable downstream.
 
 (All other per-metric columns stay in the component CSVs.)
 
@@ -40,7 +47,18 @@ COMPONENTS = {
     "workload":      DATA_DIR / "risk" / "workload.csv",
 }
 OUTPUT_FILE = DATA_DIR / "risk" / "risk.csv"
-FIELDS = ["repo", "repo_id", *COMPONENTS, "score"]
+FIELDS = ["repo", "repo_id", *COMPONENTS, "score", "dims_scored", "concentration_imputed"]
+
+# `comment` strings written by src/risk/build_concentration.py (git_metrics) when a
+# repo has no active human contributor in the 5y window and its concentration is
+# worst-case imputed (bus factor 1, HHI 10000). A row carrying one of these is the
+# only kind of imputed concentration. Fetch-failure comments ("git fetch <status>",
+# "no git data") are NOT imputation — those rows have a blank score and stay unflagged.
+CONCENTRATION_IMPUTE_COMMENTS = {
+    "no commits in 5y",
+    "no commits through last complete year",
+    "no human commits in 5y",
+}
 
 
 def _scores_by_repo(path: Path) -> dict[str, int]:
@@ -60,6 +78,26 @@ def _scores_by_repo(path: Path) -> dict[str, int]:
     return out
 
 
+def _imputed_concentration_repos(path: Path) -> set[str]:
+    """{repo_lowercased} whose concentration row was worst-case IMPUTED.
+
+    A repo is imputed when build_concentration found no active human in the 5y
+    window and forced bus factor 1 / HHI 10000, recording WHY in `comment`. We
+    match those exact reason strings (CONCENTRATION_IMPUTE_COMMENTS) — fetch
+    failures carry different comments and a blank score, so they don't match.
+    """
+    out: set[str] = set()
+    if not path.exists():
+        return out
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            repo = (row.get("repo") or "").strip().lower()
+            comment = (row.get("comment") or "").strip()
+            if repo and comment in CONCENTRATION_IMPUTE_COMMENTS:
+                out.add(repo)
+    return out
+
+
 def overall_score(component_scores: list[int]) -> str:
     """Overall risk score = geometric mean of present component scores (int)."""
     if not component_scores:
@@ -70,6 +108,7 @@ def overall_score(component_scores: list[int]) -> str:
 def aggregate(sample: set[str] | None = None) -> list[dict]:
     eligible = load_top_repos()
     by_component = {name: _scores_by_repo(path) for name, path in COMPONENTS.items()}
+    imputed = _imputed_concentration_repos(COMPONENTS["concentration"])
 
     rows: list[dict] = []
     for entry in eligible:
@@ -84,6 +123,8 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
             if s is not None:
                 present.append(s)
         row["score"] = overall_score(present)
+        row["dims_scored"] = len(present)
+        row["concentration_imputed"] = "True" if repo in imputed else ""
         rows.append(row)
     return rows
 
@@ -122,6 +163,12 @@ def main() -> None:
         w.writerows(rows)
 
     _print_coverage(rows)
+    under = sum(1 for r in rows if r.get("dims_scored", 0) < 5)
+    imputed = sum(1 for r in rows if r.get("concentration_imputed") == "True")
+    console.print(
+        f"[dim]dims_scored<5 (under-measured): {under:,} · "
+        f"concentration_imputed=True: {imputed:,}[/dim]"
+    )
     console.print(f"\n[dim]Wrote {len(rows):,} repos × {len(FIELDS)} columns → {OUTPUT_FILE}[/dim]")
 
 

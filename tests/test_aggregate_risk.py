@@ -7,7 +7,8 @@ from src.risk.aggregate_risk import overall_score, FIELDS, COMPONENTS
 
 def test_risk_csv_is_narrow():
     assert FIELDS == ["repo", "repo_id", "concentration", "complexity",
-                      "security", "funding", "workload", "score"]
+                      "security", "funding", "workload", "score",
+                      "dims_scored", "concentration_imputed"]
     assert "visibility" not in COMPONENTS
 
 

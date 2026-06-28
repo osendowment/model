@@ -150,9 +150,18 @@ def check_value_data() -> list[Result]:
 # component's risk score. A blank here is a real coverage gap (a failed upstream
 # fetch), not a modelling choice — edge cases (dormant / bot-only / new repos)
 # are imputed by the builder, so the only way these go blank is missing data.
+# This is the guard that catches "late joiner" gaps: a fetcher auto-scopes to
+# load_top_repos() but smart-skips cached repos, so a repo that joins class-A
+# scope after the last fetch silently misses its scores until a forced re-fetch.
 # Extend per dimension as 100%-coverage guarantees are added.
+# NOTE: workload is intentionally absent — it legitimately abstains (blank) for
+# repos with zero active contributors in the window (per-maintainer ratios are
+# undefined), so 100% is not a valid guarantee for it.
 SCORE_COMPONENT_COVERAGE: dict[str, list[str]] = {
     "concentration.csv": ["bf_commits_git_5y", "hhi_commits_git_5y", "score"],
+    "complexity.csv": ["score"],
+    "security.csv": ["score"],
+    "funding.csv": ["score"],
 }
 
 
