@@ -37,7 +37,6 @@ HOST_FILE = DATA_DIR / "sources" / "foundations" / "host-by-repo.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 GH_USERS_FILE = DATA_DIR / "sources" / "github" / "users.csv"
 OSI_FILE = DATA_DIR / "sources" / "osi" / "oss-licenses.csv"
-LLM_OWNERSHIP_FILE = DATA_DIR / "sources" / "llms" / "claude-github-ownership.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility" / "eligibility.csv"
 
 ECOSYSTEMS = ("npm", "pypi", "crates", "cpp")
@@ -49,11 +48,11 @@ ECOSYSTEMS = ("npm", "pypi", "crates", "cpp")
 # via load_risk_repos, so `valid_repo` is implicit and dropped. `is_eol` is reserved but
 # left empty until the per-eco EOL signals are wired through.
 FIELDS = [
-    # repo identity + project trademark
-    "repo", "repo_id", "repo_url", "repo_tm",
+    # repo identity
+    "repo", "repo_id", "repo_url",
     "value_class",
-    # github owner (login + GH-API type) + display + trademark
-    "user", "user_id", "user_type", "user_name", "user_url", "user_tm",
+    # github owner (login + GH-API type) + display
+    "user", "user_id", "user_type", "user_name", "user_url",
     # eligibility signals
     "license", "is_oss", "is_eol", "host",
     "eligibility",
@@ -240,30 +239,6 @@ def load_eligible_value_rows() -> list[dict]:
     ]
 
 
-def load_trademarks() -> tuple[dict[str, str], dict[str, str]]:
-    """Load (user_tm_idx, repo_tm_idx) from `claude-github-ownership.csv`.
-
-    The combined ownership table carries both repo-level (`repo_tm`) and
-    user-level (`user_tm`) trademark names per row. We index user TMs by
-    `user` and repo TMs by `repo`.
-    """
-    user_tm: dict[str, str] = {}
-    repo_tm: dict[str, str] = {}
-    if not LLM_OWNERSHIP_FILE.exists():
-        return user_tm, repo_tm
-    with open(LLM_OWNERSHIP_FILE, encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            slug = (r.get("repo") or "").strip().lower()
-            login = (r.get("user") or "").strip().lower()
-            r_tm = (r.get("repo_tm") or "").strip()
-            u_tm = (r.get("user_tm") or "").strip()
-            if slug and r_tm:
-                repo_tm[slug] = r_tm
-            if login and u_tm:
-                user_tm.setdefault(login, u_tm)
-    return user_tm, repo_tm
-
-
 def load_repo_registry_license() -> dict[str, str]:
     """Aggregate per-eco results.csv `license` columns into a per-repo SPDX.
 
@@ -315,7 +290,6 @@ def build_eligibility() -> list[dict]:
     host_idx = load_repo_host_index()
     user_meta = load_user_meta()
     registry_lic = load_repo_registry_license()
-    user_tm_idx, repo_tm_idx = load_trademarks()
 
     # GitHub API record per repo (login, ids, license fallback, homepage)
     gh_repos = load_rows_by_repo(GH_REPOS_FILE)
@@ -342,19 +316,17 @@ def build_eligibility() -> list[dict]:
         u_meta = user_meta.get(login, {})
 
         rows.append({
-            # repo + project-level trademark
+            # repo identity
             "repo": slug,
             "repo_id": gh.get("repo_id", ""),
             "repo_url": (gh.get("homepage") or "").strip(),
-            "repo_tm": repo_tm_idx.get(slug_lc, ""),
             "value_class": v.get("class", ""),
-            # github owner identity + display + trademark
+            # github owner identity + display
             "user": gh.get("owner_login", ""),
             "user_id": gh.get("owner_id", ""),
             "user_type": gh.get("owner_type", ""),
             "user_name": u_meta.get("name", ""),
             "user_url": u_meta.get("blog", ""),
-            "user_tm": user_tm_idx.get(login, ""),
             # eligibility signals
             "license": license_lc,
             "is_oss": is_oss_csv,

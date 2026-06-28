@@ -84,7 +84,6 @@ class TestEolExclusion:
         fixtures so the test only exercises the eligibility logic itself."""
         monkeypatch.setattr(eligibility, "load_repo_host_index", lambda: {})
         monkeypatch.setattr(eligibility, "load_user_meta", lambda: {})
-        monkeypatch.setattr(eligibility, "load_trademarks", lambda: ({}, {}))
         # Force the GH_REPOS_FILE existence check inside build_eligibility
         # to skip — the repo metadata block then becomes a no-op.
         monkeypatch.setattr(eligibility, "GH_REPOS_FILE", Path("/nonexistent"))

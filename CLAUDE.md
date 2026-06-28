@@ -9,8 +9,8 @@
   processes data from one external source. One folder per source — ecosystem
   registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git
   analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`,
-  `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `floss_fund/`,
-  `opencollective/`, `foundations/`, `llms/`, `ecosystems/`). Module folders use
+  `depsdev/`, `osi/`, `ossfuzz/`, `repology/`, `floss_fund/`,
+  `opencollective/`, `foundations/`, `ecosystems/`). Module folders use
   underscores (importable); the matching `data/sources/` folder may use a hyphen
   (e.g. code `floss_fund/` ↔ data `floss-fund/`).
 - `src/common/` — shared infrastructure used across stages: `params.py`, `repos.py`,
@@ -27,7 +27,7 @@
 
 `data/` mirrors the three-stage pipeline (Value → Risk → Eligibility), with all external-source data isolated under `data/sources/`:
 
-- `data/sources/<source>/` — raw + intermediate data fetched from external sources. One folder per source: ecosystem registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`, `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `endoflife/`, `floss-fund/`, `opencollective/`, `foundations/`, `llms/`).
+- `data/sources/<source>/` — raw + intermediate data fetched from external sources. One folder per source: ecosystem registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`, `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `endoflife/`, `floss-fund/`, `opencollective/`, `foundations/`).
 - `data/value/` — Value-stage outputs: `value.csv` (the unified per-repo value table; carries a tri-state `valid` column), `validation.csv` (git/GitHub validation audit table — rollup of the source caches), `overrides.csv` (curated manual repo/validity corrections), `stats.csv` (per-ecosystem stats matrix: metric rows × ecosystem columns — downloads per year + package/repo counts).
 - `data/risk/` — Risk-stage outputs: `risk.csv` (final aggregated risk table) plus the per-dimension builds (`concentration.csv`, `complexity.csv`, `security.csv`, `funding.csv`, `visibility.csv`, `workload.csv`). Raw funding signals live under `data/sources/github/` (`sponsors.csv` inbound, `sponsorships.csv` outbound, `funding-yml.csv`), `data/sources/floss-fund/` (`funding-json.csv`), and `data/sources/opencollective/` (`budgets.csv`).
 - `data/eligibility/` — Eligibility-stage output: `eligibility.csv`.

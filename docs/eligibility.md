@@ -344,19 +344,16 @@ Sourced exclusively from `data/sources/github/repos.csv` — no fallbacks.
 | Column | Description |
 |--------|-------------|
 | `repo` | GitHub repo slug (`owner/name`) |
-| `repo_id` | GitHub numeric repo ID (empty if `valid_repo=False`) |
-| `valid_repo` | `True` if `/repos/{owner}/{repo}` returned 200; `False` if 404 (repo deleted, renamed, or never existed). Repos absent from `data/sources/github/repos.csv` are absent from this table — there is no third state. |
+| `repo_id` | GitHub numeric repo ID (empty if no GitHub API record) |
+| `repo_url` | Repo's homepage URL from the GitHub API (empty if not set on the repo) |
+| `value_class` | Value class (`A`/`B`) carried from `value.csv` — the eligibility scope |
 | `user` | Repo owner login (from `repos.csv.owner_login`) |
 | `user_id` | Owner numeric ID |
 | `user_type` | `User` or `Organization` |
-| `license` | License SPDX key (from the GitHub API) |
+| `user_name` | Owner display name from `data/sources/github/users.csv` (e.g. "The Apache Software Foundation"). Empty if not in users.csv. |
+| `user_url` | Owner's `blog` URL from `data/sources/github/users.csv`. Empty if not set. |
+| `license` | Lower-cased SPDX key — registry-declared (per-eco `results.csv`) first, GitHub-API license as fallback |
 | `is_oss` | Ternary — `True` if OSI-approved (loaded from `data/sources/osi/oss-licenses.csv`); `False` if the license is known but not OSI-approved (CC-BY, CC0, MIT-CMU, …); `""` (empty) if no usable license signal (GitHub `noassertion`, no per-eco registry data, or empty). |
 | `is_eol` | `True` if every package mapped to this repo (joined via per-eco `data/sources/{eco}/results.csv` ↔ `data/sources/{eco}/eol.csv`) is `is_eol=True`. Repos with no constituent packages default to `False`. |
 | `host` | Slug of FOSS foundation hosting the project: `apache`, `cncf`, `eclipse`, `openjs`, `psf`, `lf`, `numfocus`, `sfc`. Empty if not foundation-hosted. Joined from `data/sources/foundations/host-by-repo.csv`. |
-| `repo_url` | Repo's homepage URL from the GitHub API (empty if not set on the repo). |
-| `repo_owner` | Owner display name from `data/sources/github/users.csv` (e.g. "The Apache Software Foundation"). Empty if not in users.csv. |
-| `repo_owner_url` | Owner's `blog` URL from `data/sources/github/users.csv`. Empty if not set. |
-| `repo_owner_type` | TODO — `company` / `nonprofit` / `individual` / `community` / `government` classification. |
-| `tm_owner` | Trademark owner (TODO) |
-| `tm_owner_type` | Corporate vs community-held (TODO) |
-| `eligibility` | `True` only if `valid_repo AND is_oss is True AND NOT is_eol`. `is_oss=False` or `is_oss=""` both produce `eligibility=False`. |
+| `eligibility` | `True` only if `is_oss is True AND NOT is_eol` (repo validity is guaranteed by the A/B ∩ valid scope, so there is no `valid_repo` column). `is_oss=False` or `is_oss=""` both produce `eligibility=False`. |
