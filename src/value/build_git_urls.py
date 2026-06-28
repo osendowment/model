@@ -630,7 +630,10 @@ def update_results_csv(ecosystem: str) -> tuple[int, int]:
         rows = list(reader)
         original_fields = list(reader.fieldnames or [])
 
-    # Layout: insert `git` after `github_repo`, then `eco_guess`.
+    # Layout: insert `git` after `github_repo`, then `eco_guess` right after it.
+    # When `git` is freshly inserted (not already a column), `eco_guess` must
+    # follow it in the same step — otherwise it falls to the end of the row,
+    # since the loop iterates the original columns and never revisits `git`.
     new_fields: list[str] = []
     inserted_git = "git" in original_fields
     inserted_eco = "eco_guess" in original_fields
@@ -639,6 +642,9 @@ def update_results_csv(ecosystem: str) -> tuple[int, int]:
         if col == "github_repo" and not inserted_git:
             new_fields.append("git")
             inserted_git = True
+            if not inserted_eco:
+                new_fields.append("eco_guess")
+                inserted_eco = True
         if col == "git" and not inserted_eco:
             new_fields.append("eco_guess")
             inserted_eco = True
