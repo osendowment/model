@@ -24,3 +24,4 @@ acl,cpp,,https://git.savannah.nongnu.org/git/acl.git,,"no GitHub repo; canonical
 libgpg-error,cpp,,git://git.gnupg.org/libgpg-error.git,,"no GitHub repo; canonical GnuPG source over git:// (dev.gnupg.org smart-http is broken; verified ls-remote OK)"
 isl,cpp,Meinersbur/isl,,,"no reachable canonical git source (repo.or.cz serves no smart-http); Meinersbur/isl is the maintained GitHub mirror (verified)"
 docutils,pypi,docutils/docutils,,,"upstream is SourceForge SVN (no git); docutils/docutils is the official read-only Git mirror on GitHub (verified)"
+performance-now,npm,myrne/performance-now,,,"npm `repository` points to braveg1rl/performance-now, a 0-byte README-only stub (single 'Create README.md' commit, 2021, GitHub size 0); the real code is myrne/performance-now (160 stars, CoffeeScript src/, not a fork). Both handles are Meryn Stol."
