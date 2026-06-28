@@ -24,7 +24,6 @@ DOWNLOADS_SCORE_HOMEBREW_WEIGHT: float = _P["downloads_score"]["homebrew_weight"
 # Value class cutoffs (cumulative PageRank share)
 VALUE_CLASS_A: float = _P["value_classes"]["A"]
 VALUE_CLASS_B: float = _P["value_classes"]["B"]
-VALUE_CLASS_C: float = _P["value_classes"]["C"]
 
 # Years — the risk-stage window. The whole risk pipeline (concentration,
 # complexity, security, workload) shares this window; LAST_COMPLETE_YEAR is the
@@ -72,11 +71,9 @@ def ecosystem_avg_downloads(ecosystem: str) -> int:
 
 
 def assign_value_class(cumulative_share: float) -> str:
-    """Assign A/B/C/D based on cumulative PageRank share."""
+    """Assign A/B/C based on cumulative PageRank share."""
     if cumulative_share <= VALUE_CLASS_A:
         return "A"
     if cumulative_share <= VALUE_CLASS_B:
         return "B"
-    if cumulative_share <= VALUE_CLASS_C:
-        return "C"
-    return "D"
+    return "C"
