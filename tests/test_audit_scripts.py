@@ -120,3 +120,37 @@ def test_dimension_score_floored_at_one(dim):
         if not v:
             continue
         assert 1 <= float(v) <= 100, f"{r.get('repo')}.{dim}.score={v} outside [1,100]"
+
+
+def test_valid_repos_have_git_url():
+    """Every valid repo must carry a git_url, and a valid github repo must have
+    the canonical github clone URL (both github_repo AND git_url — not one or
+    the other). Regression: git_url was being stripped from github repos,
+    leaving every valid github repo with an empty git_url.
+    """
+    value_csv = ROOT / "data" / "value" / "value.csv"
+    if not value_csv.exists():
+        pytest.skip("value.csv not present")
+    with value_csv.open() as f:
+        rows = [r for r in csv.DictReader(f) if r.get("valid") == "True"]
+    if not rows:
+        pytest.skip("no valid repos in value.csv")
+
+    no_git = [r for r in rows if not (r.get("git_url") or "").strip()]
+    assert not no_git, (
+        f"{len(no_git)} valid repos have no git_url, e.g. "
+        f"{[r.get('github_repo') or r.get('id') for r in no_git[:5]]}"
+    )
+
+    def canonical(slug: str) -> str:
+        return f"https://github.com/{slug.strip().lower()}.git"
+
+    mismatched = [
+        r for r in rows
+        if (r.get("github_repo") or "").strip()
+        and (r.get("git_url") or "").strip().lower() != canonical(r["github_repo"])
+    ]
+    assert not mismatched, (
+        f"{len(mismatched)} valid github repos have a non-canonical git_url, e.g. "
+        f"{[(r['github_repo'], r['git_url']) for r in mismatched[:5]]}"
+    )
