@@ -60,7 +60,6 @@ bluss/bencher,65987276,0,0,0,100.0,92,16,False,,False,0,0,100.0,,100
 boto/boto3,24774658,0,0,0,100.0,9775,1968,False,,False,0,0,100.0,,100
 boto/botocore,6670942,0,0,0,100.0,1613,1153,False,,False,0,0,100.0,,100
 boto/s3transfer,49535299,0,0,0,100.0,232,152,False,,False,0,0,100.0,,100
-braveg1rl/performance-now,336187529,0,0,0,100.0,0,2,False,,False,0,0,100.0,,100
 brianc/node-postgres,991475,19,0,19,31.58,13114,1309,True,github,False,1,0,100.0,,56
 broofa/mime,534940,6,0,6,41.43,2355,322,True,github,False,1,0,100.0,,64
 browserify/events,1649251,0,0,0,100.0,1409,174,True,tidelift,False,1,0,100.0,,100
@@ -516,6 +515,7 @@ mrabarnett/mrab-regex,309446978,0,0,0,100.0,583,71,False,,False,0,0,100.0,,100
 mrmlnc/fast-glob,77467076,0,0,0,100.0,2808,137,False,,False,0,0,100.0,,100
 msgpack/msgpack-python,2242705,0,0,0,100.0,2080,244,False,,False,0,0,100.0,,100
 mui/material-ui,23083156,,,0,100.0,98237,32651,,,False,0,0,100.0,,100
+myrne/performance-now,10219264,,,0,100.0,160,23,,,False,0,0,100.0,,100
 mysticatea/abort-controller,105228556,7,2,9,37.74,308,37,False,,False,0,0,100.0,,61
 mysticatea/event-target-shim,31137469,7,2,9,37.74,130,29,False,,False,0,0,100.0,,61
 netflix/vmaf,51317975,0,0,0,100.0,5333,819,False,,False,0,0,100.0,,100
