@@ -29,7 +29,7 @@ Security  → data/risk/security.csv  (897 A/B risk repos)  →  risk.csv col `s
 │
 ├── CVEs (OSV.dev)
 │   ├── cve_count_5y           ← distinct CVE ids mapped to the repo in 2021–2025          [2021–2025]
-│   └── cve_count_5y_p         ← derived (risk pctl; more CVEs → higher pctl)              [2021–2025]
+│   └── cve_score             ← derived (0 CVEs → 50 neutral; ≥1 ranked into (50,100])     [2021–2025]
 │
 ├── SAST  (semgrep p/default — INFORMATIONAL, not scored)
 │   ├── sast_findings_total / _p    ← semgrep p/default findings_total + pctl              [2025 EOY]
@@ -40,7 +40,7 @@ Security  → data/risk/security.csv  (897 A/B risk repos)  →  risk.csv col `s
 ├── bestpractices_badge_id    ← deps.dev (OpenSSF Best Practices badge tier)               [most recent]
 ├── fetched_at                ← checked_at of the OpenSSF score row used                   [2025 EOY]
 │
-└── score  (the score)        ← derived (geometric mean of openssf_score_p, cve_count_5y_p) [composite]
+└── score  (the score)        ← derived (geometric mean of openssf_score_p, cve_score)     [composite]
     └─ carried into risk.csv as column `security`
 ```
 
@@ -62,7 +62,7 @@ Security  → data/risk/security.csv  (897 A/B risk repos)  →  risk.csv col `s
    count distinct CVEs, read semgrep findings, set `ossfuzz_enrolled` and
    `bestpractices_badge_id`.
 4. **Score** — `add_percentiles(...)` ranks the population, then `score` =
-   geometric mean of `openssf_score_p` and `cve_count_5y_p`.
+   geometric mean of `openssf_score_p` and `cve_score`.
 5. **Aggregate** — `aggregate_risk.py` carries **only** this component's `score`
    into `risk.csv` as the column `security`.
 
@@ -132,7 +132,7 @@ percentiles are informational and are NOT inputs to `score`.**
 | Column | Basis | Direction (`asc`) |
 |---|---|---|
 | `openssf_score_p` | `openssf_score` | `False` — **lower** Scorecard score → **higher** risk pctl |
-| `cve_count_5y_p` | `cve_count_5y` | `True` — **more** CVEs → higher risk pctl |
+| `cve_score` | `cve_count_5y` | neutral-anchored — **0 CVEs → 50** neutral; **≥1** ranked into **(50,100]**, worst → 100 (not a plain `asc` percentile) |
 | `sast_findings_total_p` | `sast_findings_total` | `True` — info only |
 | `sast_findings_error_p` | `sast_findings_error` | `True` — info only |
 | `sast_findings_security_p` | `sast_findings_security` | `True` — info only |
@@ -140,14 +140,14 @@ percentiles are informational and are NOT inputs to `score`.**
 ### How `score` composes
 
 ```
-score = geometric_mean(openssf_score_p, cve_count_5y_p)
+score = geometric_mean(openssf_score_p, cve_score)
 ```
 
-`composite_cols = ["openssf_score_p", "cve_count_5y_p"]`. `score` is populated
+`composite_cols = ["openssf_score_p", "cve_score"]`. `score` is populated
 **only when both `openssf_score` and `cve_count_5y` are present**; otherwise it
 is `""`. The geometric mean means a repo that is bad on *either* axis (low
 Scorecard or many CVEs) carries elevated risk. Because ~78% of risk-scope repos
-have zero CVEs and thus share one identical `cve_count_5y_p`, for the majority
+have zero CVEs and thus share `cve_score = 50` (neutral), for the majority
 `score` effectively tracks the OpenSSF axis, with the CVE axis re-ranking only
 the minority that carry CVEs.
 
@@ -170,7 +170,7 @@ file; `fetched_at` here is the `checked_at` of the OpenSSF score row that was us
 | `sast_findings_security` / `_p` | security-category findings + pctl (info) |
 | `bestpractices_badge_id` | `passing` \| `silver` \| `gold` \| `in_progress` \| `""` |
 | `openssf_score_p` | risk pctl of `openssf_score` (lower-is-worse) |
-| `cve_count_5y_p` | risk pctl of `cve_count_5y` (more-is-worse) |
+| `cve_score` | neutral-anchored CVE risk score: 0 → 50, ≥1 ranked into (50,100] |
 | `score` | **security-risk score** (geom-mean of the two `_p`; `""` if either missing) |
 | `fetched_at` | `checked_at` of the OpenSSF score row used |
 
@@ -204,11 +204,11 @@ Of the 897 A/B risk repos:
 
 CVE distribution: 695 repos with zero CVEs, 198 with ≥1 (max 10,602). Best
 Practices badge tiers: 18 `passing`, 10 `in_progress`, 1 `gold`, 1 `silver`.
-`score` quartiles: p25 **46** · p50 **64** · p75 **78** (max 95).
+`score` quartiles: p25 **39** · p50 **53** · p75 **63** (max 94).
 
 ## Limitations
 
-- **Two-axis score.** Only `openssf_score_p` and `cve_count_5y_p` enter `score`.
+- **Two-axis score.** Only `openssf_score_p` and `cve_score` enter `score`.
   Semgrep SAST, OSS-Fuzz, and the Best Practices badge are collected and
   surfaced but **not scored** — they are context, not inputs.
 - **CVE mapping is package-name-bound.** CVE counts depend on OSV mapping a CVE
@@ -216,8 +216,8 @@ Practices badge tiers: 18 `passing`, 10 `in_progress`, 1 `gold`, 1 `silver`.
   package-name mismatches under-count (e.g. `cpython`→0, `linux`→7); a `0`
   reflects "no mapped CVEs", not necessarily "no vulnerabilities".
 - **CVE axis is coarse for the majority.** ~78% of repos have zero CVEs and
-  share one `cve_count_5y_p`, so for them `score` mostly tracks the OpenSSF
-  axis; the CVE axis only re-ranks the ~22% that carry CVEs.
+  share `cve_score = 50` (the neutral baseline), so for them `score` mostly
+  tracks the OpenSSF axis; the CVE axis only re-ranks the ~22% that carry CVEs.
 - **Snapshot pinning, not live.** The Scorecard/semgrep signals are pinned to
   the repo's latest in-window commit (2025→2021), not re-run live, so they
   reflect the snapshot sha rather than `HEAD`.

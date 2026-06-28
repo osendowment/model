@@ -57,6 +57,34 @@ def risk_percentiles_aligned(
     return out
 
 
+def floor_anchored_risk(
+    values: list[float | None], floor: float = 0.0, anchor: float = 50.0
+) -> list[float | None]:
+    """Risk score (0-100) that pins the floor value to a neutral `anchor`.
+
+    Unlike `risk_percentiles`, where the most-common floor value lands wherever
+    its CDF puts it (e.g. 78 when 78% of repos share `floor`), this anchors
+    every value == `floor` to `anchor` — a deliberate "neutral, not safe"
+    baseline (0 known CVEs is not proof of security, just absence of evidence).
+    Values strictly above the floor are ranked among *themselves* by worst-
+    pinned CDF (more = worse) and mapped linearly into (`anchor`, 100], so the
+    single worst value maps to 100. Missing (None) stays None; aligned 1:1 with
+    the input.
+    """
+    out: list[float | None] = [None] * len(values)
+    above = [(i, v) for i, v in enumerate(values) if v is not None and v > floor]
+    for i, v in enumerate(values):
+        if v is not None and v <= floor:
+            out[i] = float(anchor)
+    if above:
+        ordered = sorted(v for _, v in above)
+        m = len(above)
+        for i, v in above:
+            cdf = bisect.bisect_right(ordered, v) / m   # (0, 1], worst -> 1
+            out[i] = anchor + (100.0 - anchor) * cdf
+    return out
+
+
 def geometric_mean(values: list[float]) -> float:
     """Geometric mean (prod v)^(1/n). Assumes every value > 0; [] -> 0.0."""
     if not values:

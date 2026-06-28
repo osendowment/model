@@ -1,11 +1,44 @@
 """Tests for the shared risk-percentile statistics helpers."""
 
 from src.common.stats import (
+    floor_anchored_risk,
     geom_mean_composite,
     geometric_mean,
     risk_percentiles,
     risk_percentiles_aligned,
 )
+
+
+class TestFloorAnchoredRisk:
+    def test_floor_value_pinned_to_anchor(self):
+        # 0 CVEs -> 50 (neutral), regardless of how many repos share it.
+        out = floor_anchored_risk([0.0, 0.0, 0.0, 1.0, 5.0, 88.0])
+        assert out[0] == out[1] == out[2] == 50.0
+
+    def test_worst_above_floor_maps_to_100(self):
+        out = floor_anchored_risk([0.0, 1.0, 5.0, 88.0])
+        assert out[3] == 100.0
+
+    def test_strictly_increasing_above_floor(self):
+        out = floor_anchored_risk([0.0, 1.0, 5.0, 88.0])
+        assert 50.0 < out[1] < out[2] < out[3]
+
+    def test_zero_to_fifty_not_seventy_eight(self):
+        # The whole point: a large zero-tie group sits at 50, not at its CDF
+        # position (here 80% of repos have 0 CVEs).
+        vals = [0.0] * 8 + [3.0, 10.0]
+        out = floor_anchored_risk(vals, floor=0.0, anchor=50.0)
+        assert all(v == 50.0 for v in out[:8])
+        assert out[9] == 100.0
+
+    def test_missing_stays_none(self):
+        out = floor_anchored_risk([None, 0.0, 5.0])
+        assert out[0] is None and out[1] == 50.0
+
+    def test_all_floor_no_above(self):
+        # No value exceeds the floor -> everyone neutral, nobody pinned to 100.
+        out = floor_anchored_risk([0.0, 0.0, 0.0])
+        assert out == [50.0, 50.0, 50.0]
 
 
 class TestRiskPercentiles:

@@ -35,14 +35,15 @@ Writes:
         openssf_score_p,                    (0–100 risk percentile of
                                             openssf_score, lower-is-worse — a
                                             lower Scorecard score ranks higher-risk)
-        cve_count_5y_p,                     (0–100 risk percentile of
-                                            cve_count_5y — more CVEs higher)
-        security_p,                         (geometric mean of openssf_score_p
-                                            and cve_count_5y_p; "" if either
+        cve_score,                          (0–100 neutral-anchored CVE risk
+                                            score: 0 known CVEs → 50, ≥1 CVE
+                                            ranked into (50, 100], worst → 100)
+        score,                              (geometric mean of openssf_score_p
+                                            and cve_score; "" if either
                                             openssf_score or cve_count_5y missing)
         fetched_at                          (checked_at of openssf row used)
 
-    The sast_*_p columns are informational and NOT part of security_p.
+    The sast_*_p columns are informational and NOT part of `score`.
 
 Latest-sha picker
 -----------------
@@ -53,16 +54,17 @@ by build_complexity. If commits-years has no usable year for a repo, we
 fall back to any sha present in the long file for that repo (deterministic
 lexicographic pick).
 
-Security percentile
--------------------
-`security_p` is the geometric mean of two direction-aware risk percentiles:
-`cve_count_5y_p` (more CVEs → higher risk) and `openssf_score_p` (lower
-Scorecard score → higher risk). It is populated only when both
+Security score
+--------------
+`score` is the geometric mean of two direction-aware risk axes: `cve_score`
+(0 known CVEs → 50, ≥1 CVE ranked into (50, 100]) and `openssf_score_p`
+(lower Scorecard score → higher risk). It is populated only when both
 `openssf_score` and `cve_count_5y` are present.
 
-~78% of risk-scope repos have zero CVEs and thus share one identical
-`cve_count_5y_p`; for them `security_p` effectively tracks the OpenSSF axis,
-with the CVE axis only re-ranking the minority that carry CVEs.
+~78% of risk-scope repos have zero CVEs and all share `cve_score = 50` — a
+neutral baseline ("none known" ≠ "proven secure"), not the worst-pinned CDF's
+78. For those repos `score` tracks the OpenSSF axis, with the CVE axis only
+re-ranking the minority that carry CVEs, above the neutral 50.
 
 Usage:
     uv run python -m src.risk.build_security
@@ -80,6 +82,7 @@ from rich.table import Table
 from src.common.params import YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import canonical_repo_map, load_risk_repos
+from src.common.stats import floor_anchored_risk
 from src.common.tables import load_column_by_repo
 from src.sources.git.long_format import read as read_long
 
@@ -108,7 +111,7 @@ FIELDS = [
     "sast_findings_error", "sast_findings_error_p",
     "sast_findings_security", "sast_findings_security_p",
     "bestpractices_badge_id",
-    "openssf_score_p", "cve_count_5y_p",
+    "openssf_score_p", "cve_score",
     "score",
     "fetched_at",
 ]
@@ -359,15 +362,32 @@ def build() -> list[dict]:
             "fetched_at": ossf_checked_at,
         })
 
-    # Second pass — compute population-wide percentile rankings.
+    # CVE risk score — neutral-anchored. 0 known CVEs → 50 (not the worst-pinned
+    # CDF's 78); "none known" is treated as neutral, not proven secure. Repos
+    # with ≥1 CVE rank among themselves into (50, 100], worst → 100.
+    def _num(s: str) -> float | None:
+        s = (s or "").strip()
+        try:
+            return float(s) if s else None
+        except ValueError:
+            return None
+
+    cve_scores = floor_anchored_risk(
+        [_num(r.get("cve_count_5y", "")) for r in rows], floor=0.0, anchor=50.0
+    )
+    for r, s in zip(rows, cve_scores):
+        r["cve_score"] = "" if s is None else round(s, 2)
+
+    # Second pass — openssf risk percentile + the informational sast pctls, then
+    # the composite `score` = geom-mean(openssf_score_p, cve_score).
     add_percentiles(
         rows,
         pctl_specs=[
-            ("openssf_score", False), ("cve_count_5y", True),
+            ("openssf_score", False),
             ("sast_findings_total", True), ("sast_findings_error", True),
             ("sast_findings_security", True),
         ],
-        composite_cols=["openssf_score_p", "cve_count_5y_p"],
+        composite_cols=["openssf_score_p", "cve_score"],
         dim_col="score",
     )
 
@@ -393,7 +413,7 @@ def main() -> None:
     for col in ("openssf_score", "cve_count_5y", "ossfuzz_enrolled",
                 "sast_findings_total", "sast_findings_error",
                 "sast_findings_security", "bestpractices_badge_id",
-                "openssf_score_p", "cve_count_5y_p", "score"):
+                "openssf_score_p", "cve_score", "score"):
         n = sum(1 for r in rows if r.get(col) not in ("", None))
         pct = 100 * n / total if total else 0
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")
