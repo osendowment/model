@@ -35,19 +35,27 @@ github.com; *Git %* also counts gitlab, bitbucket, sourcehut, codeberg, and
 
 | Ecosystem | Top packages | After dep tree | Results | With GitHub | GH % | With Git | Git % |
 |-----------|-------------:|---------------:|--------:|------------:|-----:|---------:|------:|
-| npm       | 5,765  | 6,370  | 6,370  | 6,281  | 99% | 6,281  | 99% |
-| PyPI      | 2,460  | 3,139  | 3,139  | 1,728  | 55% | 1,728  | 55% |
-| crates.io | 3,719  | 6,218  | 6,218  | 5,967  | 96% | 6,130  | 99% |
-| C/C++     | 1,643  | 2,648  | 1,882  | 482    | 26% | 770    | 41% |
-| **Total** | **13,587** | **18,375** | **17,609** | **14,458** | **82%** | **14,909** | **85%** |
+| npm       | 5,765  | 6,370  | 6,370  | 6,297  | 99% | 6,305  | 99% |
+| PyPI      | 2,460  | 3,139  | 3,139  | 2,821  | 90% | 2,850  | 91% |
+| crates.io | 3,719  | 6,218  | 6,218  | 6,000  | 96% | 6,130  | 99% |
+| C/C++     | 1,329  | 2,368  | 1,639  | 508    | 31% | 1,240  | 76% |
+| **Total** | **13,273** | **18,095** | **17,366** | **15,626** | **90%** | **16,525** | **95%** |
 
-PyPI is stuck at 55% because the BigQuery extract was github-only at fetch time.
-C/C++ jumps from 26% GitHub to 41% Git because non-GitHub upstreams (sourceware,
-savannah, gitlab.gnome.org, etc.) resolve via per-eco `git.csv`.
+*After dep tree* is already a de-duplicated set of unique package nodes
+(`top ∪ transitive deps`, `unify_value_data.py:150`). For C/C++ that universe
+unions the Debian and Homebrew dependency graphs — canonicalised to one name per
+package by Repology — so a package shipped by both ecosystems is counted once.
+C/C++'s *Results* (1,639) is smaller than *After dep tree* (2,368) **not** from
+de-duplication but because the cpp pipeline's `is_cpp` filter then drops
+language-agnostic distro packages.
+
+C/C++ has the lowest GitHub coverage (31%) but Git coverage reaches 76% via
+non-GitHub upstreams (sourceware, savannah, gitlab.gnome.org, etc.) resolved
+through per-eco `git.csv`.
 
 ### Repo class distribution
 
-`unify_value_data.py` collapses the 17,609 package rows into **12,117 repo
+`unify_value_data.py` collapses the 17,366 package rows into **12,117 repo
 rows** (10,446 GitHub groups + 1,671 orphan packages kept under sequential ids so
 nothing is dropped). The 3-class cumulative-PageRank-share cutoffs are A ≤75%,
 B ≤95%, C rest. Counts are derived directly from `data/value/value.csv`.
@@ -77,16 +85,27 @@ project (glibc, gcc, …) is visible here with a populated `git_url` but no
 | `valid == True` | 10,384 | 85.7% |
 | orphan (no `github_repo`) | 1,671 | 13.8% |
 
+By strongest `class` (counts and GitHub / Git / valid coverage). `valid` tracks
+`github_repo` closely because validity requires a GitHub repo or mirror, so the
+class-A set the Risk pipeline reads is almost entirely valid:
+
+| Class | Repos | With GitHub | GH % | With Git | Git % | Valid | Valid % |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| **A** | 959 | 922 | 96.1% | 955 | 99.6% | 922 | 96.1% |
+| **B** | 3,160 | 2,717 | 86.0% | 2,929 | 92.7% | 2,708 | 85.7% |
+| **C** | 7,998 | 6,807 | 85.1% | 7,438 | 93.0% | 6,754 | 84.4% |
+| **Total** | 12,117 | 10,446 | 86.2% | 11,322 | 93.4% | 10,384 | 85.7% |
+
 Per-ecosystem GitHub vs Git coverage, and the class-A subset that the Risk
 pipeline depends on:
 
 | Ecosystem | GitHub % | Git % (incl. non-GH) | A+B GitHub % | A+B Git % |
 |---|---:|---:|---:|---:|
 | npm | 99% | 99% | 100% | 100% |
-| PyPI | 55% | 55% | 76% | 76% |
+| PyPI | 90% | 91% | 92% | 93% |
 | crates.io | 96% | 99% | 99% | 100% |
-| C/C++ | 26% | 41% | 32% | **95%** |
-| **Total** | **82%** | **85%** | **93%** | **96%** |
+| C/C++ | 31% | 76% | 42% | 67% |
+| **Total** | **90%** | **95%** | **96%** | **97%** |
 
 ---
 
@@ -99,7 +118,42 @@ an overall `score`. Each dimension funnel below starts from those 893 and shows
 how many top repos carry each signal. Methodology lives in [risk.md](risk.md) and
 the per-dimension component docs.
 
-Overall `risk.csv` score distribution: **p25 41 · p50 52 · p75 62**.
+### Score distribution by component
+
+Min / P25 / P50 / P75 / Max of each component score across the top repos.
+**Only the five components that feed the final score are shown** (bold rows) —
+`risk.csv`'s overall `score` is the geometric mean of these per-repo
+(`aggregate_risk.py`); no other dimension contributes. **Completeness rule:** a
+score is calculable only if *all* its inputs are — each component score is blank
+unless all its subcomponent percentiles are present, and the overall `score` is
+blank unless all five component scores are present (so its 816 scored rows are
+fewer than the components' counts; the 77-repo gap is mostly the missing
+workload score). `scripts/pipeline_health.py` enforces this. Under each **bold**
+component sit its scored **subcomponent percentiles** (the `*_p` / score columns
+that get geometric-meaned into that component). All are direction-aware 0–100
+risk percentiles, so tie plateaus are visible: e.g. `cve_score` sits at the
+neutral 50 for the ~78% with no CVE, and `oc_avg_funding_p` pins at 100 for the
+~95% with no OpenCollective budget.
+
+| Component / subcomponent | Scored | Min | P25 | P50 | P75 | Max |
+|---|--:|--:|--:|--:|--:|--:|
+| **Concentration** | **893** | **1** | **27** | **71** | **87** | **100** |
+| · bus factor `bf_commits_git_5y_p` | 893 | 0 | 26 | 100 | 100 | 100 |
+| · HHI `hhi_commits_git_5y_p` | 893 | 0 | 25 | 51 | 75 | 100 |
+| **Complexity** | **886** | **1** | **26** | **50** | **73** | **100** |
+| · LOC `loc_eoy_p` | 886 | 0 | 25 | 50 | 75 | 100 |
+| · cyclomatic max `cyclomatic_max_p` | 886 | 0 | 26 | 51 | 75 | 100 |
+| **Security** | **893** | **3** | **39** | **53** | **63** | **94** |
+| · OpenSSF `openssf_score_p` | 893 | 0 | 26 | 53 | 76 | 100 |
+| · CVE `cve_score` | 893 | 50 | 50 | 50 | 50 | 100 |
+| **Funding** | **893** | **1** | **46** | **70** | **100** | **100** |
+| · GitHub sponsors `gh_sponsorships_p` | 893 | 0 | 25 | 52 | 100 | 100 |
+| · OpenCollective `oc_avg_funding_p` | 893 | 0 | 100 | 100 | 100 | 100 |
+| **Workload** | **816** | **4** | **37** | **55** | **69** | **98** |
+| · LOC / AC `loc_per_ac_p` | 822 | 0 | 25 | 50 | 75 | 100 |
+| · CVE / AC `cve_per_ac_p` | 828 | 76 | 76 | 76 | 76 | 100 |
+| · net-new-issues / AC `nni_per_ac_p` | 822 | 0 | 35 | 50 | 79 | 100 |
+| **Overall `score`** | **816** | **13** | **39** | **50** | **59** | **89** |
 
 Median per-column coverage across the dimension builds is ~99%; every sub-100%
 gap below is structural (a signal that genuinely doesn't exist for that repo),
@@ -119,8 +173,8 @@ it is 100%-populated.
 | bus factor / HHI (GitHub) computed | 880 | 98.5% |
 | **`score` present** | **893** | **100%** |
 
-Score distribution: p25 27 · p50 71 · p75 87. 73.6% of top repos have a git
-`_5y` bus factor of 1 (a single author covers ≥50% of 5-year commits).
+73.6% of top repos have a git `_5y` bus factor of 1 (a single author covers ≥50%
+of 5-year commits).
 
 ### Complexity
 
@@ -136,9 +190,9 @@ git churn at the per-year EOY sha.
 | churn 5y | 761 | 85.2% |
 | **`score` present** | **886** | **99.2%** |
 
-Score distribution: p25 26 · p50 50 · p75 73. `cognitive_*` is only computed for
-languages with a Lizard cognitive parser; churn is the heaviest fetch (bare
-clone) and times out on the largest mirrors (gcc, ffmpeg, typescript).
+`cognitive_*` is only computed for languages with a Lizard cognitive parser;
+churn is the heaviest fetch (bare clone) and times out on the largest mirrors
+(gcc, ffmpeg, typescript).
 
 ### Security
 
@@ -148,15 +202,17 @@ OSV CVE counts + semgrep SAST.
 | Step | Repos | % |
 |---|---:|---:|
 | input top repos | 893 | 100% |
-| OpenSSF score present | 888 | 99.4% |
+| OpenSSF score present | 893 | 100% |
 | semgrep SAST present | 874 | 97.9% |
-| CVE count 5y > 0 | 194 | 21.7% |
+| CVE count 5y > 0 | 195 | 21.8% |
+| OSS-Fuzz enrolled | 130 | 14.6% |
 | CII Best Practices badge | 30 | 3.4% |
-| **`score` present** | **882** | **98.8%** |
+| **`score` present** | **893** | **100%** |
 
-Score distribution: p25 46 · p50 64 · p75 78. ~78% of top repos have zero known
-CVEs and tie on `cve_count_5y_p`, so for those the score is driven by the OpenSSF
-axis. The Best-Practices badge and OSS-Fuzf enrollment are sparse by nature.
+~78% of top repos have zero known CVEs and tie at the neutral `cve_score`
+baseline (50), so for those the score is driven by the OpenSSF axis; CVEs only
+re-rank the minority that carry them. The Best-Practices badge and OSS-Fuzz
+enrollment are sparse by nature.
 
 ### Funding
 
@@ -176,9 +232,8 @@ OpenCollective risk percentiles.
 | Foundation host | 38 | 4.3% |
 | funding.json (FLOSS Fund) | 6 | 0.7% |
 
-Score distribution: p25 46 · p50 70 · p75 100. The mass of unfunded repos (no
-sponsors, no OC) tie at the worst percentile — `score` = 100 is the "no
-detectable funding" plateau.
+The mass of unfunded repos (no sponsors, no OC) tie at the worst percentile —
+`score` = 100 is the "no detectable funding" plateau.
 
 #### OpenCollective
 
@@ -205,7 +260,6 @@ new issues per active contributor, plus issue-debt and trend.
 | `issue_trend_score` computed | 622 | 69.7% |
 | **`score` present** | **816** | **91.4%** |
 
-Score distribution: p25 37 · p50 55 · p75 69. ~8% of the cohort gets no `score` —
-a missing upstream input (complexity row, AC count, or issues fetch) blanks the
-per-AC ratios. `issue_trend_score` requires `mean_opened_per_year ≥ 1`, so quiet
-repos are correctly omitted.
+~8% of the cohort gets no `score` — a missing upstream input (complexity row, AC
+count, or issues fetch) blanks the per-AC ratios. `issue_trend_score` requires
+`mean_opened_per_year ≥ 1`, so quiet repos are correctly omitted.

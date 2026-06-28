@@ -35,7 +35,7 @@ you what it is:
 
 - `data/sources/<source>/` — raw + intermediate data fetched from external sources. One folder per source: ecosystem registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`, `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `endoflife/`, `floss-fund/`, `opencollective/`, `foundations/`).
 - `data/value/` — Value-stage outputs: `value.csv` (the unified per-repo value table; carries a tri-state `valid` column), `validation.csv` (git/GitHub validation audit table — rollup of the source caches), `overrides.csv` (curated manual repo/validity corrections), `stats.csv` (per-ecosystem stats matrix: metric rows × ecosystem columns — downloads per year + package/repo counts).
-- `data/risk/` — Risk-stage outputs: `risk.csv` (final aggregated risk table) plus the per-dimension builds (`concentration.csv`, `complexity.csv`, `security.csv`, `funding.csv`, `visibility.csv`, `workload.csv`). Raw funding signals live under `data/sources/github/` (`sponsors.csv` inbound, `sponsorships.csv` outbound, `funding-yml.csv`), `data/sources/floss-fund/` (`funding-json.csv`), and `data/sources/opencollective/` (`budgets.csv`).
+- `data/risk/` — Risk-stage outputs: `risk.csv` (final aggregated risk table) plus the per-dimension builds (`concentration.csv`, `complexity.csv`, `security.csv`, `funding.csv`, `workload.csv`). Raw funding signals live under `data/sources/github/` (`sponsors.csv` inbound, `sponsorships.csv` outbound, `funding-yml.csv`), `data/sources/floss-fund/` (`funding-json.csv`), and `data/sources/opencollective/` (`budgets.csv`).
 
 (Eligibility is a manual review, not a pipeline stage — it has no stage output folder. Its source signals live under `data/sources/` (`osi/`, `foundations/`, per-ecosystem `eol.csv`, license data).)
 
@@ -43,12 +43,21 @@ Rule: a script reading external/fetched data points at `data/sources/<source>/�
 
 ## Documentation
 
-`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md` — with everything else in a subfolder:
+`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md` — plus the cross-cutting **`docs/stats.md`**, with everything else in a subfolder:
 
+- `docs/stats.md` — **the single home for every pipeline/funnel/coverage/distribution number** (see rule below).
 - `docs/sources/<source>.md` — one page per external data source.
 - `docs/components/<component>.md` — cross-cutting component docs (e.g. `validation.md`, how `data/value/validation.csv` is formed).
 
 When a doc's content spans multiple stages, fold it into the relevant stage page(s) rather than adding a new top-level overview doc.
+
+### Stats live only in `docs/stats.md`
+
+**Every pipeline/funnel/coverage/distribution figure belongs in `docs/stats.md` and nowhere else.** That means: per-stage funnel counts (packages → dep tree → results → with-repo), class/score distributions, repo-identity coverage, and per-component "N of the top repos carry signal X" coverage tables. `stats.md` has an `## Value` section and an `## Risk` section (Risk covers **only the top repos** — the valid class-A set), with a funnel-style table per component.
+
+- Methodology pages (`value.md`, `risk.md`, the component and source docs) describe **how** a metric is built (formulas, schemas, column descriptions, worked illustrative examples) and **link to** `stats.md` for **how many** — they must not restate the counts.
+- A single concrete number that *defines* a parameter (e.g. "top = 95% of cumulative downloads") stays in the methodology page — it's config, not a result.
+- One number, one place: when a run changes the counts, only `stats.md` is edited. A coverage/funnel count found in any other page is a bug — move it to `stats.md` and leave a pointer.
 
 ## Philosophy
 
