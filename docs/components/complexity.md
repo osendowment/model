@@ -38,7 +38,7 @@ Complexity  → data/risk/complexity.csv  (897 A/B risk repos)
 │   ├── hotspot_log             ← derived (log10(churn+1) × log10(complexity+1))   [EOY×5y]
 │   └── hotspot_log_p           ← derived (risk percentile of hotspot_log)         [EOY×5y]
 │
-├── loc_year                    ← which snapshot year was used (or "HEAD")        [EOY]
+├── loc_year                    ← snapshot year used (real year; dated fallback)   [EOY]
 │
 ├── informational percentiles   ← derived (risk percentiles, higher = riskier)
 │   ├── scc_complexity_eoy_p · cognitive_max_p · churn_5y_total_p · hotspot_log_p
@@ -53,11 +53,14 @@ Complexity  → data/risk/complexity.csv  (897 A/B risk repos)
    `data/sources/`: scc (loc + complexity), lizard (cyclomatic + cognitive), and
    churn. Each is keyed on a sha taken from `commits-years.csv` (per-year
    `last_sha`).
-2. **Pick the snapshot sha** — for each repo `build_complexity.py` walks the
-   settings `years` window newest→oldest (2025→2021, then a `HEAD` pseudo-row for
-   dormant repos) and picks the most-recent year whose `last_sha` has scc
-   `loc > 0`. That year is recorded in `loc_year`. If no year yields a usable
-   sha, the row is left empty — there is **no** fall-back to a stale or HEAD sha.
+2. **Pick the snapshot sha** — for each repo `build_complexity.py` walks **every
+   available snapshot year newest→oldest** and picks the most-recent whose
+   `last_sha` has scc `loc > 0`. This spans the settings window (2025→2021) and,
+   for dormant repos, a **dated pre-window fallback** (e.g. 2020) recorded by
+   `resolve_head` — the latest default-branch commit capped at the last complete
+   year, so every repo with code resolves a dated snapshot. The chosen year is
+   recorded in `loc_year`. The row is empty only when **no** sha has analysable
+   code (an empty repo with `loc = 0`).
 3. **Derive** — map scc/lizard long rows for the chosen `(repo, sha)` into the
    `_eoy` columns, join 5-year churn, and fold the hotspot scores.
 4. **Score** — `score` = geometric mean of the LOC and per-function
@@ -113,9 +116,10 @@ module) has near-zero scc complexity too, so the threshold spares it.
 ### Snapshot selection
 
 The snapshot is the last commit on the default branch at the end of the chosen
-year. The walk picks the most-recent window year with a usable sha (scc
-`loc > 0`); `loc_year` records the result (`"2025"`, …, `"2021"`, `"HEAD"` for
-dormant repos, or `""` when nothing qualified).
+year. The walk picks the most-recent year with a usable sha (scc `loc > 0`)
+across the window **and any dated pre-window fallback**; `loc_year` records the
+real year (`"2025"`…`"2021"`, or an earlier year like `"2020"` for a dormant
+repo — never an opaque `"HEAD"`), or `""` only when no sha has analysable code.
 
 ### scc vs lizard metric mapping
 
@@ -208,26 +212,28 @@ Of the 897 A/B risk repos:
 
 | Signal | Repos | % |
 |---|---:|---:|
-| `loc_eoy` / `sloc_eoy` (scc) | 894 | 99.7% |
-| `scc_complexity_eoy` | 894 | 99.7% |
-| `cyclomatic_max` (lizard) | 894 | 99.7% |
-| `cognitive_max` (lizard) | 880 | 98.1% |
+| `loc_eoy` / `sloc_eoy` (scc) | 896 | 99.9% |
+| `scc_complexity_eoy` | 896 | 99.9% |
+| `cyclomatic_max` (lizard) | 896 | 99.9% |
+| `cognitive_max` (lizard) | 882 | 98.3% |
 | `churn_5y_total` | 870 | 97.0% |
 | `hotspot_log` | 869 | 96.9% |
-| `score` | 894 | 99.7% |
+| `score` | 896 | 99.9% |
 
 `score` percentiles: p25 **26** · p50 **49** · p75 **73** (min 1, max 100) — a
 near-uniform spread, as expected from a percentile composite.
 
-Snapshot-year mix (`loc_year`): 2025 = 655, 2024 = 82, 2023 = 36, 2021 = 38,
-2022 = 24, `HEAD` (dormant) = 59, none = 3.
+Snapshot-year mix (`loc_year`): 2025 = 657, 2024 = 82, 2023 = 36, 2021 = 38,
+2022 = 24, and **dated dormant-repo fallbacks** 2020 = 22 … back to 2007 = 1
+(no `HEAD` labels remain). 1 repo has no snapshot.
 
-The 3 still-empty repos:
+The 1 still-empty repo:
 
-- **docutils/docutils**, **meinersbur/isl** — no `commits-years.csv` rows at all
-  (no GitHub source / 404), so no sha to pin a snapshot to.
-- **braveg1rl/performance-now** — has a sha but scc measured `loc = 0` (no
-  analysable source), so the walk found no usable snapshot.
+- **braveg1rl/performance-now** — GitHub reports `size = 0` and scc measured
+  `loc = 0` (no analysable source), so no sha yields a usable snapshot. This is a
+  genuinely empty repo, not a fetch gap. (`docutils/docutils` and
+  `meinersbur/isl` — previously empty for lack of a pinned sha — are now scored
+  after their `commits-years` + scc/lizard fetches were recovered.)
 
 The 14 repos with scc but no lizard cognitive (e.g. `nodejs/node`,
 `gcc-mirror/gcc`, `scipy/scipy`) are either dropped by the false-zero guard or
