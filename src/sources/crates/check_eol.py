@@ -41,7 +41,7 @@ csv.field_size_limit(sys.maxsize)
 
 from rich.console import Console
 
-from src.eligibility.eol_common import EOL_FIELDS, display_summary, now_iso, write_eol
+from src.common.eol_common import display_summary, now_iso, write_eol
 
 logging.basicConfig(level="INFO")
 log = logging.getLogger(__name__)

@@ -8,13 +8,13 @@ attempt=0
 prev_count=0
 while true; do
     attempt=$((attempt + 1))
-    # Count eligible repos via Python (CSV with quoted fields breaks awk)
-    elig=$(uv run python -c "
+    # Count risk-scope repos (semgrep's target set) via Python (quoted CSV breaks awk)
+    want=$(uv run python -c "
 import csv
-n = sum(1 for r in csv.DictReader(open('data/eligibility/eligibility.csv')) if (r.get('eligibility') or '').strip()=='True')
+n = sum(1 for r in csv.DictReader(open('data/risk/risk.csv')) if (r.get('repo') or '').strip())
 print(n)" 2>/dev/null)
     have=$(tail -n +2 data/sources/git/semgrep.csv 2>/dev/null | cut -d, -f1 | sort -u | wc -l | tr -d ' ')
-    miss=$(( elig - have ))
+    miss=$(( want - have ))
     echo "[$(date +%H:%M:%S)] attempt=$attempt have=$have miss=$miss" >> "$LOG"
     if [ "$miss" -le 5 ]; then
         echo "[$(date +%H:%M:%S)] miss <= 5, stopping" >> "$LOG"
@@ -25,7 +25,7 @@ print(n)" 2>/dev/null)
         break
     fi
     prev_count=$have
-    uv run python -m src.github.fetch_semgrep --rulepack p/default --concurrency 3 --limit 0 --max-disk-gb 2 >> /tmp/semgrep-loop-detail.log 2>&1
+    uv run python -m src.sources.github.fetch_semgrep --rulepack p/default --concurrency 3 --limit 0 --max-disk-gb 2 >> /tmp/semgrep-loop-detail.log 2>&1
     rc=$?
     echo "[$(date +%H:%M:%S)] semgrep exited rc=$rc" >> "$LOG"
     if [ "$attempt" -gt 50 ]; then

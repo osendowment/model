@@ -105,21 +105,3 @@ def test_dimension_score_floored_at_one(dim):
         if not v:
             continue
         assert 1 <= float(v) <= 100, f"{r.get('repo')}.{dim}.score={v} outside [1,100]"
-
-
-def test_risk_scope_matches_eligibility_scope():
-    """Eligibility now shares the risk scope — both A/B ∩ valid.
-
-    risk.csv and eligibility.csv must cover the same repo set (the prior
-    927-vs-897 mismatch was the eligibility-scope bug).
-    """
-    risk = {r["repo"] for r in _rows("risk") if r.get("repo")}
-    elig_path = ROOT / "data" / "eligibility" / "eligibility.csv"
-    if not risk or not elig_path.exists():
-        pytest.skip("risk.csv or eligibility.csv not present")
-    with elig_path.open() as f:
-        elig = {r["repo"] for r in csv.DictReader(f) if r.get("repo")}
-    assert risk == elig, (
-        f"risk\\eligibility={sorted(risk - elig)[:5]}, "
-        f"eligibility\\risk={sorted(elig - risk)[:5]}"
-    )

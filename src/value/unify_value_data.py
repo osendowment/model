@@ -2,9 +2,10 @@
 """Stage 1 of the pipeline — unified per-repo value table.
 
 Pipeline order (each stage feeds the next):
-    1. `src.value.unify_value_data`       → data/value/value.csv  (this script)
-    2. `src.eligibility.classify_eligibility` → data/eligibility/eligibility.csv
-    3. `src.risk.aggregate_risk`        → data/risk/risk.csv
+    1. `src.value.unify_value_data`     → data/value/value.csv  (this script)
+    2. `src.risk.aggregate_risk`        → data/risk/risk.csv
+
+(Eligibility is a manual review of top candidates — no longer a pipeline stage.)
 
 Reads `data/sources/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crates,
 cpp), groups packages by canonical `git_url` (or by a per-package synthetic
@@ -34,10 +35,10 @@ the max percentile and `top_eco_pkg` is the highest-PR package in it.
 Rows are sorted by `top_eco_pct` desc so the highest-importance repos
 come first.
 
-EOL is intentionally **not** stored here. It's a property of the
-eligibility pipeline (license + EOL); see `src.eligibility.classify_eligibility`,
-which joins per-ecosystem `data/sources/{eco}/eol.csv` with
-`data/sources/{eco}/results.csv` to compute per-repo `is_eol` directly.
+EOL is intentionally **not** stored here. Per-ecosystem `check_eol.py`
+scripts write `data/sources/{eco}/eol.csv`, joined with the matching
+`results.csv` to derive per-repo `is_eol`; EOL feeds the manual
+eligibility review, not the value table.
 
 Usage:
     uv run python -m src.value.unify_value_data
@@ -470,10 +471,10 @@ def aggregate_by_repo(all_rows: list[dict], *, drop_d_class: bool = False) -> li
         present_classes = [a[f"class_{e}"] for e in ECOSYSTEMS if a[f"class_{e}"]]
         a["class"] = min(present_classes, key=lambda c: CLASS_RANK[c])
 
-    # value-data.csv stores all classes A/B/C/D — the complete long-tail
+    # value.csv stores all classes A/B/C/D — the complete long-tail
     # table. The risk pipeline filters to its own scope (A/B by default,
-    # via settings.json risk_input.value_classes); eligibility runs after
-    # risk. `drop_d_class` is retained for callers that want the ABC subset.
+    # via settings.json risk_input.value_classes). `drop_d_class` is
+    # retained for callers that want the ABC subset.
     if drop_d_class:
         aggs = [a for a in aggs if a.get("class") in ("A", "B", "C")]
 
