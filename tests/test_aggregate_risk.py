@@ -20,3 +20,32 @@ def test_overall_score_geom_mean():
 def test_overall_score_floored_and_empty():
     assert overall_score([1, 1]) == "1"
     assert overall_score([]) == ""        # no component scores → blank
+
+
+def test_aggregate_requires_all_components(monkeypatch):
+    """Completeness rule: the overall score is blank unless ALL five component
+    scores are present — a repo missing any component gets no partial score."""
+    from pathlib import Path
+
+    from src.risk import aggregate_risk as ar
+
+    class _Entry:
+        def __init__(self, repo):
+            self.repo, self.repo_id = repo, repo
+
+    monkeypatch.setattr(ar, "load_top_repos",
+                        lambda: [_Entry("o/full"), _Entry("o/partial")])
+    # `o/full` has all five; `o/partial` is missing workload.
+    by_name = {
+        "concentration": {"o/full": 50, "o/partial": 50},
+        "complexity":    {"o/full": 50, "o/partial": 50},
+        "security":      {"o/full": 50, "o/partial": 50},
+        "funding":       {"o/full": 50, "o/partial": 50},
+        "workload":      {"o/full": 50},
+    }
+    monkeypatch.setattr(ar, "_scores_by_repo", lambda p: by_name[Path(p).stem])
+
+    rows = {r["repo"]: r for r in ar.aggregate()}
+    assert rows["o/full"]["score"] == "50"        # all present → scored
+    assert rows["o/partial"]["workload"] == ""    # the missing input
+    assert rows["o/partial"]["score"] == ""       # …so no overall score
