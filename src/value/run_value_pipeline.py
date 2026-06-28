@@ -22,16 +22,26 @@ STEPS = [
     Step("cpp",        "src.value.cpp_pipeline",     fetch=True, pipeline=True),
     Step("stats",      "src.value.build_stats"),
     Step("git-urls",   "src.value.build_git_urls"),
+    Step("eco-fetch",  "src.sources.ecosystems.candidates", fetch=True),
+    Step("eco-resolve", "src.value.apply_ecosystems_authority"),
     Step("unify",      "src.value.unify_value_data"),
     Step("verify",     "src.value.verify_git_urls"),
     Step("validation", "src.value.build_validation"),
+    Step("eco-audit",  "src.value.audit_ecosystems"),
 ]
 
 # The cross-ecosystem rollup that turns existing per-ecosystem results.csv into
 # value.csv. Reads only the per-eco results.csv + the validation caches +
 # overrides.csv — no raw ecosystem data (e.g. the crates db-dump), so it runs
 # even when those large inputs are unmaterialised LFS pointers.
-ROLLUP_LABELS = ("unify", "verify", "validation")
+#
+# The ecosyste.ms authoritative layer runs inside the rollup, around unify:
+#   eco-fetch   — pull ecosyste.ms repo identity for every top package (network;
+#                 `fetch` step, so `--rollup --skip-fetch` keeps the rollup offline)
+#   eco-resolve — rewrite results.csv git/github_repo: override > eco > prior
+#   eco-audit   — read-only diff of the result against value.csv
+# All three need only results.csv / packages.csv / overrides.csv — no native raw.
+ROLLUP_LABELS = ("eco-fetch", "eco-resolve", "unify", "verify", "validation", "eco-audit")
 
 
 def main() -> int:
