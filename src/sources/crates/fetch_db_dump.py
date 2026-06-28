@@ -29,6 +29,8 @@ import httpx
 from rich.console import Console
 from rich.table import Table
 
+from src.common.lfs import has_real_data
+
 DUMP_URL  = "https://static.crates.io/db-dump.tar.gz"
 DATA_DIR  = "data/sources/crates"
 DUMP_DIR  = f"{DATA_DIR}/db-dump"
@@ -56,7 +58,8 @@ console.print()
 
 # ── Skip if already extracted ──────────────────────────────────────────────────
 
-all_present = all(os.path.exists(f"{DUMP_DIR}/{f}") for f in EXTRACT_TARGETS)
+# A Git LFS pointer counts as missing — the real data isn't on disk, so re-fetch.
+all_present = all(has_real_data(f"{DUMP_DIR}/{f}") for f in EXTRACT_TARGETS)
 if all_present:
     console.print(f"[green]Already extracted[/green]: {DUMP_DIR}/")
     for fname in sorted(EXTRACT_TARGETS):
@@ -64,9 +67,9 @@ if all_present:
         console.print(f"  {fname:<40} {size_mb:7.1f} MB")
     raise SystemExit(0)
 
-missing = [f for f in EXTRACT_TARGETS if not os.path.exists(f"{DUMP_DIR}/{f}")]
+missing = [f for f in EXTRACT_TARGETS if not has_real_data(f"{DUMP_DIR}/{f}")]
 if missing:
-    console.print(f"[yellow]Missing files[/yellow]: {missing} — re-downloading dump")
+    console.print(f"[yellow]Missing/unmaterialised[/yellow]: {missing} — re-downloading dump")
 
 # ── Get file size via HEAD ─────────────────────────────────────────────────────
 

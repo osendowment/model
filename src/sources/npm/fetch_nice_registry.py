@@ -18,6 +18,8 @@ import aiohttp
 from rich.console import Console
 from rich.table import Table
 
+from src.common.lfs import has_real_data
+
 PACKAGES_URL = "https://media.githubusercontent.com/media/nice-registry/all-the-package-repos/master/data/packages.json"
 OUT_DIR      = "data/sources/npm/nice-registry"
 OUT_CSV      = f"{OUT_DIR}/packages.csv"
@@ -41,7 +43,8 @@ def main() -> None:
     console.rule("[bold]npm — fetch_nice_registry")
     t0 = time.perf_counter()
 
-    if os.path.exists(OUT_CSV):
+    # A Git LFS pointer counts as missing — fall through and re-fetch real data.
+    if has_real_data(OUT_CSV):
         age = time.time() - os.path.getmtime(OUT_CSV)
         if age < 86400:
             console.print(f"[dim]{OUT_CSV} is {age/3600:.1f}h old — skipping fetch (< 24h)[/dim]")

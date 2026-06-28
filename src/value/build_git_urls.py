@@ -27,6 +27,8 @@ import polars as pl
 from rich.console import Console
 from rich.table import Table
 
+from src.common.lfs import is_lfs_pointer
+
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
@@ -281,6 +283,12 @@ def crates_urls() -> dict[str, list[str]]:
     path = DATA_DIR / "sources" / "crates" / "db-dump" / "crates.csv"
     if not path.exists():
         return out
+    if is_lfs_pointer(path):
+        raise SystemExit(
+            f"{path} is a Git LFS pointer — the crates db-dump isn't materialised. "
+            "Run `uv run python -m src.sources.crates.fetch_db_dump` (or `git lfs pull`) "
+            "first, or use `--rollup` to rebuild value.csv from existing results.csv."
+        )
     df = pl.read_csv(path, columns=["name", "homepage", "repository"],
                      schema_overrides={"homepage": pl.Utf8, "repository": pl.Utf8})
     for name, hp, rp in zip(df["name"].to_list(), df["homepage"].to_list(), df["repository"].to_list()):

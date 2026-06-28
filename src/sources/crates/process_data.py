@@ -39,6 +39,7 @@ import polars as pl
 from rich.console import Console
 from rich.table import Table
 
+from src.common.lfs import is_lfs_pointer
 from src.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
 DUMP_DIR    = "data/sources/crates/db-dump"
@@ -94,6 +95,12 @@ def write_csv_rows(path: str, header: list[str], rows) -> None:
 console.rule("[bold]Step 1[/bold] — load db-dump mappings")
 
 t = time.perf_counter()
+if is_lfs_pointer(f"{DUMP_DIR}/crates.csv"):
+    raise SystemExit(
+        f"{DUMP_DIR}/crates.csv is a Git LFS pointer — the crates db-dump isn't "
+        "materialised. Run `uv run python -m src.sources.crates.fetch_db_dump` "
+        "(or `git lfs pull`) to fetch it, then re-run."
+    )
 console.print("Loading crates.csv …")
 df = pl.read_csv(f"{DUMP_DIR}/crates.csv", columns=["id", "name", "repository"],
                  schema_overrides={"id": pl.Int64}, truncate_ragged_lines=True, ignore_errors=True)
