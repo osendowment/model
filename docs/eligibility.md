@@ -7,7 +7,7 @@ license status, and EOL (end-of-life) status.
 
 Target shape of inputs per dimension. Each leaf = one metric, with its data
 source and the time period it represents. Per-ecosystem rows feed the
-GitHub rollup that becomes `eligibility-data.csv`.
+GitHub rollup that becomes `eligibility.csv`.
 
 > **Note:** `[most recent]` means the latest available pull of that source.
 > Eligibility is a *current-state* check — it has no historical window.
@@ -53,7 +53,7 @@ Eligibility
 │                                    (apache/cncf/eclipse/openjs/
 │                                     psf/lf/numfocus/sfc)
 │
-└── Final rollup (→ eligibility-data.csv)
+└── Final rollup (→ eligibility.csv)
     └── eligibility               ← valid_repo                         [most recent]
                                      AND is_oss is True
                                      AND NOT is_eol
@@ -79,7 +79,7 @@ graph LR
     crates --> crates_eol --> unify
     cpp --> cpp_eol --> unify
 
-    unify --> value["value-data.csv<br/>(per-repo, no is_eol)"]
+    unify --> value["value.csv<br/>(per-repo, no is_eol)"]
 
     subgraph Eligibility["Eligibility"]
         license["OSS License Check"]
@@ -91,7 +91,7 @@ graph LR
     pypi_eol --> eol_join
     crates_eol --> eol_join
     cpp_eol --> eol_join
-    license --> output["eligibility-data.csv"]
+    license --> output["eligibility.csv"]
     eol_join --> output
 ```
 
@@ -129,8 +129,12 @@ Repos that returned HTTP 404 are recorded with `valid=False` in
 ### License check
 
 Classifies each repo's `license` (from the GitHub API) against the OSI-approved
-license list. 63 licenses are recognized, including MIT, Apache 2.0, GPL (all
-versions), BSD variants, MPL, ISC, Unlicense, and others.
+license list. The recognized set is data-driven: ~149 OSI-approved SPDX licenses
+(auto-refreshed from the SPDX list into `data/sources/osi/oss-licenses.csv`, 90-day
+TTL) plus 6 curated extras universally treated as software OSS but never reviewed
+by OSI (`curl`, `ftl`, `libpng-2.0`, `mit-cmu`, `psf-2.0`, `blessing`) — 155 SPDX
+ids in total. This covers MIT, Apache 2.0, GPL (all versions), BSD variants, MPL,
+ISC, Unlicense, and the rest of the OSI list.
 
 ### EOL check
 
@@ -140,12 +144,12 @@ is unreliable for projects whose canonical repo lives elsewhere (glibc,
 Apache, lots of mirrors).
 
 Each ecosystem has its own `check_eol.py` that writes
-`data/sources/{ecosystem}/eol.csv`. `eligibility.py` joins each per-eco
+`data/sources/{ecosystem}/eol.csv`. `classify_eligibility.py` joins each per-eco
 `eol.csv` directly with the matching `data/sources/{eco}/results.csv` (for the
 `package → github_repo` map) and aggregates: a repo is `is_eol=True`
 iff **every** constituent package across all 4 ecosystems is
 `is_eol=True` (handles monorepos and cross-ecosystem polyglot projects).
-`value-data.csv` deliberately does **not** carry `is_eol` — it's an
+`value.csv` deliberately does **not** carry `is_eol` — it's an
 eligibility concern, not a value-pipeline one.
 
 | Ecosystem | Signal | `eol_method` | Source |
@@ -221,7 +225,7 @@ thresholds change.
 |   | ↳ pypi | | 3,139 | | 17.8% |
 |   | ↳ cpp (Debian + Homebrew) | | 1,882 | | 10.7% |
 | 1 | **AB-class packages** | `value_class ∈ {A, B}` (top ~75% of cumulative downloads × pagerank) | **1,628** | **−90.8%** | 9.2% |
-| 2 | **Unique GitHub repos (AB)** | dedup packages → repos via `value-data.csv` | **917** | **−43.7%** | 5.2% |
+| 2 | **Unique GitHub repos (AB)** | dedup packages → repos via `value.csv` | **917** | **−43.7%** | 5.2% |
 |   | ↳ many-pkgs-per-repo collapse: babel/babel = ~140 npm pkgs, isaacs/glob ships under several names, etc. | | | | |
 | 3 | AB ∩ fetched in `github/repos.csv` | repo has a GitHub API record (run `src.sources.github.fetch_repo_owner_data`) | 892 | −2.7% | 5.1% |
 | 4 | AB ∩ valid (not 404) | `valid=True` in `repos.csv` (repo still exists) | 892 | 0.0% | 5.1% |
@@ -237,18 +241,22 @@ thresholds change.
 - **Stage 2 → 3 (−3%)**: GitHub fetch coverage. Closes to ~0% after a refresh of `src.sources.github.fetch_repo_owner_data`.
 - **Stage 4 → 5 (−2%)**: license check. The few remaining are `noassertion` (cpp libs without Homebrew formula match) plus genuine non-OSS rows (CC-BY data packages, MIT-CMU variant, etc.).
 - **Stage 5 → 6 (−1%)**: EOL — small absolute number (~7 archived projects).
-- **Stage 7 (Risk-scope)**: Risk runs on A/B value-class repos directly from `value-data.csv`, skipping archived and invalid repos.
+- **Stage 7 (Risk-scope)**: Risk runs on A/B value-class repos directly from `value.csv`, skipping archived and invalid repos.
 - **Stage 8 (ELIGIBLE)**: Eligibility runs after Risk. The 868 count reflects the last full eligibility run; re-run `src.eligibility.run_eligibility_pipeline` to refresh.
 
 ### How to refresh these numbers
 
 ```
-uv run python -m src.value.run_value_pipeline         # rebuilds value-data.csv
+uv run python -m src.value.run_value_pipeline         # rebuilds value.csv
 uv run python -m src.risk.run_risk_pipeline           # rebuilds risk.csv
-uv run python -m src.eligibility.run_eligibility_pipeline   # rebuilds eligibility-data.csv
+uv run python -m src.eligibility.run_eligibility_pipeline   # rebuilds eligibility.csv
 ```
 
-Then re-count and update the table.
+All three pipeline runners **fetch missing data by default** — each fetcher is
+incremental and skips data already present in its output files, so a re-run only
+fills gaps before building. Pass `--skip-fetch` to any of them to skip fetching
+entirely and re-run only the builders/classify step on existing data. Then
+re-count and update the table.
 
 ## Scripts
 
@@ -262,16 +270,21 @@ Then re-count and update the table.
 | `src/value/unify_value_data.py` | Unify per-eco results into `data/value/value.csv` | `uv run python -m src.value.run_value_pipeline` |
 | `src/eligibility/classify_eligibility.py` | Final eligibility per repo → `data/eligibility/eligibility.csv` | `uv run python -m src.eligibility.run_eligibility_pipeline` |
 
-Run order:
-1. per-ecosystem `check_eol.py` and `fetch_licenses.py` (parallelisable)
-2. `src.sources.osi.fetch_licenses` (refreshes the OSI list — TTL'd, usually a no-op)
-3. `src.value.run_value_pipeline` (unifies per-eco results → `value-data.csv`)
-4. `src.risk.run_risk_pipeline` (scores A/B repos → `risk.csv`)
-5. `src.sources.github.fetch_repo_owner_data` (populates the repo-level source of truth)
-6. `src.sources.foundations.match_repos` (host classification)
-7. `src.eligibility.run_eligibility_pipeline` (joins everything → `eligibility-data.csv`)
+Run order. `run_eligibility_pipeline` is **fetch-by-default**: it runs all the
+per-ecosystem `check_eol.py` + `fetch_licenses.py` fetchers, the OSI list refresh,
+`fetch_repo_owner_data`, and `match_repos` itself (incremental — each skips data
+already present), then classifies. So the only thing to run before it is the
+upstream value + risk pipelines:
 
-License priority inside `eligibility.py`:
+1. `src.value.run_value_pipeline` (unifies per-eco results → `value.csv`)
+2. `src.risk.run_risk_pipeline` (scores A/B repos → `risk.csv`)
+3. `src.eligibility.run_eligibility_pipeline` (fetches its own EOL / license / OSI /
+   repo-owner / foundation inputs, then joins everything → `eligibility.csv`)
+
+Pass `--skip-fetch` to step 3 to classify on existing data without fetching. The
+individual fetchers below can still be run standalone for targeted refreshes.
+
+License priority inside `classify_eligibility.py`:
 1. **Per-eco `results.csv`** — registry-declared SPDX (most authoritative; the package author set it).
 2. **Fallback: `data/sources/github/repos.csv`** — GitHub API's Licensee detection.
 
@@ -318,8 +331,8 @@ Per-package EOL details. Same schema for every ecosystem.
 
 One row per **GitHub repo** (or per orphan package without a github_repo).
 See `docs/value.md` for the full schema. Eligibility uses it indirectly:
-`src/eligibility.py` reads each ecosystem's `data/sources/{eco}/eol.csv` joined to
-`data/sources/{eco}/results.csv` to compute per-repo EOL — `value-data.csv` itself
+`src/eligibility/classify_eligibility.py` reads each ecosystem's `data/sources/{eco}/eol.csv` joined to
+`data/sources/{eco}/results.csv` to compute per-repo EOL — `value.csv` itself
 does **not** carry an `is_eol` column.
 
 ### data/eligibility/eligibility.csv

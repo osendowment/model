@@ -76,8 +76,10 @@ back to the **deps.dev-mirrored** Scorecard score
 yields a score, `openssf_score` and `openssf_score_source` are empty. (In the
 current build, 893 repos use the local score and 4 fall back to deps.dev.)
 
-Pipeline order (`src/risk/run_risk_pipeline.py`, fetchers run with
-`--with-fetchers`):
+Pipeline order (`src/risk/run_risk_pipeline.py`). The risk runner fetches these
+sources by default (incremental — each fetcher skips data already present, so a
+re-run only fills gaps); pass `--skip-fetch` to rebuild from existing data without
+fetching:
 
 ```
 commits-years → … → semgrep → … → cves → scorecard → depsdev → … → security-build → aggregate

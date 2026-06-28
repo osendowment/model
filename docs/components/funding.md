@@ -60,8 +60,10 @@ Funding  → data/risk/funding.csv  (897 A/B risk repos)
 5. **Aggregate** — `aggregate_risk.py` carries **only** this component's `score`
    into `risk.csv` as the column `funding`.
 
-Pipeline order (`src/risk/run_risk_pipeline.py`, fetchers run with
-`--with-fetchers`):
+Pipeline order (`src/risk/run_risk_pipeline.py`). The risk runner fetches these
+sources by default (incremental — each fetcher skips data already present, so a
+re-run only fills gaps); pass `--skip-fetch` to rebuild from existing data without
+fetching:
 
 ```
 funding-yml → sponsors → sponsorships → floss-fund → opencollective → funding-build

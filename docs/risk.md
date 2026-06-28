@@ -275,9 +275,9 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 | Script | Purpose |
 |--------|---------|
 | `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
-| `src/sources/github/fetch_git_metrics.py` | scc code analysis via sparse checkout |
+| `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (the `scc` fetcher) |
 | `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value/value.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.risk.run_risk_pipeline` |
+| `src/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value/value.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
 
 ## Source-file coverage
 

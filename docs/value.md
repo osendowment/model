@@ -29,7 +29,7 @@ The three pipeline stages (run in order, each feeds the next):
                 ───────────────                   ────                ───────────
 ecosystem ──► top packages ──► dep tree ──► PageRank ──► A/B/C/D
 registries     (95% cum dl)    (BFS)       ↓
-                                      value-data.csv
+                                      value.csv
                                             │
                                             ├─► A/B class repos ──► contributors + scc
                                             │   (settings.json          │
@@ -42,7 +42,7 @@ registries     (95% cum dl)    (BFS)       ↓
                                                     │                    │
                                                     │              license + EOL
                                                     │                    │
-                                                    │            eligibility-data.csv
+                                                    │            eligibility.csv
 ```
 
 Source-specific details live in [`docs/sources/`](sources/) (one `.md` per source).
@@ -144,7 +144,7 @@ etc.) now resolve via per-eco `git.csv`.
 
 ### Value class distribution
 
-Per-ecosystem and combined counts of A/B/C/D classes in `value-data.csv`.
+Per-ecosystem and combined counts of A/B/C/D classes in `value.csv`.
 
 | Ecosystem | A | B | C | D | Total | A+B GH | A+B Git |
 |-----------|--:|--:|--:|--:|------:|-------:|--------:|
@@ -157,7 +157,7 @@ Per-ecosystem and combined counts of A/B/C/D classes in `value-data.csv`.
 *A+B GH* and *A+B Git* are the share of A and B class packages with a
 known GitHub repo and any Git URL respectively — the load-bearing subset
 that the Risk pipeline (default scope: A/B) and the Eligibility pipeline
-both rely on. C/D-class rows are present in `value-data.csv` and tracked
+both rely on. C/D-class rows are present in `value.csv` and tracked
 through the value pipeline, but are outside the default Risk and
 Eligibility scope. C/C++'s A+B Git jumps from 32% to 95% once
 non-GitHub upstreams are counted (glibc, gcc, libunistring, glib, mpfr,
@@ -257,10 +257,14 @@ All dep-tree packages with downloads, PageRank, and value class.
 `data/value/value.csv` is the canonical per-repo table — one row per GitHub
 repo, plus one row per orphan package (no `github_repo`) so nothing is
 dropped. **All classes A/B/C/D are included** — D-class rows are no longer
-dropped. Produced by `uv run python -m src.value.run_value_pipeline`, which reads each
-ecosystem's `results.csv` and `eol.csv`, groups packages by repo, computes
-all per-ecosystem and cross-ecosystem aggregates, and writes the file
-sorted by `top_eco_pct` desc (most important repos first).
+dropped. Produced by the `unify` step of `uv run python -m src.value.run_value_pipeline`
+(`src/value/unify_value_data.py`), which reads each ecosystem's `results.csv`
+and `eol.csv`, groups packages by repo, computes all per-ecosystem and
+cross-ecosystem aggregates in one pass, and writes the file sorted by
+`top_eco_pct` desc (most important repos first). There is no separate
+repo-aggregation step — `unify_value_data.py` produces the per-repo table
+directly. Manual repo / `git_url` / `valid` corrections are applied from
+`data/value/overrides.csv` (by `unify_value_data.py` + `build_validation.py`).
 
 Per-ecosystem class is computed by summing the group's package PR within
 the ecosystem, ranking groups by that sum desc, and applying the same
@@ -287,7 +291,7 @@ subgraphs.
 
 ### Repo class distribution
 
-After grouping packages by `github_repo` (or as orphans), `value-data.csv`
+After grouping packages by `github_repo` (or as orphans), `value.csv`
 collapses 17,609 package rows into 12,842 repo rows.
 
 | | npm | PyPI | crates.io | C/C++ | Strongest |
@@ -299,54 +303,18 @@ collapses 17,609 package rows into 12,842 repo rows.
 
 *Strongest* is the count of repos for which the column is the highest
 class achieved across any of its ecosystems (`class` column in
-`value-data.csv`). 9,691 of the 12,842 rows are github groups; the other
+`value.csv`). 9,691 of the 12,842 rows are github groups; the other
 3,151 are orphan packages (no `github_repo`) kept under sequential ids
 so nothing is dropped.
 
 EOL information is intentionally **not** stored here — it belongs to the
-eligibility pipeline. `src/eligibility.py` joins per-ecosystem
+eligibility pipeline. `src/eligibility/classify_eligibility.py` joins per-ecosystem
 `data/sources/{eco}/eol.csv` with `data/sources/{eco}/results.csv` directly to compute
 per-repo `is_eol`, and writes it to `data/eligibility/eligibility.csv`.
 
 Per-package data isn't preserved here either — see each ecosystem's
 `data/sources/{eco}/results.csv` and `data/sources/{eco}/eol.csv` for the package-level
 rows.
-
-## Repo-level enrichment of value-data.csv
-
-`src/aggregate_by_repo.py` adds repo-level columns to `data/value/value.csv`
-(no separate per-repo file — value-data is the single source of truth for
-both per-package and per-repo views). Group by `github_repo` (or use any
-orphan row directly) and the repo-level columns are already there.
-
-**Pipeline order**: each ecosystem's `check_eol.py` → `src.value.run_value_pipeline`
-→ `aggregate_by_repo.py`. Re-running `src.value.run_value_pipeline` overwrites
-`value-data.csv` without the enriched columns; re-run `aggregate_by_repo.py`
-afterwards to restore them.
-
-**Three-stage pipeline**: `src.value.run_value_pipeline` (this script) →
-`src.risk.run_risk_pipeline` (concentration + complexity for A/B value-class repos) →
-`src.eligibility.run_eligibility_pipeline` (filters to AB ∩ OSS ∩ alive).
-
-**Grouping**: rows sharing a non-empty `github_repo` are merged into one
-group; rows with an empty `github_repo` (e.g. cpp packages like `glibc`,
-`gcc`) are treated as their own one-package groups so nothing is dropped.
-
-**Per-ecosystem class**: within each ecosystem, the group's PR is the
-**sum** of its packages' PR. Groups (with at least one package in that
-ecosystem) are sorted by that sum desc, the cumulative share is computed,
-and the per-ecosystem class is assigned via the same A/B/C/D cutoffs as
-the package-level value pipeline (≤50%, ≤75%, ≤90%, rest). The strongest
-across ecosystems becomes `repo_class`.
-
-This avoids comparing PR magnitudes across ecosystems (which aren't
-comparable — each ecosystem's PR mass sums to 1 within its own graph).
-Recomputing PageRank on a repo-level dep graph was considered and skipped
-because cross-ecosystem deps don't exist in our data; the repo graph is
-still four disconnected subgraphs.
-
-**Sort**: rows in `value-data.csv` end up sorted by `top_eco_pct` desc, so
-the highest-importance packages come first.
 
 ## Current Limitations
 
@@ -374,7 +342,7 @@ overlay.
 
 Every downstream stage (eligibility, EOL, risk, GitHub-derived contributor
 metrics) keys off the `github_repo` field. Projects that don't live on
-GitHub are present in `value-data.csv` with `github_repo=""` and are
+GitHub are present in `value.csv` with `github_repo=""` and are
 silently excluded from those analyses.
 
 Examples affected: glibc (sourceware.org), gcc (gcc.gnu.org / Savannah),
@@ -382,7 +350,7 @@ libunistring (savannah), glib (gitlab.gnome.org), mpfr (gitlab.inria.fr),
 curl (curl.se), ImageMagick (own host), many GNU/Apache/X.Org/KDE
 projects, kernel-adjacent code.
 
-**Status update**: `value-data.csv` now exposes `git_url` alongside
+**Status update**: `value.csv` now exposes `git_url` alongside
 `github_repo`, so non-GitHub upstreams are no longer silently dropped at
 the value-pipeline level. Coverage:
 
@@ -397,7 +365,7 @@ the value-pipeline level. Coverage:
 Downstream stages (eligibility, EOL, GitHub contributor metrics) still
 key off `github_repo`, so a non-GitHub-only project (glibc, gcc, etc.)
 still slips out of those analyses even though it's now visible in
-`value-data.csv` with a populated `git_url`. To fully fix: per-host
+`value.csv` with a populated `git_url`. To fully fix: per-host
 adapters for license/EOL/contributor checks against GitLab API, savannah,
 sourceware, etc.
 
@@ -406,7 +374,7 @@ sourceware, etc.
 `results.csv` admits everything in the top 95% cumulative download set
 plus its transitive deps — no license check, no age cutoff, no popularity
 floor, no archive/EOL gate. Quality filtering happens *downstream* in
-`eligibility.py` and `check_eol.py`. This is intentional (keeps the
+`classify_eligibility.py` and `check_eol.py`. This is intentional (keeps the
 value scoring untouched by signal-quality concerns), but means the raw
 value class distribution overstates how many projects we'd actually fund.
 
@@ -414,7 +382,7 @@ value class distribution overstates how many projects we'd actually fund.
 
 Homebrew and Debian popcon both come via Wayback Machine snapshots, which
 sometimes truncate (1 MB cap) or miss a year entirely. `ecosystem_avg_downloads`
-in `src/params.py` works around this by averaging only over populated years,
+in `src/common/params.py` works around this by averaging only over populated years,
 so a missing year doesn't deflate the average — but it does mean year-over-year
 trend lines are noisy, and a few packages get their `avg_downloads` from
 fewer than 5 years of data.
