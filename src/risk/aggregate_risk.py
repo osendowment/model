@@ -4,7 +4,15 @@
 Each dimension builder writes a per-component CSV whose `score` column is that
 dimension's risk score (integer 0-100, higher = riskier). This aggregator joins
 the five component scores per repo and computes the overall `score` =
-geometric mean of the available component scores.
+geometric mean of the five component scores.
+
+**Completeness rule:** the overall `score` is calculable only if *every* one of
+the five component scores is present. A partial geometric mean (over 3-4 of 5
+dimensions) is not comparable across repos, so a repo missing any component
+score is left with a blank overall `score`. (Each component score is itself
+already blank-unless-complete — `geom_mean_composite` blanks it when any of its
+own scored inputs is missing — so this rule propagates input-completeness all
+the way up.) `scripts/pipeline_health.py` enforces it.
 
 Writes data/risk/risk.csv with:
     repo, repo_id, concentration, complexity, security, funding, workload,
@@ -117,12 +125,19 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
             continue
         row = {"repo": repo, "repo_id": entry.repo_id}
         present: list[int] = []
+        complete = True
         for name, scores in by_component.items():
             s = scores.get(repo)
             row[name] = "" if s is None else s
-            if s is not None:
+            if s is None:
+                complete = False
+            else:
                 present.append(s)
-        row["score"] = overall_score(present)
+        # Completeness rule: only score a repo whose every component is present;
+        # a partial geometric mean over a subset of dimensions isn't comparable.
+        row["score"] = overall_score(present) if complete else ""
+        # dims_scored explains WHY a score is blank (how many of 5 were present);
+        # concentration_imputed flags the worst-case-imputed dormant repos.
         row["dims_scored"] = len(present)
         row["concentration_imputed"] = "True" if repo in imputed else ""
         rows.append(row)

@@ -8,7 +8,7 @@ risk) and its **count of distinct CVEs over 2021–2025** (more CVEs → more ri
 signals (semgrep SAST findings, OSS-Fuzz enrollment, OpenSSF Best Practices
 badge) that do **not** enter the score.
 
-Scope: the 893 class-A value-class repos in the risk pipeline (see
+Scope: the top repos in the risk pipeline (see
 [value.md](../value.md)). Build step: `src/risk/build_security.py`.
 
 ## Metrics Roadmap
@@ -20,7 +20,7 @@ latest pull of that source. Raw signals are fetched per-source under
 `data/sources/`; derived columns are computed by `build_security.py`.
 
 ```
-Security  → data/risk/security.csv  (893 class-A risk repos)  →  risk.csv col `security`
+Security  → data/risk/security.csv  (class-A risk repos)  →  risk.csv col `security`
 │
 ├── OpenSSF Scorecard
 │   ├── openssf_score          ← scorecard `score` (0–10); local first, deps.dev fallback  [2025 EOY]
@@ -73,8 +73,7 @@ Security  → data/risk/security.csv  (893 class-A risk repos)  →  risk.csv co
 When the snapshot picker finds no usable local row for a repo, the build falls
 back to the **deps.dev-mirrored** Scorecard score
 (`data/sources/git/depsdev.csv`, `openssf_score_source = "depsdev"`). If neither
-yields a score, `openssf_score` and `openssf_score_source` are empty. (In the
-current build, 893 repos use the local score and 4 fall back to deps.dev.)
+yields a score, `openssf_score` and `openssf_score_source` are empty.
 
 Pipeline order (`src/risk/run_risk_pipeline.py`). The risk runner fetches these
 sources by default (incremental — each fetcher skips data already present, so a
@@ -127,7 +126,7 @@ percentiles are informational and are NOT inputs to `score`.**
 ### The percentiles (`_p`)
 
 `add_percentiles(...)` computes direction-aware population percentiles
-(0–100) over all 893 repos:
+(0–100) over the top repos:
 
 | Column | Basis | Direction (`asc`) |
 |---|---|---|
@@ -146,7 +145,7 @@ score = geometric_mean(openssf_score_p, cve_score)
 `composite_cols = ["openssf_score_p", "cve_score"]`. `score` is populated
 **only when both `openssf_score` and `cve_count_5y` are present**; otherwise it
 is `""`. The geometric mean means a repo that is bad on *either* axis (low
-Scorecard or many CVEs) carries elevated risk. Because ~78% of risk-scope repos
+Scorecard or many CVEs) carries elevated risk. Because most repos
 have zero CVEs and thus share `cve_score = 50` (neutral), for the majority
 `score` effectively tracks the OpenSSF axis, with the CVE axis re-ranking only
 the minority that carry CVEs.
@@ -189,22 +188,7 @@ geometric mean of the present component scores.
 
 ## Coverage
 
-Of the 893 class-A risk repos:
-
-| Signal | Repos | % |
-|---|---:|---:|
-| `openssf_score` present | 893 | 100.0% |
-| — via local Scorecard | 890 | 99.7% |
-| — via deps.dev fallback | 3 | 0.3% |
-| `cve_count_5y` known | 893 | 100.0% |
-| `score` populated | 893 | 100.0% |
-| semgrep SAST findings present | 874 | 97.9% |
-| OSS-Fuzz enrolled | 130 | 14.6% |
-| Best Practices badge (any tier) | 30 | 3.4% |
-
-CVE distribution: 698 repos with zero CVEs, 195 with ≥1 (max 10,602). Best
-Practices badge tiers: 18 `passing`, 10 `in_progress`, 1 `gold`, 1 `silver`.
-`score` quartiles: p25 **39** · p50 **53** · p75 **63** (max 94).
+See [docs/stats.md → Risk → Security](../stats.md#security) for current per-signal coverage over the top repos and the score distribution.
 
 ## Limitations
 
@@ -215,9 +199,9 @@ Practices badge tiers: 18 `passing`, 10 `in_progress`, 1 `gold`, 1 `silver`.
   to the repo via its published package names. C/Debian-mapped repos with
   package-name mismatches under-count (e.g. `cpython`→0, `linux`→7); a `0`
   reflects "no mapped CVEs", not necessarily "no vulnerabilities".
-- **CVE axis is coarse for the majority.** ~78% of repos have zero CVEs and
+- **CVE axis is coarse for the majority.** Most repos have zero CVEs and
   share `cve_score = 50` (the neutral baseline), so for them `score` mostly
-  tracks the OpenSSF axis; the CVE axis only re-ranks the ~22% that carry CVEs.
+  tracks the OpenSSF axis; the CVE axis only re-ranks the minority that carry CVEs.
 - **Snapshot pinning, not live.** The Scorecard/semgrep signals are pinned to
   the repo's latest in-window commit (2025→2021), not re-run live, so they
   reflect the snapshot sha rather than `HEAD`.

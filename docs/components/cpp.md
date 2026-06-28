@@ -81,9 +81,10 @@ C / C++ (Debian + Homebrew + Repology)
   **GitHub-only**. Many flagship cpp upstreams live off GitHub — glibc
   (sourceware.org), gcc (Savannah), glib (gitlab.gnome.org), mpfr (gitlab.inria.fr),
   curl (curl.se) — so they carry a `git_url` in `value.csv` but `github_repo=""`,
-  and slip out of Risk (and the manual eligibility review). Coverage jumps once non-GitHub Git hosts are
-  counted: **26% → 41%** of results overall, and class-A **32% → 95%** (most non-GitHub
-  upstreams are the load-bearing class-A libraries).
+  and slip out of Risk (and the manual eligibility review). Counting non-GitHub
+  Git hosts (sourceware, Savannah, GNOME) lifts coverage well above the
+  GitHub-only figure — most non-GitHub upstreams are the load-bearing class-A
+  libraries.
 
 ## Outputs
 
@@ -101,27 +102,13 @@ uv run python -m src.sources.cpp.process_data [--top-share F] [--include-non-cpp
 
 ### cpp funnel & classes
 
-Carried from the cross-ecosystem tables in [`value.md`](../value.md):
+See [docs/stats.md → Value](../stats.md#per-ecosystem-value-funnel) for the C/C++ funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
 
-| Stage | Count |
-|---|---:|
-| Top packages (95% downloads) | 1,643 |
-| After dep tree | 2,648 |
-| Results | 1,882 |
-| With GitHub repo | 482 (26%) |
-| With any Git URL | 770 (41%) |
-
-`Results` (1,882) < `After dep tree` (2,648) because the `is_cpp` filter drops
+`Results` is smaller than `After dep tree` because the `is_cpp` filter drops
 language-agnostic distro packages that rode in as dependencies.
-
-| Class (`value.csv`) | A | B | C | Total |
-|---|--:|--:|--:|--:|
-| Repos (`class_cpp`) | 89 | 570 | 961 | 1,620 |
 
 Per-package class counts await the next full pipeline run — the per-package
 `results.csv` `value_class` is still on the legacy 4-class scheme.
-
-class-A repos: 32% have a GitHub repo, **95%** have some Git URL.
 
 ## Limitations
 

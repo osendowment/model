@@ -7,8 +7,9 @@ churn-weighted hotspots (Tornhill) — and distils them into one **complexity-ri
 score (`score`)** that feeds `data/risk/risk.csv`. Higher = larger / harder to
 maintain.
 
-Scope: the 897 class-A value-class repos in the risk pipeline (see
-[value.md](../value.md)). Build step: `src/risk/build_complexity.py`.
+Scope: the class-A value-class repos in the risk pipeline (counts in
+[stats.md → Risk](../stats.md#risk); see [value.md](../value.md)). Build step:
+`src/risk/build_complexity.py`.
 
 ## Metrics Roadmap
 
@@ -20,7 +21,7 @@ per-source under `data/sources/`; derived columns are computed by
 `build_complexity.py`.
 
 ```
-Complexity  → data/risk/complexity.csv  (897 A/B risk repos)
+Complexity  → data/risk/complexity.csv  (one row per class-A risk repo)
 │
 ├── scc  (sparse checkout, sha-pinned)
 │   ├── loc_eoy                 ← scc.loc                 (total lines)            [EOY]
@@ -208,37 +209,16 @@ complexity columns stay in `complexity.csv`. The narrow `risk.csv` is just:
 
 ## Coverage
 
-Of the 897 A/B risk repos:
+See [docs/stats.md → Risk → Complexity](../stats.md#complexity) for current per-signal coverage over the top repos and the score distribution.
 
-| Signal | Repos | % |
-|---|---:|---:|
-| `loc_eoy` / `sloc_eoy` (scc) | 896 | 99.9% |
-| `scc_complexity_eoy` | 896 | 99.9% |
-| `cyclomatic_max` (lizard) | 896 | 99.9% |
-| `cognitive_max` (lizard) | 882 | 98.3% |
-| `churn_5y_total` | 870 | 97.0% |
-| `hotspot_log` | 869 | 96.9% |
-| `score` | 896 | 99.9% |
+A row is empty only when **no** sha yields analysable code — a genuinely empty
+repo (GitHub `size = 0`, scc `loc = 0`), not a fetch gap (e.g.
+`braveg1rl/performance-now`).
 
-`score` percentiles: p25 **26** · p50 **49** · p75 **73** (min 1, max 100) — a
-near-uniform spread, as expected from a percentile composite.
-
-Snapshot-year mix (`loc_year`): 2025 = 657, 2024 = 82, 2023 = 36, 2021 = 38,
-2022 = 24, and **dated dormant-repo fallbacks** 2020 = 22 … back to 2007 = 1
-(no `HEAD` labels remain). 1 repo has no snapshot.
-
-The 1 still-empty repo:
-
-- **braveg1rl/performance-now** — GitHub reports `size = 0` and scc measured
-  `loc = 0` (no analysable source), so no sha yields a usable snapshot. This is a
-  genuinely empty repo, not a fetch gap. (`docutils/docutils` and
-  `meinersbur/isl` — previously empty for lack of a pinned sha — are now scored
-  after their `commits-years` + scc/lizard fetches were recovered.)
-
-The 14 repos with scc but no lizard cognitive (e.g. `nodejs/node`,
-`gcc-mirror/gcc`, `scipy/scipy`) are either dropped by the false-zero guard or
-were not yet covered by the cognitive fetcher; `cyclomatic_max` (and thus `score`)
-is still present for them.
+Some repos have scc but no lizard cognitive (e.g. `nodejs/node`,
+`gcc-mirror/gcc`, `scipy/scipy`): they are either dropped by the false-zero
+guard or not yet covered by the cognitive fetcher, so `cognitive_max` is missing
+while `cyclomatic_max` (and thus `score`) is still present.
 
 ## Limitations
 

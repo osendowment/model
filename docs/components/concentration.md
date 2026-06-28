@@ -8,7 +8,7 @@ concentrated = more at-risk)** that feeds `data/risk/risk.csv` as the column
 `/contributors` API — each produce a bus factor, an HHI, and contributor counts;
 only the git `_5y` axis drives the score.
 
-Scope: the 897 class-A value-class repos in the risk pipeline (see
+Scope: the class-A value-class repos in the risk pipeline (see
 [value.md](../value.md)). Build step: `src/risk/build_concentration.py`.
 
 ## Scored components: Bus Factor + HHI
@@ -33,7 +33,7 @@ direction-aware 0–100 risk percentile and combined as their geometric mean:
   the new-repo case (`no commits through last complete year`). It applies **only
   to successfully-fetched repos** — a clone/log failure writes no data and is the
   *only* thing left blank, so a fetch failure is never mistaken for a real
-  measurement. As a result the score is **100%-populated** across the risk set.
+  measurement. As a result the score is **fully populated** across the risk set.
 
 ```
 score = max(1, round( √( bf_commits_git_5y_p × hhi_commits_git_5y_p ) ))
@@ -55,7 +55,7 @@ per-source under `data/sources/`; all derived columns are computed by
 `score`.
 
 ```
-Concentration  → data/risk/concentration.csv  (897 A/B risk repos)
+Concentration  → data/risk/concentration.csv  (one row per A/B risk repo)
 │
 ├── git-clone method  (data/sources/git/contributor-commits.csv)
 │   ├── _full  (all commits through 2025)
@@ -95,7 +95,7 @@ Concentration  → data/risk/concentration.csv  (897 A/B risk repos)
    fetcher hits the `/contributors` API. Each writes a `.status.csv` sidecar
    carrying `fetched_at` per repo, so a missing metric is distinguishable from a
    failed fetch.
-2. **Join** — `build_concentration.py` joins both sources onto the 897 risk
+2. **Join** — `build_concentration.py` joins both sources onto the risk
    repos by `repo` slug (and reads `data/value/value.csv` for the A/B scope).
 3. **Derive** — for each method: merge contributor identities, drop bots, then
    compute bus factor, HHI (0–10000), and contributor counts. The git method
@@ -238,26 +238,7 @@ the overall geometric-mean `score`.
 
 ## Coverage
 
-Of the 897 A/B risk repos (counts refresh on re-run):
-
-| Signal | Repos | % |
-|---|---:|---:|
-| git `_5y` metrics (`bf`/`hhi` populated, incl. no-human imputation) | 897 | 100% |
-| **`score`** (concentration-risk score) | 897 | 100% |
-| git `_full` metrics | 897 | 100% |
-| `git_fetched_at` present | 897 | 100% |
-| GitHub `_gh_alltime` metrics | 891 | 99.3% |
-| `github_fetched_at` present | 892 | 99.4% |
-
-`score` is **100%-populated** — every successfully-fetched repo is scored, with
-the no-active-human cases imputed (see *Scored components*) and the git method at
-100% fetch coverage. `scripts/pipeline_health.py` enforces this; a blank would
-mean a failed fetch, surfaced as a gap to fix. Distribution: min **1** · p25
-**27** · p50 **71** · p75 **87** · max **100**. The high median reflects how
-concentrated this cohort is — **73.6%** of repos have a git `_5y` bus factor of 1
-(a single contributor covers half the window's commits, incl. the no-human repos
-imputed at `bf = 1`). The 64 imputed repos (60 dormant + 4 bot-only) all land at
-the `score = 100` ceiling.
+See [docs/stats.md → Risk → Concentration](../stats.md#concentration) for current per-signal coverage over the top repos and the score distribution.
 
 ## Limitations
 
@@ -267,7 +248,7 @@ the `score = 100` ceiling.
   thing left blank (out of the ranking) is the genuinely *unmeasured*: a clone
   that failed/timed out (kernel-scale mirrors). The distinction is auditable —
   the imputation lives in `git_metrics`, which only runs after a successful
-  fetch — and `scripts/pipeline_health.py` asserts the score is 100%-populated,
+  fetch — and `scripts/pipeline_health.py` asserts the score is fully populated,
   so any blank surfaces as a fetch gap to fix rather than passing silently.
 - **Commits ≠ effort.** Both methods count authored commits, not lines, reviews,
   triage, or maintenance burden. A reviewer or release manager who rarely commits

@@ -6,8 +6,9 @@ signal that a repo receives (or gives) financial support — GitHub Sponsors,
 FOSS-foundation hosting — and distills them into one **funding-risk score
 (`score`, 0–100, higher = more at-risk)** that feeds `data/risk/risk.csv`.
 
-Scope: the 897 class-A value-class repos in the risk pipeline (see
-[value.md](../value.md)). Build step: `src/risk/build_funding.py`.
+Scope: the class-A value-class repos in the risk pipeline (counts in
+[stats.md → Risk → Funding](../stats.md#funding); see [value.md](../value.md)).
+Build step: `src/risk/build_funding.py`.
 
 ## Metrics Roadmap
 
@@ -17,7 +18,7 @@ window. Raw signals are fetched per-source under `data/sources/`; derived
 columns are computed by `build_funding.py`.
 
 ```
-Funding  → data/risk/funding.csv  (897 A/B risk repos)
+Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 │
 ├── GitHub Sponsors
 │   ├── gh_sponsors_in        ← GraphQL sponsorshipsAsMaintainer (owner + FUNDING.yml github logins)  [most recent]
@@ -53,7 +54,7 @@ Funding  → data/risk/funding.csv  (897 A/B risk repos)
 
 1. **Collect** — five fetchers pull raw funding signals into `data/sources/`,
    each TTL-controlled so re-runs only fetch what's missing or stale.
-2. **Join** — `build_funding.py` joins the sources onto the 897 risk repos
+2. **Join** — `build_funding.py` joins the sources onto the risk repos
    (by `repo`, by owner `login` for outbound sponsoring, by OC `slug`).
 3. **Derive** — combine raw signals (`gh_sponsorships`, `channels_count`,
    `has_funding_json`) and compute the percentiles.
@@ -136,8 +137,8 @@ in `.env` to lift it. `oc_avg_funding` is the mean over years with data.
 
 Each funding channel is turned into a **worst-pinned CDF risk percentile** —
 lower funding ranks *higher* (more at-risk), mirroring the negated
-`openssf_score` in the security component. Both are computed over all 897 repos
-(`gh_sponsorships` defaults to 0, `oc_avg_funding` defaults to $0).
+`openssf_score` in the security component. Both are computed over all the top
+repos (`gh_sponsorships` defaults to 0, `oc_avg_funding` defaults to $0).
 
 | Column | Basis | Direction |
 |---|---|---|
@@ -235,24 +236,9 @@ The five component scores (`concentration`, `complexity`, `security`,
 
 ## Coverage
 
-Of the 897 A/B risk repos:
-
-| Signal | Repos | % |
-|---|---:|---:|
-| GitHub Sponsors (inbound > 0) | 440 | 49.1% |
-| ≥ 1 funding channel | 258 | 28.8% |
-| FUNDING.yml present | 255 | 28.4% |
-| Owner sponsors others (out > 0) | 158 | 17.6% |
-| OpenCollective budget > 0 | 45 | 5.0% |
-| Foundation host | 38 | 4.2% |
-| funding.json (FLOSS Fund) | 6 | 0.7% |
-
-`score` percentiles: p25 **60** · p50 **78** · p75 **100**. Because the third
-axis treats "no institutional backer" as a risk voice, the whole cohort sits
-higher than the old two-axis version (median 69 → 78). `score` = 100 is the
-"no funding **and** no legal backer" plateau (**389** repos); nonprofit/foundation
-backing (scraped + curated) lowers ~**34** repos to **79**, and a company
-host/owner floors **8** repos at **1**.
+See [docs/stats.md → Risk → Funding](../stats.md#funding) for current per-channel
+coverage over the top repos (including the dedicated OpenCollective funnel) and
+the score distribution.
 
 ## Limitations
 

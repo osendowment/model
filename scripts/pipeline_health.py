@@ -15,7 +15,9 @@ Checks:
   3. data/value/value.csv matches `unify_value_data` (class assignments).
   4. Score-forming component columns are 100%-populated across the risk-scope
      set (a blank = a failed upstream fetch, since edge cases are imputed).
-  5. Long-format git files have no duplicate (repo, sha, metric) keys.
+  5. Completeness rule: a component score / the overall risk score is present
+     only if ALL of its scored inputs are present (no partial scores on disk).
+  6. Long-format git files have no duplicate (repo, sha, metric) keys.
 
 Usage:
     uv run python scripts/pipeline_health.py
@@ -194,6 +196,52 @@ def check_score_component_coverage() -> list[Result]:
     return out
 
 
+# A score may be present ONLY if all of its scored inputs are present. For each
+# component CSV the inputs are the `composite_cols` its builder geometric-means
+# (src/risk/build_<dim>.py); for risk.csv they are the five component scores
+# aggregate_risk geometric-means. The producers already enforce this (a missing
+# input blanks the score), so any score-with-a-missing-input on disk is a real
+# inconsistency — a hand-edit or a builder/aggregator regression.
+SCORE_INPUTS: dict[str, list[str]] = {
+    "concentration.csv": ["bf_commits_git_5y_p", "hhi_commits_git_5y_p"],
+    "complexity.csv":    ["loc_eoy_p", "cyclomatic_max_p"],
+    "security.csv":      ["openssf_score_p", "cve_score"],
+    "funding.csv":       ["gh_sponsorships_p", "oc_avg_funding_p"],
+    "workload.csv":      ["loc_per_ac_p", "cve_per_ac_p", "nni_per_ac_p"],
+    "risk.csv":          ["concentration", "complexity", "security", "funding", "workload"],
+}
+
+
+def check_score_input_completeness() -> list[Result]:
+    """A component score / the risk score may be present only if ALL its scored
+    inputs are present.
+
+    Enforces the completeness rule end to end: each component score is the
+    geometric mean of its `composite_cols` (blanked when any is missing), and the
+    overall risk score is the geometric mean of the five component scores (blanked
+    when any component is missing). A row carrying a score while one of its inputs
+    is blank violates the rule.
+    """
+    out: list[Result] = []
+    for fname, inputs in SCORE_INPUTS.items():
+        path = ROOT / "data" / "risk" / fname
+        if not path.exists():
+            out.append((f"{fname} score⟸inputs", False, "file missing"))
+            continue
+        rows = list(csv.DictReader(open(path, encoding="utf-8")))
+        scored = [r for r in rows if str(r.get("score", "")).strip()]
+        bad = [r.get("repo", "?") for r in scored
+               if not all(str(r.get(c, "")).strip() for c in inputs)]
+        ok = not bad
+        if ok:
+            detail = f"{len(scored):,} scored rows — every input present"
+        else:
+            shown = ", ".join(bad[:5]) + (" …" if len(bad) > 5 else "")
+            detail = f"{len(bad)} score(s) with a missing input: {shown}"
+        out.append((f"{fname} score⟸inputs", ok, detail))
+    return out
+
+
 def check_long_format_keys() -> list[Result]:
     """Long-format git files must have unique (repo, sha, metric) keys."""
     out: list[Result] = []
@@ -211,7 +259,8 @@ def check_long_format_keys() -> list[Result]:
 
 
 CHECKS = [check_dimension_csvs, check_risk_data, check_value_data,
-          check_score_component_coverage, check_long_format_keys]
+          check_score_component_coverage, check_score_input_completeness,
+          check_long_format_keys]
 
 
 def main() -> int:
