@@ -32,6 +32,7 @@ AUDIT_SCRIPTS = [
     "coverage_report.py",
     "investigate-risk-metrics.py",
     "fill_gaps.py",
+    "stats.py",
 ]
 
 
@@ -64,6 +65,16 @@ def test_data_anomalies_clean_or_reports():
     sys.argv = ["data_anomalies.py"]
     rc = mod.main()
     assert rc in (0, 1)
+
+
+def test_stats_md_is_not_stale():
+    """scripts/stats.py recomputes every docs/stats.md figure from the live CSVs;
+    its --check headline gate must pass, i.e. stats.md reflects the current run.
+    Regression for stats.md drifting after a value/scope/risk regeneration."""
+    mod = _load_module(SCRIPTS / "stats.py")
+    v, r = mod.value_stats(), mod.risk_stats()
+    assert mod.check(v, r) == 0, "docs/stats.md headline numbers are stale — " \
+        "re-run `uv run python scripts/stats.py --markdown`"
 
 
 def test_score_component_coverage_is_full():

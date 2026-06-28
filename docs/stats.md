@@ -7,9 +7,10 @@ methodology pages (`value.md`, `risk.md`, the component and source docs) describ
 in one place means there is exactly one number to refresh per pipeline run, and
 no stale count hiding in a methodology page.
 
-Counts reflect the **last pipeline run**. Refresh the Value tables by
-regenerating `data/value/value.csv`; refresh the Risk tables with
-`uv run python scripts/coverage_report.py`.
+Counts reflect the **last pipeline run**. Every figure below is computed from the
+live CSVs by `scripts/stats.py` — refresh them with
+`uv run python scripts/stats.py --markdown` (rich dashboard:
+`uv run python scripts/stats.py`; drift gate: `uv run python scripts/stats.py --check`).
 
 - [Value](#value) — funnel, class distribution, repo identity coverage
 - [Risk](#risk) — per-component coverage funnels over the top repos
