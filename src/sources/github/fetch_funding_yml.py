@@ -39,7 +39,7 @@ from rich.progress import (
 )
 
 from src.common.funding_platforms import FUNDING_PLATFORMS
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 from src.sources.github.github_client import GITHUB_API, _AsyncRateLimiter, _Deferred
 
 console = Console()
@@ -247,7 +247,7 @@ def main() -> None:
     p.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args()
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
-    repos = sorted({e.repo for e in load_risk_repos() if e.repo})
+    repos = sorted({e.repo for e in load_top_repos() if e.repo})
     asyncio.run(batch(repos, args.force, args.limit, args.concurrency))
 
 

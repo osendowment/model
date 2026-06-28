@@ -79,7 +79,7 @@ from rich.table import Table
 
 from src.common.params import YEARS
 from src.common.percentiles import add_percentiles
-from src.common.repos import canonical_repo_map, load_risk_repos
+from src.common.repos import canonical_repo_map, load_top_repos
 from src.common.tables import load_column_by_repo
 from src.sources.git.long_format import read as read_long
 
@@ -272,7 +272,7 @@ def _load_osv_queried() -> set[str]:
 
 
 def build() -> list[dict]:
-    eligible = load_risk_repos()
+    eligible = load_top_repos()
 
     per_year = _per_year_shas(COMMITS_YEARS_FILE)
 

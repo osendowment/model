@@ -129,7 +129,7 @@ over them. Join key into the risk-repo set is `repo` for both.
 | `git/contributor-commits.status.csv` | `src/sources/git/contributors.py` | per-repo git-fetch status + `fetched_at` | `repo` |
 | `github/contributor-commits.csv` | `src/sources/github/fetch_contributors_metrics.py` | long raw: `repo, login, contributions, account_type` from the `/repos/{repo}/contributors` endpoint | `repo` |
 | `github/contributor-commits.status.csv` | `src/sources/github/fetch_contributors_metrics.py` | per-repo GitHub-fetch status + `fetched_at` | `repo` |
-| `value/value.csv` | value pipeline | A/B scope (`load_risk_repos`) | `repo` |
+| `value/value.csv` | value pipeline | A/B scope (`load_top_repos`) | `repo` |
 
 ### Two methods, two different lenses
 

@@ -164,9 +164,9 @@ def check_score_component_coverage() -> list[Result]:
     / `score` means an upstream git fetch failed — surfaced here as the gap to
     fix (raise the fetch `--timeout` or re-run the fetcher for the listed repos).
     """
-    from src.common.repos import load_risk_repos
+    from src.common.repos import load_top_repos
 
-    repos = [e.repo for e in load_risk_repos()]
+    repos = [e.repo for e in load_top_repos()]
     n = len(repos)
     out: list[Result] = []
     for fname, cols in SCORE_COMPONENT_COVERAGE.items():

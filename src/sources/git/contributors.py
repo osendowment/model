@@ -56,7 +56,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.common.repos import load_repo_ids, load_risk_repos
+from src.common.repos import load_repo_ids, load_top_repos
 from src.sources.git.clone import bare_treeless_clone
 from src.sources.git.disk import (
     check_disk_or_exit,
@@ -695,7 +695,7 @@ def main() -> int:
         targets = [(s, ids.get(s, ""))
                    for s in (r.strip().lower() for r in args.repos)]
     else:
-        entries = load_risk_repos()
+        entries = load_top_repos()
         targets = [(e.repo, e.repo_id) for e in entries]
         if args.limit and args.limit < len(targets):
             random.seed(args.seed)

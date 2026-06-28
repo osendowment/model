@@ -24,7 +24,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 from src.common.stats import geometric_mean
 
 console = Console()
@@ -68,7 +68,7 @@ def overall_score(component_scores: list[int]) -> str:
 
 
 def aggregate(sample: set[str] | None = None) -> list[dict]:
-    eligible = load_risk_repos()
+    eligible = load_top_repos()
     by_component = {name: _scores_by_repo(path) for name, path in COMPONENTS.items()}
 
     rows: list[dict] = []
@@ -111,7 +111,7 @@ def main() -> None:
     sample = None
     if args.random:
         random.seed(args.seed)
-        allslugs = [e.repo for e in load_risk_repos()]
+        allslugs = [e.repo for e in load_top_repos()]
         sample = set(random.sample(allslugs, min(args.random, len(allslugs))))
 
     rows = aggregate(sample=sample)

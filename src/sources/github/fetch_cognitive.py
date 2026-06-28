@@ -98,7 +98,7 @@ from src.sources.git.disk import check_disk_or_exit, make_clone_tmpdir, print_di
 from src.sources.git.long_format import read as _read_long
 from src.sources.git.long_format import upsert_snapshot
 from src.sources.github.display import _ETAColumn
-from src.common.repos import load_default_branches, load_risk_repos
+from src.common.repos import load_default_branches, load_top_repos
 
 
 log = logging.getLogger(__name__)
@@ -793,7 +793,7 @@ def main() -> None:
     print_disk_banner(console=console)
     console.print()
 
-    risk_repos = load_risk_repos()
+    risk_repos = load_top_repos()
     repo_ids: dict[str, str] = {e.repo: e.repo_id for e in risk_repos}
     repos_all = [e.repo for e in risk_repos]
 

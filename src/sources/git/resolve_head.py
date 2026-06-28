@@ -33,7 +33,7 @@ from src.sources.git.commits_years import (
     DEFAULT_YEARS, load_sha_data, write_sha_data, SHA_FILE,
 )
 from src.common.params import LAST_COMPLETE_YEAR
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -106,7 +106,7 @@ async def resolve_head_sha(
 
 
 async def main_async(args):
-    eligible = {e.repo for e in load_risk_repos()}
+    eligible = {e.repo for e in load_top_repos()}
     sha_data = load_sha_data(args.sha_file)
 
     # "Done" = the repo has a real sha in a settings window year (active repo).

@@ -75,7 +75,7 @@ from rich.table import Table
 
 from src.common.params import YEARS
 from src.common.percentiles import add_percentiles
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 from src.common.tables import load_rows_by_repo
 from src.sources.git.long_format import read as read_long
 
@@ -207,7 +207,7 @@ def _is_lizard_false_zero(scc_vals: dict, lz_vals: dict) -> bool:
 
 
 def build() -> list[dict]:
-    eligible = load_risk_repos()
+    eligible = load_top_repos()
 
     # 1. Build per-repo year→sha lookup from commits-years.csv.
     per_year = _per_year_shas(COMMITS_YEARS_FILE)

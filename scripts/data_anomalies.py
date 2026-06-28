@@ -29,7 +29,7 @@ console = Console()
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.common.repos import load_risk_repos  # noqa: E402
+from src.common.repos import load_top_repos  # noqa: E402
 
 RISK_DIR = ROOT / "data" / "risk"
 SEVERITIES = ("err", "warn", "info")
@@ -74,7 +74,7 @@ def load_risk_scope() -> set[str]:
     `src.risk.aggregate_risk`), so any repo here that is *missing* from
     `risk.csv` means the file is stale and needs a re-run.
     """
-    entries = load_risk_repos(
+    entries = load_top_repos(
         value_file=str(ROOT / "data/value/value.csv"),
         repos_file=str(ROOT / "data/sources/github/repos.csv"),
     )

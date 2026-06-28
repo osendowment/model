@@ -41,7 +41,7 @@ from rich.progress import (
 )
 
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ def sponsoring_count(data: dict) -> int:
 
 def owner_logins() -> list[str]:
     """Distinct lower-cased owner logins across the risk-scope repos."""
-    return sorted({e.repo.split("/", 1)[0].lower() for e in load_risk_repos() if e.repo})
+    return sorted({e.repo.split("/", 1)[0].lower() for e in load_top_repos() if e.repo})
 
 
 async def fetch_one(session, limiter, login: str) -> dict:

@@ -77,7 +77,7 @@ from rich.progress import (
 from rich.table import Table
 from yarl import URL
 
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 from src.sources.git.long_format import upsert_rows as upsert_long_rows
 from src.sources.osv.fetch_cves import load_repo_package_mapping
 
@@ -820,7 +820,7 @@ def main() -> None:
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
 
-    risk = load_risk_repos()
+    risk = load_top_repos()
     repos_with_ids: list[tuple[str, str]] = sorted(
         {(e.repo, e.repo_id) for e in risk if e.repo}
     )

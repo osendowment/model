@@ -21,7 +21,7 @@ from src.sources.github.models import (
     Contributor, PerfStats, RunResult,
     THRESHOLD, is_bot,
 )
-from src.common.repos import VALUE_FILE, load_risk_slugs
+from src.common.repos import VALUE_FILE, load_top_slugs
 
 
 def parse_repo(url_or_slug: str) -> str:
@@ -156,7 +156,7 @@ def main() -> None:
         return
 
     # Batch mode: every A/B-class repo from value-data.csv.
-    repos = load_risk_slugs(value_file=args.input)
+    repos = load_top_slugs(value_file=args.input)
     asyncio.run(batch_update(
         repos, threshold=args.threshold,
         include_bots=args.include_bots, limit=args.limit, force=args.force,

@@ -65,7 +65,7 @@ from rich.table import Table
 
 from src.common.params import LAST_COMPLETE_YEAR, YEARS
 from src.common.percentiles import add_percentiles
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 from src.common.tables import load_column_by_repo, load_rows_by_repo
 
 console = Console()
@@ -213,7 +213,7 @@ def _repo_age_years(created_at_iso: str) -> str:
 
 
 def build() -> list[dict]:
-    eligible = load_risk_repos()
+    eligible = load_top_repos()
 
     repos = load_rows_by_repo(REPOS_FILE)
     commits_years = _load_commits_years()

@@ -43,7 +43,7 @@ def test_build_funding_score_lower_funding_higher_score(monkeypatch):
             return {"o/rich": {"open_collective": "rich"}}
         return {}
 
-    monkeypatch.setattr(bf, "load_risk_repos", lambda: [E("o/poor"), E("o/rich")])
+    monkeypatch.setattr(bf, "load_top_repos", lambda: [E("o/poor"), E("o/rich")])
     monkeypatch.setattr(bf, "load_rows_by_repo", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})

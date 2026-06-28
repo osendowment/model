@@ -6,7 +6,7 @@ raw long-format source. This builder merges identities, drops bots, and
 computes bus factor / HHI / contributor counts from both:
 
 Reads:
-    data/value/value.csv                          — A/B value-class set (load_risk_repos)
+    data/value/value.csv                          — A/B value-class set (load_top_repos)
     data/sources/git/contributor-commits.csv             — git-clone method, long raw:
                                                    repo, author_name, author_email, year, commits
     data/sources/git/contributor-commits.status.csv      — per-repo git fetch status / fetched_at
@@ -71,7 +71,7 @@ from src.common.params import (
     LAST_COMPLETE_YEAR,
 )
 from src.common.percentiles import add_percentiles
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 from src.common.tables import load_rows_by_repo
 from src.sources.git.contributors import _is_bot_identity, merge_identity_groups
 from src.sources.github.fetch_contributors_metrics import _compute_bus_factor
@@ -255,7 +255,7 @@ def git_metrics(rows: list[dict]) -> dict:
 
 
 def build() -> list[dict]:
-    eligible = load_risk_repos()
+    eligible = load_top_repos()
     git_long = _load_long_grouped(GIT_LONG_FILE)
     gh_long = _load_long_grouped(GH_LONG_FILE)
     git_status = load_rows_by_repo(GIT_STATUS_FILE)
