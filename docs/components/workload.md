@@ -42,6 +42,7 @@ Workload  → data/risk/workload.csv  (the top risk repos)
 │
 ├── Per-AC burden  (AC = active_contributors_git_5y, from concentration.csv)
 │   ├── active_contributors_git_5y ← concentration.csv (the AC denominator)        [2021–2025]
+│   ├── dormant                 ← 1 if AC was 0 (then AC=1 assumed below)           [2021–2025]
 │   ├── loc_per_ac              ← complexity.csv loc_eoy / AC                       [EOY]
 │   ├── cve_per_ac             ← security.csv cve_count_5y / AC                     [2021–2025]
 │   ├── nni_per_ac             ← net_new_issues_5y / AC                             [2021–2025]
@@ -103,7 +104,12 @@ gap from masquerading as "zero issues" and skewing the per-AC percentiles.
 
 `AC = active_contributors_git_5y` — distinct non-bot contributors who authored a
 commit in 2021–2025 (git-clone method, from `concentration.csv`). Each burden is
-divided by AC; when `AC = 0` or missing, all three per-AC values are blank.
+divided by AC. A repo with **zero active contributors** in the window (dormant /
+bot-only) has no real maintainer to spread the burden across; rather than leave
+it unscored, the whole burden is attributed to a single notional maintainer
+(**AC = 1**) and the row is flagged **`dormant = 1`**. Every top repo therefore
+gets a workload score. (`AC` is genuinely missing only if the concentration
+fetch failed — never in the risk scope, where concentration is 100%.)
 
 | Column | Formula |
 |---|---|

@@ -65,11 +65,28 @@ def _truthy(v: str | None) -> bool:
     return (v or "").strip().lower() in ("true", "1")
 
 
-def _quantiles(values: list[float]) -> tuple[int, int, int, int, int] | None:
+def _quantiles(values: list[float]) -> tuple[float, ...] | None:
     if not values:
         return None
     a = np.array(values)
-    return tuple(int(round(np.percentile(a, q))) for q in (0, 25, 50, 75, 100))
+    return tuple(float(np.percentile(a, q)) for q in (0, 25, 50, 75, 100))
+
+
+def _fmt(val: float | None, kind: str) -> str:
+    """Render a raw metric value in its natural form.
+
+    `int` = comma-grouped integer (LOC, bus factor, HHI, CVE count);
+    `f1`/`f2` = fixed decimals (OpenSSF 0–10 score, per-contributor ratios).
+    """
+    if val is None:
+        return ""
+    if kind == "int":
+        return f"{round(val):,}"
+    if kind == "f1":
+        return f"{val:.1f}"
+    if kind == "f2":
+        return f"{val:.2f}"
+    return str(val)
 
 
 # ── scope ────────────────────────────────────────────────────────────────────
@@ -130,13 +147,28 @@ def value_stats() -> dict:
 
 # ── risk ─────────────────────────────────────────────────────────────────────
 
-# (component, dimension CSV, [score col, *subcomponent percentile cols])
+# (component, dimension CSV, score col, [(subcomponent label, RAW column, fmt)]).
+# The component row is the 0–100 risk score; the subcomponent rows show the
+# NATURAL metric distribution (bus factor, LOC, $ …) — not the 0–100 percentile
+# the score is built from, which is 0/25/50/75/100 by construction and tells you
+# nothing. fmt: "int" comma-grouped, "f1"/"f2" fixed decimals.
 RISK_COMPONENTS = [
-    ("Concentration", "concentration", ["score", "bf_commits_git_5y_p", "hhi_commits_git_5y_p"]),
-    ("Complexity", "complexity", ["score", "loc_eoy_p", "cyclomatic_max_p"]),
-    ("Security", "security", ["score", "openssf_score_p", "cve_score"]),
-    ("Funding", "funding", ["score", "gh_sponsorships_p", "oc_avg_funding_p"]),
-    ("Workload", "workload", ["score", "loc_per_ac_p", "cve_per_ac_p", "nni_per_ac_p"]),
+    ("Concentration", "concentration", "score", [
+        ("bus factor", "bf_commits_git_5y", "int"),
+        ("HHI", "hhi_commits_git_5y", "int")]),
+    ("Complexity", "complexity", "score", [
+        ("lines of code", "loc_eoy", "int"),
+        ("cyclomatic max", "cyclomatic_max", "int")]),
+    ("Security", "security", "score", [
+        ("OpenSSF score (0–10)", "openssf_score", "f1"),
+        ("CVE count 5y", "cve_count_5y", "int")]),
+    ("Funding", "funding", "score", [
+        ("GitHub sponsorships", "gh_sponsorships", "int"),
+        ("OpenCollective avg $/yr", "oc_avg_funding", "int")]),
+    ("Workload", "workload", "score", [
+        ("LOC / contributor", "loc_per_ac", "int"),
+        ("CVE / contributor", "cve_per_ac", "f2"),
+        ("net-new-issues / contributor", "nni_per_ac", "f2")]),
 ]
 
 # (dimension CSV, [(label, kind, column/expr)]) for each per-dimension funnel.
@@ -185,23 +217,28 @@ def risk_stats() -> dict:
     scope = scope_set()
     n = len(scope)
     dims = {name: _load(f"data/risk/{name}.csv")
-            for _, name, _ in RISK_COMPONENTS}
+            for _, name, _, _ in RISK_COMPONENTS}
     risk = _load("data/risk/risk.csv")
 
-    # score distribution by component + subcomponents
+    def col_dist(rows, col):
+        vals = [v for v in (_num(r.get(col)) for r in rows if r["repo"] in scope)
+                if v is not None]
+        return len(vals), _quantiles(vals)
+
+    # score distribution: component = the 0–100 score; subcomponents = raw metrics
     distribution = []
-    for label, name, cols in RISK_COMPONENTS:
-        for i, col in enumerate(cols):
-            vals = [v for v in (_num(r.get(col)) for r in dims[name] if r["repo"] in scope)
-                    if v is not None]
-            distribution.append({
-                "label": label if i == 0 else col, "is_component": i == 0,
-                "scored": len(vals), "q": _quantiles(vals),
-            })
-    overall = [v for v in (_num(r.get("score")) for r in risk if r["repo"] in scope)
-               if v is not None]
+    for comp, name, score_col, subs in RISK_COMPONENTS:
+        scored, q = col_dist(dims[name], score_col)
+        distribution.append({"label": comp, "is_component": True, "fmt": "int",
+                             "scored": scored, "q": q})
+        for sub_label, raw_col, fmt in subs:
+            scored, q = col_dist(dims[name], raw_col)
+            distribution.append({"label": f"{sub_label} `{raw_col}`",
+                                 "is_component": False, "fmt": fmt,
+                                 "scored": scored, "q": q})
+    o_scored, o_q = col_dist(risk, "score")
     distribution.append({"label": "Overall `score`", "is_component": True,
-                         "scored": len(overall), "q": _quantiles(overall)})
+                         "fmt": "int", "scored": o_scored, "q": o_q})
 
     # per-dimension funnels
     funnels = {name: [(label, _count(dims[name], scope, kind, col))
@@ -220,7 +257,7 @@ def risk_stats() -> dict:
     return {
         "scope": n, "distribution": distribution, "funnels": funnels,
         "oc_slug": oc_slug, "oc_budget": oc_budget,
-        "overall_scored": len(overall), "overall_gap": n - len(overall),
+        "overall_scored": o_scored, "overall_gap": n - o_scored,
         "bf1_pct": 100 * bf1 / len(bf_computed) if bf_computed else 0,
     }
 
@@ -269,9 +306,9 @@ def dashboard(v: dict, r: dict) -> None:
     for col in ("Component / subcomponent", "Scored", "Min", "P25", "P50", "P75", "Max"):
         t.add_column(col, justify="right" if col != "Component / subcomponent" else "left")
     for row in r["distribution"]:
-        q = row["q"] or ("—",) * 5
+        vals = [_fmt(x, row["fmt"]) for x in row["q"]] if row["q"] else ["—"] * 5
         label = f"[bold]{row['label']}[/bold]" if row["is_component"] else f"· {row['label']}"
-        cells = [f"[bold]{x}[/bold]" if row["is_component"] else str(x) for x in q]
+        cells = [f"[bold]{x}[/bold]" if row["is_component"] else x for x in vals]
         t.add_row(label, str(row["scored"]), *cells)
     console.print(t)
 
@@ -324,12 +361,12 @@ def markdown(v: dict, r: dict) -> str:
     a("| Component / subcomponent | Scored | Min | P25 | P50 | P75 | Max |")
     a("|---|--:|--:|--:|--:|--:|--:|")
     for row in r["distribution"]:
-        q = row["q"] or ("",) * 5
+        vals = [_fmt(x, row["fmt"]) for x in row["q"]] if row["q"] else [""] * 5
         if row["is_component"]:
             a(f"| **{row['label']}** | **{row['scored']}** | " +
-              " | ".join(f"**{x}**" for x in q) + " |")
+              " | ".join(f"**{x}**" for x in vals) + " |")
         else:
-            a(f"| · `{row['label']}` | {row['scored']} | " + " | ".join(str(x) for x in q) + " |")
+            a(f"| · {row['label']} | {row['scored']} | " + " | ".join(vals) + " |")
 
     for name, steps in r["funnels"].items():
         a(f"\n### {name.capitalize()} funnel\n")

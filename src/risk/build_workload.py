@@ -17,6 +17,9 @@ Writes:
         repo, repo_id,
         repo_age_years,         (years between created_at and EOY of the last complete year)
         active_contributors_git_5y,  (windowed AC — from concentration.csv)
+        dormant,                         (1 if no real active contributors in the
+                                          window — AC was 0, so AC=1 was assumed
+                                          for the per-AC ratios below; else 0)
         openssf_maintained,              (Scorecard "Maintained" sub-check, 0-10 or "")
         has_issues,                      (bool from GH /repos)
         push_cadence_years,              (count of window years with ≥1 commit, 0..len(years))
@@ -28,9 +31,9 @@ Writes:
         slope_opened,                    (OLS slope of yearly opened, 2 dp)
         slope_closed,
         issue_trend_score,               (vol-normalised slope_closed - slope_opened)
-        loc_per_ac,                      (loc_eoy / active_contributors_git_5y)
-        cve_per_ac,                      (cve_count_5y / active_contributors_git_5y)
-        nni_per_ac,                      (net_new_issues_5y / active_contributors_git_5y)
+        loc_per_ac,                      (loc_eoy / AC; AC=1 when dormant)
+        cve_per_ac,                      (cve_count_5y / AC; AC=1 when dormant)
+        nni_per_ac,                      (net_new_issues_5y / AC; AC=1 when dormant)
         loc_per_ac_p,                    (risk percentile of loc_per_ac)
         cve_per_ac_p,
         nni_per_ac_p,
@@ -43,6 +46,8 @@ Notes:
     score is the geometric mean of loc_per_ac_p, cve_per_ac_p, nni_per_ac_p. A
     repo with no fetched issues has a blank nni_per_ac; its nni_per_ac_p is
     neutral-filled to 50 so loc + cve still produce a score (see build()).
+    Repos with zero active contributors (`dormant = 1`) are scored with AC=1
+    rather than left blank, so every top repo gets a workload score.
     build_workload must run after build_complexity, build_security,
     and build_concentration.
 
@@ -89,6 +94,7 @@ FIELDS = [
     "repo", "repo_id",
     "repo_age_years",
     "active_contributors_git_5y",
+    "dormant",
     "openssf_maintained",
     "has_issues",
     "push_cadence_years", "pushed_at",
@@ -285,10 +291,22 @@ def build() -> list[dict]:
         ac_f = _num(ac_raw)
         loc_f = _num(loc_by_repo.get(repo, ""))
         cve_f = _num(cve_by_repo.get(repo, ""))
-        if ac_f and ac_f > 0:
-            row_loc_per_ac = round(loc_f / ac_f, 4) if loc_f is not None else ""
-            row_cve_per_ac = round(cve_f / ac_f, 4) if cve_f is not None else ""
-            row_nni_per_ac = round(net_new_issues / ac_f, 4) if issues_fetched else ""
+        # A repo with zero active contributors in the window (dormant / bot-only)
+        # has no real maintainer to divide the burden across; rather than leave
+        # it unscored, attribute the whole burden to a single notional maintainer
+        # (AC = 1) and flag it `dormant = 1`. ac_f is None only if the AC fetch is
+        # genuinely absent (never in scope, since concentration is 100%) — then
+        # leave the ratios blank and dormant unknown.
+        if ac_f == 0:
+            dormant, ac_eff = "1", 1.0
+        elif ac_f and ac_f > 0:
+            dormant, ac_eff = "0", ac_f
+        else:
+            dormant, ac_eff = "", None
+        if ac_eff:
+            row_loc_per_ac = round(loc_f / ac_eff, 4) if loc_f is not None else ""
+            row_cve_per_ac = round(cve_f / ac_eff, 4) if cve_f is not None else ""
+            row_nni_per_ac = round(net_new_issues / ac_eff, 4) if issues_fetched else ""
         else:
             row_loc_per_ac = row_cve_per_ac = row_nni_per_ac = ""
 
@@ -297,6 +315,7 @@ def build() -> list[dict]:
             "repo_id": entry.repo_id,
             "repo_age_years": age,
             "active_contributors_git_5y": ac_raw,
+            "dormant": dormant,
             "openssf_maintained": openssf_maintained,
             "has_issues": has_issues,
             "push_cadence_years": cadence_val,

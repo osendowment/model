@@ -134,3 +134,38 @@ def test_empty_nni_neutral_filled_only_when_loc_and_cve_present(monkeypatch):
     # r0: real issues -> keeps its computed percentile, not 50.
     assert rows["o/r0"]["nni_per_ac"] != ""
     assert rows["o/r0"]["nni_per_ac_p"] != 50
+
+
+def test_dormant_repo_scored_with_ac_one(monkeypatch):
+    """A zero-active-contributor repo (AC=0) is flagged `dormant=1` and scored
+    with AC=1 (per-AC ratio = the whole raw burden) instead of being left blank;
+    a live repo (AC>0) is `dormant=0` and divides by its real AC."""
+    import types
+    from src.risk import build_workload as bw
+
+    repos = [types.SimpleNamespace(repo="o/dormant", repo_id="1"),
+             types.SimpleNamespace(repo="o/live", repo_id="2")]
+    cols = {
+        "loc_eoy": {"o/dormant": "1000", "o/live": "1000"},
+        "cve_count_5y": {"o/dormant": "4", "o/live": "4"},
+        "active_contributors_git_5y": {"o/dormant": "0", "o/live": "2"},
+    }
+    monkeypatch.setattr(bw, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bw, "load_rows_by_repo", lambda *a, **k: {})
+    monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
+    monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
+    monkeypatch.setattr(bw, "_load_issues_long",
+                        lambda path: {"opened_issues": {}, "closed_issues": {}})
+    monkeypatch.setattr(bw, "load_column_by_repo", lambda path, col: cols[col])
+
+    rows = {r["repo"]: r for r in bw.build()}
+
+    # dormant: AC=0 -> dormant=1, divided by 1, so per-AC = raw burden, scored.
+    assert rows["o/dormant"]["dormant"] == "1"
+    assert rows["o/dormant"]["loc_per_ac"] == 1000.0
+    assert rows["o/dormant"]["cve_per_ac"] == 4.0
+    assert rows["o/dormant"]["score"] != ""
+    # live: AC=2 -> dormant=0, divided by 2.
+    assert rows["o/live"]["dormant"] == "0"
+    assert rows["o/live"]["loc_per_ac"] == 500.0
+    assert rows["o/live"]["score"] != ""
