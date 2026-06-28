@@ -11,14 +11,14 @@ The three pipeline stages (run in order, each feeds the next):
 1. **Value** (`src.value.run_value_pipeline`) → `data/value/value.csv` — picks the
    most-depended-on packages per ecosystem and ranks them by
    download-weighted PageRank, then unifies per-package classes into one
-   row per GitHub repo. All classes A/B/C/D are included. (this doc)
+   row per GitHub repo. All classes A/B/C are included. (this doc)
 2. **Risk** (`src.risk.run_risk_pipeline`) → `data/risk/risk.csv` — concentration
-   + complexity + issue-debt scoring for **A/B value-class repos** read
+   + complexity + issue-debt scoring for **valid class-A repos** read
    directly from `data/value/value.csv`. Target classes are configured in
    `src/settings.json` under `risk_input.value_classes` (default
-   `["A", "B"]`). See [docs/risk.md](risk.md).
+   `["A"]`). See [docs/risk.md](risk.md).
 3. **Eligibility** (`src.eligibility.run_eligibility_pipeline`) → `data/eligibility/eligibility.csv`
-   — restricts to AB-class repos with a fresh GitHub API record, an
+   — restricts to class-A repos with a fresh GitHub API record, an
    OSI-approved license, and a non-EOL signal. Runs after Risk. See [docs/eligibility.md](eligibility.md).
 ```
 
@@ -27,11 +27,11 @@ The three pipeline stages (run in order, each feeds the next):
 ```
                 Value pipeline                    Risk                Eligibility
                 ───────────────                   ────                ───────────
-ecosystem ──► top packages ──► dep tree ──► PageRank ──► A/B/C/D
+ecosystem ──► top packages ──► dep tree ──► PageRank ──► A/B/C
 registries     (95% cum dl)    (BFS)       ↓
                                       value.csv
                                             │
-                                            ├─► A/B class repos ──► contributors + scc
+                                            ├─► class A repos ──► contributors + scc
                                             │   (settings.json          │
                                             │    risk_input.            │
                                             │    value_classes)   risk.csv
@@ -90,7 +90,7 @@ Value
 
 1. **Top packages** -- select packages covering 95% of ecosystem-wide cumulative downloads
 2. **Dependency tree** -- follow transitive dependencies from top packages
-3. **Scoring** -- download-weighted PageRank over the dep graph, then classify A/B/C/D
+3. **Scoring** -- download-weighted PageRank over the dep graph, then classify A/B/C
 
 ### Top Package Selection
 
@@ -109,10 +109,9 @@ Packages sorted by PageRank descending. Cumulative PageRank share determines cla
 
 | Class | Cumulative Share | Meaning |
 |-------|-----------------|---------|
-| **A** | 0--50% | Critical infrastructure |
-| **B** | 50--75% | Important, widely depended on |
-| **C** | 75--90% | Useful but not load-bearing |
-| **D** | 90--100% | Long tail |
+| **A** | 0--75% | Critical infrastructure |
+| **B** | 75--95% | Important, widely depended on |
+| **C** | 95--100% | Long tail |
 
 > See [Current Limitations](#current-limitations) for known scope gaps
 > (cpp runtime-only deps, GitHub-only project identity, etc.).
@@ -250,14 +249,14 @@ All dep-tree packages with downloads, PageRank, and value class.
 | `2021`--`2025` | Downloads per year |
 | `top` | `True` if package is in the 95% cumulative set |
 | `pagerank` | Download-weighted PageRank score |
-| `value_class` | A/B/C/D (see [Value Classes](#value-classes)) |
+| `value_class` | A/B/C (see [Value Classes](#value-classes)) |
 
 ## Unified output
 
 `data/value/value.csv` is the canonical per-repo table — one row per GitHub
 repo, plus one row per orphan package (no `github_repo`) so nothing is
-dropped. **All classes A/B/C/D are included** — D-class rows are no longer
-dropped. Produced by the `unify` step of `uv run python -m src.value.run_value_pipeline`
+dropped. **All classes A/B/C are included** — the complete long-tail table
+is kept. Produced by the `unify` step of `uv run python -m src.value.run_value_pipeline`
 (`src/value/unify_value_data.py`), which reads each ecosystem's `results.csv`
 and `eol.csv`, groups packages by repo, computes all per-ecosystem and
 cross-ecosystem aggregates in one pass, and writes the file sorted by
@@ -268,8 +267,8 @@ directly. Manual repo / `git_url` / `valid` corrections are applied from
 
 Per-ecosystem class is computed by summing the group's package PR within
 the ecosystem, ranking groups by that sum desc, and applying the same
-A/B/C/D cumulative-share cutoffs as the package-level pipeline (≤50%,
-≤75%, ≤90%, rest). The strongest across ecosystems becomes `class`.
+A/B/C cumulative-share cutoffs as the package-level pipeline (≤75%,
+≤95%, rest). The strongest across ecosystems becomes `class`.
 This avoids comparing PR magnitudes across ecosystems (each ecosystem's
 PR mass sums to 1 within its own graph). Recomputing PageRank on a
 repo-level dep graph was considered and skipped because cross-ecosystem
@@ -286,8 +285,8 @@ subgraphs.
 | `top_eco` | Ecosystem where the repo is highest-ranked (max PR percentile). `npm` / `pypi` / `crates` / `cpp`. |
 | `top_eco_pkg` | Highest-PR package in `top_eco` (e.g. `@babel/helper-plugin-utils` for babel/babel) |
 | `top_eco_pct` | PR percentile in `top_eco` (`100 − pr_cum_pct`). 0–100, **higher = better**. babel/babel = 92.25; tail near 0. |
-| `class` | Strongest of the per-ecosystem classes (A < B < C < D) |
-| `class_npm`, `class_pypi`, `class_crates`, `class_cpp` | A/B/C/D from per-ecosystem cumulative PR share; empty if no package in that ecosystem |
+| `class` | Strongest of the per-ecosystem classes (A < B < C) |
+| `class_npm`, `class_pypi`, `class_crates`, `class_cpp` | A/B/C from per-ecosystem cumulative PR share; empty if no package in that ecosystem |
 
 ### Repo class distribution
 

@@ -277,11 +277,11 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 | `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
 | `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (the `scc` fetcher) |
 | `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value/value.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
+| `src/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)** — `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
 
 ## Source-file coverage
 
-Snapshot of how complete each source file is across the risk-scope (A/B)
+Snapshot of how complete each source file is across the risk-scope (class A)
 repos. Counts reflect the last pipeline run; refresh with
 `uv run python scripts/coverage_report.py`.
 
@@ -311,7 +311,7 @@ repos. Counts reflect the last pipeline run; refresh with
 
 ### What this rolls up to in `risk.csv`
 
-**899 rows × 51 columns · 100% risk-scope (A/B) repos populated · median per-column coverage 98.8%.** Counts refresh on re-run.
+**899 rows × 51 columns · 100% risk-scope (class A) repos populated · median per-column coverage 98.8%.** Counts refresh on re-run.
 
 Sub-100% columns (every gap is structural, not a data-collection bug):
 
