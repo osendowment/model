@@ -10,12 +10,17 @@ Reads (all under data/sources/):
     opencollective/budgets.csv — annual gross raised per OC slug (src.sources.opencollective.fetch_budgets)
     funding/host-by-repo.csv   — scraped FOSS-foundation host per repo
     funding/overrides.csv      — curated host/owner institutional backing per repo
+    npm/funding.csv            — npm package.json `funding` field (npm repos only,
+                                 src.sources.npm.fetch_funding) — a declared channel
 
 Writes data/risk/funding.csv. The funding risk **score** (0-100, higher =
 less funded = riskier) is the geometric mean of THREE direction-aware risk axes:
     gh_sponsorships_p  ← gh_sponsorships (in + out), lower → riskier
     oc_avg_funding_p   ← oc_avg_funding ($0 when none),  lower → riskier
     host_score×100     ← combined host/owner backing (company 0, nonprofit 50, none 100)
+A repo that DECLARES a funding channel (npm `funding` field, `has_npm_funding`)
+has its score capped at NPM_FUNDING_CAP (79) — it is not maximally unfunded even
+when no $ is measured. npm-only; the other ecosystems have no equivalent field.
 `gh_stars` / `gh_forks` are informational popularity columns (not scored);
 their fetch timestamp lives in data/sources/github/repos.csv. No per-signal
 `fetched_at` is rolled up here.
@@ -50,12 +55,20 @@ FLOSS_FUND_FILE = DATA_DIR / "sources" / "floss-fund" / "funding-json.csv"
 OC_BUDGETS_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
 FOUNDATIONS_FILE = DATA_DIR / "sources" / "funding" / "host-by-repo.csv"
 OVERRIDES_FILE = DATA_DIR / "sources" / "funding" / "overrides.csv"
+NPM_FUNDING_FILE = DATA_DIR / "sources" / "npm" / "funding.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
+
+# A repo that has *declared* a funding channel (npm package.json `funding` field)
+# is not maximally unfunded even if no $ is measured — cap its funding risk at the
+# "has some backing" level (the nonprofit-host score: geom(100,100,50) ≈ 79).
+# npm-only: no equivalent field exists for the other ecosystems.
+NPM_FUNDING_CAP = 79
 
 FIELDS = ["repo", "repo_id",
           "gh_sponsors_in", "gh_sponsors_out", "gh_sponsorships", "gh_sponsorships_p",
           "gh_stars", "gh_forks",
-          "has_funding_yml", "funding_yml_platforms", "has_funding_json", "channels_count",
+          "has_funding_yml", "funding_yml_platforms", "has_funding_json",
+          "has_npm_funding", "npm_funding_url", "channels_count",
           "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
           "host", "host_type", "owner", "owner_type", "host_score",
           "score"]
@@ -118,15 +131,21 @@ def oc_avg_funding(slug: str, oc_budgets: dict[str, dict]) -> str:
 def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dict,
                  host: str, host_type: str, owner: str, owner_type: str,
                  repo_meta: dict, sponsoring_count: str = "",
-                 oc_slug: str = "", oc_avg: str = "0") -> dict:
+                 oc_slug: str = "", oc_avg: str = "0",
+                 npm_funding: dict | None = None) -> dict:
     """Join one repo's raw funding signals (percentiles filled later in build()).
 
     `oc_slug` / `oc_avg` are the Open Collective attribution resolved in build():
     a repo-level collective's full budget, or a class-A repo's equal share of its
-    org's collective (see build()).
+    org's collective (see build()). `npm_funding` is the npm registry `funding`
+    field (npm repos only) — an extra declared funding channel.
     """
+    npm_funding = npm_funding or {}
+    has_npm = (npm_funding.get("has_npm_funding") or "").strip() == "True"
     channels = _platform_set(yml.get("funding_yml_platforms")) | _platform_set(
         export.get("channel_platforms"))
+    if has_npm:
+        channels = channels | {"npm"}
     gh_in = (sponsors.get("github_sponsors") or "").strip()
     gh_out = (sponsoring_count or "").strip()
     return {
@@ -140,6 +159,8 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "has_funding_yml": (yml.get("has_funding_yml") or "").strip(),
         "funding_yml_platforms": (yml.get("funding_yml_platforms") or "").strip(),
         "has_funding_json": "True" if export else "False",
+        "has_npm_funding": "True" if has_npm else "False",
+        "npm_funding_url": (npm_funding.get("npm_funding_url") or "").strip(),
         "channels_count": str(len(channels)),
         "oc_slug": oc_slug,
         "oc_avg_funding": oc_avg,
@@ -230,6 +251,7 @@ def build() -> list[dict]:
     export = _export_by_repo(FLOSS_FUND_FILE)
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
     sponsoring = _load_sponsoring(SPONSORSHIPS_FILE)
+    npm_funding = load_rows_by_repo(NPM_FUNDING_FILE) if NPM_FUNDING_FILE.exists() else {}
 
     # Open Collective attribution is driven by the reverse-map (collectives.csv),
     # which records whether each collective's GitHub link names a specific repo or
@@ -288,7 +310,8 @@ def build() -> list[dict]:
             owner=ov.get("owner", ""), owner_type=ov.get("owner_type", ""),
             repo_meta=repos_meta.get(repo, {}),
             sponsoring_count=sponsoring.get(owner_login, ""),
-            oc_slug=oc_slug, oc_avg=_fmt_money(oc_amt)))
+            oc_slug=oc_slug, oc_avg=_fmt_money(oc_amt),
+            npm_funding=npm_funding.get(repo, {})))
 
     # Funding risk score: both axes are `lower_is_worse` (less funding → riskier).
     # add_percentiles writes the two risk percentiles; we then recompute `score`
@@ -310,7 +333,12 @@ def build() -> list[dict]:
               if str(r.get(c, "")).strip()]
         if len(ps) == 2:
             backing_p = float(r["host_score"]) * 100.0
-            r["score"] = max(1, round(geometric_mean(ps + [backing_p])))
+            score = max(1, round(geometric_mean(ps + [backing_p])))
+            # A declared npm funding channel caps the funding risk: a project that
+            # has set up a way to be funded is not maximally unfunded.
+            if r.get("has_npm_funding") == "True":
+                score = min(score, NPM_FUNDING_CAP)
+            r["score"] = score
     return rows
 
 

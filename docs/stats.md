@@ -10,7 +10,6 @@ docs) describe *how* a metric is built and link here for *how many*.
 - [Value](#value) — funnel, class distribution, repo identity coverage
 - [Risk](#risk) — per-component coverage funnels over the top repos
 
----
 
 ## Value
 
@@ -49,11 +48,10 @@ mirrors of a live upstream stay *valid* (they resolve).
 
 ### Repo class distribution
 
-17,366 package rows collapse into **12,025 repo rows** (10,445 GitHub groups +
-1,580 orphans). Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
+Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 
-- *repos (strongest)* = distinct repos whose highest class is that column; the per-ecosystem rows count a repo once per ecosystem, so they over-sum.
-- `Valid %` tracks `GitHub %` closely (validity needs a GitHub repo/mirror), so class A is almost entirely valid.
+*Repos* = distinct repos whose highest class is that column; the per-ecosystem rows count a repo once per ecosystem, so they over-sum.
+
 
 | Metric | A | B | C |
 |---|--:|--:|--:|
@@ -61,12 +59,11 @@ mirrors of a live upstream stay *valid* (they resolve).
 | pypi | 165 | 636 | 1,711 |
 | crates | 131 | 529 | 2,890 |
 | cpp | 89 | 571 | 961 |
-| **repos (strongest)** | **953** | **3,135** | **7,937** |
+| **Repos** | **953** | **3,135** | **7,937** |
 | GitHub % | 96.1% | 86.9% | 85.8% |
 | Git % | 99.6% | 94.8% | 93.6% |
 | Valid % | 96.1% | 86.6% | 85.1% |
 
----
 
 ## Risk
 
@@ -161,22 +158,25 @@ driven by the OpenSSF axis; CVEs re-rank only the minority that carry them.
 ### Funding
 
 Project resourcing ([funding.md](components/funding.md)) — GitHub Sponsors
-(in+out), `FUNDING.yml`, OpenCollective budgets, FLOSS Fund, foundation hosting.
-Score = geomean of the GitHub-sponsorship + OpenCollective risk percentiles.
+(in+out), `FUNDING.yml`, OpenCollective budgets, FLOSS Fund, foundation hosting,
+plus the npm package.json `funding` field (npm repos only). Score = geomean of
+the GitHub-sponsorship + OpenCollective + backing percentiles.
 
 | Channel | Repos | % |
 |---|---:|---:|
 | input top repos | 895 | 100% |
 | GitHub Sponsors inbound > 0 | 440 | 49.2% |
-| ≥ 1 funding channel | 259 | 28.9% |
+| ≥ 1 funding channel | 384 | 42.9% |
 | `FUNDING.yml` present | 256 | 28.6% |
 | Owner sponsors others (out > 0) | 157 | 17.5% |
 | OpenCollective budget > 0 | 162 | 18.1% |
+| npm funding field declared | 210 | 23.5% |
 | Foundation host | 44 | 4.9% |
 | funding.json (FLOSS Fund) | 6 | 0.7% |
 
 Unfunded repos (no sponsors, no OC) tie at the worst percentile — `score` = 100
-is the "no detectable funding" plateau.
+is the "no detectable funding" plateau. A declared npm `funding` channel caps the
+score at 79 (not maximally unfunded), which moved 29 repos off the plateau.
 
 #### OpenCollective
 

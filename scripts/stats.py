@@ -226,6 +226,7 @@ RISK_FUNNELS = {
                 ("`FUNDING.yml` present", "bool", "has_funding_yml"),
                 ("Owner sponsors others (out > 0)", "gt0", "gh_sponsors_out"),
                 ("OpenCollective budget > 0", "gt0", "oc_avg_funding"),
+                ("npm funding field declared", "bool", "has_npm_funding"),
                 ("funding.json (FLOSS Fund)", "bool", "has_funding_json")],
     "workload": [("issues data present", "present", "issues_opened_5y"),
                  ("per-AC ratios (loc/cve/nni) computed", "present", "loc_per_ac_p"),
@@ -337,7 +338,7 @@ def dashboard(v: dict, r: dict) -> None:
     for e in ECOSYSTEMS:
         t.add_row(e, *[f"{cl[c][e]:,}" for c in ("A", "B", "C")])
     t.add_section()
-    t.add_row("repos (strongest)", *[f"{cl[c]['strongest']:,}" for c in ("A", "B", "C")],
+    t.add_row("Repos", *[f"{cl[c]['strongest']:,}" for c in ("A", "B", "C")],
               style="bold")
     for label, key in (("GitHub %", "github"), ("Git %", "git"), ("Valid %", "valid")):
         t.add_row(label, *[_pct(bc[c][key], bc[c]["repos"]) for c in ("A", "B", "C")])
@@ -403,7 +404,7 @@ def markdown(v: dict, r: dict) -> str:
     cl = v["classes"]
     for e in ECOSYSTEMS:
         a(f"| {e} | {cl['A'][e]:,} | {cl['B'][e]:,} | {cl['C'][e]:,} |")
-    a(f"| **repos (strongest)** | **{cl['A']['strongest']:,}** | "
+    a(f"| **Repos** | **{cl['A']['strongest']:,}** | "
       f"**{cl['B']['strongest']:,}** | **{cl['C']['strongest']:,}** |")
     bc = v["by_class"]
     for label, key in (("GitHub %", "github"), ("Git %", "git"), ("Valid %", "valid")):

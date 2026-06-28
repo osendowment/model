@@ -64,6 +64,34 @@ def test_build_funding_score_lower_funding_higher_score(monkeypatch):
     assert int(rows["rich/r"]["score"]) < int(rows["poor/p"]["score"])
 
 
+def test_build_funding_npm_declared_channel_caps_score(monkeypatch):
+    """A repo with no measured funding but a DECLARED npm funding channel is capped
+    at NPM_FUNDING_CAP (79) instead of the 100 max-risk plateau, and the npm channel
+    is counted. An identical repo with no declared channel stays at 100."""
+    def rows_by_repo(p):
+        if "sponsors.csv" in str(p):
+            return {"rich/r": {"github_sponsors": "100"}}
+        if "npm/funding.csv" in str(p):
+            return {"declared/d": {"has_npm_funding": "True",
+                                   "npm_funding_url": "https://github.com/sponsors/x"}}
+        return {}
+    monkeypatch.setattr(bf, "load_top_repos",
+                        lambda: [E("plain/p"), E("declared/d"), E("rich/r")])
+    monkeypatch.setattr(bf, "load_rows_by_repo", rows_by_repo)
+    monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000"}})
+    monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
+    monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({"rich/r": "rich"}, {}))
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["plain/p"]["score"] == 100               # unfunded, no channel
+    assert rows["declared/d"]["has_npm_funding"] == "True"
+    assert rows["declared/d"]["channels_count"] == "1"   # npm channel counted
+    assert rows["declared/d"]["score"] == bf.NPM_FUNDING_CAP  # 100 → 79
+
+
 def test_build_funding_scraped_foundation_host_lowers_score(monkeypatch):
     """A scraped FOSS-foundation host (no override) defaults to nonprofit.
 

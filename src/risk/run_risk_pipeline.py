@@ -26,6 +26,7 @@ FETCHERS = [
     Step("scorecard",     "src.sources.openssf.scorecard",                fetch=True),
     Step("depsdev",       "src.sources.depsdev.fetch",                    fetch=True),
     Step("funding-yml",   "src.sources.github.fetch_funding_yml",         fetch=True),
+    Step("npm-funding",   "src.sources.npm.fetch_funding",                fetch=True),
     Step("sponsors",      "src.sources.github.fetch_sponsors",            fetch=True),
     Step("floss-fund",    "src.sources.floss_fund.funding_json",          fetch=True),
     Step("oc-collectives", "src.sources.opencollective.fetch_collectives", fetch=True),
