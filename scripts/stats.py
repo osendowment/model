@@ -225,20 +225,23 @@ def risk_stats() -> dict:
                 if v is not None]
         return len(vals), _quantiles(vals)
 
-    # score distribution: component = the 0–100 score; subcomponents = raw metrics
+    # score distribution: component = the 0–100 score; subcomponents = raw metrics.
+    # `column` is the source CSV column, kept separate from the human `label`.
     distribution = []
     for comp, name, score_col, subs in RISK_COMPONENTS:
         scored, q = col_dist(dims[name], score_col)
-        distribution.append({"label": comp, "is_component": True, "fmt": "int",
+        distribution.append({"label": comp, "column": score_col,
+                             "is_component": True, "fmt": "int",
                              "scored": scored, "q": q})
         for sub_label, raw_col, fmt in subs:
             scored, q = col_dist(dims[name], raw_col)
-            distribution.append({"label": f"{sub_label} `{raw_col}`",
+            distribution.append({"label": sub_label, "column": raw_col,
                                  "is_component": False, "fmt": fmt,
                                  "scored": scored, "q": q})
     o_scored, o_q = col_dist(risk, "score")
-    distribution.append({"label": "Overall `score`", "is_component": True,
-                         "fmt": "int", "scored": o_scored, "q": o_q})
+    distribution.append({"label": "Overall", "column": "score",
+                         "is_component": True, "fmt": "int",
+                         "scored": o_scored, "q": o_q})
 
     # per-dimension funnels
     funnels = {name: [(label, _count(dims[name], scope, kind, col))
@@ -303,13 +306,14 @@ def dashboard(v: dict, r: dict) -> None:
 
     n = r["scope"]
     t = Table(title=f"Risk — score distribution (scope {n})", header_style="bold dim")
-    for col in ("Component / subcomponent", "Scored", "Min", "P25", "P50", "P75", "Max"):
-        t.add_column(col, justify="right" if col != "Component / subcomponent" else "left")
+    for col in ("Component / subcomponent", "Column", "Min", "P25", "P50", "P75", "Max"):
+        t.add_column(col, justify="right" if col not in
+                     ("Component / subcomponent", "Column") else "left")
     for row in r["distribution"]:
         vals = [_fmt(x, row["fmt"]) for x in row["q"]] if row["q"] else ["—"] * 5
         label = f"[bold]{row['label']}[/bold]" if row["is_component"] else f"· {row['label']}"
         cells = [f"[bold]{x}[/bold]" if row["is_component"] else x for x in vals]
-        t.add_row(label, str(row["scored"]), *cells)
+        t.add_row(label, f"[dim]{row['column']}[/dim]", *cells)
     console.print(t)
 
     for name, steps in r["funnels"].items():
@@ -358,15 +362,15 @@ def markdown(v: dict, r: dict) -> str:
 
     n = r["scope"]
     a(f"\n### Score distribution by component (scope {n})\n")
-    a("| Component / subcomponent | Scored | Min | P25 | P50 | P75 | Max |")
-    a("|---|--:|--:|--:|--:|--:|--:|")
+    a("| Component / subcomponent | Column | Min | P25 | P50 | P75 | Max |")
+    a("|---|---|--:|--:|--:|--:|--:|")
     for row in r["distribution"]:
         vals = [_fmt(x, row["fmt"]) for x in row["q"]] if row["q"] else [""] * 5
         if row["is_component"]:
-            a(f"| **{row['label']}** | **{row['scored']}** | " +
+            a(f"| **{row['label']}** | `{row['column']}` | " +
               " | ".join(f"**{x}**" for x in vals) + " |")
         else:
-            a(f"| · {row['label']} | {row['scored']} | " + " | ".join(vals) + " |")
+            a(f"| · {row['label']} | `{row['column']}` | " + " | ".join(vals) + " |")
 
     for name, steps in r["funnels"].items():
         a(f"\n### {name.capitalize()} funnel\n")
