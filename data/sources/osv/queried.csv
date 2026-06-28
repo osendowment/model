@@ -27,6 +27,7 @@ amanieu/parking_lot,58731560,"crates.io:parking_lot_core,crates.io:lock_api,crat
 andialbrecht/sqlparse,4067434,PyPI:sqlparse,2026-05-18T01:11:37+00:00
 andrewrk/node-pend,11836813,npm:pend,2026-05-18T01:11:37+00:00
 andyperlitch/jsbn,9710533,npm:jsbn,2026-05-18T01:11:37+00:00
+angular/angular-cli,36891867,"npm:@angular-devkit/core,npm:@angular-devkit/schematics,npm:@angular-devkit/architect,npm:@schematics/angular",2026-06-28T15:39:04+00:00
 annotated-types/annotated-types,487934134,PyPI:annotated-types,2026-05-18T01:11:37+00:00
 antonk52/lilconfig,238967485,npm:lilconfig,2026-05-18T01:11:37+00:00
 apache/airflow,33884891,"PyPI:apache-airflow,PyPI:apache-airflow-providers-common-compat,PyPI:apache-airflow-providers-common-sql,PyPI:apache-airflow-core,PyPI:apache-airflow-task-sdk,PyPI:apache-airflow-providers-apache-cassandra,PyPI:apache-airflow-providers-snowflake,PyPI:apache-airflow-providers-cncf-kubernetes,PyPI:apache-airflow-providers-ssh,PyPI:apache-airflow-providers-google,PyPI:apache-airflow-providers-databricks,PyPI:apache-airflow-providers-mysql,PyPI:apache-airflow-providers-http,PyPI:apache-airflow-providers-sqlite,PyPI:apache-airflow-providers-fab,PyPI:apache-airflow-providers-ftp,PyPI:apache-airflow-providers-imap,PyPI:apache-airflow-providers-slack,PyPI:apache-airflow-providers-amazon,PyPI:apache-airflow-providers-common-io,PyPI:apache-airflow-providers-smtp,PyPI:apache-airflow-providers-docker,PyPI:apache-airflow-providers-postgres,PyPI:apache-airflow-providers-microsoft-mssql,PyPI:apache-airflow-providers-sftp,PyPI:apache-airflow-providers-airbyte,PyPI:apache-airflow-providers-microsoft-azure,PyPI:apache-airflow-providers-standard",2026-05-18T01:12:21+00:00
@@ -146,6 +147,7 @@ defunctzombie/node-process,7580644,npm:process,2026-05-18T01:12:32+00:00
 django/asgiref,48501860,PyPI:asgiref,2026-05-18T01:12:33+00:00
 djc/rustc-version-rs,41272773,crates.io:rustc_version,2026-05-18T01:12:33+00:00
 dmitrysoshnikov/regexp-tree,85459304,npm:regexp-tree,2026-05-18T01:12:34+00:00
+docutils/docutils,44840244,PyPI:docutils,2026-06-28T15:44:43+00:00
 dominictarr/through,4885140,npm:through,2026-05-03T18:57:14+00:00
 doowb/ansi-colors,47135420,npm:ansi-colors,2026-05-18T01:12:34+00:00
 douglasdwyer/wasm_sync,668034655,crates.io:wasm_sync,2026-05-18T01:12:35+00:00
@@ -172,6 +174,7 @@ eemeli/yaml,119439276,npm:yaml,2026-05-18T01:12:43+00:00
 ehmicky/human-signals,214467546,npm:human-signals,2026-05-18T01:12:44+00:00
 eliben/pycparser,10589864,PyPI:pycparser,2026-05-18T01:12:44+00:00
 emotion-js/emotion,92570536,"npm:@emotion/memoize,npm:@emotion/utils,npm:@emotion/unitless,npm:@emotion/hash,npm:@emotion/serialize,npm:@emotion/is-prop-valid,npm:@emotion/sheet,npm:@emotion/cache,npm:@emotion/weak-memoize,npm:@emotion/use-insertion-effect-with-fallbacks,npm:@emotion/babel-plugin,npm:@emotion/react,npm:@emotion/styled,npm:@emotion/css,npm:babel-plugin-emotion,npm:@emotion/core,npm:emotion-theming",2026-05-18T01:13:00+00:00
+enarx/ciborium,313759241,"crates.io:ciborium,crates.io:ciborium-io,crates.io:ciborium-ll",2026-06-28T15:39:03+00:00
 encode/httpcore,237210639,PyPI:httpcore,2026-05-18T01:12:45+00:00
 encode/httpx,179492861,PyPI:httpx,2026-05-18T01:12:45+00:00
 epoberezkin/ajv-keywords,60477053,npm:ajv-keywords,2026-05-03T18:57:30+00:00
@@ -283,6 +286,7 @@ googlechrome/workbox,55424670,"npm:workbox-core,npm:workbox-routing,npm:workbox-
 gozala/events,1649251,npm:events,2026-05-03T18:58:26+00:00
 gpg/libgpg-error,42075984,Debian:libgpg-error,2026-05-18T01:13:46+00:00
 grahamdumpleton/wrapt,10357291,PyPI:wrapt,2026-05-18T01:13:33+00:00
+grantjenks/python-sortedcontainers,17144859,PyPI:sortedcontainers,2026-06-28T15:44:43+00:00
 graydon/exhaustigen-rs,432630522,crates.io:exhaustigen,2026-05-18T01:13:34+00:00
 gregberge/svgr,102155012,"npm:@svgr/babel-preset,npm:@svgr/hast-util-to-babel-ast,npm:@svgr/babel-plugin-transform-svg-component,npm:@svgr/babel-plugin-transform-react-native-svg,npm:@svgr/babel-plugin-svg-em-dimensions,npm:@svgr/babel-plugin-replace-jsx-attribute-value,npm:@svgr/babel-plugin-svg-dynamic-title,npm:@svgr/babel-plugin-add-jsx-attribute,npm:@svgr/core,npm:@svgr/babel-plugin-remove-jsx-attribute,npm:@svgr/babel-plugin-remove-jsx-empty-expression,npm:@svgr/plugin-jsx,npm:@svgr/plugin-svgo,npm:@svgr/webpack",2026-05-18T01:13:48+00:00
 grncdr/merge-stream,10579821,npm:merge-stream,2026-05-18T01:13:43+00:00
@@ -497,6 +501,7 @@ ljharb/side-channel-weakmap,901188921,npm:side-channel-weakmap,2026-05-18T01:14:
 lodash/lodash,3955647,"npm:lodash,npm:lodash.debounce,npm:lodash.merge,npm:lodash.memoize,npm:lodash.isplainobject,npm:lodash.uniq,npm:lodash.once,npm:lodash.camelcase,npm:lodash._reinterpolate,npm:lodash.isstring,npm:lodash.sortby,npm:lodash.clonedeep,npm:lodash.isboolean,npm:lodash.get,npm:lodash.truncate,npm:lodash.includes,npm:lodash.isinteger,npm:lodash.isnumber,npm:lodash-es,npm:lodash.isequal,npm:lodash.defaults,npm:lodash.templatesettings,npm:lodash.flatten,npm:lodash.flattendeep,npm:lodash.template,npm:lodash.isarguments,npm:lodash.difference,npm:lodash.union,npm:lodash.throttle,npm:lodash.kebabcase,npm:lodash.isfunction,npm:lodash.mergewith,npm:lodash.escaperegexp,npm:lodash.snakecase,npm:lodash.keys,npm:lodash.isobject,npm:lodash.escape,npm:lodash.pick,npm:lodash.ismatch,npm:lodash.set,npm:lodash.assign,npm:lodash.isempty,npm:lodash.isnil,npm:lodash.startcase,npm:lodash.upperfirst,npm:lodash.map,npm:lodash.isarray,npm:lodash.uniqby,npm:lodash.groupby,npm:lodash._getnative,npm:lodash.isfinite,npm:lodash.isundefined,npm:lodash.foreach,npm:lodash.mapvalues,npm:lodash._basecopy,npm:lodash.omit,npm:lodash.has,npm:lodash.capitalize,npm:lodash.reduce,npm:lodash._isiterateecall,npm:lodash._bindcallback,npm:lodash.clone,npm:lodash.restparam,npm:lodash.find,npm:lodash.castarray,npm:lodash.zip,npm:lodash.some,npm:lodash._root,npm:lodash.bind,npm:lodash.defaultsdeep,npm:lodash.filter,npm:lodash.assignin,npm:lodash.toarray,npm:lodash.pickby,npm:lodash.deburr,npm:lodash._baseassign,npm:lodash._basetostring,npm:lodash.curry,npm:lodash.unescape,npm:lodash.reject,npm:lodash.padend,npm:lodash.values,npm:lodash.flow,npm:lodash.transform,npm:lodash.topath,npm:lodash._reevaluate,npm:lodash._reescape,npm:lodash._basevalues",2026-05-18T01:16:13+00:00
 loganfsmyth/gensync,132383032,npm:gensync,2026-05-18T01:14:40+00:00
 lokathor/bytemuck,209673558,"crates.io:bytemuck,crates.io:bytemuck_derive",2026-05-18T01:14:41+00:00
+lovell/detect-libc,96149091,npm:detect-libc,2026-06-28T15:39:01+00:00
 lukeed/dequal,174421655,npm:dequal,2026-05-18T01:14:40+00:00
 lukeed/escalade,273568715,npm:escalade,2026-05-18T01:14:40+00:00
 lukeed/kleur,140393403,npm:kleur,2026-05-18T01:14:40+00:00
@@ -526,6 +531,7 @@ medikoo/d,10817569,npm:d,2026-05-18T01:14:45+00:00
 medikoo/es5-ext,1792941,"npm:es5-ext,npm:ext",2026-05-18T01:14:46+00:00
 medikoo/es6-symbol,14423385,npm:es6-symbol,2026-05-18T01:14:45+00:00
 medikoo/type,177198492,npm:type,2026-05-18T01:14:46+00:00
+meinersbur/isl,37677854,Debian:isl,2026-06-28T15:44:43+00:00
 mhammond/pywin32,108187130,PyPI:pywin32,2026-05-18T01:14:46+00:00
 micheles/decorator,14656555,PyPI:decorator,2026-05-18T01:14:46+00:00
 micromark/micromark,157420458,"npm:micromark-util-symbol,npm:micromark-util-types,npm:micromark-util-character,npm:micromark-factory-space,npm:micromark-util-chunked,npm:micromark,npm:micromark-util-decode-numeric-character-reference,npm:micromark-util-encode,npm:micromark-util-normalize-identifier,npm:micromark-util-sanitize-uri,npm:micromark-util-decode-string,npm:micromark-util-classify-character,npm:micromark-util-resolve-all,npm:micromark-util-combine-extensions,npm:micromark-core-commonmark,npm:micromark-util-subtokenize,npm:micromark-factory-whitespace,npm:micromark-util-html-tag-name,npm:micromark-factory-title,npm:micromark-factory-label,npm:micromark-factory-destination",2026-05-18T01:15:06+00:00
@@ -540,6 +546,7 @@ microsoft/tslib,34414315,"npm:tslib,Debian:tslib",2026-05-18T01:14:49+00:00
 microsoft/typescript,20929025,npm:typescript,2026-05-18T01:14:48+00:00
 microsoft/windows-rs,208102250,"crates.io:windows-sys,crates.io:windows-link,crates.io:windows_x86_64_msvc,crates.io:windows_x86_64_gnu,crates.io:windows_aarch64_msvc,crates.io:windows_i686_msvc,crates.io:windows_i686_gnu,crates.io:windows_x86_64_gnullvm,crates.io:windows_aarch64_gnullvm,crates.io:windows-targets,crates.io:windows-core,crates.io:windows_i686_gnullvm,crates.io:windows-result,crates.io:windows-strings,crates.io:windows,crates.io:windows-implement,crates.io:windows-interface,crates.io:windows-bindgen,crates.io:windows-registry,crates.io:windows-future,crates.io:windows-collections,crates.io:windows-numerics,crates.io:windows-threading,crates.io:windows-version",2026-05-18T01:15:24+00:00
 minimistjs/minimist,549230701,npm:minimist,2026-05-18T01:14:49+00:00
+mirror/ncurses,22324756,Debian:ncurses,2026-06-28T15:44:45+00:00
 mitsuhiko/insta,165561258,crates.io:insta,2026-05-18T01:14:49+00:00
 mlocati/gettext-iconv-windows,12751919,Debian:gettext,2026-05-18T01:14:49+00:00
 mm2/little-cms,507969,Debian:lcms,2026-05-18T01:14:50+00:00
@@ -551,7 +558,9 @@ mozilla/source-map,2014930,npm:source-map,2026-05-18T01:14:51+00:00
 mrabarnett/mrab-regex,309446978,PyPI:regex,2026-05-18T01:14:51+00:00
 mrmlnc/fast-glob,77467076,npm:fast-glob,2026-05-18T01:14:51+00:00
 msgpack/msgpack-python,2242705,"PyPI:msgpack,PyPI:msgpack-python",2026-05-18T01:14:53+00:00
+mui/material-ui,23083156,"npm:@mui/utils,npm:@mui/types,npm:@mui/system,npm:@mui/private-theming,npm:@mui/styled-engine,npm:@mui/core-downloads-tracker,npm:@mui/material,npm:@mui/icons-material,npm:@mui/lab",2026-06-28T15:39:09+00:00
 mvdnes/spin-rs,21686666,crates.io:spin,2026-05-03T18:59:34+00:00
+myrne/performance-now,10219264,npm:performance-now,2026-06-28T15:44:43+00:00
 mysticatea/abort-controller,105228556,npm:abort-controller,2026-05-18T01:14:52+00:00
 mysticatea/event-target-shim,31137469,npm:event-target-shim,2026-05-18T01:14:52+00:00
 netflix/vmaf,51317975,Debian:vmaf,2026-05-18T01:14:52+00:00
@@ -752,6 +761,7 @@ servo/rust-smallvec,33456236,crates.io:smallvec,2026-05-18T01:16:12+00:00
 servo/rust-url,14934771,"crates.io:percent-encoding,crates.io:url,crates.io:idna,crates.io:form_urlencoded,crates.io:data-url",2026-05-18T01:16:15+00:00
 shtylman/node-process,7580644,npm:process,2026-05-03T19:00:41+00:00
 sinclairzx81/sinclair-typebox,1122129819,npm:@sinclair/typebox,2026-05-18T01:16:12+00:00
+sinclairzx81/typebox,87454905,npm:@sinclair/typebox,2026-06-28T15:39:01+00:00
 sindresorhus/ansi-escapes,40721875,npm:ansi-escapes,2026-05-18T01:16:13+00:00
 sindresorhus/array-union,21005682,npm:array-union,2026-05-18T01:16:12+00:00
 sindresorhus/binary-extensions,29771015,npm:binary-extensions,2026-05-18T01:16:13+00:00
@@ -793,6 +803,7 @@ sindresorhus/locate-path,74266248,npm:locate-path,2026-05-18T01:16:20+00:00
 sindresorhus/log-symbols,21673868,npm:log-symbols,2026-05-18T01:16:20+00:00
 sindresorhus/lowercase-keys,29769737,npm:lowercase-keys,2026-05-18T01:16:21+00:00
 sindresorhus/make-dir,90776169,npm:make-dir,2026-05-18T01:16:21+00:00
+sindresorhus/map-obj,25117742,npm:map-obj,2026-06-28T15:39:01+00:00
 sindresorhus/meow,25121561,npm:meow,2026-05-18T01:16:21+00:00
 sindresorhus/mimic-fn,71381729,npm:mimic-fn,2026-05-03T19:00:51+00:00
 sindresorhus/mimic-function,71381729,"npm:mimic-function,npm:mimic-fn",2026-05-18T01:16:22+00:00

@@ -206,16 +206,20 @@ percentiles (▴ higher = worse security):
 
 - `openssf_score_p` — percentile of the OpenSSF Scorecard `openssf_score`,
   **inverted**: a lower Scorecard score ranks as higher risk.
-- `cve_count_5y_p` — percentile of `cve_count_5y`: more known CVEs → higher
-  risk.
+- `cve_score` — neutral-anchored CVE risk score (0–100): a repo with **0 known
+  CVEs** scores **50** (a deliberate neutral baseline — "none known" is absence
+  of evidence, not proof of safety); a repo with **≥1 CVE** is ranked among the
+  non-zero repos only (by worst-pinned CDF) and mapped into **(50, 100]**, so
+  more CVEs → strictly higher risk and the single worst maps to 100.
 - `sast_findings_{total,error,security}_p` — percentiles of semgrep
   `p/default` findings (informational).
 
 The dimension `score` is the geometric mean of `openssf_score_p` and
-`cve_count_5y_p` — a repo ranks worst when it is high-risk on both axes.
+`cve_score` — a repo ranks worst when it is high-risk on both axes.
 ~78% of risk-scope repos have zero known CVEs and share the same
-`cve_count_5y_p`, so for those the score is effectively driven by the OpenSSF
-Scorecard axis.
+`cve_score = 50` (the neutral baseline), so for those the score is effectively
+driven by the OpenSSF Scorecard axis, with CVEs only re-ranking the ~22% that
+carry them, above the neutral 50.
 
 ## Data Sources
 
