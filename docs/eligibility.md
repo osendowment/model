@@ -16,8 +16,8 @@ GitHub rollup that becomes `eligibility.csv`.
 Eligibility
 │
 ├── Scope gate
-│   └── value_class ∈ {A, B}      ← data/value/value.csv                 [2021–2025]
-│                                    (C/D dropped before any check)
+│   └── value_class = A           ← data/value/value.csv                 [2021–2025]
+│                                    (B/C dropped before any check)
 │
 ├── License (OSS check)
 │   ├── package_license           ← npm:    registry.npmjs.org          [most recent]
@@ -98,10 +98,10 @@ graph LR
 ## How It Works
 
 > **Pipeline order**: Eligibility now runs **after** the Risk stage
-> (`Value → Risk → Eligibility`). Its intended scope (future work, not yet
-> coded) is repos with `value_class=A` that also have the highest risk
-> class. For now the code is unchanged — it still filters to all AB-class
-> repos — but it is no longer the Risk pipeline's input.
+> (`Value → Risk → Eligibility`), sharing its input scope — valid
+> `value_class=A` repos. It is no longer the Risk pipeline's input. (A future
+> refinement could narrow eligibility further by risk score, but the code
+> currently scopes to all valid class-A repos.)
 
 ### Source of truth and scope
 
@@ -109,12 +109,12 @@ Eligibility reads exclusively from `data/sources/github/repos.csv` (populated by
 `src.sources.github.fetch_repo_owner_data`). No fallback to discovery data: a repo
 must have a fresh GitHub API record to appear in eligibility at all.
 
-**Scope is the shared risk scope (A/B ∩ valid).** Eligibility consumes the
+**Scope is the shared risk scope (class A ∩ valid).** Eligibility consumes the
 exact same set the risk pipeline runs on, via `src.common.repos.load_risk_repos`
 (single source of truth — governed by `settings.json risk_input.value_classes`).
 A repo must satisfy all three:
 
-1. Be in `value.csv` with `class ∈ {A, B}` **and** the unified `valid` column
+1. Be in `value.csv` with `class = A` **and** the unified `valid` column
    `True` (`load_risk_repos` gates on `valid` by default, `skip_invalid=True`).
 2. Be in `data/sources/github/repos.csv` (we have a fresh GitHub API record).
 3. Pass the OSS license + EOL checks below.
@@ -224,24 +224,24 @@ thresholds change.
 |   | ↳ crates | | 6,218 | | 35.3% |
 |   | ↳ pypi | | 3,139 | | 17.8% |
 |   | ↳ cpp (Debian + Homebrew) | | 1,882 | | 10.7% |
-| 1 | **AB-class packages** | `value_class ∈ {A, B}` (top ~75% of cumulative downloads × pagerank) | **1,628** | **−90.8%** | 9.2% |
-| 2 | **Unique GitHub repos (AB)** | dedup packages → repos via `value.csv` | **917** | **−43.7%** | 5.2% |
+| 1 | **class-A packages** | `value_class = A` (top ~75% of cumulative downloads × pagerank) | **1,628** | **−90.8%** | 9.2% |
+| 2 | **Unique GitHub repos (class A)** | dedup packages → repos via `value.csv` | **917** | **−43.7%** | 5.2% |
 |   | ↳ many-pkgs-per-repo collapse: babel/babel = ~140 npm pkgs, isaacs/glob ships under several names, etc. | | | | |
-| 3 | AB ∩ fetched in `github/repos.csv` | repo has a GitHub API record (run `src.sources.github.fetch_repo_owner_data`) | 892 | −2.7% | 5.1% |
-| 4 | AB ∩ valid (not 404) | `valid=True` in `repos.csv` (repo still exists) | 892 | 0.0% | 5.1% |
+| 3 | class A ∩ fetched in `github/repos.csv` | repo has a GitHub API record (run `src.sources.github.fetch_repo_owner_data`) | 892 | −2.7% | 5.1% |
+| 4 | class A ∩ valid (not 404) | `valid=True` in `repos.csv` (repo still exists) | 892 | 0.0% | 5.1% |
 | 5 | `is_oss=True` | strict OSI membership against `data/sources/osi/oss-licenses.csv` (handles SPDX expressions) | 875 | −1.9% | 5.0% |
 | 6 | NOT `is_eol` | every constituent package alive on its registry | 868 | −0.8% | 4.9% |
-| **7** | **Risk-scope (A/B)** | `value_class ∈ {A, B}` repos after dropping archived/invalid — input to the Risk pipeline (~224 A + ~676 B ≈ 900 repos) | **~900** | — | — |
-| **8** | **ELIGIBLE** | `valid_repo AND is_oss=True AND NOT is_eol` — runs after Risk; future scope narrows to `value_class=A` ∩ highest risk class | **868** | **0.0%** | **4.9%** |
+| **7** | **Risk-scope (class A)** | `value_class = A` repos after dropping archived/invalid — input to the Risk pipeline (~900 repos) | **~900** | — | — |
+| **8** | **ELIGIBLE** | `valid_repo AND is_oss=True AND NOT is_eol` — runs after Risk; a future refinement could narrow further by risk score | **868** | **0.0%** | **4.9%** |
 
 ### Key drop points
 
 - **Stage 0 → 1 (−91%)**: the pareto cut. We deliberately keep only the top-of-pagerank packages in the funding scope. Everything else is fetched & classified for completeness but not eligible.
-- **Stage 1 → 2 (−44%)**: monorepo collapse. `babel/babel`, `isaacs/*`, `python/*` etc. ship many AB-class packages from a single GitHub repo. This is normal — the funding decision is per-repo, not per-package.
+- **Stage 1 → 2 (−44%)**: monorepo collapse. `babel/babel`, `isaacs/*`, `python/*` etc. ship many class-A packages from a single GitHub repo. This is normal — the funding decision is per-repo, not per-package.
 - **Stage 2 → 3 (−3%)**: GitHub fetch coverage. Closes to ~0% after a refresh of `src.sources.github.fetch_repo_owner_data`.
 - **Stage 4 → 5 (−2%)**: license check. The few remaining are `noassertion` (cpp libs without Homebrew formula match) plus genuine non-OSS rows (CC-BY data packages, MIT-CMU variant, etc.).
 - **Stage 5 → 6 (−1%)**: EOL — small absolute number (~7 archived projects).
-- **Stage 7 (Risk-scope)**: Risk runs on A/B value-class repos directly from `value.csv`, skipping archived and invalid repos.
+- **Stage 7 (Risk-scope)**: Risk runs on class-A value repos directly from `value.csv`, skipping archived and invalid repos.
 - **Stage 8 (ELIGIBLE)**: Eligibility runs after Risk. The 868 count reflects the last full eligibility run; re-run `src.eligibility.run_eligibility_pipeline` to refresh.
 
 ### How to refresh these numbers
@@ -277,7 +277,7 @@ already present), then classifies. So the only thing to run before it is the
 upstream value + risk pipelines:
 
 1. `src.value.run_value_pipeline` (unifies per-eco results → `value.csv`)
-2. `src.risk.run_risk_pipeline` (scores A/B repos → `risk.csv`)
+2. `src.risk.run_risk_pipeline` (scores class-A repos → `risk.csv`)
 3. `src.eligibility.run_eligibility_pipeline` (fetches its own EOL / license / OSI /
    repo-owner / foundation inputs, then joins everything → `eligibility.csv`)
 
@@ -346,7 +346,7 @@ Sourced exclusively from `data/sources/github/repos.csv` — no fallbacks.
 | `repo` | GitHub repo slug (`owner/name`) |
 | `repo_id` | GitHub numeric repo ID (empty if no GitHub API record) |
 | `repo_url` | Repo's homepage URL from the GitHub API (empty if not set on the repo) |
-| `value_class` | Value class (`A`/`B`) carried from `value.csv` — the eligibility scope |
+| `value_class` | Value class (`A`) carried from `value.csv` — the eligibility scope |
 | `user` | Repo owner login (from `repos.csv.owner_login`) |
 | `user_id` | Owner numeric ID |
 | `user_type` | `User` or `Organization` |
@@ -356,4 +356,4 @@ Sourced exclusively from `data/sources/github/repos.csv` — no fallbacks.
 | `is_oss` | Ternary — `True` if OSI-approved (loaded from `data/sources/osi/oss-licenses.csv`); `False` if the license is known but not OSI-approved (CC-BY, CC0, MIT-CMU, …); `""` (empty) if no usable license signal (GitHub `noassertion`, no per-eco registry data, or empty). |
 | `is_eol` | `True` if every package mapped to this repo (joined via per-eco `data/sources/{eco}/results.csv` ↔ `data/sources/{eco}/eol.csv`) is `is_eol=True`. Repos with no constituent packages default to `False`. |
 | `host` | Slug of FOSS foundation hosting the project: `apache`, `cncf`, `eclipse`, `openjs`, `psf`, `lf`, `numfocus`, `sfc`. Empty if not foundation-hosted. Joined from `data/sources/foundations/host-by-repo.csv`. |
-| `eligibility` | `True` only if `is_oss is True AND NOT is_eol` (repo validity is guaranteed by the A/B ∩ valid scope, so there is no `valid_repo` column). `is_oss=False` or `is_oss=""` both produce `eligibility=False`. |
+| `eligibility` | `True` only if `is_oss is True AND NOT is_eol` (repo validity is guaranteed by the class-A ∩ valid scope, so there is no `valid_repo` column). `is_oss=False` or `is_oss=""` both produce `eligibility=False`. |

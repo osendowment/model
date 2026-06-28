@@ -38,7 +38,7 @@ uv run python -m src.sources.crates.process_data [--min-avg N] [--alpha F]
 3. **top-packages.csv** -- crates covering 95% of ecosystem downloads
 4. **dependency-tree.csv** -- follow transitive deps through default-version deps only (not yanked)
 5. **github-repos.csv** -- parse repo URLs from crates.io metadata
-6. **results.csv** -- download-weighted PageRank, value classes A/B/C/D
+6. **results.csv** -- download-weighted PageRank, value classes A/B/C
 
 ## Outputs
 
