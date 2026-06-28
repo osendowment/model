@@ -40,7 +40,9 @@ Writes:
         fetched_at
 
 Notes:
-    workload_p is the geometric mean of loc_per_ac_p, cve_per_ac_p, nni_per_ac_p.
+    score is the geometric mean of loc_per_ac_p, cve_per_ac_p, nni_per_ac_p. A
+    repo with no fetched issues has a blank nni_per_ac; its nni_per_ac_p is
+    neutral-filled to 50 so loc + cve still produce a score (see build()).
     build_workload must run after build_complexity, build_security,
     and build_concentration.
 
@@ -256,13 +258,19 @@ def build() -> list[dict]:
         cl = closed.get(repo, {})
         issues_fetched = (repo in opened) or (repo in closed)
         if issues_fetched:
-            op_5y = sum(op.values())
-            cl_5y = sum(cl.values())
+            # Window every issue figure to YEARS. _load_issues_long can carry
+            # year keys outside the settings window (e.g. a wider `--years`
+            # fetch); summing op.values()/cl.values() directly would let those
+            # leak into the *_5y totals while the OLS slopes (which iterate
+            # `for y in YEARS`) silently ignore them. Derive the sums from the
+            # same windowed series the slopes use so the two can never diverge.
+            op_vals = [op.get(y, 0) for y in YEARS]
+            cl_vals = [cl.get(y, 0) for y in YEARS]
+            op_5y = sum(op_vals)
+            cl_5y = sum(cl_vals)
             ratio = round(cl_5y / op_5y, 3) if op_5y > 0 else ""
             net_new_issues = op_5y - cl_5y
 
-            op_vals = [op.get(y, 0) for y in YEARS]
-            cl_vals = [cl.get(y, 0) for y in YEARS]
             s_open = _ols_slope(YEARS, op_vals)
             s_close = _ols_slope(YEARS, cl_vals)
             mean_op = op_5y / len(YEARS) if op_5y else 0
@@ -314,6 +322,11 @@ def build() -> list[dict]:
         ],
         composite_cols=["loc_per_ac_p", "cve_per_ac_p", "nni_per_ac_p"],
         dim_col="score",
+        # A repo whose issues were never fetched has a blank nni_per_ac. When its
+        # LOC and CVE burdens are both present, treat the unknown issue-backlog
+        # burden as neutral (median percentile 50) so the row still scores; if
+        # LOC or CVE is also missing the row stays blank (no lone 50).
+        neutral_fill={"nni_per_ac_p": 50},
     )
     return rows
 

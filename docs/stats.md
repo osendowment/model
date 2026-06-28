@@ -127,9 +127,10 @@ Min / P25 / P50 / P75 / Max of each component score across the top repos.
 (`aggregate_risk.py`); no other dimension contributes. **Completeness rule:** a
 score is calculable only if *all* its inputs are — each component score is blank
 unless all its subcomponent percentiles are present, and the overall `score` is
-blank unless all five component scores are present (so its 817 scored rows are
-fewer than the components' counts; the 74-repo gap is mostly the missing
-workload score). `scripts/pipeline_health.py` enforces this. Under each **bold**
+blank unless all five component scores are present (so its 825 scored rows are
+fewer than the components' counts; the 66-repo gap is the missing
+workload score — repos with zero active contributors in the window).
+`scripts/pipeline_health.py` enforces this. Under each **bold**
 component sit its scored **subcomponent percentiles** (the `*_p` / score columns
 that get geometric-meaned into that component). All are direction-aware 0–100
 risk percentiles, so tie plateaus are visible: e.g. `cve_score` sits at the
@@ -150,11 +151,11 @@ neutral 50 for the ~78% with no CVE, and `oc_avg_funding_p` pins at 100 for the
 | **Funding** | **891** | **1** | **55** | **77** | **100** | **100** |
 | · GitHub sponsors `gh_sponsorships_p` | 891 | 0 | 25 | 52 | 100 | 100 |
 | · OpenCollective `oc_avg_funding_p` | 891 | 0 | 100 | 100 | 100 | 100 |
-| **Workload** | **817** | **4** | **36** | **55** | **69** | **98** |
+| **Workload** | **825** | **4** | **37** | **55** | **69** | **98** |
 | · LOC / AC `loc_per_ac_p` | 825 | 0 | 25 | 50 | 75 | 100 |
 | · CVE / AC `cve_per_ac_p` | 825 | 76 | 76 | 76 | 76 | 100 |
-| · net-new-issues / AC `nni_per_ac_p` | 817 | 0 | 35 | 50 | 79 | 100 |
-| **Overall `score`** | **817** | **10** | **39** | **50** | **60** | **89** |
+| · net-new-issues / AC `nni_per_ac_p` | 825 | 0 | 35 | 50 | 79 | 100 |
+| **Overall `score`** | **825** | **10** | **39** | **50** | **60** | **92** |
 
 Median per-column coverage across the dimension builds is ~99%; every sub-100%
 gap below is structural (a signal that genuinely doesn't exist for that repo),
@@ -259,8 +260,10 @@ new issues per active contributor, plus issue-debt and trend.
 | per-AC ratios (loc/cve/nni) computed | 825 | 92.6% |
 | `issue_close_ratio` computed | 814 | 91.4% |
 | `issue_trend_score` computed | 617 | 69.2% |
-| **`score` present** | **817** | **91.7%** |
+| **`score` present** | **825** | **92.6%** |
 
-~8% of the cohort gets no `score` — a missing upstream input (complexity row, AC
-count, or issues fetch) blanks the per-AC ratios. `issue_trend_score` requires
+~7% of the cohort gets no `score` — repos with zero active contributors in the
+window, where per-maintainer ratios are undefined. A repo with LOC + CVE present
+but no fetched issues still scores: its `nni_per_ac_p` is neutral-filled to 50.
+`issue_trend_score` requires
 `mean_opened_per_year ≥ 1`, so quiet repos are correctly omitted.

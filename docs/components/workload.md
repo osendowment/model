@@ -142,10 +142,14 @@ A constant axis carries no signal and yields blank.
 score = geometric_mean(loc_per_ac_p, cve_per_ac_p, nni_per_ac_p)
 ```
 
-An integer 0–100, **higher = more workload risk**, floored at 1. It is blank
-unless all three component percentiles are present (i.e. LOC, CVE, NNI, and AC > 0
-all exist). `issue_close_ratio_p` and `issue_trend_score_p` are informational —
-they describe backlog dynamics but are **not** scoring inputs.
+An integer 0–100, **higher = more workload risk**, floored at 1. A repo with no
+fetched issues has a blank `nni_per_ac`; **when its LOC and CVE burdens are both
+present**, `nni_per_ac_p` is neutral-filled to 50 so the row still scores. The
+score is therefore blank only when LOC or CVE (or AC > 0) is missing —
+`nni_per_ac` no longer gates it, but it is never the *sole* present input (no
+lone 50 on an otherwise-blank row). `issue_close_ratio_p` and
+`issue_trend_score_p` are informational — they describe backlog dynamics but are
+**not** scoring inputs.
 
 ## Output
 
@@ -200,9 +204,11 @@ Repos without a `score` are those missing one of the three per-AC inputs (most o
   with no windowed contributors (e.g. archived, mirror-only, or git-clone
   failure) gets blank per-AC values and no `score`.
 - **Issues only when enabled.** `issues.csv` is fetched only for repos that have
-  issues enabled and were reachable; an absent repo stays blank (never 0), so
-  `nni_per_ac` — and therefore `score` — is missing for those repos rather than
-  optimistically low.
+  issues enabled and were reachable; an absent repo's `nni_per_ac` stays blank
+  (never 0). When LOC and CVE are both present, its `nni_per_ac_p` is neutral-
+  filled to 50 so the repo keeps a `score` rather than dropping out — the unknown
+  issue burden is treated as median, neither optimistic nor punitive. If LOC or
+  CVE is also missing the row stays unscored (no lone 50).
 - **Upstream-dependent coverage.** Because it reads `complexity.csv`,
   `security.csv`, and `concentration.csv`, any repo those builders couldn't
   score (missing LOC, CVE, or AC) also drops out of the workload score. Workload

@@ -228,7 +228,11 @@ def risk_stats() -> dict:
 # ── rendering: rich dashboard ────────────────────────────────────────────────
 
 def _pct(n: int, d: int) -> str:
-    return f"{100 * n / d:.1f}%" if d else "—"
+    if not d:
+        return "—"
+    p = 100 * n / d
+    # stats.md convention: an exact 100% is written "100%", everything else 1dp.
+    return "100%" if n == d else f"{p:.1f}%"
 
 
 def dashboard(v: dict, r: dict) -> None:
@@ -341,22 +345,28 @@ def markdown(v: dict, r: dict) -> str:
 # ── drift check ──────────────────────────────────────────────────────────────
 
 def check(v: dict, r: dict) -> int:
-    """Verify the headline numbers appear in docs/stats.md; exit 1 on drift."""
+    """Verify docs/stats.md is current; exit 1 on drift.
+
+    Rather than loose substring matches (which collide — a stale `817` can hide
+    behind any other `817` on the page), this checks that every **bold** table
+    row the generator emits — component scores, class/identity totals, and each
+    funnel's `score present` line — appears verbatim in stats.md. Bold rows carry
+    the headline numbers in unambiguous, fully-formatted context, so a drifted
+    count can't accidentally match.
+    """
     text = (ROOT / "docs" / "stats.md").read_text(encoding="utf-8")
-    headline = {
-        "value rows": f"{v['rows']:,}",
-        "class A": f"{v['classes']['A']['strongest']:,}",
-        "valid": f"{v['valid']:,}",
-        "risk scope": str(r["scope"]),
-        "overall scored": str(r["overall_scored"]),
-    }
-    stale = {k: val for k, val in headline.items() if val not in text}
-    if stale:
-        console.print("[red]docs/stats.md is STALE — missing:[/red]")
-        for k, val in stale.items():
-            console.print(f"  {k} = {val}")
+    bold_rows = [ln.strip() for ln in markdown(v, r).splitlines()
+                 if ln.startswith("| **")]
+    missing = [ln for ln in bold_rows if ln not in text]
+    if missing:
+        console.print(f"[red]docs/stats.md is STALE — {len(missing)} row(s) "
+                      "no longer match the data:[/red]")
+        for ln in missing:
+            console.print(f"  {ln}")
+        console.print("[dim]refresh: uv run python scripts/stats.py --markdown[/dim]")
         return 1
-    console.print("[green]docs/stats.md headline numbers are current.[/green]")
+    console.print(f"[green]docs/stats.md current — all {len(bold_rows)} "
+                  "headline rows match the data.[/green]")
     return 0
 
 
