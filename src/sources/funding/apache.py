@@ -1,10 +1,10 @@
 """Fetch Apache Software Foundation projects from projects.apache.org.
 
 Source: https://projects.apache.org/json/foundation/projects.json
-Output: data/sources/foundations/apache/projects.csv
+Output: data/sources/funding/apache/projects.csv
 
 Usage:
-    uv run python -m src.sources.foundations.apache
+    uv run python -m src.sources.funding.apache
 """
 
 import argparse
@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 
 import httpx
 
-from src.sources.foundations._common import (USER_AGENT, atomic_write, banner,
+from src.sources.funding._common import (USER_AGENT, atomic_write, banner,
                                      extract_package, github_slug, out_path,
                                      summary_table)
 

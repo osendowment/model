@@ -11,21 +11,21 @@ that matter most for this corpus:
   • Python core (`github.com/python/*`): cpython, peps, mypy, etc.
     Source: GitHub `/orgs/python/repos`.
 
-Output: data/sources/foundations/psf/projects.csv
+Output: data/sources/funding/psf/projects.csv
 
 Authenticated with the same token revolver as the other scrapers
 (`src.sources.github.github_client`). Unauthenticated runs work but burn the 60
 req/hr anonymous budget — fine for the ~5 paginated calls we need.
 
 Usage:
-    uv run python -m src.sources.foundations.psf
+    uv run python -m src.sources.funding.psf
 """
 
 import argparse
 
 import httpx
 
-from src.sources.foundations._common import (USER_AGENT, atomic_write, banner,
+from src.sources.funding._common import (USER_AGENT, atomic_write, banner,
                                      extract_package, github_slug, out_path,
                                      summary_table)
 from src.sources.github.github_client import get_revolver

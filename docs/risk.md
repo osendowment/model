@@ -55,7 +55,8 @@ Risk
 │   ├── github_sponsors               ← GitHub Sponsors API             [most recent]
 │   ├── has_funding_yml, _yml_platforms  ← repo /.github/FUNDING.yml     [most recent]
 │   ├── has_funding_json              ← repo /funding.json (FLOSS/fund)  [most recent]
-│   └── foundation_host               ← foundation rosters (Apache/CNCF/LF/…) [most recent]
+│   ├── host / host_type             ← foundation rosters + funding/overrides.csv [most recent]
+│   └── owner / owner_type            ← funding/overrides.csv (GitHub-org backing)  [most recent]
 │
 └── Workload  →  data/risk/workload.csv
     ├── repo_age_years                ← GitHub /repos created_at        [EOY, last complete yr]

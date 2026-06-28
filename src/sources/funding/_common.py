@@ -13,7 +13,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "sources" / "foundations"
+DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "sources" / "funding"
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"
 
 # Browser-like UA — some foundation sites (numfocus, sfc) block default httpx UA.
@@ -93,7 +93,7 @@ def extract_package(*texts: str) -> tuple[str, str]:
 
 
 def out_path(slug: str) -> Path:
-    """Standard output path: data/sources/foundations/{slug}/projects.csv."""
+    """Standard output path: data/sources/funding/{slug}/projects.csv."""
     p = DATA_DIR / slug / "projects.csv"
     p.parent.mkdir(parents=True, exist_ok=True)
     return p
