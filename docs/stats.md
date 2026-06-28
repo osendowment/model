@@ -23,31 +23,28 @@ Packages remaining after each Value stage, plus the share with a known upstream 
 
 | Metric | npm | pypi | crates | cpp | Total | Comment |
 |---|--:|--:|--:|--:|--:|---|
-| Top packages | 5,765 | 2,460 | 3,719 | 1,329 | 13,273 | 95% of downloads |
-| **After dep tree** | **6,370** | **3,139** | **6,218** | **1,639** | **17,366** | top ∪ deps, post-`is_cpp`; PageRank + % base |
-| Git URL | 6,305 | 2,850 | 6,130 | 1,240 | 16,525 | any git host |
-| GitHub repo | 6,297 | 2,821 | 6,000 | 508 | 15,626 | github.com repo |
-| **Active GH** | **6,032** | **2,728** | **5,842** | **500** | **15,102** | mirror not archived |
-| Git % | 99% | 91% | 99% | 76% | 95% | of After dep tree |
-| GitHub % | 99% | 90% | 96% | 31% | 90% | |
-| **Active GH %** | **95%** | **87%** | **94%** | **31%** | **87%** | |
+| Top packages | 5,765 | 2,460 | 3,719 | 1,329 | 13,273 | Representing 95% of downloads per eco |
+| **After dep tree** | **6,370** | **3,139** | **6,218** | **1,639** | **17,366** | Extended via own dependencies |
+| Git URL | 6,305 | 2,850 | 6,130 | 1,240 | 16,525 | Any git host |
+| GitHub repo | 6,297 | 2,821 | 6,000 | 508 | 15,626 | Github repository |
+| Git % | 99% | 91% | 99% | 76% | 95% |  |
+| **GitHub %** | **99%** | **90%** | **96%** | **31%** | **90%** | |
 
-- *After dep tree* is de-duplicated (`unify_value_data.py:150`); cpp unions the Debian + Homebrew graphs, Repology-canonicalised to one name each, then drops 729 non-cpp distro packages (2,368 → 1,639) via the `is_cpp` filter.
-- cpp has the lowest GitHub coverage (31%) but 76% Git via non-GitHub upstreams (sourceware, savannah, gitlab.gnome.org) resolved through per-eco `git.csv`.
+Note that after dep tree is de-duplicated, cpp unions the Debian + Homebrew graphs, Repology-canonicalised to one name each, and leave only C/C++ packages.
 
 ### Repo identity coverage
 
-Share of the 12,060 repo rows carrying each identity field. A non-GitHub-only
-project (glibc, gcc) has a `git_url` but no `github_repo`, so it drops out of the
-GitHub-keyed downstream analyses (risk, EOL, contributor metrics).
+From the per-ecosystem GitHub appearances down to the valid repos, per strongest
+`class` and total (distinct repos). Orphans / non-GitHub-only projects (glibc, gcc
+when not overridden) drop out at *unique*; archived GitHub mirrors of a live
+upstream stay *valid* (they resolve), so *valid* > *active*.
 
-| Field | Repos | % |
-|---|--:|--:|
-| `git_url` present | 11,265 | 93.4% |
-| `github_repo` present | 10,389 | 86.1% |
-| `valid == True` | 10,327 | 85.6% |
-| orphan (no `github_repo`) | 1,671 | 13.9% |
-| **total repo rows** | **12,060** | **100%** |
+| Step | A | B | C | Total | Comment |
+|---|--:|--:|--:|--:|---|
+| GitHub total repos | — | — | — | 15,626 | per-ecosystem results (a repo counts once per ecosystem) |
+| GitHub unique repos | 917 | 2,703 | 6,769 | 10,389 | deduped; + 1,671 orphans = 12,060 repos |
+| GitHub active repos | 890 | 2,594 | 6,442 | 9,926 | not archived |
+| **Valid repos** | **917** | **2,694** | **6,716** | **10,327** | github repo resolves (200); incl. archived mirrors |
 
 ### Repo class distribution
 
