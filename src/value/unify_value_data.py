@@ -55,6 +55,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.common.params import assign_value_class
+from src.common.repos import canonical_repo_map
 
 console = Console()
 
@@ -281,6 +282,34 @@ def _github_git_url(slug: str) -> str:
     return f"https://github.com/{slug}.git"
 
 
+def _canonicalise_git_urls(rows: list[dict], canon: dict[str, str]) -> list[dict]:
+    """Rewrite each row's GitHub `git_url` to its post-rename canonical form.
+
+    A package's `git` URL is often a stale pre-rename slug (e.g.
+    `github.com/facebook/jest.git` for a repo now at `jestjs/jest`). Grouping by
+    the raw URL splits the renamed-away packages into their own repo row (lower
+    PageRank → demoted to B/C), and `verify_git_urls` later canonicalises both to
+    the same slug — leaving duplicate `value.csv` rows whose `class` disagrees.
+
+    Canonicalising the GitHub slug *before* grouping (via `repos.csv` `full_name`,
+    the same map `load_top_repos` uses) collapses the rename-twins into one group
+    with combined PageRank, so each repo gets one row and one class. Non-GitHub
+    URLs have no rename source and are left untouched; unknown slugs map to
+    themselves. Mutates and returns `rows` so `_group_key` (used here AND in
+    `apply_repo_overrides`) keys on the canonical URL consistently.
+    """
+    if not canon:
+        return rows
+    for r in rows:
+        slug = _github_repo_from_url(r.get("git_url") or "")
+        if not slug:
+            continue
+        canonical = canon.get(slug, slug)
+        if canonical != slug:
+            r["git_url"] = _github_git_url(canonical)
+    return rows
+
+
 def load_repo_overrides(path: Path = OVERRIDES_FILE) -> dict[tuple[str, str], dict]:
     """Return {(package, ecosystem): override} from the curated CSV.
 
@@ -397,7 +426,12 @@ def _strip_internals(a: dict) -> dict:
     return {k: v for k, v in a.items() if not any(k.startswith(p) for p in _INTERNAL_PREFIXES)}
 
 
-def aggregate_by_repo(all_rows: list[dict], *, drop_d_class: bool = False) -> list[dict]:
+def aggregate_by_repo(
+    all_rows: list[dict],
+    *,
+    drop_d_class: bool = False,
+    canon: dict[str, str] | None = None,
+) -> list[dict]:
     """Collapse per-package rows into one row per repo (or per orphan).
 
     Per-ecosystem PR sum → cumulative-share ranking → A/B/C, plus
@@ -405,10 +439,19 @@ def aggregate_by_repo(all_rows: list[dict], *, drop_d_class: bool = False) -> li
     (strongest), and the comma-separated `ecosystems` list. Rows are
     sorted by `top_eco_pct` desc.
 
+    GitHub `git_url`s are first canonicalised to their post-rename name (via
+    `repos.csv` `full_name`) so rename-twin packages group into one repo row
+    instead of splitting into a demoted duplicate — see `_canonicalise_git_urls`.
+    `canon` defaults to `canonical_repo_map()`; pass `{}` to skip (tests).
+
     `drop_d_class` (default False, kept for back-compat) is now a no-op:
     the scheme has only three classes (A/B/C), so there is no D tail to
     drop and value-data.csv always carries the full A/B/C table.
     """
+    if canon is None:
+        canon = canonical_repo_map()
+    _canonicalise_git_urls(all_rows, canon)
+
     groups: dict[str, list[dict]] = defaultdict(list)
     for r in all_rows:
         groups[_group_key(r)].append(r)

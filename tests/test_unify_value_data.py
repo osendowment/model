@@ -266,10 +266,15 @@ class TestAggregateByRepo:
     @pytest.fixture(autouse=True)
     def _isolate_overrides(self, monkeypatch):
         """aggregate_by_repo applies the curated overrides.csv as its last
-        step; isolate these pure-aggregation tests from it, since fixtures use
-        real package names (glibc, gcc, …) that may appear in overrides.csv."""
+        step and canonicalises github URLs via repos.csv; isolate these
+        pure-aggregation tests from both, since fixtures use real package/repo
+        names (glibc, gcc, …) that may appear in overrides.csv / be renamed in
+        repos.csv."""
         monkeypatch.setattr(
             "src.value.unify_value_data.load_repo_overrides", lambda *a, **k: {}
+        )
+        monkeypatch.setattr(
+            "src.value.unify_value_data.canonical_repo_map", lambda *a, **k: {}
         )
 
     def test_empty_input(self):
@@ -501,6 +506,33 @@ class TestAggregateByRepo:
         assert len(aggs) == 1
         assert aggs[0]["github_repo"] == "typeshed-internal/stub_uploader"
 
+    def test_rename_twins_merge_via_canon(self):
+        """Two packages whose git URLs are the old and new slug of the SAME
+        renamed repo collapse into one group with combined PageRank — not two
+        duplicate rows with a demoted twin. Canonicalisation keys on repos.csv
+        full_name (here injected via `canon`)."""
+        rows = [
+            _pkg_row("jest-old", "npm", github_repo="facebook/jest",
+                     pagerank="0.6"),                       # stale pre-rename slug
+            _pkg_row("@jest/core", "npm", github_repo="jestjs/jest",
+                     pagerank="0.4"),                       # current slug
+        ]
+        canon = {"facebook/jest": "jestjs/jest", "jestjs/jest": "jestjs/jest"}
+        aggs = aggregate_by_repo(rows, canon=canon)
+        assert len(aggs) == 1                               # one repo, not two
+        assert aggs[0]["github_repo"] == "jestjs/jest"
+        assert aggs[0]["packages"] == 2                     # both pkgs, PR combined
+
+    def test_canon_empty_leaves_rename_twins_split(self):
+        """Without a canon map the two slugs stay separate (documents that the
+        fix depends on repos.csv being present)."""
+        rows = [
+            _pkg_row("jest-old", "npm", github_repo="facebook/jest", pagerank="0.6"),
+            _pkg_row("@jest/core", "npm", github_repo="jestjs/jest", pagerank="0.4"),
+        ]
+        aggs = aggregate_by_repo(rows, canon={})
+        assert len(aggs) == 2
+
     def test_packages_count_matches_membership(self):
         rows = [_pkg_row(f"p{i}", "npm", github_repo="x/y", pagerank=str(i))
                 for i in range(7)]
@@ -702,9 +734,13 @@ class TestEndToEnd:
     @pytest.fixture(autouse=True)
     def _isolate_overrides(self, monkeypatch):
         """Isolate the end-to-end aggregation from the curated overrides.csv
-        (the `glibc` fixture below would otherwise pick up a real override)."""
+        (the `glibc` fixture below would otherwise pick up a real override) and
+        from repos.csv rename canonicalisation."""
         monkeypatch.setattr(
             "src.value.unify_value_data.load_repo_overrides", lambda *a, **k: {}
+        )
+        monkeypatch.setattr(
+            "src.value.unify_value_data.canonical_repo_map", lambda *a, **k: {}
         )
 
     def test_full_pipeline_two_ecosystems(self, tmp_path):
