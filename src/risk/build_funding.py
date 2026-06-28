@@ -233,13 +233,8 @@ def build() -> list[dict]:
 
     # Open Collective attribution is driven by the reverse-map (collectives.csv),
     # which records whether each collective's GitHub link names a specific repo or
-    # just an org — the authoritative connection. A curated override `oc_slug`
-    # acts as a manual repo-level link for collectives OC didn't GitHub-link.
+    # just an org — the authoritative connection.
     oc_by_repo, oc_by_org = _load_oc_index()
-    for repo_lc, ov in overrides.items():
-        s = normalize_oc_slug(ov.get("oc_slug"))
-        if s:
-            oc_by_repo.setdefault(repo_lc, s)
 
     def _avg(slug: str) -> float:
         try:
@@ -262,13 +257,23 @@ def build() -> list[dict]:
         host = ov.get("host") or scraped_host
         host_type = ov.get("host_type") or ("nonprofit" if scraped_host else "")
 
-        # OC budget: a repo-level collective → its FULL avg budget; otherwise the
-        # org's collective avg budget split equally across the org's class-A repos
-        # (so a class-B repo of a funded org gets $0 unless it has its own).
-        repo_slug = oc_by_repo.get(repo.lower())
-        if repo_slug:
-            oc_slug, oc_amt = repo_slug, _avg(repo_slug)
-        elif oc_by_org.get(owner_login) and entry.value_class == "A":
+        # OC budget. A curated override row is AUTHORITATIVE: its `oc_slug` wins
+        # over the auto-map, including when EMPTY — an empty oc_slug on a curated
+        # repo means "no OC", suppressing a spurious reverse-map match (e.g. a junk
+        # collective claiming github.com/facebook). Otherwise auto-map: a repo-level
+        # collective → its FULL avg budget; else the org's collective split equally
+        # across the org's class-A repos.
+        # Auto-map matches are guarded by `_avg(...) > 0` — a $0 collective carries
+        # no funding signal and is usually junk (e.g. `for-the-mage` claiming
+        # github.com/facebook), so we don't attribute its slug.
+        if repo.lower() in overrides:
+            s = normalize_oc_slug(ov.get("oc_slug"))
+            oc_slug, oc_amt = (s, _avg(s)) if s else ("", 0.0)
+        elif oc_by_repo.get(repo.lower()) and _avg(oc_by_repo[repo.lower()]) > 0:
+            oc_slug = oc_by_repo[repo.lower()]
+            oc_amt = _avg(oc_slug)
+        elif (oc_by_org.get(owner_login) and entry.value_class == "A"
+              and _avg(oc_by_org[owner_login]) > 0):
             org_slug = oc_by_org[owner_login]
             n = classA_per_org[owner_login] or 1
             oc_slug, oc_amt = org_slug, _avg(org_slug) / n

@@ -133,3 +133,31 @@ def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
     # repo-level collective → full budget to the named repo
     assert rows["solo/repo"]["oc_avg_funding"] == "500"
     assert rows["solo/repo"]["oc_slug"] == "solo"
+
+
+def test_build_funding_override_oc_slug_authoritative(monkeypatch):
+    """A curated override row is authoritative for OC, overriding the auto-map.
+
+    - empty `oc_slug` on a curated repo → NO OC (suppresses a spurious match);
+    - a non-empty `oc_slug` is used even if it differs from the reverse-map.
+    """
+    repos = [E("big/junkmatch", value_class="A"), E("big/keep", value_class="A")]
+    monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bf, "load_rows_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
+    monkeypatch.setattr(bf, "_load_oc", lambda p: {
+        "junk": {"raised_2024": "9999"}, "real": {"raised_2024": "200"}})
+    # reverse-map would auto-match org `big` to the junk collective…
+    monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({}, {"big": "junk"}))
+    # …but overrides win: junkmatch → empty (no OC), keep → explicit slug.
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {
+        "big/junkmatch": {"oc_slug": ""},
+        "big/keep": {"oc_slug": "real"}})
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["big/junkmatch"]["oc_slug"] == ""        # empty override → suppressed
+    assert rows["big/junkmatch"]["oc_avg_funding"] == "0"
+    assert rows["big/keep"]["oc_slug"] == "real"         # explicit override slug
+    assert rows["big/keep"]["oc_avg_funding"] == "200"
