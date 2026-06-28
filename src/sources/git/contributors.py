@@ -361,7 +361,8 @@ def _window_bounds(start_year: int, end_year: int) -> tuple[float, float]:
 
 # ── per-repo collection ─────────────────────────────────────────────────────
 
-def process_repo(repo: str, repo_id: str, base_dir: str) -> tuple[list[dict], dict]:
+def process_repo(repo: str, repo_id: str, base_dir: str,
+                 timeout: int = 300) -> tuple[list[dict], dict]:
     """Clone one repo, bucket commits by (author, year), clean up.
 
     Returns (long_rows, status_row). Always returns without raising — failures
@@ -370,6 +371,8 @@ def process_repo(repo: str, repo_id: str, base_dir: str) -> tuple[list[dict], di
     long_rows: list of dicts with LONG_FIELDS keys — one per (name, email, year).
     status_row: dict with STATUS_FIELDS keys.
     `status` ∈ {ok, clone_failed, timeout, no_commits, error}.
+    `timeout` (seconds) bounds both the clone and the `git log` — raise it for
+    kernel-scale mirrors that overrun the 300s default.
     """
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     status_row: dict = {f: "" for f in STATUS_FIELDS}
@@ -380,8 +383,8 @@ def process_repo(repo: str, repo_id: str, base_dir: str) -> tuple[list[dict], di
     dest = os.path.join(base_dir, repo.replace("/", "_"))
     long_rows: list[dict] = []
     try:
-        clone_s, _size = bare_treeless_clone(repo, dest)
-        commit_rows = log_commits(dest)
+        clone_s, _size = bare_treeless_clone(repo, dest, timeout=timeout)
+        commit_rows = log_commits(dest, timeout=timeout)
         if not commit_rows:
             status_row["status"] = "no_commits"
             status_row["clone_seconds"] = round(clone_s, 1)
@@ -493,6 +496,7 @@ async def run_batch(
     status_path: Path,
     force: bool,
     max_disk_gb: float,
+    timeout: int = 300,
 ) -> tuple[dict[str, list[dict]], dict[str, dict]]:
     """Clone + bucket every target concurrently, writing CSVs as it goes.
 
@@ -527,7 +531,7 @@ async def run_batch(
     async def _one(repo: str, rid: str) -> tuple[str, list[dict], dict]:
         async with sem:
             long_rows, status_row = await loop.run_in_executor(
-                None, process_repo, repo, rid, base_dir
+                None, process_repo, repo, rid, base_dir, timeout
             )
             return repo, long_rows, status_row
 
@@ -669,6 +673,9 @@ def main() -> int:
                         help="re-collect every repo, ignoring existing ok rows")
     parser.add_argument("--max-disk-gb", type=float, default=2.0,
                         help="abort if free temp disk drops below this (default: 2.0)")
+    parser.add_argument("--timeout", type=int, default=300,
+                        help="per-repo clone + git-log timeout in seconds "
+                             "(default: 300; raise for kernel-scale mirrors)")
     parser.add_argument("--seed", type=int, default=42,
                         help="random seed for --limit sampling")
     parser.add_argument("--inspect", metavar="REPO", default="",
@@ -705,7 +712,7 @@ def main() -> int:
     t0 = time.monotonic()
     long_by_repo, status_by_repo = asyncio.run(run_batch(
         targets, args.concurrency, OUTPUT_FILE, STATUS_FILE,
-        args.force, args.max_disk_gb,
+        args.force, args.max_disk_gb, args.timeout,
     ))
     console.print()
     _print_summary(long_by_repo, status_by_repo, time.monotonic() - t0)

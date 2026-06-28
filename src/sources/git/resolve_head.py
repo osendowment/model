@@ -4,12 +4,14 @@ Some risk-scope repos are dormant — their last commit is older than the
 window covered by `commits-years.csv` (default 2021-2025). Without a
 sha they can't be analysed by sha-pinned fetchers (scc, lizard, semgrep).
 
-This module fills those gaps by fetching the repo's default-branch HEAD
-sha via the GitHub API and inserting a `year=HEAD` row into
-`commits-years.csv`. `resolve_snapshot_sha` walks backward from the
-requested year and will pick up the HEAD row last (when nothing else
-matches) — making dormant repos analysable while leaving active repos
-untouched.
+This module fills those gaps by fetching the repo's latest default-branch
+commit (sha + date) via the GitHub API and inserting it into
+`commits-years.csv` under its **real commit year** (e.g. 2020) — so the
+LOC/complexity snapshot is dated rather than an opaque "HEAD". A `year=HEAD`
+alias row (same sha) is also written: the sha-pinned tarball fetchers
+(lizard/cognitive/semgrep) special-case it, and `resolve_snapshot_sha` falls
+back to it for repos older than its 10-year walk-back. Active repos are
+untouched. There is always a snapshot sha when the repo has any commit.
 
 Usage:
     uv run python -m src.sources.git.resolve_head           # all risk-scope repos with no last_sha
@@ -27,7 +29,10 @@ import httpx
 from rich.console import Console
 from rich.progress import Progress
 
-from src.sources.git.commits_years import load_sha_data, write_sha_data, SHA_FILE
+from src.sources.git.commits_years import (
+    DEFAULT_YEARS, load_sha_data, write_sha_data, SHA_FILE,
+)
+from src.common.params import LAST_COMPLETE_YEAR
 from src.common.repos import load_risk_repos
 
 console = Console()
@@ -59,16 +64,25 @@ def _tokens() -> list[str]:
 
 async def resolve_head_sha(
     client: httpx.AsyncClient, repo: str, token: str
-) -> str | None:
-    """Return the latest commit sha on the default branch via GitHub API.
+) -> tuple[str, int] | None:
+    """Return ``(sha, year)`` for the latest default-branch commit via the API.
 
-    Returns None if the repo is missing / private / API error.
+    ``year`` is the committer year of that commit (e.g. 2020 for a repo whose
+    last activity predates the 2021-2025 window), so the snapshot can be
+    recorded under its real year instead of an opaque "HEAD". ``year`` is 0 if
+    the date can't be parsed. Returns None if the repo is missing / private /
+    API error.
     """
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
-    # /commits returns commits on the default branch by default
+    # /commits returns commits on the default branch by default. Cap at the end
+    # of the last COMPLETE year (exclude the in-progress current year) so the
+    # snapshot is reproducible and lands on a year scc/lizard already analysed —
+    # not a fresh in-progress-year commit with no code metrics yet.
+    until = f"{LAST_COMPLETE_YEAR + 1}-01-01T00:00:00Z"
     try:
         r = await client.get(f"{GITHUB_API}/repos/{repo}/commits",
-                             params={"per_page": 1}, headers=headers, timeout=20)
+                             params={"per_page": 1, "until": until},
+                             headers=headers, timeout=20)
     except httpx.HTTPError as e:
         log.warning("HTTP error for %s: %s", repo, e)
         return None
@@ -78,28 +92,38 @@ async def resolve_head_sha(
     body = r.json()
     if not body:
         return None
-    return body[0].get("sha")
+    sha = body[0].get("sha")
+    if not sha:
+        return None
+    commit = body[0].get("commit") or {}
+    date = ((commit.get("committer") or {}).get("date")
+            or (commit.get("author") or {}).get("date") or "")
+    try:
+        year = int(date[:4])
+    except (ValueError, TypeError):
+        year = 0
+    return sha, year
 
 
 async def main_async(args):
     eligible = {e.repo for e in load_risk_repos()}
     sha_data = load_sha_data(args.sha_file)
 
-    # Repos with NO last_sha at any year
-    have_sha: set[str] = set()
+    # "Done" = the repo has a real sha in a settings window year (active repo).
+    # Dormant repos have only fallback rows (dated pre-window and/or HEAD), so
+    # they remain candidates and are (re)resolved into a dated snapshot capped at
+    # the last complete year — cheap (~tens of repos) and idempotent in result
+    # (the same pre-window commit resolves each run).
+    window = {str(y) for y in DEFAULT_YEARS}
+    have_window: set[str] = set()
     for (repo, year), row in sha_data.items():
-        if (row.get("last_sha") or "").strip():
-            have_sha.add(repo)
+        if year in window and (row.get("last_sha") or "").strip():
+            have_window.add(repo)
 
-    candidates = sorted(eligible - have_sha)
-    if not args.force:
-        # Skip repos already resolved (have a HEAD row)
-        resolved = {repo for (repo, year) in sha_data.keys() if year == HEAD_YEAR
-                    and (sha_data[(repo, year)].get("last_sha") or "").strip()}
-        candidates = [c for c in candidates if c not in resolved]
+    candidates = sorted(eligible if args.force else eligible - have_window)
 
     if not candidates:
-        console.print("[green]All risk-scope repos already have a sha — nothing to resolve.[/green]")
+        console.print("[green]All risk-scope repos already have a dated snapshot sha — nothing to resolve.[/green]")
         return
 
     tokens = _tokens()
@@ -113,10 +137,11 @@ async def main_async(args):
         async def go(idx: int, repo: str):
             async with sem:
                 token = tokens[idx % len(tokens)]
-                sha = await resolve_head_sha(client, repo, token)
-                if not sha:
-                    return repo, None
-                return repo, sha
+                res = await resolve_head_sha(client, repo, token)
+                if not res:
+                    return repo, None, 0
+                sha, year = res
+                return repo, sha, year
 
         with Progress(console=console) as progress:
             task = progress.add_task("Resolving", total=len(candidates))
@@ -126,14 +151,16 @@ async def main_async(args):
 
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     resolved = 0; failed = 0
-    for repo, sha in done:
+    for repo, sha, year in done:
         if sha:
-            sha_data[(repo, HEAD_YEAR)] = {
-                "first_sha": sha,
-                "last_sha": sha,
-                "commits": "1",
-                "fetched_at": now,
-            }
+            row = {"first_sha": sha, "last_sha": sha, "commits": "1", "fetched_at": now}
+            # Record the snapshot under its REAL commit year (e.g. 2020) so the
+            # LOC/complexity walk reads a dated fallback instead of an opaque
+            # "HEAD". Keep the "HEAD" alias too: the sha-pinned tarball fetchers
+            # (lizard/cognitive/semgrep) special-case it as the dormant snapshot.
+            if year:
+                sha_data[(repo, str(year))] = dict(row)
+            sha_data[(repo, HEAD_YEAR)] = dict(row)
             resolved += 1
         else:
             failed += 1

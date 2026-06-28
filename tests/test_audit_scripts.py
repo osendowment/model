@@ -66,6 +66,21 @@ def test_data_anomalies_clean_or_reports():
     assert rc in (0, 1)
 
 
+def test_score_component_coverage_is_full():
+    """Score-forming component columns are 100%-populated on live data.
+
+    Regression guard for the no-human-in-window imputation: if a change drops
+    concentration bf/hhi/score coverage below the full risk set (e.g. the
+    imputation is removed, or a fetch gap reappears), this fails — mirroring the
+    pipeline_health check in-process.
+    """
+    mod = _load_module(SCRIPTS / "pipeline_health.py")
+    results = mod.check_score_component_coverage()
+    assert results, "no coverage results returned"
+    failed = [(label, detail) for label, ok, detail in results if not ok]
+    assert not failed, f"score components below 100%: {failed}"
+
+
 # --- schema invariant sweep over the per-dimension risk CSVs ----------------
 
 DIMENSION_CSVS = ["complexity", "concentration", "security", "funding", "workload"]
