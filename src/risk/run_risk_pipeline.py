@@ -1,12 +1,13 @@
-"""Risk pipeline runner — dimension builders + aggregation.
+"""Risk pipeline runner — fetch missing data, then build + aggregate.
 
-By default runs only the cheap projection (the six dimension builders ->
-aggregate). Pass --with-fetchers to also run the multi-hour data-collection
-fetchers first.
+By default fetches any MISSING raw data first (incremental — each fetcher
+skips data already present in its output files, so only gaps are fetched),
+then runs the six dimension builders -> aggregate. Pass --skip-fetch to skip
+all fetchers and only re-run the builders/aggregate from existing data.
 
 Usage:
-    uv run python -m src.risk.run_risk_pipeline                 # build + aggregate
-    uv run python -m src.risk.run_risk_pipeline --with-fetchers # full pipeline
+    uv run python -m src.risk.run_risk_pipeline                # fetch + build + aggregate
+    uv run python -m src.risk.run_risk_pipeline --skip-fetch   # build + aggregate only
     uv run python -m src.risk.run_risk_pipeline --from aggregate
     uv run python -m src.risk.run_risk_pipeline --list
 """
@@ -41,10 +42,8 @@ BUILDERS = [
 
 def main() -> int:
     parser = build_parser("risk pipeline runner")
-    parser.add_argument("--with-fetchers", action="store_true",
-                        help="Also run the multi-hour data-collection fetchers first")
     args = parser.parse_args()
-    steps = (FETCHERS + BUILDERS) if args.with_fetchers else BUILDERS
+    steps = FETCHERS + BUILDERS
     return run_pipeline(steps, args)
 
 

@@ -1,12 +1,14 @@
-"""Eligibility pipeline runner — license / EOL / foundation checks, then classify.
+"""Eligibility pipeline runner — fetch missing license / EOL / foundation data, then classify.
 
-By default runs only the classification step on existing data. Pass
---with-fetchers to prepend the per-ecosystem license + EOL fetchers, the
-OSI license-list refresh, and the GitHub repo-owner / foundation fetchers.
+By default fetches any MISSING data first (incremental — each fetcher skips
+data already present in its output files, so only gaps are fetched): the
+per-ecosystem license + EOL fetchers, the OSI license-list refresh, and the
+GitHub repo-owner / foundation fetchers; then runs the classification step.
+Pass --skip-fetch to skip all fetchers and only classify on existing data.
 
 Usage:
-    uv run python -m src.eligibility.run_eligibility_pipeline                 # classify
-    uv run python -m src.eligibility.run_eligibility_pipeline --with-fetchers # full
+    uv run python -m src.eligibility.run_eligibility_pipeline                # fetch + classify
+    uv run python -m src.eligibility.run_eligibility_pipeline --skip-fetch   # classify only
     uv run python -m src.eligibility.run_eligibility_pipeline --list
 """
 from src.common.pipeline_runner import Step, build_parser, run_pipeline
@@ -30,10 +32,8 @@ STEPS = [Step("classify", "src.eligibility.classify_eligibility")]
 
 def main() -> int:
     parser = build_parser("eligibility pipeline runner")
-    parser.add_argument("--with-fetchers", action="store_true",
-                        help="Also run the license / EOL / foundation fetchers first")
     args = parser.parse_args()
-    steps = (FETCHERS + STEPS) if args.with_fetchers else STEPS
+    steps = FETCHERS + STEPS
     return run_pipeline(steps, args)
 
 
