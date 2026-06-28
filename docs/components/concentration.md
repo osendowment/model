@@ -11,6 +11,38 @@ only the git `_5y` axis drives the score.
 Scope: the 897 A/B value-class repos in the risk pipeline (see
 [value.md](../value.md)). Build step: `src/risk/build_concentration.py`.
 
+## Scored components: Bus Factor + HHI
+
+`concentration.csv` carries 25 columns, but the **`score` uses exactly two** —
+both from the git-clone log over the `_5y` window (2021–2025), each turned into a
+direction-aware 0–100 risk percentile and combined as their geometric mean:
+
+- **Bus factor** (`bf_commits_git_5y`) — sort the merged, non-bot contributors by
+  commits descending and count how many it takes for their cumulative commit
+  share to reach 50% (`bus_factor_threshold`). A **low** bus factor (often 1, a
+  single person covering half the window's commits) means high risk.
+- **HHI** (`hhi_commits_git_5y`) — the Herfindahl–Hirschman index of commit
+  shares, `10000 · Σ pᵢ²`, ranging from `10000 / n` (commits spread evenly) up to
+  `10000` (one author writes everything). A **high** HHI means high risk.
+- **No active human in the window** — any repo with **no human commit in the
+  `_5y` window** (2021–2025) is imputed the worst valid pair, **bus factor `1`
+  and HHI `10000`**: a project with no active human maintainer in five years is a
+  maximal single-point-of-failure, so it ranks as fully concentrated rather than
+  dropping out of the score. This covers the dormant/archived case (`comment =
+  no commits in 5y`), the bot-only-window case (`no human commits in 5y`), and
+  the new-repo case (`no commits through last complete year`). It applies **only
+  to successfully-fetched repos** — a clone/log failure writes no data and is the
+  *only* thing left blank, so a fetch failure is never mistaken for a real
+  measurement. As a result the score is **100%-populated** across the risk set.
+
+```
+score = max(1, round( √( bf_commits_git_5y_p × hhi_commits_git_5y_p ) ))
+```
+
+Every other column — the GitHub `/contributors` `_gh_alltime` figures, the git
+`_full` lifetime figures, and all contributor/commit counts — is emitted for
+inspection and cross-checking only. **None of them feed `score`.**
+
 ## Metrics Roadmap
 
 Each leaf is one column with its source and the period it represents. `_full` =
@@ -166,7 +198,7 @@ it is well-distributed — one concentrated axis pulls the product up.
 
 ### `data/risk/concentration.csv` (per-dimension build)
 
-24 columns, one row per risk repo. No `fetched_at` *value* columns — per-method
+25 columns, one row per risk repo. No `fetched_at` *value* columns — per-method
 timestamps live in `github_fetched_at` / `git_fetched_at`.
 
 | Column | Description |
@@ -192,6 +224,7 @@ timestamps live in `github_fetched_at` / `git_fetched_at`.
 | `hhi_commits_git_5y` | HHI (0–10000) — git method, `_5y` |
 | `hhi_commits_git_5y_p` | risk percentile of `hhi_commits_git_5y` **(scores)** |
 | `score` | **concentration-risk score** (geom-mean of the two `_5y` `_p`, 0–100) |
+| `comment` | edge-case note on the `_5y` axis (auditability), else empty. All but the last are imputed `bf=1`/`HHI=10000`: `no commits in 5y` (dormant), `no human commits in 5y` (bot-only window), `no commits through last complete year` (only in-progress-year activity). `git fetch <status>` / `no git data` (fetch failed → **blank**, the only unscored case) |
 | `github_fetched_at` | when the GitHub `/contributors` data was fetched |
 | `git_fetched_at` | when the git-clone log was fetched |
 
@@ -209,26 +242,33 @@ Of the 897 A/B risk repos (counts refresh on re-run):
 
 | Signal | Repos | % |
 |---|---:|---:|
-| git `_5y` metrics (`bf`/`hhi` populated) | 830 | 92.5% |
-| **`score`** (concentration-risk score) | 830 | 92.5% |
-| git `_full` metrics | 894 | 99.7% |
-| `git_fetched_at` present | 895 | 99.8% |
+| git `_5y` metrics (`bf`/`hhi` populated, incl. no-human imputation) | 897 | 100% |
+| **`score`** (concentration-risk score) | 897 | 100% |
+| git `_full` metrics | 897 | 100% |
+| `git_fetched_at` present | 897 | 100% |
 | GitHub `_gh_alltime` metrics | 891 | 99.3% |
 | `github_fetched_at` present | 892 | 99.4% |
 
-`score` distribution: min **1** · p25 **27** · p50 **71** · p75 **87** · max
-**100**. The high median reflects how concentrated this cohort is — **71.6%** of
-scored repos have a git `_5y` bus factor of 1 (a single contributor covers half
-the window's commits). The ~7.5% of repos with no `score` are those whose git
-`_5y` axis is blank — repos with no commits in 2021–2025 (e.g. archived /
-frozen projects), or where the git clone failed/timed out (kernel-scale mirrors).
+`score` is **100%-populated** — every successfully-fetched repo is scored, with
+the no-active-human cases imputed (see *Scored components*) and the git method at
+100% fetch coverage. `scripts/pipeline_health.py` enforces this; a blank would
+mean a failed fetch, surfaced as a gap to fix. Distribution: min **1** · p25
+**27** · p50 **71** · p75 **87** · max **100**. The high median reflects how
+concentrated this cohort is — **73.6%** of repos have a git `_5y` bus factor of 1
+(a single contributor covers half the window's commits, incl. the no-human repos
+imputed at `bf = 1`). The 64 imputed repos (60 dormant + 4 bot-only) all land at
+the `score = 100` ceiling.
 
 ## Limitations
 
-- **`_5y` window or no score.** A repo with zero commits in 2021–2025 — archived,
-  frozen, or whose clone timed out — has no `bf_commits_git_5y`, so no `score`.
-  This is intentional: a stale repo cannot be scored on *current* concentration,
-  and a blank keeps it out of the percentile ranking rather than faking a value.
+- **No human in the window is imputed; fetch failures are not.** Any repo with
+  no human commit in 2021–2025 (dormant, bot-only, or new) is scored as maximally
+  concentrated (`bf = 1`, `HHI = 10000`) — see *Scored components*. The **only**
+  thing left blank (out of the ranking) is the genuinely *unmeasured*: a clone
+  that failed/timed out (kernel-scale mirrors). The distinction is auditable —
+  the imputation lives in `git_metrics`, which only runs after a successful
+  fetch — and `scripts/pipeline_health.py` asserts the score is 100%-populated,
+  so any blank surfaces as a fetch gap to fix rather than passing silently.
 - **Commits ≠ effort.** Both methods count authored commits, not lines, reviews,
   triage, or maintenance burden. A reviewer or release manager who rarely commits
   is invisible, so a repo can read as more concentrated than it truly is.
