@@ -54,8 +54,10 @@ JavaScript / TypeScript (npm)
   ecosystems becomes `class`.
 - **Risk** — A/B-class npm repos enter `src.risk.run_risk_pipeline` (scope set by
   `risk_input.value_classes` in `src/settings.json`).
-- **Eligibility** — A/B repos that also pass the OSI-license and non-EOL gates
-  reach `data/eligibility/eligibility.csv`.
+- **Eligibility** — now a **manual review** of the top A/B candidates (OSS license,
+  EOL, independence), not an automated pipeline stage. The per-ecosystem license/EOL
+  signals (`fetch_licenses.py`, `check_eol.py` → `data/sources/npm/eol.csv`) are still
+  produced and feed that review; there is no automated eligibility output.
 
 ## Outputs
 
@@ -87,5 +89,5 @@ Carried from the cross-ecosystem tables in [`value.md`](../value.md):
 | Repos (`value.csv`) | 144 | 430 | 769 | 3,087 | — |
 
 A+B repos with a GitHub repo: **100%** — npm has the cleanest upstream identity of
-the four ecosystems, so essentially all load-bearing npm packages reach Risk and
-Eligibility.
+the four ecosystems, so essentially all load-bearing npm packages reach Risk (and
+the manual eligibility review).

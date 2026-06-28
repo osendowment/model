@@ -20,15 +20,15 @@ It is important to trace dependencies across ecosystem boundaries, not just with
 
 Beyond dividing grants between ecosystems, we need to prioritize individual OSS projects within each one. Our goal is to make this process transparent and quantifiable, combining automated scoring with human judgment, especially in the early stages. The model is under active development; its final form will emerge from discussions with OSE donors.
 
-Our approach is a three-stage pipeline — **Value → Risk → Eligibility** — where each stage narrows the set the next one operates on:
+Our approach is a two-stage automated pipeline — **Value → Risk** — followed by a manual **Eligibility** review of the top candidates. Each step narrows the set the next operates on:
 
 | Step | Goal | Implemented | Roadmap |
 |------|------|-------------|---------|
 | **[Value](docs/value.md)** | Find most important packages in ecosystems | Download-weighted PageRank for Python (PyPI), Rust (crates), JS/TS (npm), C/C++ (Debian, Homebrew) based on dependency trees, covering 95% downloads in each ecosystem | Community nominations, critical software lists, cross-ecosystem dependencies |
 | **[Risk](docs/risk.md)** | Prioritize risky projects among most valuable | Bus factor and Herfindahl--Hirschman index for contributors, complexity metrics (LOC, etc) using [scc](https://github.com/boyter/scc) | [OpenSSF scorecard](https://scorecard.dev), active maintainers, issue activity, GitHub Sponsors |
-| **[Eligibility](docs/eligibility.md)** | Filter to fundable projects | OSS license check (149 OSI-approved SPDX licenses auto-refreshed from the SPDX list + 6 curated extras = 155) | Trademark check (corporate vs community), EOL check |
+| **Eligibility** *(manual)* | Filter to fundable projects | Checked manually for the top candidates — OSS license, EOL, and independence (no corporate trademarks, no associated startups, community-led) | Automate the license / EOL / independence checks |
 
-Detailed methodology lives in [`docs/`](docs/): one page per stage — [value](docs/value.md), [risk](docs/risk.md), [eligibility](docs/eligibility.md) — plus [`docs/sources/`](docs/sources/) (one page per data source) and [`docs/components/`](docs/components/) (cross-cutting components — the per-language value pipelines [python](docs/components/python.md) / [javascript](docs/components/javascript.md) / [cpp](docs/components/cpp.md) / [rust](docs/components/rust.md), plus the [funding](docs/components/funding.md) and [validation](docs/components/validation.md) tables). The code mirrors this: `src/sources/<source>/` for fetch/process scripts, `src/{value,risk,eligibility}/` for the stage pipelines, and `src/common/` for shared infrastructure.
+Detailed methodology lives in [`docs/`](docs/): one page per automated stage — [value](docs/value.md), [risk](docs/risk.md) — plus [`docs/sources/`](docs/sources/) (one page per data source) and [`docs/components/`](docs/components/) (cross-cutting components — the per-language value pipelines [python](docs/components/python.md) / [javascript](docs/components/javascript.md) / [cpp](docs/components/cpp.md) / [rust](docs/components/rust.md), plus the [funding](docs/components/funding.md) and [validation](docs/components/validation.md) tables). The code mirrors this: `src/sources/<source>/` for fetch/process scripts, `src/{value,risk}/` for the stage pipelines, and `src/common/` for shared infrastructure.
 
 Work is currently happening in this repo and the following places:
 

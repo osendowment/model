@@ -53,8 +53,10 @@ Python (PyPI)
   ecosystems becomes `class`.
 - **Risk** — A/B-class PyPI repos enter `src.risk.run_risk_pipeline` (scope set by
   `risk_input.value_classes` in `src/settings.json`).
-- **Eligibility** — A/B repos that also pass the OSI-license and non-EOL gates
-  reach `data/eligibility/eligibility.csv`.
+- **Eligibility** — now a **manual review** of the top A/B candidates (OSS license,
+  EOL, independence), not an automated pipeline stage. The per-ecosystem license/EOL
+  signals (`fetch_licenses.py`, `check_eol.py` → `data/sources/pypi/eol.csv`) are still
+  produced and feed that review; there is no automated eligibility output.
 
 ## Outputs
 
@@ -84,6 +86,7 @@ A+B repos with a GitHub repo: **76%**.
 
 - **55% GitHub coverage — the lowest of the four ecosystems.** The BigQuery extract
   carried only GitHub URLs at fetch time, so non-GitHub upstreams (GitLab,
-  self-hosted) have no `package → repo` link. Because Risk and Eligibility key off
-  `github_repo`, this caps how many PyPI repos those stages can score, even for
+  self-hosted) have no `package → repo` link. Because Risk (and the manual
+  eligibility review) key off `github_repo`, this caps how many PyPI repos can be
+  scored, even for
   A/B-class packages (A+B GitHub coverage is 76%, not ~100% like npm/crates).

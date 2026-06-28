@@ -5,7 +5,8 @@ download volume with dependency graph analysis (PageRank).
 
 ## Pipeline overview
 
-The three pipeline stages (run in order, each feeds the next):
+Two automated stages (run in order, each feeds the next), followed by a
+separate **manual** review:
 
 ```
 1. **Value** (`src.value.run_value_pipeline`) → `data/value/value.csv` — picks the
@@ -17,33 +18,42 @@ The three pipeline stages (run in order, each feeds the next):
    directly from `data/value/value.csv`. Target classes are configured in
    `src/settings.json` under `risk_input.value_classes` (default
    `["A", "B"]`). See [docs/risk.md](risk.md).
-3. **Eligibility** (`src.eligibility.run_eligibility_pipeline`) → `data/eligibility/eligibility.csv`
-   — restricts to AB-class repos with a fresh GitHub API record, an
-   OSI-approved license, and a non-EOL signal. Runs after Risk. See [docs/eligibility.md](eligibility.md).
 ```
+
+**Eligibility** is no longer an automated pipeline stage. It is a manual
+review of the top-ranked candidates surfaced by Value + Risk, checking OSS
+license, end-of-life (EOL) status, and independence (no corporate
+trademarks, no associated startups, community-led). The source signals
+that inform it (OSI license lists, foundation membership, per-ecosystem
+`check_eol.py` / `fetch_licenses.py`) are still collected under
+`src/sources/`, but there is no automated eligibility runner and no
+eligibility stage output.
 
 ### Dataflow at a glance
 
 ```
-                Value pipeline                    Risk                Eligibility
-                ───────────────                   ────                ───────────
+                Value pipeline                    Risk           Manual review
+                ───────────────                   ────           ─────────────
 ecosystem ──► top packages ──► dep tree ──► PageRank ──► A/B/C/D
 registries     (95% cum dl)    (BFS)       ↓
                                       value.csv
                                             │
-                                            ├─► A/B class repos ──► contributors + scc
-                                            │   (settings.json          │
-                                            │    risk_input.            │
-                                            │    value_classes)   risk.csv
-                                            │
-                                            └─► github_repo
-                                                    │
-                                                    ├──────────────► repos.csv
-                                                    │                    │
-                                                    │              license + EOL
-                                                    │                    │
-                                                    │            eligibility.csv
+                                            └─► A/B class repos ──► contributors + scc
+                                                (settings.json          │
+                                                 risk_input.            │
+                                                 value_classes)    risk.csv
+                                                                       │
+                                                                       ▼
+                                                              top candidates
+                                                                       │
+                                                              manual eligibility
+                                                              (OSS license · EOL ·
+                                                               independence)
 ```
+
+The two automated stages stop at `risk.csv`. Eligibility is a manual review
+of the top candidates — the `github_repo`-keyed license/EOL signals below
+are inputs to that review, not an automated output.
 
 Source-specific details live in [`docs/sources/`](sources/) (one `.md` per source).
 
@@ -156,10 +166,10 @@ Per-ecosystem and combined counts of A/B/C/D classes in `value.csv`.
 
 *A+B GH* and *A+B Git* are the share of A and B class packages with a
 known GitHub repo and any Git URL respectively — the load-bearing subset
-that the Risk pipeline (default scope: A/B) and the Eligibility pipeline
-both rely on. C/D-class rows are present in `value.csv` and tracked
-through the value pipeline, but are outside the default Risk and
-Eligibility scope. C/C++'s A+B Git jumps from 32% to 95% once
+that the Risk pipeline (default scope: A/B) and the manual eligibility
+review both rely on. C/D-class rows are present in `value.csv` and tracked
+through the value pipeline, but are outside the default Risk scope and the
+manual eligibility shortlist. C/C++'s A+B Git jumps from 32% to 95% once
 non-GitHub upstreams are counted (glibc, gcc, libunistring, glib, mpfr,
 etc. live on sourceware / savannah / gitlab hosts, not GitHub).
 Non-GitHub upstreams are concentrated in C/D classes, so the A+B
@@ -169,7 +179,7 @@ numbers barely move.
 
 Each language assembles the steps above from its own sources. The per-language
 component docs cover **what data is collected from each source and which pipeline
-stage uses it** (Value → Risk → Eligibility):
+stage uses it** (Value → Risk, plus the manual eligibility review):
 
 | Language | Registry / sources | Pipeline doc | Raw-fetch reference |
 |---|---|---|---|
@@ -307,10 +317,11 @@ class achieved across any of its ecosystems (`class` column in
 3,151 are orphan packages (no `github_repo`) kept under sequential ids
 so nothing is dropped.
 
-EOL information is intentionally **not** stored here — it belongs to the
-eligibility pipeline. `src/eligibility/classify_eligibility.py` joins per-ecosystem
-`data/sources/{eco}/eol.csv` with `data/sources/{eco}/results.csv` directly to compute
-per-repo `is_eol`, and writes it to `data/eligibility/eligibility.csv`.
+EOL information is intentionally **not** stored here — it feeds the manual
+eligibility review, not the value table. The per-ecosystem `check_eol.py`
+scripts compute it and write `data/sources/{eco}/eol.csv`; joining that with
+the matching `data/sources/{eco}/results.csv` yields per-repo `is_eol` for the
+top candidates under manual review.
 
 Per-package data isn't preserved here either — see each ecosystem's
 `data/sources/{eco}/results.csv` and `data/sources/{eco}/eol.csv` for the package-level
@@ -340,10 +351,10 @@ overlay.
 
 ### Project identity is GitHub-only
 
-Every downstream stage (eligibility, EOL, risk, GitHub-derived contributor
-metrics) keys off the `github_repo` field. Projects that don't live on
-GitHub are present in `value.csv` with `github_repo=""` and are
-silently excluded from those analyses.
+Every downstream consumer (risk, EOL, GitHub-derived contributor metrics,
+and the manual eligibility review) keys off the `github_repo` field.
+Projects that don't live on GitHub are present in `value.csv` with
+`github_repo=""` and are silently excluded from those analyses.
 
 Examples affected: glibc (sourceware.org), gcc (gcc.gnu.org / Savannah),
 libunistring (savannah), glib (gitlab.gnome.org), mpfr (gitlab.inria.fr),
@@ -362,19 +373,20 @@ the value-pipeline level. Coverage:
 | C/C++ | 26% | 41% | 32% | **95%** |
 | **Total** | **82%** | **85%** | **93%** | **96%** |
 
-Downstream stages (eligibility, EOL, GitHub contributor metrics) still
-key off `github_repo`, so a non-GitHub-only project (glibc, gcc, etc.)
-still slips out of those analyses even though it's now visible in
-`value.csv` with a populated `git_url`. To fully fix: per-host
-adapters for license/EOL/contributor checks against GitLab API, savannah,
-sourceware, etc.
+Downstream consumers (risk, EOL, GitHub contributor metrics, the manual
+eligibility review) still key off `github_repo`, so a non-GitHub-only
+project (glibc, gcc, etc.) still slips out of those analyses even though
+it's now visible in `value.csv` with a populated `git_url`. To fully fix:
+per-host adapters for license/EOL/contributor checks against GitLab API,
+savannah, sourceware, etc.
 
 ### No package-level quality gate before results.csv
 
 `results.csv` admits everything in the top 95% cumulative download set
 plus its transitive deps — no license check, no age cutoff, no popularity
-floor, no archive/EOL gate. Quality filtering happens *downstream* in
-`classify_eligibility.py` and `check_eol.py`. This is intentional (keeps the
+floor, no archive/EOL gate. Quality filtering happens *downstream*: the
+per-ecosystem `check_eol.py` / `fetch_licenses.py` signals feed the manual
+eligibility review of the top candidates. This is intentional (keeps the
 value scoring untouched by signal-quality concerns), but means the raw
 value class distribution overstates how many projects we'd actually fund.
 

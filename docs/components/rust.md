@@ -56,8 +56,10 @@ Rust (crates.io)
   ecosystems becomes `class`.
 - **Risk** — A/B-class crates repos enter `src.risk.run_risk_pipeline` (scope set
   by `risk_input.value_classes` in `src/settings.json`).
-- **Eligibility** — A/B repos that also pass the OSI-license and non-EOL gates
-  reach `data/eligibility/eligibility.csv`.
+- **Eligibility** — now a **manual review** of the top A/B candidates (OSS license,
+  EOL, independence), not an automated pipeline stage. The per-ecosystem license/EOL
+  signals (`fetch_licenses.py`, `check_eol.py` → `data/sources/crates/eol.csv`) are still
+  produced and feed that review; there is no automated eligibility output.
 
 ## Outputs
 

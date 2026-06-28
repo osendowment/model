@@ -182,7 +182,7 @@ backlog. For each repo three ratios are formed (▴ higher = more workload):
 
 `AC` = `active_contributors_git_5y`, the count of distinct non-bot
 contributors who authored a commit in 2021–2025 (git-clone method).
-Each ratio is percentile-ranked across the eligible set (Hazen position
+Each ratio is percentile-ranked across the risk-scope set (Hazen position
 `100·(rank−0.5)/n`, strictly in 0–100); `workload_burden_percentile` is the
 geometric mean of the three percentiles. The class is its equal-count quartile:
 
@@ -305,7 +305,7 @@ repos. Counts reflect the last pipeline run; refresh with
 ### Why the remaining gaps
 
 - **depsdev (88%)** — repos that publish only via Debian / Homebrew / vcpkg / source tarballs are absent from deps.dev's index. Not fillable.
-- **Anything ~99% with 4–6 missing** — a mix of brand-new eligibility additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
+- **Anything ~99% with 4–6 missing** — a mix of brand-new risk-scope additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
 - **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos. The `/stats/contributors` per-year breakdown and `data/concentration-data.csv` are retired.
 - **churn (96.7%)** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
 
@@ -352,7 +352,7 @@ Sub-100% columns (every gap is structural, not a data-collection bug):
 | `loc_per_ac` | Lines of code per active contributor |
 | `cve_per_ac` | CVEs (5y) per active contributor |
 | `nni_per_ac` | Net new issues (5y) per active contributor |
-| `loc_per_ac_pctl` | Hazen percentile (0–100) of `loc_per_ac` across the eligible set |
+| `loc_per_ac_pctl` | Hazen percentile (0–100) of `loc_per_ac` across the risk-scope set |
 | `cve_per_ac_pctl` | Hazen percentile (0–100) of `cve_per_ac` |
 | `nni_per_ac_pctl` | Hazen percentile (0–100) of `nni_per_ac` |
 | `workload_burden_percentile` | Geometric mean of the three `*_pctl` values |

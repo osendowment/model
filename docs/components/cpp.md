@@ -77,11 +77,11 @@ C / C++ (Debian + Homebrew + Repology)
 
 - **Value** — `value_class` feeds the `class_cpp` column of
   `data/value/value.csv`.
-- **Risk / Eligibility** — these stages key off `github_repo`, and cpp identity is
+- **Risk** (and the manual eligibility review) — both key off `github_repo`, and cpp identity is
   **GitHub-only**. Many flagship cpp upstreams live off GitHub — glibc
   (sourceware.org), gcc (Savannah), glib (gitlab.gnome.org), mpfr (gitlab.inria.fr),
   curl (curl.se) — so they carry a `git_url` in `value.csv` but `github_repo=""`,
-  and slip out of Risk and Eligibility. Coverage jumps once non-GitHub Git hosts are
+  and slip out of Risk (and the manual eligibility review). Coverage jumps once non-GitHub Git hosts are
   counted: **26% → 41%** of results overall, and A+B **32% → 95%** (most non-GitHub
   upstreams are the load-bearing A/B libraries).
 
@@ -125,7 +125,7 @@ A+B repos: 32% have a GitHub repo, **95%** have some Git URL.
 
 - **Runtime-only dep tree** — build infrastructure (cmake, pkgconf) is undervalued;
   PageRank reflects runtime coupling, not build coupling.
-- **GitHub-only identity downstream** — Risk/Eligibility miss non-GitHub upstreams
+- **GitHub-only identity downstream** — Risk (and the manual eligibility review) miss non-GitHub upstreams
   even though `value.csv` now exposes their `git_url`. Fully fixing this needs
   per-host adapters (GitLab API, Savannah, sourceware) for license/EOL/contributor
   checks.

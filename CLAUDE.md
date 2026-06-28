@@ -2,8 +2,9 @@
 
 ## Code Organization
 
-`src/` is organized by **role**, mirroring the Value → Risk → Eligibility pipeline
-(and the `data/` layout). A script's location tells you what it is:
+`src/` is organized by **role**, mirroring the Value → Risk pipeline (plus a
+manual eligibility review) and the `data/` layout. A script's location tells
+you what it is:
 
 - `src/sources/<source>/` — source-related scripts: everything that fetches or
   processes data from one external source. One folder per source — ecosystem
@@ -15,9 +16,14 @@
   (e.g. code `floss_fund/` ↔ data `floss-fund/`).
 - `src/common/` — shared infrastructure used across stages: `params.py`, `repos.py`,
   `tables.py`, `stats.py`, `pipeline_runner.py`, `funding_platforms.py`.
-- `src/value/`, `src/risk/`, `src/eligibility/` — pipeline-stage scripts: the
-  per-dimension builders for that stage **plus** its orchestrator
-  (`run_<stage>_pipeline.py`, run via `uv run python -m src.<stage>.run_<stage>_pipeline`).
+- `src/value/`, `src/risk/` — pipeline-stage scripts: the per-dimension
+  builders for that stage **plus** its orchestrator (`run_<stage>_pipeline.py`,
+  run via `uv run python -m src.<stage>.run_<stage>_pipeline`). Eligibility
+  has no stage folder of its own — it is a **manual review** of the top
+  candidates, not an automated stage. The source inputs that inform it
+  (`src/sources/osi/`, `src/sources/foundations/`, the per-ecosystem
+  `check_eol.py` / `fetch_licenses.py`, `fetch_repo_owner_data`) are kept
+  under `src/sources/`.
 - `src/settings.json` — model parameters/config at the `src/` root (loaded by `src/common/params.py`).
 - Only truly general-purpose scripts (tied to no source or stage) go in a top-level
   `scripts/` folder. Never leave a script in a bare `scripts/` folder if it belongs
@@ -25,18 +31,19 @@
 
 ## Data Organization
 
-`data/` mirrors the three-stage pipeline (Value → Risk → Eligibility), with all external-source data isolated under `data/sources/`:
+`data/` mirrors the two-stage pipeline (Value → Risk), with all external-source data isolated under `data/sources/`:
 
 - `data/sources/<source>/` — raw + intermediate data fetched from external sources. One folder per source: ecosystem registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`, `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `endoflife/`, `floss-fund/`, `opencollective/`, `foundations/`).
 - `data/value/` — Value-stage outputs: `value.csv` (the unified per-repo value table; carries a tri-state `valid` column), `validation.csv` (git/GitHub validation audit table — rollup of the source caches), `overrides.csv` (curated manual repo/validity corrections), `stats.csv` (per-ecosystem stats matrix: metric rows × ecosystem columns — downloads per year + package/repo counts).
 - `data/risk/` — Risk-stage outputs: `risk.csv` (final aggregated risk table) plus the per-dimension builds (`concentration.csv`, `complexity.csv`, `security.csv`, `funding.csv`, `visibility.csv`, `workload.csv`). Raw funding signals live under `data/sources/github/` (`sponsors.csv` inbound, `sponsorships.csv` outbound, `funding-yml.csv`), `data/sources/floss-fund/` (`funding-json.csv`), and `data/sources/opencollective/` (`budgets.csv`).
-- `data/eligibility/` — Eligibility-stage output: `eligibility.csv`.
+
+(Eligibility is a manual review, not a pipeline stage — it has no stage output folder. Its source signals live under `data/sources/` (`osi/`, `foundations/`, per-ecosystem `eol.csv`, license data).)
 
 Rule: a script reading external/fetched data points at `data/sources/<source>/…`; a script reading or writing a stage result points at `data/<stage>/…`. Never write a stage output into `data/sources/`, and never write fetched source data into a stage folder.
 
 ## Documentation
 
-`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md`, `eligibility.md` — with everything else in a subfolder:
+`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md` — with everything else in a subfolder:
 
 - `docs/sources/<source>.md` — one page per external data source.
 - `docs/components/<component>.md` — cross-cutting component docs (e.g. `validation.md`, how `data/value/validation.csv` is formed).
