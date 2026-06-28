@@ -68,3 +68,6 @@ serde_test,crates,serde-rs/serde,,,serde_test lives in the main serde-rs/serde m
 google-api-core,pypi,googleapis/google-cloud-python,,,google split google-cloud-python into per-package repos; keep the google-cloud-python monorepo as canonical for this package. Manually approved.
 google-auth,pypi,googleapis/google-cloud-python,,,google split google-cloud-python into per-package repos; keep the google-cloud-python monorepo as canonical for this package. Manually approved.
 googleapis-common-protos,pypi,googleapis/google-cloud-python,,,google split google-cloud-python into per-package repos; keep the google-cloud-python monorepo as canonical for this package. Manually approved.
+pg8000,pypi,,https://codeberg.org/tlocke/pg8000.git,,github slug tlocke/pg8000 is 404; project moved to Codeberg codeberg.org/tlocke/pg8000 (verified git ls-remote OK). Non-GitHub upstream.
+gethostname,crates,,https://codeberg.org/swsnr/gethostname.rs.git,,github slug swsnr/gethostname.rs is 404; swsnr migrated to Codeberg codeberg.org/swsnr/gethostname.rs (verified ls-remote OK). Non-GitHub upstream.
+bevy_state_macros,crates,bevyengine/bevy,,,fork slug martintrumann/bevy_state_macros is 404; the crate is a subcrate of the bevyengine/bevy monorepo (verified).
