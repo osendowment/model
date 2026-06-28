@@ -1,17 +1,13 @@
-"""Fetch CNCF landscape projects from the official landscape.yml.
+"""Fetch Linux Foundation landscape projects.
 
-Note: CNCF is hosted under the Linux Foundation. We tag CNCF projects
-separately because that's the most specific (and the more useful) host
-when classifying a repo. The matcher prefers `cncf` over `lf` on overlap.
+Source: https://github.com/jmertic/lf-landscape (landscape.yml)
+Output: data/sources/funding/lf/projects.csv
 
-Source: https://github.com/cncf/landscape (landscape.yml)
-Output: data/sources/foundations/cncf/projects.csv
-
-Only rows with `maturity` set (sandbox / incubating / graduated / archived)
-are kept — those are actual CNCF projects, not just landscape entries.
+Note: CNCF projects also appear here (CNCF is hosted under LF). The
+matcher prefers the more specific `cncf` slug when a repo matches both.
 
 Usage:
-    uv run python -m src.sources.foundations.cncf
+    uv run python -m src.sources.funding.lf
 """
 
 import argparse
@@ -20,15 +16,15 @@ from urllib.parse import urlparse
 import httpx
 import yaml
 
-from src.sources.foundations._common import (USER_AGENT, atomic_write, banner,
+from src.sources.funding._common import (USER_AGENT, atomic_write, banner,
                                      extract_package, github_slug, out_path,
                                      summary_table)
 
-SLUG = "cncf"
-SOURCE = "https://raw.githubusercontent.com/cncf/landscape/master/landscape.yml"
+SLUG = "lf"
+SOURCE = "https://raw.githubusercontent.com/jmertic/lf-landscape/main/landscape.yml"
 COLS = ["name", "domain", "homepage_url", "github_repo",
         "ecosystem", "package", "repo_url",
-        "maturity", "category", "subcategory", "description", "accepted"]
+        "category", "subcategory", "description", "license", "accepted"]
 
 
 def fetch() -> list[dict]:
@@ -39,12 +35,14 @@ def fetch() -> list[dict]:
     rows: list[dict] = []
     for category in data.get("landscape") or []:
         cat_name = category.get("name", "")
+        # Skip the "LF Members" category — those are companies paying LF dues,
+        # not LF-hosted projects. Mixing them in causes false positives like
+        # "boto3 → lf" because AWS is an LF member.
+        if cat_name == "LF Members":
+            continue
         for subcat in category.get("subcategories") or []:
             subcat_name = subcat.get("name", "")
             for item in subcat.get("items") or []:
-                maturity = item.get("project") or ""
-                if not maturity:
-                    continue  # landscape-only entries (vendors etc.) — skip
                 homepage = (item.get("homepage_url") or "").strip()
                 repo_url = (item.get("repo_url") or "").strip()
                 try:
@@ -62,10 +60,10 @@ def fetch() -> list[dict]:
                     "ecosystem": eco,
                     "package": pkg,
                     "repo_url": repo_url,
-                    "maturity": maturity,
                     "category": cat_name,
                     "subcategory": subcat_name,
                     "description": desc,
+                    "license": item.get("license") or "",
                     "accepted": extra.get("accepted") or "",
                 })
     rows.sort(key=lambda r: r["name"].lower())
@@ -74,11 +72,11 @@ def fetch() -> list[dict]:
 
 def main() -> None:
     argparse.ArgumentParser().parse_args()
-    banner(SLUG, "Cloud Native Computing Foundation", f"Fetching {SOURCE}")
+    banner(SLUG, "Linux Foundation landscape", f"Fetching {SOURCE}")
     rows = fetch()
     path = out_path(SLUG)
     atomic_write(path, rows, COLS)
-    summary_table(SLUG, rows, path, group_by="maturity")
+    summary_table(SLUG, rows, path, group_by="category")
 
 
 if __name__ == "__main__":

@@ -8,13 +8,14 @@ Reads (all under data/sources/):
     github/repos.csv           — stars, forks (info)          (src.github.fetch_repo_owner_data)
     floss-fund/funding-json.csv — FLOSS Fund directory export  (src.sources.floss_fund.funding_json)
     opencollective/budgets.csv — annual gross raised per OC slug (src.sources.opencollective.fetch_budgets)
-    foundations/host-by-repo.csv — FOSS-foundation host per repo
+    funding/host-by-repo.csv   — scraped FOSS-foundation host per repo
+    funding/overrides.csv      — curated host/owner institutional backing per repo
 
 Writes data/risk/funding.csv. The funding risk **score** (0-100, higher =
-less funded = riskier) is the geometric mean of two direction-aware risk
-percentiles:
+less funded = riskier) is the geometric mean of THREE direction-aware risk axes:
     gh_sponsorships_p  ← gh_sponsorships (in + out), lower → riskier
     oc_avg_funding_p   ← oc_avg_funding ($0 when none),  lower → riskier
+    host_score×100     ← combined host/owner backing (company 0, nonprofit 50, none 100)
 `gh_stars` / `gh_forks` are informational popularity columns (not scored);
 their fetch timestamp lives in data/sources/github/repos.csv. No per-signal
 `fetched_at` is rolled up here.
@@ -33,8 +34,10 @@ from rich.table import Table
 from src.common.funding_platforms import normalize_oc_slug
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_top_repos
+from src.common.stats import geometric_mean
 from src.common.tables import load_column_by_repo, load_rows_by_repo
 from src.sources.floss_fund.directory import normalize_github_repo
+from src.sources.opencollective.fetch_collectives import load_index as _load_oc_index
 
 console = Console()
 
@@ -45,15 +48,43 @@ FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
 REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 FLOSS_FUND_FILE = DATA_DIR / "sources" / "floss-fund" / "funding-json.csv"
 OC_BUDGETS_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
-FOUNDATIONS_FILE = DATA_DIR / "sources" / "foundations" / "host-by-repo.csv"
+FOUNDATIONS_FILE = DATA_DIR / "sources" / "funding" / "host-by-repo.csv"
+OVERRIDES_FILE = DATA_DIR / "sources" / "funding" / "overrides.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
 
 FIELDS = ["repo", "repo_id",
           "gh_sponsors_in", "gh_sponsors_out", "gh_sponsorships", "gh_sponsorships_p",
           "gh_stars", "gh_forks",
           "has_funding_yml", "funding_yml_platforms", "has_funding_json", "channels_count",
-          "oc_avg_funding", "oc_avg_funding_p",
-          "foundation_host", "score"]
+          "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
+          "host", "host_type", "owner", "owner_type", "host_score",
+          "score"]
+
+# A repo's institutional backing discounts its funding risk. `host` = the
+# foundation/company *legally* stewarding the project; `owner` = the entity that
+# owns the GitHub org. Each is typed company / nonprofit / (none). The single
+# `host_score` combines both — the most-funded backer wins (min) — and is the
+# multiplier carried into the funding score: a company backer fully resources the
+# project (0 → score floors at 1), a nonprofit/foundation halves the risk (0.5),
+# and no known backer leaves it unchanged (1).
+TYPE_SCORE = {"company": 0.0, "nonprofit": 0.5, "": 1.0}
+
+
+def _type_score(t: str) -> float:
+    return TYPE_SCORE.get((t or "").strip().lower(), 1.0)
+
+
+def _backing_score(host_type: str, owner_type: str) -> float:
+    """Combined backing multiplier ∈ {0, 0.5, 1} — the most-funded of host/owner."""
+    return min(_type_score(host_type), _type_score(owner_type))
+
+
+def _fmt_score(x: float) -> str:
+    return str(int(x)) if x == int(x) else f"{x:g}"
+
+
+def _fmt_money(x: float) -> str:
+    return str(int(x)) if x == int(x) else f"{x:.2f}"
 
 
 def _platform_set(csv_value: str) -> set[str]:
@@ -85,13 +116,17 @@ def oc_avg_funding(slug: str, oc_budgets: dict[str, dict]) -> str:
 
 
 def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dict,
-                 foundation_host: str, oc_budgets: dict, repo_meta: dict,
-                 sponsoring_count: str = "") -> dict:
-    """Join one repo's raw funding signals (percentiles filled later in build())."""
+                 host: str, host_type: str, owner: str, owner_type: str,
+                 repo_meta: dict, sponsoring_count: str = "",
+                 oc_slug: str = "", oc_avg: str = "0") -> dict:
+    """Join one repo's raw funding signals (percentiles filled later in build()).
+
+    `oc_slug` / `oc_avg` are the Open Collective attribution resolved in build():
+    a repo-level collective's full budget, or a class-A repo's equal share of its
+    org's collective (see build()).
+    """
     channels = _platform_set(yml.get("funding_yml_platforms")) | _platform_set(
         export.get("channel_platforms"))
-    oc_slug = (normalize_oc_slug(yml.get("open_collective"))
-               or normalize_oc_slug(export.get("open_collective")))
     gh_in = (sponsors.get("github_sponsors") or "").strip()
     gh_out = (sponsoring_count or "").strip()
     return {
@@ -106,8 +141,13 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "funding_yml_platforms": (yml.get("funding_yml_platforms") or "").strip(),
         "has_funding_json": "True" if export else "False",
         "channels_count": str(len(channels)),
-        "oc_avg_funding": oc_avg_funding(oc_slug, oc_budgets),
-        "foundation_host": foundation_host,
+        "oc_slug": oc_slug,
+        "oc_avg_funding": oc_avg,
+        "host": host,
+        "host_type": host_type,
+        "owner": owner,
+        "owner_type": owner_type,
+        "host_score": _fmt_score(_backing_score(host_type, owner_type)),
     }
 
 
@@ -146,36 +186,131 @@ def _load_sponsoring(path: Path) -> dict[str, str]:
     return out
 
 
+def _load_funding_overrides(path: Path) -> dict[str, dict]:
+    """{repo_lower: {host, host_type, owner, owner_type}} from overrides.csv.
+
+    Schema: ``repo, host, host_type, gh_user, owner, owner_type, oc_slug``.
+    `host` and `owner` are **domains** (the domain is the canonical name — no
+    separate `*_domain` column); `gh_user` is the GitHub login (informational);
+    `oc_slug` is a curated Open Collective slug for projects that fund via OC but
+    declare no FUNDING.yml (e.g. socketio).
+
+    Curated per-repo institutional backing — the foundation/company that hosts a
+    project and the entity that owns it. **Only a *legally connected* host
+    counts**: the foundation must legally steward the project (e.g. the Apache
+    Software Foundation legally holds Apache projects, the Rust Foundation holds
+    Rust) — a loose marketing/community association is not a host. A company that
+    legally owns the project is recorded as the `owner` instead.
+    """
+    out: dict[str, dict] = {}
+    if not path.exists():
+        return out
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            repo = (row.get("repo") or "").strip().lower()
+            if not repo:
+                continue
+            out[repo] = {
+                "host": (row.get("host") or "").strip(),
+                "host_type": (row.get("host_type") or "").strip(),
+                "owner": (row.get("owner") or "").strip(),
+                "owner_type": (row.get("owner_type") or "").strip(),
+                "oc_slug": (row.get("oc_slug") or "").strip(),
+            }
+    return out
+
+
 def build() -> list[dict]:
     eligible = load_top_repos()
     sponsors = load_rows_by_repo(SPONSORS_FILE)
     yml = load_rows_by_repo(FUNDING_YML_FILE)
     repos_meta = load_rows_by_repo(REPOS_FILE)
     foundations = load_column_by_repo(FOUNDATIONS_FILE, "host")
+    overrides = _load_funding_overrides(OVERRIDES_FILE)
     export = _export_by_repo(FLOSS_FUND_FILE)
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
     sponsoring = _load_sponsoring(SPONSORSHIPS_FILE)
 
+    # Open Collective attribution is driven by the reverse-map (collectives.csv),
+    # which records whether each collective's GitHub link names a specific repo or
+    # just an org — the authoritative connection.
+    oc_by_repo, oc_by_org = _load_oc_index()
+
+    def _avg(slug: str) -> float:
+        try:
+            return float(oc_avg_funding(slug, oc_budgets))
+        except (TypeError, ValueError):
+            return 0.0
+
+    # Org-budget split denominator: the org's top (class-A, valid) repos.
+    classA_per_org = Counter(e.repo.split("/", 1)[0].lower()
+                             for e in eligible if e.value_class == "A")
+
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
-        owner = repo.split("/", 1)[0].lower()
+        owner_login = repo.split("/", 1)[0].lower()
+        ov = overrides.get(repo.lower(), {})
+        # host: override wins; otherwise the scraped FOSS-foundation host, which
+        # is a nonprofit by definition. owner: from the override only.
+        scraped_host = foundations.get(repo, "")
+        host = ov.get("host") or scraped_host
+        host_type = ov.get("host_type") or ("nonprofit" if scraped_host else "")
+
+        # OC budget. A curated override row is AUTHORITATIVE: its `oc_slug` wins
+        # over the auto-map, including when EMPTY — an empty oc_slug on a curated
+        # repo means "no OC", suppressing a spurious reverse-map match (e.g. a junk
+        # collective claiming github.com/facebook). Otherwise auto-map: a repo-level
+        # collective → its FULL avg budget; else the org's collective split equally
+        # across the org's class-A repos.
+        # Auto-map matches are guarded by `_avg(...) > 0` — a $0 collective carries
+        # no funding signal and is usually junk (e.g. `for-the-mage` claiming
+        # github.com/facebook), so we don't attribute its slug.
+        if repo.lower() in overrides:
+            s = normalize_oc_slug(ov.get("oc_slug"))
+            oc_slug, oc_amt = (s, _avg(s)) if s else ("", 0.0)
+        elif oc_by_repo.get(repo.lower()) and _avg(oc_by_repo[repo.lower()]) > 0:
+            oc_slug = oc_by_repo[repo.lower()]
+            oc_amt = _avg(oc_slug)
+        elif (oc_by_org.get(owner_login) and entry.value_class == "A"
+              and _avg(oc_by_org[owner_login]) > 0):
+            org_slug = oc_by_org[owner_login]
+            n = classA_per_org[owner_login] or 1
+            oc_slug, oc_amt = org_slug, _avg(org_slug) / n
+        else:
+            oc_slug, oc_amt = "", 0.0
+
         rows.append(assemble_row(
             repo=repo, repo_id=entry.repo_id,
             sponsors=sponsors.get(repo, {}), yml=yml.get(repo, {}),
             export=export.get(repo.lower(), {}),
-            foundation_host=foundations.get(repo, ""),
-            oc_budgets=oc_budgets, repo_meta=repos_meta.get(repo, {}),
-            sponsoring_count=sponsoring.get(owner, "")))
+            host=host, host_type=host_type,
+            owner=ov.get("owner", ""), owner_type=ov.get("owner_type", ""),
+            repo_meta=repos_meta.get(repo, {}),
+            sponsoring_count=sponsoring.get(owner_login, ""),
+            oc_slug=oc_slug, oc_avg=_fmt_money(oc_amt)))
 
-    # Funding risk score: both axes are `lower_is_worse` (less funding → riskier);
-    # score = geometric mean of the two risk percentiles (0-100, integer).
+    # Funding risk score: both axes are `lower_is_worse` (less funding → riskier).
+    # add_percentiles writes the two risk percentiles; we then recompute `score`
+    # as their geometric mean × the backing factor (single round, auditable).
     add_percentiles(
         rows,
         pctl_specs=[("gh_sponsorships", False), ("oc_avg_funding", False)],
         composite_cols=["gh_sponsorships_p", "oc_avg_funding_p"],
         dim_col="score",
     )
+    # Funding score = geometric mean of THREE risk axes: the two channel
+    # percentiles plus the combined backing (`host_score`, the most-funded of
+    # host/owner). host_score (0/0.5/1) enters scaled to the 0-100 axis — company
+    # 0 · nonprofit 50 · none 100 — so it's commensurate with the percentiles. A
+    # company backer (0) zeroes the product → score floors at 1; a nonprofit
+    # foundation (50) is one of three equal voices; no backer (100) is neutral.
+    for r in rows:
+        ps = [float(r[c]) for c in ("gh_sponsorships_p", "oc_avg_funding_p")
+              if str(r.get(c, "")).strip()]
+        if len(ps) == 2:
+            backing_p = float(r["host_score"]) * 100.0
+            r["score"] = max(1, round(geometric_mean(ps + [backing_p])))
     return rows
 
 
@@ -194,20 +329,21 @@ def main() -> None:
     table.add_column("Field", style="bold")
     table.add_column("Populated", justify="right")
     for col in ("gh_sponsorships", "gh_stars", "has_funding_yml", "has_funding_json",
-                "channels_count", "oc_avg_funding", "foundation_host", "score"):
+                "channels_count", "oc_avg_funding", "host", "owner", "score"):
         n = sum(1 for r in rows if str(r.get(col, "")) not in ("", "0", "False"))
         table.add_row(col, f"{n:,}")
     console.print(table)
 
-    fh = Counter(r["foundation_host"] for r in rows if r["foundation_host"])
-    if fh:
-        ftable = Table(title="\n[bold]Foundation hosts[/bold]", show_header=True,
-                       header_style="bold dim", padding=(0, 1))
-        ftable.add_column("Host", style="bold")
-        ftable.add_column("Repos", justify="right")
-        for host, n in sorted(fh.items(), key=lambda x: -x[1]):
-            ftable.add_row(host, f"{n:,}")
-        console.print(ftable)
+    # Backing breakdown: how many repos each host/owner type discounts.
+    btable = Table(title="\n[bold]Backing (host / owner)[/bold]", show_header=True,
+                   header_style="bold dim", padding=(0, 1))
+    btable.add_column("Field", style="bold")
+    for t in ("company", "nonprofit"):
+        btable.add_column(t, justify="right")
+    for field in ("host_type", "owner_type"):
+        c = Counter(r[field] for r in rows if r[field])
+        btable.add_row(field, *(f"{c.get(t, 0):,}" for t in ("company", "nonprofit")))
+    console.print(btable)
 
     console.print(f"\n[dim]Wrote {total:,} rows → {OUTPUT_FILE}[/dim]")
 

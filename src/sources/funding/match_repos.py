@@ -1,11 +1,11 @@
 """Determine which foundation hosts each repo.
 
-Reads every `data/sources/foundations/{slug}/projects.csv` and builds three indexes:
+Reads every `data/sources/funding/{slug}/projects.csv` and builds three indexes:
   1. github_slug → host (e.g. `apache/kafka` → apache)
   2. github_org  → host (e.g. `apache/*`    → apache)
   3. apex_domain → host (e.g. `numpy.org`   → numfocus)
 
-…and writes `data/sources/foundations/host-by-repo.csv` with one row per repo:
+…and writes `data/sources/funding/host-by-repo.csv` with one row per repo:
   repo, host, host_source
 
 Matching priority (highest specificity wins):
@@ -18,7 +18,7 @@ CNCF wins over LF on overlap (CNCF lives inside the Linux Foundation —
 the more specific label is more useful for funding decisions).
 
 Usage:
-    uv run python -m src.sources.foundations.match_repos
+    uv run python -m src.sources.funding.match_repos
 """
 
 import argparse
@@ -29,7 +29,7 @@ from urllib.parse import urlparse
 from rich.console import Console
 from rich.table import Table
 
-from src.sources.foundations._common import DATA_DIR
+from src.sources.funding._common import DATA_DIR
 
 console = Console()
 
@@ -208,7 +208,7 @@ def classify(slug_idx: dict[str, str], org_idx: dict[str, str],
 def main() -> None:
     argparse.ArgumentParser().parse_args()
 
-    console.rule("[bold cyan]foundations/match_repos — joining foundation lists vs top-repos")
+    console.rule("[bold cyan]funding/match_repos — joining foundation lists vs top-repos")
     slug_idx, org_idx, domain_idx = build_indexes()
     console.print(f"  [dim]indexed[/dim] {len(slug_idx):,} project slugs across {len(SLUGS)} foundations")
     console.print(f"  [dim]+[/dim] {len(org_idx):,} curated org-prefix rules")

@@ -37,13 +37,15 @@ Funding  → data/risk/funding.csv  (897 A/B risk repos)
 │   ├── oc_avg_funding        ← OC GraphQL totalAmountReceived (gross, mean of years; $0 if none)     [2021–2025]
 │   └── oc_avg_funding_p      ← derived (worst-pinned CDF risk percentile of oc_avg_funding)          [2021–2025]
 │
-├── Foundations
-│   └── foundation_host       ← foundations/host-by-repo.csv (apache, lf, psf, numfocus …)            [most recent]
+├── Institutional backing  (funding/host-by-repo.csv ∪ funding/overrides.csv)
+│   ├── host, host_type      ← legally-connected steward domain (e.g. apache.org, react.foundation)  [most recent]
+│   ├── owner, owner_type     ← owning-entity domain (e.g. meta.com), from overrides.csv               [most recent]
+│   └── host_score           ← derived: combined backing, most-funded of host/owner (0 · 0.5 · 1)     [most recent]
 │
 ├── channels_count           ← derived (FUNDING.yml platforms ∪ funding.json channels, deduped)      [most recent]
 ├── gh_stars, gh_forks        ← GitHub /repos (informational, not scored)                             [most recent]
 │
-└── score  (the score)       ← derived (geometric mean of gh_sponsorships_p, oc_avg_funding_p; int 1–100)  [most recent]
+└── score  (the score)       ← derived (geom-mean of gh_sponsorships_p, oc_avg_funding_p, host_score×100; int 1–100)  [most recent]
     └─ carried into risk.csv as the column `funding`
 ```
 
@@ -55,8 +57,9 @@ Funding  → data/risk/funding.csv  (897 A/B risk repos)
    (by `repo`, by owner `login` for outbound sponsoring, by OC `slug`).
 3. **Derive** — combine raw signals (`gh_sponsorships`, `channels_count`,
    `has_funding_json`) and compute the percentiles.
-4. **Score** — `score` = geometric mean of the two channel percentiles
-   (integer 0–100, higher = more at-risk).
+4. **Score** — `score` = geometric mean of the two channel percentiles, then
+   **× `host_score`** — the combined backing multiplier (most-funded of host /
+   owner: company 0 · nonprofit 0.5 · none 1); integer 0–100, higher = more at-risk.
 5. **Aggregate** — `aggregate_risk.py` carries **only** this component's `score`
    into `risk.csv` as the column `funding`.
 
@@ -81,7 +84,8 @@ Five sources feed the build. Each fetcher records a `*_status` and/or
 | `github/funding-yml.csv` | `src/sources/github/fetch_funding_yml.py` | `.github/FUNDING.yml` platforms + handles | `repo` |
 | `floss-fund/funding-json.csv` | `src/sources/floss_fund/funding_json.py` | FLOSS Fund manifest directory | `id` |
 | `opencollective/budgets.csv` | `src/sources/opencollective/fetch_budgets.py` | OC gross annual budgets | `slug` |
-| `foundations/host-by-repo.csv` | foundations pipeline | FOSS-foundation host | `repo` |
+| `funding/host-by-repo.csv` | foundations scrapers (`src/sources/funding/`) | scraped FOSS-foundation host | `repo` |
+| `funding/overrides.csv` | curated | per-repo `host`/`owner` **domains** + types (company/nonprofit); schema `repo,host,host_type,gh_user,owner,owner_type` | `repo` |
 
 `gh_stars` / `gh_forks` are read from `data/sources/github/repos.csv` (GitHub
 `/repos`) and carried as informational columns — they are **not** scored.
@@ -139,28 +143,60 @@ lower funding ranks *higher* (more at-risk), mirroring the negated
 |---|---|---|
 | `gh_sponsorships_p` | `gh_sponsorships` (in + out) | low engagement → high percentile |
 | `oc_avg_funding_p` | `oc_avg_funding` | low $ → high percentile |
-| **`score`** | geometric mean of the two | the funding-risk score (int 1–100) |
+| **`score`** | geom-mean of **three** axes: the two `_p` **and `host_score×100`** | the funding-risk score (int 1–100) |
+
+```
+score      = max(1, round( ∛(gh_sponsorships_p × oc_avg_funding_p × host_score×100) ))
+host_score = min( type(host), type(owner) )      # 0 company · 0.5 nonprofit · 1 none
+```
+
+`host_score` (0/0.5/1) enters the geom mean **scaled to the 0–100 axis** (×100:
+company 0 · nonprofit 50 · none 100) so it is commensurate with the two channel
+percentiles — one of three equal voices rather than a blunt multiplier.
 
 The **geometric mean** is the key choice: a repo funded strongly on *either*
 channel gets a low (good) `score`, because one low percentile pulls the
 product down. A project with no GitHub Sponsors but a healthy OpenCollective
 (or vice-versa) is correctly read as funded.
 
+The **`host_score`** then folds in institutional resourcing the GitHub/OC axes
+miss. `host` is the foundation/company **legally** stewarding the project (a
+domain — only a *legally connected* steward counts, not a loose community
+association); `owner` is the owning entity (a domain). Each is classified
+**company** (0 — fully resourced, score floors at 1), **nonprofit/foundation**
+(0.5 — halved), or **none** (1 — unchanged). `host_score` is the **most-funded
+of the two** (`min`), so a single value ∈ {0, 0.5, 1}:
+
+- A scraped FOSS-foundation host (`funding/host-by-repo.csv`) defaults to
+  nonprofit, so Apache/LF/CNCF/NumFOCUS/PSF repos drop from 100 → 50 as before.
+- A curated `funding/overrides.csv` row sets either side by domain.
+  `facebook/react` (host `react.foundation` nonprofit, owner `meta.com` company)
+  → host_score `min(0.5, 0)` = 0 → ∛(100·100·0) = **1**; `rust-lang/rust` (host
+  `rustfoundation.org` nonprofit, no owner) → host_score `min(0.5, 1)` = 0.5 →
+  ∛(100·100·50) = **79**.
+
+Non-backed unfunded repos stay at 100.
+
 Worked examples:
 
-| Repo | oc_avg | ships | `score` | Reading |
-|---|---:|---:|---:|---|
-| vuejs/core | $132,860 | 158 | **1** | funded both channels |
-| axios/axios | $32,031 | 20 | 3 | funded both |
-| zloirock/core-js | $34,530 | 0 | 5 | OC-funded only — still low risk |
-| astral-sh/ruff | 0 | 39 | 48 | VC-backed, sponsors others |
-| acornjs/acorn | 0 | 0 | **100** | no detectable funding |
+| Repo | oc_avg | ships | host_score | `score` | Reading |
+|---|---:|---:|---:|---:|---|
+| facebook/react | 0 | 0 | 0 | **1** | company-owned (meta.com) — floors at 1 |
+| vuejs/core | $132,860 | 158 | 1 | 5 | funded both channels, no institutional backer |
+| axios/axios | $32,031 | 20 | 1 | 10 | funded both, no backer |
+| zloirock/core-js | $34,530 | 0 | 1 | 13 | OC-funded only |
+| rust-lang/rust | 0 | 0 | 0.5 | 79 | nonprofit foundation host only |
+| acornjs/acorn | 0 | 0 | 1 | **100** | no funding, no backer |
+
+Note the third axis lifts *funded-but-unbacked* repos (vuejs `1 → 5`, axios
+`3 → 10`): "no institutional backer" (`host_score = 1` → backing 100) is now a
+risk voice, not a no-op. The cohort median rose 69 → 78.
 
 ## Output
 
 ### `data/risk/funding.csv` (per-dimension build)
 
-16 columns, one row per risk repo. No `fetched_at` — per-signal timestamps stay
+20 columns, one row per risk repo. No `fetched_at` — per-signal timestamps stay
 in each source file.
 
 | Column | Description |
@@ -177,8 +213,12 @@ in each source file.
 | `channels_count` | distinct funding platforms |
 | `oc_avg_funding` | mean OC gross annual budget (`0` if none) |
 | `oc_avg_funding_p` | risk percentile of `oc_avg_funding` |
-| `foundation_host` | FOSS-foundation host (e.g. `apache`, `psf`) |
-| `score` | **funding-risk score** (geom-mean of the two `_p`, int 1–100) |
+| `host` | legally-connected steward **domain** (e.g. `apache`, `react.foundation`) or empty |
+| `host_type` | `company` / `nonprofit` / empty |
+| `owner` | owning-entity **domain** (e.g. `meta.com`), from `overrides.csv` |
+| `owner_type` | `company` / `nonprofit` / empty |
+| `host_score` | combined backing = `min(type(host), type(owner))` ∈ {`0` company, `0.5` nonprofit, `1` none} — multiplies `score` |
+| `score` | **funding-risk score** (geom-mean of the two `_p` × `host_score`, int 1–100) |
 
 ### `data/risk/risk.csv` (aggregate)
 
@@ -207,18 +247,24 @@ Of the 897 A/B risk repos:
 | Foundation host | 38 | 4.2% |
 | funding.json (FLOSS Fund) | 6 | 0.7% |
 
-`score` percentiles: p25 **46** · p50 **70** · p75 **100**. The mass of unfunded
-repos (no sponsors, no OC) tie at the worst percentile — `score` = 100 is the
-"no detectable funding" plateau.
+`score` percentiles: p25 **60** · p50 **78** · p75 **100**. Because the third
+axis treats "no institutional backer" as a risk voice, the whole cohort sits
+higher than the old two-axis version (median 69 → 78). `score` = 100 is the
+"no funding **and** no legal backer" plateau (**389** repos); nonprofit/foundation
+backing (scraped + curated) lowers ~**34** repos to **79**, and a company
+host/owner floors **8** repos at **1**.
 
 ## Limitations
 
-- **GitHub-centric.** Inbound sponsors, outbound sponsoring, and FUNDING.yml all
-  come from GitHub. A project funded entirely off-platform (corporate payroll,
-  grants, a private foundation) shows little signal — `astral-sh/ruff` is the
-  canonical case: VC-backed yet `gh_sponsors_in = 0` (it still lands at
-  `score` 48 only because the outbound signal flags it as a well-resourced
-  backer).
+- **Still GitHub/OC-centric for $ signal.** The two *scored axes* are inbound/
+  outbound GitHub Sponsors and OpenCollective. **Institutional backing is now
+  folded in** (the `host_score` factor — scraped foundations plus curated
+  legally-connected company/foundation overrides), but a repo with no `host`/`owner`
+  override and no scraped foundation host still shows little off-platform signal
+  (corporate payroll, private grants, VC) — except via
+  the outbound-sponsoring proxy. `astral-sh/ruff` is the canonical case: VC-backed
+  yet `gh_sponsors_in = 0`, landing at `score` 48 only because its outbound signal
+  flags it as a well-resourced backer.
 - **funding.json is still negligible** (6 repos) — the structured-manifest
   ecosystem hasn't reached this cohort. `has_funding_json` is informational, not
   yet a scoring input.

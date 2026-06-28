@@ -55,6 +55,7 @@ log = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
 FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
+OVERRIDES_FILE = DATA_DIR / "sources" / "funding" / "overrides.csv"
 FLOSS_FUND_FILE = DATA_DIR / "sources" / "floss-fund" / "funding-json.csv"
 
 API_URL = "https://api.opencollective.com/graphql/v2"
@@ -131,10 +132,42 @@ def _slugs_from_export(path: Path, scope: set[str]) -> set[str]:
     return out
 
 
+def _slugs_from_overrides(path: Path) -> set[str]:
+    """OC slugs curated per-repo in funding/overrides.csv (`oc_slug` column).
+
+    Catches projects that fund via Open Collective but declare no FUNDING.yml
+    (e.g. socketio), which the registry/FLOSS-export discovery can't see.
+    """
+    out: set[str] = set()
+    if path.exists():
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                out |= _oc_slugs(row.get("oc_slug"))
+    return out
+
+
+def _slugs_from_collectives(scope_repos: set[str], scope_orgs: set[str]) -> set[str]:
+    """OC slugs whose GitHub link (repo or org) matches a risk-scope repo.
+
+    The reverse map (data/sources/opencollective/collectives.csv) — OC declares
+    which repo/org each collective funds, so this catches OC-funded projects that
+    never declared a FUNDING.yml (socketio, …) without any guessing.
+    """
+    from src.sources.opencollective import fetch_collectives
+    by_repo, by_org = fetch_collectives.load_index()
+    out = {slug for repo, slug in by_repo.items() if repo in scope_repos}
+    out |= {slug for org, slug in by_org.items() if org in scope_orgs}
+    return out
+
+
 def collect_slugs() -> list[str]:
     """Distinct Open Collective slugs referenced by risk-scope repos."""
-    scope = {e.repo for e in load_top_repos()}
-    return sorted(_slugs_from_yml(FUNDING_YML_FILE) | _slugs_from_export(FLOSS_FUND_FILE, scope))
+    scope = {e.repo.lower() for e in load_top_repos()}
+    orgs = {r.split("/", 1)[0] for r in scope}
+    return sorted(_slugs_from_yml(FUNDING_YML_FILE)
+                  | _slugs_from_export(FLOSS_FUND_FILE, scope)
+                  | _slugs_from_overrides(OVERRIDES_FILE)
+                  | _slugs_from_collectives(scope, orgs))
 
 
 # ── CSV I/O ──────────────────────────────────────────────────────────────────

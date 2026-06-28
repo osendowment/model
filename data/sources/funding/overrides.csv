@@ -1,0 +1,16 @@
+repo,host,host_type,gh_user,owner,owner_type,oc_slug
+facebook/react,react.foundation,nonprofit,facebook,meta.com,company,
+rust-lang/rust,rustfoundation.org,nonprofit,rust-lang,,,
+langchain-ai/langchain,,,langchain-ai,langchain.com,company,
+mui/material-ui,,,mui,mui.com,company,mui-org
+protocolbuffers/protobuf,,,protocolbuffers,google.com,company,
+angular/angular-cli,,,angular,google.com,company,
+facebook/zstd,,,facebook,meta.com,company,
+radix-ui/primitives,,,radix-ui,workos.com,company,
+adobe/react-spectrum,,,adobe,adobe.com,company,
+torvalds/linux,linuxfoundation.org,nonprofit,torvalds,,,
+git/git,sfconservancy.org,nonprofit,git,,,
+certbot/certbot,eff.org,nonprofit,certbot,,,
+libuv/libuv,openjsf.org,nonprofit,libuv,,,
+sqlite/sqlite,sqlite.org,,sqlite,hwaci.com,company,
+socketio/socket.io,,,socketio,,,socketio

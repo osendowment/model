@@ -4,10 +4,10 @@ SFC is a fiscal sponsor — it holds trademarks and assets for projects like
 Git, Inkscape, BusyBox, Wine. The site has no API, so we parse the
 projects listing HTML.
 
-Output: data/sources/foundations/sfc/projects.csv
+Output: data/sources/funding/sfc/projects.csv
 
 Usage:
-    uv run python -m src.sources.foundations.sfc
+    uv run python -m src.sources.funding.sfc
 """
 
 import argparse
@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 import httpx
 
-from src.sources.foundations._common import (BROWSER_UA, atomic_write, banner,
+from src.sources.funding._common import (BROWSER_UA, atomic_write, banner,
                                      extract_package, github_slug, out_path,
                                      summary_table)
 
