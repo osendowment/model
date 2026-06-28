@@ -8,7 +8,7 @@ risk) and its **count of distinct CVEs over 2021–2025** (more CVEs → more ri
 signals (semgrep SAST findings, OSS-Fuzz enrollment, OpenSSF Best Practices
 badge) that do **not** enter the score.
 
-Scope: the 897 class-A value-class repos in the risk pipeline (see
+Scope: the 893 class-A value-class repos in the risk pipeline (see
 [value.md](../value.md)). Build step: `src/risk/build_security.py`.
 
 ## Metrics Roadmap
@@ -20,7 +20,7 @@ latest pull of that source. Raw signals are fetched per-source under
 `data/sources/`; derived columns are computed by `build_security.py`.
 
 ```
-Security  → data/risk/security.csv  (897 A/B risk repos)  →  risk.csv col `security`
+Security  → data/risk/security.csv  (893 class-A risk repos)  →  risk.csv col `security`
 │
 ├── OpenSSF Scorecard
 │   ├── openssf_score          ← scorecard `score` (0–10); local first, deps.dev fallback  [2025 EOY]
@@ -127,7 +127,7 @@ percentiles are informational and are NOT inputs to `score`.**
 ### The percentiles (`_p`)
 
 `add_percentiles(...)` computes direction-aware population percentiles
-(0–100) over all 897 repos:
+(0–100) over all 893 repos:
 
 | Column | Basis | Direction (`asc`) |
 |---|---|---|
@@ -189,20 +189,20 @@ geometric mean of the present component scores.
 
 ## Coverage
 
-Of the 897 A/B risk repos:
+Of the 893 class-A risk repos:
 
 | Signal | Repos | % |
 |---|---:|---:|
-| `openssf_score` present | 897 | 100.0% |
-| — via local Scorecard | 893 | 99.6% |
-| — via deps.dev fallback | 4 | 0.4% |
-| `cve_count_5y` known | 893 | 99.6% |
-| `score` populated | 893 | 99.6% |
-| semgrep SAST findings present | 884 | 98.6% |
-| OSS-Fuzz enrolled | 130 | 14.5% |
-| Best Practices badge (any tier) | 30 | 3.3% |
+| `openssf_score` present | 893 | 100.0% |
+| — via local Scorecard | 890 | 99.7% |
+| — via deps.dev fallback | 3 | 0.3% |
+| `cve_count_5y` known | 893 | 100.0% |
+| `score` populated | 893 | 100.0% |
+| semgrep SAST findings present | 874 | 97.9% |
+| OSS-Fuzz enrolled | 130 | 14.6% |
+| Best Practices badge (any tier) | 30 | 3.4% |
 
-CVE distribution: 695 repos with zero CVEs, 198 with ≥1 (max 10,602). Best
+CVE distribution: 698 repos with zero CVEs, 195 with ≥1 (max 10,602). Best
 Practices badge tiers: 18 `passing`, 10 `in_progress`, 1 `gold`, 1 `silver`.
 `score` quartiles: p25 **39** · p50 **53** · p75 **63** (max 94).
 
