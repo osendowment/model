@@ -3,8 +3,8 @@
 
 Connector for the ecosyste.ms /registries/{registry}/packages/{name} endpoint,
 used by the value pipeline to fill URLs the native registry crawl didn't
-surface. Runs BEFORE the claude-generated `llm_guess` fallback so we prefer
-ecosyste.ms's cross-registry consensus over LLM guesses.
+surface, so we prefer registry-native URLs and fall back to ecosyste.ms's
+cross-registry consensus.
 
 For each ecosystem (npm, pypi, crates, cpp), reads `data/sources/{eco}/results.csv`
 and finds packages with empty `github_repo` AND empty `git`. Queries

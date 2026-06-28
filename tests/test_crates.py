@@ -259,7 +259,7 @@ def test_github_repos_non_empty():
 def test_results_columns():
     cols, _ = _read_csv(RESULTS_CSV)
     expected = (
-        ["package", "github_repo", "git", "eco_guess", "llm_guess", "avg_downloads"]
+        ["package", "github_repo", "git", "eco_guess", "avg_downloads"]
         + YEAR_COLS
         + ["top", "pagerank", "value_class", "license"]
     )
