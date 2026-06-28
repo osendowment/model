@@ -61,7 +61,7 @@ bitflags/bitflags,29287955,crates.io:bitflags,2026-05-18T01:11:51+00:00
 blakeembrey/array-flatten,17789771,npm:array-flatten,2026-05-18T01:11:51+00:00
 blakeembrey/change-case,9440238,"npm:no-case,npm:lower-case,npm:camel-case,npm:param-case,npm:dot-case,npm:pascal-case,npm:upper-case,npm:snake-case,npm:change-case,npm:upper-case-first,npm:constant-case,npm:title-case,npm:sentence-case,npm:path-case,npm:header-case,npm:swap-case,npm:capital-case,npm:is-lower-case,npm:is-upper-case,npm:lower-case-first,npm:sponge-case",2026-05-18T01:12:12+00:00
 bluss/bencher,65987276,crates.io:bencher,2026-05-18T01:11:52+00:00
-bminor/glibc,13868694,Debian:glibc,2026-05-03T18:55:59+00:00
+bminor/glibc,13868694,Debian:glibc,2026-06-28T17:39:45+00:00
 boto/boto3,24774658,PyPI:boto3,2026-05-18T01:11:53+00:00
 boto/botocore,6670942,PyPI:botocore,2026-05-18T01:11:54+00:00
 boto/s3transfer,49535299,PyPI:s3transfer,2026-05-18T01:11:54+00:00
@@ -465,7 +465,7 @@ libffi/libffi,321154,Debian:libffi,2026-05-18T01:14:32+00:00
 libidn/libidn2,87378214,Debian:libidn2,2026-05-18T01:14:32+00:00
 libjpeg-turbo/libjpeg-turbo,39760454,Debian:libjpeg-turbo,2026-05-18T01:14:34+00:00
 libjxl/libjxl,340219494,Debian:libjxl,2026-05-18T01:14:33+00:00
-libpixman/pixman,81675971,Debian:pixman,2026-05-03T18:59:18+00:00
+libpixman/pixman,81675971,Debian:pixman,2026-06-28T17:39:42+00:00
 libuv/libuv,14812739,Debian:libuv,2026-05-18T01:14:33+00:00
 linusu/buffer-from,66025821,npm:buffer-from,2026-05-18T01:14:33+00:00
 linux-audit/audit-userspace,52464964,Debian:audit,2026-05-18T01:14:34+00:00

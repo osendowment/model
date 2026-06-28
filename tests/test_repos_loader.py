@@ -65,6 +65,39 @@ def test_load_top_repos_keeps_archived_when_flag_off(tmp_path, monkeypatch):
     assert {e.repo for e in out} == {"owner/b"}
 
 
+def test_load_top_repos_keeps_archived_live_upstream_mirror(tmp_path, monkeypatch):
+    """An archived GitHub mirror of a live non-github upstream (per
+    overrides.csv) is KEPT; a plain archived repo (no mirror override) is
+    DROPPED."""
+    value = tmp_path / "value.csv"
+    _write(value, ["github_repo", "valid", "class"], [
+        {"github_repo": "bminor/glibc", "valid": "True", "class": "A"},
+        {"github_repo": "owner/plainarchived", "valid": "True", "class": "A"},
+    ])
+    gh = tmp_path / "repos.csv"
+    _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
+        {"repo": "bminor/glibc", "valid": "True", "repo_id": "10",
+         "archived": "True", "size": "5", "stars": "9"},
+        {"repo": "owner/plainarchived", "valid": "True", "repo_id": "20",
+         "archived": "True", "size": "1", "stars": "1"},
+    ])
+    overrides = tmp_path / "overrides.csv"
+    _write(overrides, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"], [
+        # mirror: non-github git_url -> exempt from skip_archived
+        {"package": "glibc", "ecosystem": "cpp", "github_repo": "bminor/glibc",
+         "git_url": "https://sourceware.org/git/glibc.git", "valid": "", "reason": "mirror"},
+        # not a mirror: github git_url -> NOT exempt (but it's not archived here anyway)
+        {"package": "x", "ecosystem": "cpp", "github_repo": "owner/plainarchived",
+         "git_url": "https://github.com/owner/plainarchived.git", "valid": "", "reason": "x"},
+    ])
+    monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
+    out = repos.load_top_repos(
+        value_file=str(value), repos_file=str(gh), overrides_file=str(overrides)
+    )
+    # glibc mirror kept despite archived; plain archived repo dropped.
+    assert {e.repo for e in out} == {"bminor/glibc"}
+
+
 def test_load_top_repos_dedup_highest_class_wins(tmp_path, monkeypatch):
     value = tmp_path / "value.csv"
     _write(value, ["github_repo", "valid", "class"], [
