@@ -17,8 +17,9 @@ step is a pure rollup — it does NO network IO:
      pipeline error (run `verify_git_urls` first) — never silently invalid.
   5. Write `data/value/validation.csv` (target, type, sources, checked_at,
      valid) and join the per-repo `valid` verdict back into `value.csv`:
-     `True` if all the row's targets are valid, `False` if any is invalid,
-     empty for an orphan row with no target.
+     `True` iff the repo has a validated `github_repo` (mirror); `False`
+     otherwise — no GitHub repo at all (orphan or non-GitHub-only upstream),
+     or a `github_repo` that 404s.
 
 Usage:
     uv run python -m src.value.build_validation
@@ -186,17 +187,20 @@ def join_valid(
     value_rows: list[dict],
     target_valid: dict[tuple[str, str], bool],
 ) -> list[dict]:
-    """Set each row's `valid`: AND of its targets (True/False), '' if no target.
+    """Set each row's `valid`: True iff the repo has a validated GitHub repo.
 
-    Current data has one target per row, but the AND generalises to a future
-    row carrying both a github repo and a distinct non-github URL.
+    A repo is fundable only if it has a GitHub repo (or mirror) that resolves
+    (HTTP 200). Everything else is `False`:
+    - orphans (no upstream repo at all),
+    - non-GitHub-only upstreams (sourceware / savannah / gitlab / …) — a
+      non-GitHub `git_url` does not make a repo valid on its own; add a GitHub
+      mirror to `overrides.csv` to bring one into scope,
+    - a `github_repo` that 404s.
     """
     for row in value_rows:
-        key = _row_target(row)
-        if key is None:
-            row["valid"] = ""
-        else:
-            row["valid"] = "True" if target_valid.get(key) is True else "False"
+        gh = (row.get("github_repo") or "").strip().lower()
+        valid = bool(gh) and target_valid.get((gh, "github_repo")) is True
+        row["valid"] = "True" if valid else "False"
     return value_rows
 
 
