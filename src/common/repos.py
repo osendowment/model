@@ -2,7 +2,7 @@
 
 Source of truth: `data/value/value.csv` — the risk pipeline runs on repos
 whose `class` is one of `settings.json risk_input.value_classes`
-(default {A, B}). Repo metadata (`repo_id`, `archived`, `size`, `stars`)
+(default {A}). Repo metadata (`repo_id`, `archived`, `size`, `stars`)
 is enriched from `data/sources/github/repos.csv`, the authoritative GitHub-API
 record populated by `src.sources.github.fetch_repo_owner_data`.
 """
@@ -22,7 +22,7 @@ VALUE_FILE = "data/value/value.csv"
 REPOS_FILE = "data/sources/github/repos.csv"
 
 # Class precedence — highest class wins if a repo has multiple rows.
-_RANK = {"A": 4, "B": 3, "C": 2, "D": 1}
+_RANK = {"A": 3, "B": 2, "C": 1}
 
 
 @dataclass
@@ -84,17 +84,17 @@ def load_risk_repos(
 
     The risk pipeline runs on this set: repos whose `class` in
     `value-data.csv` is one of `settings.json risk_input.value_classes`
-    (default {A, B}) AND whose unified `valid` column is `True`.
+    (default {A}) AND whose unified `valid` column is `True`.
 
     - Keeps rows with `class` in RISK_INPUT_CLASSES, a non-empty
       `github_repo`, and `valid == "True"`. The `valid` gate is on by
       default (drops failed/404/invalid targets); pass `skip_invalid=False`
       to include rows regardless of validity. The eligibility stage shares
-      this exact scope (A/B ∩ valid).
+      this exact scope (valid class-A repos).
     - Slugs are canonicalised against `github/repos.csv` `full_name`, so a
       renamed repo (`gozala/events`) resolves to its current name
       (`browserify/events`) — the form the Search API and downstream joins need.
-    - Deduped by canonical slug; highest class wins (A > B > C > D).
+    - Deduped by canonical slug; highest class wins (A > B > C).
     - repo_id / archived / size_kb / stars enriched from `data/sources/github/repos.csv`.
       `skip_archived` drops archived repos.
     - Repos missing from github/repos.csv are returned with `enriched=False`

@@ -1,7 +1,8 @@
 # Risk Pipeline
 
 Measures sustainability risk for GitHub repos using contributor concentration,
-codebase complexity, and issue-tracker dynamics over the last 5 years.
+codebase complexity, security posture, funding, and maintainer workload over
+the last 5 years.
 
 Each of the five dimensions has its own component doc — how it collects its
 sources, derives metrics, and produces the `score` it contributes to
@@ -91,67 +92,85 @@ graph LR
     subgraph Risk["Risk Pipeline"]
         concentration["Contributor Concentration"]
         complexity["Codebase Complexity"]
-        debt["Issue Debt"]
-        trend["Issue Trend"]
+        security["Security"]
+        funding["Funding"]
+        workload["Workload (incl. issue debt + trend)"]
     end
 
     github --> concentration
     github --> complexity
-    github --> debt
-    github --> trend
+    github --> security
+    github --> funding
+    github --> workload
 ```
 
-All thresholds are defined in `src/settings.json`.
+All scoring parameters (windows, weights) are defined in `src/settings.json`.
 
 ## How It Works
 
-Independent risk dimensions, each classified A (highest risk) through D (lowest)
-plus a separate trend signal:
+Five independent risk dimensions — **concentration, complexity, security,
+funding, workload**. Each dimension percentile-ranks its raw metrics
+(direction-aware, so a higher percentile always means *more* risk), takes the
+geometric mean of a designated subset of those percentiles, and emits a single
+**0–100 `score`** for the dimension (higher = riskier). The five dimension
+scores are combined into the overall `risk.csv` `score`. Risk is expressed as
+continuous scores and percentiles end-to-end — there are **no discrete risk
+classes or tiers**.
+
+Percentiles use the Hazen position `100·(rank−0.5)/n`, ranked across the
+risk-scope set, strictly within 0–100. "Direction-aware" means each metric is
+oriented before ranking: a low bus factor, a high HHI, a low OpenSSF score all
+map to a *high* risk percentile. The exact percentile(s) that feed each
+dimension `score` are listed in the table at the top of this doc and in each
+component doc; every `*_p` column and raw metric lives in the per-dimension
+`data/risk/<dimension>.csv`.
 
 1. **Concentration risk** -- how dependent is the project on a few contributors?
 2. **Complexity risk** -- how large and hard to audit is the codebase?
-3. **Issue debt risk** -- is the maintainer keeping up with reported issues over 5 years?
-4. **Issue trend** -- is the closure-vs-opening balance improving or deteriorating?
+3. **Security risk** -- how exposed is the project (OpenSSF Scorecard, CVEs, SAST)?
+4. **Funding risk** -- how well-resourced is the project (sponsorships, foundations)?
+5. **Workload risk** -- how much per-contributor burden (code, CVEs, issue backlog)?
 
-### Concentration Class
+### Concentration
 
-Based on bus factor (BF) and Herfindahl-Hirschman Index (HHI):
+Built from two metrics, each resolved by two methods (git-clone log + GitHub
+`/contributors`):
 
-| Class | Label | Criteria |
-|-------|-------|----------|
-| **A** | critical | BF = 1 and HHI >= 8000 |
-| **B** | high risk | BF <= 2 and HHI >= 5000 |
-| **C** | moderate | BF <= 4 and HHI >= 2500 |
-| **D** | healthy | otherwise |
+- **bus factor** (`bf_commits_*`) — the fewest contributors whose combined
+  commits reach `bus_factor_threshold` (0.5 = the people covering 50% of
+  commits). Low bus factor → higher risk.
+- **HHI** (`hhi_commits_*`, 0–10000) — Herfindahl-Hirschman concentration of
+  commit shares. High HHI → higher risk.
 
-### Complexity Class
+The `_5y` git axis (last `concentration.window_years` complete years) feeds the
+dimension `score`: `bf_commits_git_5y_p` and `hhi_commits_git_5y_p` are
+geometric-meaned. The `_full` / `_gh_alltime` percentiles are computed for
+context but not scored.
 
-Based on scc lines of code:
+### Complexity
 
-| Class | Label | Criteria |
-|-------|-------|----------|
-| **A** | massive | >= 1M LOC |
-| **B** | large | 100K -- 1M LOC |
-| **C** | moderate | 10K -- 100K LOC |
-| **D** | small | < 10K LOC |
+How large and hard to audit is the codebase? Percentile-ranked metrics
+(`data/risk/complexity.csv`):
 
-### Issue Debt Class
+- `loc_eoy` — lines of code (scc, EOY snapshot).
+- `scc_complexity_eoy` — scc cyclomatic total; `cyclomatic_max` /
+  `cognitive_max` — lizard per-function maxima.
+- `churn_5y_total` — added + deleted lines over 2021–2025 (git churn).
+- `hotspot_log` — Tornhill `churn × complexity` hotspot, log-scaled.
 
-Based on the 5-year close ratio (`closed_5y / opened_5y`) plus a per-class
-volume floor so a low-traffic repo isn't flagged as "drowning in backlog"
-on the strength of two dropped issues:
+### Issue debt
 
-| Class | Label | Criteria |
-|-------|-------|----------|
-| **A** | critical | close_ratio < 0.30 AND opened_5y >= 100 |
-| **B** | high risk | close_ratio < 0.60 AND opened_5y >= 30 |
-| **C** | moderate | close_ratio < 0.85 AND opened_5y >= 10 |
-| **D** | healthy | close_ratio >= 0.85 (and opened_5y >= 10) |
-| _empty_ | no signal | opened_5y < 10 (issues disabled / unused) |
+Is the maintainer keeping up with reported issues over 5 years? (Folded into the
+**workload** dimension.) `issue_close_ratio` = `closed_5y / opened_5y` (rounded
+to 3 dp); a low close ratio means a growing backlog, and its risk percentile is
+`issue_close_ratio_p`. Repos with too few issues (`opened_5y` below the volume
+floor) get an empty signal rather than a misleading ratio off two dropped
+issues.
 
 ### Issue Trend
 
-Independent of debt class; captures direction. For each year `y ∈ 2021..2025`:
+Independent of the backlog level; captures direction. For each year
+`y ∈ 2021..2025`:
 
 ```
 slope_opened = OLS slope of opened_y vs y
@@ -159,70 +178,44 @@ slope_closed = OLS slope of closed_y vs y
 trend_score  = (slope_closed - slope_opened) / mean(opened_per_year)
 ```
 
-Normalising by mean opened-volume makes the score comparable across project sizes.
+Normalising by mean opened-volume makes the score comparable across project
+sizes. A positive `issue_trend_score` means the maintainer is closing the gap
+(`issue_trend_score_p` is its risk percentile); it is empty when `opened_5y` is
+too small or fewer than three years had any issues opened.
 
-| Trend | Criteria |
-|-------|----------|
-| improving | trend_score >= +0.05 |
-| stable | -0.05 < trend_score < +0.05 |
-| deteriorating | trend_score <= -0.05 |
-| _empty_ | opened_5y < 25 OR fewer than 3 years had any issues opened |
-
-A class-A debt repo with `trend=improving` is the strongest "maintainer-rebound"
-signal: backlog is high *now* but the slope is closing the gap.
-
-### Workload Class
+### Workload
 
 Per-contributor burden, combining codebase size, security debt, and issue
-backlog. For each repo three ratios are formed (▴ higher = more workload):
+backlog. Three ratios (▴ higher = more workload), each percentile-ranked:
 
-- `loc_per_ac` — lines of code per active contributor
-- `cve_per_ac` — CVEs (5y) per active contributor
-- `nni_per_ac` — net new issues (opened − closed, 5y) per active contributor
+- `loc_per_ac` — lines of code per active contributor.
+- `cve_per_ac` — CVEs (5y) per active contributor.
+- `nni_per_ac` — net new issues (opened − closed, 5y) per active contributor.
 
 `AC` = `active_contributors_git_5y`, the count of distinct non-bot
 contributors who authored a commit in 2021–2025 (git-clone method).
 Each ratio is percentile-ranked across the risk-scope set (Hazen position
-`100·(rank−0.5)/n`, strictly in 0–100); `workload_burden_percentile` is the
-geometric mean of the three percentiles. The class is its equal-count quartile:
+`100·(rank−0.5)/n`, strictly in 0–100) into `loc_per_ac_p` / `cve_per_ac_p` /
+`nni_per_ac_p`; the dimension `score` is the geometric mean of the three
+percentiles, empty when an input is missing or AC = 0.
 
-| Class | Label | Criteria |
-|-------|-------|----------|
-| **A** | overloaded | top 25% of `workload_burden_percentile` |
-| **B** | high | next 25% |
-| **C** | moderate | next 25% |
-| **D** | comfortable | bottom 25% |
-| _empty_ | no signal | LOC, CVE, NNI, or AC missing, or AC = 0 |
+### Security
 
-### Security Class
+Combines the OpenSSF-rooted signals and SAST findings. Direction-aware risk
+percentiles (▴ higher = worse security):
 
-Combines the two OpenSSF-rooted security signals into a single A–D tier
-using the same method as the workload class. Two risk percentiles are
-formed (▴ higher = worse security):
+- `openssf_score_p` — percentile of the OpenSSF Scorecard `openssf_score`,
+  **inverted**: a lower Scorecard score ranks as higher risk.
+- `cve_count_5y_p` — percentile of `cve_count_5y`: more known CVEs → higher
+  risk.
+- `sast_findings_{total,error,security}_p` — percentiles of semgrep
+  `p/default` findings (informational).
 
-- `openssf_risk_pctl` — percentile of `openssf_score`, **inverted**: a
-  lower Scorecard score ranks as higher risk.
-- `cve_risk_pctl` — percentile of `cve_count_5y`: more known CVEs ranks
-  as higher risk.
-
-Each axis is percentile-ranked across the classified set (Hazen position
-`100·(rank−0.5)/n`, strictly in 0–100); `security_risk_percentile` is the
-geometric mean of the two — a repo ranks worst when it is high-risk on
-**both** axes, while a low-risk score on one axis pulls the composite
-down toward the safer quartiles. The class is its equal-count quartile:
-
-| Class | Label | Criteria |
-|-------|-------|----------|
-| **A** | critical | top 25% of `security_risk_percentile` |
-| **B** | high | next 25% |
-| **C** | moderate | next 25% |
-| **D** | healthy | bottom 25% |
-| _empty_ | no signal | `openssf_score` or `cve_count_5y` missing |
-
-~78% of risk-scope repos have zero known CVEs and so share one identical
-`cve_risk_pctl`; for those repos the class is effectively driven by the
-OpenSSF Scorecard axis, with the CVE axis only re-ranking the minority
-that carry CVEs.
+The dimension `score` is the geometric mean of `openssf_score_p` and
+`cve_count_5y_p` — a repo ranks worst when it is high-risk on both axes.
+~78% of risk-scope repos have zero known CVEs and share the same
+`cve_count_5y_p`, so for those the score is effectively driven by the OpenSSF
+Scorecard axis.
 
 ## Data Sources
 
@@ -277,11 +270,11 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 | `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
 | `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (the `scc` fetcher) |
 | `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value/value.csv` — repos with `class ∈ settings.json risk_input.value_classes` (default A/B)** — `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
+| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall risk `score`. **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)** — `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
 
 ## Source-file coverage
 
-Snapshot of how complete each source file is across the risk-scope (A/B)
+Snapshot of how complete each source file is across the risk-scope (class A)
 repos. Counts reflect the last pipeline run; refresh with
 `uv run python scripts/coverage_report.py`.
 
@@ -309,11 +302,15 @@ repos. Counts reflect the last pipeline run; refresh with
 - **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos. The `/stats/contributors` per-year breakdown and `data/concentration-data.csv` are retired.
 - **churn (96.7%)** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
 
-### What this rolls up to in `risk.csv`
+### What this rolls up to
 
-**899 rows × 51 columns · 100% risk-scope (A/B) repos populated · median per-column coverage 98.8%.** Counts refresh on re-run.
+**899 risk-scope repos in the last run · `risk.csv` holds one row each (five
+0–100 dimension scores + an overall `score`); the detailed metric and `*_p`
+percentile columns referenced below live in the per-dimension `data/risk/*.csv`
+files · median per-column coverage 98.8%.** Counts reflect the last pipeline run
+and refresh on re-run.
 
-Sub-100% columns (every gap is structural, not a data-collection bug):
+Sub-100% per-dimension columns (every gap is structural, not a data-collection bug):
 
 | Column | Coverage | Why |
 |---|---:|---|
@@ -327,37 +324,21 @@ Sub-100% columns (every gap is structural, not a data-collection bug):
 
 ### risk.csv
 
+One row per risk-scope repo. The five dimension columns are each a **0–100 risk
+score** (higher = riskier) — the geometric-mean rollup of that dimension's
+scored percentiles — and `score` is the overall risk score across the five
+dimensions. The detailed per-dimension metric and `*_p` percentile columns live
+in the per-dimension files
+(`data/risk/{concentration,complexity,security,funding,workload}.csv`) and are
+documented in the component docs linked at the top of this page.
+
 | Column | Description |
 |--------|-------------|
 | `repo` | GitHub repo slug (`owner/name`) |
 | `repo_id` | GitHub numeric repo ID |
-| `bf_commits_git_full` / `hhi_commits_git_full` | Bus factor / HHI (0--10000) — git-clone method, `_full` (all commits through the last complete year = `max(settings.years)`) |
-| `contributors_git_full` / `total_commits_git_full` | Merged non-bot contributors / non-merge commits — git, `_full` |
-| `bf_commits_git_5y` / `hhi_commits_git_5y` | Bus factor / HHI — git, `_5y` window (last `concentration.window_years` complete years; **the only axis that feeds `score`**) |
-| `active_contributors_git_5y` / `commits_git_5y` | Distinct non-bot contributors / commits — git, `_5y` window |
-| `bf_commits_gh_alltime` / `hhi_commits_gh_alltime` | Bus factor / HHI — GitHub `/contributors` method, `_gh_alltime` (uncapped API lifetime as of `github_fetched_at`; no per-year data, list capped near 500) |
-| `total_commits_gh_alltime` / `total_contributors_gh_alltime` / `active_contributors_gh_alltime` | Commit + contributor counts — GitHub method, `_gh_alltime` |
-| `loc_eoy` | Lines of code (scc, EOY snapshot; snapshot year in `loc_year`) |
-| `complexity_class` | A--D |
-| `issues_opened_5y` | Sum of issues opened over the settings window |
-| `issues_closed_5y` | Sum of issues closed over the settings window |
-| `issue_close_ratio` | `closed_5y / opened_5y`, rounded to 3 decimals |
-| `slope_opened` | OLS slope of yearly opened counts (issues/yr) |
-| `slope_closed` | OLS slope of yearly closed counts (issues/yr) |
-| `issue_trend_score` | Volume-normalised `slope_closed - slope_opened`; signed |
-| `issue_trend` | `improving` / `stable` / `deteriorating` / empty |
-| `issue_debt_class` | A--D, or empty if `opened_5y < 10` |
-| `active_contributors_git_5y` | Distinct non-bot contributors active in the settings window — the workload class's AC denominator |
-| `net_new_issues_5y` | `issues_opened_5y` − `issues_closed_5y` (5-year issue backlog growth) |
-| `loc_per_ac` | Lines of code per active contributor |
-| `cve_per_ac` | CVEs (5y) per active contributor |
-| `nni_per_ac` | Net new issues (5y) per active contributor |
-| `loc_per_ac_pctl` | Hazen percentile (0–100) of `loc_per_ac` across the risk-scope set |
-| `cve_per_ac_pctl` | Hazen percentile (0–100) of `cve_per_ac` |
-| `nni_per_ac_pctl` | Hazen percentile (0–100) of `nni_per_ac` |
-| `workload_burden_percentile` | Geometric mean of the three `*_pctl` values |
-| `workload_class` | A–D equal-count quartile of `workload_burden_percentile` (A = worst); empty when an input is missing |
-| `openssf_risk_pctl` | Hazen percentile (0–100) of `openssf_score`, inverted (lower score → higher risk) |
-| `cve_risk_pctl` | Hazen percentile (0–100) of `cve_count_5y` (more CVEs → higher risk) |
-| `security_risk_percentile` | Geometric mean of `openssf_risk_pctl` and `cve_risk_pctl` |
-| `security_class` | A–D equal-count quartile of `security_risk_percentile` (A = worst); empty when `openssf_score` or `cve_count_5y` is missing |
+| `concentration` | Contributor-concentration risk score (0–100) |
+| `complexity` | Codebase-complexity risk score (0–100) |
+| `security` | Security risk score (0–100) |
+| `funding` | Funding risk score (0–100) |
+| `workload` | Per-contributor workload risk score (0–100) |
+| `score` | Overall risk score (0–100) across the five dimensions |

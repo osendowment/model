@@ -49,7 +49,7 @@ uv run python -m src.sources.pypi.process_data [--min-avg N] [--alpha F]
 3. **top-packages.csv** -- packages covering 95% of ecosystem downloads
 4. **dependency-tree.csv** -- follow transitive deps from top packages
 5. **github-repos.csv** -- parse GitHub URLs from mapping file
-6. **results.csv** -- download-weighted PageRank, value classes A/B/C/D
+6. **results.csv** -- download-weighted PageRank, value classes A/B/C
 
 ## Outputs
 

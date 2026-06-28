@@ -1,7 +1,7 @@
 # Rust (crates.io)
 
 The crates.io slice of the [Value pipeline](../value.md): how crate download and
-dependency data becomes a download-weighted PageRank and an A/B/C/D value class for
+dependency data becomes a download-weighted PageRank and an A/B/C value class for
 every Rust crate. This page covers the **pipeline assembly**; for raw-fetch
 mechanics (the DB dump, download archives, fetch scripts) see the source reference
 [`sources/crates.md`](../sources/crates.md).
@@ -32,7 +32,7 @@ crates data flows through the shared Value mechanics (full description in
 6. **PageRank** — download-weighted personalized PageRank (α = 0.85) over the dep
    graph.
 7. **Value class** — sort by PageRank desc; cumulative-share cutoffs assign
-   A (≤50%) / B (≤75%) / C (≤90%) / D (rest).
+   A (≤75%) / B (≤95%) / C (rest).
 
 Orchestrated by `src.value.crates_pipeline` (fetch-db-dump → fetch-downloads →
 process). Metric lineage (`←` = data source, `[…]` = period):
@@ -54,9 +54,9 @@ Rust (crates.io)
 - **Value** — each crate's `value_class` is grouped by repo into
   `data/value/value.csv` as the `class_crates` column; the strongest class across
   ecosystems becomes `class`.
-- **Risk** — A/B-class crates repos enter `src.risk.run_risk_pipeline` (scope set
+- **Risk** — class-A crates repos enter `src.risk.run_risk_pipeline` (scope set
   by `risk_input.value_classes` in `src/settings.json`).
-- **Eligibility** — now a **manual review** of the top A/B candidates (OSS license,
+- **Eligibility** — now a **manual review** of the top candidates (OSS license,
   EOL, independence), not an automated pipeline stage. The per-ecosystem license/EOL
   signals (`fetch_licenses.py`, `check_eol.py` → `data/sources/crates/eol.csv`) are still
   produced and feed that review; there is no automated eligibility output.
@@ -79,11 +79,13 @@ Carried from the cross-ecosystem tables in [`value.md`](../value.md):
 | With GitHub repo | 5,967 (96%) |
 | With any Git URL | 6,130 (99%) |
 
-| Class | A | B | C | D | Total |
-|---|--:|--:|--:|--:|--:|
-| Packages | 49 | 197 | 449 | 5,523 | 6,218 |
-| Repos (`value.csv`) | 31 | 102 | 256 | 3,231 | — |
+| Class (`value.csv`) | A | B | C | Total |
+|---|--:|--:|--:|--:|
+| Repos (`class_crates`) | 132 | 533 | 2,911 | 3,576 |
 
-A+B repos: 99% have a GitHub repo, 100% have some Git URL. The crates.io
+Per-package class counts await the next full pipeline run — the per-package
+`results.csv` `value_class` is still on the legacy 4-class scheme.
+
+class-A repos: 99% have a GitHub repo, 100% have some Git URL. The crates.io
 `repository` field also resolves non-GitHub Git hosts, so Git coverage (99%)
 slightly exceeds GitHub (96%).
