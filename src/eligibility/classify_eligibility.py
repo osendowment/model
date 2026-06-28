@@ -145,11 +145,6 @@ def classify_oss(spdx: str) -> bool | None:
     return False
 
 
-def is_oss_license(spdx: str) -> bool:
-    """Back-compat alias — returns True only when `classify_oss` says True."""
-    return classify_oss(spdx) is True
-
-
 def load_repo_eol_index() -> dict[str, bool]:
     """Compute per-repo is_eol from per-ecosystem eol.csv + results.csv.
 

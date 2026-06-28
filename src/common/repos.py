@@ -5,9 +5,6 @@ whose `class` is one of `settings.json risk_input.value_classes`
 (default {A, B}). Repo metadata (`repo_id`, `archived`, `size`, `stars`)
 is enriched from `data/sources/github/repos.csv`, the authoritative GitHub-API
 record populated by `src.sources.github.fetch_repo_owner_data`.
-
-`load_eligible_repos` (eligibility-data.csv) is retained for the
-eligibility stage only — no risk script should call it.
 """
 
 from __future__ import annotations
@@ -23,7 +20,6 @@ log = logging.getLogger(__name__)
 
 VALUE_FILE = "data/value/value.csv"
 REPOS_FILE = "data/sources/github/repos.csv"
-ELIGIBILITY_FILE = "data/eligibility/eligibility.csv"
 
 # Class precedence — highest class wins if a repo has multiple rows.
 _RANK = {"A": 4, "B": 3, "C": 2, "D": 1}
@@ -213,34 +209,3 @@ def load_default_branches(repos_file: str = REPOS_FILE) -> dict[str, str]:
 # load_ab_repos is no longer accepted.
 load_ab_repos = load_risk_repos
 load_ab_slugs = load_risk_slugs
-
-
-def load_eligible_repos(
-    eligibility_file: str = ELIGIBILITY_FILE,
-) -> list[RepoEntry]:
-    """Return repos with `eligibility=True` from `eligibility-data.csv`.
-
-    Retained for the eligibility stage only. The risk pipeline now reads
-    `value-data.csv` via `load_risk_repos` — no risk script should call this.
-    """
-    if not os.path.exists(eligibility_file):
-        raise SystemExit(
-            f"missing {eligibility_file} — run "
-            "`uv run python -m src.eligibility.classify_eligibility` first"
-        )
-    out: list[RepoEntry] = []
-    with open(eligibility_file, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            if (row.get("eligibility") or "").strip() != "True":
-                continue
-            slug = row["repo"].strip().lower()
-            if not slug:
-                continue
-            out.append(RepoEntry(
-                repo=slug,
-                value_class=(row.get("value_class") or "").strip(),
-                repo_id=(row.get("repo_id") or "").strip(),
-                enriched=True,
-            ))
-    out.sort(key=lambda e: e.repo)
-    return out
