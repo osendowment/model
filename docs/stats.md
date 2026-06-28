@@ -24,19 +24,19 @@ Packages remaining after each Value stage, plus the share with a known upstream 
 - *Top packages* — covers 95% of cumulative downloads.
 - *After dep tree* — `|top ∪ transitive deps|`, the universe analysed for PageRank.
 - *Results* — every node from that universe (PageRank=0 rows kept); cpp is smaller, an `is_cpp` filter drops language-agnostic distro packages.
-- *GH %* / *Active GH %* — github.com share of *Results* (active = non-archived); *Git %* — also gitlab/bitbucket/sourcehut/codeberg + `custom` hosts (savannah, sourceware, kernel.org).
+- *Git URL* — results with any git host (gitlab/bitbucket/sourcehut/codeberg + `custom`: savannah, sourceware, kernel.org); *GitHub repo* — a github.com repo; *Active GH* — its mirror isn't archived. The `%` rows are shares of *Results*.
 
 | Metric | npm | pypi | crates | cpp | Total |
 |---|--:|--:|--:|--:|--:|
 | Top packages | 5,765 | 2,460 | 3,719 | 1,329 | 13,273 |
 | After dep tree | 6,370 | 3,139 | 6,218 | 2,368 | 18,095 |
-| Results | 6,370 | 3,139 | 6,218 | 1,639 | 17,366 |
-| With GitHub | 6,297 | 2,821 | 6,000 | 508 | 15,626 |
-| GH % | 99% | 90% | 96% | 31% | 90% |
-| Active GH (non-archived) | 6,032 | 2,728 | 5,842 | 500 | 15,102 |
-| Active GH % | 95% | 87% | 94% | 31% | 87% |
-| With Git | 6,305 | 2,850 | 6,130 | 1,240 | 16,525 |
+| **Results** | **6,370** | **3,139** | **6,218** | **1,639** | **17,366** |
+| Git URL | 6,305 | 2,850 | 6,130 | 1,240 | 16,525 |
+| GitHub repo | 6,297 | 2,821 | 6,000 | 508 | 15,626 |
+| **Active GH** | **6,032** | **2,728** | **5,842** | **500** | **15,102** |
 | Git % | 99% | 91% | 99% | 76% | 95% |
+| GitHub % | 99% | 90% | 96% | 31% | 90% |
+| **Active GH %** | **95%** | **87%** | **94%** | **31%** | **87%** |
 
 - *After dep tree* is already de-duplicated (`unify_value_data.py:150`); cpp unions the Debian + Homebrew graphs, Repology-canonicalised to one name each.
 - cpp *Results* (1,639) < *After dep tree* (2,368) from the `is_cpp` filter, **not** dedup.
