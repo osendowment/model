@@ -57,3 +57,80 @@ def test_workload_blanks_issues_when_repo_not_fetched(monkeypatch):
     assert absent["issue_close_ratio"] == ""
     assert absent["slope_opened"] == ""
     assert absent["nni_per_ac"] == ""
+
+
+def test_issue_sums_windowed_to_years(monkeypatch):
+    """*_5y issue figures must sum ONLY the YEARS window, not stray years.
+
+    Regression: op_5y/cl_5y summed every year key in the per-repo dict, so a
+    wider fetch (out-of-window rows in issues.csv) leaked into issues_opened_5y /
+    issues_closed_5y / net_new_issues_5y while the OLS slopes — which iterate
+    `for y in YEARS` — correctly ignored them. The two must agree.
+    """
+    import types
+    from src.risk import build_workload as bw
+
+    repos = [types.SimpleNamespace(repo="o/r", repo_id="1")]
+    in_open = {y: i + 1 for i, y in enumerate(bw.YEARS)}   # 1..5 -> sum 15
+    in_close = {y: 1 for y in bw.YEARS}                    # sum 5
+    # Inject out-of-window years that must NOT be counted.
+    issues = {
+        "opened_issues": {"o/r": {bw.YEARS[0] - 2: 1000, **in_open}},
+        "closed_issues": {"o/r": {bw.YEARS[-1] + 1: 500, **in_close}},
+    }
+    monkeypatch.setattr(bw, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bw, "load_rows_by_repo", lambda *a, **k: {})
+    monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
+    monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
+    monkeypatch.setattr(bw, "_load_issues_long", lambda path: issues)
+    monkeypatch.setattr(bw, "load_column_by_repo", lambda path, col: {"o/r": "5"})
+
+    row = {r["repo"]: r for r in bw.build()}["o/r"]
+    assert row["issues_opened_5y"] == 15   # not 1015
+    assert row["issues_closed_5y"] == 5    # not 505
+    assert row["net_new_issues_5y"] == 10  # not 510
+
+
+def test_empty_nni_neutral_filled_only_when_loc_and_cve_present(monkeypatch):
+    """Empty nni_per_ac is neutral-filled to 50 ONLY when the row is otherwise
+    scorable (LOC and CVE present); otherwise it stays blank (no lone 50).
+
+    - r0..r2: issues fetched -> real nni percentile (not 50).
+    - r3: no issues, but LOC+CVE present -> nni_per_ac_p=50, score present.
+    - r4: no issues AND no CVE -> not filled (blank), no score.
+    """
+    import types
+    from src.risk import build_workload as bw
+
+    repos = [types.SimpleNamespace(repo=f"o/r{i}", repo_id=str(i)) for i in range(5)]
+    cols = {
+        "loc_eoy": {f"o/r{i}": str(100 * (i + 1)) for i in range(5)},       # all
+        "cve_count_5y": {f"o/r{i}": str(i + 1) for i in range(4)},          # r0..r3
+        "active_contributors_git_5y": {f"o/r{i}": "2" for i in range(5)},   # all
+    }
+    issues = {
+        "opened_issues": {f"o/r{i}": {y: i for y in bw.YEARS} for i in range(3)},
+        "closed_issues": {f"o/r{i}": {y: 0 for y in bw.YEARS} for i in range(3)},
+    }
+    monkeypatch.setattr(bw, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bw, "load_rows_by_repo", lambda *a, **k: {})
+    monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
+    monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
+    monkeypatch.setattr(bw, "_load_issues_long", lambda path: issues)
+    monkeypatch.setattr(bw, "load_column_by_repo", lambda path, col: cols[col])
+
+    rows = {r["repo"]: r for r in bw.build()}
+
+    # r3: scorable (LOC+CVE present) but no issues -> filled + scored.
+    assert rows["o/r3"]["nni_per_ac"] == ""
+    assert rows["o/r3"]["nni_per_ac_p"] == 50
+    assert rows["o/r3"]["score"] != ""
+
+    # r4: CVE missing too -> NOT filled, stays blank, no score (no lone 50).
+    assert rows["o/r4"]["nni_per_ac"] == ""
+    assert rows["o/r4"]["nni_per_ac_p"] == ""
+    assert rows["o/r4"]["score"] == ""
+
+    # r0: real issues -> keeps its computed percentile, not 50.
+    assert rows["o/r0"]["nni_per_ac"] != ""
+    assert rows["o/r0"]["nni_per_ac_p"] != 50
