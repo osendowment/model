@@ -38,7 +38,7 @@ import aiohttp
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
-from src.common.repos import VALUE_FILE, load_repo_ids, load_risk_slugs
+from src.common.repos import VALUE_FILE, load_repo_ids, load_top_slugs
 from src.sources.github.display import _ETAColumn, console
 from src.sources.github.github_client import GITHUB_API, get_revolver
 
@@ -447,7 +447,7 @@ def main() -> None:
     year_start, year_end = args.years
     years_int = list(range(year_start, year_end + 1))
 
-    all_repos = load_risk_slugs(value_file=args.input)
+    all_repos = load_top_slugs(value_file=args.input)
 
     repo_ids = load_repo_ids(repos_file=args.repos_file)
     rows_by_state, _existing_years = _load_long(args.output)

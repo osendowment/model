@@ -45,7 +45,7 @@ from rich.progress import (
 
 from src.sources.github.display import _ETAColumn
 from src.sources.github.github_client import GITHUB_API, get_revolver
-from src.common.repos import load_default_branches, load_risk_repos
+from src.common.repos import load_default_branches, load_top_repos
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -330,7 +330,7 @@ def main() -> None:
 
     # Use the risk-scope set (A/B value classes from value-data.csv) as the
     # canonical fetch list.
-    entries = load_risk_repos()
+    entries = load_top_repos()
     repos_all = [e.repo for e in entries]
     if args.limit:
         repos_all = random.sample(repos_all, min(args.limit, len(repos_all)))

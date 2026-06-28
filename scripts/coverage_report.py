@@ -24,7 +24,7 @@ console = Console()
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.common.repos import load_risk_repos  # noqa: E402
+from src.common.repos import load_top_repos  # noqa: E402
 
 # (label, path, repo_col, expectation_per_repo)
 #   expectation_per_repo = how many rows per repo we expect at minimum.
@@ -62,7 +62,7 @@ CATEGORY_FILES = [
 def load_eligible() -> set[str]:
     """Risk-scope set (value-class A/B, non-archived, valid) — the same set
     the risk fetchers/builders run on, and now also the eligibility input."""
-    return {e.repo for e in load_risk_repos(
+    return {e.repo for e in load_top_repos(
         value_file=str(ROOT / "data/value/value.csv"),
         repos_file=str(ROOT / "data/sources/github/repos.csv"),
     ) if e.repo}

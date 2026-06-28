@@ -288,11 +288,11 @@ class TestAggregateByRepo:
         assert a["ecosystems"] == "npm"
         assert a["top_eco"] == "npm"
         assert a["top_eco_pkg"] == "a"
-        # Single-package universe: cum_share=100% → assign_value_class → D
+        # Single-package universe: cum_share=100% → assign_value_class → C
         # top_eco_pct = 100 − 100 = 0 (it is also the *last* entry in the ranking).
         assert a["top_eco_pct"] == 0.0
-        assert a["class"] == "D"
-        assert a["class_npm"] == "D"
+        assert a["class"] == "C"
+        assert a["class_npm"] == "C"
         assert a["class_pypi"] == ""
 
     def test_monorepo_groups_packages_by_github_repo(self):
@@ -326,9 +326,9 @@ class TestAggregateByRepo:
 
     def test_cross_ecosystem_strongest_class_wins(self):
         # Repo x/x lives in both npm and pypi. We arrange:
-        #  - in pypi: x/x is the top entry with cum_share ≤ 50% → class A
-        #  - in npm:  x/x is the bottom entry with cum_share = 100% → class D
-        # Strongest of {A, D} is A, so `class` should be A and `top_eco` pypi.
+        #  - in pypi: x/x is the top entry with cum_share ≤ 75% → class A
+        #  - in npm:  x/x is the bottom entry with cum_share = 100% → class C
+        # Strongest of {A, C} is A, so `class` should be A and `top_eco` pypi.
         rows = [
             # pypi: x/x at top with 40% share, two fillers at 30% each
             _pkg_row("xpypi", "pypi", github_repo="x/x", pagerank="4.0"),
@@ -342,24 +342,24 @@ class TestAggregateByRepo:
         x = next(a for a in aggs if a["github_repo"] == "x/x")
         assert set(x["ecosystems"].split(",")) == {"npm", "pypi"}
         assert x["class_pypi"] == "A"
-        assert x["class_npm"] == "D"
+        assert x["class_npm"] == "C"
         # Strongest: A (pypi)
         assert x["class"] == "A"
         # top_eco is the ecosystem where x/x ranks best (pypi here)
         assert x["top_eco"] == "pypi"
 
     def test_class_assignment_follows_cumulative_share(self):
-        # 4 single-eco repos with PRs picked so the cum-share cutoffs (50/75/90)
-        # land on each: A=top 50%, B=next 25%, C=next 15%, D=last 10%.
+        # 3 single-eco repos with PRs picked so the cum-share cutoffs (75/95)
+        # land on each: A=top 75% (cum 75%), B=next 17% (cum 92%),
+        # C=last 8% (cum 100%). The A boundary (cum == 75%) is inclusive.
         rows = [
-            _pkg_row("p1", "npm", github_repo="r/1", pagerank="50"),  # A
-            _pkg_row("p2", "npm", github_repo="r/2", pagerank="25"),  # B
-            _pkg_row("p3", "npm", github_repo="r/3", pagerank="15"),  # C
-            _pkg_row("p4", "npm", github_repo="r/4", pagerank="10"),  # D
+            _pkg_row("p1", "npm", github_repo="r/1", pagerank="75"),  # A
+            _pkg_row("p2", "npm", github_repo="r/2", pagerank="17"),  # B
+            _pkg_row("p3", "npm", github_repo="r/3", pagerank="8"),   # C
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         by_repo = {a["github_repo"]: a["class_npm"] for a in aggs}
-        assert by_repo == {"r/1": "A", "r/2": "B", "r/3": "C", "r/4": "D"}
+        assert by_repo == {"r/1": "A", "r/2": "B", "r/3": "C"}
 
     def test_sort_orders_by_top_eco_pct_desc(self):
         rows = [
@@ -381,7 +381,7 @@ class TestAggregateByRepo:
         first, second = aggs
         assert first["github_repo"] == "a/a"
         assert first["top_eco_pct"] == 0.0  # only entry → cum_share=100% → pct=0
-        # The no-PR group has total=0 path; it still gets a class (D) but is sorted after.
+        # The no-PR group has total=0 path; it still gets a class (C) but is sorted after.
         assert second["github_repo"] == "b/b"
 
 
@@ -684,9 +684,9 @@ class TestWriteValueData:
             assert reader.fieldnames == FIELDS
         assert len(written) == 1
         assert written[0]["github_repo"] == "x/y"
-        # Single-package universe → cum_share=100% → class D (see
+        # Single-package universe → cum_share=100% → class C (see
         # test_single_package_single_ecosystem for the reasoning).
-        assert written[0]["class"] == "D"
+        assert written[0]["class"] == "C"
         assert written[0]["class_pypi"] == ""
 
     def test_creates_parent_directory(self, tmp_path):
@@ -762,8 +762,8 @@ class TestEndToEnd:
 # ── invariants ───────────────────────────────────────────────────────────────
 
 class TestInvariants:
-    def test_class_rank_covers_abcd_in_strict_order(self):
-        assert CLASS_RANK == {"A": 0, "B": 1, "C": 2, "D": 3}
+    def test_class_rank_covers_abc_in_strict_order(self):
+        assert CLASS_RANK == {"A": 0, "B": 1, "C": 2}
 
     def test_fields_contains_required_columns(self):
         for col in ("github_repo", "git_url", "ecosystems", "packages",

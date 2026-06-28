@@ -59,7 +59,7 @@ from src.sources.git.long_format import read as read_long
 from src.sources.git.long_format import upsert_snapshot
 from src.sources.github.display import _ETAColumn
 from src.common.repos import (
-    load_default_branches, load_repo_ids, load_risk_repos,
+    load_default_branches, load_repo_ids, load_top_repos,
 )
 
 log = logging.getLogger(__name__)
@@ -480,7 +480,7 @@ def main() -> None:
 
     # Use the risk-scope set (A/B value classes from value-data.csv) as the
     # canonical fetch list. Entries carry size_kb directly so no side load needed.
-    entries = load_risk_repos(value_file=args.input)
+    entries = load_top_repos(value_file=args.input)
     repos_all = [e.repo for e in entries]
     sizes = {e.repo: e.size_kb for e in entries if e.size_kb}
 

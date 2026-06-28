@@ -47,7 +47,7 @@ uv run python -m src.sources.npm.process_data [--ignore-gaps]
 3. **Fetch missing downloads** -- ensure all dep-tree packages have download data
 4. **dependency-tree.csv** -- all transitive edges from top packages
 5. **github-repos.csv** -- match dep-tree packages against nice-registry
-6. **results.csv** -- download-weighted PageRank, value classes A/B/C/D
+6. **results.csv** -- download-weighted PageRank, value classes A/B/C
 
 ## Outputs
 

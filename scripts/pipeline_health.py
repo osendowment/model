@@ -13,7 +13,9 @@ Checks:
      security / workload) matches its `build_<dim>.build()`.
   2. data/risk/risk.csv matches `aggregate_risk.aggregate()`.
   3. data/value/value.csv matches `unify_value_data` (class assignments).
-  4. Long-format git files have no duplicate (repo, sha, metric) keys.
+  4. Score-forming component columns are 100%-populated across the risk-scope
+     set (a blank = a failed upstream fetch, since edge cases are imputed).
+  5. Long-format git files have no duplicate (repo, sha, metric) keys.
 
 Usage:
     uv run python scripts/pipeline_health.py
@@ -144,6 +146,45 @@ def check_value_data() -> list[Result]:
              if mismatch == 0 else f"{mismatch} class mismatches — re-run unify")]
 
 
+# Columns that MUST be populated for EVERY risk-scope repo because they form a
+# component's risk score. A blank here is a real coverage gap (a failed upstream
+# fetch), not a modelling choice — edge cases (dormant / bot-only / new repos)
+# are imputed by the builder, so the only way these go blank is missing data.
+# Extend per dimension as 100%-coverage guarantees are added.
+SCORE_COMPONENT_COVERAGE: dict[str, list[str]] = {
+    "concentration.csv": ["bf_commits_git_5y", "hhi_commits_git_5y", "score"],
+}
+
+
+def check_score_component_coverage() -> list[Result]:
+    """Score-forming component columns must be 100% across the risk-scope set.
+
+    For concentration, the builder imputes dormant / bot-only / new repos
+    (bus factor 1, HHI 10000), so a blank `bf_commits_git_5y` / `hhi_commits_git_5y`
+    / `score` means an upstream git fetch failed — surfaced here as the gap to
+    fix (raise the fetch `--timeout` or re-run the fetcher for the listed repos).
+    """
+    from src.common.repos import load_top_repos
+
+    repos = [e.repo for e in load_top_repos()]
+    n = len(repos)
+    out: list[Result] = []
+    for fname, cols in SCORE_COMPONENT_COVERAGE.items():
+        disk = _read_csv_by_repo(ROOT / "data" / "risk" / fname)
+        for col in cols:
+            missing = [r for r in repos
+                       if not str(disk.get(r, {}).get(col, "")).strip()]
+            present = n - len(missing)
+            ok = not missing
+            if ok:
+                detail = f"{present}/{n} (100%)"
+            else:
+                shown = ", ".join(missing[:5]) + (" …" if len(missing) > 5 else "")
+                detail = f"{present}/{n} — {len(missing)} missing: {shown}"
+            out.append((f"{fname}:{col}", ok, detail))
+    return out
+
+
 def check_long_format_keys() -> list[Result]:
     """Long-format git files must have unique (repo, sha, metric) keys."""
     out: list[Result] = []
@@ -161,7 +202,7 @@ def check_long_format_keys() -> list[Result]:
 
 
 CHECKS = [check_dimension_csvs, check_risk_data, check_value_data,
-          check_long_format_keys]
+          check_score_component_coverage, check_long_format_keys]
 
 
 def main() -> int:

@@ -66,6 +66,21 @@ def test_data_anomalies_clean_or_reports():
     assert rc in (0, 1)
 
 
+def test_score_component_coverage_is_full():
+    """Score-forming component columns are 100%-populated on live data.
+
+    Regression guard for the no-human-in-window imputation: if a change drops
+    concentration bf/hhi/score coverage below the full risk set (e.g. the
+    imputation is removed, or a fetch gap reappears), this fails — mirroring the
+    pipeline_health check in-process.
+    """
+    mod = _load_module(SCRIPTS / "pipeline_health.py")
+    results = mod.check_score_component_coverage()
+    assert results, "no coverage results returned"
+    failed = [(label, detail) for label, ok, detail in results if not ok]
+    assert not failed, f"score components below 100%: {failed}"
+
+
 # --- schema invariant sweep over the per-dimension risk CSVs ----------------
 
 DIMENSION_CSVS = ["complexity", "concentration", "security", "funding", "workload"]
@@ -105,3 +120,43 @@ def test_dimension_score_floored_at_one(dim):
         if not v:
             continue
         assert 1 <= float(v) <= 100, f"{r.get('repo')}.{dim}.score={v} outside [1,100]"
+
+
+def test_valid_repos_have_github_repo_and_git_url():
+    """A valid repo must have a github_repo (mirror) AND the canonical github
+    clone URL. Validity is github-only: orphans and non-github-only upstreams
+    are invalid. Regression for (a) git_url stripped from github repos and
+    (b) non-github / orphan rows being marked valid.
+    """
+    value_csv = ROOT / "data" / "value" / "value.csv"
+    if not value_csv.exists():
+        pytest.skip("value.csv not present")
+    with value_csv.open() as f:
+        rows = [r for r in csv.DictReader(f) if r.get("valid") == "True"]
+    if not rows:
+        pytest.skip("no valid repos in value.csv")
+
+    no_gh = [r for r in rows if not (r.get("github_repo") or "").strip()]
+    assert not no_gh, (
+        f"{len(no_gh)} valid repos have no github_repo, e.g. "
+        f"{[r.get('git_url') or r.get('id') for r in no_gh[:5]]}"
+    )
+
+    no_git = [r for r in rows if not (r.get("git_url") or "").strip()]
+    assert not no_git, (
+        f"{len(no_git)} valid repos have no git_url, e.g. "
+        f"{[r.get('github_repo') or r.get('id') for r in no_git[:5]]}"
+    )
+
+    def canonical(slug: str) -> str:
+        return f"https://github.com/{slug.strip().lower()}.git"
+
+    mismatched = [
+        r for r in rows
+        if (r.get("github_repo") or "").strip()
+        and (r.get("git_url") or "").strip().lower() != canonical(r["github_repo"])
+    ]
+    assert not mismatched, (
+        f"{len(mismatched)} valid github repos have a non-canonical git_url, e.g. "
+        f"{[(r['github_repo'], r['git_url']) for r in mismatched[:5]]}"
+    )

@@ -76,7 +76,7 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from src.common.repos import canonical_repo_map, load_risk_repos
+from src.common.repos import canonical_repo_map, load_top_repos
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -136,7 +136,7 @@ def load_repo_package_mapping() -> dict[str, list[tuple[str, str]]]:
     mapping: dict[str, list[tuple[str, str]]] = {}
     seen: dict[str, set[tuple[str, str]]] = {}
     # Resolve renamed repos to their canonical name so the mapping keys
-    # match the canonical slugs load_risk_repos iterates over.
+    # match the canonical slugs load_top_repos iterates over.
     canon = canonical_repo_map()
     for path, eco in ECOSYSTEM_FILES:
         if not path.exists():
@@ -792,7 +792,7 @@ def main() -> None:
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
 
-    risk = load_risk_repos()
+    risk = load_top_repos()
     repos_with_ids: list[tuple[str, str]] = sorted(
         {(e.repo, e.repo_id) for e in risk if e.repo}
     )

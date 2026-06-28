@@ -1,8 +1,9 @@
-"""Shared repo loaders for the risk pipeline.
+"""Shared loaders for the *top* repo set — the valid class-A repos.
 
-Source of truth: `data/value/value.csv` — the risk pipeline runs on repos
+Source of truth: `data/value/value.csv` — `load_top_repos` returns repos
 whose `class` is one of `settings.json risk_input.value_classes`
-(default {A, B}). Repo metadata (`repo_id`, `archived`, `size`, `stars`)
+(default {A}) and whose `valid` column is `True`; this is the set the risk
+pipeline runs on. Repo metadata (`repo_id`, `archived`, `size`, `stars`)
 is enriched from `data/sources/github/repos.csv`, the authoritative GitHub-API
 record populated by `src.sources.github.fetch_repo_owner_data`.
 """
@@ -22,7 +23,7 @@ VALUE_FILE = "data/value/value.csv"
 REPOS_FILE = "data/sources/github/repos.csv"
 
 # Class precedence — highest class wins if a repo has multiple rows.
-_RANK = {"A": 4, "B": 3, "C": 2, "D": 1}
+_RANK = {"A": 3, "B": 2, "C": 1}
 
 
 @dataclass
@@ -74,27 +75,27 @@ def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]
     return canon, meta
 
 
-def load_risk_repos(
+def load_top_repos(
     value_file: str = VALUE_FILE,
     repos_file: str = REPOS_FILE,
     skip_archived: bool = True,
     skip_invalid: bool = True,
 ) -> list[RepoEntry]:
-    """Return repos in the risk-input value classes, sorted by slug.
+    """Return the *top* repos — valid class-A — sorted by slug.
 
     The risk pipeline runs on this set: repos whose `class` in
-    `value-data.csv` is one of `settings.json risk_input.value_classes`
-    (default {A, B}) AND whose unified `valid` column is `True`.
+    `value.csv` is one of `settings.json risk_input.value_classes`
+    (default {A}) AND whose unified `valid` column is `True`.
 
     - Keeps rows with `class` in RISK_INPUT_CLASSES, a non-empty
       `github_repo`, and `valid == "True"`. The `valid` gate is on by
       default (drops failed/404/invalid targets); pass `skip_invalid=False`
       to include rows regardless of validity. The eligibility stage shares
-      this exact scope (A/B ∩ valid).
+      this exact scope (valid class-A repos).
     - Slugs are canonicalised against `github/repos.csv` `full_name`, so a
       renamed repo (`gozala/events`) resolves to its current name
       (`browserify/events`) — the form the Search API and downstream joins need.
-    - Deduped by canonical slug; highest class wins (A > B > C > D).
+    - Deduped by canonical slug; highest class wins (A > B > C).
     - repo_id / archived / size_kb / stars enriched from `data/sources/github/repos.csv`.
       `skip_archived` drops archived repos.
     - Repos missing from github/repos.csv are returned with `enriched=False`
@@ -133,9 +134,9 @@ def load_risk_repos(
     return entries
 
 
-def load_risk_slugs(*args, **kwargs) -> list[str]:
+def load_top_slugs(*args, **kwargs) -> list[str]:
     """Convenience wrapper returning just the lowercased repo slugs."""
-    return [e.repo for e in load_risk_repos(*args, **kwargs)]
+    return [e.repo for e in load_top_repos(*args, **kwargs)]
 
 
 def canonical_repo_map(repos_file: str = REPOS_FILE) -> dict[str, str]:
@@ -144,7 +145,7 @@ def canonical_repo_map(repos_file: str = REPOS_FILE) -> dict[str, str]:
     For risk scripts that read `github_repo` straight from value-data.csv
     or a per-ecosystem results.csv: pass each raw slug through this map so
     a renamed repo (`gozala/events`) resolves to the same canonical name
-    `load_risk_repos` uses (`browserify/events`). Unknown slugs map to
+    `load_top_repos` uses (`browserify/events`). Unknown slugs map to
     themselves via `.get(slug, slug)`.
     """
     return _read_github_repos(repos_file)[0]
@@ -207,5 +208,5 @@ def load_default_branches(repos_file: str = REPOS_FILE) -> dict[str, str]:
 # Back-compat aliases — risk scripts migrate to load_risk_*; these keep any
 # remaining `load_ab_*` imports working. The old `top_repos_file` kwarg of
 # load_ab_repos is no longer accepted.
-load_ab_repos = load_risk_repos
-load_ab_slugs = load_risk_slugs
+load_ab_repos = load_top_repos
+load_ab_slugs = load_top_slugs

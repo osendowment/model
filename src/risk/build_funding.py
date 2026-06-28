@@ -33,7 +33,7 @@ from rich.table import Table
 
 from src.common.funding_platforms import normalize_oc_slug
 from src.common.percentiles import add_percentiles
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 from src.common.stats import geometric_mean
 from src.common.tables import load_column_by_repo, load_rows_by_repo
 from src.sources.floss_fund.directory import normalize_github_repo
@@ -221,7 +221,7 @@ def _load_funding_overrides(path: Path) -> dict[str, dict]:
 
 
 def build() -> list[dict]:
-    eligible = load_risk_repos()
+    eligible = load_top_repos()
     sponsors = load_rows_by_repo(SPONSORS_FILE)
     yml = load_rows_by_repo(FUNDING_YML_FILE)
     repos_meta = load_rows_by_repo(REPOS_FILE)

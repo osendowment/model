@@ -46,7 +46,7 @@ from rich.progress import (
 )
 
 from src.common.funding_platforms import normalize_oc_slug
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 from src.sources.floss_fund.directory import normalize_github_repo
 
 console = Console()
@@ -162,7 +162,7 @@ def _slugs_from_collectives(scope_repos: set[str], scope_orgs: set[str]) -> set[
 
 def collect_slugs() -> list[str]:
     """Distinct Open Collective slugs referenced by risk-scope repos."""
-    scope = {e.repo.lower() for e in load_risk_repos()}
+    scope = {e.repo.lower() for e in load_top_repos()}
     orgs = {r.split("/", 1)[0] for r in scope}
     return sorted(_slugs_from_yml(FUNDING_YML_FILE)
                   | _slugs_from_export(FLOSS_FUND_FILE, scope)

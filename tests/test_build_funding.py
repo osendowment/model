@@ -46,7 +46,7 @@ def _base_mocks(monkeypatch, repos):
         if "sponsors.csv" in str(p):
             return {"rich/r": {"github_sponsors": "100"}}
         return {}
-    monkeypatch.setattr(bf, "load_risk_repos", lambda: repos)
+    monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
     monkeypatch.setattr(bf, "load_rows_by_repo", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
@@ -113,7 +113,7 @@ def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
     # solo/repo has its own repo-level collective ($500).
     repos = [E("aio/a1", value_class="A"), E("aio/a2", value_class="A"),
              E("aio/b"), E("solo/repo", value_class="A")]
-    monkeypatch.setattr(bf, "load_risk_repos", lambda: repos)
+    monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
     monkeypatch.setattr(bf, "load_rows_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})

@@ -33,7 +33,7 @@ def test_workload_blanks_issues_when_repo_not_fetched(monkeypatch):
         "opened_issues": {"o/present": {y: 0 for y in bw.YEARS}},
         "closed_issues": {"o/present": {y: 0 for y in bw.YEARS}},
     }
-    monkeypatch.setattr(bw, "load_risk_repos", lambda: repos)
+    monkeypatch.setattr(bw, "load_top_repos", lambda: repos)
     monkeypatch.setattr(bw, "load_rows_by_repo", lambda *a, **k: {})
     monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
     monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})

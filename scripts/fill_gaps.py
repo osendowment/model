@@ -31,7 +31,7 @@ console = Console()
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.common.repos import load_risk_repos  # noqa: E402
+from src.common.repos import load_top_repos  # noqa: E402
 
 
 def _run(cmd: list[str], log_path: Path) -> int:
@@ -45,7 +45,7 @@ def _run(cmd: list[str], log_path: Path) -> int:
 def _eligible() -> set[str]:
     """Risk-scope set (value-class A/B, non-archived, valid) — the repos the
     risk fetchers/builders run on."""
-    return {e.repo for e in load_risk_repos(
+    return {e.repo for e in load_top_repos(
         value_file=str(ROOT / "data/value/value.csv"),
         repos_file=str(ROOT / "data/sources/github/repos.csv"),
     ) if e.repo}

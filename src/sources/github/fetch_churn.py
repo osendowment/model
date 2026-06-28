@@ -62,7 +62,7 @@ from rich.table import Table
 from src.sources.git.clone import SOURCE_EXTS
 from src.sources.git.disk import check_disk_or_exit, make_clone_tmpdir, print_disk_banner, sweep_stale_clone_dirs
 from src.sources.github.display import _ETAColumn
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -581,7 +581,7 @@ def main() -> None:
         repos = [r.strip().lower() for r in args.repos]
         total_eligible = len(repos)
     else:
-        risk_repos = load_risk_repos()
+        risk_repos = load_top_repos()
         repos = [e.repo for e in risk_repos]
         total_eligible = len(repos)
 

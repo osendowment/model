@@ -1,7 +1,7 @@
 # Python (PyPI)
 
 The PyPI slice of the [Value pipeline](../value.md): how PyPI download and
-dependency data becomes a download-weighted PageRank and an A/B/C/D value class for
+dependency data becomes a download-weighted PageRank and an A/B/C value class for
 every Python package. This page covers the **pipeline assembly**; for raw-fetch
 mechanics (the BigQuery export, the JSON API, fetch scripts) see the source
 reference [`sources/pypi.md`](../sources/pypi.md).
@@ -29,7 +29,7 @@ PyPI data flows through the shared Value mechanics (full description in
 5. **PageRank** — download-weighted personalized PageRank (α = 0.85) over the dep
    graph.
 6. **Value class** — sort by PageRank desc; cumulative-share cutoffs assign
-   A (≤50%) / B (≤75%) / C (≤90%) / D (rest).
+   A (≤75%) / B (≤95%) / C (rest).
 
 Orchestrated by `src.value.pypi_pipeline` (fetch-data → fetch-urls → process).
 Metric lineage (`←` = data source, `[…]` = period):
@@ -51,9 +51,9 @@ Python (PyPI)
 - **Value** — each package's `value_class` is grouped by repo into
   `data/value/value.csv` as the `class_pypi` column; the strongest class across
   ecosystems becomes `class`.
-- **Risk** — A/B-class PyPI repos enter `src.risk.run_risk_pipeline` (scope set by
+- **Risk** — class-A PyPI repos enter `src.risk.run_risk_pipeline` (scope set by
   `risk_input.value_classes` in `src/settings.json`).
-- **Eligibility** — now a **manual review** of the top A/B candidates (OSS license,
+- **Eligibility** — now a **manual review** of the top candidates (OSS license,
   EOL, independence), not an automated pipeline stage. The per-ecosystem license/EOL
   signals (`fetch_licenses.py`, `check_eol.py` → `data/sources/pypi/eol.csv`) are still
   produced and feed that review; there is no automated eligibility output.
@@ -75,12 +75,14 @@ Carried from the cross-ecosystem tables in [`value.md`](../value.md):
 | Results | 3,139 |
 | With GitHub repo | 1,728 (55%) |
 
-| Class | A | B | C | D | Total |
-|---|--:|--:|--:|--:|--:|
-| Packages | 54 | 157 | 414 | 2,514 | 3,139 |
-| Repos (`value.csv`) | 53 | 151 | 389 | 2,347 | — |
+| Class (`value.csv`) | A | B | C | Total |
+|---|--:|--:|--:|--:|
+| Repos (`class_pypi`) | 163 | 638 | 1,726 | 2,527 |
 
-A+B repos with a GitHub repo: **76%**.
+Per-package class counts await the next full pipeline run — the per-package
+`results.csv` `value_class` is still on the legacy 4-class scheme.
+
+class-A repos with a GitHub repo: **76%**.
 
 ## Limitations
 
@@ -88,5 +90,5 @@ A+B repos with a GitHub repo: **76%**.
   carried only GitHub URLs at fetch time, so non-GitHub upstreams (GitLab,
   self-hosted) have no `package → repo` link. Because Risk (and the manual
   eligibility review) key off `github_repo`, this caps how many PyPI repos can be
-  scored, even for
-  A/B-class packages (A+B GitHub coverage is 76%, not ~100% like npm/crates).
+  scored, even for class-A packages (class-A GitHub coverage is 76%, not ~100% like
+  npm/crates).

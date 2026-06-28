@@ -67,7 +67,7 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from src.common.repos import load_default_branches, load_risk_repos
+from src.common.repos import load_default_branches, load_top_repos
 from src.sources.git.clone import SOURCE_EXTS
 from src.sources.git.clone import corrected_clone_sha
 from src.sources.git.clone import download_tarball as _download_tarball
@@ -726,7 +726,7 @@ def main() -> None:
     print_disk_banner(console=console)
     console.print()
 
-    risk_repos = load_risk_repos()
+    risk_repos = load_top_repos()
     repo_ids: dict[str, str] = {e.repo: e.repo_id for e in risk_repos}
     repos_all = [e.repo for e in risk_repos]
 

@@ -6,7 +6,7 @@ raw long-format source. This builder merges identities, drops bots, and
 computes bus factor / HHI / contributor counts from both:
 
 Reads:
-    data/value/value.csv                          — A/B value-class set (load_risk_repos)
+    data/value/value.csv                          — A/B value-class set (load_top_repos)
     data/sources/git/contributor-commits.csv             — git-clone method, long raw:
                                                    repo, author_name, author_email, year, commits
     data/sources/git/contributor-commits.status.csv      — per-repo git fetch status / fetched_at
@@ -71,7 +71,7 @@ from src.common.params import (
     LAST_COMPLETE_YEAR,
 )
 from src.common.percentiles import add_percentiles
-from src.common.repos import load_risk_repos
+from src.common.repos import load_top_repos
 from src.common.tables import load_rows_by_repo
 from src.sources.git.contributors import _is_bot_identity, merge_identity_groups
 from src.sources.github.fetch_contributors_metrics import _compute_bus_factor
@@ -103,6 +103,7 @@ FIELDS = [
     "bf_commits_git_5y", "bf_commits_git_5y_p",
     "hhi_commits_git_5y", "hhi_commits_git_5y_p",
     "score",
+    "comment",
     "github_fetched_at", "git_fetched_at",
 ]
 
@@ -220,6 +221,26 @@ def git_metrics(rows: list[dict]) -> dict:
 
     bf_l, hhi_l = _bus_factor_hhi(full_humans)
     bf_w, hhi_w = _bus_factor_hhi(win_humans)
+
+    # No human authored in the _5y window → impute the worst valid concentration
+    # (bus factor 1, HHI 10000): a repo with no active human maintainer in five
+    # years is a maximal single-point-of-failure, so it still scores rather than
+    # dropping out. `comment` records WHICH flavour of "no human in the window"
+    # triggered the imputation (auditability). This runs only for SUCCESSFULLY
+    # FETCHED repos (git_metrics is called only when `repo in git_long`); a
+    # clone/log failure writes no rows, never reaches here, and is annotated in
+    # build() instead — so a fetch failure is the only thing that stays blank.
+    comment = ""
+    if not win_humans:
+        bf_w, hhi_w = 1, 10000
+        if total_win == 0:
+            # Dormant (real history, nothing in the window) vs. only activity in
+            # the excluded in-progress year (total_full == 0).
+            comment = "no commits in 5y" if total_full > 0 \
+                else "no commits through last complete year"
+        else:
+            # Commits exist in the window but only from bots — no active human.
+            comment = "no human commits in 5y"
     return {
         "total_commits_git_full": total_full,
         "contributors_git_full": len(full_humans),
@@ -229,11 +250,12 @@ def git_metrics(rows: list[dict]) -> dict:
         "active_contributors_git_5y": len(win_humans),
         "bf_commits_git_5y": bf_w,
         "hhi_commits_git_5y": hhi_w,
+        "comment": comment,
     }
 
 
 def build() -> list[dict]:
-    eligible = load_risk_repos()
+    eligible = load_top_repos()
     git_long = _load_long_grouped(GIT_LONG_FILE)
     gh_long = _load_long_grouped(GH_LONG_FILE)
     git_status = load_rows_by_repo(GIT_STATUS_FILE)
@@ -254,6 +276,11 @@ def build() -> list[dict]:
 
         if repo in git_long:
             row.update(git_metrics(git_long[repo]))
+        else:
+            # No git long rows = the clone/log never produced data. Record why,
+            # so a blank _5y axis is auditable rather than silently empty.
+            st = (git_status.get(repo, {}).get("status") or "").strip()
+            row["comment"] = f"git fetch {st}" if st else "no git data"
         row["git_fetched_at"] = (
             git_status.get(repo, {}).get("fetched_at") or ""
         ).strip()

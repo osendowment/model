@@ -6,7 +6,7 @@ signal that a repo receives (or gives) financial support — GitHub Sponsors,
 FOSS-foundation hosting — and distills them into one **funding-risk score
 (`score`, 0–100, higher = more at-risk)** that feeds `data/risk/risk.csv`.
 
-Scope: the 897 A/B value-class repos in the risk pipeline (see
+Scope: the 897 class-A value-class repos in the risk pipeline (see
 [value.md](../value.md)). Build step: `src/risk/build_funding.py`.
 
 ## Metrics Roadmap
@@ -268,8 +268,8 @@ host/owner floors **8** repos at **1**.
 - **funding.json is still negligible** (6 repos) — the structured-manifest
   ecosystem hasn't reached this cohort. `has_funding_json` is informational, not
   yet a scoring input.
-- **`score` is a percentile, not a class.** It's a 0–100 risk number, not an
-  A–D class — but, unlike earlier versions, it **is** folded into the overall
+- **`score` is a percentile, not a class.** It's a 0–100 risk number, not a
+  class tier — but, unlike earlier versions, it **is** folded into the overall
   `risk.csv` `score` (the geometric mean of the five component scores).
 - **OC is the only $ amount.** GitHub Sponsors and Patreon/Tidelift amounts
   aren't public, so dollar figures exist only for the ~45 OpenCollective repos;

@@ -253,8 +253,9 @@ def _canonicalize_git_url(url: str) -> str:
                      "https://www.bytereef.org/")):
         return ""
 
-    # Github URLs are tracked via the `github_repo` column already;
-    # `git_url` is reserved for non-github canonicals. Strip them.
+    # Drop the raw github URL here; the verification loop re-derives the
+    # canonical github clone URL from the (post-rename) `github_repo` slug, so
+    # every github repo ends up with both an owner/repo slug and a git_url.
     if re.match(r"^https?://github\.com/", u):
         return ""
 
@@ -448,6 +449,14 @@ def verify_urls_in_aggregates(aggs: list[dict],
             if full and "/" in full and full != gh:
                 a["github_repo"] = full
                 renamed += 1
+
+        # git_url: every github repo also carries its canonical clone URL, so a
+        # valid repo has both an owner/repo slug AND a git_url. (git_url is no
+        # longer reserved for non-github upstreams.) Derive it from the
+        # post-rename slug; non-github rows keep their canonicalised git_url.
+        final_gh = (a.get("github_repo") or "").strip().lower()
+        if final_gh and "/" in final_gh:
+            a["git_url"] = f"https://github.com/{final_gh}.git"
 
     if renamed:
         console.print(f"  [dim]github_repo canonicalised to current "

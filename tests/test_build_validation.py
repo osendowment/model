@@ -126,14 +126,20 @@ class TestBuild:
 # ── join_valid (AND of targets, tri-state) ───────────────────────────────────
 
 class TestJoinValid:
-    def test_tri_state(self):
-        target_valid = {("a/b", "github_repo"): True, ("u", "git_url"): False}
+    def test_valid_requires_github_repo(self):
+        """valid=True iff the repo has a validated github_repo. No github repo
+        (orphan, or non-github git_url — even a reachable one) → False; a
+        github_repo that 404s → False."""
+        target_valid = {
+            ("a/b", "github_repo"): True,
+            ("c/d", "github_repo"): False,
+            ("u", "git_url"): True,   # reachable non-github url, but no github
+        }
         rows = [
-            {"github_repo": "a/b", "git_url": "https://github.com/a/b.git"},
-            {"github_repo": "", "git_url": "u"},
-            {"github_repo": "", "git_url": ""},  # orphan
+            {"github_repo": "a/b", "git_url": "https://github.com/a/b.git"},  # valid github
+            {"github_repo": "c/d", "git_url": "https://github.com/c/d.git"},  # github 404
+            {"github_repo": "", "git_url": "u"},   # non-github, reachable, no github
+            {"github_repo": "", "git_url": ""},    # orphan
         ]
         out = bv.join_valid(rows, target_valid)
-        assert out[0]["valid"] == "True"
-        assert out[1]["valid"] == "False"
-        assert out[2]["valid"] == ""
+        assert [r["valid"] for r in out] == ["True", "False", "False", "False"]
