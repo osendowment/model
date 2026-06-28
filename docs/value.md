@@ -141,9 +141,17 @@ extract was github-only at fetch time. C/C++ jumps from 26% GitHub to 41%
 Git because non-GitHub upstreams (sourceware, savannah, gitlab.gnome.org,
 etc.) now resolve via per-eco `git.csv`.
 
-### Value class distribution
+### Value class distribution (per-package — legacy snapshot)
 
-Per-ecosystem and combined counts of A/B/C/D classes in `value.csv`.
+> **Stale, pending the next full pipeline run.** These are *per-package*
+> `value_class` counts read from each `data/sources/<eco>/results.csv`, which is
+> still on the legacy **4-class** scheme (A/B/C/D) and is regenerated only when
+> the per-ecosystem `process_data` stages re-run. The authoritative 3-class
+> *repo-level* distribution (from the regenerated `value.csv`) is in
+> [Repo class distribution](#repo-class-distribution) below — read the table
+> here as a historical snapshot.
+
+Per-ecosystem and combined per-package class counts (legacy 4-class snapshot).
 
 | Ecosystem | A | B | C | D | Total | A+B GH | A+B Git |
 |-----------|--:|--:|--:|--:|------:|-------:|--------:|
@@ -291,19 +299,19 @@ subgraphs.
 ### Repo class distribution
 
 After grouping packages by `github_repo` (or as orphans), `value.csv`
-collapses 17,609 package rows into 12,842 repo rows.
+collapses 17,609 package rows into 12,096 repo rows. Counts below are the
+current 3-class distribution, derived directly from the regenerated `value.csv`.
 
 | | npm | PyPI | crates.io | C/C++ | Strongest |
 |---|---:|---:|---:|---:|---:|
-| A | 144 | 53 | 31 | 10 | **238** |
-| B | 430 | 151 | 102 | 81 | **763** |
-| C | 769 | 389 | 256 | 291 | **1,704** |
-| D | 3,087 | 2,347 | 3,231 | 1,491 | **10,137** |
+| A | 571 | 163 | 132 | 89 | **953** |
+| B | 1,414 | 638 | 533 | 570 | **3,148** |
+| C | 2,428 | 1,726 | 2,911 | 961 | **7,995** |
 
 *Strongest* is the count of repos for which the column is the highest
 class achieved across any of its ecosystems (`class` column in
-`value.csv`). 9,691 of the 12,842 rows are github groups; the other
-3,151 are orphan packages (no `github_repo`) kept under sequential ids
+`value.csv`). 10,529 of the 12,096 rows are github groups; the other
+1,567 are orphan packages (no `github_repo`) kept under sequential ids
 so nothing is dropped.
 
 EOL information is intentionally **not** stored here — it belongs to the
