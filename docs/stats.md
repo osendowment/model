@@ -43,7 +43,8 @@ mirrors of a live upstream stay *valid* (they resolve).
 | Step | A | B | C | Total | Comment |
 |---|--:|--:|--:|--:|---|
 | Packages | 3,403 | 4,682 | 9,281 | 17,366 | package universe (after dep tree) |
-| GitHub total repos | 3,366 | 4,234 | 8,057 | 15,657 | package appearances in a github group |
+| GitHub total repos | 3,338 | 4,231 | 8,056 | 15,625 | raw `github_repo` field on the package |
+| GH repos + overrides | 3,366 | 4,234 | 8,057 | 15,657 | + overrides.csv mapping non-github upstreams (glibc, gcc, linux, …) |
 | GitHub unique repos | 917 | 2,703 | 6,769 | 10,389 | deduped; + 1,671 orphans = 12,060 repos |
 | **Valid repos** | **917** | **2,694** | **6,716** | **10,327** | github repo resolves (200); incl. archived mirrors |
 

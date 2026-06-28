@@ -34,6 +34,7 @@ from rich.table import Table
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from src.common.repos import load_top_repos  # noqa: E402
+from src.value.unify_value_data import load_repo_overrides  # noqa: E402
 
 console = Console()
 
@@ -157,9 +158,12 @@ def value_stats() -> dict:
         if _present(r.get("github_repo")):
             ght_class[c] += p
 
-    # per-ecosystem funnel: top-of-funnel from stats.csv, tail from results.csv
+    # per-ecosystem funnel: top-of-funnel from stats.csv, tail from results.csv.
+    # Capture each package's RAW github_repo field to separate it from the
+    # override-assigned github identity below.
     smatrix = {r["metric"]: r for r in _load("data/value/stats.csv")}
     funnel = {}
+    raw_github: dict[tuple[str, str], str] = {}
     for eco in ECOSYSTEMS:
         rr = _load(f"data/sources/{eco}/results.csv")
         n = len(rr)
@@ -170,10 +174,26 @@ def value_stats() -> dict:
             "deps": int(smatrix.get("packages_with_deps", {}).get(eco, 0) or 0),
             "results": n, "github": wgh, "git": wgit,
         }
+        for r in rr:
+            raw_github[(r.get("package", ""), eco)] = (r.get("github_repo") or "").strip()
+
+    # GH-without-overrides per class: the github group count minus packages whose
+    # github identity comes ONLY from overrides.csv (raw github_repo field blank —
+    # non-GitHub upstreams like glibc/gcc/linux mapped to their canonical mirror).
+    cls_by_gh = {(r.get("github_repo") or "").strip().lower(): (r.get("class") or "").strip()
+                 for r in rows if _present(r.get("github_repo"))}
+    pulled = {"A": 0, "B": 0, "C": 0}
+    for (pkg, eco), o in load_repo_overrides().items():
+        slug = (o.get("github_repo") or "").strip().lower()
+        if slug and not raw_github.get((pkg, eco), ""):
+            c = cls_by_gh.get(slug)
+            if c in pulled:
+                pulled[c] += 1
+    ght_raw = {c: ght_class[c] - pulled[c] for c in ("A", "B", "C")}
 
     return {
         "rows": m, "github": gh, "git": git, "valid": valid, "orphan": orphan,
-        "pkg_class": pkg_class, "ght_class": ght_class,
+        "pkg_class": pkg_class, "ght_class": ght_class, "ght_raw": ght_raw,
         "classes": classes, "by_class": by_class, "funnel": funnel,
     }
 
@@ -324,7 +344,8 @@ def dashboard(v: dict, r: dict) -> None:
         t.add_row(label, *cells, style="bold" if bold else None)
 
     _drow("Packages", v["pkg_class"])
-    _drow("GitHub total repos", v["ght_class"])
+    _drow("GitHub total repos", v["ght_raw"])
+    _drow("GH repos + overrides", v["ght_class"])
     _drow("GitHub unique repos", {c: bc[c]["github"] for c in "ABC"})
     _drow("Valid repos", {c: bc[c]["valid"] for c in "ABC"}, bold=True)
     console.print(t)
@@ -391,7 +412,9 @@ def markdown(v: dict, r: dict) -> str:
         return f"| {label} | " + " | ".join(cells) + f" | {comment} |"
 
     a(_id_row("Packages", v["pkg_class"], "package universe (after dep tree)"))
-    a(_id_row("GitHub total repos", v["ght_class"], "package appearances in a github group"))
+    a(_id_row("GitHub total repos", v["ght_raw"], "raw `github_repo` field on the package"))
+    a(_id_row("GH repos + overrides", v["ght_class"],
+              "+ overrides.csv mapping non-github upstreams (glibc, gcc, linux, …)"))
     a(_id_row("GitHub unique repos", {c: bc[c]["github"] for c in "ABC"},
               f"deduped; + {v['orphan']:,} orphans = {v['rows']:,} repos"))
     a(_id_row("Valid repos", {c: bc[c]["valid"] for c in "ABC"},
