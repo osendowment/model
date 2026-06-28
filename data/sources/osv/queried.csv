@@ -37,6 +37,7 @@ archlinux/linux,142707813,Debian:linux,2026-05-18T01:11:46+00:00
 ardatan/graphql-tools,54432168,"npm:@graphql-tools/utils,npm:@graphql-tools/merge,npm:@graphql-tools/schema,npm:cross-inspect,npm:@graphql-tools/load,npm:@graphql-tools/import,npm:@graphql-tools/relay-operation-optimizer,npm:@ardatan/relay-compiler,npm:@graphql-tools/optimize,npm:@graphql-tools/graphql-file-loader,npm:@graphql-tools/url-loader,npm:@graphql-tools/graphql-tag-pluck,npm:@graphql-tools/json-file-loader,npm:@graphql-tools/executor,npm:@graphql-tools/code-file-loader,npm:@graphql-tools/executor-legacy-ws,npm:@graphql-tools/apollo-engine-loader,npm:graphql-tools,npm:@graphql-tools/mock",2026-05-18T01:11:56+00:00
 ardatan/whatwg-node,429511342,"npm:@whatwg-node/promise-helpers,npm:@whatwg-node/node-fetch,npm:@whatwg-node/fetch,npm:@whatwg-node/disposablestack,npm:@whatwg-node/events",2026-05-18T01:11:42+00:00
 assert-rs/snapbox,424722460,"crates.io:snapbox,crates.io:trycmd,crates.io:snapbox-macros",2026-05-18T01:11:40+00:00
+astanin/python-tabulate,205875548,PyPI:tabulate,2026-06-28T20:20:33+00:00
 astral-sh/ruff,523043277,PyPI:ruff,2026-05-18T01:11:38+00:00
 auth0/node-jwa,8116861,npm:jwa,2026-05-18T01:11:39+00:00
 autotools-mirror/autoconf,47662429,Debian:autoconf,2026-05-18T01:11:39+00:00
@@ -301,6 +302,7 @@ hapijs/hoek,5831189,"npm:@hapi/hoek,npm:hoek",2026-05-18T01:13:53+00:00
 harfbuzz/harfbuzz,5050525,Debian:harfbuzz,2026-05-18T01:13:51+00:00
 hiddentao/fast-levenshtein,9490451,npm:fast-levenshtein,2026-05-18T01:13:50+00:00
 httplib2/httplib2,53002916,PyPI:httplib2,2026-05-18T01:13:51+00:00
+huggingface/huggingface_hub,323591830,PyPI:huggingface-hub,2026-06-28T20:20:33+00:00
 hukkin/tomli,370616797,PyPI:tomli,2026-05-18T01:13:51+00:00
 hyperium/http,84983058,crates.io:http,2026-05-18T01:13:52+00:00
 hyperium/http-body,183281612,"crates.io:http-body,crates.io:http-body-util",2026-05-18T01:13:53+00:00
@@ -634,6 +636,7 @@ pkgconf/pkgconf,4180110,Debian:pkgconf,2026-05-18T01:15:18+00:00
 pnggroup/libpng,3768025,Debian:libpng,2026-05-18T01:15:18+00:00
 postcss/postcss,13078968,npm:postcss,2026-05-18T01:15:18+00:00
 postcss/postcss-selector-parser,36500102,npm:postcss-selector-parser,2026-05-18T01:15:19+00:00
+postcss/postcss-value-parser,40920306,npm:postcss-value-parser,2026-06-28T20:20:33+00:00
 prettier/prettier,75104123,npm:prettier,2026-05-18T01:15:19+00:00
 primus/eventemitter3,13100677,npm:eventemitter3,2026-05-18T01:15:19+00:00
 proptest-rs/proptest,94702898,"crates.io:proptest,crates.io:proptest-macro,crates.io:proptest-derive",2026-05-18T01:15:21+00:00
@@ -669,6 +672,7 @@ python-greenlet/greenlet,3003137,PyPI:greenlet,2026-05-18T01:15:28+00:00
 python-hyper/brotlicffi,43543393,"PyPI:brotlicffi,PyPI:brotlipy",2026-05-18T01:15:30+00:00
 python-hyper/h11,57372073,PyPI:h11,2026-05-18T01:15:29+00:00
 python-jsonschema/jsonschema,3072629,PyPI:jsonschema,2026-05-18T01:15:29+00:00
+python-jsonschema/jsonschema-specifications,582755777,PyPI:jsonschema-specifications,2026-06-28T20:20:33+00:00
 python-jsonschema/referencing,569027868,PyPI:referencing,2026-05-03T19:00:05+00:00
 python-pillow/pillow,5171600,PyPI:pillow,2026-05-18T01:15:45+00:00
 python-poetry/poetry,123303402,PyPI:poetry,2026-05-18T01:15:31+00:00
@@ -915,6 +919,7 @@ trysound/postcss-value-parser,40920306,npm:postcss-value-parser,2026-05-18T01:16
 tsconfig/bases,263697285,"npm:@tsconfig/node16,npm:@tsconfig/node10,npm:@tsconfig/node14,npm:@tsconfig/node12",2026-05-18T01:16:57+00:00
 tukaani-project/xz,553665726,Debian:xz,2026-05-18T01:16:54+00:00
 typescript-eslint/typescript-eslint,165536154,"npm:@typescript-eslint/types,npm:@typescript-eslint/visitor-keys,npm:@typescript-eslint/typescript-estree,npm:@typescript-eslint/utils,npm:@typescript-eslint/scope-manager,npm:@typescript-eslint/parser,npm:@typescript-eslint/type-utils,npm:@typescript-eslint/eslint-plugin,npm:@typescript-eslint/tsconfig-utils,npm:@typescript-eslint/project-service,npm:@typescript-eslint/experimental-utils,npm:typescript-eslint",2026-05-18T01:17:05+00:00
+typeshed-internal/stub_uploader,331669593,"PyPI:types-python-dateutil,PyPI:types-pyyaml,PyPI:types-setuptools,PyPI:types-protobuf,PyPI:types-pytz,PyPI:types-urllib3,PyPI:types-pyopenssl,PyPI:types-redis,PyPI:types-toml,PyPI:types-docutils,PyPI:types-paramiko,PyPI:types-dataclasses,PyPI:types-deprecated,PyPI:types-markdown,PyPI:types-cachetools,PyPI:types-croniter,PyPI:types-six,PyPI:types-certifi,PyPI:types-html5lib,PyPI:types-cryptography,PyPI:types-python-slugify,PyPI:types-jsonschema,PyPI:types-mock,PyPI:types-simplejson,PyPI:types-pillow,PyPI:types-psycopg2,PyPI:types-ujson,PyPI:types-freezegun,PyPI:types-beautifulsoup4",2026-06-28T20:21:01+00:00
 unicode-org/icu,49244766,Debian:icu,2026-05-18T01:16:56+00:00
 unicode-org/icu4x,243395141,"crates.io:zerofrom-derive,crates.io:zerovec,crates.io:zerofrom,crates.io:icu_properties,crates.io:icu_normalizer,crates.io:yoke,crates.io:icu_provider,crates.io:yoke-derive,crates.io:zerovec-derive,crates.io:writeable,crates.io:icu_collections,crates.io:litemap,crates.io:tinystr,crates.io:icu_properties_data,crates.io:databake,crates.io:icu_normalizer_data,crates.io:zerotrie,crates.io:icu_locale_core,crates.io:icu_locid,crates.io:icu_locid_transform_data,crates.io:icu_locid_transform,crates.io:icu_provider_macros,crates.io:potential_utf,crates.io:databake-derive,crates.io:icu_locale,crates.io:fixed_decimal,crates.io:icu_decimal,crates.io:icu_calendar,crates.io:icu_decimal_data,crates.io:icu_plurals,crates.io:icu_list,crates.io:calendrical_calculations,crates.io:icu_calendar_data,crates.io:icu_datetime,crates.io:icu_provider_adapters,crates.io:icu_plurals_data,crates.io:icu_segmenter,crates.io:icu_datetime_data,crates.io:icu_segmenter_data,crates.io:icu_list_data,crates.io:icu_collator,crates.io:icu_collator_data,crates.io:icu_locale_data,crates.io:icu_casemap,crates.io:icu_casemap_data,crates.io:icu_pattern,crates.io:icu_provider_blob,crates.io:icu,crates.io:icu_experimental,crates.io:icu_experimental_data,crates.io:ixdtf,crates.io:icu_time,crates.io:zoneinfo64,crates.io:icu_time_data,crates.io:resb,crates.io:tzif,crates.io:icu_provider_registry",2026-05-18T01:17:51+00:00
 unicode-rs/unicode-xid,34637906,crates.io:unicode-xid,2026-05-18T01:16:56+00:00
@@ -937,6 +942,7 @@ wbond/asn1crypto,36823669,PyPI:asn1crypto,2026-05-18T01:17:05+00:00
 webmproject/libwebp,23368445,Debian:libwebp,2026-05-18T01:17:07+00:00
 webpack/enhanced-resolve,5400204,npm:enhanced-resolve,2026-05-18T01:17:06+00:00
 webpack/loader-utils,6503675,npm:loader-utils,2026-05-03T19:01:32+00:00
+webpack/minimizer-webpack-plugin,143057914,npm:terser-webpack-plugin,2026-06-28T20:20:33+00:00
 webpack/schema-utils,80306715,npm:schema-utils,2026-05-18T01:17:06+00:00
 webpack/tapable,7730086,npm:tapable,2026-05-18T01:17:07+00:00
 webpack/terser-webpack-plugin,143057914,npm:terser-webpack-plugin,2026-05-18T01:17:07+00:00

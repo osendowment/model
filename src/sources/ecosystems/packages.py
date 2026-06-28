@@ -43,7 +43,12 @@ from pathlib import Path
 import aiohttp
 from rich.console import Console
 from rich.progress import (
-    BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn, TimeElapsedColumn,
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
 )
 from rich.table import Table
 
@@ -185,7 +190,9 @@ async def _fetch_one(
     registry_hit = ""
 
     for reg in registries:
-        url = f"{ECOSYSTE_API}/registries/{urllib.parse.quote(reg, safe='')}/packages/{urllib.parse.quote(pkg, safe='')}"
+        q_reg = urllib.parse.quote(reg, safe="")
+        q_pkg = urllib.parse.quote(pkg, safe="")
+        url = f"{ECOSYSTE_API}/registries/{q_reg}/packages/{q_pkg}"
         async with sem:
             try:
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=15)) as resp:

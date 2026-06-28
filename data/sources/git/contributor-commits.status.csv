@@ -28,6 +28,7 @@ andialbrecht/sqlparse,4067434,ok,126,1212,1.2,,2026-05-19T11:22:38+00:00
 andrewrk/node-pend,11836813,ok,1,13,0.5,,2026-05-19T11:22:39+00:00
 andyperlitch/jsbn,9710533,ok,11,18,0.7,,2026-05-19T11:22:39+00:00
 angular/angular-cli,36891867,ok,862,18393,2.1,,2026-06-28T14:47:38+00:00
+angular/angular-cli astanin/python-tabulate huggingface/huggingface_hub postcss/postcss-value-parser python-jsonschema/jsonschema-specifications python-jsonschema/referencing typeshed-internal/stub_uploader webpack/minimizer-webpack-plugin,,clone_failed,,,,angular/angular-cli astanin/python-tabulate huggingface/huggingface_hub postcss/postcss-value-parser python-jsonschema/jsonschema-specifications python-jsonschema/referencing typeshed-internal/stub_up,2026-06-28T20:15:03+00:00
 annotated-types/annotated-types,487934134,ok,22,81,0.7,,2026-05-19T11:22:40+00:00
 antonk52/lilconfig,238967485,ok,14,122,2.6,,2026-05-19T11:22:40+00:00
 apache/airflow,33884891,ok,4448,37251,32.5,,2026-05-19T11:22:40+00:00
@@ -37,6 +38,8 @@ archlinux/linux,142707813,timeout,,,,clone or git log exceeded timeout,2026-05-1
 ardatan/graphql-tools,54432168,ok,442,7094,15.7,,2026-05-19T11:22:41+00:00
 ardatan/whatwg-node,429511342,ok,34,3222,3.5,,2026-05-19T11:22:42+00:00
 assert-rs/snapbox,424722460,ok,22,1097,0.9,,2026-05-19T11:22:43+00:00
+astanin/python-tabulate,205875548,ok,112,713,0.6,,2026-06-28T20:19:21+00:00
+astanin/python-tabulate huggingface/huggingface_hub postcss/postcss-value-parser python-jsonschema/jsonschema-specifications python-jsonschema/referencing typeshed-internal/stub_uploader webpack/minimizer-webpack-plugin,,clone_failed,,,,astanin/python-tabulate huggingface/huggingface_hub postcss/postcss-value-parser python-jsonschema/jsonschema-specifications python-jsonschema/referencing typeshed-internal/stub_uploader webpack/minim,2026-06-28T20:16:30+00:00
 astral-sh/ruff,523043277,ok,910,15254,6.2,,2026-05-19T11:22:45+00:00
 auth0/node-jwa,8116861,ok,16,82,1.7,,2026-05-19T11:22:45+00:00
 autotools-mirror/autoconf,47662429,ok,160,7088,1.5,,2026-05-19T11:22:46+00:00
@@ -279,6 +282,7 @@ hapijs/hoek,5831189,ok,67,573,18.1,,2026-05-19T11:24:19+00:00
 harfbuzz/harfbuzz,5050525,ok,341,20567,7.1,,2026-05-19T11:24:19+00:00
 hiddentao/fast-levenshtein,9490451,ok,10,56,0.5,,2026-05-19T11:24:23+00:00
 httplib2/httplib2,53002916,ok,86,557,0.7,,2026-05-19T11:24:24+00:00
+huggingface/huggingface_hub,323591830,ok,377,2528,0.7,,2026-06-28T20:18:43+00:00
 hukkin/tomli,370616797,ok,18,312,0.6,,2026-05-19T11:24:24+00:00
 hyperium/http,84983058,ok,137,451,0.6,,2026-05-19T11:24:25+00:00
 hyperium/http-body,183281612,ok,29,118,0.6,,2026-05-19T11:24:25+00:00
@@ -601,6 +605,7 @@ pkgconf/pkgconf,4180110,ok,100,2112,0.8,,2026-05-19T11:25:43+00:00
 pnggroup/libpng,3768025,ok,119,4609,0.9,,2026-05-19T11:25:43+00:00
 postcss/postcss,13078968,ok,466,3727,1.1,,2026-05-19T11:25:44+00:00
 postcss/postcss-selector-parser,36500102,ok,51,360,0.6,,2026-05-19T11:25:44+00:00
+postcss/postcss-value-parser,40920306,ok,16,114,0.5,,2026-06-28T20:19:21+00:00
 prettier/prettier,75104123,ok,844,11001,9.6,,2026-05-19T11:25:45+00:00
 primus/eventemitter3,13100677,ok,35,356,0.6,,2026-05-19T11:25:46+00:00
 proptest-rs/proptest,94702898,ok,111,941,0.6,,2026-05-19T11:25:47+00:00
@@ -635,6 +640,8 @@ python-greenlet/greenlet,3003137,ok,90,1076,1.1,,2026-05-19T11:25:59+00:00
 python-hyper/brotlicffi,43543393,ok,22,313,1.2,,2026-05-19T11:25:59+00:00
 python-hyper/h11,57372073,ok,40,439,0.5,,2026-05-19T11:26:00+00:00
 python-jsonschema/jsonschema,3072629,ok,133,2559,0.8,,2026-05-19T11:26:00+00:00
+python-jsonschema/jsonschema-specifications,582755777,ok,6,200,0.6,,2026-06-28T20:19:21+00:00
+python-jsonschema/referencing,569027868,ok,8,649,0.7,,2026-06-28T20:19:21+00:00
 python-pillow/pillow,5171600,ok,550,14464,2.3,,2026-05-19T11:26:00+00:00
 python-poetry/poetry,123303402,ok,688,3665,1.1,,2026-05-19T11:26:01+00:00
 python-poetry/tomlkit,140365570,ok,49,426,0.8,,2026-05-19T11:26:01+00:00
@@ -867,6 +874,7 @@ trysound/postcss-value-parser,40920306,ok,15,107,0.6,,2026-05-19T11:30:48+00:00
 tsconfig/bases,263697285,ok,107,281,0.7,,2026-05-19T11:30:48+00:00
 tukaani-project/xz,553665726,ok,66,3013,2.7,,2026-05-19T11:27:12+00:00
 typescript-eslint/typescript-eslint,165536154,ok,847,6528,13.0,,2026-05-19T11:27:12+00:00
+typeshed-internal/stub_uploader,331669593,ok,28,3456,0.7,,2026-06-28T20:19:21+00:00
 unicode-org/icu,49244766,ok,324,33640,77.0,,2026-05-19T11:27:15+00:00
 unicode-org/icu4x,243395141,ok,166,4951,3.9,,2026-05-19T11:27:18+00:00
 unicode-rs/unicode-xid,34637906,ok,24,61,0.5,,2026-05-19T11:27:21+00:00
@@ -887,6 +895,7 @@ watson/ci-info,71475907,ok,38,210,0.6,,2026-05-19T11:27:30+00:00
 wbond/asn1crypto,36823669,ok,40,758,0.7,,2026-05-19T11:27:31+00:00
 webmproject/libwebp,23368445,ok,78,4008,1.1,,2026-05-19T11:27:31+00:00
 webpack/enhanced-resolve,5400204,ok,92,813,2.8,,2026-05-19T11:27:32+00:00
+webpack/minimizer-webpack-plugin,143057914,ok,45,427,0.5,,2026-06-28T20:19:21+00:00
 webpack/schema-utils,80306715,ok,26,206,0.8,,2026-05-19T11:27:34+00:00
 webpack/tapable,7730086,ok,42,233,0.7,,2026-05-19T11:27:34+00:00
 webpack/terser-webpack-plugin,143057914,ok,45,423,0.9,,2026-05-19T11:27:35+00:00
