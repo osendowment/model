@@ -8,7 +8,7 @@ concentrated = more at-risk)** that feeds `data/risk/risk.csv` as the column
 `/contributors` API — each produce a bus factor, an HHI, and contributor counts;
 only the git `_5y` axis drives the score.
 
-Scope: the 897 A/B value-class repos in the risk pipeline (see
+Scope: the 897 class-A value-class repos in the risk pipeline (see
 [value.md](../value.md)). Build step: `src/risk/build_concentration.py`.
 
 ## Metrics Roadmap
@@ -243,5 +243,5 @@ frozen projects), or where the git clone failed/timed out (kernel-scale mirrors)
   identities will still be split — inflating contributor count and deflating
   concentration slightly.
 - **`score` is a percentile, not a class.** It is a 0–100 rank within this
-  cohort, not an absolute A–D rating, and it is one of five inputs to the overall
+  cohort, not an absolute rating, and it is one of five inputs to the overall
   `risk.csv` `score` (geometric mean of the component scores).

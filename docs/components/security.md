@@ -8,7 +8,7 @@ risk) and its **count of distinct CVEs over 2021–2025** (more CVEs → more ri
 signals (semgrep SAST findings, OSS-Fuzz enrollment, OpenSSF Best Practices
 badge) that do **not** enter the score.
 
-Scope: the 897 A/B value-class repos in the risk pipeline (see
+Scope: the 897 class-A value-class repos in the risk pipeline (see
 [value.md](../value.md)). Build step: `src/risk/build_security.py`.
 
 ## Metrics Roadmap
@@ -94,7 +94,7 @@ metric per sha — and are joined on the snapshot sha. The rest join on `repo`.
 
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
 |---|---|---|---|
-| `value/value.csv` | (value stage) | A/B value-class scope | `repo` |
+| `value/value.csv` | (value stage) | class-A value-class scope | `repo` |
 | `github/git/commits-years.csv` | `src.sources.git.commits_years` | per-(repo, year) `last_sha` — the snapshot pin | `repo`, `year` |
 | `git/openssf.csv` | `src/sources/openssf/scorecard.py` | OpenSSF Scorecard `score` + 18 checks per `(repo, sha)` — see [openssf.md](../sources/openssf.md) | `repo`, `sha` |
 | `git/depsdev.csv` | `src/sources/depsdev/fetch.py` | deps.dev-mirrored Scorecard `score` + checks (**fallback** when local row missing) | `repo`, `sha` |
@@ -221,6 +221,6 @@ Practices badge tiers: 18 `passing`, 10 `in_progress`, 1 `gold`, 1 `silver`.
 - **Snapshot pinning, not live.** The Scorecard/semgrep signals are pinned to
   the repo's latest in-window commit (2025→2021), not re-run live, so they
   reflect the snapshot sha rather than `HEAD`.
-- **`score` is not a class.** It's a 0–100 risk percentile, not an A–D tier; the
-  A–D `security_class` tiering lives in the downstream risk-class layer (see
-  [risk.md](../risk.md)), not in this component CSV.
+- **`score` is not a class.** It's a 0–100 risk percentile — the risk pipeline
+  has no A–D class tier; `security` enters `risk.csv` as a 0–100 score, not a
+  `security_class` column.

@@ -7,7 +7,7 @@ churn-weighted hotspots (Tornhill) — and distils them into one **complexity-ri
 score (`score`)** that feeds `data/risk/risk.csv`. Higher = larger / harder to
 maintain.
 
-Scope: the 897 A/B value-class repos in the risk pipeline (see
+Scope: the 897 class-A value-class repos in the risk pipeline (see
 [value.md](../value.md)). Build step: `src/risk/build_complexity.py`.
 
 ## Metrics Roadmap
@@ -251,6 +251,6 @@ is still present for them.
 - **Mainline correction is best-effort.** The false-zero guard catches the common
   off-mainline lizard zero, but a partially-wrong off-mainline tree that still
   has *some* functions would pass the guard and slightly mis-measure.
-- **`score` is a percentile, not a class.** It is not an A–D class; the legacy
-  LOC-bucket class (A ≥ 1M, B 100K–1M, C 10K–100K, D < 10K) in
-  [risk.md](../risk.md) is a separate, coarser view.
+- **`score` is a percentile, not a class.** It is a 0–100 risk percentile, not
+  an A–D class — the risk pipeline has no class tiers; `complexity` enters
+  `risk.csv` as a 0–100 score.

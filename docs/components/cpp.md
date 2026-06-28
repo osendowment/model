@@ -57,7 +57,7 @@ reflects who *runs* with whom, not who *builds* whom, so build infrastructure
 ## Value pipeline
 
 After unification, cpp uses the shared scoring mechanics (download-weighted
-PageRank α = 0.85, then A/B/C/D cumulative-share cutoffs — see
+PageRank α = 0.85, then A/B/C cumulative-share cutoffs — see
 [`value.md`](../value.md)). Orchestrated by `src.value.cpp_pipeline`, which runs
 the Debian → Homebrew → Repology sub-pipelines, then the cpp aggregation.
 

@@ -6,7 +6,7 @@ backlog — **per active contributor (AC)**, then folds the three per-AC
 percentiles into one **workload-risk score (`score`)** that feeds
 `data/risk/risk.csv` as the `workload` column.
 
-Scope: the 897 A/B value-class repos in the risk pipeline (see
+Scope: the 897 class-A value-class repos in the risk pipeline (see
 [value.md](../value.md)). Build step: `src/risk/build_workload.py` — unusually,
 it must run **after** `build_complexity`, `build_security`, and
 `build_concentration`, because it reads their per-dimension CSVs to get the LOC,

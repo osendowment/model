@@ -1,7 +1,7 @@
 # JavaScript / TypeScript (npm)
 
 The npm slice of the [Value pipeline](../value.md): how npm download and
-dependency data becomes a download-weighted PageRank and an A/B/C/D value class
+dependency data becomes a download-weighted PageRank and an A/B/C value class
 for every JavaScript/TypeScript package. This page covers the **pipeline
 assembly**; for raw-fetch mechanics (endpoints, rate limits, fetch scripts) see
 the source reference [`sources/npm.md`](../sources/npm.md).
@@ -30,7 +30,7 @@ npm data flows through the shared Value mechanics (full description in
 4. **PageRank** — download-weighted personalized PageRank (α = 0.85) over the
    directed dep graph (`A → B` means *A depends on B*).
 5. **Value class** — sort by PageRank desc; cumulative-share cutoffs assign
-   A (≤50%) / B (≤75%) / C (≤90%) / D (rest).
+   A (≤75%) / B (≤95%) / C (rest).
 
 Orchestrated by `src.value.npm_pipeline` (fetch-data → fetch-stats → fetch-repos →
 process). Metric lineage (`←` = data source, `[…]` = period):

@@ -1,7 +1,7 @@
 # Python (PyPI)
 
 The PyPI slice of the [Value pipeline](../value.md): how PyPI download and
-dependency data becomes a download-weighted PageRank and an A/B/C/D value class for
+dependency data becomes a download-weighted PageRank and an A/B/C value class for
 every Python package. This page covers the **pipeline assembly**; for raw-fetch
 mechanics (the BigQuery export, the JSON API, fetch scripts) see the source
 reference [`sources/pypi.md`](../sources/pypi.md).
@@ -29,7 +29,7 @@ PyPI data flows through the shared Value mechanics (full description in
 5. **PageRank** — download-weighted personalized PageRank (α = 0.85) over the dep
    graph.
 6. **Value class** — sort by PageRank desc; cumulative-share cutoffs assign
-   A (≤50%) / B (≤75%) / C (≤90%) / D (rest).
+   A (≤75%) / B (≤95%) / C (rest).
 
 Orchestrated by `src.value.pypi_pipeline` (fetch-data → fetch-urls → process).
 Metric lineage (`←` = data source, `[…]` = period):
