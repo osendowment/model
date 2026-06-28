@@ -227,6 +227,7 @@ RISK_FUNNELS = {
                 ("Owner sponsors others (out > 0)", "gt0", "gh_sponsors_out"),
                 ("OpenCollective budget > 0", "gt0", "oc_avg_funding"),
                 ("npm funding field declared", "bool", "has_npm_funding"),
+                ("PyPI funding url declared", "bool", "has_pypi_funding"),
                 ("funding.json (FLOSS Fund)", "bool", "has_funding_json")],
     "workload": [("issues data present", "present", "issues_opened_5y"),
                  ("per-AC ratios (loc/cve/nni) computed", "present", "loc_per_ac_p"),

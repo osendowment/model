@@ -64,19 +64,23 @@ def test_build_funding_score_lower_funding_higher_score(monkeypatch):
     assert int(rows["rich/r"]["score"]) < int(rows["poor/p"]["score"])
 
 
-def test_build_funding_npm_declared_channel_caps_score(monkeypatch):
-    """A repo with no measured funding but a DECLARED npm funding channel is capped
-    at NPM_FUNDING_CAP (79) instead of the 100 max-risk plateau, and the npm channel
-    is counted. An identical repo with no declared channel stays at 100."""
+def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
+    """A repo with no measured funding but a DECLARED registry funding channel —
+    npm package.json `funding` OR PyPI `project_urls` — is capped at
+    DECLARED_FUNDING_CAP (79) instead of the 100 max-risk plateau; the channel is
+    counted. An identical repo with no declared channel stays at 100."""
     def rows_by_repo(p):
         if "sponsors.csv" in str(p):
             return {"rich/r": {"github_sponsors": "100"}}
         if "npm/funding.csv" in str(p):
-            return {"declared/d": {"has_npm_funding": "True",
-                                   "npm_funding_url": "https://github.com/sponsors/x"}}
+            return {"npm/d": {"has_npm_funding": "True",
+                              "npm_funding_url": "https://github.com/sponsors/x"}}
+        if "pypi/funding.csv" in str(p):
+            return {"pypi/d": {"has_pypi_funding": "True",
+                               "pypi_funding_platforms": "github"}}
         return {}
     monkeypatch.setattr(bf, "load_top_repos",
-                        lambda: [E("plain/p"), E("declared/d"), E("rich/r")])
+                        lambda: [E("plain/p"), E("npm/d"), E("pypi/d"), E("rich/r")])
     monkeypatch.setattr(bf, "load_rows_by_repo", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
@@ -86,10 +90,10 @@ def test_build_funding_npm_declared_channel_caps_score(monkeypatch):
     monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({"rich/r": "rich"}, {}))
 
     rows = {r["repo"]: r for r in bf.build()}
-    assert rows["plain/p"]["score"] == 100               # unfunded, no channel
-    assert rows["declared/d"]["has_npm_funding"] == "True"
-    assert rows["declared/d"]["channels_count"] == "1"   # npm channel counted
-    assert rows["declared/d"]["score"] == bf.NPM_FUNDING_CAP  # 100 → 79
+    assert rows["plain/p"]["score"] == 100                  # unfunded, no channel
+    for d in ("npm/d", "pypi/d"):
+        assert rows[d]["channels_count"] == "1"             # registry channel counted
+        assert rows[d]["score"] == bf.DECLARED_FUNDING_CAP  # 100 → 79
 
 
 def test_build_funding_scraped_foundation_host_lowers_score(monkeypatch):

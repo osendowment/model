@@ -159,24 +159,26 @@ driven by the OpenSSF axis; CVEs re-rank only the minority that carry them.
 
 Project resourcing ([funding.md](components/funding.md)) — GitHub Sponsors
 (in+out), `FUNDING.yml`, OpenCollective budgets, FLOSS Fund, foundation hosting,
-plus the npm package.json `funding` field (npm repos only). Score = geomean of
-the GitHub-sponsorship + OpenCollective + backing percentiles.
+plus declared registry channels (npm `funding` field / PyPI `project_urls`).
+Score = geomean of the GitHub-sponsorship + OpenCollective + backing percentiles.
 
 | Channel | Repos | % |
 |---|---:|---:|
 | input top repos | 895 | 100% |
 | GitHub Sponsors inbound > 0 | 440 | 49.2% |
-| ≥ 1 funding channel | 384 | 42.9% |
+| ≥ 1 funding channel | 393 | 43.9% |
 | `FUNDING.yml` present | 256 | 28.6% |
 | Owner sponsors others (out > 0) | 157 | 17.5% |
 | OpenCollective budget > 0 | 162 | 18.1% |
 | npm funding field declared | 210 | 23.5% |
+| PyPI funding url declared | 17 | 1.9% |
 | Foundation host | 44 | 4.9% |
 | funding.json (FLOSS Fund) | 6 | 0.7% |
 
 Unfunded repos (no sponsors, no OC) tie at the worst percentile — `score` = 100
-is the "no detectable funding" plateau. A declared npm `funding` channel caps the
-score at 79 (not maximally unfunded), which moved 29 repos off the plateau.
+is the "no detectable funding" plateau. A declared registry funding channel (npm
+`funding` field / PyPI `project_urls`) caps the score at 79 (not maximally
+unfunded), which moved 31 repos off the plateau (29 npm + 2 pypi).
 
 #### OpenCollective
 

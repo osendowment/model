@@ -12,15 +12,18 @@ Reads (all under data/sources/):
     funding/overrides.csv      — curated host/owner institutional backing per repo
     npm/funding.csv            — npm package.json `funding` field (npm repos only,
                                  src.sources.npm.fetch_funding) — a declared channel
+    pypi/funding.csv           — PyPI `project_urls` funding link (pypi repos only,
+                                 src.sources.pypi.fetch_funding) — a declared channel
 
 Writes data/risk/funding.csv. The funding risk **score** (0-100, higher =
 less funded = riskier) is the geometric mean of THREE direction-aware risk axes:
     gh_sponsorships_p  ← gh_sponsorships (in + out), lower → riskier
     oc_avg_funding_p   ← oc_avg_funding ($0 when none),  lower → riskier
     host_score×100     ← combined host/owner backing (company 0, nonprofit 50, none 100)
-A repo that DECLARES a funding channel (npm `funding` field, `has_npm_funding`)
-has its score capped at NPM_FUNDING_CAP (79) — it is not maximally unfunded even
-when no $ is measured. npm-only; the other ecosystems have no equivalent field.
+A repo that DECLARES a registry funding channel (`has_npm_funding` /
+`has_pypi_funding`) has its score capped at DECLARED_FUNDING_CAP (79) — it is not
+maximally unfunded even when no $ is measured. Each is repo/package-level, so it
+catches channels the owner-level checks miss; npm/pypi only.
 `gh_stars` / `gh_forks` are informational popularity columns (not scored);
 their fetch timestamp lives in data/sources/github/repos.csv. No per-signal
 `fetched_at` is rolled up here.
@@ -56,19 +59,22 @@ OC_BUDGETS_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
 FOUNDATIONS_FILE = DATA_DIR / "sources" / "funding" / "host-by-repo.csv"
 OVERRIDES_FILE = DATA_DIR / "sources" / "funding" / "overrides.csv"
 NPM_FUNDING_FILE = DATA_DIR / "sources" / "npm" / "funding.csv"
+PYPI_FUNDING_FILE = DATA_DIR / "sources" / "pypi" / "funding.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
 
-# A repo that has *declared* a funding channel (npm package.json `funding` field)
-# is not maximally unfunded even if no $ is measured — cap its funding risk at the
-# "has some backing" level (the nonprofit-host score: geom(100,100,50) ≈ 79).
-# npm-only: no equivalent field exists for the other ecosystems.
-NPM_FUNDING_CAP = 79
+# A repo that has *declared* a funding channel in its registry metadata (the npm
+# package.json `funding` field, or a PyPI `project_urls` funding link) is not
+# maximally unfunded even if no $ is measured — cap its funding risk at the "has
+# some backing" level (the nonprofit-host score: geom(100,100,50) ≈ 79). Both are
+# repo/package-level, so they catch channels the owner-level checks miss.
+DECLARED_FUNDING_CAP = 79
 
 FIELDS = ["repo", "repo_id",
           "gh_sponsors_in", "gh_sponsors_out", "gh_sponsorships", "gh_sponsorships_p",
           "gh_stars", "gh_forks",
           "has_funding_yml", "funding_yml_platforms", "has_funding_json",
-          "has_npm_funding", "npm_funding_url", "channels_count",
+          "has_npm_funding", "npm_funding_url",
+          "has_pypi_funding", "pypi_funding_platforms", "channels_count",
           "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
           "host", "host_type", "owner", "owner_type", "host_score",
           "score"]
@@ -132,20 +138,26 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
                  host: str, host_type: str, owner: str, owner_type: str,
                  repo_meta: dict, sponsoring_count: str = "",
                  oc_slug: str = "", oc_avg: str = "0",
-                 npm_funding: dict | None = None) -> dict:
+                 npm_funding: dict | None = None,
+                 pypi_funding: dict | None = None) -> dict:
     """Join one repo's raw funding signals (percentiles filled later in build()).
 
     `oc_slug` / `oc_avg` are the Open Collective attribution resolved in build():
     a repo-level collective's full budget, or a class-A repo's equal share of its
-    org's collective (see build()). `npm_funding` is the npm registry `funding`
-    field (npm repos only) — an extra declared funding channel.
+    org's collective (see build()). `npm_funding` / `pypi_funding` are the registry
+    funding declarations (npm package.json `funding` field / PyPI `project_urls`) —
+    extra declared funding channels.
     """
     npm_funding = npm_funding or {}
+    pypi_funding = pypi_funding or {}
     has_npm = (npm_funding.get("has_npm_funding") or "").strip() == "True"
+    has_pypi = (pypi_funding.get("has_pypi_funding") or "").strip() == "True"
     channels = _platform_set(yml.get("funding_yml_platforms")) | _platform_set(
         export.get("channel_platforms"))
     if has_npm:
         channels = channels | {"npm"}
+    if has_pypi:
+        channels = channels | {"pypi"}
     gh_in = (sponsors.get("github_sponsors") or "").strip()
     gh_out = (sponsoring_count or "").strip()
     return {
@@ -161,6 +173,8 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "has_funding_json": "True" if export else "False",
         "has_npm_funding": "True" if has_npm else "False",
         "npm_funding_url": (npm_funding.get("npm_funding_url") or "").strip(),
+        "has_pypi_funding": "True" if has_pypi else "False",
+        "pypi_funding_platforms": (pypi_funding.get("pypi_funding_platforms") or "").strip(),
         "channels_count": str(len(channels)),
         "oc_slug": oc_slug,
         "oc_avg_funding": oc_avg,
@@ -252,6 +266,7 @@ def build() -> list[dict]:
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
     sponsoring = _load_sponsoring(SPONSORSHIPS_FILE)
     npm_funding = load_rows_by_repo(NPM_FUNDING_FILE) if NPM_FUNDING_FILE.exists() else {}
+    pypi_funding = load_rows_by_repo(PYPI_FUNDING_FILE) if PYPI_FUNDING_FILE.exists() else {}
 
     # Open Collective attribution is driven by the reverse-map (collectives.csv),
     # which records whether each collective's GitHub link names a specific repo or
@@ -311,7 +326,8 @@ def build() -> list[dict]:
             repo_meta=repos_meta.get(repo, {}),
             sponsoring_count=sponsoring.get(owner_login, ""),
             oc_slug=oc_slug, oc_avg=_fmt_money(oc_amt),
-            npm_funding=npm_funding.get(repo, {})))
+            npm_funding=npm_funding.get(repo, {}),
+            pypi_funding=pypi_funding.get(repo, {})))
 
     # Funding risk score: both axes are `lower_is_worse` (less funding → riskier).
     # add_percentiles writes the two risk percentiles; we then recompute `score`
@@ -334,10 +350,11 @@ def build() -> list[dict]:
         if len(ps) == 2:
             backing_p = float(r["host_score"]) * 100.0
             score = max(1, round(geometric_mean(ps + [backing_p])))
-            # A declared npm funding channel caps the funding risk: a project that
-            # has set up a way to be funded is not maximally unfunded.
-            if r.get("has_npm_funding") == "True":
-                score = min(score, NPM_FUNDING_CAP)
+            # A declared registry funding channel (npm `funding` / PyPI project_urls)
+            # caps the risk: a project that has set up a way to be funded is not
+            # maximally unfunded.
+            if "True" in (r.get("has_npm_funding"), r.get("has_pypi_funding")):
+                score = min(score, DECLARED_FUNDING_CAP)
             r["score"] = score
     return rows
 
