@@ -163,8 +163,8 @@ Per-ecosystem and combined per-package class counts (legacy 4-class snapshot).
 
 *A+B GH* and *A+B Git* are the share of A and B class packages with a
 known GitHub repo and any Git URL respectively — the load-bearing subset
-that the Risk pipeline (default scope: A/B) and the Eligibility pipeline
-both rely on. C/D-class rows are present in `value.csv` and tracked
+that the Risk pipeline (scope: class A, the former A∪B) and the Eligibility
+pipeline both rely on. C/D-class rows are present in `value.csv` and tracked
 through the value pipeline, but are outside the default Risk and
 Eligibility scope. C/C++'s A+B Git jumps from 32% to 95% once
 non-GitHub upstreams are counted (glibc, gcc, libunistring, glib, mpfr,

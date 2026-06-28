@@ -92,14 +92,16 @@ graph LR
     subgraph Risk["Risk Pipeline"]
         concentration["Contributor Concentration"]
         complexity["Codebase Complexity"]
-        debt["Issue Debt"]
-        trend["Issue Trend"]
+        security["Security"]
+        funding["Funding"]
+        workload["Workload (incl. issue debt + trend)"]
     end
 
     github --> concentration
     github --> complexity
-    github --> debt
-    github --> trend
+    github --> security
+    github --> funding
+    github --> workload
 ```
 
 All scoring parameters (windows, weights) are defined in `src/settings.json`.
@@ -266,7 +268,7 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 | `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
 | `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (the `scc` fetcher) |
 | `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/risk/aggregate_risk.py` | Aggregate into risk classifications. **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)** — `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
+| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall risk `score`. **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)** — `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
 
 ## Source-file coverage
 
