@@ -124,7 +124,10 @@ def _per_year_shas(commits_years_file: Path) -> dict[str, dict[int, str]]:
     """Return {repo: {year_int: last_sha}} for usable (sha, year) pairs.
 
     A pair is "usable" when ``last_sha`` is non-empty AND ``commits > 0``.
-    Years are clamped to the settings `years` window. Repos with no usable
+    EVERY real year is kept — not just the settings window — so a dormant
+    repo's pre-window fallback snapshot (e.g. year 2020, recorded by
+    `resolve_head`) is available to the walk in `build()`. The `HEAD`
+    pseudo-row is bucketed as year 0 (ultimate fallback). Repos with no usable
     year get no key.
     """
     by_repo: dict[str, dict[int, str]] = {}
@@ -152,8 +155,10 @@ def _per_year_shas(commits_years_file: Path) -> dict[str, dict[int, str]]:
                 continue
             if commits <= 0:
                 continue
-            if min(YEARS) <= year <= max(YEARS):
-                by_repo.setdefault(slug, {})[year] = last_sha
+            # Keep any real year (no window clamp): resolve_head records a
+            # dormant repo's snapshot under its real commit year as a dated
+            # fallback, which the walk in build() reaches after the window.
+            by_repo.setdefault(slug, {})[year] = last_sha
     return by_repo
 
 
@@ -235,12 +240,15 @@ def build() -> list[dict]:
         repo = entry.repo
         year_to_sha = per_year.get(repo, {})
 
-        # Walk newest→oldest window year. Pick the most-recent year whose sha
-        # has scc loc>0. If none qualifies, leave the row empty (no HEAD fallback).
+        # Walk newest→oldest over EVERY available snapshot year, picking the
+        # most-recent whose sha has scc loc>0. Real years (incl. pre-window
+        # dormant-repo fallbacks from resolve_head, e.g. 2020) sort ahead of the
+        # HEAD pseudo-row (year 0, the ultimate fallback). So as long as the repo
+        # has any usable sha there is always a snapshot to score.
         scc_vals: dict[str, str] = {}
         lz_vals: dict[str, str] = {}
         year_label = ""
-        for y in (*sorted(YEARS, reverse=True), 0):
+        for y in sorted(year_to_sha, reverse=True):
             sha = year_to_sha.get(y)
             if not sha:
                 continue
