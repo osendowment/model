@@ -143,6 +143,20 @@ def value_stats() -> dict:
             "valid": sum(1 for r in sub if _truthy(r.get("valid"))),
         }
 
+    # Packages per repo class, from value.csv's own `packages` column (every
+    # package belongs to exactly one repo group, so this is A/B/C-only and sums
+    # to the results universe). `ght` = the subset in GitHub-identified groups.
+    pkg_class = {"A": 0, "B": 0, "C": 0}
+    ght_class = {"A": 0, "B": 0, "C": 0}
+    for r in rows:
+        c = (r.get("class") or "").strip()
+        if c not in pkg_class:
+            continue
+        p = int(r.get("packages") or 0)
+        pkg_class[c] += p
+        if _present(r.get("github_repo")):
+            ght_class[c] += p
+
     # per-ecosystem funnel: top-of-funnel from stats.csv, tail from results.csv
     smatrix = {r["metric"]: r for r in _load("data/value/stats.csv")}
     funnel = {}
@@ -156,12 +170,10 @@ def value_stats() -> dict:
             "deps": int(smatrix.get("packages_with_deps", {}).get(eco, 0) or 0),
             "results": n, "github": wgh, "git": wgit,
         }
-    # results-level GitHub appearances (a repo counts once per ecosystem)
-    github_total = sum(f["github"] for f in funnel.values())
 
     return {
         "rows": m, "github": gh, "git": git, "valid": valid, "orphan": orphan,
-        "github_total": github_total,
+        "pkg_class": pkg_class, "ght_class": ght_class,
         "classes": classes, "by_class": by_class, "funnel": funnel,
     }
 
@@ -301,21 +313,20 @@ def dashboard(v: dict, r: dict) -> None:
     console.print(f"value.csv rows: [bold]{v['rows']:,}[/bold]   "
                   f"risk scope (top repos): [bold]{r['scope']:,}[/bold]\n")
 
-    t = Table(title="Value — identity coverage (distinct repos)", header_style="bold dim")
+    t = Table(title="Value — identity coverage", header_style="bold dim")
     t.add_column("Step")
     for c in ("A", "B", "C", "Total"):
         t.add_column(c, justify="right")
     bc = v["by_class"]
-    t.add_row("GitHub total repos", "—", "—", "—", f"{v['github_total']:,}")
 
-    def _drow(label, key, bold=False):
-        vals = [bc[c][key] for c in ("A", "B", "C")]
-        cells = [f"{x:,}" for x in (*vals, sum(vals))]
+    def _drow(label, d, bold=False):
+        cells = [f"{x:,}" for x in (d["A"], d["B"], d["C"], d["A"] + d["B"] + d["C"])]
         t.add_row(label, *cells, style="bold" if bold else None)
 
-    _drow("GitHub unique repos", "github")
-    _drow("GitHub active repos", "active")
-    _drow("Valid repos", "valid", bold=True)
+    _drow("Packages", v["pkg_class"])
+    _drow("GitHub total repos", v["ght_class"])
+    _drow("GitHub unique repos", {c: bc[c]["github"] for c in "ABC"})
+    _drow("Valid repos", {c: bc[c]["valid"] for c in "ABC"}, bold=True)
     console.print(t)
 
     t = Table(title="Value — class distribution", header_style="bold dim")
@@ -371,21 +382,19 @@ def markdown(v: dict, r: dict) -> str:
     a("### Repo identity coverage\n")
     a("| Step | A | B | C | Total | Comment |")
     a("|---|--:|--:|--:|--:|---|")
-    a(f"| GitHub total repos | — | — | — | {v['github_total']:,} | "
-      "per-ecosystem results (a repo counts once per ecosystem) |")
     bc = v["by_class"]
 
-    def _id_row(label: str, key: str, comment: str, bold: bool = False) -> str:
-        vals = [bc[c][key] for c in ("A", "B", "C")]
-        cells = [f"{x:,}" for x in (*vals, sum(vals))]
+    def _id_row(label: str, d: dict, comment: str, bold: bool = False) -> str:
+        cells = [f"{x:,}" for x in (d["A"], d["B"], d["C"], d["A"] + d["B"] + d["C"])]
         if bold:
             return f"| **{label}** | " + " | ".join(f"**{x}**" for x in cells) + f" | {comment} |"
         return f"| {label} | " + " | ".join(cells) + f" | {comment} |"
 
-    a(_id_row("GitHub unique repos", "github",
+    a(_id_row("Packages", v["pkg_class"], "package universe (after dep tree)"))
+    a(_id_row("GitHub total repos", v["ght_class"], "package appearances in a github group"))
+    a(_id_row("GitHub unique repos", {c: bc[c]["github"] for c in "ABC"},
               f"deduped; + {v['orphan']:,} orphans = {v['rows']:,} repos"))
-    a(_id_row("GitHub active repos", "active", "not archived"))
-    a(_id_row("Valid repos", "valid",
+    a(_id_row("Valid repos", {c: bc[c]["valid"] for c in "ABC"},
               "github repo resolves (200); incl. archived mirrors", bold=True))
 
     a("\n### Repo class distribution\n")

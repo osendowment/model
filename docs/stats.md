@@ -34,16 +34,17 @@ Note that after dep tree is de-duplicated, cpp unions the Debian + Homebrew grap
 
 ### Repo identity coverage
 
-From the per-ecosystem GitHub appearances down to the valid repos, per strongest
-`class` and total (distinct repos). Orphans / non-GitHub-only projects (glibc, gcc
-when not overridden) drop out at *unique*; archived GitHub mirrors of a live
-upstream stay *valid* (they resolve), so *valid* > *active*.
+From the package universe down to the valid repos, per `class` and total. Each
+row is classed by the repo's `class` (A/B/C). Packages → GitHub total are
+appearance-level (a repo counts once per ecosystem); unique → valid are distinct
+repos. Orphans / non-GitHub-only projects drop out at *unique*; archived GitHub
+mirrors of a live upstream stay *valid* (they resolve).
 
 | Step | A | B | C | Total | Comment |
 |---|--:|--:|--:|--:|---|
-| GitHub total repos | — | — | — | 15,626 | per-ecosystem results (a repo counts once per ecosystem) |
+| Packages | 3,403 | 4,682 | 9,281 | 17,366 | package universe (after dep tree) |
+| GitHub total repos | 3,366 | 4,234 | 8,057 | 15,657 | package appearances in a github group |
 | GitHub unique repos | 917 | 2,703 | 6,769 | 10,389 | deduped; + 1,671 orphans = 12,060 repos |
-| GitHub active repos | 890 | 2,594 | 6,442 | 9,926 | not archived |
 | **Valid repos** | **917** | **2,694** | **6,716** | **10,327** | github repo resolves (200); incl. archived mirrors |
 
 ### Repo class distribution
