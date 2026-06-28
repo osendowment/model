@@ -25,9 +25,9 @@ validation caches); `gh_repo_id` is set by `verify_git_urls`.
 
 Per-ecosystem class is computed by summing each group's package PR within
 the ecosystem, ranking groups by that sum desc, and applying the same
-cumulative-share cutoffs as the package-level value pipeline (≤50% A,
-≤75% B, ≤90% C, rest D). `class` is the strongest of the per-eco classes
-(A < B < C < D). `top_eco_pct = 100 − cumulative_pr_share`, so higher
+cumulative-share cutoffs as the package-level value pipeline (≤75% A,
+≤95% B, rest C). `class` is the strongest of the per-eco classes
+(A < B < C). `top_eco_pct = 100 − cumulative_pr_share`, so higher
 means closer to the top of the ecosystem; `top_eco` is the ecosystem with
 the max percentile and `top_eco_pkg` is the highest-PR package in it.
 
@@ -74,7 +74,7 @@ OUTPUT_FILE = DATA_DIR / "value" / "value.csv"
 OVERRIDES_FILE = DATA_DIR / "value" / "overrides.csv"
 
 ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
-CLASS_RANK = {"A": 0, "B": 1, "C": 2, "D": 3}
+CLASS_RANK = {"A": 0, "B": 1, "C": 2}
 
 FIELDS = (
     ["github_repo", "gh_repo_id", "git_url", "valid",
@@ -399,13 +399,14 @@ def _strip_internals(a: dict) -> dict:
 def aggregate_by_repo(all_rows: list[dict], *, drop_d_class: bool = False) -> list[dict]:
     """Collapse per-package rows into one row per repo (or per orphan).
 
-    Per-ecosystem PR sum → cumulative-share ranking → A/B/C/D, plus
+    Per-ecosystem PR sum → cumulative-share ranking → A/B/C, plus
     top_eco / top_eco_pkg / top_eco_pct, the cross-ecosystem `class`
     (strongest), and the comma-separated `ecosystems` list. Rows are
     sorted by `top_eco_pct` desc.
 
-    `drop_d_class` (default False) keeps all classes — value-data.csv is
-    the complete long-tail table (A/B/C/D). Pass True to drop the D tail.
+    `drop_d_class` (default False, kept for back-compat) is now a no-op:
+    the scheme has only three classes (A/B/C), so there is no D tail to
+    drop and value-data.csv always carries the full A/B/C table.
     """
     groups: dict[str, list[dict]] = defaultdict(list)
     for r in all_rows:
@@ -470,10 +471,10 @@ def aggregate_by_repo(all_rows: list[dict], *, drop_d_class: bool = False) -> li
         present_classes = [a[f"class_{e}"] for e in ECOSYSTEMS if a[f"class_{e}"]]
         a["class"] = min(present_classes, key=lambda c: CLASS_RANK[c])
 
-    # value-data.csv stores all classes A/B/C/D — the complete long-tail
-    # table. The risk pipeline filters to its own scope (A/B by default,
+    # value-data.csv stores all classes A/B/C — the complete long-tail
+    # table. The risk pipeline filters to its own scope (class A by default,
     # via settings.json risk_input.value_classes); eligibility runs after
-    # risk. `drop_d_class` is retained for callers that want the ABC subset.
+    # risk. `drop_d_class` is a back-compat no-op (no D class exists now).
     if drop_d_class:
         aggs = [a for a in aggs if a.get("class") in ("A", "B", "C")]
 
@@ -606,7 +607,7 @@ def _print_repo_class_table(aggs: list[dict]) -> None:  # pragma: no cover
     for eco in ECOSYSTEMS:
         table.add_column(eco, justify="right")
     table.add_column("strongest", justify="right", style="bold")
-    for cls in ("A", "B", "C", "D"):
+    for cls in ("A", "B", "C"):
         row = [cls]
         for eco in ECOSYSTEMS:
             n = sum(1 for a in aggs if a[f"class_{eco}"] == cls)

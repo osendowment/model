@@ -745,8 +745,8 @@ class TestEndToEnd:
 # ── invariants ───────────────────────────────────────────────────────────────
 
 class TestInvariants:
-    def test_class_rank_covers_abcd_in_strict_order(self):
-        assert CLASS_RANK == {"A": 0, "B": 1, "C": 2, "D": 3}
+    def test_class_rank_covers_abc_in_strict_order(self):
+        assert CLASS_RANK == {"A": 0, "B": 1, "C": 2}
 
     def test_fields_contains_required_columns(self):
         for col in ("github_repo", "git_url", "ecosystems", "packages",
