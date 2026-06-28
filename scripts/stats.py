@@ -280,28 +280,29 @@ def dashboard(v: dict, r: dict) -> None:
     console.print(f"value.csv rows: [bold]{v['rows']:,}[/bold]   "
                   f"risk scope (top repos): [bold]{r['scope']:,}[/bold]\n")
 
-    t = Table(title="Value — class distribution", header_style="bold dim")
-    t.add_column("Class")
-    for e in ECOSYSTEMS:
-        t.add_column(e, justify="right")
-    t.add_column("Strongest", justify="right", style="bold")
-    for cls in ("A", "B", "C"):
-        c = v["classes"][cls]
-        t.add_row(cls, *[f"{c[e]:,}" for e in ECOSYSTEMS], f"{c['strongest']:,}")
+    t = Table(title="Value — identity coverage", header_style="bold dim")
+    t.add_column("Field")
+    t.add_column("Repos", justify="right")
+    t.add_column("%", justify="right")
+    for label, cnt in (("git_url present", v["git"]), ("github_repo present", v["github"]),
+                       ("valid == True", v["valid"]), ("orphan", v["orphan"])):
+        t.add_row(label, f"{cnt:,}", _pct(cnt, v["rows"]))
+    t.add_section()
+    t.add_row("total repo rows", f"{v['rows']:,}", "100%", style="bold")
     console.print(t)
 
-    t = Table(title="Value — identity coverage", header_style="bold dim")
-    for col in ("Class", "Repos", "GitHub", "GH %", "Git", "Git %", "Valid", "Valid %"):
-        t.add_column(col, justify="right" if col != "Class" else "left")
-    for cls in ("A", "B", "C"):
-        c = v["by_class"][cls]
-        d = c["repos"]
-        t.add_row(cls, f"{d:,}", f"{c['github']:,}", _pct(c['github'], d),
-                  f"{c['git']:,}", _pct(c['git'], d), f"{c['valid']:,}", _pct(c['valid'], d))
+    t = Table(title="Value — class distribution", header_style="bold dim")
+    t.add_column("Metric")
+    for c in ("A", "B", "C"):
+        t.add_column(c, justify="right")
+    cl, bc = v["classes"], v["by_class"]
+    for e in ECOSYSTEMS:
+        t.add_row(e, *[f"{cl[c][e]:,}" for c in ("A", "B", "C")])
     t.add_section()
-    t.add_row("Total", f"{v['rows']:,}", f"{v['github']:,}", _pct(v['github'], v['rows']),
-              f"{v['git']:,}", _pct(v['git'], v['rows']), f"{v['valid']:,}",
-              _pct(v['valid'], v['rows']), style="bold")
+    t.add_row("repos (strongest)", *[f"{cl[c]['strongest']:,}" for c in ("A", "B", "C")],
+              style="bold")
+    for label, key in (("GitHub %", "github"), ("Git %", "git"), ("Valid %", "valid")):
+        t.add_row(label, *[_pct(bc[c][key], bc[c]["repos"]) for c in ("A", "B", "C")])
     console.print(t)
 
     n = r["scope"]
@@ -340,25 +341,27 @@ def dashboard(v: dict, r: dict) -> None:
 def markdown(v: dict, r: dict) -> str:
     out: list[str] = []
     a = out.append
-    a("### Repo class distribution\n")
-    a("| Class | npm | PyPI | crates.io | C/C++ | Strongest |")
-    a("|---|---:|---:|---:|---:|---:|")
-    for cls in ("A", "B", "C"):
-        c = v["classes"][cls]
-        a(f"| **{cls}** | {c['npm']:,} | {c['pypi']:,} | {c['crates']:,} | "
-          f"{c['cpp']:,} | **{c['strongest']:,}** |")
+    a("### Repo identity coverage\n")
+    a("| Field | Repos | % |")
+    a("|---|--:|--:|")
+    a(f"| `git_url` present | {v['git']:,} | {_pct(v['git'], v['rows'])} |")
+    a(f"| `github_repo` present | {v['github']:,} | {_pct(v['github'], v['rows'])} |")
+    a(f"| `valid == True` | {v['valid']:,} | {_pct(v['valid'], v['rows'])} |")
+    a(f"| orphan (no `github_repo`) | {v['orphan']:,} | {_pct(v['orphan'], v['rows'])} |")
+    a(f"| **total repo rows** | **{v['rows']:,}** | **100%** |")
 
-    a("\n### Repo identity coverage\n")
-    a("| Class | Repos | With GitHub | GH % | With Git | Git % | Valid | Valid % |")
-    a("|---|--:|--:|--:|--:|--:|--:|--:|")
-    for cls in ("A", "B", "C"):
-        c = v["by_class"][cls]
-        d = c["repos"]
-        a(f"| **{cls}** | {d:,} | {c['github']:,} | {_pct(c['github'], d)} | "
-          f"{c['git']:,} | {_pct(c['git'], d)} | {c['valid']:,} | {_pct(c['valid'], d)} |")
-    a(f"| **Total** | {v['rows']:,} | {v['github']:,} | {_pct(v['github'], v['rows'])} | "
-      f"{v['git']:,} | {_pct(v['git'], v['rows'])} | {v['valid']:,} | "
-      f"{_pct(v['valid'], v['rows'])} |")
+    a("\n### Repo class distribution\n")
+    a("| Metric | A | B | C |")
+    a("|---|--:|--:|--:|")
+    cl = v["classes"]
+    for e in ECOSYSTEMS:
+        a(f"| {e} | {cl['A'][e]:,} | {cl['B'][e]:,} | {cl['C'][e]:,} |")
+    a(f"| **repos (strongest)** | **{cl['A']['strongest']:,}** | "
+      f"**{cl['B']['strongest']:,}** | **{cl['C']['strongest']:,}** |")
+    bc = v["by_class"]
+    for label, key in (("GitHub %", "github"), ("Git %", "git"), ("Valid %", "valid")):
+        a(f"| {label} | " + " | ".join(
+            _pct(bc[c][key], bc[c]["repos"]) for c in ("A", "B", "C")) + " |")
 
     n = r["scope"]
     a(f"\n### Score distribution by component (scope {n})\n")
@@ -388,26 +391,23 @@ def markdown(v: dict, r: dict) -> str:
 def check(v: dict, r: dict) -> int:
     """Verify docs/stats.md is current; exit 1 on drift.
 
-    Rather than loose substring matches (which collide — a stale `817` can hide
-    behind any other `817` on the page), this checks that every **bold** table
-    row the generator emits — component scores, class/identity totals, and each
-    funnel's `score present` line — appears verbatim in stats.md. Bold rows carry
-    the headline numbers in unambiguous, fully-formatted context, so a drifted
-    count can't accidentally match.
+    Every generated table DATA row (any `| … |` line carrying a digit — headers
+    and separators have none) must appear verbatim in stats.md. This is a full
+    match, not a loose substring (a stale `817` can't hide behind another `817`),
+    over every figure the generator owns. Static tables (the per-eco value funnel)
+    are not generated here, so they are not checked.
     """
     text = (ROOT / "docs" / "stats.md").read_text(encoding="utf-8")
-    bold_rows = [ln.strip() for ln in markdown(v, r).splitlines()
-                 if ln.startswith("| **")]
-    missing = [ln for ln in bold_rows if ln not in text]
+    rows = [ln.strip() for ln in markdown(v, r).splitlines()
+            if ln.strip().startswith("|") and any(ch.isdigit() for ch in ln)]
+    missing = [ln for ln in rows if ln not in text]
     if missing:
-        console.print(f"[red]docs/stats.md is STALE — {len(missing)} row(s) "
-                      "no longer match the data:[/red]")
+        console.print(f"[red]docs/stats.md is STALE — {len(missing)} row(s) drifted:[/red]")
         for ln in missing:
             console.print(f"  {ln}")
         console.print("[dim]refresh: uv run python scripts/stats.py --markdown[/dim]")
         return 1
-    console.print(f"[green]docs/stats.md current — all {len(bold_rows)} "
-                  "headline rows match the data.[/green]")
+    console.print(f"[green]docs/stats.md current — all {len(rows)} data rows match.[/green]")
     return 0
 
 
