@@ -174,7 +174,7 @@ it is 100%-populated.
 | input top repos | 891 | 100% |
 | bus factor / HHI (git 5y) computed | 891 | 100% |
 | bus factor / HHI (GitHub) computed | 880 | 98.8% |
-| **`score` present** | **891** | **100%** |
+| **Concentration score** | **891** | **100%** |
 
 73.7% of top repos have a git `_5y` bus factor of 1 (a single author covers ≥50%
 of 5-year commits).
@@ -191,7 +191,7 @@ git churn at the per-year EOY sha.
 | cyclomatic max (lizard) | 891 | 100% |
 | cognitive max (lizard) | 879 | 98.7% |
 | churn 5y | 862 | 96.7% |
-| **`score` present** | **891** | **100%** |
+| **Complexity score** | **891** | **100%** |
 
 `cognitive_*` is only computed for languages with a Lizard cognitive parser;
 churn is the heaviest fetch (bare clone) and times out on the largest mirrors
@@ -210,7 +210,7 @@ OSV CVE counts + semgrep SAST.
 | CVE count 5y > 0 | 197 | 22.1% |
 | OSS-Fuzz enrolled | 130 | 14.6% |
 | CII Best Practices badge | 30 | 3.4% |
-| **`score` present** | **891** | **100%** |
+| **Security score** | **891** | **100%** |
 
 ~78% of top repos have zero known CVEs and tie at the neutral `cve_score`
 baseline (50), so for those the score is driven by the OpenSSF axis; CVEs only
@@ -261,7 +261,7 @@ new issues per active contributor, plus issue-debt and trend.
 | per-AC ratios (loc/cve/nni) computed | 891 | 100% |
 | `issue_close_ratio` computed | 814 | 91.4% |
 | `issue_trend_score` computed | 617 | 69.2% |
-| **`score` present** | **891** | **100%** |
+| **Workload score** | **891** | **100%** |
 
 Every top repo gets a workload `score`. A repo with zero active contributors
 (66 repos, `dormant = 1`) is scored with AC=1 — the whole burden attributed to a

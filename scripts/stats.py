@@ -176,18 +176,18 @@ RISK_COMPONENTS = [
 RISK_FUNNELS = {
     "concentration": [("bus factor / HHI (git 5y) computed", "present", "bf_commits_git_5y_p"),
                       ("bus factor / HHI (GitHub) computed", "present", "bf_commits_gh_alltime_p"),
-                      ("`score` present", "present", "score")],
+                      ("Concentration score", "present", "score")],
     "complexity": [("lines of code (scc)", "present", "loc_eoy"),
                    ("cyclomatic max (lizard)", "present", "cyclomatic_max"),
                    ("cognitive max (lizard)", "present", "cognitive_max"),
                    ("churn 5y", "present", "churn_5y_total"),
-                   ("`score` present", "present", "score")],
+                   ("Complexity score", "present", "score")],
     "security": [("OpenSSF score present", "present", "openssf_score"),
                  ("semgrep SAST present", "present", "sast_findings_total"),
                  ("CVE count 5y > 0", "gt0", "cve_count_5y"),
                  ("OSS-Fuzz enrolled", "bool", "ossfuzz_enrolled"),
                  ("CII Best Practices badge", "present", "bestpractices_badge_id"),
-                 ("`score` present", "present", "score")],
+                 ("Security score", "present", "score")],
     "funding": [("GitHub Sponsors inbound > 0", "gt0", "gh_sponsors_in"),
                 ("≥ 1 funding channel", "gt0", "channels_count"),
                 ("`FUNDING.yml` present", "bool", "has_funding_yml"),
@@ -198,7 +198,7 @@ RISK_FUNNELS = {
                  ("per-AC ratios (loc/cve/nni) computed", "present", "loc_per_ac_p"),
                  ("`issue_close_ratio` computed", "present", "issue_close_ratio"),
                  ("`issue_trend_score` computed", "present", "issue_trend_score"),
-                 ("`score` present", "present", "score")],
+                 ("Workload score", "present", "score")],
 }
 
 
@@ -378,7 +378,7 @@ def markdown(v: dict, r: dict) -> str:
         a("|---|---:|---:|")
         a(f"| input top repos | {n} | 100% |")
         for label, cnt in steps:
-            mark = "**" if label.startswith("`score`") else ""
+            mark = "**" if label.endswith(" score") else ""
             a(f"| {mark}{label}{mark} | {mark}{cnt}{mark} | {mark}{_pct(cnt, n)}{mark} |")
     return "\n".join(out)
 
