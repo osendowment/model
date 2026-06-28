@@ -215,11 +215,11 @@ percentiles (▴ higher = worse security):
   `p/default` findings (informational).
 
 The dimension `score` is the geometric mean of `openssf_score_p` and
-`cve_score` — a repo ranks worst when it is high-risk on both axes.
-~78% of risk-scope repos have zero known CVEs and share the same
-`cve_score = 50` (the neutral baseline), so for those the score is effectively
-driven by the OpenSSF Scorecard axis, with CVEs only re-ranking the ~22% that
-carry them, above the neutral 50.
+`cve_score` — a repo ranks worst when it is high-risk on both axes. Most
+risk-scope repos have zero known CVEs and share the same `cve_score = 50` (the
+neutral baseline), so for those the score is effectively driven by the OpenSSF
+Scorecard axis; CVEs only re-rank the minority that carry them, above the neutral
+50. (CVE coverage is in [stats.md → Risk → Security](stats.md#security).)
 
 ## Data Sources
 
@@ -278,51 +278,23 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 
 ## Source-file coverage
 
-Snapshot of how complete each source file is across the risk-scope (class A)
-repos. Counts reflect the last pipeline run; refresh with
-`uv run python scripts/coverage_report.py`.
-
-| Source | File | Risk-scope covered | Coverage | Notes |
-|---|---|---:|---:|---|
-| commits-years (foundation) | `data/sources/github/git/commits-years.csv` | 899/899 | **100%** | per-(repo, year) `last_sha`; foundation file |
-| scc | `data/sources/git/scc.csv` | 899/899 | **100%** | sparse-checkout per year sha |
-| repos | `data/sources/github/repos.csv` | 899/899 | **100%** | stars / forks / watchers / pushed_at |
-| openssf | `data/sources/git/openssf.csv` | 895/899 | 99.6% | overall score + 18 checks per sha |
-| concentration (git) | `data/sources/git/contributor-commits.csv` | 898/899 | 99.9% | long raw per (repo, author, year) |
-| concentration (github) | `data/sources/github/contributor-commits.csv` | 895/899 | 99.6% | long raw `/contributors` payload per (repo, login) |
-| lizard | `data/sources/git/lizard.csv` | 894/899 | 99.4% | cognitive + cyclomatic + Halstead per sha |
-| semgrep | `data/sources/git/semgrep.csv` | 892/899 | 99.2% | rulepack-prefixed SAST findings per sha |
-| cves-queried | `data/sources/osv/queried.csv` | 888/899 | 98.8% | repos OSV was successfully asked about |
-| funding | `data/risk/funding.csv` | 888/899 | 98.8% | github_sponsors + FUNDING.yml |
-| openssf-checks | `data/sources/openssf/checks.csv` | 881/899 | 98.0% | per-check Scorecard scores (used by build_workload) |
-| issues | `data/sources/github/issues.csv` | 878/899 | 97.7% | opened/closed per year |
-| churn | `data/sources/github/git/churn.csv` | 869/899 | 96.7% | 5y added+deleted lines (heavy bare-clone) |
-| depsdev | `data/sources/git/depsdev.csv` | 791/899 | 88.0% | structural — deps.dev only indexes npm / pypi / cargo / maven / go / nuget / rubygems (Debian, cpp, Homebrew unsupported) |
+Per-source-file coverage across the top repos, the `risk.csv` rollup, and the
+sub-100% per-dimension columns all live in
+[docs/stats.md → Risk](stats.md#risk). Refresh them with
+`uv run python scripts/coverage_report.py`. `risk.csv` holds one row per top repo
+— five 0–100 dimension scores plus an overall `score`; the detailed metric and
+`*_p` percentile columns live in the per-dimension `data/risk/*.csv` files.
 
 ### Why the remaining gaps
 
-- **depsdev (88%)** — repos that publish only via Debian / Homebrew / vcpkg / source tarballs are absent from deps.dev's index. Not fillable.
-- **Anything ~99% with 4–6 missing** — a mix of brand-new risk-scope additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
+Every sub-100% gap is structural — a signal that genuinely doesn't exist for that
+repo, not a data-collection bug:
+
+- **depsdev** — repos that publish only via Debian / Homebrew / vcpkg / source tarballs are absent from deps.dev's index. Not fillable.
+- **Scorecard files (~99%)** — a mix of brand-new risk-scope additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
 - **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos. The `/stats/contributors` per-year breakdown and `data/concentration-data.csv` are retired.
-- **churn (96.7%)** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
-
-### What this rolls up to
-
-**899 risk-scope repos in the last run · `risk.csv` holds one row each (five
-0–100 dimension scores + an overall `score`); the detailed metric and `*_p`
-percentile columns referenced below live in the per-dimension `data/risk/*.csv`
-files · median per-column coverage 98.8%.** Counts reflect the last pipeline run
-and refresh on re-run.
-
-Sub-100% per-dimension columns (every gap is structural, not a data-collection bug):
-
-| Column | Coverage | Why |
-|---|---:|---|
-| `bestpractices_badge_id` | 2.8% | Only repos enrolled in CII Best Practices have a badge. |
-| `foundation_host` | 3.9% | Only 35 repos belong to a FOSS foundation (apache / psf / lf / numfocus / lf/cncf / lf/openjs). |
-| `funding_yml_platforms` | 27.3% | Most repos don't have a `.github/FUNDING.yml`. |
-| `cognitive_total` / `_avg` / `_max` | 65.1% | Only computed for languages with a Lizard / cognitive-complexity parser. |
-| `issue_trend_score` | 67.5% | Formula requires `mean_opened_per_year ≥ 1`; quiet repos correctly omitted. |
+- **churn** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
+- **Structurally-sparse columns** — `bestpractices_badge_id` (only CII-enrolled repos), `foundation_host` (only FOSS-foundation members), `funding_yml_platforms` (only repos with a `.github/FUNDING.yml`), `cognitive_*` (only languages with a Lizard cognitive parser), and `issue_trend_score` (only repos with `mean_opened_per_year ≥ 1`) are sparse by definition. Their coverage is in [stats.md](stats.md#risk).
 
 ## Output
 

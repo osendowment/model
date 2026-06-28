@@ -66,29 +66,15 @@ Python (PyPI)
 
 ### PyPI funnel & classes
 
-Carried from the cross-ecosystem tables in [`value.md`](../value.md):
-
-| Stage | Count |
-|---|---:|
-| Top packages (95% downloads) | 2,460 |
-| After dep tree | 3,139 |
-| Results | 3,139 |
-| With GitHub repo | 1,728 (55%) |
-
-| Class (`value.csv`) | A | B | C | Total |
-|---|--:|--:|--:|--:|
-| Repos (`class_pypi`) | 163 | 638 | 1,726 | 2,527 |
+See [docs/stats.md → Value](../stats.md#per-ecosystem-value-funnel) for the PyPI funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
 
 Per-package class counts await the next full pipeline run — the per-package
 `results.csv` `value_class` is still on the legacy 4-class scheme.
 
-class-A repos with a GitHub repo: **76%**.
-
 ## Limitations
 
-- **55% GitHub coverage — the lowest of the four ecosystems.** The BigQuery extract
+- **Lowest GitHub coverage of the four ecosystems.** The BigQuery extract
   carried only GitHub URLs at fetch time, so non-GitHub upstreams (GitLab,
   self-hosted) have no `package → repo` link. Because Risk (and the manual
   eligibility review) key off `github_repo`, this caps how many PyPI repos can be
-  scored, even for class-A packages (class-A GitHub coverage is 76%, not ~100% like
-  npm/crates).
+  scored, even for class-A packages.

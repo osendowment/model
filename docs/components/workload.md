@@ -6,7 +6,7 @@ backlog — **per active contributor (AC)**, then folds the three per-AC
 percentiles into one **workload-risk score (`score`)** that feeds
 `data/risk/risk.csv` as the `workload` column.
 
-Scope: the 897 class-A value-class repos in the risk pipeline (see
+Scope: the top repos in the risk pipeline (see
 [value.md](../value.md)). Build step: `src/risk/build_workload.py` — unusually,
 it must run **after** `build_complexity`, `build_security`, and
 `build_concentration`, because it reads their per-dimension CSVs to get the LOC,
@@ -21,7 +21,7 @@ the last complete year (2025). Raw signals are fetched per-source under
 columns are computed by `build_workload.py`.
 
 ```
-Workload  → data/risk/workload.csv  (897 A/B risk repos)
+Workload  → data/risk/workload.csv  (the top risk repos)
 │
 ├── Activity / liveness
 │   ├── repo_age_years          ← repos.csv created_at → EOY                       [EOY]
@@ -189,32 +189,16 @@ present component scores.
 
 ## Coverage
 
-Of the 897 A/B risk repos:
+See [docs/stats.md → Risk → Workload](../stats.md#workload) for current per-signal coverage over the top repos and the score distribution.
 
-| Signal | Repos | % |
-|---|---:|---:|
-| `has_issues` (flag present) | 897 | 100.0% |
-| `repo_age_years` | 897 | 100.0% |
-| `push_cadence_years` | 895 | 99.8% |
-| `active_contributors_git_5y` (AC) | 894 | 99.7% |
-| `issues_opened_5y` (issues fetched) | 891 | 99.3% |
-| `openssf_maintained` | 847 | 94.4% |
-| `loc_per_ac` | 829 | 92.4% |
-| `cve_per_ac` | 828 | 92.3% |
-| `nni_per_ac` | 827 | 92.2% |
-| **`score`** | **826** | **92.1%** |
-| `issue_close_ratio` | 815 | 90.9% |
-| `issue_trend_score` | 617 | 68.8% |
-
-`score` distribution: p25 **37** · p50 **55** · p75 **69**. The ~8% of repos
-without a `score` are those missing one of the three per-AC inputs (most often
+Repos without a `score` are those missing one of the three per-AC inputs (most often
 `AC = 0` or a missing LOC/CVE/issue figure).
 
 ## Limitations
 
 - **AC = 0 / missing kills the score.** The whole component is per-AC, so a repo
   with no windowed contributors (e.g. archived, mirror-only, or git-clone
-  failure) gets blank per-AC values and no `score` — ~8% of the cohort.
+  failure) gets blank per-AC values and no `score`.
 - **Issues only when enabled.** `issues.csv` is fetched only for repos that have
   issues enabled and were reachable; an absent repo stays blank (never 0), so
   `nni_per_ac` — and therefore `score` — is missing for those repos rather than
@@ -223,6 +207,6 @@ without a `score` are those missing one of the three per-AC inputs (most often
   `security.csv`, and `concentration.csv`, any repo those builders couldn't
   score (missing LOC, CVE, or AC) also drops out of the workload score. Workload
   coverage can never exceed the intersection of the three upstream builds.
-- **`issue_trend_score` is sparse** (68.8%) — it needs ≥1 mean opened/year to be
+- **`issue_trend_score` is sparse** — it needs ≥1 mean opened/year to be
   meaningful, so quiet repos carry no trend. It is info-only and never enters the
   score, so this sparsity does not reduce `score` coverage.

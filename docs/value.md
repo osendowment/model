@@ -128,60 +128,19 @@ Packages sorted by PageRank descending. Cumulative PageRank share determines cla
 
 ### Funnel
 
-Packages remaining after each pipeline stage, plus the share with a known
-upstream repo at the end. *GH %* counts only github.com; *Git %* also
-counts gitlab, bitbucket, sourcehut, codeberg, and `custom` hosts
+Packages remaining after each pipeline stage (top → dep tree → results), plus
+the share with a known upstream repo at the end. *GH %* counts only github.com;
+*Git %* also counts gitlab, bitbucket, sourcehut, codeberg, and `custom` hosts
 (savannah, sourceware, kernel.org, etc.) -- see [Unified output](#unified-output).
+*Top packages* covers 95% of cumulative downloads; *After dep tree* is
+`|top ∪ transitive deps|` (the universe analysed for PageRank); *Results* keeps
+every node from that universe (top packages with no edges still get a row with
+PageRank = 0). C/C++'s `Results` is smaller than `After dep tree` because the
+cpp pipeline applies an `is_cpp` filter — language-agnostic distro packages get
+dropped.
 
-| Ecosystem | Top packages | After dep tree | Results | With GitHub | GH % | With Git | Git % |
-|-----------|-------------:|---------------:|--------:|------------:|-----:|---------:|------:|
-| npm       | 5,765  | 6,370  | 6,370  | 6,281  | 99% | 6,281  | 99% |
-| PyPI      | 2,460  | 3,139  | 3,139  | 1,728  | 55% | 1,728  | 55% |
-| crates.io | 3,719  | 6,218  | 6,218  | 5,967  | 96% | 6,130  | 99% |
-| C/C++     | 1,643  | 2,648  | 1,882  | 482    | 26% | 770    | 41% |
-| **Total** | **13,587** | **18,375** | **17,609** | **14,458** | **82%** | **14,909** | **85%** |
-
-*Top packages* covers 95% of cumulative downloads. *After dep tree* is
-`|top ∪ transitive deps|` -- the universe analysed for PageRank. *Results*
-keeps every node from that universe (top packages with no edges still get
-a row, with PageRank = 0). C/C++'s `Results` is smaller than `After dep
-tree` because the cpp pipeline applies an `is_cpp` filter — language-agnostic
-distro packages get dropped. PyPI is stuck at 55% because the BigQuery
-extract was github-only at fetch time. C/C++ jumps from 26% GitHub to 41%
-Git because non-GitHub upstreams (sourceware, savannah, gitlab.gnome.org,
-etc.) now resolve via per-eco `git.csv`.
-
-### Value class distribution (per-package — legacy snapshot)
-
-> **Stale, pending the next full pipeline run.** These are *per-package*
-> `value_class` counts read from each `data/sources/<eco>/results.csv`, which is
-> still on the legacy **4-class** scheme (A/B/C/D) and is regenerated only when
-> the per-ecosystem `process_data` stages re-run. The authoritative 3-class
-> *repo-level* distribution (from the regenerated `value.csv`) is in
-> [Repo class distribution](#repo-class-distribution) below — read the table
-> here as a historical snapshot.
-
-Per-ecosystem and combined per-package class counts (legacy 4-class snapshot).
-
-| Ecosystem | A | B | C | D | Total | A+B GH | A+B Git |
-|-----------|--:|--:|--:|--:|------:|-------:|--------:|
-| npm       | 331 | 748   | 1,183 | 4,108  | 6,370 | 100% | 100% |
-| PyPI      | 54  | 157   | 414   | 2,514  | 3,139 | 76%  | 76%  |
-| crates.io | 49  | 197   | 449   | 5,523  | 6,218 | 99%  | 100% |
-| C/C++     | 10  | 82    | 291   | 1,499  | 1,882 | 32%  | 95%  |
-| **Total** | **444** | **1,184** | **2,337** | **13,644** | **17,609** | **93%** | **96%** |
-
-*A+B GH* and *A+B Git* are the share of A and B class packages with a
-known GitHub repo and any Git URL respectively — the load-bearing subset
-that the Risk pipeline (scope: class A, the former A∪B) and the manual
-eligibility review both rely on. C/D-class rows are present in `value.csv`
-and tracked through the value pipeline, but are outside the default Risk
-scope and the manual eligibility shortlist. C/C++'s A+B Git jumps from 32%
-to 95% once
-non-GitHub upstreams are counted (glibc, gcc, libunistring, glib, mpfr,
-etc. live on sourceware / savannah / gitlab hosts, not GitHub).
-Non-GitHub upstreams are concentrated in C/D classes, so the A+B
-numbers barely move.
+See [docs/stats.md → Value](stats.md#per-ecosystem-value-funnel) for the
+per-ecosystem funnel counts and repo-coverage percentages.
 
 ## Ecosystems
 
@@ -309,21 +268,14 @@ subgraphs.
 
 ### Repo class distribution
 
-After grouping packages by `github_repo` (or as orphans), `value.csv`
-collapses 17,609 package rows into 12,117 repo rows. Counts below are the
-current 3-class distribution, derived directly from the regenerated `value.csv`.
+After grouping packages by `github_repo` (or as orphans), `value.csv` collapses
+the package rows into one row per repo (GitHub groups) plus one per orphan
+package (no `github_repo`, kept under sequential ids so nothing is dropped).
+*Strongest* class is the highest class a repo achieves across any of its
+ecosystems (the `class` column in `value.csv`).
 
-| | npm | PyPI | crates.io | C/C++ | Strongest |
-|---|---:|---:|---:|---:|---:|
-| A | 574 | 165 | 133 | 89 | **959** |
-| B | 1,418 | 641 | 534 | 571 | **3,160** |
-| C | 2,428 | 1,726 | 2,911 | 962 | **7,998** |
-
-*Strongest* is the count of repos for which the column is the highest
-class achieved across any of its ecosystems (`class` column in
-`value.csv`). 10,446 of the 12,117 rows are github groups; the other
-1,671 are orphan packages (no `github_repo`) kept under sequential ids
-so nothing is dropped.
+See [docs/stats.md → Value](stats.md#repo-class-distribution) for the per-class ×
+per-ecosystem counts and the GitHub-group / orphan split.
 
 EOL information is intentionally **not** stored here — it feeds the manual
 eligibility review, not the value table. The per-ecosystem `check_eol.py`
@@ -371,15 +323,9 @@ projects, kernel-adjacent code.
 
 **Status update**: `value.csv` now exposes `git_url` alongside
 `github_repo`, so non-GitHub upstreams are no longer silently dropped at
-the value-pipeline level. Coverage:
-
-| Ecosystem | GitHub % | Git % (incl. non-GH) | A+B GitHub % | A+B Git % |
-|---|---:|---:|---:|---:|
-| npm | 99% | 99% | 100% | 100% |
-| PyPI | 55% | 55% | 76% | 76% |
-| crates.io | 96% | 99% | 99% | 100% |
-| C/C++ | 26% | 41% | 32% | **95%** |
-| **Total** | **82%** | **85%** | **93%** | **96%** |
+the value-pipeline level. Per-ecosystem GitHub vs Git coverage (and the
+load-bearing class-A subset) is in
+[docs/stats.md → Value](stats.md#repo-identity-coverage-valuecsv).
 
 Downstream consumers (risk, EOL, GitHub contributor metrics, the manual
 eligibility review) still key off `github_repo`, so a non-GitHub-only

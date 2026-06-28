@@ -74,22 +74,11 @@ JavaScript / TypeScript (npm)
 
 ### npm funnel & classes
 
-Carried from the cross-ecosystem tables in [`value.md`](../value.md):
-
-| Stage | Count |
-|---|---:|
-| Top packages (95% downloads) | 5,765 |
-| After dep tree | 6,370 |
-| Results | 6,370 |
-| With GitHub repo | 6,281 (99%) |
-
-| Class (`value.csv`) | A | B | C | Total |
-|---|--:|--:|--:|--:|
-| Repos (`class_npm`) | 571 | 1,414 | 2,428 | 4,413 |
+See [docs/stats.md → Value](../stats.md#per-ecosystem-value-funnel) for the npm funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
 
 Per-package class counts await the next full pipeline run — the per-package
 `results.csv` `value_class` is still on the legacy 4-class scheme.
 
-class-A repos with a GitHub repo: **100%** — npm has the cleanest upstream identity of
-the four ecosystems, so essentially all load-bearing npm packages reach Risk (and
-the manual eligibility review).
+npm has the cleanest upstream identity (highest GitHub-repo coverage) of the four
+ecosystems, so essentially all load-bearing npm packages reach Risk (and the
+manual eligibility review).
