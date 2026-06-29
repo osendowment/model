@@ -150,19 +150,13 @@ def test_dimension_score_floored_at_one(dim):
         assert 1 <= float(v) <= 100, f"{r.get('repo')}.{dim}.score={v} outside [1,100]"
 
 
-# --- risk.csv aggregate columns: dims_scored + concentration_imputed ---------
+# --- risk.csv aggregate columns: intent + nonprofit --------------------------
 
-RISK_COMPONENTS = ["concentration", "complexity", "security", "funding", "workload"]
+RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
 
 
-def test_risk_dims_scored_matches_present_components():
-    """risk.csv `dims_scored` is an int in [0, 5] and equals the count of
-    non-empty component scores for every row.
-
-    Regression for under-measured repos (e.g. a repo scored on only 3 of the 5
-    dimensions) being silently rolled into `score`: dims_scored must faithfully
-    report how many components actually backed the overall score.
-    """
+def test_risk_intent_and_nonprofit_are_boolean_flags():
+    """risk.csv intent/nonprofit are present on every row and are 'True'/'False'."""
     path = RISK_DIR / "risk.csv"
     if not path.exists():
         pytest.skip("risk.csv not present")
@@ -170,38 +164,11 @@ def test_risk_dims_scored_matches_present_components():
         rows = list(csv.DictReader(f))
     if not rows:
         pytest.skip("risk.csv empty")
-    assert "dims_scored" in rows[0], "risk.csv missing dims_scored column"
-    for r in rows:
-        present = sum(1 for c in RISK_COMPONENTS if (r.get(c) or "").strip())
-        raw = (r.get("dims_scored") or "").strip()
-        assert raw, f"{r.get('repo')} has blank dims_scored"
-        ds = int(raw)
-        assert 0 <= ds <= 5, f"{r.get('repo')}.dims_scored={ds} outside [0,5]"
-        assert ds == present, (
-            f"{r.get('repo')}.dims_scored={ds} != {present} present components"
-        )
-
-
-def test_risk_concentration_imputed_is_boolean_flag():
-    """risk.csv `concentration_imputed` is blank or "True"; a flagged repo always
-    carries a concentration score (imputation forces a worst-case score, never a
-    blank), keeping the ceiling-tied concentration repos auditable.
-    """
-    path = RISK_DIR / "risk.csv"
-    if not path.exists():
-        pytest.skip("risk.csv not present")
-    with path.open() as f:
-        rows = list(csv.DictReader(f))
-    if not rows:
-        pytest.skip("risk.csv empty")
-    assert "concentration_imputed" in rows[0], "risk.csv missing concentration_imputed column"
-    for r in rows:
-        flag = (r.get("concentration_imputed") or "").strip()
-        assert flag in ("", "True"), f"{r.get('repo')}.concentration_imputed={flag!r}"
-        if flag == "True":
-            assert (r.get("concentration") or "").strip(), (
-                f"{r.get('repo')} imputed but has blank concentration score"
-            )
+    for col in ("intent", "nonprofit"):
+        assert col in rows[0], f"risk.csv missing {col} column"
+        for r in rows:
+            assert (r.get(col) or "").strip() in ("True", "False"), \
+                f"{r.get('repo')}.{col}={r.get(col)!r}"
 
 
 def test_valid_repos_have_github_repo_and_git_url():
