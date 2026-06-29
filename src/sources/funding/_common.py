@@ -145,7 +145,7 @@ def _existing_row_count(path: Path) -> int:
 
 
 def write_projects(slug: str, rows: list[dict], cols: list[str], *,
-                   fetched_at: str | None = None) -> tuple[Path, bool]:
+                   fetched_at: str | None = None, force: bool = False) -> tuple[Path, bool]:
     """Stamp `fetched_at`, apply the MIN-ROW GUARD, atomically write projects.csv.
 
     Returns `(path, written)`. When the new scrape produced too few rows to
@@ -153,16 +153,23 @@ def write_projects(slug: str, rows: list[dict], cols: list[str], *,
     `written` is False (a loud warning is logged). On a real refresh the file
     is rewritten with a fresh `fetched_at`; within-TTL re-runs are gated out
     earlier by `is_output_fresh`, so the discovery layer stays idempotent.
+
+    `force=True` (wired from each scraper's --force) bypasses the MIN-ROW GUARD:
+    an operator explicitly refreshing may legitimately accept a much smaller
+    project list (a foundation that genuinely shrank), so --force is the escape
+    hatch when the guard would otherwise refuse forever.
     """
     path = out_path(slug)
     existing = _existing_row_count(path)
-    # Refuse to clobber a good file with a 0-row / partial scrape.
-    if existing and len(rows) < existing * MIN_ROW_FRACTION:
+    # Refuse to clobber a good file with a 0-row / partial scrape — unless the
+    # caller explicitly forced the refresh.
+    if not force and existing and len(rows) < existing * MIN_ROW_FRACTION:
         console.print(
             f"  [bold yellow]GUARD[/bold yellow]: new scrape produced "
             f"[yellow]{len(rows):,}[/yellow] rows "
             f"(< {MIN_ROW_FRACTION:.0%} of existing {existing:,}) — keeping old "
-            f"[cyan]{path}[/cyan], NOT overwriting."
+            f"[cyan]{path}[/cyan], NOT overwriting. Re-run with [bold]--force[/bold] "
+            f"if the shrink is real."
         )
         return path, False
 

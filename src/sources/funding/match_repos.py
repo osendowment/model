@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 from rich.console import Console
 from rich.table import Table
 
-from src.sources.funding._common import DATA_DIR, utc_now_iso
+from src.sources.funding._common import DATA_DIR
 
 console = Console()
 
@@ -198,8 +198,7 @@ def _host_from_domain(host_url: str, domain_idx: dict[str, str]) -> str:
 
 
 def classify(slug_idx: dict[str, str], org_idx: dict[str, str],
-             domain_idx: dict[str, str], fetched_at_by_host: dict[str, str],
-             run_ts: str) -> list[dict]:
+             domain_idx: dict[str, str], fetched_at_by_host: dict[str, str]) -> list[dict]:
     rows: list[dict] = []
     with open(REPOS_FILE, encoding="utf-8") as f:
         for r in csv.DictReader(f):
@@ -219,10 +218,12 @@ def classify(slug_idx: dict[str, str], org_idx: dict[str, str],
                     host, source = hd, "domain"
 
             # `host` here is the UNQUALIFIED foundation slug (or ""). Stamp the
-            # check with that foundation's projects.csv timestamp when we have
-            # it, else the match-run time (so the negative/legacy case is still
-            # auditable). Emit qualified `parent/child` for the `host` column.
-            host_checked = (fetched_at_by_host.get(host) or run_ts) if host else run_ts
+            # check with that foundation's projects.csv `fetched_at` when we have
+            # it, else blank — NEVER the match-run time, so the join is
+            # idempotent: a re-run with unchanged upstream data yields a
+            # byte-identical host-by-repo.csv. Emit qualified `parent/child` for
+            # the `host` column.
+            host_checked = fetched_at_by_host.get(host, "") if host else ""
             rows.append({"repo": repo, "host": _qualified(host) if host else "",
                          "host_source": source, "host_checked": host_checked})
     return rows
@@ -232,13 +233,12 @@ def main() -> None:
     argparse.ArgumentParser().parse_args()
 
     console.rule("[bold cyan]funding/match_repos — joining foundation lists vs top-repos")
-    run_ts = utc_now_iso()
     slug_idx, org_idx, domain_idx, fetched_at_by_host = build_indexes()
     console.print(f"  [dim]indexed[/dim] {len(slug_idx):,} project slugs across {len(SLUGS)} foundations")
     console.print(f"  [dim]+[/dim] {len(org_idx):,} curated org-prefix rules")
     console.print(f"  [dim]+[/dim] {len(domain_idx):,} apex domains and {len(DOMAIN_SUFFIX_HOST)} suffix rules\n")
 
-    rows = classify(slug_idx, org_idx, domain_idx, fetched_at_by_host, run_ts)
+    rows = classify(slug_idx, org_idx, domain_idx, fetched_at_by_host)
 
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     tmp = OUT_FILE.with_suffix(".csv.tmp")

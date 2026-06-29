@@ -79,7 +79,7 @@ def main() -> None:
     if is_output_fresh(SLUG, args):
         return
     rows = fetch()
-    path, written = write_projects(SLUG, rows, COLS)
+    path, written = write_projects(SLUG, rows, COLS, force=args.force)
     if written:
         summary_table(SLUG, rows, path)
 

@@ -76,6 +76,14 @@ class TestWriteProjects:
         assert written is False
         assert len(_read(path)) == 10
 
+    def test_force_bypasses_guard(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(common, "DATA_DIR", tmp_path)
+        path, _ = write_projects("acme", _rows(10), ["name", "github_repo"])
+        # --force is the escape hatch when a foundation legitimately shrank.
+        _, written = write_projects("acme", _rows(2), ["name", "github_repo"], force=True)
+        assert written is True
+        assert len(_read(path)) == 2
+
     def test_guard_allows_at_or_above_half(self, tmp_path, monkeypatch):
         monkeypatch.setattr(common, "DATA_DIR", tmp_path)
         path, _ = write_projects("acme", _rows(10), ["name", "github_repo"])
@@ -138,25 +146,25 @@ class TestMatchReposHostChecked:
         rows = match_repos.classify(
             slug_idx, {}, {},
             fetched_at_by_host={"apache": "2023-09-09T00:00:00+00:00"},
-            run_ts="2026-01-01T00:00:00+00:00",
         )
         by_repo = {r["repo"]: r for r in rows}
         # matched repo → carries the apache projects.csv timestamp
         assert by_repo["apache/kafka"]["host"] == "apache"
         assert by_repo["apache/kafka"]["host_checked"] == "2023-09-09T00:00:00+00:00"
-        # unmatched repo → still auditable: stamped with the run timestamp
+        # unmatched repo → blank (no host signal), NEVER a run timestamp, so the
+        # join is idempotent across runs.
         assert by_repo["random/unmatched"]["host"] == ""
-        assert by_repo["random/unmatched"]["host_checked"] == "2026-01-01T00:00:00+00:00"
+        assert by_repo["random/unmatched"]["host_checked"] == ""
 
-    def test_host_checked_falls_back_to_run_ts(self, tmp_path, monkeypatch):
+    def test_host_checked_blank_when_no_foundation_timestamp(self, tmp_path, monkeypatch):
         repos = self._write_repos(tmp_path, [{"repo": "apache/kafka", "homepage": ""}])
         monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
-        # Legacy projects.csv with no fetched_at → fetched_at_by_host empty.
+        # Legacy projects.csv with no fetched_at → blank host_checked,
+        # deterministic (never a churning run timestamp).
         rows = match_repos.classify(
-            {"apache/kafka": "apache"}, {}, {},
-            fetched_at_by_host={}, run_ts="2026-01-01T00:00:00+00:00",
+            {"apache/kafka": "apache"}, {}, {}, fetched_at_by_host={},
         )
-        assert rows[0]["host_checked"] == "2026-01-01T00:00:00+00:00"
+        assert rows[0]["host_checked"] == ""
 
     def test_host_column_present_and_unchanged(self, tmp_path, monkeypatch):
         # build_funding reads `host` by name — guard that the column survives.
@@ -165,7 +173,6 @@ class TestMatchReposHostChecked:
         rows = match_repos.classify(
             {"cncf/etcd": "cncf"}, {}, {},
             fetched_at_by_host={"cncf": "2025-01-01T00:00:00+00:00"},
-            run_ts="2026-01-01T00:00:00+00:00",
         )
         assert set(rows[0]) == {"repo", "host", "host_source", "host_checked"}
         assert rows[0]["host"] == "lf/cncf"  # qualified parent/child unchanged
