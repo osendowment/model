@@ -229,10 +229,10 @@ Two flag columns in `risk.csv` that describe the repo's funding context — they
 are **not scored dimensions** and do not affect `score`.
 
 - **`intent`** (`bool`, default `false`) — `true` when the repo shows at least
-  one declared funding signal: GitHub Sponsors (inbound or outbound),
+  one funding signal: GitHub Sponsors (inbound or outbound),
   a `.github/FUNDING.yml`, a `funding.json` (FLOSS Fund), an npm `funding`
-  field, a PyPI project-URLs funding entry, or an Open Collective budget / an
-  institutional foundation host or owner. "Intent" means the project is
+  field, a PyPI project-URLs funding entry, an Open Collective slug, or an
+  institutional host or owner. "Intent" means the project is
   actively seeking or accepting support.
 - **`nonprofit`** (`bool`, default `true`) — `false` only when a corporate
   entity (Meta, Google, Microsoft, AWS, …) is the project's host or owner,
@@ -305,7 +305,7 @@ Per-source-file coverage across the top repos, the `risk.csv` rollup, and the
 sub-100% per-dimension columns all live in
 [docs/stats.md → Risk](stats.md#risk). Refresh them with
 `uv run python scripts/coverage_report.py`. `risk.csv` holds one row per top repo
-— five 0–100 dimension scores plus an overall `score`; the detailed metric and
+— four 0–100 dimension scores plus an overall `score`; the detailed metric and
 `*_p` percentile columns live in the per-dimension `data/risk/*.csv` files.
 
 ### Why the remaining gaps
@@ -341,5 +341,5 @@ documented in the component docs linked at the top of this page.
 | `security` | Security risk score (0–100) |
 | `workload` | Per-contributor workload risk score (0–100) |
 | `score` | Overall risk score (0–100) — geometric mean of the four dimensions |
-| `intent` | `true` if the repo has at least one declared funding signal |
+| `intent` | `true` if the repo has at least one funding signal (incl. host/owner) |
 | `nonprofit` | `true` for community/foundation-backed repos; `false` if company-backed |
