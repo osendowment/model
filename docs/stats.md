@@ -156,16 +156,17 @@ driven by the OpenSSF axis; CVEs re-rank only the minority that carry them.
 
 ### Intent and nonprofit
 
-`intent` = at least one declared funding signal (GitHub Sponsors inbound, `FUNDING.yml`,
-funding.json, npm/PyPI funding field, or OpenCollective budget). `nonprofit` = not
-company-backed (Meta, Google, Microsoft, …). See [funding.md](components/funding.md).
+`intent` = at least one funding signal — GitHub Sponsors (inbound or outbound), a
+declared channel (`FUNDING.yml`, funding.json, npm/PyPI funding field, OpenCollective
+slug), or an institutional host/owner. `nonprofit` = not company-backed (Meta, Google,
+Microsoft, …). See [funding.md](components/funding.md).
 
 | Category | Repos | % |
 |---|---:|---:|
 | intent — any declared funding signal | 585 | 65.4% |
 | intent — no declared signal | 310 | 34.6% |
 | nonprofit — community / independent | 862 | 96.3% |
-| nonprofit — company-backed (excluded) | 33 | 3.7% |
+| nonprofit — company-backed | 33 | 3.7% |
 
 The 33 company-backed repos are **kept in `risk.csv`** and flagged
 `nonprofit=false` (they are already resourced; filter by the flag to restrict

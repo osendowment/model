@@ -365,7 +365,7 @@ def dashboard(v: dict, r: dict) -> None:
     t.add_row("intent — any declared funding signal", str(it), _pct(it, n))
     t.add_row("intent — no declared signal", str(n - it), _pct(n - it, n))
     t.add_row("nonprofit — community / independent", str(npt), _pct(npt, n))
-    t.add_row("nonprofit — company-backed (excluded)", str(n - npt), _pct(n - npt, n))
+    t.add_row("nonprofit — company-backed", str(n - npt), _pct(n - npt, n))
     console.print(t)
 
     console.print(f"\n[dim]bus-factor-1: {r['bf1_pct']:.1f}% of computed · "
@@ -437,7 +437,7 @@ def markdown(v: dict, r: dict) -> str:
     a(f"| intent — any declared funding signal | {it} | {_pct(it, n)} |")
     a(f"| intent — no declared signal | {n - it} | {_pct(n - it, n)} |")
     a(f"| nonprofit — community / independent | {npt} | {_pct(npt, n)} |")
-    a(f"| nonprofit — company-backed (excluded) | {n - npt} | {_pct(n - npt, n)} |")
+    a(f"| nonprofit — company-backed | {n - npt} | {_pct(n - npt, n)} |")
     return "\n".join(out)
 
 
