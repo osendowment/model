@@ -8,7 +8,7 @@ from src.risk.build_funding import _intent_flag, _nonprofit_flag
 
 def _row(**kw):
     base = {
-        "gh_sponsors_in": "", "gh_sponsors_out": "",
+        "gh_sponsors_in": "", "gh_sponsors_out": "", "owner_has_sponsors_listing": "False",
         "has_funding_yml": "False", "has_funding_json": "False",
         "has_npm_funding": "False", "has_pypi_funding": "False",
         "oc_slug": "", "host": "", "owner": "",
@@ -24,6 +24,7 @@ def test_intent_false_when_no_signal():
 def test_intent_each_single_signal_is_true():
     assert _intent_flag(_row(gh_sponsors_in="3")) is True
     assert _intent_flag(_row(gh_sponsors_out="1")) is True
+    assert _intent_flag(_row(owner_has_sponsors_listing="True")) is True
     assert _intent_flag(_row(has_funding_yml="True")) is True
     assert _intent_flag(_row(has_funding_json="True")) is True
     assert _intent_flag(_row(has_npm_funding="True")) is True

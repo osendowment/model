@@ -73,7 +73,8 @@ OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
 DECLARED_FUNDING_CAP = 79
 
 FIELDS = ["repo", "repo_id",
-          "gh_sponsors_in", "gh_sponsors_out", "gh_sponsorships", "gh_sponsorships_p",
+          "gh_sponsors_in", "gh_sponsors_out", "owner_has_sponsors_listing",
+          "gh_sponsorships", "gh_sponsorships_p",
           "gh_stars", "gh_forks",
           "has_funding_yml", "funding_yml_platforms", "has_funding_json",
           "has_npm_funding", "npm_funding_url",
@@ -111,10 +112,11 @@ def _nonprofit_flag(host_type: str, owner_type: str) -> bool:
 
 def _intent_flag(row: dict) -> bool:
     """Sustainability intent: True if the repo shows any funding signal — a live
-    sponsorship, a declared channel (FUNDING.yml / funding.json / npm / PyPI / OC),
-    or an institutional host/owner."""
+    sponsorship, the owner's GitHub Sponsors listing, a declared channel
+    (FUNDING.yml / funding.json / npm / PyPI / OC), or an institutional host/owner."""
     return (
         _to_int(row.get("gh_sponsors_in")) + _to_int(row.get("gh_sponsors_out")) > 0
+        or (row.get("owner_has_sponsors_listing") or "").strip() == "True"
         or (row.get("has_funding_yml") or "").strip() == "True"
         or (row.get("has_funding_json") or "").strip() == "True"
         or (row.get("has_npm_funding") or "").strip() == "True"
@@ -192,6 +194,7 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "repo_id": repo_id,
         "gh_sponsors_in": gh_in,
         "gh_sponsors_out": gh_out,
+        "owner_has_sponsors_listing": (sponsors.get("owner_has_sponsors_listing") or "").strip(),
         "gh_sponsorships": str(_to_int(gh_in) + _to_int(gh_out)),
         "gh_stars": (repo_meta.get("stars") or "").strip(),
         "gh_forks": (repo_meta.get("forks") or "").strip(),

@@ -58,7 +58,7 @@ besser82/libxcrypt,35503965,72,81,52,72,68,False,True
 bitflags/bitflags,29287955,73,49,27,31,42,False,True
 blakeembrey/array-flatten,17789771,68,20,63,30,40,True,True
 blakeembrey/change-case,9440238,78,49,57,44,56,True,True
-bluss/bencher,65987276,100,41,67,84,69,False,True
+bluss/bencher,65987276,100,41,67,84,69,True,True
 bminor/glibc,13868694,4,98,88,76,40,False,True
 boto/boto3,24774658,83,55,20,21,37,False,True
 boto/botocore,6670942,79,71,12,48,42,False,True
