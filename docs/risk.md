@@ -54,12 +54,13 @@ Risk
 │   ├── sast_findings_{total,error,security}  ← semgrep p/default        [2025 EOY]
 │   └── bestpractices_badge_id        ← deps.dev (OpenSSF Best Practices) [most recent]
 │
-├── Funding  →  data/risk/funding.csv
+├── Funding (signals only — not scored)  →  data/risk/funding.csv
 │   ├── github_sponsors               ← GitHub Sponsors API             [most recent]
 │   ├── has_funding_yml, _yml_platforms  ← repo /.github/FUNDING.yml     [most recent]
 │   ├── has_funding_json              ← repo /funding.json (FLOSS/fund)  [most recent]
 │   ├── host / host_type             ← foundation rosters + funding/overrides.csv [most recent]
-│   └── owner / owner_type            ← funding/overrides.csv (GitHub-org backing)  [most recent]
+│   ├── owner / owner_type            ← funding/overrides.csv (GitHub-org backing)  [most recent]
+│   └── → intent, nonprofit           ← boolean flags joined into risk.csv (not scored)
 │
 └── Workload  →  data/risk/workload.csv
     ├── repo_age_years                ← GitHub /repos created_at        [EOY, last complete yr]
@@ -96,7 +97,7 @@ graph LR
         concentration["Contributor Concentration"]
         complexity["Codebase Complexity"]
         security["Security"]
-        funding["Funding"]
+        funding["Funding (signals only — not scored)"]
         workload["Workload (incl. issue debt + trend)"]
     end
 
@@ -288,7 +289,7 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 
 - `data/risk/complexity.csv` ← `src.risk.build_complexity` projects `data/sources/git/scc.csv` + `data/sources/git/lizard.csv` using `commits-years.last_sha` (2025 → 2021 walk; first sha with `loc > 0`). Also folds in the **hotspot** score (Tornhill `churn × complexity`): joins `data/sources/github/git/churn.csv` (`churn_5y_total`) with the EOY-2025 scc complexity snapshot to emit `churn_5y_total`, `hotspot_raw`, `hotspot_log`, `hotspot_percentile`.
 - `data/risk/security.csv` ← `src.risk.build_security` projects `data/sources/git/openssf.csv`, `data/sources/git/depsdev.csv`, `data/sources/git/semgrep.csv` using the same per-year sha priority.
-- `data/risk/risk.csv` ← `src.risk.run_risk_pipeline` joins complexity + security + concentration + issue-debt and computes the final risk score.
+- `data/risk/risk.csv` ← `src.risk.run_risk_pipeline` joins the four scored dimensions (concentration · complexity · security · workload) and computes the final risk score as their geometric mean.
 
 ## Scripts
 

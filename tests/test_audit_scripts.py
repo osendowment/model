@@ -154,8 +154,6 @@ def test_dimension_score_floored_at_one(dim):
 
 # --- risk.csv aggregate columns: intent + nonprofit --------------------------
 
-RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
-
 
 def test_risk_intent_and_nonprofit_are_boolean_flags():
     """risk.csv intent/nonprofit are present on every row and are 'True'/'False'."""

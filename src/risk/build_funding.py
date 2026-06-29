@@ -26,7 +26,10 @@ maximally unfunded even when no $ is measured. Each is repo/package-level, so it
 catches channels the owner-level checks miss; npm/pypi only.
 `gh_stars` / `gh_forks` are informational popularity columns (not scored);
 their fetch timestamp lives in data/sources/github/repos.csv. No per-signal
-`fetched_at` is rolled up here.
+`fetched_at` is rolled up here. The script also writes two boolean flag columns:
+`intent` (True when ≥1 funding signal is present) and `nonprofit` (False only
+when host_type or owner_type == "company"). These flags are joined into
+data/risk/risk.csv by aggregate_risk.py.
 
 Usage:
     uv run python -m src.risk.build_funding
