@@ -26,8 +26,8 @@ Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 │   ├── gh_sponsorships       ← derived (in + out, total engagement)                                  [most recent]
 │   └── gh_sponsorships_p     ← derived (worst-pinned CDF risk percentile of gh_sponsorships)         [most recent]
 │
-├── FUNDING.yml  (.github/FUNDING.yml)
-│   ├── has_funding_yml       ← REST contents API                                                     [most recent]
+├── Funding links  (GraphQL repository.fundingLinks — the "Sponsor" widget)
+│   ├── has_funding_yml       ← GraphQL fundingLinks (resolves FUNDING.yml anywhere + org default)    [most recent]
 │   ├── funding_yml_platforms ← derived (declared platform keys)                                      [most recent]
 │   └── <platform handles>    ← parsed handles: github, patreon, open_collective, tidelift, custom …  [most recent]
 │
@@ -82,7 +82,7 @@ Five sources feed the build. Each fetcher records a `*_status` and/or
 |---|---|---|---|
 | `github/sponsors.csv` | `src/sources/github/fetch_sponsors.py` | inbound GitHub Sponsors count | `repo` |
 | `github/sponsorships.csv` | `src/sources/github/fetch_sponsorships.py` | outbound sponsoring count | `login` |
-| `github/funding-yml.csv` | `src/sources/github/fetch_funding_yml.py` | `.github/FUNDING.yml` platforms + handles | `repo` |
+| `github/funding-yml.csv` | `src/sources/github/fetch_funding_yml.py` | resolved funding links (GraphQL `fundingLinks`) — platforms + handles | `repo` |
 | `floss-fund/funding-json.csv` | `src/sources/floss_fund/funding_json.py` | FLOSS Fund manifest directory | `id` |
 | `opencollective/budgets.csv` | `src/sources/opencollective/fetch_budgets.py` | OC gross annual budgets | `slug` |
 | `funding/host-by-repo.csv` | foundations scrapers (`src/sources/funding/`) | scraped FOSS-foundation host | `repo` |
@@ -208,7 +208,7 @@ in each source file.
 | `gh_sponsorships` | `in + out` |
 | `gh_sponsorships_p` | risk percentile of `gh_sponsorships` |
 | `gh_stars`, `gh_forks` | GitHub stars / forks (informational, not scored) |
-| `has_funding_yml` | repo has `.github/FUNDING.yml` |
+| `has_funding_yml` | repo declares ≥1 funding link (GitHub's resolved `fundingLinks`) |
 | `funding_yml_platforms` | declared platform keys (comma-sep) |
 | `has_funding_json` | registered in the FLOSS Fund directory |
 | `channels_count` | distinct funding platforms |

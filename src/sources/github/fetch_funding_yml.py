@@ -1,15 +1,30 @@
-"""Fetch .github/FUNDING.yml signals per risk-scope repo.
+"""Fetch declared funding channels per risk-scope repo, via GitHub GraphQL.
 
-Writes data/sources/github/funding-yml.csv:
+Source: `repository.fundingLinks` — GitHub's *resolved* funding links, i.e.
+exactly what the "Sponsor this project" sidebar widget shows. This resolves a
+repo's FUNDING.yml wherever it lives (`.github/`, repo root, `docs/`, or an
+org-level `.github` default), so it catches channels a raw
+`.github/FUNDING.yml` GET would miss. Example: tukaani-project/xz declares
+`liberapay.com/Larhzu` through the widget with no FUNDING.yml in the repo tree
+at all — the old contents-API fetch recorded it as unfunded.
+
+Writes data/sources/github/funding-yml.csv (schema unchanged):
     repo, repo_id, has_funding_yml, funding_yml_platforms,
     <one column per platform in FUNDING_PLATFORMS>, fetched_at
 
-`funding_yml_platforms` = the FUNDING.yml mapping keys (github, patreon, …).
-Each platform column holds that platform's handle(s) (comma-joined for a
-list); the `github` column is the lower-cased, deduped usernames under the
-`github:` key (so the sponsors fetcher can count co-maintainer sponsorships).
+`has_funding_yml` = the repo declares at least one funding link.
+`funding_yml_platforms` = the canonical platform keys present (github, patreon, …).
+Each platform column holds that platform's handle(s) (comma-joined for a list):
+the `github` column is the lower-cased, deduped sponsor logins (so the sponsors
+fetcher can count co-maintainer sponsorships); `custom` keeps the full URL.
+
+GitHub's GraphQL `FundingPlatform` enum covers every platform in
+FUNDING_PLATFORMS except `otechie` (a dead platform GitHub dropped) — its
+column stays in the schema but is never populated here.
 
 TTL-controlled: re-runs only fetch repos missing or older than TTL_DAYS.
+Repos are fetched in GraphQL batches (one aliased query per BATCH_SIZE repos),
+which is far cheaper than the previous one-REST-call-per-repo approach.
 
 Usage:
     uv run python -m src.sources.github.fetch_funding_yml
@@ -20,14 +35,13 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import base64
 import csv
 import datetime
 import logging
+import re
 from pathlib import Path
 
 import aiohttp
-import yaml
 from rich.console import Console
 from rich.progress import (
     BarColumn,
@@ -40,7 +54,7 @@ from rich.progress import (
 
 from src.common.funding_platforms import FUNDING_PLATFORMS
 from src.common.repos import load_top_repos
-from src.sources.github.github_client import GITHUB_API, _AsyncRateLimiter, _Deferred
+from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -54,104 +68,137 @@ FIELDS = (
     + ["fetched_at"]
 )
 TTL_DAYS = 90
+BATCH_SIZE = 50
+
+_PLATFORM_SET = set(FUNDING_PLATFORMS)
 
 
-def parse_funding_yml(text: str) -> dict[str, list[str] | str]:
-    """Parse a `.github/FUNDING.yml` into {platform: value(s)}.
+# ── pure transforms (GraphQL fundingLinks → funding-yml.csv row) ──────────────
 
-    FUNDING.yml is YAML, so we parse it as YAML — this correctly handles
-    every shape GitHub accepts: a scalar value, an inline `[a, b]` list,
-    AND a block-style list whose `- item` lines sit at column 0 under the
-    key. The old hand-rolled line parser mis-read each block-list line as
-    its own `key: value` pair (a URL's `https:` became the separator),
-    emitting a bogus `- https` platform and silently dropping the real
-    `custom:` key.
+def platform_key(enum_name: str) -> str:
+    """Map a GraphQL `FundingPlatform` enum value to our column key.
 
-    Keys whose value is empty (null / "" / []) are dropped — an unset
-    platform is not a funding signal. A file that is not a YAML mapping
-    (or fails to parse) yields an empty dict.
+    The mapping is just lower-casing (`LIBERAPAY` → `liberapay`). An unknown
+    value (e.g. a platform GitHub adds in the future) falls back to `custom`
+    so the link is never silently dropped.
     """
-    try:
-        data = yaml.safe_load(text)
-    except yaml.YAMLError:
-        return {}
-    if not isinstance(data, dict):
-        return {}
-    result: dict[str, list[str] | str] = {}
-    for key, val in data.items():
-        if val is None or val == "" or val == [] or val == {}:
+    key = (enum_name or "").strip().lower()
+    return key if key in _PLATFORM_SET else "custom"
+
+
+def handle_from_link(platform: str, url: str) -> str:
+    """Extract a platform handle from a funding link URL.
+
+    For known platforms this is the last path segment
+    (`github.com/yyx990803` → `yyx990803`, `opencollective.com/vuejs` →
+    `vuejs`, `thanks.dev/u/gh/prettier` → `prettier`). `custom` keeps the full
+    URL (it is a free-form address — preserve it for auditability). A URL with
+    no path (bare host) falls back to the full URL.
+    """
+    u = (url or "").strip()
+    if not u:
+        return ""
+    if platform == "custom":
+        return u
+    path = re.sub(r"^[a-z][a-z0-9+.-]*://", "", u, flags=re.IGNORECASE)
+    path = path.split("/", 1)[1] if "/" in path else ""
+    path = re.split(r"[?#]", path, maxsplit=1)[0].strip("/")
+    if not path:
+        return u
+    return path.rsplit("/", 1)[-1]
+
+
+def build_row(repo: str, funding_links: list[dict]) -> dict:
+    """Build one funding-yml.csv row from a repo's GraphQL fundingLinks list.
+
+    `funding_links` is `[{"platform": "<ENUM>", "url": "<url>"}, ...]`. Handles
+    are grouped per canonical platform, in first-seen order, deduped. `github`
+    logins are additionally lower-cased (the sponsors fetcher comma-splits and
+    lower-cases this column to count co-maintainer sponsorships).
+    """
+    by_platform: dict[str, list[str]] = {}
+    for link in funding_links:
+        key = platform_key(link.get("platform", ""))
+        handle = handle_from_link(key, link.get("url", ""))
+        if not handle:
             continue
-        if isinstance(val, list):
-            cleaned = [str(v).strip() for v in val if v not in (None, "")]
-            if cleaned:
-                result[str(key)] = cleaned
-        else:
-            result[str(key)] = str(val).strip()
-    return result
-
-
-def funding_yml_github_logins(yml: dict) -> list[str]:
-    """Lower-cased usernames under the FUNDING.yml `github:` key (deduped, ordered)."""
-    g = yml.get("github") if isinstance(yml, dict) else None
-    raw = g if isinstance(g, list) else ([g] if isinstance(g, str) else [])
-    seen: set[str] = set()
-    out: list[str] = []
-    for u in raw:
-        ul = str(u).strip().lower()
-        if ul and ul not in seen:
-            seen.add(ul)
-            out.append(ul)
-    return out
-
-
-def platform_handle_value(yml: dict, platform: str) -> str:
-    """The FUNDING.yml handle(s) for one platform, comma-joined.
-
-    `github` is special-cased to the deduped, lower-cased login list. Other
-    platforms keep their raw value(s) as written (URLs/handles), stripped.
-    Returns "" when the platform key is absent.
-    """
-    if platform == "github":
-        return ",".join(funding_yml_github_logins(yml))
-    val = yml.get(platform) if isinstance(yml, dict) else None
-    if isinstance(val, list):
-        return ",".join(str(v).strip() for v in val if str(v).strip())
-    if isinstance(val, str):
-        return val.strip()
-    return ""
-
-
-async def fetch_funding_yml(session, limiter, repo: str) -> tuple[bool, dict]:
-    """Return (exists, parsed_dict). parsed_dict empty if not present."""
-    url = f"{GITHUB_API}/repos/{repo}/contents/.github/FUNDING.yml"
-    try:
-        resp = await limiter.get(session, url)
-    except _Deferred:
-        return False, {}
-    async with resp:
-        if resp.status != 200:
-            return False, {}
-        try:
-            payload = await resp.json()
-            text = base64.b64decode(payload.get("content", "")).decode(
-                "utf-8", errors="replace"
-            )
-        except Exception:
-            return True, {}
-        return True, parse_funding_yml(text)
-
-
-async def fetch_one(session, limiter, repo: str) -> dict:
-    has_yml, yml = await fetch_funding_yml(session, limiter, repo)
-    platforms = list(yml.keys()) if has_yml else []
+        if key == "github":
+            handle = handle.lower()
+        bucket = by_platform.setdefault(key, [])
+        if handle not in bucket:
+            bucket.append(handle)
     row = {
         "repo": repo,
-        "has_funding_yml": "True" if has_yml else "False",
-        "funding_yml_platforms": ",".join(platforms),
+        "has_funding_yml": "True" if by_platform else "False",
+        "funding_yml_platforms": ",".join(by_platform),
     }
     for p in FUNDING_PLATFORMS:
-        row[p] = platform_handle_value(yml, p)
+        row[p] = ",".join(by_platform.get(p, []))
     return row
+
+
+def build_query(batch: list[str]) -> tuple[str, dict]:
+    """Build an aliased GraphQL query + variables for a batch of `owner/name`.
+
+    Owner/name go through GraphQL variables (not string interpolation) so the
+    query is injection-safe regardless of repo slug contents.
+    """
+    decls: list[str] = []
+    selections: list[str] = []
+    variables: dict[str, str] = {}
+    for i, repo in enumerate(batch):
+        owner, _, name = repo.partition("/")
+        decls.append(f"$o{i}:String!,$n{i}:String!")
+        selections.append(
+            f"r{i}: repository(owner:$o{i}, name:$n{i}) "
+            f"{{ fundingLinks {{ platform url }} }}"
+        )
+        variables[f"o{i}"] = owner
+        variables[f"n{i}"] = name
+    query = "query(" + ",".join(decls) + "){\n  " + "\n  ".join(selections) + "\n}"
+    return query, variables
+
+
+def rows_from_response(batch: list[str], body: dict) -> dict[str, dict]:
+    """Turn a GraphQL response body into {repo: row} for the batch.
+
+    A repo whose alias errored with `NOT_FOUND` (deleted/renamed) is recorded
+    as "checked, no funding" (`has_funding_yml=False`). A null alias *without*
+    a NOT_FOUND error is a fetch failure — it is skipped, not written as False,
+    so a transient error never masquerades as "no funding" (auditability).
+    """
+    payload = body.get("data")
+    errors = body.get("errors") or []
+    if payload is None:
+        raise RuntimeError(f"GraphQL returned no data: {errors[:2]}")
+    not_found = {
+        e["path"][0]
+        for e in errors
+        if e.get("type") == "NOT_FOUND" and e.get("path")
+    }
+    rows: dict[str, dict] = {}
+    for i, repo in enumerate(batch):
+        alias = f"r{i}"
+        node = payload.get(alias)
+        if node is not None:
+            rows[repo] = build_row(repo, node.get("fundingLinks") or [])
+        elif alias in not_found:
+            rows[repo] = build_row(repo, [])
+        else:
+            log.warning("funding-yml: no data for %s (errors: %s)", repo, errors[:1])
+    return rows
+
+
+# ── fetch / batch orchestration ──────────────────────────────────────────────
+
+async def fetch_batch(session, limiter, batch: list[str]) -> dict[str, dict]:
+    """Fetch one batch of repos' funding links. Raises RuntimeError on failure."""
+    query, variables = build_query(batch)
+    try:
+        body = await _graphql(session, limiter, query, variables)
+    except _Deferred as e:
+        raise RuntimeError("transient network error") from e
+    return rows_from_response(batch, body)
 
 
 def _load_existing() -> dict[str, dict]:
@@ -205,36 +252,38 @@ async def batch(repos: list[str], force: bool, limit: int | None, concurrency: i
     if limit and limit < len(to_fetch):
         import random
         to_fetch = random.sample(to_fetch, limit)
-    console.print(f"[bold]funding-yml[/bold]: {len(repos)} repos, {len(to_fetch)} to fetch")
+    chunks = [to_fetch[i:i + BATCH_SIZE] for i in range(0, len(to_fetch), BATCH_SIZE)]
+    console.print(
+        f"[bold]funding-yml[/bold]: {len(repos)} repos, {len(to_fetch)} to fetch "
+        f"in {len(chunks)} batch(es) of ≤{BATCH_SIZE}"
+    )
     if not to_fetch:
         console.print("[dim]Nothing to fetch.[/dim]")
         return
     limiter = _AsyncRateLimiter()
     sem = asyncio.Semaphore(concurrency)
 
-    async def one(repo: str) -> dict:
+    async def one(chunk: list[str]) -> tuple[list[str], dict[str, dict]]:
         async with sem:
             try:
-                return await fetch_one(session, limiter, repo)
+                return chunk, await fetch_batch(session, limiter, chunk)
             except RuntimeError as e:
-                log.warning("funding-yml failed for %s: %s", repo, e)
-                return {"repo": repo, "_error": str(e)}
+                log.warning("funding-yml batch failed (%d repos): %s", len(chunk), e)
+                return chunk, {}
 
     headers = {"Accept": "application/vnd.github+json"}
     async with aiohttp.ClientSession(headers=headers) as session:
         with Progress(SpinnerColumn(), TextColumn("{task.description}"), BarColumn(),
                       TaskProgressColumn(), TimeElapsedColumn(), console=console) as prog:
             task = prog.add_task("funding-yml", total=len(to_fetch))
-            for coro in asyncio.as_completed([one(r) for r in to_fetch]):
-                res = await coro
-                prog.advance(task)
-                if "_error" in res:
-                    continue
-                res["repo_id"] = repo_ids.get(res["repo"], "")
-                res["fetched_at"] = datetime.datetime.now(
-                    datetime.timezone.utc
-                ).isoformat(timespec="seconds")
-                existing[res["repo"]] = res
+            for coro in asyncio.as_completed([one(c) for c in chunks]):
+                chunk, rows = await coro
+                now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+                for repo, row in rows.items():
+                    row["repo_id"] = repo_ids.get(repo, "")
+                    row["fetched_at"] = now
+                    existing[repo] = row
+                prog.advance(task, advance=len(chunk))
                 _write(existing)
     console.print(f"[green]done[/green] → {OUTPUT_FILE}")
 
