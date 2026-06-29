@@ -106,6 +106,27 @@ def _imputed_concentration_repos(path: Path) -> set[str]:
     return out
 
 
+def _company_backed_repos(funding_csv: Path) -> set[str]:
+    """Repos whose funding backing is a company (`host_type` or `owner_type` ==
+    'company' in funding.csv).
+
+    The Open Source Endowment funds *independent* projects, so a company-backed
+    repo is not a funding candidate — a company (Meta, Google, …) already fully
+    resources it. These are dropped from the final risk.csv ranking. The
+    classification is curated in data/sources/funding/overrides.csv.
+    """
+    out: set[str] = set()
+    if not funding_csv.exists():
+        return out
+    with open(funding_csv, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            types = ((row.get("host_type") or "").strip().lower(),
+                     (row.get("owner_type") or "").strip().lower())
+            if "company" in types:
+                out.add((row.get("repo") or "").strip().lower())
+    return out
+
+
 def overall_score(component_scores: list[int]) -> str:
     """Overall risk score = geometric mean of present component scores (int)."""
     if not component_scores:
@@ -117,10 +138,15 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
     eligible = load_top_repos()
     by_component = {name: _scores_by_repo(path) for name, path in COMPONENTS.items()}
     imputed = _imputed_concentration_repos(COMPONENTS["concentration"])
+    company_backed = _company_backed_repos(COMPONENTS["funding"])
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
+        # Rule: company-backed repos are excluded from the final risk ranking —
+        # they are resourced by a company, not endowment funding candidates.
+        if repo.lower() in company_backed:
+            continue
         if sample is not None and repo not in sample:
             continue
         row = {"repo": repo, "repo_id": entry.repo_id}

@@ -77,6 +77,23 @@ def test_stats_md_is_not_stale():
         "re-run `uv run python scripts/stats.py --markdown`"
 
 
+def test_risk_csv_excludes_company_backed():
+    """The final risk.csv drops company-backed repos (funding host_type/owner_type
+    == company) — a company already resources them, so they are not endowment
+    funding candidates. Regression for the exclusion rule in aggregate_risk."""
+    risk, funding = RISK_DIR / "risk.csv", RISK_DIR / "funding.csv"
+    if not (risk.exists() and funding.exists()):
+        pytest.skip("risk/funding csv not present")
+    with funding.open() as f:
+        company = {r["repo"].lower() for r in csv.DictReader(f)
+                   if "company" in ((r.get("host_type") or "").lower(),
+                                    (r.get("owner_type") or "").lower())}
+    with risk.open() as f:
+        in_risk = {r["repo"].lower() for r in csv.DictReader(f)}
+    leaked = company & in_risk
+    assert not leaked, f"company-backed repos in risk.csv: {sorted(leaked)}"
+
+
 def test_score_component_coverage_is_full():
     """Score-forming component columns are 100%-populated on live data.
 

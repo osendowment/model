@@ -2,7 +2,24 @@
 
 import math
 
-from src.risk.aggregate_risk import overall_score, FIELDS, COMPONENTS
+from src.risk.aggregate_risk import (
+    COMPONENTS,
+    FIELDS,
+    _company_backed_repos,
+    overall_score,
+)
+
+
+def test_company_backed_repos_detected(tmp_path):
+    """A repo whose funding host_type OR owner_type is 'company' is flagged for
+    exclusion from the final risk ranking; nonprofit/none are not."""
+    f = tmp_path / "funding.csv"
+    f.write_text("repo,host_type,owner_type\n"
+                 "a/co,,company\n"
+                 "b/host-co,company,\n"
+                 "c/found,nonprofit,\n"
+                 "d/none,,\n")
+    assert _company_backed_repos(f) == {"a/co", "b/host-co"}
 
 
 def test_risk_csv_is_narrow():
