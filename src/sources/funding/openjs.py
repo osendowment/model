@@ -15,15 +15,21 @@ Usage:
     uv run python -m src.sources.funding.openjs
 """
 
-import argparse
 import re
 from urllib.parse import urlparse
 
 import httpx
 
-from src.sources.funding._common import (USER_AGENT, atomic_write, banner,
-                                     extract_package, github_slug, out_path,
-                                     summary_table)
+from src.sources.funding._common import (
+    USER_AGENT,
+    banner,
+    extract_package,
+    github_slug,
+    is_output_fresh,
+    parse_scraper_args,
+    summary_table,
+    write_projects,
+)
 
 SLUG = "openjs"
 SOURCE = ("https://raw.githubusercontent.com/openjs-foundation"
@@ -106,12 +112,14 @@ def fetch() -> list[dict]:
 
 
 def main() -> None:
-    argparse.ArgumentParser().parse_args()
+    args = parse_scraper_args("Fetch OpenJS Foundation projects.")
     banner(SLUG, "OpenJS Foundation", f"Fetching {SOURCE}")
+    if is_output_fresh(SLUG, args):
+        return
     rows = fetch()
-    path = out_path(SLUG)
-    atomic_write(path, rows, COLS)
-    summary_table(SLUG, rows, path, group_by="stage")
+    path, written = write_projects(SLUG, rows, COLS)
+    if written:
+        summary_table(SLUG, rows, path, group_by="stage")
 
 
 if __name__ == "__main__":

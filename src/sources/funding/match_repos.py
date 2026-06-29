@@ -6,7 +6,12 @@ Reads every `data/sources/funding/{slug}/projects.csv` and builds three indexes:
   3. apex_domain → host (e.g. `numpy.org`   → numfocus)
 
 …and writes `data/sources/funding/host-by-repo.csv` with one row per repo:
-  repo, host, host_source
+  repo, host, host_source, host_checked
+
+`host_checked` is the audit timestamp of the host signal: the `fetched_at` of
+the matched foundation's projects.csv (so the host is traceable to the scrape
+that produced it), or the match-run timestamp when no foundation fetched_at is
+available / the repo matched no foundation.
 
 Matching priority (highest specificity wins):
   1. Exact `owner/name` slug from a foundation CSV.
@@ -29,7 +34,7 @@ from urllib.parse import urlparse
 from rich.console import Console
 from rich.table import Table
 
-from src.sources.funding._common import DATA_DIR
+from src.sources.funding._common import DATA_DIR, utc_now_iso
 
 console = Console()
 
@@ -121,13 +126,18 @@ GENERIC_DOMAINS: set[str] = {
 }
 
 
-def _load_foundation_index(slug: str) -> tuple[set[str], set[str]]:
-    """Return (set of `owner/name` slugs, set of apex domains) for one foundation."""
+def _load_foundation_index(slug: str) -> tuple[set[str], set[str], str]:
+    """Return (`owner/name` slugs, apex domains, fetched_at) for one foundation.
+
+    `fetched_at` is the projects.csv audit timestamp (first non-empty value), or
+    "" for a legacy file written before the audit column existed.
+    """
     path = DATA_DIR / slug / "projects.csv"
     if not path.exists():
-        return set(), set()
+        return set(), set(), ""
     slugs: set[str] = set()
     domains: set[str] = set()
+    fetched_at = ""
     with open(path, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             gh = (r.get("github_repo") or "").strip().lower()
@@ -136,23 +146,31 @@ def _load_foundation_index(slug: str) -> tuple[set[str], set[str]]:
             d = (r.get("domain") or "").strip().lower()
             if d and "." in d and d not in GENERIC_DOMAINS:
                 domains.add(d)
-    return slugs, domains
+            if not fetched_at:
+                fetched_at = (r.get("fetched_at") or "").strip()
+    return slugs, domains, fetched_at
 
 
-def build_indexes() -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
+def build_indexes() -> tuple[dict[str, str], dict[str, str], dict[str, str],
+                             dict[str, str]]:
     """Combine all foundation CSVs into slug→host and domain→host mappings.
 
-    Earlier slugs in `SLUGS` win (priority order).
+    Earlier slugs in `SLUGS` win (priority order). Also returns
+    `fetched_at_by_host` (unqualified foundation slug → projects.csv timestamp)
+    so the host signal can be stamped with the scrape it came from.
     """
     slug_to_host: dict[str, str] = {}
     domain_to_host: dict[str, str] = {}
+    fetched_at_by_host: dict[str, str] = {}
     for host in SLUGS:
-        slugs, domains = _load_foundation_index(host)
+        slugs, domains, fetched_at = _load_foundation_index(host)
+        if fetched_at:
+            fetched_at_by_host[host] = fetched_at
         for s in slugs:
             slug_to_host.setdefault(s, host)
         for d in domains:
             domain_to_host.setdefault(d, host)
-    return slug_to_host, ORG_HOST, domain_to_host
+    return slug_to_host, ORG_HOST, domain_to_host, fetched_at_by_host
 
 
 def _apex(url: str) -> str:
@@ -180,7 +198,8 @@ def _host_from_domain(host_url: str, domain_idx: dict[str, str]) -> str:
 
 
 def classify(slug_idx: dict[str, str], org_idx: dict[str, str],
-             domain_idx: dict[str, str]) -> list[dict]:
+             domain_idx: dict[str, str], fetched_at_by_host: dict[str, str],
+             run_ts: str) -> list[dict]:
     rows: list[dict] = []
     with open(REPOS_FILE, encoding="utf-8") as f:
         for r in csv.DictReader(f):
@@ -199,9 +218,13 @@ def classify(slug_idx: dict[str, str], org_idx: dict[str, str],
                 if hd:
                     host, source = hd, "domain"
 
-            # Emit qualified `parent/child` for hosts under a parent foundation
+            # `host` here is the UNQUALIFIED foundation slug (or ""). Stamp the
+            # check with that foundation's projects.csv timestamp when we have
+            # it, else the match-run time (so the negative/legacy case is still
+            # auditable). Emit qualified `parent/child` for the `host` column.
+            host_checked = (fetched_at_by_host.get(host) or run_ts) if host else run_ts
             rows.append({"repo": repo, "host": _qualified(host) if host else "",
-                         "host_source": source})
+                         "host_source": source, "host_checked": host_checked})
     return rows
 
 
@@ -209,17 +232,19 @@ def main() -> None:
     argparse.ArgumentParser().parse_args()
 
     console.rule("[bold cyan]funding/match_repos — joining foundation lists vs top-repos")
-    slug_idx, org_idx, domain_idx = build_indexes()
+    run_ts = utc_now_iso()
+    slug_idx, org_idx, domain_idx, fetched_at_by_host = build_indexes()
     console.print(f"  [dim]indexed[/dim] {len(slug_idx):,} project slugs across {len(SLUGS)} foundations")
     console.print(f"  [dim]+[/dim] {len(org_idx):,} curated org-prefix rules")
     console.print(f"  [dim]+[/dim] {len(domain_idx):,} apex domains and {len(DOMAIN_SUFFIX_HOST)} suffix rules\n")
 
-    rows = classify(slug_idx, org_idx, domain_idx)
+    rows = classify(slug_idx, org_idx, domain_idx, fetched_at_by_host, run_ts)
 
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     tmp = OUT_FILE.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=["repo", "host", "host_source"])
+        w = csv.DictWriter(f,
+                           fieldnames=["repo", "host", "host_source", "host_checked"])
         w.writeheader()
         w.writerows(rows)
     tmp.replace(OUT_FILE)
@@ -234,7 +259,8 @@ def main() -> None:
 
     tbl = Table(title="[bold]Hosts matched[/bold]", show_header=True,
                 header_style="bold dim", padding=(0, 1))
-    tbl.add_column("host"); tbl.add_column("repos", justify="right")
+    tbl.add_column("host")
+    tbl.add_column("repos", justify="right")
     tbl.add_column("%", justify="right")
     for host in SLUGS:
         c = by_host.get(_qualified(host), 0)
@@ -248,7 +274,7 @@ def main() -> None:
     tbl.add_section()
     tbl.add_row("[bold]Total repos[/bold]", f"[bold]{total:,}[/bold]", "")
     console.print(tbl)
-    console.print(f"\n  [dim]source breakdown:[/dim] " +
+    console.print("\n  [dim]source breakdown:[/dim] " +
                   ", ".join(f"{k}={v:,}" for k, v in sorted(by_source.items())))
     console.print(f"  → wrote [cyan]{OUT_FILE}[/cyan]")
 

@@ -2,19 +2,41 @@
 
 Kept tiny on purpose — every scraper just needs: a banner, atomic CSV
 writes, a github slug extractor, and a consistent User-Agent.
+
+Auditability + idempotency live here too, so all 8 scrapers inherit them:
+
+- Every `projects.csv` carries a `fetched_at` (UTC ISO, seconds) column,
+  stamped by `write_projects`.
+- `write_projects` enforces a MIN-ROW GUARD: a fresh scrape may not overwrite
+  an existing good file if it produced 0 rows (or fewer than `MIN_ROW_FRACTION`
+  of the existing count) — a blocked / partial scrape can never clobber data.
+- `parse_scraper_args` + `is_output_fresh` gate each scraper on the shared
+  funding TTL (`FUNDING_TTL_DAYS`): a re-run inside the window fetches nothing
+  and rewrites nothing.
 """
 
+import argparse
 import csv
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
 
+from src.common.freshness import FUNDING_TTL_DAYS, file_is_fresh
+
 DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "sources" / "funding"
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"
+
+# Audit column stamped onto every scraper's projects.csv.
+FETCHED_AT_COL = "fetched_at"
+
+# A fresh scrape must produce at least this fraction of the existing row count
+# before it is allowed to OVERWRITE a good projects.csv. Guards against a
+# transient / blocked / partial scrape silently clobbering good data.
+MIN_ROW_FRACTION = 0.5
 
 # Browser-like UA — some foundation sites (numfocus, sfc) block default httpx UA.
 BROWSER_UA = (
@@ -107,6 +129,86 @@ def atomic_write(path: Path, rows: list[dict], fieldnames: list[str]) -> None:
         w.writeheader()
         w.writerows(rows)
     os.replace(tmp, path)
+
+
+def utc_now_iso() -> str:
+    """Current UTC timestamp as an ISO-8601 string, seconds precision."""
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _existing_row_count(path: Path) -> int:
+    """Number of data rows (excluding header) in an existing projects.csv."""
+    if not path.exists():
+        return 0
+    with open(path, newline="", encoding="utf-8") as f:
+        return sum(1 for _ in csv.DictReader(f))
+
+
+def write_projects(slug: str, rows: list[dict], cols: list[str], *,
+                   fetched_at: str | None = None) -> tuple[Path, bool]:
+    """Stamp `fetched_at`, apply the MIN-ROW GUARD, atomically write projects.csv.
+
+    Returns `(path, written)`. When the new scrape produced too few rows to
+    safely overwrite an existing good file, the old file is kept untouched and
+    `written` is False (a loud warning is logged). On a real refresh the file
+    is rewritten with a fresh `fetched_at`; within-TTL re-runs are gated out
+    earlier by `is_output_fresh`, so the discovery layer stays idempotent.
+    """
+    path = out_path(slug)
+    existing = _existing_row_count(path)
+    # Refuse to clobber a good file with a 0-row / partial scrape.
+    if existing and len(rows) < existing * MIN_ROW_FRACTION:
+        console.print(
+            f"  [bold yellow]GUARD[/bold yellow]: new scrape produced "
+            f"[yellow]{len(rows):,}[/yellow] rows "
+            f"(< {MIN_ROW_FRACTION:.0%} of existing {existing:,}) — keeping old "
+            f"[cyan]{path}[/cyan], NOT overwriting."
+        )
+        return path, False
+
+    stamp = fetched_at or utc_now_iso()
+    fieldnames = list(cols)
+    if FETCHED_AT_COL not in fieldnames:
+        fieldnames.append(FETCHED_AT_COL)
+    stamped = [{**r, FETCHED_AT_COL: r.get(FETCHED_AT_COL) or stamp} for r in rows]
+    atomic_write(path, stamped, fieldnames)
+    return path, True
+
+
+def parse_scraper_args(description: str = "") -> argparse.Namespace:
+    """Standard CLI for every foundation scraper: a shared TTL + force escape.
+
+    `--ttl 0` or `--force` both bypass the freshness gate and re-fetch.
+    """
+    p = argparse.ArgumentParser(description=description)
+    p.add_argument(
+        "--ttl", type=int, default=FUNDING_TTL_DAYS,
+        help=f"Skip the fetch if projects.csv is younger than this many days "
+             f"(default {FUNDING_TTL_DAYS}; 0 forces a refresh).",
+    )
+    p.add_argument(
+        "--force", action="store_true",
+        help="Ignore the TTL and re-fetch unconditionally.",
+    )
+    return p.parse_args()
+
+
+def is_output_fresh(slug: str, args: argparse.Namespace) -> bool:
+    """True if projects.csv is within the TTL window — a re-run is a no-op.
+
+    Prints a clear "fresh, skipping" line so a within-window re-run is obvious.
+    """
+    if getattr(args, "force", False):
+        return False
+    ttl = getattr(args, "ttl", FUNDING_TTL_DAYS)
+    path = out_path(slug)
+    if file_is_fresh(path, ttl):
+        console.print(
+            f"  [green]fresh[/green]: [cyan]{path}[/cyan] is within the "
+            f"{ttl}-day TTL — skipping fetch (use --force or --ttl 0 to refresh)."
+        )
+        return True
+    return False
 
 
 def banner(slug: str, title: str, subtitle: str) -> None:

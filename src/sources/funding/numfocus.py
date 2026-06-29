@@ -11,15 +11,21 @@ Usage:
     uv run python -m src.sources.funding.numfocus
 """
 
-import argparse
 import re
 from urllib.parse import urlparse
 
 import httpx
 
-from src.sources.funding._common import (BROWSER_UA, atomic_write, banner,
-                                     extract_package, github_slug, out_path,
-                                     summary_table)
+from src.sources.funding._common import (
+    BROWSER_UA,
+    banner,
+    extract_package,
+    github_slug,
+    is_output_fresh,
+    parse_scraper_args,
+    summary_table,
+    write_projects,
+)
 
 SLUG = "numfocus"
 LISTING_URL = "https://numfocus.org/sponsored-projects"
@@ -92,12 +98,14 @@ def fetch() -> list[dict]:
 
 
 def main() -> None:
-    argparse.ArgumentParser().parse_args()
+    args = parse_scraper_args("Scrape NumFOCUS sponsored projects.")
     banner(SLUG, "NumFOCUS sponsored projects", f"Scraping {LISTING_URL}")
+    if is_output_fresh(SLUG, args):
+        return
     rows = fetch()
-    path = out_path(SLUG)
-    atomic_write(path, rows, COLS)
-    summary_table(SLUG, rows, path)
+    path, written = write_projects(SLUG, rows, COLS)
+    if written:
+        summary_table(SLUG, rows, path)
 
 
 if __name__ == "__main__":
