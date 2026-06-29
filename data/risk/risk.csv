@@ -108,7 +108,7 @@ clap-rs/clap,31315121,71,85,42,62,63,True,True
 cloudflare/cloudflare-python,753271547,84,83,43,86,71,True,False
 colinhacks/zod,245704608,59,88,54,51,61,True,True
 colorjs/color-name,27038309,28,2,80,36,20,False,True
-comex/rust-shlex,37886228,23,41,56,58,42,False,True
+comex/rust-shlex,37886228,23,41,56,58,42,True,True
 component/escape-html,5444800,100,8,68,53,41,False,True
 component/toidentifier,114743189,100,8,65,42,38,False,True
 conventional-changelog/commitlint,51575745,7,64,42,47,31,False,True
@@ -513,7 +513,7 @@ moment/moment,1424470,59,97,90,97,84,True,True
 more-itertools/more-itertools,4144530,19,66,46,52,42,False,True
 motdotla/dotenv,11205780,79,39,48,17,40,True,True
 moxystudio/node-cross-spawn,21335844,80,38,84,79,67,False,True
-mozilla/source-map,2014930,13,64,57,25,33,True,True
+mozilla/source-map,2014930,13,64,57,25,33,False,True
 mrabarnett/mrab-regex,309446978,83,91,49,91,76,False,True
 mrmlnc/fast-glob,77467076,82,71,65,73,72,False,True
 msgpack/msgpack-python,2242705,69,70,31,49,52,False,True
@@ -672,7 +672,7 @@ rust-lang/libc,29197565,2,92,29,56,23,False,True
 rust-lang/libz-sys,26042019,12,51,33,37,29,False,True
 rust-lang/log,27974762,21,49,31,34,32,False,True
 rust-lang/pkg-config-rs,26042035,11,52,52,45,34,False,True
-rust-lang/regex,27890669,76,85,42,50,61,False,True
+rust-lang/regex,27890669,76,85,42,50,61,True,True
 rust-lang/rust,724712,1,99,23,79,21,True,True
 rust-num/num-traits,114705611,51,46,53,70,54,False,True
 rust-phf/rust-phf,15992970,64,58,29,45,47,True,True
