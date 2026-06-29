@@ -1,12 +1,17 @@
 """Fetch GitHub Sponsors counts per risk-scope repo.
 
 Writes data/sources/github/sponsors.csv:
-    repo, repo_id, github_sponsors, sponsors_status, fetched_at
+    repo, repo_id, github_sponsors, owner_has_sponsors_listing, sponsors_status, fetched_at
 
 `github_sponsors` (inbound) = public sponsorships *received* by the repo owner
 plus every `github:` login in the repo's FUNDING.yml (read from
 data/sources/github/funding-yml.csv — run fetch_funding_yml first). Outbound
 sponsoring is a separate signal — see src.github.fetch_sponsorships.
+`owner_has_sponsors_listing` = the repo OWNER has an active GitHub Sponsors
+profile (`hasSponsorsListing`), i.e. is set up to receive sponsors even when the
+public count is 0 — a sustainability-intent signal in its own right. Scoped to
+the owner only (not FUNDING.yml co-logins), since intent attaches to the repo's
+owning entity.
 `sponsors_status`: "ok" if every queried login resolved, "error" if any GraphQL
 query failed (so a 0 from a failure is not mistaken for a genuine 0).
 
@@ -45,13 +50,14 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "sponsors.csv"
 FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
-FIELDS = ["repo", "repo_id", "github_sponsors", "sponsors_status", "fetched_at"]
+FIELDS = ["repo", "repo_id", "github_sponsors", "owner_has_sponsors_listing",
+          "sponsors_status", "fetched_at"]
 TTL_DAYS = 90
 
 SPONSORS_QUERY = """
 query($login: String!) {
-  user(login: $login) { sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount } }
-  organization(login: $login) { sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount } }
+  user(login: $login) { hasSponsorsListing sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount } }
+  organization(login: $login) { hasSponsorsListing sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount } }
 }
 """
 
@@ -74,32 +80,42 @@ def status_from_counts(counts: list[int], any_error: bool) -> str:
     return "error" if any_error else "ok"
 
 
-async def fetch_sponsors_for_login(session, limiter, login: str) -> tuple[int, bool]:
-    """(public sponsor count, ok). ok=False on a failed/deferred query."""
+async def fetch_sponsors_for_login(session, limiter, login: str) -> tuple[int, bool, bool]:
+    """(public sponsor count, has_sponsors_listing, ok). ok=False on a failed/deferred query.
+
+    A login resolves to either a user OR an organization (the other is null), so
+    the count is their sum (one is 0) and the listing is either one's.
+    """
     if not login:
-        return 0, True
+        return 0, False, True
     try:
         result = await _graphql(session, limiter, SPONSORS_QUERY, {"login": login})
     except _Deferred:
-        return 0, False
+        return 0, False, False
     except RuntimeError as e:
         log.warning("graphql failed for %s: %s", login, e)
-        return 0, False
+        return 0, False, False
     data = result.get("data") or {}
-    user = (data.get("user") or {}).get("sponsorshipsAsMaintainer") or {}
-    org = (data.get("organization") or {}).get("sponsorshipsAsMaintainer") or {}
-    return int(user.get("totalCount") or 0) + int(org.get("totalCount") or 0), True
+    user = data.get("user") or {}
+    org = data.get("organization") or {}
+    count = (int((user.get("sponsorshipsAsMaintainer") or {}).get("totalCount") or 0)
+             + int((org.get("sponsorshipsAsMaintainer") or {}).get("totalCount") or 0))
+    listing = bool(user.get("hasSponsorsListing") or org.get("hasSponsorsListing"))
+    return count, listing, True
 
 
 async def fetch_one(session, limiter, repo: str, yml_github: dict[str, str]) -> dict:
     logins = logins_for_repo(repo, yml_github)
     results = await asyncio.gather(*(fetch_sponsors_for_login(session, limiter, l) for l in logins))
-    total = sum(c for c, _ in results)
-    any_error = any(not ok for _, ok in results)
+    total = sum(c for c, _, _ in results)
+    any_error = any(not ok for _, _, ok in results)
+    # logins_for_repo puts the repo OWNER first; the listing signal is owner-scoped.
+    owner_listing = results[0][1] if results else False
     return {
         "repo": repo,
         "github_sponsors": str(total),
-        "sponsors_status": status_from_counts([c for c, _ in results], any_error),
+        "owner_has_sponsors_listing": "True" if owner_listing else "False",
+        "sponsors_status": status_from_counts([c for c, _, _ in results], any_error),
     }
 
 

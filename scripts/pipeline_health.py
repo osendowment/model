@@ -198,7 +198,7 @@ def check_score_component_coverage() -> list[Result]:
 
 # A score may be present ONLY if all of its scored inputs are present. For each
 # component CSV the inputs are the `composite_cols` its builder geometric-means
-# (src/risk/build_<dim>.py); for risk.csv they are the five component scores
+# (src/risk/build_<dim>.py); for risk.csv they are the four component scores
 # aggregate_risk geometric-means. The producers already enforce this (a missing
 # input blanks the score), so any score-with-a-missing-input on disk is a real
 # inconsistency — a hand-edit or a builder/aggregator regression.
@@ -208,7 +208,7 @@ SCORE_INPUTS: dict[str, list[str]] = {
     "security.csv":      ["openssf_score_p", "cve_score"],
     "funding.csv":       ["gh_sponsorships_p", "oc_avg_funding_p"],
     "workload.csv":      ["loc_per_ac_p", "cve_per_ac_p", "nni_per_ac_p"],
-    "risk.csv":          ["concentration", "complexity", "security", "funding", "workload"],
+    "risk.csv":          ["concentration", "complexity", "security", "workload"],
 }
 
 
@@ -218,7 +218,7 @@ def check_score_input_completeness() -> list[Result]:
 
     Enforces the completeness rule end to end: each component score is the
     geometric mean of its `composite_cols` (blanked when any is missing), and the
-    overall risk score is the geometric mean of the five component scores (blanked
+    overall risk score is the geometric mean of the four component scores (blanked
     when any component is missing). A row carrying a score while one of its inputs
     is blank violates the rule.
     """

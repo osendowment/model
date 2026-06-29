@@ -28,7 +28,10 @@ checks miss); `org_fundable` is owner-level (a FLOSS Fund manifest registered fo
 the whole GitHub org).
 `gh_stars` / `gh_forks` are informational popularity columns (not scored);
 their fetch timestamp lives in data/sources/github/repos.csv. No per-signal
-`fetched_at` is rolled up here.
+`fetched_at` is rolled up here. The script also writes two boolean flag columns:
+`intent` (True when ≥1 funding signal is present) and `nonprofit` (False only
+when host_type or owner_type == "company"). These flags are joined into
+data/risk/risk.csv by aggregate_risk.py.
 
 Usage:
     uv run python -m src.risk.build_funding
@@ -77,14 +80,15 @@ DECLARED_FUNDING_CAP = 79
 MEASURED_PLATFORMS = {"github", "open_collective"}
 
 FIELDS = ["repo", "repo_id",
-          "gh_sponsors_in", "gh_sponsors_out", "gh_sponsorships", "gh_sponsorships_p",
+          "gh_sponsors_in", "gh_sponsors_out", "owner_has_sponsors_listing",
+          "gh_sponsorships", "gh_sponsorships_p",
           "gh_stars", "gh_forks",
           "has_funding_link", "funding_link_platforms", "has_funding_json", "org_fundable",
           "has_npm_funding", "npm_funding_url",
           "has_pypi_funding", "pypi_funding_platforms", "channels_count",
           "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
           "host", "host_type", "owner", "owner_type", "host_score",
-          "score"]
+          "score", "intent", "nonprofit"]
 
 # A repo's institutional backing discounts its funding risk. `host` = the
 # foundation/company *legally* stewarding the project; `owner` = the entity that
@@ -103,6 +107,32 @@ def _type_score(t: str) -> float:
 def _backing_score(host_type: str, owner_type: str) -> float:
     """Combined backing multiplier ∈ {0, 0.5, 1} — the most-funded of host/owner."""
     return min(_type_score(host_type), _type_score(owner_type))
+
+
+def _nonprofit_flag(host_type: str, owner_type: str) -> bool:
+    """Default True; False only when a corporate host or owner backs the repo."""
+    return "company" not in (
+        (host_type or "").strip().lower(),
+        (owner_type or "").strip().lower(),
+    )
+
+
+def _intent_flag(row: dict) -> bool:
+    """Sustainability intent: True if the repo shows any funding signal — a live
+    sponsorship, the owner's GitHub Sponsors listing, a declared channel
+    (FUNDING.yml / funding.json / npm / PyPI / OC), or an institutional host/owner."""
+    return (
+        _to_int(row.get("gh_sponsors_in")) + _to_int(row.get("gh_sponsors_out")) > 0
+        or (row.get("owner_has_sponsors_listing") or "").strip() == "True"
+        or (row.get("has_funding_link") or "").strip() == "True"
+        or (row.get("has_funding_json") or "").strip() == "True"
+        or (row.get("org_fundable") or "").strip() == "True"
+        or (row.get("has_npm_funding") or "").strip() == "True"
+        or (row.get("has_pypi_funding") or "").strip() == "True"
+        or bool((row.get("oc_slug") or "").strip())
+        or bool((row.get("host") or "").strip())
+        or bool((row.get("owner") or "").strip())
+    )
 
 
 def _fmt_score(x: float) -> str:
@@ -189,11 +219,12 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         channels = channels | {"pypi"}
     gh_in = (sponsors.get("github_sponsors") or "").strip()
     gh_out = (sponsoring_count or "").strip()
-    return {
+    row = {
         "repo": repo,
         "repo_id": repo_id,
         "gh_sponsors_in": gh_in,
         "gh_sponsors_out": gh_out,
+        "owner_has_sponsors_listing": (sponsors.get("owner_has_sponsors_listing") or "").strip(),
         "gh_sponsorships": str(_to_int(gh_in) + _to_int(gh_out)),
         "gh_stars": (repo_meta.get("stars") or "").strip(),
         "gh_forks": (repo_meta.get("forks") or "").strip(),
@@ -214,6 +245,9 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "owner_type": owner_type,
         "host_score": _fmt_score(_backing_score(host_type, owner_type)),
     }
+    row["intent"] = "True" if _intent_flag(row) else "False"
+    row["nonprofit"] = "True" if _nonprofit_flag(host_type, owner_type) else "False"
+    return row
 
 
 def _export_by_repo(path: Path) -> dict[str, dict]:
@@ -329,6 +363,14 @@ def build() -> list[dict]:
         except (TypeError, ValueError):
             return 0.0
 
+    def _real_oc(slug: str) -> bool:
+        """A real, existing collective — successfully fetched with `oc_status == ok`
+        (as opposed to a not-found/error slug). A real OC channel is a
+        sustainability-intent signal even when $0 has been raised; the dollar
+        amount is carried separately by `_avg`."""
+        row = oc_budgets.get(slug)
+        return bool(row) and (row.get("oc_status") or "").strip() == "ok"
+
     # Org-budget split denominator: the org's top (class-A, valid) repos.
     classA_per_org = Counter(e.repo.split("/", 1)[0].lower()
                              for e in eligible if e.value_class == "A")
@@ -350,17 +392,21 @@ def build() -> list[dict]:
         # collective claiming github.com/facebook). Otherwise auto-map: a repo-level
         # collective → its FULL avg budget; else the org's collective split equally
         # across the org's class-A repos.
-        # Auto-map matches are guarded by `_avg(...) > 0` — a $0 collective carries
-        # no funding signal and is usually junk (e.g. `for-the-mage` claiming
-        # github.com/facebook), so we don't attribute its slug.
+        # A repo-level reverse-map match (the collective declares THIS owner/repo)
+        # sets the slug when the collective is REAL (fetched, status ok) even at $0
+        # raised — a real OC channel is itself a sustainability-intent signal;
+        # `oc_amt` still carries the (possibly $0) budget. Org-level matches stay
+        # guarded by `_avg(...) > 0`: an org-only $0 collective is usually junk
+        # (e.g. `for-the-mage` claiming github.com/facebook), so we don't spread its
+        # slug across the org's repos.
         if repo.lower() in overrides:
             s = normalize_oc_slug(ov.get("oc_slug"))
             oc_slug, oc_amt = (s, _avg(s)) if s else ("", 0.0)
-        elif oc_by_repo.get(repo.lower()) and _avg(oc_by_repo[repo.lower()]) > 0:
+        elif oc_by_repo.get(repo.lower()) and _real_oc(oc_by_repo[repo.lower()]):
             oc_slug = oc_by_repo[repo.lower()]
             oc_amt = _avg(oc_slug)
         elif (oc_by_org.get(owner_login) and entry.value_class == "A"
-              and _avg(oc_by_org[owner_login]) > 0):
+              and _real_oc(oc_by_org[owner_login])):
             org_slug = oc_by_org[owner_login]
             n = classA_per_org[owner_login] or 1
             oc_slug, oc_amt = org_slug, _avg(org_slug) / n

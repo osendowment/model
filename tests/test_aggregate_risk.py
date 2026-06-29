@@ -5,28 +5,27 @@ import math
 from src.risk.aggregate_risk import (
     COMPONENTS,
     FIELDS,
-    _company_backed_repos,
+    _funding_flags,
     overall_score,
 )
 
 
-def test_company_backed_repos_detected(tmp_path):
-    """A repo whose funding host_type OR owner_type is 'company' is flagged for
-    exclusion from the final risk ranking; nonprofit/none are not."""
+def test_funding_flags_read(tmp_path):
+    """intent/nonprofit are read per repo from funding.csv; missing → safe defaults."""
     f = tmp_path / "funding.csv"
-    f.write_text("repo,host_type,owner_type\n"
-                 "a/co,,company\n"
-                 "b/host-co,company,\n"
-                 "c/found,nonprofit,\n"
-                 "d/none,,\n")
-    assert _company_backed_repos(f) == {"a/co", "b/host-co"}
+    f.write_text("repo,intent,nonprofit\n"
+                 "a/co,True,False\n"
+                 "c/found,True,True\n"
+                 "d/none,False,True\n")
+    flags = _funding_flags(f)
+    assert flags["a/co"] == {"intent": "True", "nonprofit": "False"}
+    assert flags["d/none"] == {"intent": "False", "nonprofit": "True"}
 
 
 def test_risk_csv_is_narrow():
     assert FIELDS == ["repo", "repo_id", "concentration", "complexity",
-                      "security", "funding", "workload", "score",
-                      "dims_scored", "concentration_imputed"]
-    assert "visibility" not in COMPONENTS
+                      "security", "workload", "score", "intent", "nonprofit"]
+    assert "funding" not in COMPONENTS
 
 
 def test_overall_score_geom_mean():
@@ -41,7 +40,7 @@ def test_overall_score_floored_and_empty():
 
 
 def test_aggregate_requires_all_components(monkeypatch):
-    """Completeness rule: the overall score is blank unless ALL five component
+    """Completeness rule: the overall score is blank unless ALL four component
     scores are present — a repo missing any component gets no partial score."""
     from pathlib import Path
 
@@ -53,12 +52,12 @@ def test_aggregate_requires_all_components(monkeypatch):
 
     monkeypatch.setattr(ar, "load_top_repos",
                         lambda: [_Entry("o/full"), _Entry("o/partial")])
-    # `o/full` has all five; `o/partial` is missing workload.
+    monkeypatch.setattr(ar, "_funding_flags", lambda p: {})
+    # `o/full` has all four; `o/partial` is missing workload.
     by_name = {
         "concentration": {"o/full": 50, "o/partial": 50},
         "complexity":    {"o/full": 50, "o/partial": 50},
         "security":      {"o/full": 50, "o/partial": 50},
-        "funding":       {"o/full": 50, "o/partial": 50},
         "workload":      {"o/full": 50},
     }
     monkeypatch.setattr(ar, "_scores_by_repo", lambda p: by_name[Path(p).stem])

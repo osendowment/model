@@ -3,11 +3,16 @@
 How well-resourced is a project? The funding component gathers every public
 signal that a repo receives (or gives) financial support — GitHub Sponsors,
 `FUNDING.yml` platforms, the FLOSS Fund directory, OpenCollective budgets, and
-FOSS-foundation hosting — and distills them into one **funding-risk score
-(`score`, 0–100, higher = more at-risk)** that feeds `data/risk/risk.csv`.
+FOSS-foundation hosting — and distills them into:
+
+1. a **funding-risk score (`score`, 0–100, higher = more at-risk)** stored in
+   `data/risk/funding.csv` (not carried into `risk.csv` — see below), and
+2. two boolean flags — **`intent`** and **`nonprofit`** — that are joined into
+   `risk.csv`.
 
 Scope: the class-A value-class repos in the risk pipeline (counts in
-[stats.md → Risk → Funding](../stats.md#funding); see [value.md](../value.md)).
+[stats.md → Risk → Intent and nonprofit](../stats.md#intent-and-nonprofit);
+see [value.md](../value.md)).
 Build step: `src/risk/build_funding.py`.
 
 ## Metrics Roadmap
@@ -47,8 +52,10 @@ Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 ├── channels_count           ← derived (funding-link platforms ∪ funding.json channels ∪ org channels, deduped)  [most recent]
 ├── gh_stars, gh_forks        ← GitHub /repos (informational, not scored)                             [most recent]
 │
-└── score  (the score)       ← derived (geom-mean of gh_sponsorships_p, oc_avg_funding_p, host_score×100; int 1–100)  [most recent]
-    └─ carried into risk.csv as the column `funding`
+├── score  (funding-risk score)  ← derived (geom-mean of gh_sponsorships_p, oc_avg_funding_p, host_score×100; int 1–100)  [most recent]
+│                                  (NOT carried into risk.csv — funding is not a scored dimension)
+├── intent                     ← derived bool: ≥1 funding signal present (see below)
+└── nonprofit                  ← derived bool: false only when host_type or owner_type == company
 ```
 
 ## How It Works
@@ -62,8 +69,12 @@ Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 4. **Score** — `score` = geometric mean of the two channel percentiles, then
    **× `host_score`** — the combined backing multiplier (most-funded of host /
    owner: company 0 · nonprofit 0.5 · none 1); integer 0–100, higher = more at-risk.
-5. **Aggregate** — `aggregate_risk.py` carries **only** this component's `score`
-   into `risk.csv` as the column `funding`.
+5. **Flags** — `build_funding.py` derives the `intent` and `nonprofit` booleans
+   from the funding signals (`_intent_flag` / `_nonprofit_flag`) and writes them
+   to `funding.csv`; `aggregate_risk.py` joins just those two columns into
+   `risk.csv` alongside the four scored dimensions. The funding `score` does
+   **not** feed `risk.csv`; funding is a signal-only component, not a scored
+   dimension.
 
 Pipeline order (`src/risk/run_risk_pipeline.py`). The risk runner fetches these
 sources by default (incremental — each fetcher skips data already present, so a
@@ -216,7 +227,7 @@ Worked examples:
 
 Note the third axis lifts *funded-but-unbacked* repos (vuejs `1 → 5`, axios
 `3 → 10`): "no institutional backer" (`host_score = 1` → backing 100) is now a
-risk voice, not a no-op. (Score distribution → [stats.md](../stats.md#funding).)
+risk voice, not a no-op. (Intent/nonprofit coverage → [stats.md](../stats.md#intent-and-nonprofit).)
 
 ## Output
 
@@ -249,22 +260,37 @@ in each source file.
 
 ### `data/risk/risk.csv` (aggregate)
 
-`aggregate_risk.py` carries **only** the per-dimension `score`, renamed to the
-column `funding`:
+The funding component does **not** contribute a scored column to `risk.csv`.
+The overall `risk.csv` `score` is the geometric mean of the **four** scored
+dimensions only: `concentration`, `complexity`, `security`, `workload`.
 
-| `risk.csv` column | Source |
-|---|---|
-| `funding` | this component's `score` (0–100, higher = riskier) |
+Instead, `aggregate_risk.py` derives two boolean flag columns from the funding
+signals and joins them into `risk.csv`:
 
-The five component scores (`concentration`, `complexity`, `security`,
-`funding`, `workload`) are then geometric-mean-combined into the overall
-`risk.csv` `score`.
+| `risk.csv` column | Source | Default |
+|---|---|---|
+| `intent` | `true` when the repo has ≥1 funding signal (see below) | `false` |
+| `nonprofit` | `false` only when `host_type`/`owner_type == company` | `true` |
+
+### `intent` and `nonprofit` flags
+
+**`intent`** (`bool`, default `false`) — `true` when the repo shows at least
+one funding signal: GitHub Sponsors (inbound or outbound), a `.github/FUNDING.yml`,
+a `funding.json` (FLOSS Fund), an npm `funding` field, a PyPI project-URLs
+funding entry, an Open Collective slug, or an institutional host or owner.
+"Intent" means the project is actively seeking or accepting support.
+
+**`nonprofit`** (`bool`, default `true`) — `false` only when a corporate entity
+(Meta, Google, Microsoft, AWS, …) is the project's host or owner, as determined by
+`host_type` / `owner_type == "company"` in `data/risk/funding.csv`.
+Community-run and foundation-backed projects are `nonprofit=true`.
+Corporate-backed repos remain in `risk.csv` with their scores intact; callers
+filter by `nonprofit=true` to restrict to endowment candidates.
 
 ## Coverage
 
-See [docs/stats.md → Risk → Funding](../stats.md#funding) for current per-channel
-coverage over the top repos (including the dedicated OpenCollective funnel) and
-the score distribution.
+See [stats.md → Risk → Intent and nonprofit](../stats.md#intent-and-nonprofit)
+for current per-channel coverage over the top repos and the score distribution.
 
 ## Limitations
 
@@ -281,8 +307,9 @@ the score distribution.
   ecosystem hasn't reached this cohort. `has_funding_json` is informational, not
   yet a scoring input.
 - **`score` is a percentile, not a class.** It's a 0–100 risk number, not a
-  class tier — but, unlike earlier versions, it **is** folded into the overall
-  `risk.csv` `score` (the geometric mean of the five component scores).
+  class tier. It lives in `funding.csv` and is **not** folded into the overall
+  `risk.csv` `score` — the risk aggregate uses four scored dimensions only
+  (concentration, complexity, security, workload).
 - **OC is the only $ amount.** GitHub Sponsors and Patreon/Tidelift amounts
   aren't public, so dollar figures exist only for the ~45 OpenCollective repos;
   the sponsorship axis is a *count*, not a *sum*.

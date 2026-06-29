@@ -3,26 +3,22 @@
 
 Each dimension builder writes a per-component CSV whose `score` column is that
 dimension's risk score (integer 0-100, higher = riskier). This aggregator joins
-the five component scores per repo and computes the overall `score` =
-geometric mean of the five component scores.
+the four component scores per repo and computes the overall `score` =
+geometric mean of the four component scores (floored to 1).
 
 **Completeness rule:** the overall `score` is calculable only if *every* one of
-the five component scores is present. A partial geometric mean (over 3-4 of 5
-dimensions) is not comparable across repos, so a repo missing any component
-score is left with a blank overall `score`. (Each component score is itself
-already blank-unless-complete — `geom_mean_composite` blanks it when any of its
-own scored inputs is missing — so this rule propagates input-completeness all
-the way up.) `scripts/pipeline_health.py` enforces it.
+the four component scores is present. A partial geometric mean is not comparable
+across repos, so a repo missing any component score is left with a blank overall
+`score`. `scripts/pipeline_health.py` enforces it.
 
 Writes data/risk/risk.csv with:
-    repo, repo_id, concentration, complexity, security, funding, workload,
-    score, dims_scored, concentration_imputed
+    repo, repo_id, concentration, complexity, security, workload,
+    score, intent, nonprofit
 
-`dims_scored` (0-5) counts how many of the five component scores are present for
-the repo — it surfaces under-measured repos whose overall `score` rests on only a
-partial set of dimensions. `concentration_imputed` flags repos whose concentration
-row was worst-case imputed (no active human contributor in the 5y window), so the
-ceiling-tied (score=100) concentration repos stay auditable downstream.
+`intent` (True/False) — whether the repo has any declared or inferred funding
+intent. `nonprofit` (True/False) — False when the repo is company-backed (Meta,
+Google, …). Company-backed repos remain in risk.csv and are flagged
+`nonprofit=False` rather than being dropped, so callers can filter as needed.
 
 (All other per-metric columns stay in the component CSVs.)
 
@@ -46,28 +42,17 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
-# Component name (= its risk.csv column) → per-dimension CSV.
+# Component name (= its risk.csv column) → per-dimension CSV. Order is the
+# column order in risk.csv: concentration · complexity · security · workload.
 COMPONENTS = {
     "concentration": DATA_DIR / "risk" / "concentration.csv",
     "complexity":    DATA_DIR / "risk" / "complexity.csv",
     "security":      DATA_DIR / "risk" / "security.csv",
-    "funding":       DATA_DIR / "risk" / "funding.csv",
     "workload":      DATA_DIR / "risk" / "workload.csv",
 }
+FUNDING_FILE = DATA_DIR / "risk" / "funding.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "risk.csv"
-FIELDS = ["repo", "repo_id", *COMPONENTS, "score", "dims_scored", "concentration_imputed"]
-
-# `comment` strings written by src/risk/build_concentration.py (git_metrics) when a
-# repo has no active human contributor in the 5y window and its concentration is
-# worst-case imputed (bus factor 1, HHI 10000). A row carrying one of these is the
-# only kind of imputed concentration. Fetch-failure comments ("git fetch <status>",
-# "no git data") are NOT imputation — those rows have a blank score and stay unflagged.
-CONCENTRATION_IMPUTE_COMMENTS = {
-    "no commits in 5y",
-    "no commits through last complete year",
-    "no human commits in 5y",
-}
-
+FIELDS = ["repo", "repo_id", *COMPONENTS, "score", "intent", "nonprofit"]
 
 def _scores_by_repo(path: Path) -> dict[str, int]:
     """{repo_lowercased: int(score)} from a component CSV; blanks skipped."""
@@ -86,44 +71,20 @@ def _scores_by_repo(path: Path) -> dict[str, int]:
     return out
 
 
-def _imputed_concentration_repos(path: Path) -> set[str]:
-    """{repo_lowercased} whose concentration row was worst-case IMPUTED.
-
-    A repo is imputed when build_concentration found no active human in the 5y
-    window and forced bus factor 1 / HHI 10000, recording WHY in `comment`. We
-    match those exact reason strings (CONCENTRATION_IMPUTE_COMMENTS) — fetch
-    failures carry different comments and a blank score, so they don't match.
-    """
-    out: set[str] = set()
-    if not path.exists():
-        return out
-    with open(path, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            repo = (row.get("repo") or "").strip().lower()
-            comment = (row.get("comment") or "").strip()
-            if repo and comment in CONCENTRATION_IMPUTE_COMMENTS:
-                out.add(repo)
-    return out
-
-
-def _company_backed_repos(funding_csv: Path) -> set[str]:
-    """Repos whose funding backing is a company (`host_type` or `owner_type` ==
-    'company' in funding.csv).
-
-    The Open Source Endowment funds *independent* projects, so a company-backed
-    repo is not a funding candidate — a company (Meta, Google, …) already fully
-    resources it. These are dropped from the final risk.csv ranking. The
-    classification is curated in data/sources/funding/overrides.csv.
-    """
-    out: set[str] = set()
+def _funding_flags(funding_csv: Path) -> dict[str, dict[str, str]]:
+    """{repo_lower: {"intent": .., "nonprofit": ..}} from funding.csv. Missing
+    repo → intent defaults False (no signal), nonprofit defaults True (not corporate)."""
+    out: dict[str, dict[str, str]] = {}
     if not funding_csv.exists():
         return out
     with open(funding_csv, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            types = ((row.get("host_type") or "").strip().lower(),
-                     (row.get("owner_type") or "").strip().lower())
-            if "company" in types:
-                out.add((row.get("repo") or "").strip().lower())
+            repo = (row.get("repo") or "").strip().lower()
+            if repo:
+                out[repo] = {
+                    "intent": (row.get("intent") or "").strip() or "False",
+                    "nonprofit": (row.get("nonprofit") or "").strip() or "True",
+                }
     return out
 
 
@@ -137,16 +98,11 @@ def overall_score(component_scores: list[int]) -> str:
 def aggregate(sample: set[str] | None = None) -> list[dict]:
     eligible = load_top_repos()
     by_component = {name: _scores_by_repo(path) for name, path in COMPONENTS.items()}
-    imputed = _imputed_concentration_repos(COMPONENTS["concentration"])
-    company_backed = _company_backed_repos(COMPONENTS["funding"])
+    flags = _funding_flags(FUNDING_FILE)
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
-        # Rule: company-backed repos are excluded from the final risk ranking —
-        # they are resourced by a company, not endowment funding candidates.
-        if repo.lower() in company_backed:
-            continue
         if sample is not None and repo not in sample:
             continue
         row = {"repo": repo, "repo_id": entry.repo_id}
@@ -159,13 +115,11 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
                 complete = False
             else:
                 present.append(s)
-        # Completeness rule: only score a repo whose every component is present;
-        # a partial geometric mean over a subset of dimensions isn't comparable.
+        # Completeness rule: only score a repo whose every dimension is present.
         row["score"] = overall_score(present) if complete else ""
-        # dims_scored explains WHY a score is blank (how many of 5 were present);
-        # concentration_imputed flags the worst-case-imputed dormant repos.
-        row["dims_scored"] = len(present)
-        row["concentration_imputed"] = "True" if repo in imputed else ""
+        f = flags.get(repo.lower(), {})
+        row["intent"] = f.get("intent", "False")
+        row["nonprofit"] = f.get("nonprofit", "True")
         rows.append(row)
     return rows
 
@@ -204,11 +158,11 @@ def main() -> None:
         w.writerows(rows)
 
     _print_coverage(rows)
-    under = sum(1 for r in rows if r.get("dims_scored", 0) < 5)
-    imputed = sum(1 for r in rows if r.get("concentration_imputed") == "True")
+    si = sum(1 for r in rows if r.get("intent") == "True")
+    corp = sum(1 for r in rows if r.get("nonprofit") == "False")
     console.print(
-        f"[dim]dims_scored<5 (under-measured): {under:,} · "
-        f"concentration_imputed=True: {imputed:,}[/dim]"
+        f"[dim]intent=True: {si:,}/{len(rows):,} "
+        f"({100*si/len(rows):.1f}%) · nonprofit=False (corporate): {corp:,}[/dim]"
     )
     console.print(f"\n[dim]Wrote {len(rows):,} repos × {len(FIELDS)} columns → {OUTPUT_FILE}[/dim]")
 

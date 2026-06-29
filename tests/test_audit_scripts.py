@@ -77,10 +77,10 @@ def test_stats_md_is_not_stale():
         "re-run `uv run python scripts/stats.py --markdown`"
 
 
-def test_risk_csv_excludes_company_backed():
-    """The final risk.csv drops company-backed repos (funding host_type/owner_type
-    == company) — a company already resources them, so they are not endowment
-    funding candidates. Regression for the exclusion rule in aggregate_risk."""
+def test_risk_csv_keeps_company_backed_flagged_nonprofit():
+    """Company-backed repos (funding host_type/owner_type == company) are KEPT in
+    the final risk.csv and flagged nonprofit=False — they are no longer dropped.
+    Regression for the intent/nonprofit reversal in aggregate_risk."""
     risk, funding = RISK_DIR / "risk.csv", RISK_DIR / "funding.csv"
     if not (risk.exists() and funding.exists()):
         pytest.skip("risk/funding csv not present")
@@ -89,9 +89,11 @@ def test_risk_csv_excludes_company_backed():
                    if "company" in ((r.get("host_type") or "").lower(),
                                     (r.get("owner_type") or "").lower())}
     with risk.open() as f:
-        in_risk = {r["repo"].lower() for r in csv.DictReader(f)}
-    leaked = company & in_risk
-    assert not leaked, f"company-backed repos in risk.csv: {sorted(leaked)}"
+        risk_rows = {r["repo"].lower(): r for r in csv.DictReader(f)}
+    present = company & set(risk_rows)
+    assert present, "expected company-backed repos to appear in risk.csv"
+    bad = {repo for repo in present if (risk_rows[repo].get("nonprofit") or "") != "False"}
+    assert not bad, f"company-backed repos not flagged nonprofit=False: {sorted(bad)}"
 
 
 def test_score_component_coverage_is_full():
@@ -150,19 +152,11 @@ def test_dimension_score_floored_at_one(dim):
         assert 1 <= float(v) <= 100, f"{r.get('repo')}.{dim}.score={v} outside [1,100]"
 
 
-# --- risk.csv aggregate columns: dims_scored + concentration_imputed ---------
-
-RISK_COMPONENTS = ["concentration", "complexity", "security", "funding", "workload"]
+# --- risk.csv aggregate columns: intent + nonprofit --------------------------
 
 
-def test_risk_dims_scored_matches_present_components():
-    """risk.csv `dims_scored` is an int in [0, 5] and equals the count of
-    non-empty component scores for every row.
-
-    Regression for under-measured repos (e.g. a repo scored on only 3 of the 5
-    dimensions) being silently rolled into `score`: dims_scored must faithfully
-    report how many components actually backed the overall score.
-    """
+def test_risk_intent_and_nonprofit_are_boolean_flags():
+    """risk.csv intent/nonprofit are present on every row and are 'True'/'False'."""
     path = RISK_DIR / "risk.csv"
     if not path.exists():
         pytest.skip("risk.csv not present")
@@ -170,38 +164,11 @@ def test_risk_dims_scored_matches_present_components():
         rows = list(csv.DictReader(f))
     if not rows:
         pytest.skip("risk.csv empty")
-    assert "dims_scored" in rows[0], "risk.csv missing dims_scored column"
-    for r in rows:
-        present = sum(1 for c in RISK_COMPONENTS if (r.get(c) or "").strip())
-        raw = (r.get("dims_scored") or "").strip()
-        assert raw, f"{r.get('repo')} has blank dims_scored"
-        ds = int(raw)
-        assert 0 <= ds <= 5, f"{r.get('repo')}.dims_scored={ds} outside [0,5]"
-        assert ds == present, (
-            f"{r.get('repo')}.dims_scored={ds} != {present} present components"
-        )
-
-
-def test_risk_concentration_imputed_is_boolean_flag():
-    """risk.csv `concentration_imputed` is blank or "True"; a flagged repo always
-    carries a concentration score (imputation forces a worst-case score, never a
-    blank), keeping the ceiling-tied concentration repos auditable.
-    """
-    path = RISK_DIR / "risk.csv"
-    if not path.exists():
-        pytest.skip("risk.csv not present")
-    with path.open() as f:
-        rows = list(csv.DictReader(f))
-    if not rows:
-        pytest.skip("risk.csv empty")
-    assert "concentration_imputed" in rows[0], "risk.csv missing concentration_imputed column"
-    for r in rows:
-        flag = (r.get("concentration_imputed") or "").strip()
-        assert flag in ("", "True"), f"{r.get('repo')}.concentration_imputed={flag!r}"
-        if flag == "True":
-            assert (r.get("concentration") or "").strip(), (
-                f"{r.get('repo')} imputed but has blank concentration score"
-            )
+    for col in ("intent", "nonprofit"):
+        assert col in rows[0], f"risk.csv missing {col} column"
+        for r in rows:
+            assert (r.get(col) or "").strip() in ("True", "False"), \
+                f"{r.get('repo')}.{col}={r.get(col)!r}"
 
 
 def test_valid_repos_have_github_repo_and_git_url():
