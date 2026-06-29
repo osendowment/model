@@ -201,6 +201,37 @@ def test_build_funding_override_oc_slug_authoritative(monkeypatch):
     assert rows["big/keep"]["oc_avg_funding"] == "200"
 
 
+def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
+    """A repo declaring a funding LINK we can't value (liberapay, ko_fi, …) is
+    capped at 79 even with $0 measured — e.g. tukaani-project/xz's Liberapay. But
+    a link to a MEASURED platform (GitHub Sponsors / Open Collective) does NOT cap
+    on its own, because the score already reflects the real sponsor/budget signal.
+    """
+    def rows_by_repo(p):
+        s = str(p)
+        if "funding-yml.csv" in s:
+            return {"link/lp": {"has_funding_link": "True", "funding_link_platforms": "liberapay"},
+                    "gh/only": {"has_funding_link": "True", "funding_link_platforms": "github"}}
+        if "sponsors.csv" in s:
+            return {"rich/r": {"github_sponsors": "100"}}
+        return {}
+    monkeypatch.setattr(bf, "load_top_repos",
+                        lambda: [E("link/lp"), E("gh/only"), E("plain/p"), E("rich/r")])
+    monkeypatch.setattr(bf, "load_rows_by_repo", rows_by_repo)
+    monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
+    monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000"}})
+    monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
+    monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({"rich/r": "rich"}, {}))
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["link/lp"]["score"] == bf.DECLARED_FUNDING_CAP  # liberapay → capped 79
+    assert rows["gh/only"]["score"] == 100   # github-only is measured → no cap, 0 sponsors
+    assert rows["plain/p"]["score"] == 100   # no channel at all
+
+
 def test_build_funding_org_fundable_caps_score_and_counts_channel(monkeypatch):
     """A fundable ORG (FLOSS manifest registered for the whole GitHub org) marks
     every repo it owns: org_fundable=True, its channels count, and the score is

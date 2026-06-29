@@ -64,12 +64,17 @@ NPM_FUNDING_FILE = DATA_DIR / "sources" / "npm" / "funding.csv"
 PYPI_FUNDING_FILE = DATA_DIR / "sources" / "pypi" / "funding.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
 
-# A repo that has *declared* a funding channel in its registry metadata (the npm
-# package.json `funding` field, or a PyPI `project_urls` funding link) is not
-# maximally unfunded even if no $ is measured — cap its funding risk at the "has
-# some backing" level (the nonprofit-host score: geom(100,100,50) ≈ 79). Both are
-# repo/package-level, so they catch channels the owner-level checks miss.
+# A repo that DECLARES a funding channel whose $ we cannot measure is not
+# maximally unfunded even if no $ is observed — cap its funding risk at the "has
+# some backing" level (the nonprofit-host score: geom(100,100,50) ≈ 79).
 DECLARED_FUNDING_CAP = 79
+
+# Platforms whose dollars we DO measure: GitHub Sponsors (sponsors.csv counts)
+# and Open Collective (budgets.csv). For these the score already reflects the
+# real signal, so a link to them is NOT a cap trigger. Every other funding-link
+# platform (liberapay, ko_fi, patreon, tidelift, custom, …) is unmeasured — a
+# link is the only signal we have, so it caps (same logic as npm/pypi/org).
+MEASURED_PLATFORMS = {"github", "open_collective"}
 
 FIELDS = ["repo", "repo_id",
           "gh_sponsors_in", "gh_sponsors_out", "gh_sponsorships", "gh_sponsorships_p",
@@ -110,6 +115,23 @@ def _fmt_money(x: float) -> str:
 
 def _platform_set(csv_value: str) -> set[str]:
     return {p.strip() for p in (csv_value or "").split(",") if p.strip()}
+
+
+def _declares_unmeasured_channel(row: dict) -> bool:
+    """True if the repo declares a funding channel whose $ we don't measure.
+
+    A registry channel (npm `funding` / PyPI `project_urls`), a fundable
+    owner/org (`org_fundable`), or a funding **link** to any platform other than
+    GitHub Sponsors / Open Collective (those two are measured in dollars
+    elsewhere). Such a repo has set up *a way* to be funded → not maximally
+    unfunded, so its score is capped at DECLARED_FUNDING_CAP.
+    """
+    return (
+        row.get("has_npm_funding") == "True"
+        or row.get("has_pypi_funding") == "True"
+        or row.get("org_fundable") == "True"
+        or bool(_platform_set(row.get("funding_link_platforms")) - MEASURED_PLATFORMS)
+    )
 
 
 def _to_int(s: str) -> int:
@@ -379,12 +401,11 @@ def build() -> list[dict]:
         if len(ps) == 2:
             backing_p = float(r["host_score"]) * 100.0
             score = max(1, round(geometric_mean(ps + [backing_p])))
-            # A declared funding channel caps the risk: a project (or its org)
-            # that has set up a way to be funded is not maximally unfunded —
-            # a registry channel (npm `funding` / PyPI project_urls) or a
-            # fundable owner/org (FLOSS Fund manifest for the whole org).
-            if "True" in (r.get("has_npm_funding"), r.get("has_pypi_funding"),
-                          r.get("org_fundable")):
+            # A declared but unmeasured funding channel caps the risk: a project
+            # (or its org) that has set up a way to be funded is not maximally
+            # unfunded — a registry channel (npm/PyPI), a fundable owner/org, or
+            # a funding link to a platform we can't value (liberapay, ko_fi, …).
+            if _declares_unmeasured_channel(r):
                 score = min(score, DECLARED_FUNDING_CAP)
             r["score"] = score
     return rows

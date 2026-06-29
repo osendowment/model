@@ -192,11 +192,16 @@ of the two** (`min`), so a single value ∈ {0, 0.5, 1}:
   `rustfoundation.org` nonprofit, no owner) → host_score `min(0.5, 1)` = 0.5 →
   ∛(100·100·50) = **79**.
 
-Non-backed unfunded repos stay at 100 — **unless they declare a funding
-channel** with no measured $: a registry channel (`has_npm_funding` /
-`has_pypi_funding`) or a fundable owner/org (`org_fundable`) caps the score at
-`DECLARED_FUNDING_CAP` (79). A project that has set up *a way* to be funded is
-not maximally unfunded.
+Non-backed unfunded repos stay at 100 — **unless they declare a funding channel
+whose $ we can't measure**, which caps the score at `DECLARED_FUNDING_CAP` (79).
+A project that has set up *a way* to be funded is not maximally unfunded. The cap
+fires on: a registry channel (`has_npm_funding` / `has_pypi_funding`), a fundable
+owner/org (`org_fundable`), or a funding **link** to any platform *other than*
+GitHub Sponsors / Open Collective. Those two are excluded because their real
+dollars already feed the score (`gh_sponsorships_p`, `oc_avg_funding_p`) — a
+link to them adds nothing to cap on. So a Liberapay/Ko-fi/Tidelift link caps
+(e.g. `tukaani-project/xz` → 79), but a GitHub-Sponsors-only repo with 0
+sponsors stays at its measured score.
 
 Worked examples:
 
@@ -211,7 +216,7 @@ Worked examples:
 
 Note the third axis lifts *funded-but-unbacked* repos (vuejs `1 → 5`, axios
 `3 → 10`): "no institutional backer" (`host_score = 1` → backing 100) is now a
-risk voice, not a no-op. The cohort median rose 69 → 78.
+risk voice, not a no-op. (Score distribution → [stats.md](../stats.md#funding).)
 
 ## Output
 
