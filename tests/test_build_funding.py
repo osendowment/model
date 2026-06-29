@@ -3,6 +3,49 @@
 from dataclasses import dataclass
 
 from src.risk import build_funding as bf
+from src.risk.build_funding import _intent_flag, _nonprofit_flag
+
+
+def _row(**kw):
+    base = {
+        "gh_sponsors_in": "", "gh_sponsors_out": "",
+        "has_funding_yml": "False", "has_funding_json": "False",
+        "has_npm_funding": "False", "has_pypi_funding": "False",
+        "oc_slug": "", "host": "", "owner": "",
+    }
+    base.update(kw)
+    return base
+
+
+def test_intent_false_when_no_signal():
+    assert _intent_flag(_row()) is False
+
+
+def test_intent_each_single_signal_is_true():
+    assert _intent_flag(_row(gh_sponsors_in="3")) is True
+    assert _intent_flag(_row(gh_sponsors_out="1")) is True
+    assert _intent_flag(_row(has_funding_yml="True")) is True
+    assert _intent_flag(_row(has_funding_json="True")) is True
+    assert _intent_flag(_row(has_npm_funding="True")) is True
+    assert _intent_flag(_row(has_pypi_funding="True")) is True
+    assert _intent_flag(_row(oc_slug="babel")) is True
+    assert _intent_flag(_row(host="apache")) is True
+    assert _intent_flag(_row(owner="meta.com")) is True
+
+
+def test_intent_zero_counts_are_false():
+    assert _intent_flag(_row(gh_sponsors_in="0", gh_sponsors_out="0")) is False
+
+
+def test_nonprofit_default_true():
+    assert _nonprofit_flag("", "") is True
+    assert _nonprofit_flag("nonprofit", "") is True
+
+
+def test_nonprofit_false_when_corporate():
+    assert _nonprofit_flag("", "company") is False
+    assert _nonprofit_flag("company", "") is False
+    assert _nonprofit_flag("Company", "nonprofit") is False  # case-insensitive
 
 
 @dataclass

@@ -77,7 +77,7 @@ FIELDS = ["repo", "repo_id",
           "has_pypi_funding", "pypi_funding_platforms", "channels_count",
           "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
           "host", "host_type", "owner", "owner_type", "host_score",
-          "score"]
+          "score", "intent", "nonprofit"]
 
 # A repo's institutional backing discounts its funding risk. `host` = the
 # foundation/company *legally* stewarding the project; `owner` = the entity that
@@ -96,6 +96,30 @@ def _type_score(t: str) -> float:
 def _backing_score(host_type: str, owner_type: str) -> float:
     """Combined backing multiplier ∈ {0, 0.5, 1} — the most-funded of host/owner."""
     return min(_type_score(host_type), _type_score(owner_type))
+
+
+def _nonprofit_flag(host_type: str, owner_type: str) -> bool:
+    """Default True; False only when a corporate host or owner backs the repo."""
+    return "company" not in (
+        (host_type or "").strip().lower(),
+        (owner_type or "").strip().lower(),
+    )
+
+
+def _intent_flag(row: dict) -> bool:
+    """Sustainability intent: True if the repo shows any funding signal — a live
+    sponsorship, a declared channel (FUNDING.yml / funding.json / npm / PyPI / OC),
+    or an institutional host/owner."""
+    return (
+        _to_int(row.get("gh_sponsors_in")) + _to_int(row.get("gh_sponsors_out")) > 0
+        or (row.get("has_funding_yml") or "").strip() == "True"
+        or (row.get("has_funding_json") or "").strip() == "True"
+        or (row.get("has_npm_funding") or "").strip() == "True"
+        or (row.get("has_pypi_funding") or "").strip() == "True"
+        or bool((row.get("oc_slug") or "").strip())
+        or bool((row.get("host") or "").strip())
+        or bool((row.get("owner") or "").strip())
+    )
 
 
 def _fmt_score(x: float) -> str:
@@ -160,7 +184,7 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         channels = channels | {"pypi"}
     gh_in = (sponsors.get("github_sponsors") or "").strip()
     gh_out = (sponsoring_count or "").strip()
-    return {
+    row = {
         "repo": repo,
         "repo_id": repo_id,
         "gh_sponsors_in": gh_in,
@@ -184,6 +208,9 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "owner_type": owner_type,
         "host_score": _fmt_score(_backing_score(host_type, owner_type)),
     }
+    row["intent"] = "True" if _intent_flag(row) else "False"
+    row["nonprofit"] = "True" if _nonprofit_flag(host_type, owner_type) else "False"
+    return row
 
 
 def _export_by_repo(path: Path) -> dict[str, dict]:
