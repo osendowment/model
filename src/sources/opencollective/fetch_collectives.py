@@ -42,7 +42,7 @@ QUERY = """
 query($limit:Int!,$offset:Int!){
   accounts(type: COLLECTIVE, limit:$limit, offset:$offset){
     totalCount
-    nodes { slug name repositoryUrl socialLinks { type url } }
+    nodes { slug name repositoryUrl website socialLinks { type url } }
   }
 }"""
 
@@ -64,10 +64,20 @@ def _gh_parse(url: str | None) -> tuple[str, str]:
 
 
 def _github_link(node: dict) -> tuple[str, str, str]:
-    """Best GitHub (owner, repo, url) for a node — repositoryUrl first, else a GITHUB social link."""
+    """Best GitHub (owner, repo, url) for a node.
+
+    Prefers the explicit `repositoryUrl`, then a `GITHUB`-typed social link, then
+    any other social link or the `website` that points at github.com — some
+    collectives file their repo under a `WEBSITE`-typed social link or the
+    `website` field rather than `GITHUB` (e.g. `debug` → debug-js/debug raised
+    $13.9k, `rxjs` → ReactiveX/rxjs). `_gh_parse` keeps only github.com URLs, so
+    a non-GitHub website here is skipped, not guessed at.
+    """
+    socials = node.get("socialLinks") or []
     candidates = [node.get("repositoryUrl")]
-    candidates += [s.get("url") for s in (node.get("socialLinks") or [])
-                   if s.get("type") == "GITHUB"]
+    candidates += [s.get("url") for s in socials if s.get("type") == "GITHUB"]
+    candidates += [s.get("url") for s in socials if s.get("type") != "GITHUB"]
+    candidates.append(node.get("website"))
     for url in candidates:
         owner, repo = _gh_parse(url)
         if owner:

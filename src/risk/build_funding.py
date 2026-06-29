@@ -309,6 +309,14 @@ def build() -> list[dict]:
         except (TypeError, ValueError):
             return 0.0
 
+    def _real_oc(slug: str) -> bool:
+        """A real, existing collective — successfully fetched with `oc_status == ok`
+        (as opposed to a not-found/error slug). A real OC channel is a
+        sustainability-intent signal even when $0 has been raised; the dollar
+        amount is carried separately by `_avg`."""
+        row = oc_budgets.get(slug)
+        return bool(row) and (row.get("oc_status") or "").strip() == "ok"
+
     # Org-budget split denominator: the org's top (class-A, valid) repos.
     classA_per_org = Counter(e.repo.split("/", 1)[0].lower()
                              for e in eligible if e.value_class == "A")
@@ -330,17 +338,21 @@ def build() -> list[dict]:
         # collective claiming github.com/facebook). Otherwise auto-map: a repo-level
         # collective → its FULL avg budget; else the org's collective split equally
         # across the org's class-A repos.
-        # Auto-map matches are guarded by `_avg(...) > 0` — a $0 collective carries
-        # no funding signal and is usually junk (e.g. `for-the-mage` claiming
-        # github.com/facebook), so we don't attribute its slug.
+        # A repo-level reverse-map match (the collective declares THIS owner/repo)
+        # sets the slug when the collective is REAL (fetched, status ok) even at $0
+        # raised — a real OC channel is itself a sustainability-intent signal;
+        # `oc_amt` still carries the (possibly $0) budget. Org-level matches stay
+        # guarded by `_avg(...) > 0`: an org-only $0 collective is usually junk
+        # (e.g. `for-the-mage` claiming github.com/facebook), so we don't spread its
+        # slug across the org's repos.
         if repo.lower() in overrides:
             s = normalize_oc_slug(ov.get("oc_slug"))
             oc_slug, oc_amt = (s, _avg(s)) if s else ("", 0.0)
-        elif oc_by_repo.get(repo.lower()) and _avg(oc_by_repo[repo.lower()]) > 0:
+        elif oc_by_repo.get(repo.lower()) and _real_oc(oc_by_repo[repo.lower()]):
             oc_slug = oc_by_repo[repo.lower()]
             oc_amt = _avg(oc_slug)
         elif (oc_by_org.get(owner_login) and entry.value_class == "A"
-              and _avg(oc_by_org[owner_login]) > 0):
+              and _real_oc(oc_by_org[owner_login])):
             org_slug = oc_by_org[owner_login]
             n = classA_per_org[owner_login] or 1
             oc_slug, oc_amt = org_slug, _avg(org_slug) / n

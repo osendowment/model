@@ -133,7 +133,7 @@ davidhalter/parso,90668463,8,78,41,65,36,True,True
 davisjam/safe-regex,90781457,100,34,65,79,65,False,True
 dchest/tweetnacl-js,15649752,74,60,70,40,59,False,True
 dcodeio/long.js,8678904,78,60,65,20,50,True,True
-debug-js/debug,2871998,63,36,82,61,58,False,True
+debug-js/debug,2871998,63,36,82,61,58,True,True
 definitelytyped/definitelytyped,6093316,1,86,24,29,16,False,True
 defunctzombie/node-process,7580644,100,26,65,76,60,False,True
 django/asgiref,48501860,4,51,51,41,26,True,True
@@ -254,7 +254,7 @@ google/zerocopy,534354967,28,84,39,89,53,True,False
 googleapis/google-cloud-python,16316451,10,75,22,64,32,True,False
 googlechrome/workbox,55424670,22,69,46,27,37,True,False
 grahamdumpleton/wrapt,10357291,82,71,55,75,70,True,True
-grantjenks/python-sortedcontainers,17144859,81,58,64,84,71,False,True
+grantjenks/python-sortedcontainers,17144859,81,58,64,84,71,True,True
 graydon/exhaustigen-rs,432630522,100,17,70,63,52,False,True
 gregberge/svgr,102155012,54,63,49,54,55,True,True
 grncdr/merge-stream,10579821,100,12,67,45,44,False,True
@@ -265,7 +265,7 @@ gulpjs/glob-parent,29154915,25,23,78,50,39,True,True
 gweis/isodate,6449370,30,50,62,79,52,False,True
 gyscos/zstd-rs,52115335,66,56,43,63,56,False,True
 hapijs/hoek,5831189,14,67,75,63,46,True,True
-harfbuzz/harfbuzz,5050525,69,95,20,31,45,False,True
+harfbuzz/harfbuzz,5050525,69,95,20,31,45,True,True
 hiddentao/fast-levenshtein,9490451,100,36,67,74,65,False,True
 httplib2/httplib2,53002916,61,78,51,80,66,False,True
 huggingface/huggingface_hub,323591830,6,79,36,60,32,True,False
@@ -642,7 +642,7 @@ raynos/for-each,6006855,87,21,62,45,48,True,True
 raynos/function-bind,10727014,87,21,49,55,47,True,True
 rayon-rs/either,42479602,52,27,53,45,43,False,True
 rayon-rs/rayon,24725038,62,67,42,80,61,False,True
-reactivex/rxjs,32247847,21,87,44,31,40,False,True
+reactivex/rxjs,32247847,21,87,44,31,40,True,True
 realpython/pytest-mypy,69576530,89,43,62,36,54,False,True
 remix-run/react-router,19872456,9,89,55,55,39,True,False
 remusao/tldts,97631656,70,66,49,82,66,False,True

@@ -94,7 +94,7 @@ def _base_mocks(monkeypatch, repos):
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
-    monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000"}})
+    monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({"rich/r": "rich"}, {}))
 
@@ -128,7 +128,7 @@ def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
-    monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000"}})
+    monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({"rich/r": "rich"}, {}))
 
@@ -195,7 +195,8 @@ def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
-        "aio-libs": {"raised_2024": "9000"}, "solo": {"raised_2024": "500"}})
+        "aio-libs": {"raised_2024": "9000", "oc_status": "ok"},
+        "solo": {"raised_2024": "500", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_oc_index",
                         lambda *a, **k: ({"solo/repo": "solo"}, {"aio": "aio-libs"}))
 
@@ -208,6 +209,31 @@ def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
     # repo-level collective → full budget to the named repo
     assert rows["solo/repo"]["oc_avg_funding"] == "500"
     assert rows["solo/repo"]["oc_slug"] == "solo"
+
+
+def test_build_funding_real_zero_oc_counts_as_intent(monkeypatch):
+    """A real OC channel (`oc_status == "ok"`) signals sustainability intent even
+    at $0 raised — its slug is attributed (with oc_avg_funding $0). A `not_found`
+    slug is not a real channel and is never attributed."""
+    repos = [E("live/zero", value_class="A"), E("dead/none", value_class="A")]
+    monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bf, "load_rows_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
+    monkeypatch.setattr(bf, "_load_oc", lambda p: {
+        "zero": {"raised_2024": "0", "oc_status": "ok"},   # real collective, $0 raised
+        "ghost": {"oc_status": "not_found"}})              # fetched, doesn't exist
+    monkeypatch.setattr(bf, "_load_oc_index",
+                        lambda *a, **k: ({"live/zero": "zero", "dead/none": "ghost"}, {}))
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["live/zero"]["oc_slug"] == "zero"          # real $0 OC → attributed
+    assert rows["live/zero"]["oc_avg_funding"] == "0"
+    assert rows["live/zero"]["intent"] == "True"           # real channel → intent
+    assert rows["dead/none"]["oc_slug"] == ""              # not_found → not attributed
+    assert rows["dead/none"]["intent"] == "False"
 
 
 def test_build_funding_override_oc_slug_authoritative(monkeypatch):
