@@ -69,9 +69,10 @@ Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 
 **Risk dimensions cover the 895 top repos** — the valid class-A set
 (`risk_input.value_classes = ["A"]`); each funnel below starts from those 895.
-The final **`risk.csv` ranks 862** of them: **33 company-backed repos** (a company —
-Meta, Google, Microsoft, … — already resources them, so not endowment funding
-candidates) are dropped at aggregation. Methodology: [risk.md](risk.md) + component docs.
+**`risk.csv` ranks all 895** — the 33 corporate-backed repos (Meta, Google,
+Microsoft, …) are **kept and flagged `nonprofit=false`** (a company already
+resources them; filter via the flag rather than excluding them).
+Methodology: [risk.md](risk.md) + component docs.
 
 ### Score distribution by component
 
@@ -166,9 +167,10 @@ company-backed (Meta, Google, Microsoft, …). See [funding.md](components/fundi
 | nonprofit — community / independent | 862 | 96.3% |
 | nonprofit — company-backed (excluded) | 33 | 3.7% |
 
-The 33 company-backed repos are excluded from `risk.csv` output (they are already
-resourced; endowment funding is moot). The 310 repos with `intent=False` are not
-actively soliciting support — a higher-priority target for outreach.
+The 33 company-backed repos are **kept in `risk.csv`** and flagged
+`nonprofit=false` (they are already resourced; filter by the flag to restrict
+to endowment candidates). The 310 repos with `intent=False` are not actively
+soliciting support — a higher-priority target for outreach.
 
 ### Workload
 

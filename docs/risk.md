@@ -1,20 +1,22 @@
 # Risk Pipeline
 
-Measures sustainability risk for GitHub repos using contributor concentration,
-codebase complexity, security posture, funding, and maintainer workload over
-the last 5 years.
+Measures sustainability risk for GitHub repos using four scored dimensions —
+contributor concentration, codebase complexity, security posture, and
+maintainer workload — over the last 5 years.
 
-Each of the five dimensions has its own component doc — how it collects its
-sources, derives metrics, and produces the `score` it contributes to
-`risk.csv`:
+Each scored dimension has its own component doc — how it collects its sources,
+derives metrics, and produces the `score` it contributes to `risk.csv`:
 
 | Component | Doc | Score (0–100, higher = riskier) |
 |---|---|---|
 | Concentration | [components/concentration.md](components/concentration.md) | geom-mean of 5y bus-factor + HHI percentiles |
 | Complexity | [components/complexity.md](components/complexity.md) | geom-mean of LOC + cyclomatic-max percentiles |
 | Security | [components/security.md](components/security.md) | geom-mean of OpenSSF-score + CVE-count percentiles |
-| Funding | [components/funding.md](components/funding.md) | geom-mean of GitHub-sponsorship + OpenCollective percentiles |
 | Workload | [components/workload.md](components/workload.md) | geom-mean of LOC/CVE/net-issues-per-contributor percentiles |
+
+Funding signals are collected but **not a scored dimension** — they feed the
+`intent` and `nonprofit` flag columns (see [components/funding.md](components/funding.md)
+and the [Intent and nonprofit](#intent-and-nonprofit) section below).
 
 ## Metrics Roadmap
 
@@ -109,14 +111,14 @@ All scoring parameters (windows, weights) are defined in `src/settings.json`.
 
 ## How It Works
 
-Five independent risk dimensions — **concentration, complexity, security,
-funding, workload**. Each dimension percentile-ranks its raw metrics
+Four independent scored risk dimensions — **concentration, complexity,
+security, workload**. Each dimension percentile-ranks its raw metrics
 (direction-aware, so a higher percentile always means *more* risk), takes the
 geometric mean of a designated subset of those percentiles, and emits a single
-**0–100 `score`** for the dimension (higher = riskier). The five dimension
-scores are combined into the overall `risk.csv` `score`. Risk is expressed as
-continuous scores and percentiles end-to-end — there are **no discrete risk
-classes or tiers**.
+**0–100 `score`** for the dimension (higher = riskier). The four dimension
+scores are combined into the overall `risk.csv` `score` via a geometric mean.
+Risk is expressed as continuous scores and percentiles end-to-end — there are
+**no discrete risk classes or tiers**.
 
 Percentiles use the Hazen position `100·(rank−0.5)/n`, ranked across the
 risk-scope set, strictly within 0–100. "Direction-aware" means each metric is
@@ -129,8 +131,7 @@ component doc; every `*_p` column and raw metric lives in the per-dimension
 1. **Concentration risk** -- how dependent is the project on a few contributors?
 2. **Complexity risk** -- how large and hard to audit is the codebase?
 3. **Security risk** -- how exposed is the project (OpenSSF Scorecard, CVEs, SAST)?
-4. **Funding risk** -- how well-resourced is the project (sponsorships, foundations)?
-5. **Workload risk** -- how much per-contributor burden (code, CVEs, issue backlog)?
+4. **Workload risk** -- how much per-contributor burden (code, CVEs, issue backlog)?
 
 ### Concentration
 
@@ -222,6 +223,27 @@ neutral baseline), so for those the score is effectively driven by the OpenSSF
 Scorecard axis; CVEs only re-rank the minority that carry them, above the neutral
 50. (CVE coverage is in [stats.md → Risk → Security](stats.md#security).)
 
+### Intent and nonprofit
+
+Two flag columns in `risk.csv` that describe the repo's funding context — they
+are **not scored dimensions** and do not affect `score`.
+
+- **`intent`** (`bool`, default `false`) — `true` when the repo shows at least
+  one declared funding signal: GitHub Sponsors (inbound or outbound),
+  a `.github/FUNDING.yml`, a `funding.json` (FLOSS Fund), an npm `funding`
+  field, a PyPI project-URLs funding entry, or an Open Collective budget / an
+  institutional foundation host or owner. "Intent" means the project is
+  actively seeking or accepting support.
+- **`nonprofit`** (`bool`, default `true`) — `false` only when a corporate
+  entity (Meta, Google, Microsoft, AWS, …) is the project's host or owner,
+  as determined by `host_type` / `owner_type == "company"` in
+  `data/risk/funding.csv`. Community-run and foundation-backed projects are
+  `nonprofit=true`. Corporate-backed repos remain in `risk.csv` with their
+  score intact; callers filter by `nonprofit=true` to restrict to endowment
+  candidates.
+
+Coverage numbers live in [stats.md → Risk → Intent and nonprofit](stats.md#intent-and-nonprofit).
+
 ## Data Sources
 
 | Source | Fields extracted for Risk |
@@ -275,7 +297,7 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 | `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
 | `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (the `scc` fetcher) |
 | `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall risk `score`. **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)**, minus **company-backed repos** (funding `host_type`/`owner_type == company`), which are dropped from the final `risk.csv` — a company already resources them, so they are not endowment funding candidates. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
+| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall risk `score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload). **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)**. Company-backed repos (`host_type`/`owner_type == company`) are **kept and flagged `nonprofit=false`** — they are not excluded from `risk.csv`. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
 
 ## Source-file coverage
 
@@ -301,12 +323,13 @@ repo, not a data-collection bug:
 
 ### risk.csv
 
-One row per risk-scope repo. The five dimension columns are each a **0–100 risk
-score** (higher = riskier) — the geometric-mean rollup of that dimension's
-scored percentiles — and `score` is the overall risk score across the five
-dimensions. The detailed per-dimension metric and `*_p` percentile columns live
-in the per-dimension files
-(`data/risk/{concentration,complexity,security,funding,workload}.csv`) and are
+One row per risk-scope repo. The four scored-dimension columns are each a
+**0–100 risk score** (higher = riskier) — the geometric-mean rollup of that
+dimension's scored percentiles — and `score` is the geometric mean of those
+four scores. Two flag columns (`intent`, `nonprofit`) describe the repo's
+funding context but do not affect `score`. The detailed per-dimension metric
+and `*_p` percentile columns live in the per-dimension files
+(`data/risk/{concentration,complexity,security,workload}.csv`) and are
 documented in the component docs linked at the top of this page.
 
 | Column | Description |
@@ -316,6 +339,7 @@ documented in the component docs linked at the top of this page.
 | `concentration` | Contributor-concentration risk score (0–100) |
 | `complexity` | Codebase-complexity risk score (0–100) |
 | `security` | Security risk score (0–100) |
-| `funding` | Funding risk score (0–100) |
 | `workload` | Per-contributor workload risk score (0–100) |
-| `score` | Overall risk score (0–100) across the five dimensions |
+| `score` | Overall risk score (0–100) — geometric mean of the four dimensions |
+| `intent` | `true` if the repo has at least one declared funding signal |
+| `nonprofit` | `true` for community/foundation-backed repos; `false` if company-backed |
