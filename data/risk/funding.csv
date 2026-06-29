@@ -36,7 +36,7 @@ ardatan/graphql-tools,54432168,3,0,3,47.82,5425,828,True,github,False,False,,Fal
 ardatan/whatwg-node,429511342,3,0,3,47.82,194,37,True,github,False,False,,False,,1,,0,100.0,,,,,1,78
 assert-rs/snapbox,424722460,0,0,0,100.0,174,26,False,,False,False,,False,,0,,0,100.0,,,,,1,100
 astanin/python-tabulate,205875548,,,0,100.0,2548,186,,,False,False,,False,,0,,0,100.0,,,,,1,100
-astral-sh/ruff,523043277,0,39,39,23.13,47269,2030,False,,False,False,,False,,0,astral-sh,2000,5.59,,,,,1,23
+astral-sh/ruff,523043277,0,39,39,23.13,47269,2030,False,,False,False,,False,,0,astral-sh,2000,5.59,,,openai.com,company,0,1
 auth0/node-jwa,8116861,0,0,0,100.0,102,45,False,,False,False,,False,,0,,0,100.0,,,,,1,100
 autotools-mirror/autoconf,47662429,0,0,0,100.0,66,25,False,,False,False,,False,,0,,0,100.0,,,,,1,100
 autotools-mirror/libtool,47662711,0,0,0,100.0,51,28,False,,False,False,,False,,0,,0,100.0,,,,,1,100
@@ -795,7 +795,7 @@ sqlite/sqlite,176278485,0,0,0,100.0,9457,1484,False,,False,False,,False,,0,,0,10
 srijs/rust-crc32fast,157348282,0,2,2,49.39,323,39,False,,False,False,,False,,0,,0,100.0,,,,,1,79
 stebalien/tempfile,33832372,0,11,11,36.09,1425,146,False,,False,False,,False,,0,,0,100.0,,,,,1,71
 stefanpenner/get-caller-file,48818175,0,0,0,100.0,37,12,False,,False,False,,False,,0,,0,100.0,,,,,1,100
-storybookjs/storybook,54173593,0,0,0,100.0,89805,10032,True,open_collective,False,True,https://opencollective.com/storybook,False,,2,storybook,29580.35,1.79,,,,,1,26
+storybookjs/storybook,54173593,0,0,0,100.0,89805,10032,True,open_collective,False,True,https://opencollective.com/storybook,False,,2,storybook,29580.35,1.79,,,chromatic.com,company,0,1
 stream-utils/destroy,15544623,0,0,0,100.0,53,9,False,,False,False,,False,,0,,0,100.0,,,,,1,100
 stream-utils/raw-body,12823654,0,0,0,100.0,400,75,False,,False,False,,False,,0,,0,100.0,,,,,1,100
 stream-utils/unpipe,37428186,0,0,0,100.0,22,6,False,,False,False,,False,,0,,0,100.0,,,,,1,100

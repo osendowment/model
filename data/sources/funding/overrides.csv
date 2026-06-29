@@ -37,3 +37,5 @@ netflix/vmaf,,,netflix,netflix.com,company,
 huggingface/huggingface_hub,,,huggingface,huggingface.co,company,
 cloudflare/cloudflare-python,,,cloudflare,cloudflare.com,company,
 pydantic/pydantic,,,pydantic,pydantic.dev,company,
+astral-sh/ruff,,,astral-sh,openai.com,company,astral-sh
+storybookjs/storybook,,,storybookjs,chromatic.com,company,storybook
