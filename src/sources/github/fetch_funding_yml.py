@@ -23,7 +23,8 @@ GitHub's GraphQL `FundingPlatform` enum covers every platform in
 FUNDING_PLATFORMS except `otechie` (a dead platform GitHub dropped) — its
 column stays in the schema but is never populated here.
 
-TTL-controlled: re-runs only fetch repos missing or older than TTL_DAYS.
+TTL-controlled: re-runs only fetch repos missing or older than the shared
+funding TTL (FUNDING_TTL_DAYS = 365), so a re-run inside the window is a no-op.
 Repos are fetched in GraphQL batches (one aliased query per BATCH_SIZE repos),
 which is far cheaper than the previous one-REST-call-per-repo approach.
 
@@ -53,6 +54,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
+from src.common.freshness import row_is_fresh
 from src.common.funding_platforms import FUNDING_PLATFORMS
 from src.common.repos import load_top_repos
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
@@ -68,7 +70,6 @@ FIELDS = (
     + FUNDING_PLATFORMS
     + ["fetched_at"]
 )
-TTL_DAYS = 90
 BATCH_SIZE = 50
 
 _PLATFORM_SET = set(FUNDING_PLATFORMS)
@@ -232,27 +233,13 @@ def _write(rows: dict[str, dict]) -> None:
             w.writerow(rows[repo])
 
 
-def _is_fresh(row: dict, ttl_days: int) -> bool:
-    ts = (row.get("fetched_at") or "").strip()
-    if not ts:
-        return False
-    try:
-        dt = datetime.datetime.fromisoformat(ts)
-    except ValueError:
-        return False
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=datetime.timezone.utc)
-    return dt >= datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=ttl_days)
-
-
 async def batch(repos: list[str], force: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
     repo_ids = _load_repo_id_map()
-    fresh = set() if force else {r for r, row in existing.items() if _is_fresh(row, TTL_DAYS)}
+    fresh = set() if force else {r for r, row in existing.items() if row_is_fresh(row)}
     to_fetch = [r for r in repos if r not in fresh]
     if limit and limit < len(to_fetch):
-        import random
-        to_fetch = random.sample(to_fetch, limit)
+        to_fetch = to_fetch[:limit]
     chunks = [to_fetch[i:i + BATCH_SIZE] for i in range(0, len(to_fetch), BATCH_SIZE)]
     console.print(
         f"[bold]funding-yml[/bold]: {len(repos)} repos, {len(to_fetch)} to fetch "

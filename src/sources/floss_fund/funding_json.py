@@ -2,6 +2,9 @@
 
 Source: https://dir.floss.fund/funding-manifests.tar.gz
 
+Re-running within the shared funding TTL (365 days) is a no-op: the output file
+is considered fresh, so nothing is downloaded and nothing is rewritten.
+
 Usage:
     python -m src.sources.floss_fund.funding_json
     python -m src.sources.floss_fund.funding_json --ttl 0   # force refresh
@@ -23,6 +26,7 @@ import requests
 from rich.console import Console
 from rich.table import Table
 
+from src.common.freshness import FUNDING_TTL_DAYS, file_is_fresh
 from src.common.funding_platforms import (
     FUNDING_PLATFORMS,
     platform_handle_from_url,
@@ -34,7 +38,6 @@ console = Console()
 
 SOURCE_URL = "https://dir.floss.fund/funding-manifests.tar.gz"
 OUTPUT_FILE = "data/sources/floss-fund/funding-json.csv"
-DEFAULT_TTL_DAYS = 30
 RESOLVED_FIELD = "project_repository_resolved"
 
 OUTPUT_FIELDS = [
@@ -119,15 +122,45 @@ def _resolve_url(url: str, timeout: int = 8) -> str | None:
     return final if normalize_github_repo(final) else None
 
 
+def _load_last_good_resolved(filepath: str) -> dict[str, str]:
+    """Map {project_repository(raw) -> project_repository_resolved} from prior output.
+
+    Only rows that already carry a non-empty resolved value are kept — this is the
+    "last-good" cache that protects a previously-resolved URL from being wiped by a
+    transient network failure on the next run. A missing/unreadable file → empty map.
+    """
+    last_good: dict[str, str] = {}
+    if not os.path.exists(filepath):
+        return last_good
+    try:
+        with open(filepath, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                raw = (row.get("project_repository") or "").strip()
+                resolved = (row.get(RESOLVED_FIELD) or "").strip()
+                if raw and resolved:
+                    last_good[raw] = resolved
+    except OSError as e:
+        log.debug("could not load last-good resolved map from %s: %s", filepath, e)
+    return last_good
+
+
 def resolve_repo_redirects(rows: list[dict], resolver=_resolve_url,
-                           max_workers: int = 16) -> int:
+                           max_workers: int = 16,
+                           last_good: dict[str, str] | None = None) -> int:
     """Populate `project_repository_resolved` on every row; return count resolved.
 
     Probes only the non-GitHub repo URLs (`_redirect_candidate_urls`), in
     parallel, and records the final GitHub URL when one redirects there. Rows
     that already name a GitHub repo (or don't redirect to one) get an empty
     resolved value — consumers fall back to the raw URL via `export_repo_slug`.
+
+    `last_good` (raw URL → previously-resolved value) makes resolution
+    deterministic across runs: a URL that resolved on an earlier run is NEVER
+    blanked by a transient network failure this run — we fall back to the
+    last-good value instead. Final precedence per row: fresh resolve, else
+    last-good, else "".
     """
+    last_good = last_good or {}
     candidates = sorted(_redirect_candidate_urls(rows))
     mapping: dict[str, str] = {}
     if candidates:
@@ -137,17 +170,8 @@ def resolve_repo_redirects(rows: list[dict], resolver=_resolve_url,
                     mapping[url] = resolved
     for r in rows:
         raw = (r.get("project_repository") or "").strip()
-        r[RESOLVED_FIELD] = mapping.get(raw, "")
+        r[RESOLVED_FIELD] = mapping.get(raw) or last_good.get(raw, "")
     return len(mapping)
-
-
-def _is_fresh(filepath: str, ttl_days: int) -> bool:
-    """Check if the output file was modified within TTL."""
-    if ttl_days <= 0 or not os.path.exists(filepath):
-        return False
-    mtime = os.path.getmtime(filepath)
-    age = time.time() - mtime
-    return age < ttl_days * 86400
 
 
 def _download_and_extract(url: str) -> str:
@@ -226,8 +250,9 @@ def _parse_manifests(raw_csv: str) -> list[dict]:
 
 
 def _write_csv(filepath: str, rows: list[dict]) -> None:
-    """Write parsed rows to CSV."""
+    """Write parsed rows to CSV, sorted by a stable key for deterministic output."""
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
+    rows = sorted(rows, key=lambda r: (str(r.get("id", "")), str(r.get("project_name", ""))))
     with open(filepath, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=OUTPUT_FIELDS)
         writer.writeheader()
@@ -238,15 +263,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Download FLOSS Fund funding manifests")
     parser.add_argument("--output", default=OUTPUT_FILE,
                         help=f"Output CSV (default: {OUTPUT_FILE})")
-    parser.add_argument("--ttl", type=int, default=DEFAULT_TTL_DAYS,
-                        help=f"Skip if fetched within N days (default: {DEFAULT_TTL_DAYS}, 0 to force)")
+    parser.add_argument("--ttl", type=int, default=FUNDING_TTL_DAYS,
+                        help=f"Skip if fetched within N days (default: {FUNDING_TTL_DAYS}, 0 to force)")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
 
-    fresh = _is_fresh(args.output, args.ttl)
+    fresh = file_is_fresh(args.output, args.ttl)
 
     if fresh:
         mtime = datetime.datetime.fromtimestamp(os.path.getmtime(args.output))
@@ -262,7 +287,8 @@ def main() -> None:
         raw_csv = _download_and_extract(SOURCE_URL)
         rows = _parse_manifests(raw_csv)
         console.print("[dim]Resolving non-GitHub repo URLs via redirect…[/dim]")
-        resolve_repo_redirects(rows)
+        last_good = _load_last_good_resolved(args.output)
+        resolve_repo_redirects(rows, last_good=last_good)
         _write_csv(args.output, rows)
         elapsed = time.monotonic() - t_start
 

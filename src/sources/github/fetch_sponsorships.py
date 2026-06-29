@@ -40,8 +40,9 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
-from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
+from src.common.freshness import row_is_fresh
 from src.common.repos import load_top_repos
+from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -49,7 +50,6 @@ log = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "sponsorships.csv"
 FIELDS = ["login", "sponsoring_count", "sponsoring_status", "fetched_at"]
-TTL_DAYS = 90
 
 SPONSORING_QUERY = """
 query($login: String!) {
@@ -103,26 +103,18 @@ def _write(rows: dict[str, dict]) -> None:
             w.writerow(rows[login])
 
 
-def _is_fresh(row: dict, ttl_days: int) -> bool:
-    # A failed fetch is never fresh — always retry errored rows.
-    if (row.get("sponsoring_status") or "").strip() == "error":
-        return False
-    ts = (row.get("fetched_at") or "").strip()
-    if not ts:
-        return False
-    try:
-        dt = datetime.datetime.fromisoformat(ts)
-    except ValueError:
-        return False
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=datetime.timezone.utc)
-    return dt >= datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=ttl_days)
-
-
 async def batch(logins: list[str], force: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
-    fresh = set() if force else {l for l, row in existing.items() if _is_fresh(row, TTL_DAYS)}
-    to_fetch = [l for l in logins if l not in fresh]  # gap-fill: only missing/stale
+    fresh = (
+        set()
+        if force
+        else {
+            login
+            for login, row in existing.items()
+            if row_is_fresh(row, status_key="sponsoring_status")
+        }
+    )
+    to_fetch = [login for login in logins if login not in fresh]  # gap-fill: only missing/stale
     if limit and limit < len(to_fetch):
         to_fetch = to_fetch[:limit]
     console.print(f"[bold]sponsorships[/bold]: {len(logins)} owner logins, "
@@ -146,7 +138,7 @@ async def batch(logins: list[str], force: bool, limit: int | None, concurrency: 
         with Progress(SpinnerColumn(), TextColumn("{task.description}"), BarColumn(),
                       TaskProgressColumn(), TimeElapsedColumn(), console=console) as prog:
             task = prog.add_task("sponsorships", total=len(to_fetch))
-            for coro in asyncio.as_completed([one(l) for l in to_fetch]):
+            for coro in asyncio.as_completed([one(login) for login in to_fetch]):
                 res = await coro
                 prog.advance(task)
                 res["fetched_at"] = datetime.datetime.now(

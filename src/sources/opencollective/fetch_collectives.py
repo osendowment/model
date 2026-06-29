@@ -29,6 +29,8 @@ from dotenv import load_dotenv
 from rich.console import Console
 from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
 
+from src.common.freshness import FUNDING_TTL_DAYS, file_is_fresh
+
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
@@ -152,11 +154,12 @@ def main() -> None:
                    help="Re-download even if collectives.csv already exists.")
     args = p.parse_args()
 
-    # Fetch-once: the full OC index (~38k accounts) rarely changes the matches we
-    # care about, so in the pipeline it only runs when the file is missing.
-    if OUTPUT_FILE.exists() and not args.force:
-        console.print(f"[dim]{OUTPUT_FILE.relative_to(DATA_DIR.parent)} already present "
-                      f"— skipping download (pass --force to refresh).[/dim]")
+    # TTL gate: the full OC index (~38k accounts) rarely changes the matches we
+    # care about, so within the funding TTL window a re-run is a no-op; it
+    # refreshes only once the file is older than FUNDING_TTL_DAYS.
+    if not args.force and file_is_fresh(OUTPUT_FILE, FUNDING_TTL_DAYS):
+        console.print(f"[dim]{OUTPUT_FILE.relative_to(DATA_DIR.parent)} fresh "
+                      f"(< {FUNDING_TTL_DAYS}d) — skipping download (pass --force to refresh).[/dim]")
         return
 
     load_dotenv()

@@ -40,6 +40,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
+from src.common.freshness import FUNDING_TTL_DAYS, row_is_fresh
 from src.common.repos import load_top_repos
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
 
@@ -52,12 +53,15 @@ FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 FIELDS = ["repo", "repo_id", "github_sponsors", "owner_has_sponsors_listing",
           "sponsors_status", "fetched_at"]
-TTL_DAYS = 90
 
 SPONSORS_QUERY = """
 query($login: String!) {
-  user(login: $login) { hasSponsorsListing sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount } }
-  organization(login: $login) { hasSponsorsListing sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount } }
+  user(login: $login) {
+    hasSponsorsListing sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount }
+  }
+  organization(login: $login) {
+    hasSponsorsListing sponsorshipsAsMaintainer(first: 1, includePrivate: false) { totalCount }
+  }
 }
 """
 
@@ -106,7 +110,8 @@ async def fetch_sponsors_for_login(session, limiter, login: str) -> tuple[int, b
 
 async def fetch_one(session, limiter, repo: str, yml_github: dict[str, str]) -> dict:
     logins = logins_for_repo(repo, yml_github)
-    results = await asyncio.gather(*(fetch_sponsors_for_login(session, limiter, l) for l in logins))
+    results = await asyncio.gather(
+        *(fetch_sponsors_for_login(session, limiter, login) for login in logins))
     total = sum(c for c, _, _ in results)
     any_error = any(not ok for _, _, ok in results)
     # logins_for_repo puts the repo OWNER first; the listing signal is owner-scoped.
@@ -148,28 +153,19 @@ def _write(rows: dict[str, dict]) -> None:
             w.writerow(rows[repo])
 
 
-def _is_fresh(row: dict, ttl_days: int) -> bool:
-    ts = (row.get("fetched_at") or "").strip()
-    if not ts:
-        return False
-    try:
-        dt = datetime.datetime.fromisoformat(ts)
-    except ValueError:
-        return False
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=datetime.timezone.utc)
-    return dt >= datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=ttl_days)
-
-
 async def batch(repos: list[str], force: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
     repo_ids = _load_map(GH_REPOS_FILE, "repo", "repo_id")
     yml_github = _load_map(FUNDING_YML_FILE, "repo", "github")
-    fresh = set() if force else {r for r, row in existing.items() if _is_fresh(row, TTL_DAYS)}
+    # Within the shared 365-day funding TTL a re-run is a no-op (idempotent); an
+    # "error" sponsors_status is never fresh, so failed fetches are always retried.
+    fresh = set() if force else {
+        r for r, row in existing.items()
+        if row_is_fresh(row, FUNDING_TTL_DAYS, status_key="sponsors_status")
+    }
     to_fetch = [r for r in repos if r not in fresh]
     if limit and limit < len(to_fetch):
-        import random
-        to_fetch = random.sample(to_fetch, limit)
+        to_fetch = to_fetch[:limit]
     console.print(f"[bold]sponsors[/bold]: {len(repos)} repos, {len(to_fetch)} to fetch")
     if not to_fetch:
         console.print("[dim]Nothing to fetch.[/dim]")

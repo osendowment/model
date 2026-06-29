@@ -45,6 +45,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
+from src.common.freshness import row_is_fresh
 from src.common.funding_platforms import normalize_oc_slug
 from src.common.repos import load_top_repos
 from src.sources.floss_fund.directory import export_repo_slug
@@ -62,7 +63,6 @@ API_URL = "https://api.opencollective.com/graphql/v2"
 USER_AGENT = "Mozilla/5.0 (research; endowment.dev funding model)"
 YEARS = list(range(2021, 2026))  # 2021..2025
 FIELDS = ["slug"] + [f"raised_{y}" for y in YEARS] + ["currency", "oc_status", "fetched_at"]
-TTL_DAYS = 30
 
 
 def _money(cents) -> str:
@@ -190,22 +190,6 @@ def _write(rows: dict[str, dict]) -> None:
             w.writerow(rows[slug])
 
 
-def _is_fresh(row: dict, ttl_days: int) -> bool:
-    # A failed fetch is never "fresh" — always retry errored rows.
-    if (row.get("oc_status") or "").strip() == "error":
-        return False
-    ts = (row.get("fetched_at") or "").strip()
-    if not ts:
-        return False
-    try:
-        dt = datetime.datetime.fromisoformat(ts)
-    except ValueError:
-        return False
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=datetime.timezone.utc)
-    return dt >= datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=ttl_days)
-
-
 # ── fetch ────────────────────────────────────────────────────────────────────
 
 def _retry_after(resp: aiohttp.ClientResponse, attempt: int) -> float:
@@ -246,7 +230,8 @@ async def fetch_one(session: aiohttp.ClientSession, query: str, slug: str,
 
 async def batch(slugs: list[str], force: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
-    fresh = set() if force else {s for s, row in existing.items() if _is_fresh(row, TTL_DAYS)}
+    fresh = set() if force else {s for s, row in existing.items()
+                                 if row_is_fresh(row, status_key="oc_status")}
     to_fetch = [s for s in slugs if s not in fresh]
     if limit and limit < len(to_fetch):
         to_fetch = to_fetch[:limit]

@@ -19,9 +19,15 @@ Writes data/sources/npm/funding.csv:
 (`not_found` / `error`), so a blank `has_npm_funding` never silently stands in for
 a failed lookup.
 
+Gap-filling: a normal run only fetches repos missing from the file or older than
+the shared funding TTL (`FUNDING_TTL_DAYS` = 365 days); an `error` row is never
+fresh, so a transient failure is always retried. Re-running inside the window
+fetches nothing and rewrites nothing (idempotent). Pass --force to refetch all.
+
 Usage:
     uv run python -m src.sources.npm.fetch_funding            # all npm top repos
     uv run python -m src.sources.npm.fetch_funding --limit 20 # smoke test
+    uv run python -m src.sources.npm.fetch_funding --force    # ignore the TTL cache
 """
 from __future__ import annotations
 
@@ -38,6 +44,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.freshness import row_is_fresh
 from src.common.repos import load_top_repos
 
 console = Console()
@@ -102,32 +109,63 @@ def fetch(targets: list[tuple[str, str]], concurrency: int = 16) -> list[dict]:
     return rows
 
 
+def _load_existing() -> dict[str, dict]:
+    """Existing output rows keyed by `repo`."""
+    out: dict[str, dict] = {}
+    if OUTPUT_FILE.exists():
+        with OUTPUT_FILE.open(encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                out[row["repo"]] = row
+    return out
+
+
+def _write(rows: dict[str, dict]) -> None:
+    """Write the union, sorted by `repo` for deterministic output."""
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with OUTPUT_FILE.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=FIELDS, extrasaction="ignore")
+        w.writeheader()
+        for repo in sorted(rows):
+            w.writerow(rows[repo])
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--limit", type=int, default=0, help="only the first N packages")
     ap.add_argument("--concurrency", type=int, default=16)
+    ap.add_argument("--force", action="store_true", help="refetch all, ignoring the TTL cache")
     args = ap.parse_args()
 
     console.print(f"[bold]npm funding-field fetcher[/bold] — "
                   f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S}")
     targets = npm_top_packages()
-    if args.limit:
-        targets = targets[:args.limit]
-    console.print(f"npm top repos: {len(targets)}")
 
-    rows = fetch(targets, concurrency=args.concurrency)
-    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with OUTPUT_FILE.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=FIELDS)
-        w.writeheader()
-        w.writerows(rows)
+    # Gap-fill: keep rows still fresh within the TTL, fetch only missing/stale repos.
+    existing = _load_existing()
+    fresh = set() if args.force else {
+        repo for repo, row in existing.items() if row_is_fresh(row, status_key="status")
+    }
+    to_fetch = [(repo, pkg) for repo, pkg in targets if repo not in fresh]
+    if args.limit and args.limit < len(to_fetch):
+        to_fetch = to_fetch[:args.limit]
+    console.print(f"npm top repos: {len(targets)}, {len(to_fetch)} to fetch, "
+                  f"{len(targets) - len(to_fetch)} already fresh")
 
-    declared = sum(1 for r in rows if r["has_npm_funding"] == "True")
-    errors = sum(1 for r in rows if r["status"] != "ok")
+    rows = fetch(to_fetch, concurrency=args.concurrency) if to_fetch else []
+    for row in rows:
+        existing[row["repo"]] = row
+    if rows:
+        _write(existing)  # merge fetched over kept, write the union
+    else:
+        console.print("[dim]All fresh within TTL — nothing to fetch.[/dim]")
+
+    declared = sum(1 for r in existing.values() if r.get("has_npm_funding") == "True")
+    errors = sum(1 for r in existing.values() if (r.get("status") or "") != "ok")
     t = Table(title="[bold]npm funding[/bold]", header_style="bold dim", padding=(0, 1))
     t.add_column("metric")
     t.add_column("repos", justify="right")
-    t.add_row("fetched", f"{len(rows):,}")
+    t.add_row("in scope", f"{len(targets):,}")
+    t.add_row("fetched this run", f"{len(rows):,}")
     t.add_row("declare a funding field", f"{declared:,}")
     t.add_row("fetch errors", f"{errors:,}")
     console.print(t)
