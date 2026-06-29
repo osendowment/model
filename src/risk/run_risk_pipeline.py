@@ -37,8 +37,8 @@ BUILDERS = [
     Step("concentration", "src.risk.build_concentration"),
     Step("complexity",    "src.risk.build_complexity"),
     Step("security",      "src.risk.build_security"),
-    Step("funding-build", "src.risk.build_funding"),
     Step("workload",      "src.risk.build_workload"),
+    Step("funding-build", "src.risk.build_funding"),
     Step("aggregate",     "src.risk.aggregate_risk"),
 ]
 
