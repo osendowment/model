@@ -8,12 +8,13 @@ org-level `.github` default), so it catches channels a raw
 `liberapay.com/Larhzu` through the widget with no FUNDING.yml in the repo tree
 at all — the old contents-API fetch recorded it as unfunded.
 
-Writes data/sources/github/funding-yml.csv (schema unchanged):
-    repo, repo_id, has_funding_yml, funding_yml_platforms,
+Writes data/sources/github/funding-yml.csv:
+    repo, repo_id, has_funding_link, funding_link_platforms,
     <one column per platform in FUNDING_PLATFORMS>, fetched_at
 
-`has_funding_yml` = the repo declares at least one funding link.
-`funding_yml_platforms` = the canonical platform keys present (github, patreon, …).
+`has_funding_link` = the repo declares at least one funding link (the columns
+are named for the GraphQL `fundingLinks` source, not a raw FUNDING.yml file).
+`funding_link_platforms` = the canonical platform keys present (github, patreon, …).
 Each platform column holds that platform's handle(s) (comma-joined for a list):
 the `github` column is the lower-cased, deduped sponsor logins (so the sponsors
 fetcher can count co-maintainer sponsorships); `custom` keeps the full URL.
@@ -63,7 +64,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 FIELDS = (
-    ["repo", "repo_id", "has_funding_yml", "funding_yml_platforms"]
+    ["repo", "repo_id", "has_funding_link", "funding_link_platforms"]
     + FUNDING_PLATFORMS
     + ["fetched_at"]
 )
@@ -129,8 +130,8 @@ def build_row(repo: str, funding_links: list[dict]) -> dict:
             bucket.append(handle)
     row = {
         "repo": repo,
-        "has_funding_yml": "True" if by_platform else "False",
-        "funding_yml_platforms": ",".join(by_platform),
+        "has_funding_link": "True" if by_platform else "False",
+        "funding_link_platforms": ",".join(by_platform),
     }
     for p in FUNDING_PLATFORMS:
         row[p] = ",".join(by_platform.get(p, []))
@@ -163,7 +164,7 @@ def rows_from_response(batch: list[str], body: dict) -> dict[str, dict]:
     """Turn a GraphQL response body into {repo: row} for the batch.
 
     A repo whose alias errored with `NOT_FOUND` (deleted/renamed) is recorded
-    as "checked, no funding" (`has_funding_yml=False`). A null alias *without*
+    as "checked, no funding" (`has_funding_link=False`). A null alias *without*
     a NOT_FOUND error is a fetch failure — it is skipped, not written as False,
     so a transient error never masquerades as "no funding" (auditability).
     """

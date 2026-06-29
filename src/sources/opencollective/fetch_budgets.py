@@ -47,7 +47,7 @@ from rich.progress import (
 
 from src.common.funding_platforms import normalize_oc_slug
 from src.common.repos import load_top_repos
-from src.sources.floss_fund.directory import normalize_github_repo
+from src.sources.floss_fund.directory import export_repo_slug
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -127,7 +127,7 @@ def _slugs_from_export(path: Path, scope: set[str]) -> set[str]:
     if path.exists():
         with open(path, encoding="utf-8") as f:
             for row in csv.DictReader(f):
-                if normalize_github_repo(row.get("project_repository")) in scope:
+                if export_repo_slug(row) in scope:
                     out |= _oc_slugs(row.get("open_collective"))
     return out
 

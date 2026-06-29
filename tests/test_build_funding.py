@@ -22,11 +22,13 @@ def test_assemble_row_stars_forks_sponsorships():
     row = bf.assemble_row(
         repo="o/r", repo_id="1",
         sponsors={"github_sponsors": "12"},
-        yml={"has_funding_yml": "True", "funding_yml_platforms": "github"},
+        yml={"has_funding_link": "True", "funding_link_platforms": "github"},
         export={}, host="", host_type="", owner="", owner_type="",
         repo_meta={"stars": "5000", "forks": "300"},
         sponsoring_count="39",
     )
+    assert row["has_funding_link"] == "True"
+    assert row["org_fundable"] == "False"      # no org-level manifest
     assert row["gh_sponsors_in"] == "12"
     assert row["gh_sponsors_out"] == "39"
     assert row["gh_sponsorships"] == "51"      # in + out
@@ -51,6 +53,7 @@ def _base_mocks(monkeypatch, repos):
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({"rich/r": "rich"}, {}))
@@ -85,6 +88,7 @@ def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({"rich/r": "rich"}, {}))
@@ -150,6 +154,7 @@ def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
         "aio-libs": {"raised_2024": "9000"}, "solo": {"raised_2024": "500"}})
@@ -178,6 +183,7 @@ def test_build_funding_override_oc_slug_authoritative(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
         "junk": {"raised_2024": "9999"}, "real": {"raised_2024": "200"}})
@@ -193,3 +199,24 @@ def test_build_funding_override_oc_slug_authoritative(monkeypatch):
     assert rows["big/junkmatch"]["oc_avg_funding"] == "0"
     assert rows["big/keep"]["oc_slug"] == "real"         # explicit override slug
     assert rows["big/keep"]["oc_avg_funding"] == "200"
+
+
+def test_build_funding_org_fundable_caps_score_and_counts_channel(monkeypatch):
+    """A fundable ORG (FLOSS manifest registered for the whole GitHub org) marks
+    every repo it owns: org_fundable=True, its channels count, and the score is
+    capped at DECLARED_FUNDING_CAP even with $0 measured. A repo in a different,
+    non-fundable org stays at the 100 plateau.
+    """
+    _base_mocks(monkeypatch, [E("zulip/zulip"), E("zulip/zulip-mobile"),
+                              E("plain/p"), E("rich/r")])
+    # org `zulip` is fundable via an org-page manifest declaring liberapay+github.
+    monkeypatch.setattr(bf, "_fundable_orgs",
+                        lambda p: {"zulip": {"channel_platforms": "liberapay,github"}})
+
+    rows = {r["repo"]: r for r in bf.build()}
+    for repo in ("zulip/zulip", "zulip/zulip-mobile"):
+        assert rows[repo]["org_fundable"] == "True"          # inherited by ALL org repos
+        assert rows[repo]["channels_count"] == "2"           # org channels counted
+        assert rows[repo]["score"] == bf.DECLARED_FUNDING_CAP  # 100 → 79 (cap)
+    assert rows["plain/p"]["org_fundable"] == "False"
+    assert rows["plain/p"]["score"] == 100                   # different org → no cap

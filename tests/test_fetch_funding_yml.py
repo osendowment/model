@@ -76,8 +76,8 @@ class TestBuildRow:
         row = build_row("tukaani-project/xz", [
             {"platform": "LIBERAPAY", "url": "https://liberapay.com/Larhzu"},
         ])
-        assert row["has_funding_yml"] == "True"
-        assert row["funding_yml_platforms"] == "liberapay"
+        assert row["has_funding_link"] == "True"
+        assert row["funding_link_platforms"] == "liberapay"
         assert row["liberapay"] == "Larhzu"
         assert row["github"] == ""
 
@@ -94,14 +94,14 @@ class TestBuildRow:
             {"platform": "GITHUB", "url": "https://github.com/yyx990803"},
             {"platform": "OPEN_COLLECTIVE", "url": "https://opencollective.com/vuejs"},
         ])
-        assert set(row["funding_yml_platforms"].split(",")) == {"github", "open_collective"}
+        assert set(row["funding_link_platforms"].split(",")) == {"github", "open_collective"}
         assert row["github"] == "yyx990803"
         assert row["open_collective"] == "vuejs"
 
     def test_no_links(self):
         row = build_row("o/r", [])
-        assert row["has_funding_yml"] == "False"
-        assert row["funding_yml_platforms"] == ""
+        assert row["has_funding_link"] == "False"
+        assert row["funding_link_platforms"] == ""
         for p in FUNDING_PLATFORMS:
             assert row[p] == ""
 
@@ -128,7 +128,7 @@ class TestRowsFromResponse:
         }}
         rows = rows_from_response(["tukaani-project/xz", "o/r"], body)
         assert rows["tukaani-project/xz"]["liberapay"] == "Larhzu"
-        assert rows["o/r"]["has_funding_yml"] == "False"
+        assert rows["o/r"]["has_funding_link"] == "False"
 
     def test_not_found_recorded_as_no_funding(self):
         body = {
@@ -137,9 +137,9 @@ class TestRowsFromResponse:
                         "message": "Could not resolve to a Repository"}],
         }
         rows = rows_from_response(["o/a", "gone/repo"], body)
-        assert rows["o/a"]["has_funding_yml"] == "False"
+        assert rows["o/a"]["has_funding_link"] == "False"
         # A repo GitHub says is gone is "checked, no funding" — written, not skipped.
-        assert rows["gone/repo"]["has_funding_yml"] == "False"
+        assert rows["gone/repo"]["has_funding_link"] == "False"
 
     def test_unknown_null_is_skipped(self):
         # A null alias with no NOT_FOUND error is a fetch failure, not "no funding"

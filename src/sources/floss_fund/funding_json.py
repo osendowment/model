@@ -9,6 +9,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import csv
 import datetime
 import io
@@ -26,6 +27,7 @@ from src.common.funding_platforms import (
     FUNDING_PLATFORMS,
     platform_handle_from_url,
 )
+from src.sources.floss_fund.directory import normalize_github_repo
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -33,13 +35,14 @@ console = Console()
 SOURCE_URL = "https://dir.floss.fund/funding-manifests.tar.gz"
 OUTPUT_FILE = "data/sources/floss-fund/funding-json.csv"
 DEFAULT_TTL_DAYS = 30
+RESOLVED_FIELD = "project_repository_resolved"
 
 OUTPUT_FIELDS = [
     "id", "url", "status",
     "entity_name", "entity_type", "entity_email", "entity_webpage",
     "project_name", "project_guid", "project_description",
     "project_licenses", "project_tags",
-    "project_webpage", "project_repository",
+    "project_webpage", "project_repository", RESOLVED_FIELD,
     "funding_channels", "channel_platforms", "funding_plans_count",
 ] + FUNDING_PLATFORMS + [
     "created_at", "updated_at",
@@ -77,6 +80,65 @@ def parse_channels(channels: list) -> tuple[dict[str, str], str]:
             _note((ch.get("type") or "").strip())  # e.g. bank — no address
     cols = {p: ",".join(handles[p]) for p in handles}
     return cols, ",".join(seen_platforms)
+
+
+def _redirect_candidate_urls(rows: list[dict]) -> set[str]:
+    """Distinct `project_repository` URLs worth a redirect probe.
+
+    A non-empty http(s) URL that does NOT already name a GitHub repo — these are
+    the only ones that could resolve to a GitHub repo via a redirect (e.g.
+    `tukaani.org/xz/redirect-to-github-xz`). Already-GitHub and non-URL values
+    are skipped.
+    """
+    out: set[str] = set()
+    for r in rows:
+        u = (r.get("project_repository") or "").strip()
+        if u.lower().startswith(("http://", "https://")) and not normalize_github_repo(u):
+            out.add(u)
+    return out
+
+
+def _resolve_url(url: str, timeout: int = 8) -> str | None:
+    """Follow redirects; return the final URL iff it lands on a GitHub repo.
+
+    Tries HEAD first (cheap), then GET (some hosts only redirect on GET). Any
+    network/TLS error → None (best-effort; the row keeps its raw URL).
+    """
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; OSE-model funding resolver)"}
+    try:
+        resp = requests.head(url, allow_redirects=True, timeout=timeout, headers=headers)
+        final = resp.url
+        if normalize_github_repo(final) is None:
+            resp = requests.get(url, allow_redirects=True, timeout=timeout,
+                                headers=headers, stream=True)
+            final = resp.url
+            resp.close()
+    except requests.RequestException as e:
+        log.debug("redirect resolve failed for %s: %s", url, e)
+        return None
+    return final if normalize_github_repo(final) else None
+
+
+def resolve_repo_redirects(rows: list[dict], resolver=_resolve_url,
+                           max_workers: int = 16) -> int:
+    """Populate `project_repository_resolved` on every row; return count resolved.
+
+    Probes only the non-GitHub repo URLs (`_redirect_candidate_urls`), in
+    parallel, and records the final GitHub URL when one redirects there. Rows
+    that already name a GitHub repo (or don't redirect to one) get an empty
+    resolved value — consumers fall back to the raw URL via `export_repo_slug`.
+    """
+    candidates = sorted(_redirect_candidate_urls(rows))
+    mapping: dict[str, str] = {}
+    if candidates:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as ex:
+            for url, resolved in zip(candidates, ex.map(resolver, candidates)):
+                if resolved:
+                    mapping[url] = resolved
+    for r in rows:
+        raw = (r.get("project_repository") or "").strip()
+        r[RESOLVED_FIELD] = mapping.get(raw, "")
+    return len(mapping)
 
 
 def _is_fresh(filepath: str, ttl_days: int) -> bool:
@@ -199,12 +261,15 @@ def main() -> None:
         console.print()
         raw_csv = _download_and_extract(SOURCE_URL)
         rows = _parse_manifests(raw_csv)
+        console.print("[dim]Resolving non-GitHub repo URLs via redirect…[/dim]")
+        resolve_repo_redirects(rows)
         _write_csv(args.output, rows)
         elapsed = time.monotonic() - t_start
 
     entities = len({r["id"] for r in rows})
     projects = len(rows)
     with_repo = sum(1 for r in rows if r["project_repository"])
+    resolved = sum(1 for r in rows if (r.get(RESOLVED_FIELD) or "").strip())
     active = sum(1 for r in rows if r["status"] == "active")
 
     # Entity type breakdown
@@ -263,6 +328,7 @@ def main() -> None:
     summary.add_row("Entities", f"{entities:,}")
     summary.add_row("Projects", f"[bold]{projects:,}[/bold]")
     summary.add_row("With repo URL", f"{with_repo:,}")
+    summary.add_row("Repo URL resolved (redirect→GitHub)", f"{resolved:,}")
     summary.add_row("Active", f"{active:,}")
     type_str = "  ".join(f"{t}: {c}" for t, c in type_counts.most_common())
     summary.add_row("Types", f"[dim]{type_str}[/dim]")

@@ -4,7 +4,7 @@
 Reads (all under data/sources/):
     github/sponsors.csv        — github_sponsors (inbound)  (src.github.fetch_sponsors)
     github/sponsorships.csv    — sponsoring_count (outbound) (src.github.fetch_sponsorships)
-    github/funding-yml.csv     — has_funding_yml / platforms  (src.github.fetch_funding_yml)
+    github/funding-yml.csv     — has_funding_link / platforms (src.github.fetch_funding_yml)
     github/repos.csv           — stars, forks (info)          (src.github.fetch_repo_owner_data)
     floss-fund/funding-json.csv — FLOSS Fund directory export  (src.sources.floss_fund.funding_json)
     opencollective/budgets.csv — annual gross raised per OC slug (src.sources.opencollective.fetch_budgets)
@@ -20,10 +20,12 @@ less funded = riskier) is the geometric mean of THREE direction-aware risk axes:
     gh_sponsorships_p  ← gh_sponsorships (in + out), lower → riskier
     oc_avg_funding_p   ← oc_avg_funding ($0 when none),  lower → riskier
     host_score×100     ← combined host/owner backing (company 0, nonprofit 50, none 100)
-A repo that DECLARES a registry funding channel (`has_npm_funding` /
-`has_pypi_funding`) has its score capped at DECLARED_FUNDING_CAP (79) — it is not
-maximally unfunded even when no $ is measured. Each is repo/package-level, so it
-catches channels the owner-level checks miss; npm/pypi only.
+A repo that DECLARES a funding channel — a registry channel (`has_npm_funding` /
+`has_pypi_funding`) or a fundable owner/org (`org_fundable`) — has its score
+capped at DECLARED_FUNDING_CAP (79): it is not maximally unfunded even when no $
+is measured. npm/pypi are repo/package-level (catching channels the owner-level
+checks miss); `org_fundable` is owner-level (a FLOSS Fund manifest registered for
+the whole GitHub org).
 `gh_stars` / `gh_forks` are informational popularity columns (not scored);
 their fetch timestamp lives in data/sources/github/repos.csv. No per-signal
 `fetched_at` is rolled up here.
@@ -44,7 +46,7 @@ from src.common.percentiles import add_percentiles
 from src.common.repos import load_top_repos
 from src.common.stats import geometric_mean
 from src.common.tables import load_column_by_repo, load_rows_by_repo
-from src.sources.floss_fund.directory import normalize_github_repo
+from src.sources.floss_fund.directory import export_repo_slug, github_org_page
 from src.sources.opencollective.fetch_collectives import load_index as _load_oc_index
 
 console = Console()
@@ -72,7 +74,7 @@ DECLARED_FUNDING_CAP = 79
 FIELDS = ["repo", "repo_id",
           "gh_sponsors_in", "gh_sponsors_out", "gh_sponsorships", "gh_sponsorships_p",
           "gh_stars", "gh_forks",
-          "has_funding_yml", "funding_yml_platforms", "has_funding_json",
+          "has_funding_link", "funding_link_platforms", "has_funding_json", "org_fundable",
           "has_npm_funding", "npm_funding_url",
           "has_pypi_funding", "pypi_funding_platforms", "channels_count",
           "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
@@ -139,21 +141,26 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
                  repo_meta: dict, sponsoring_count: str = "",
                  oc_slug: str = "", oc_avg: str = "0",
                  npm_funding: dict | None = None,
-                 pypi_funding: dict | None = None) -> dict:
+                 pypi_funding: dict | None = None,
+                 org_export: dict | None = None) -> dict:
     """Join one repo's raw funding signals (percentiles filled later in build()).
 
     `oc_slug` / `oc_avg` are the Open Collective attribution resolved in build():
     a repo-level collective's full budget, or a class-A repo's equal share of its
     org's collective (see build()). `npm_funding` / `pypi_funding` are the registry
     funding declarations (npm package.json `funding` field / PyPI `project_urls`) —
-    extra declared funding channels.
+    extra declared funding channels. `export` is the repo's OWN FLOSS Fund manifest;
+    `org_export` is an ORG-level manifest (registered for the whole GitHub org), so
+    its channels apply to every repo the org owns — `org_fundable` flags those.
     """
     npm_funding = npm_funding or {}
     pypi_funding = pypi_funding or {}
+    org_export = org_export or {}
     has_npm = (npm_funding.get("has_npm_funding") or "").strip() == "True"
     has_pypi = (pypi_funding.get("has_pypi_funding") or "").strip() == "True"
-    channels = _platform_set(yml.get("funding_yml_platforms")) | _platform_set(
-        export.get("channel_platforms"))
+    channels = (_platform_set(yml.get("funding_link_platforms"))
+                | _platform_set(export.get("channel_platforms"))
+                | _platform_set(org_export.get("channel_platforms")))
     if has_npm:
         channels = channels | {"npm"}
     if has_pypi:
@@ -168,9 +175,10 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "gh_sponsorships": str(_to_int(gh_in) + _to_int(gh_out)),
         "gh_stars": (repo_meta.get("stars") or "").strip(),
         "gh_forks": (repo_meta.get("forks") or "").strip(),
-        "has_funding_yml": (yml.get("has_funding_yml") or "").strip(),
-        "funding_yml_platforms": (yml.get("funding_yml_platforms") or "").strip(),
+        "has_funding_link": (yml.get("has_funding_link") or "").strip(),
+        "funding_link_platforms": (yml.get("funding_link_platforms") or "").strip(),
         "has_funding_json": "True" if export else "False",
+        "org_fundable": "True" if org_export else "False",
         "has_npm_funding": "True" if has_npm else "False",
         "npm_funding_url": (npm_funding.get("npm_funding_url") or "").strip(),
         "has_pypi_funding": "True" if has_pypi else "False",
@@ -187,15 +195,34 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
 
 
 def _export_by_repo(path: Path) -> dict[str, dict]:
+    """{owner/repo: manifest row} for repo-level FLOSS manifests (resolved-or-raw)."""
     out: dict[str, dict] = {}
     if not path.exists():
         return out
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            repo = normalize_github_repo(row.get("project_repository"))
+            repo = export_repo_slug(row)
             if repo:
                 out[repo] = row
     return out
+
+
+def _fundable_orgs(path: Path) -> dict[str, dict]:
+    """{org_login: {channel_platforms}} for ORG-level FLOSS manifests.
+
+    A manifest whose repo URL is a GitHub org page (`github.com/<org>`, not a
+    specific repo) funds the whole org, so every repo it owns is fundable. An
+    org's `channel_platforms` are unioned across all its manifests.
+    """
+    accum: dict[str, set[str]] = {}
+    if path.exists():
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                org = github_org_page(row.get("project_repository"))
+                if org:
+                    accum.setdefault(org, set()).update(
+                        _platform_set(row.get("channel_platforms")))
+    return {org: {"channel_platforms": ",".join(sorted(p))} for org, p in accum.items()}
 
 
 def _load_oc(path: Path) -> dict[str, dict]:
@@ -263,6 +290,7 @@ def build() -> list[dict]:
     foundations = load_column_by_repo(FOUNDATIONS_FILE, "host")
     overrides = _load_funding_overrides(OVERRIDES_FILE)
     export = _export_by_repo(FLOSS_FUND_FILE)
+    fundable_orgs = _fundable_orgs(FLOSS_FUND_FILE)
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
     sponsoring = _load_sponsoring(SPONSORSHIPS_FILE)
     npm_funding = load_rows_by_repo(NPM_FUNDING_FILE) if NPM_FUNDING_FILE.exists() else {}
@@ -327,7 +355,8 @@ def build() -> list[dict]:
             sponsoring_count=sponsoring.get(owner_login, ""),
             oc_slug=oc_slug, oc_avg=_fmt_money(oc_amt),
             npm_funding=npm_funding.get(repo, {}),
-            pypi_funding=pypi_funding.get(repo, {})))
+            pypi_funding=pypi_funding.get(repo, {}),
+            org_export=fundable_orgs.get(owner_login, {})))
 
     # Funding risk score: both axes are `lower_is_worse` (less funding → riskier).
     # add_percentiles writes the two risk percentiles; we then recompute `score`
@@ -350,10 +379,12 @@ def build() -> list[dict]:
         if len(ps) == 2:
             backing_p = float(r["host_score"]) * 100.0
             score = max(1, round(geometric_mean(ps + [backing_p])))
-            # A declared registry funding channel (npm `funding` / PyPI project_urls)
-            # caps the risk: a project that has set up a way to be funded is not
-            # maximally unfunded.
-            if "True" in (r.get("has_npm_funding"), r.get("has_pypi_funding")):
+            # A declared funding channel caps the risk: a project (or its org)
+            # that has set up a way to be funded is not maximally unfunded —
+            # a registry channel (npm `funding` / PyPI project_urls) or a
+            # fundable owner/org (FLOSS Fund manifest for the whole org).
+            if "True" in (r.get("has_npm_funding"), r.get("has_pypi_funding"),
+                          r.get("org_fundable")):
                 score = min(score, DECLARED_FUNDING_CAP)
             r["score"] = score
     return rows
@@ -373,8 +404,8 @@ def main() -> None:
                   header_style="bold dim", padding=(0, 1))
     table.add_column("Field", style="bold")
     table.add_column("Populated", justify="right")
-    for col in ("gh_sponsorships", "gh_stars", "has_funding_yml", "has_funding_json",
-                "channels_count", "oc_avg_funding", "host", "owner", "score"):
+    for col in ("gh_sponsorships", "gh_stars", "has_funding_link", "has_funding_json",
+                "org_fundable", "channels_count", "oc_avg_funding", "host", "owner", "score"):
         n = sum(1 for r in rows if str(r.get(col, "")) not in ("", "0", "False"))
         table.add_row(col, f"{n:,}")
     console.print(table)

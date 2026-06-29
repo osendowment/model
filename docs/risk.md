@@ -54,7 +54,7 @@ Risk
 │
 ├── Funding  →  data/risk/funding.csv
 │   ├── github_sponsors               ← GitHub Sponsors API             [most recent]
-│   ├── has_funding_yml, _yml_platforms  ← GraphQL repository.fundingLinks [most recent]
+│   ├── has_funding_link, _link_platforms ← GraphQL repository.fundingLinks [most recent]
 │   ├── has_funding_json              ← repo /funding.json (FLOSS/fund)  [most recent]
 │   ├── host / host_type             ← foundation rosters + funding/overrides.csv [most recent]
 │   └── owner / owner_type            ← funding/overrides.csv (GitHub-org backing)  [most recent]
@@ -295,7 +295,7 @@ repo, not a data-collection bug:
 - **Scorecard files (~99%)** — a mix of brand-new risk-scope additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
 - **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos. The `/stats/contributors` per-year breakdown and `data/concentration-data.csv` are retired.
 - **churn** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
-- **Structurally-sparse columns** — `bestpractices_badge_id` (only CII-enrolled repos), `foundation_host` (only FOSS-foundation members), `funding_yml_platforms` (only repos that declare funding links), `cognitive_*` (only languages with a Lizard cognitive parser), and `issue_trend_score` (only repos with `mean_opened_per_year ≥ 1`) are sparse by definition. Their coverage is in [stats.md](stats.md#risk).
+- **Structurally-sparse columns** — `bestpractices_badge_id` (only CII-enrolled repos), `foundation_host` (only FOSS-foundation members), `funding_link_platforms` (only repos that declare funding links), `cognitive_*` (only languages with a Lizard cognitive parser), and `issue_trend_score` (only repos with `mean_opened_per_year ≥ 1`) are sparse by definition. Their coverage is in [stats.md](stats.md#risk).
 
 ## Output
 

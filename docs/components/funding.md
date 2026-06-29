@@ -27,12 +27,13 @@ Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 │   └── gh_sponsorships_p     ← derived (worst-pinned CDF risk percentile of gh_sponsorships)         [most recent]
 │
 ├── Funding links  (GraphQL repository.fundingLinks — the "Sponsor" widget)
-│   ├── has_funding_yml       ← GraphQL fundingLinks (resolves FUNDING.yml anywhere + org default)    [most recent]
-│   ├── funding_yml_platforms ← derived (declared platform keys)                                      [most recent]
+│   ├── has_funding_link      ← GraphQL fundingLinks (resolves FUNDING.yml anywhere + org default)    [most recent]
+│   ├── funding_link_platforms ← derived (declared platform keys)                                     [most recent]
 │   └── <platform handles>    ← parsed handles: github, patreon, open_collective, tidelift, custom …  [most recent]
 │
 ├── FLOSS Fund  (funding.json)
-│   └── has_funding_json      ← dir.floss.fund directory export ∩ repo (URL match)                    [most recent]
+│   ├── has_funding_json      ← dir.floss.fund export ∩ repo (URL match, incl. redirect-resolved)     [most recent]
+│   └── org_fundable          ← owner has an ORG-level FLOSS manifest (github.com/<org>) → all repos  [most recent]
 │
 ├── OpenCollective
 │   ├── oc_avg_funding        ← OC GraphQL totalAmountReceived (gross, mean of years; $0 if none)     [2021–2025]
@@ -43,7 +44,7 @@ Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 │   ├── owner, owner_type     ← owning-entity domain (e.g. meta.com), from overrides.csv               [most recent]
 │   └── host_score           ← derived: combined backing, most-funded of host/owner (0 · 0.5 · 1)     [most recent]
 │
-├── channels_count           ← derived (FUNDING.yml platforms ∪ funding.json channels, deduped)      [most recent]
+├── channels_count           ← derived (funding-link platforms ∪ funding.json channels ∪ org channels, deduped)  [most recent]
 ├── gh_stars, gh_forks        ← GitHub /repos (informational, not scored)                             [most recent]
 │
 └── score  (the score)       ← derived (geom-mean of gh_sponsorships_p, oc_avg_funding_p, host_score×100; int 1–100)  [most recent]
@@ -108,11 +109,25 @@ is a *resourced* backer, not an unfunded project — which is why the score uses
 
 ### funding.json from the FLOSS Fund directory
 
-Rather than fetch `funding.json` from ~900 repos individually (6 in-scope hits),
+Rather than fetch `funding.json` from ~900 repos individually,
 `funding_json.py` downloads the whole [FLOSS Fund](https://dir.floss.fund)
 directory once and `build_funding` matches `project_repository` URLs against the
-risk repos — **6 in-scope hits** with zero per-repo requests. The export also
-parses each manifest's channels into per-platform handles + `channel_platforms`.
+risk repos, with zero per-repo requests. The export also parses each manifest's
+channels into per-platform handles + `channel_platforms`. Two matching refinements
+catch manifests a raw URL-equality check would miss:
+
+- **Redirect resolution.** A manifest may point at a redirect rather than a
+  GitHub URL (e.g. `tukaani.org/xz/redirect-to-github-xz` →
+  `github.com/tukaani-project/xz`). The fetcher follows these and records the
+  final GitHub URL in `project_repository_resolved`; `export_repo_slug` prefers
+  it over the raw URL. Only non-GitHub URLs are probed (best-effort, cached in
+  the 30-day export).
+- **Org-level manifests (`org_fundable`).** A manifest whose repo URL is a GitHub
+  *org page* (`github.com/<org>`, not a specific repo) declares funding for the
+  whole org. Every risk-scope repo under that owner gets `org_fundable=True` and
+  inherits the org manifest's channels — "if the org is fundable, its repos have
+  a funding channel". (GitHub Sponsors and `fundingLinks` are already
+  owner/org-inherited per repo, so this only fills the FLOSS-side gap.)
 
 ### OpenCollective budgets
 
@@ -129,8 +144,9 @@ in `.env` to lift it. `oc_avg_funding` is the mean over years with data.
 | Column | Formula |
 |---|---|
 | `gh_sponsorships` | `gh_sponsors_in + gh_sponsors_out` |
-| `channels_count` | distinct platforms across FUNDING.yml ∪ funding.json |
-| `has_funding_json` | repo URL present in the FLOSS Fund export |
+| `channels_count` | distinct platforms across funding links ∪ funding.json ∪ org-level channels |
+| `has_funding_json` | repo URL present in the FLOSS Fund export (incl. redirect-resolved) |
+| `org_fundable` | repo's owner has an org-level FLOSS manifest (`github.com/<org>`) |
 | `oc_avg_funding` | mean of OC `raised_*` years (**`0`** when no OC presence) |
 
 ### The percentiles (`_p`)
@@ -176,7 +192,11 @@ of the two** (`min`), so a single value ∈ {0, 0.5, 1}:
   `rustfoundation.org` nonprofit, no owner) → host_score `min(0.5, 1)` = 0.5 →
   ∛(100·100·50) = **79**.
 
-Non-backed unfunded repos stay at 100.
+Non-backed unfunded repos stay at 100 — **unless they declare a funding
+channel** with no measured $: a registry channel (`has_npm_funding` /
+`has_pypi_funding`) or a fundable owner/org (`org_fundable`) caps the score at
+`DECLARED_FUNDING_CAP` (79). A project that has set up *a way* to be funded is
+not maximally unfunded.
 
 Worked examples:
 
@@ -197,7 +217,7 @@ risk voice, not a no-op. The cohort median rose 69 → 78.
 
 ### `data/risk/funding.csv` (per-dimension build)
 
-20 columns, one row per risk repo. No `fetched_at` — per-signal timestamps stay
+One row per risk repo. No `fetched_at` — per-signal timestamps stay
 in each source file.
 
 | Column | Description |
@@ -208,10 +228,11 @@ in each source file.
 | `gh_sponsorships` | `in + out` |
 | `gh_sponsorships_p` | risk percentile of `gh_sponsorships` |
 | `gh_stars`, `gh_forks` | GitHub stars / forks (informational, not scored) |
-| `has_funding_yml` | repo declares ≥1 funding link (GitHub's resolved `fundingLinks`) |
-| `funding_yml_platforms` | declared platform keys (comma-sep) |
-| `has_funding_json` | registered in the FLOSS Fund directory |
-| `channels_count` | distinct funding platforms |
+| `has_funding_link` | repo declares ≥1 funding link (GitHub's resolved `fundingLinks`) |
+| `funding_link_platforms` | declared platform keys (comma-sep) |
+| `has_funding_json` | repo registered in the FLOSS Fund directory (incl. redirect-resolved URL) |
+| `org_fundable` | repo's **owner** has an org-level FLOSS manifest — counts as a funding channel (caps `score` at 79) |
+| `channels_count` | distinct funding platforms (links ∪ funding.json ∪ org-level) |
 | `oc_avg_funding` | mean OC gross annual budget (`0` if none) |
 | `oc_avg_funding_p` | risk percentile of `oc_avg_funding` |
 | `host` | legally-connected steward **domain** (e.g. `apache`, `react.foundation`) or empty |
