@@ -159,27 +159,35 @@ driven by the OpenSSF axis; CVEs re-rank only the minority that carry them.
 ### Funding
 
 Project resourcing ([funding.md](components/funding.md)) — GitHub Sponsors
-(in+out), `FUNDING.yml`, OpenCollective budgets, FLOSS Fund, foundation hosting,
-plus declared registry channels (npm `funding` field / PyPI `project_urls`).
-Score = geomean of the GitHub-sponsorship + OpenCollective + backing percentiles.
+(in+out), GitHub funding links (the "Sponsor" widget, via `fundingLinks`),
+OpenCollective budgets, FLOSS Fund (incl. redirect-resolved + org-level
+manifests), foundation hosting, plus declared registry channels (npm `funding`
+field / PyPI `project_urls`). Score = geomean of the GitHub-sponsorship +
+OpenCollective + backing percentiles.
 
 | Channel | Repos | % |
 |---|---:|---:|
 | input top repos | 895 | 100% |
+| ≥ 1 funding channel | 507 | 56.6% |
+| Funding link present (`has_funding_link`) | 503 | 56.2% |
 | GitHub Sponsors inbound > 0 | 440 | 49.2% |
-| ≥ 1 funding channel | 393 | 43.9% |
-| `FUNDING.yml` present | 256 | 28.6% |
-| Owner sponsors others (out > 0) | 157 | 17.5% |
-| OpenCollective budget > 0 | 162 | 18.1% |
 | npm funding field declared | 210 | 23.5% |
-| PyPI funding url declared | 17 | 1.9% |
+| OpenCollective budget > 0 | 162 | 18.1% |
+| Owner sponsors others (out > 0) | 157 | 17.5% |
 | Foundation host | 44 | 4.9% |
-| funding.json (FLOSS Fund) | 6 | 0.7% |
+| PyPI funding url declared | 17 | 1.9% |
+| funding.json (FLOSS Fund) | 7 | 0.8% |
+| Org-fundable owner (`org_fundable`) | 1 | 0.1% |
 
 Unfunded repos (no sponsors, no OC) tie at the worst percentile — `score` = 100
-is the "no detectable funding" plateau. A declared registry funding channel (npm
-`funding` field / PyPI `project_urls`) caps the score at 79 (not maximally
-unfunded), which moved 31 repos off the plateau (29 npm + 2 pypi).
+is the "no detectable funding" plateau (332 repos). A declared channel with no
+measured $ — a registry channel (npm `funding` field / PyPI `project_urls`) or a
+fundable owner/org (`org_fundable`) — caps the score at 79 (not maximally
+unfunded), which moved 31 repos off the plateau (29 npm + 2 pypi; the 1
+org-fundable repo was already below the cap). Note: a repo's own funding **link**
+(`has_funding_link`, e.g. a Liberapay/Ko-fi URL we can't measure $ for) does
+**not** currently cap the score — so e.g. `tukaani-project/xz` is detected
+(`liberapay`) but still scores 100.
 
 #### OpenCollective
 
