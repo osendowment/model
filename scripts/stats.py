@@ -195,9 +195,6 @@ RISK_COMPONENTS = [
     ("Security", "security", "score", [
         ("OpenSSF score (0–10)", "openssf_score", "f1"),
         ("CVE count 5y", "cve_count_5y", "int")]),
-    ("Funding", "funding", "score", [
-        ("GitHub sponsorships", "gh_sponsorships", "int"),
-        ("OpenCollective avg $/yr", "oc_avg_funding", "int")]),
     ("Workload", "workload", "score", [
         ("LOC / contributor", "loc_per_ac", "int"),
         ("CVE / contributor", "cve_per_ac", "f2"),
@@ -221,14 +218,6 @@ RISK_FUNNELS = {
                  ("OSS-Fuzz enrolled", "bool", "ossfuzz_enrolled"),
                  ("CII Best Practices badge", "present", "bestpractices_badge_id"),
                  ("Security score", "present", "score")],
-    "funding": [("GitHub Sponsors inbound > 0", "gt0", "gh_sponsors_in"),
-                ("≥ 1 funding channel", "gt0", "channels_count"),
-                ("`FUNDING.yml` present", "bool", "has_funding_yml"),
-                ("Owner sponsors others (out > 0)", "gt0", "gh_sponsors_out"),
-                ("OpenCollective budget > 0", "gt0", "oc_avg_funding"),
-                ("npm funding field declared", "bool", "has_npm_funding"),
-                ("PyPI funding url declared", "bool", "has_pypi_funding"),
-                ("funding.json (FLOSS Fund)", "bool", "has_funding_json")],
     "workload": [("issues data present", "present", "issues_opened_5y"),
                  ("per-AC ratios (loc/cve/nni) computed", "present", "loc_per_ac_p"),
                  ("`issue_close_ratio` computed", "present", "issue_close_ratio"),
@@ -282,9 +271,10 @@ def risk_stats() -> dict:
     funnels = {name: [(label, _count(dims[name], scope, kind, col))
                       for label, kind, col in steps]
                for name, steps in RISK_FUNNELS.items()}
-    # OpenCollective sub-funnel (declared slug → non-zero budget)
-    oc_slug = _count(dims["funding"], scope, "present", "oc_slug")
-    oc_budget = _count(dims["funding"], scope, "gt0", "oc_avg_funding")
+
+    # intent / nonprofit coverage (from risk.csv — already loaded above)
+    intent_count = _count(risk, scope, "bool", "intent")
+    nonprofit_count = _count(risk, scope, "bool", "nonprofit")
 
     # headline prose figures
     conc = dims["concentration"]
@@ -294,7 +284,7 @@ def risk_stats() -> dict:
 
     return {
         "scope": n, "distribution": distribution, "funnels": funnels,
-        "oc_slug": oc_slug, "oc_budget": oc_budget,
+        "intent_count": intent_count, "nonprofit_count": nonprofit_count,
         "overall_scored": o_scored, "overall_gap": n - o_scored,
         "bf1_pct": 100 * bf1 / len(bf_computed) if bf_computed else 0,
     }
@@ -365,11 +355,18 @@ def dashboard(v: dict, r: dict) -> None:
         t.add_row("input top repos", str(n), "100%")
         for label, cnt in steps:
             t.add_row(label.replace("`", ""), str(cnt), _pct(cnt, n))
-        if name == "funding":
-            t.add_section()
-            t.add_row("OC slug declared", str(r["oc_slug"]), _pct(r["oc_slug"], n))
-            t.add_row("OC budget > 0", str(r["oc_budget"]), _pct(r["oc_budget"], n))
         console.print(t)
+
+    t = Table(title="Risk — intent and nonprofit", header_style="bold dim")
+    t.add_column("Category")
+    t.add_column("Repos", justify="right")
+    t.add_column("%", justify="right")
+    it, npt = r["intent_count"], r["nonprofit_count"]
+    t.add_row("intent — any declared funding signal", str(it), _pct(it, n))
+    t.add_row("intent — no declared signal", str(n - it), _pct(n - it, n))
+    t.add_row("nonprofit — community / independent", str(npt), _pct(npt, n))
+    t.add_row("nonprofit — company-backed (excluded)", str(n - npt), _pct(n - npt, n))
+    console.print(t)
 
     console.print(f"\n[dim]bus-factor-1: {r['bf1_pct']:.1f}% of computed · "
                   f"overall score: {r['overall_scored']}/{n} scored "
@@ -432,6 +429,15 @@ def markdown(v: dict, r: dict) -> str:
         for label, cnt in steps:
             mark = "**" if label.endswith(" score") else ""
             a(f"| {mark}{label}{mark} | {mark}{cnt}{mark} | {mark}{_pct(cnt, n)}{mark} |")
+
+    it, npt = r["intent_count"], r["nonprofit_count"]
+    a("\n### Intent and nonprofit\n")
+    a("| Category | Repos | % |")
+    a("|---|---:|---:|")
+    a(f"| intent — any declared funding signal | {it} | {_pct(it, n)} |")
+    a(f"| intent — no declared signal | {n - it} | {_pct(n - it, n)} |")
+    a(f"| nonprofit — community / independent | {npt} | {_pct(npt, n)} |")
+    a(f"| nonprofit — company-backed (excluded) | {n - npt} | {_pct(n - npt, n)} |")
     return "\n".join(out)
 
 
