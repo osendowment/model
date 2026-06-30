@@ -55,7 +55,7 @@ Risk
 │   └── bestpractices_badge_id        ← deps.dev (OpenSSF Best Practices) [most recent]
 │
 ├── Funding (signals only — not scored)  →  data/risk/funding.csv
-│   ├── has_gh_sponsors, gh_sponsors     ← GitHub Sponsors API (owner only) [most recent]
+│   ├── has_gh_sponsors, gh_sponsorships_in     ← GitHub Sponsors API (owner only) [most recent]
 │   ├── has_funding_link, _link_platforms ← GraphQL repository.fundingLinks [most recent]
 │   ├── has_funding_json              ← repo /funding.json (FLOSS/fund)  [most recent]
 │   ├── host / host_type             ← foundation rosters + funding/overrides.csv [most recent]
@@ -231,7 +231,7 @@ are **not scored dimensions** and do not affect `score`.
 
 - **`intent`** (`bool`, default `false`) — `true` when the repo has expressed a
   way to be funded: GitHub Sponsors enabled / received (`has_gh_sponsors` /
-  `gh_sponsors`), a `.github/FUNDING.yml`, a `funding.json` (FLOSS Fund), an npm
+  `gh_sponsorships_in`), a `.github/FUNDING.yml`, a `funding.json` (FLOSS Fund), an npm
   `funding` field, a PyPI project-URLs funding entry, an Open Collective slug, or an
   institutional host or owner. "Intent" means the project is
   actively seeking or accepting support.

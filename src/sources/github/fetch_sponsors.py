@@ -1,9 +1,9 @@
 """Fetch GitHub Sponsors counts per risk-scope repo.
 
 Writes data/sources/github/sponsors.csv:
-    repo, repo_id, github_sponsors, owner_has_sponsors_listing, sponsors_status, fetched_at
+    repo, repo_id, gh_sponsorships_in, has_gh_sponsors, sponsors_status, fetched_at
 
-`github_sponsors` (inbound) = public sponsorships *received* by the repo OWNER
+`gh_sponsorships_in` (inbound) = public sponsorships *received* by the repo OWNER
 only. Sponsors are attributed to a repo solely when the sponsored account owns
 it: a `github:` login in the repo's FUNDING.yml that is NOT the owner (a
 co-maintainer) is *not* counted — their sponsors fund that person's whole
@@ -12,10 +12,10 @@ funding. The FUNDING.yml link still marks the repo as having a funding channel
 (`has_funding_link`, handled by build_funding); this fetcher just measures the
 owner's actual sponsor count. Outbound sponsoring is a separate signal — see
 src.github.fetch_sponsorships.
-`owner_has_sponsors_listing` = the repo OWNER has an active GitHub Sponsors
-profile (`hasSponsorsListing`), i.e. is set up to receive sponsors even when the
-public count is 0 — a sustainability-intent signal in its own right. Scoped to
-the owner only (not FUNDING.yml co-logins), since intent attaches to the repo's
+`has_gh_sponsors` = the repo OWNER has GitHub Sponsors enabled (an active
+`hasSponsorsListing`), i.e. is set up to receive sponsors even when the public
+count is 0 — a sustainability-intent signal in its own right. Scoped to the
+owner only (not FUNDING.yml co-logins), since intent attaches to the repo's
 owning entity.
 `sponsors_status`: "ok" if every queried login resolved, "error" if any GraphQL
 query failed (so a 0 from a failure is not mistaken for a genuine 0).
@@ -55,7 +55,7 @@ log = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "sponsors.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
-FIELDS = ["repo", "repo_id", "gh_sponsors", "has_gh_sponsors",
+FIELDS = ["repo", "repo_id", "gh_sponsorships_in", "has_gh_sponsors",
           "sponsors_status", "fetched_at"]
 
 SPONSORS_QUERY = """
@@ -91,7 +91,7 @@ def _has_sponsor_signal(row: dict) -> bool:
     sponsor count or GitHub Sponsors enabled (an active listing). Rows without one
     are rechecked on the shorter funding window (they may gain sponsors)."""
     try:
-        count = int((row.get("gh_sponsors") or "0").strip() or "0")
+        count = int((row.get("gh_sponsorships_in") or "0").strip() or "0")
     except ValueError:
         count = 0
     enabled = (row.get("has_gh_sponsors") or "").strip() == "True"
@@ -128,7 +128,7 @@ async def fetch_one(session, limiter, repo: str) -> dict:
     count, enabled, ok = await fetch_sponsors_for_login(session, limiter, owner)
     return {
         "repo": repo,
-        "gh_sponsors": str(count),
+        "gh_sponsorships_in": str(count),
         "has_gh_sponsors": "True" if enabled else "False",
         "sponsors_status": status_from_counts([count], not ok),
     }

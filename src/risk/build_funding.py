@@ -2,7 +2,7 @@
 """Build data/risk/funding.csv — funding signals + risk score per risk-scope repo.
 
 Reads (all under data/sources/):
-    github/sponsors.csv        — gh_sponsors (inbound), has_gh_sponsors (src.github.fetch_sponsors)
+    github/sponsors.csv        — gh_sponsorships_in (inbound), has_gh_sponsors (src.github.fetch_sponsors)
     github/sponsorships.csv    — sponsoring_count (outbound) (src.github.fetch_sponsorships)
     github/funding-yml.csv     — has_funding_link / platforms (src.github.fetch_funding_yml)
     github/repos.csv           — stars, forks (info)          (src.github.fetch_repo_owner_data)
@@ -80,8 +80,9 @@ DECLARED_FUNDING_CAP = 79
 MEASURED_PLATFORMS = {"github", "open_collective"}
 
 FIELDS = ["repo", "repo_id",
-          "gh_sponsors", "has_gh_sponsors",
-          "gh_sponsorships", "gh_sponsorships_p",
+          "has_gh_sponsors",
+          "gh_sponsorships_in", "gh_sponsorships_out", "gh_sponsorships",
+          "gh_sponsorships_p",
           "gh_stars", "gh_forks",
           "has_funding_link", "funding_link_platforms", "has_funding_json", "org_fundable",
           "has_npm_funding", "npm_funding_url",
@@ -120,12 +121,12 @@ def _nonprofit_flag(host_type: str, owner_type: str) -> bool:
 def _intent_flag(row: dict) -> bool:
     """Sustainability intent: True if the repo has expressed a way to be funded —
     GitHub Sponsors enabled on the owner (`has_gh_sponsors`) or with sponsors
-    (`gh_sponsors`), a declared channel (FUNDING.yml / funding.json / npm / PyPI /
+    (`gh_sponsorships_in`), a declared channel (FUNDING.yml / funding.json / npm / PyPI /
     OC), or an institutional host/owner. Outbound sponsoring (the owner funding
     *others*, folded into `gh_sponsorships`) is NOT intent — it is not a funding
     channel for this repo, only a resourcing proxy used by the score."""
     return (
-        _to_int(row.get("gh_sponsors")) > 0
+        _to_int(row.get("gh_sponsorships_in")) > 0
         or (row.get("has_gh_sponsors") or "").strip() == "True"
         or (row.get("has_funding_link") or "").strip() == "True"
         or (row.get("has_funding_json") or "").strip() == "True"
@@ -220,17 +221,18 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         channels = channels | {"npm"}
     if has_pypi:
         channels = channels | {"pypi"}
-    gh_sponsors = (sponsors.get("gh_sponsors") or "").strip()
-    # Outbound sponsoring (owner funds others) — folded into gh_sponsorships for the
-    # score's "resourced backer" proxy; the raw per-login value lives in
-    # sponsorships.csv. Not emitted as its own column and not an intent signal.
+    gh_in = (sponsors.get("gh_sponsorships_in") or "").strip()
+    # Outbound sponsoring (owner funds others) — a "resourced backer" proxy used by
+    # the score (gh_sponsorships = in + out) but NOT an intent signal: funding
+    # others is not a funding channel for this repo.
     gh_out = (sponsoring_count or "").strip()
     row = {
         "repo": repo,
         "repo_id": repo_id,
-        "gh_sponsors": gh_sponsors,
         "has_gh_sponsors": (sponsors.get("has_gh_sponsors") or "").strip(),
-        "gh_sponsorships": str(_to_int(gh_sponsors) + _to_int(gh_out)),
+        "gh_sponsorships_in": gh_in,
+        "gh_sponsorships_out": gh_out,
+        "gh_sponsorships": str(_to_int(gh_in) + _to_int(gh_out)),
         "gh_stars": (repo_meta.get("stars") or "").strip(),
         "gh_forks": (repo_meta.get("forks") or "").strip(),
         "has_funding_link": (yml.get("has_funding_link") or "").strip(),
