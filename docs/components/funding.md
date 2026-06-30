@@ -21,15 +21,16 @@ funding *others*) is **not** intent: it is not a funding channel for this repo.
 
 | Signal | Criteria | Sources |
 |---|---|---|
-| GitHub Sponsors enabled | owner has a Sponsors listing — `has_gh_sponsors` (a channel exists even at 0 sponsors) | github |
-| GitHub Sponsors received | owner has ≥1 sponsor — `gh_sponsorships_in > 0` (owner-only; co-maintainers don't count) | github |
-| FUNDING.yml link | repo declares a funding link — `has_funding_link` | github |
-| FLOSS Fund manifest | repo registered, or owner has an org-level manifest — `has_funding_json` / `org_fundable` | floss_fund |
-| npm funding | npm `package.json` `funding` field — `has_npm_funding` | npm |
-| PyPI funding | PyPI `project_urls` funding entry — `has_pypi_funding` | pypi |
-| Open Collective | repo/org maps to a real collective — `oc_slug` | opencollective |
-| Institutional host | a foundation/company legally stewards it — `host` | foundations, overrides |
-| Institutional owner | an owning entity is recorded — `owner` | overrides |
+| `has_gh_sponsors` | the repo owner has GitHub Sponsors enabled — a listing exists even with zero sponsors | `github` |
+| `gh_sponsorships_in` | the repo owner has at least one sponsor (owner only — co-maintainers are not counted) | `github` |
+| `has_funding_link` | the repo declares a funding link in its FUNDING.yml | `github` |
+| `has_funding_json` | the repo is registered in the FLOSS Fund directory | `floss_fund` |
+| `org_fundable` | the repo's owner has an org-wide FLOSS Fund manifest | `floss_fund` |
+| `has_npm_funding` | the repo's npm package declares a funding field | `npm` |
+| `has_pypi_funding` | the repo's PyPI project declares a funding URL | `pypi` |
+| `oc_slug` | the repo or its org maps to a real Open Collective | `opencollective` |
+| `host` | a foundation or company legally stewards the repo | `foundations`, `overrides` |
+| `owner` | a company or other entity owns the repo | `overrides` |
 
 ## Nonprofit
 
@@ -38,8 +39,8 @@ Google, Microsoft, AWS, …) hosts or owns the repo.
 
 | Criteria | Sources |
 |---|---|
-| `host_type == company` (corporate steward) | foundations, overrides |
-| `owner_type == company` (corporate owner) | overrides |
+| a company legally stewards the repo (its host) | `overrides` |
+| a company owns the repo | `overrides` |
 
 ## Data Pipeline
 
