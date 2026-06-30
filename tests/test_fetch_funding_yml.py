@@ -110,6 +110,12 @@ class TestBuildRow:
         for p in FUNDING_PLATFORMS:
             assert p in row
 
+    def test_has_funding_yml_flag(self):
+        # file-existence flag is independent of resolved links
+        assert build_row("o/r", [], has_yml=True)["has_funding_yml"] == "True"
+        assert build_row("o/r", [], has_yml=False)["has_funding_yml"] == "False"
+        assert build_row("o/r", [])["has_funding_yml"] == "False"  # default
+
 
 class TestBuildQuery:
     def test_aliases_and_variables(self):
@@ -118,6 +124,13 @@ class TestBuildQuery:
         assert "r1: repository(owner:$o1, name:$n1)" in query
         assert "fundingLinks" in query
         assert variables == {"o0": "a", "n0": "b", "o1": "c", "n1": "d"}
+
+    def test_includes_funding_yml_file_checks(self):
+        query, _ = build_query(["a/b"])
+        assert 'object(expression:"HEAD:.github/FUNDING.yml")' in query
+        assert 'object(expression:"HEAD:FUNDING.yml")' in query
+        assert 'object(expression:"HEAD:docs/FUNDING.yml")' in query
+        assert 'g0: repository(owner:$o0, name:".github")' in query   # owner default
 
 
 class TestRowsFromResponse:
@@ -155,3 +168,21 @@ class TestRowsFromResponse:
     def test_top_level_failure_raises(self):
         with pytest.raises(RuntimeError):
             rows_from_response(["o/a"], {"data": None, "errors": [{"message": "boom"}]})
+
+    def test_funding_yml_file_sets_flag(self):
+        # a FUNDING.yml file (repo root) but no resolved links → links False, yml True
+        body = {"data": {"r0": {"fundingLinks": [], "y2": {"__typename": "Blob"}}, "g0": None}}
+        rows = rows_from_response(["o/r"], body)
+        assert rows["o/r"]["has_funding_links"] == "False"
+        assert rows["o/r"]["has_funding_yml"] == "True"
+
+    def test_owner_github_default_sets_yml(self):
+        # repo has no file, but the owner's `.github` repo carries one → yml True
+        body = {"data": {"r0": {"fundingLinks": []}, "g0": {"z2": {"__typename": "Blob"}}}}
+        rows = rows_from_response(["o/r"], body)
+        assert rows["o/r"]["has_funding_yml"] == "True"
+
+    def test_no_funding_yml_file(self):
+        body = {"data": {"r0": {"fundingLinks": []}, "g0": None}}
+        rows = rows_from_response(["o/r"], body)
+        assert rows["o/r"]["has_funding_yml"] == "False"

@@ -84,7 +84,7 @@ FIELDS = ["repo", "repo_id",
           "gh_sponsorships_in", "gh_sponsorships_out", "gh_sponsorships",
           "gh_sponsorships_p",
           "gh_stars", "gh_forks",
-          "has_funding_links", "funding_link_platforms", "has_funding_json",
+          "has_funding_links", "has_funding_yml", "funding_link_platforms", "has_funding_json",
           "has_npm_funding", "npm_funding_url",
           "has_pypi_funding", "pypi_funding_platforms", "channels_count",
           "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
@@ -121,15 +121,18 @@ def _nonprofit_flag(host_type: str, owner_type: str) -> bool:
 def _intent_flag(row: dict) -> bool:
     """Sustainability intent: True if the repo has expressed a way to be funded —
     GitHub Sponsors enabled on the owner (`gh_sponsors_enabled`), a resolved
-    funding link (`has_funding_links`), a FLOSS Fund manifest for the repo or its
-    owner (`has_funding_json`), an npm / PyPI funding field, an Open Collective,
-    or an institutional host/owner. The inbound sponsor count is NOT checked
+    funding link (`has_funding_links`), a FUNDING.yml file present for the repo or
+    owner even if it resolves to no links (`has_funding_yml`), a FLOSS Fund
+    manifest for the repo or its owner (`has_funding_json`), an npm / PyPI funding
+    field, an Open Collective, or an institutional host/owner. The inbound sponsor
+    count is NOT checked
     separately — any count implies the listing is enabled, so `gh_sponsors_enabled`
     already covers it. Outbound sponsoring (the owner funding *others*, folded into
     `gh_sponsorships`) is NOT intent — it is not a funding channel for this repo."""
     return (
         (row.get("gh_sponsors_enabled") or "").strip() == "True"
         or (row.get("has_funding_links") or "").strip() == "True"
+        or (row.get("has_funding_yml") or "").strip() == "True"
         or (row.get("has_funding_json") or "").strip() == "True"
         or (row.get("has_npm_funding") or "").strip() == "True"
         or (row.get("has_pypi_funding") or "").strip() == "True"
@@ -236,6 +239,7 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "gh_stars": (repo_meta.get("stars") or "").strip(),
         "gh_forks": (repo_meta.get("forks") or "").strip(),
         "has_funding_links": (yml.get("has_funding_links") or "").strip(),
+        "has_funding_yml": (yml.get("has_funding_yml") or "").strip(),
         "funding_link_platforms": (yml.get("funding_link_platforms") or "").strip(),
         # FLOSS Fund presence for the repo OR its owner (org-level manifest).
         "has_funding_json": "True" if (export or org_export) else "False",

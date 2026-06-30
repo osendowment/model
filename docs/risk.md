@@ -56,7 +56,7 @@ Risk
 │
 ├── Funding (signals only — not scored)  →  data/risk/funding.csv
 │   ├── gh_sponsors_enabled, gh_sponsorships_in  ← GitHub Sponsors API (owner only) [most recent]
-│   ├── has_funding_links, _link_platforms ← GraphQL repository.fundingLinks [most recent]
+│   ├── has_funding_links, has_funding_yml ← GraphQL fundingLinks + FUNDING.yml file existence [most recent]
 │   ├── has_funding_json              ← repo /funding.json (FLOSS/fund)  [most recent]
 │   ├── host / host_type             ← foundation rosters + funding/overrides.csv [most recent]
 │   ├── owner / owner_type            ← funding/overrides.csv (GitHub-org backing)  [most recent]
@@ -231,7 +231,8 @@ are **not scored dimensions** and do not affect `score`.
 
 - **`intent`** (`bool`, default `false`) — `true` when the repo has expressed a
   way to be funded: GitHub Sponsors enabled (`gh_sponsors_enabled`), a resolved
-  funding link (`has_funding_links`), a `funding.json` (FLOSS Fund, repo or owner), an npm
+  funding link (`has_funding_links`), a FUNDING.yml file (`has_funding_yml`), a
+  `funding.json` (FLOSS Fund, repo or owner), an npm
   `funding` field, a PyPI project-URLs funding entry, an Open Collective slug, or an
   institutional host or owner. "Intent" means the project is
   actively seeking or accepting support.

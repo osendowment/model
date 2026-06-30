@@ -1,19 +1,23 @@
 """Fetch declared funding channels per risk-scope repo, via GitHub GraphQL.
 
-Source: `repository.fundingLinks` — GitHub's *resolved* funding links, i.e.
-exactly what the "Sponsor this project" sidebar widget shows. This resolves a
-repo's FUNDING.yml wherever it lives (`.github/`, repo root, `docs/`, or an
-org-level `.github` default), so it catches channels a raw
-`.github/FUNDING.yml` GET would miss. Example: tukaani-project/xz declares
-`liberapay.com/Larhzu` through the widget with no FUNDING.yml in the repo tree
-at all — the old contents-API fetch recorded it as unfunded.
+Two complementary signals, both from one batched GraphQL query:
+
+1. `has_funding_links` — `repository.fundingLinks`, GitHub's *resolved* funding
+   links (exactly what the "Sponsor this project" widget shows). This resolves a
+   repo's FUNDING.yml wherever it lives (`.github/`, repo root, `docs/`, or an
+   org-level `.github` default) and reports the actual links — so it catches
+   channels a raw file GET would miss (e.g. tukaani-project/xz's `liberapay`).
+2. `has_funding_yml` — whether a FUNDING.yml *file* exists for the repo (any of
+   the three locations) or its owner (`<owner>/.github`), via `object()` lookups.
+   This catches an empty / malformed FUNDING.yml that resolves to no links: the
+   file's mere existence still signals intent.
 
 Writes data/sources/github/funding-yml.csv:
-    repo, repo_id, has_funding_links, funding_link_platforms,
+    repo, repo_id, has_funding_links, has_funding_yml, funding_link_platforms,
     <one column per platform in FUNDING_PLATFORMS>, fetched_at
 
-`has_funding_links` = the repo declares at least one funding link (the columns
-are named for the GraphQL `fundingLinks` source, not a raw FUNDING.yml file).
+`has_funding_links` = the repo declares at least one resolved funding link.
+`has_funding_yml` = a FUNDING.yml file exists for the repo or its owner.
 `funding_link_platforms` = the canonical platform keys present (github, patreon, …).
 Each platform column holds that platform's handle(s) (comma-joined for a list):
 the `github` column is the lower-cased, deduped sponsor logins (so the sponsors
@@ -67,7 +71,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 FIELDS = (
-    ["repo", "repo_id", "has_funding_links", "funding_link_platforms"]
+    ["repo", "repo_id", "has_funding_links", "has_funding_yml", "funding_link_platforms"]
     + FUNDING_PLATFORMS
     + ["fetched_at"]
 )
@@ -111,13 +115,17 @@ def handle_from_link(platform: str, url: str) -> str:
     return path.rsplit("/", 1)[-1]
 
 
-def build_row(repo: str, funding_links: list[dict]) -> dict:
+def build_row(repo: str, funding_links: list[dict], has_yml: bool = False) -> dict:
     """Build one funding-yml.csv row from a repo's GraphQL fundingLinks list.
 
     `funding_links` is `[{"platform": "<ENUM>", "url": "<url>"}, ...]`. Handles
     are grouped per canonical platform, in first-seen order, deduped. `github`
     logins are additionally lower-cased (the sponsors fetcher comma-splits and
     lower-cases this column to count co-maintainer sponsorships).
+
+    `has_yml` records whether a FUNDING.yml *file* exists for the repo or its
+    owner (`has_funding_yml`) — independent of `has_funding_links` (the resolved
+    widget): an empty / malformed file yields no links but still signals intent.
     """
     by_platform: dict[str, list[str]] = {}
     for link in funding_links:
@@ -133,6 +141,7 @@ def build_row(repo: str, funding_links: list[dict]) -> dict:
     row = {
         "repo": repo,
         "has_funding_links": "True" if by_platform else "False",
+        "has_funding_yml": "True" if has_yml else "False",
         "funding_link_platforms": ",".join(by_platform),
     }
     for p in FUNDING_PLATFORMS:
@@ -152,9 +161,19 @@ def build_query(batch: list[str]) -> tuple[str, dict]:
     for i, repo in enumerate(batch):
         owner, _, name = repo.partition("/")
         decls.append(f"$o{i}:String!,$n{i}:String!")
+        # r{i}: the repo's resolved widget + whether a FUNDING.yml FILE exists at
+        # any of GitHub's three repo locations. g{i}: the owner's `.github` default
+        # FUNDING.yml. `object(expression:"HEAD:<path>")` is non-null iff the file
+        # exists; `name:".github"` is a constant (injection-safe).
         selections.append(
-            f"r{i}: repository(owner:$o{i}, name:$n{i}) "
-            f"{{ fundingLinks {{ platform url }} }}"
+            f"r{i}: repository(owner:$o{i}, name:$n{i}) {{ "
+            f"fundingLinks {{ platform url }} "
+            f'y1:object(expression:"HEAD:.github/FUNDING.yml"){{__typename}} '
+            f'y2:object(expression:"HEAD:FUNDING.yml"){{__typename}} '
+            f'y3:object(expression:"HEAD:docs/FUNDING.yml"){{__typename}} }} '
+            f'g{i}: repository(owner:$o{i}, name:".github") {{ '
+            f'z1:object(expression:"HEAD:FUNDING.yml"){{__typename}} '
+            f'z2:object(expression:"HEAD:.github/FUNDING.yml"){{__typename}} }}'
         )
         variables[f"o{i}"] = owner
         variables[f"n{i}"] = name
@@ -183,10 +202,16 @@ def rows_from_response(batch: list[str], body: dict) -> dict[str, dict]:
     for i, repo in enumerate(batch):
         alias = f"r{i}"
         node = payload.get(alias)
+        # Owner `.github` default FUNDING.yml (g{i} is null when the owner has no
+        # `.github` repo or no file — a NOT_FOUND alias, which we treat as absent).
+        gnode = payload.get(f"g{i}") or {}
+        owner_yml = bool(gnode.get("z1") or gnode.get("z2"))
         if node is not None:
-            rows[repo] = build_row(repo, node.get("fundingLinks") or [])
+            repo_yml = bool(node.get("y1") or node.get("y2") or node.get("y3"))
+            rows[repo] = build_row(repo, node.get("fundingLinks") or [],
+                                   repo_yml or owner_yml)
         elif alias in not_found:
-            rows[repo] = build_row(repo, [])
+            rows[repo] = build_row(repo, [], owner_yml)
         else:
             log.warning("funding-yml: no data for %s (errors: %s)", repo, errors[:1])
     return rows
@@ -237,11 +262,12 @@ def _write(rows: dict[str, dict]) -> None:
 async def batch(repos: list[str], force: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
     repo_ids = _load_repo_id_map()
-    # A repo with no funding link yet is rechecked sooner (funding_ttl_for); one
-    # that already declares a link is cached for the full TTL.
+    # A repo with no funding signal yet is rechecked sooner (funding_ttl_for); one
+    # that already has a resolved link OR a FUNDING.yml file is cached for the full TTL.
     fresh = set() if force else {
         r for r, row in existing.items()
-        if row_is_fresh(row, funding_ttl_for(row.get("has_funding_links") == "True"))
+        if row_is_fresh(row, funding_ttl_for(
+            row.get("has_funding_links") == "True" or row.get("has_funding_yml") == "True"))
     }
     to_fetch = [r for r in repos if r not in fresh]
     if limit and limit < len(to_fetch):

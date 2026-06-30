@@ -23,6 +23,7 @@ funding *others*) is **not** intent: it is not a funding channel for this repo.
 |---|---|---|
 | `gh_sponsors_enabled` | the repo owner has GitHub Sponsors enabled — a listing exists even with zero sponsors | `github` |
 | `has_funding_links` | the repo's resolved Sponsor widget (owner + repo) shows at least one funding link | `github` |
+| `has_funding_yml` | a FUNDING.yml file exists for the repo (`.github/`, root, `docs/`) or its owner (`<owner>/.github`) — even an empty / malformed one counts | `github` |
 | `has_funding_json` | the repo or its owner is registered in the FLOSS Fund directory | `floss_fund` |
 | `has_npm_funding` | the repo's npm package declares a funding field | `npm` |
 | `has_pypi_funding` | the repo's PyPI project declares a funding URL | `pypi` |
@@ -48,7 +49,7 @@ floss-fund → opencollective → (npm/pypi) → build.
 
 | Source | Fetcher | Gathers |
 |---|---|---|
-| `github/funding-yml.csv` | `github.fetch_funding_yml` | resolved FUNDING.yml funding links (platforms + handles) |
+| `github/funding-yml.csv` | `github.fetch_funding_yml` | resolved funding links (`has_funding_links`, platforms + handles) **and** FUNDING.yml file existence (`has_funding_yml`, repo + owner `.github`) |
 | `github/sponsors.csv` | `github.fetch_sponsors` | owner Sponsors enabled (`gh_sponsors_enabled`) + inbound count (`gh_sponsorships_in`, owner-only) |
 | `github/sponsorships.csv` | `github.fetch_sponsorships` | owner outbound sponsoring count (score proxy only) |
 | `floss-fund/funding-json.csv` | `floss_fund.funding_json` | FLOSS Fund manifest directory (repo + org-level) |

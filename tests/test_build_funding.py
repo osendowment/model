@@ -9,7 +9,7 @@ from src.risk.build_funding import _intent_flag, _nonprofit_flag
 def _row(**kw):
     base = {
         "gh_sponsorships_in": "", "gh_sponsors_enabled": "False",
-        "has_funding_links": "False", "has_funding_json": "False",
+        "has_funding_links": "False", "has_funding_yml": "False", "has_funding_json": "False",
         "has_npm_funding": "False", "has_pypi_funding": "False",
         "oc_slug": "", "host": "", "owner": "",
     }
@@ -24,6 +24,7 @@ def test_intent_false_when_no_signal():
 def test_intent_each_single_signal_is_true():
     assert _intent_flag(_row(gh_sponsors_enabled="True")) is True   # Sponsors enabled → intent
     assert _intent_flag(_row(has_funding_links="True")) is True
+    assert _intent_flag(_row(has_funding_yml="True")) is True       # FUNDING.yml file exists (even if empty)
     assert _intent_flag(_row(has_funding_json="True")) is True      # repo OR owner in FLOSS Fund
     assert _intent_flag(_row(has_npm_funding="True")) is True
     assert _intent_flag(_row(has_pypi_funding="True")) is True
