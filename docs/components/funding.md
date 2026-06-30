@@ -54,7 +54,8 @@ floss-fund → opencollective → (npm/pypi) → build.
 | `github/sponsors.csv` | `github.fetch_sponsors` | owner Sponsors enabled (`has_gh_sponsors`) + inbound count (`gh_sponsorships_in`, owner-only) |
 | `github/sponsorships.csv` | `github.fetch_sponsorships` | owner outbound sponsoring count (score proxy only) |
 | `floss-fund/funding-json.csv` | `floss_fund.funding_json` | FLOSS Fund manifest directory (repo + org-level) |
-| `opencollective/` | `opencollective.fetch_collectives` + `fetch_budgets` | OC collective↔repo map + gross annual budgets |
+| `opencollective/collectives.csv` | `opencollective.fetch_collectives` | OC collective↔repo map |
+| `opencollective/budgets.csv` | `opencollective.fetch_budgets` | gross annual budgets per collective |
 | `npm/funding.csv` | `npm.fetch_funding` | npm `package.json` `funding` field |
 | `pypi/funding.csv` | `pypi.fetch_funding` | PyPI `project_urls` funding entry |
 | `funding/host-by-repo.csv` | foundation scrapers (`sources/funding/`) | scraped FOSS-foundation host per repo |
