@@ -163,8 +163,8 @@ Microsoft, …). See [funding.md](components/funding.md).
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 654 | 73.1% |
-| intent — no funding signal | 241 | 26.9% |
+| intent — any funding signal | 655 | 73.2% |
+| intent — no funding signal | 240 | 26.8% |
 | nonprofit — community / independent | 834 | 93.2% |
 | nonprofit — company-backed | 61 | 6.8% |
 

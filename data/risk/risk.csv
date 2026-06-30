@@ -838,7 +838,7 @@ toml-rs/toml,95902102,86,84,14,74,52,True,True
 tootallnate/proxy-agents,11293703,62,62,69,58,63,False,True
 tootallnate/util-deprecate,19321056,100,10,67,47,42,False,True
 torvalds/linux,2325298,1,99,85,77,28,True,True
-tower-rs/tower,98244646,7,69,48,60,34,False,True
+tower-rs/tower,98244646,7,69,48,60,34,True,True
 tox-dev/filelock,17098256,50,42,19,36,35,True,True
 tox-dev/platformdirs,367032142,21,44,16,38,27,True,True
 tqdm/tqdm,36804486,80,70,50,78,68,True,True
