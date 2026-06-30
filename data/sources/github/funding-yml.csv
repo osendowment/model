@@ -1,4 +1,4 @@
-repo,repo_id,has_funding_link,funding_link_platforms,github,patreon,open_collective,ko_fi,tidelift,community_bridge,liberapay,issuehunt,lfx_crowdfunding,polar,buy_me_a_coffee,thanks_dev,otechie,custom,fetched_at
+repo,repo_id,has_funding_links,funding_link_platforms,github,patreon,open_collective,ko_fi,tidelift,community_bridge,liberapay,issuehunt,lfx_crowdfunding,polar,buy_me_a_coffee,thanks_dev,otechie,custom,fetched_at
 10der/homeassistant-custom_components-awtrix,748539167,,,,,,,,,,,,,,,,,2026-05-19T11:10:37+00:00
 7rulnik/source-map-js,330043541,False,,,,,,,,,,,,,,,,2026-06-29T23:53:53+00:00
 acornjs/acorn,5932749,False,,,,,,,,,,,,,,,,2026-06-29T23:53:53+00:00

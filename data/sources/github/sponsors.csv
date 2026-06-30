@@ -1,4 +1,4 @@
-repo,repo_id,gh_sponsorships_in,has_gh_sponsors,sponsors_status,fetched_at
+repo,repo_id,gh_sponsorships_in,gh_sponsors_enabled,sponsors_status,fetched_at
 10der/homeassistant-custom_components-awtrix,748539167,,,ok,2026-05-19T11:10:37+00:00
 7rulnik/source-map-js,330043541,2,True,ok,2026-06-30T10:25:20+00:00
 acornjs/acorn,5932749,0,False,ok,2026-06-30T10:25:27+00:00
