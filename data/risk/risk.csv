@@ -20,7 +20,7 @@ ajv-validator/ajv-keywords,60477053,79,49,50,79,63,True,True
 alexcrichton/tar-rs,21946092,8,70,21,69,30,False,True
 alexei/sprintf.js,9175790,71,21,71,71,52,False,True
 alexeyraspopov/picocolors,410740124,59,15,63,40,39,False,True
-alexhuszagh/rust-lexical,155286170,87,83,55,54,68,True,True
+alexhuszagh/rust-lexical,155286170,87,83,55,54,68,False,True
 alexindigo/asynckit,59087459,71,39,70,75,62,False,True
 amanieu/parking_lot,58731560,4,59,66,59,31,False,True
 andialbrecht/sqlparse,4067434,69,64,63,73,67,False,True
@@ -108,14 +108,14 @@ clap-rs/clap,31315121,71,85,42,62,63,True,True
 cloudflare/cloudflare-python,753271547,84,83,43,86,71,True,False
 colinhacks/zod,245704608,59,88,54,51,61,True,True
 colorjs/color-name,27038309,28,2,80,36,20,False,True
-comex/rust-shlex,37886228,23,41,56,58,42,True,True
+comex/rust-shlex,37886228,23,41,56,58,42,False,True
 component/escape-html,5444800,100,8,68,53,41,False,True
 component/toidentifier,114743189,100,8,65,42,38,False,True
 conventional-changelog/commitlint,51575745,7,64,42,47,31,False,True
 conventional-changelog/conventional-changelog,15639771,60,69,55,77,65,False,True
 cosmiconfig/cosmiconfig,45750507,26,52,45,65,45,True,True
 coveragepy/coveragepy,138421996,87,78,15,61,50,True,True
-cpburnz/python-pathspec,14648551,81,70,44,64,63,True,True
+cpburnz/python-pathspec,14648551,81,70,44,64,63,False,True
 crate-py/rpds,608018848,73,55,25,51,48,True,True
 criterion-rs/criterion.rs,1081104682,7,60,40,51,30,False,True
 crossbeam-rs/crossbeam,35566048,70,73,46,80,66,False,True
@@ -190,7 +190,7 @@ estools/esutils,14677293,100,53,67,80,73,False,True
 ethers-io/ethers.js,63465664,100,91,62,92,85,True,True
 evanw/esbuild,61137153,87,94,75,88,86,False,True
 evanw/node-source-map-support,7682781,25,66,68,77,54,False,True
-eventualbuddha/lines-and-columns,47284288,83,7,70,39,35,True,True
+eventualbuddha/lines-and-columns,47284288,83,7,70,39,35,False,True
 executablebooks/markdown-it-py,249956697,64,70,45,73,62,False,True
 executablebooks/mdurl,387293763,86,56,64,64,67,False,True
 exodusoss/bytes,885154008,90,73,39,83,68,False,True
@@ -339,8 +339,8 @@ jaraco/jaraco.develop,48289082,82,32,47,47,49,True,True
 jaraco/pytest-perf,372026120,78,20,51,29,39,True,True
 jaraco/zipp,157774633,79,34,46,27,43,True,True
 jaredhanson/utils-merge,11349896,100,12,68,55,46,True,True
-jaredwray/cacheable,9267870,79,66,36,34,50,True,True
-jaredwray/keyv,96540810,83,64,49,31,53,True,True
+jaredwray/cacheable,9267870,79,66,36,34,50,False,True
+jaredwray/keyv,96540810,83,64,49,31,53,False,True
 jawah/charset_normalizer,200259335,86,73,8,39,37,True,True
 jbgutierrez/path-parse,34113780,57,18,84,46,45,False,True
 jd/tenacity,65468547,6,39,20,54,22,True,True
@@ -407,7 +407,7 @@ json5/json5,4463453,71,57,83,77,71,False,True
 juliangruber/balanced-match,13538817,80,31,35,36,42,True,True
 juliangruber/brace-expansion,13539234,66,43,42,36,46,True,True
 juliangruber/isarray,10227611,78,4,23,12,17,True,True
-justmoon/node-extend,3967764,86,43,62,55,60,True,True
+justmoon/node-extend,3967764,86,43,62,55,60,False,True
 jviereck/regjsparser,14087781,23,58,51,40,41,False,True
 ka-weihe/fastest-levenshtein,158960628,56,26,70,34,43,False,True
 kaelzhang/node-ignore,12519245,81,41,67,55,59,True,True
@@ -482,7 +482,7 @@ mathiasbynens/regenerate,10182772,100,55,68,85,75,True,True
 mathiasbynens/regexpu-core,49437324,27,65,63,26,41,True,True
 mathiasbynens/unicode-canonical-property-names-ecmascript,88346537,100,5,65,39,34,True,True
 mathiasbynens/unicode-property-aliases-ecmascript,88333533,82,17,66,34,42,True,True
-matklad/once_cell,143220272,9,63,56,32,32,True,True
+matklad/once_cell,143220272,9,63,56,32,32,False,True
 matplotlib/matplotlib,1385122,5,93,9,40,20,True,True
 mcollina/fastq,37368217,59,36,48,49,47,True,True
 mcollina/reusify,42106515,78,11,48,48,37,True,True
@@ -548,7 +548,7 @@ npm/ssri,193817839,22,12,39,13,19,True,False
 npm/unique-slug,35246620,64,4,31,11,17,True,False
 npm/write-file-atomic,23896209,56,13,28,8,20,True,False
 numpy/numpy,908607,2,96,16,63,21,True,True
-nv/cssom,1025209,63,72,68,83,71,True,True
+nv/cssom,1025209,63,72,68,83,71,False,True
 nvzqz/static-assertions,100129252,100,27,64,89,63,True,True
 oauthlib/oauthlib,2811323,23,68,30,69,42,True,True
 octokit/openapi-types.ts,304109193,61,26,31,26,34,True,False
@@ -637,7 +637,7 @@ qix-/color-convert,1874305,63,41,75,64,59,True,True
 qix-/node-error-ex,41388258,100,29,83,56,61,True,True
 qix-/node-is-arrayish,41376759,100,7,84,29,36,True,True
 radix-ui/primitives,273499522,13,75,53,81,45,True,False
-raszi/node-tmp,2313213,29,57,73,26,42,True,True
+raszi/node-tmp,2313213,29,57,73,26,42,False,True
 raynos/for-each,6006855,87,21,62,45,48,True,True
 raynos/function-bind,10727014,87,21,49,55,47,True,True
 rayon-rs/either,42479602,52,27,53,45,43,False,True
@@ -792,8 +792,8 @@ snowflakedb/snowflake-connector-python,62262074,4,87,50,68,33,True,True
 socketio/socket.io,557980,79,89,48,17,49,True,True
 sqlalchemy/sqlalchemy,159271175,62,90,42,65,62,True,True
 sqlite/sqlite,176278485,58,98,62,69,70,True,False
-srijs/rust-crc32fast,157348282,81,28,62,56,53,True,True
-stebalien/tempfile,33832372,54,49,29,32,40,True,True
+srijs/rust-crc32fast,157348282,81,28,62,56,53,False,True
+stebalien/tempfile,33832372,54,49,29,32,40,False,True
 stefanpenner/get-caller-file,48818175,100,12,71,48,45,False,True
 storybookjs/storybook,54173593,6,96,47,71,37,True,False
 stream-utils/destroy,15544623,100,29,65,55,57,False,True

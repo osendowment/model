@@ -163,15 +163,19 @@ Microsoft, …). See [funding.md](components/funding.md).
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 666 | 74.4% |
-| intent — no funding signal | 229 | 25.6% |
+| intent — any funding signal | 654 | 73.1% |
+| intent — no funding signal | 241 | 26.9% |
 | nonprofit — community / independent | 834 | 93.2% |
 | nonprofit — company-backed | 61 | 6.8% |
 
-The 61 company-backed repos are **kept in `risk.csv`** and flagged
-`nonprofit=false` (they are already resourced; filter by the flag to restrict
-to endowment candidates). The 229 repos with `intent=False` are not actively
-soliciting support — a higher-priority target for outreach.
+`intent=true` is the endowment's candidate filter — a repo that expressed a way
+to be funded (a foundation/institutional host, or ≥1 funding channel: GitHub
+Sponsors enabled/received, FUNDING.yml, funding.json, npm/PyPI funding, Open
+Collective). Sponsors count only when the sponsored account **owns** the repo,
+and **outbound** sponsoring (the owner funding others) is not intent — so a
+maintainer who merely sponsors other projects no longer shows false intent.
+The 61 company-backed repos are kept in `risk.csv` flagged `nonprofit=false`
+(already resourced; filter by the flag to restrict to candidates).
 
 ### Workload
 
