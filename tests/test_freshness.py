@@ -4,8 +4,10 @@ import datetime
 import os
 
 from src.common.freshness import (
+    FUNDING_EMPTY_RECHECK_DAYS,
     FUNDING_TTL_DAYS,
     file_is_fresh,
+    funding_ttl_for,
     row_is_fresh,
 )
 
@@ -53,6 +55,23 @@ class TestRowIsFresh:
     def test_ok_status_stays_fresh(self):
         row = {"fetched_at": _iso(1), "oc_status": "ok"}
         assert row_is_fresh(row, status_key="oc_status") is True
+
+
+class TestFundingTtlFor:
+    def test_signal_gets_full_window(self):
+        assert funding_ttl_for(True) == FUNDING_TTL_DAYS
+
+    def test_empty_gets_short_window(self):
+        assert funding_ttl_for(False) == FUNDING_EMPTY_RECHECK_DAYS
+        assert FUNDING_EMPTY_RECHECK_DAYS < FUNDING_TTL_DAYS
+
+    def test_empty_row_rechecked_sooner_than_signal_row(self):
+        """At an age between the two windows, an empty result is stale (refetched)
+        while a row carrying a signal is still fresh — the self-healing property."""
+        age = (FUNDING_EMPTY_RECHECK_DAYS + FUNDING_TTL_DAYS) / 2  # e.g. ~197 days
+        ts = {"fetched_at": _iso(age)}
+        assert row_is_fresh(ts, funding_ttl_for(False)) is False   # empty → recheck
+        assert row_is_fresh(ts, funding_ttl_for(True)) is True     # signal → cached
 
 
 class TestFileIsFresh:

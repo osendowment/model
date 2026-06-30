@@ -1,10 +1,15 @@
 """Shared TTL / freshness gating for the funding-intent discovery layer.
 
-Every funding source shares ONE TTL window (`FUNDING_TTL_DAYS`) so discovery is
-**idempotent within the window**: a re-run inside TTL finds every record fresh,
-fetches nothing, and rewrites nothing — identical output. A record whose status
-column holds an error value is never fresh, so a transient failure is always
-retried rather than cached as a genuine "no funding" result (auditability).
+Funding records are cached on **two** windows. A record that already carries a
+funding signal uses the full `FUNDING_TTL_DAYS` window — declared funding rarely
+disappears, so re-running inside it is a no-op (idempotency for *positive*
+results). A record with no signal yet uses the shorter
+`FUNDING_EMPTY_RECHECK_DAYS` window (`funding_ttl_for` maps the per-row boolean
+to the right one): the empties are the rows most likely to gain funding and the
+cheapest to re-query, so they self-heal instead of staying stale for a full year.
+A record whose status column holds an error value is never fresh, so a transient
+failure is always retried rather than cached as a genuine "no funding" result
+(auditability).
 
 Two gates, matching the two fetch shapes in this codebase:
 
@@ -21,12 +26,32 @@ import datetime
 import os
 import time
 
-# One TTL for the entire funding-intent discovery layer (days). Within this
-# window a re-run of any funding fetcher is a no-op — the idempotency guarantee.
+# One TTL for the entire funding-intent discovery layer (days). A record that
+# already carries a funding signal is cached for this full window — declared
+# funding rarely disappears, so re-running inside it is a no-op (the idempotency
+# guarantee for *positive* results).
 FUNDING_TTL_DAYS = 365
+
+# A record with NO funding signal yet (`has_funding_link=False`, 0 sponsors, …)
+# is the one most likely to GAIN one and the cheapest to re-query, so it is
+# rechecked on this much shorter window instead of the full TTL. This is what
+# keeps a freshly-added FUNDING.yml from staying invisible for up to a year
+# (the canonical miss: rust-lang/regex added a FUNDING.yml 1.5h after a fetch).
+FUNDING_EMPTY_RECHECK_DAYS = 30
 
 # Status values that mark a record as a failed fetch (never fresh → always retried).
 ERROR_STATUSES = ("error",)
+
+
+def funding_ttl_for(has_signal: bool) -> int:
+    """Per-row funding TTL: the full window for a row that already carries a
+    funding signal, the shorter recheck window for an empty/negative result.
+
+    The caller decides what "has a signal" means for its source (a funding link,
+    a non-zero sponsor count, an active sponsors listing); this just maps that
+    boolean to the right window so positive results stay idempotent while
+    negatives self-heal."""
+    return FUNDING_TTL_DAYS if has_signal else FUNDING_EMPTY_RECHECK_DAYS
 
 
 def row_is_fresh(

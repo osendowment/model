@@ -1,4 +1,8 @@
-from src.sources.github.fetch_sponsors import logins_for_repo, status_from_counts
+from src.sources.github.fetch_sponsors import (
+    _has_sponsor_signal,
+    logins_for_repo,
+    status_from_counts,
+)
 
 
 def test_logins_owner_plus_yml():
@@ -18,3 +22,13 @@ def test_logins_dedupe_owner_in_yml():
 def test_status_ok_vs_error():
     assert status_from_counts([0, 3], any_error=False) == "ok"
     assert status_from_counts([0], any_error=True) == "error"
+
+
+def test_has_sponsor_signal():
+    # no signal → rechecked on the short window
+    assert _has_sponsor_signal({"github_sponsors": "0", "owner_has_sponsors_listing": "False"}) is False
+    assert _has_sponsor_signal({}) is False
+    assert _has_sponsor_signal({"github_sponsors": "", "owner_has_sponsors_listing": ""}) is False
+    # any signal → cached for the full TTL
+    assert _has_sponsor_signal({"github_sponsors": "5", "owner_has_sponsors_listing": "False"}) is True
+    assert _has_sponsor_signal({"github_sponsors": "0", "owner_has_sponsors_listing": "True"}) is True

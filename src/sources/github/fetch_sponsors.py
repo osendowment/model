@@ -40,7 +40,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
-from src.common.freshness import FUNDING_TTL_DAYS, row_is_fresh
+from src.common.freshness import funding_ttl_for, row_is_fresh
 from src.common.repos import load_top_repos
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
 
@@ -82,6 +82,18 @@ def logins_for_repo(repo: str, yml_github: dict[str, str]) -> list[str]:
 def status_from_counts(counts: list[int], any_error: bool) -> str:
     """"error" if any queried login failed, else "ok"."""
     return "error" if any_error else "ok"
+
+
+def _has_sponsor_signal(row: dict) -> bool:
+    """True if a stored row already carries an inbound-sponsor signal — a non-zero
+    public sponsor count or an active owner Sponsors listing. Rows without one are
+    rechecked on the shorter funding window (they may gain sponsors)."""
+    try:
+        count = int((row.get("github_sponsors") or "0").strip() or "0")
+    except ValueError:
+        count = 0
+    listing = (row.get("owner_has_sponsors_listing") or "").strip() == "True"
+    return count > 0 or listing
 
 
 async def fetch_sponsors_for_login(session, limiter, login: str) -> tuple[int, bool, bool]:
@@ -157,11 +169,14 @@ async def batch(repos: list[str], force: bool, limit: int | None, concurrency: i
     existing = _load_existing()
     repo_ids = _load_map(GH_REPOS_FILE, "repo", "repo_id")
     yml_github = _load_map(FUNDING_YML_FILE, "repo", "github")
-    # Within the shared 365-day funding TTL a re-run is a no-op (idempotent); an
-    # "error" sponsors_status is never fresh, so failed fetches are always retried.
+    # A re-run is a no-op within the TTL (idempotent); an "error" sponsors_status
+    # is never fresh, so failed fetches are always retried. A repo with no sponsor
+    # signal yet (0 sponsors AND no owner listing) is rechecked on the shorter
+    # window — it is the one likely to gain sponsors and cheap to re-query.
     fresh = set() if force else {
         r for r, row in existing.items()
-        if row_is_fresh(row, FUNDING_TTL_DAYS, status_key="sponsors_status")
+        if row_is_fresh(row, funding_ttl_for(_has_sponsor_signal(row)),
+                        status_key="sponsors_status")
     }
     to_fetch = [r for r in repos if r not in fresh]
     if limit and limit < len(to_fetch):

@@ -61,7 +61,10 @@ Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 ## How It Works
 
 1. **Collect** — five fetchers pull raw funding signals into `data/sources/`,
-   each TTL-controlled so re-runs only fetch what's missing or stale.
+   each TTL-controlled so re-runs only fetch what's missing or stale. A repo that
+   already carries a signal is cached for the full TTL (365 d); one with **no**
+   signal yet is rechecked on a shorter window (`FUNDING_EMPTY_RECHECK_DAYS`), so
+   a newly-added FUNDING.yml / Sponsors listing surfaces in weeks, not a year.
 2. **Join** — `build_funding.py` joins the sources onto the risk repos
    (by `repo`, by owner `login` for outbound sponsoring, by OC `slug`).
 3. **Derive** — combine raw signals (`gh_sponsorships`, `channels_count`,
