@@ -1,7 +1,7 @@
 """Fetch Eclipse Foundation projects from the official Eclipse projects API.
 
 Source: https://projects.eclipse.org/api/projects (paginated JSON)
-Output: data/sources/funding/eclipse/projects.csv
+Output: data/sources/funding/foundations/eclipse-foundation.csv
 
 Usage:
     uv run python -m src.sources.funding.eclipse

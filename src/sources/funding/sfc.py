@@ -4,7 +4,7 @@ SFC is a fiscal sponsor — it holds trademarks and assets for projects like
 Git, Inkscape, BusyBox, Wine. The site has no API, so we parse the
 projects listing HTML.
 
-Output: data/sources/funding/sfc/projects.csv
+Output: data/sources/funding/foundations/software-freedom-conservancy.csv
 
 Usage:
     uv run python -m src.sources.funding.sfc

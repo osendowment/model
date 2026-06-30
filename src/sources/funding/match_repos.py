@@ -1,6 +1,6 @@
 """Determine which foundation hosts each repo.
 
-Reads every `data/sources/funding/{slug}/projects.csv` and builds three indexes:
+Reads every `data/sources/funding/foundations/<foundation>.csv` and builds three indexes:
   1. github_slug → host (e.g. `apache/kafka` → apache)
   2. github_org  → host (e.g. `apache/*`    → apache)
   3. apex_domain → host (e.g. `numpy.org`   → numfocus)
@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 from rich.console import Console
 from rich.table import Table
 
-from src.sources.funding._common import DATA_DIR
+from src.sources.funding._common import DATA_DIR, out_path
 
 console = Console()
 
@@ -129,10 +129,10 @@ GENERIC_DOMAINS: set[str] = {
 def _load_foundation_index(slug: str) -> tuple[set[str], set[str], str]:
     """Return (`owner/name` slugs, apex domains, fetched_at) for one foundation.
 
-    `fetched_at` is the projects.csv audit timestamp (first non-empty value), or
+    `fetched_at` is the project-list audit timestamp (first non-empty value), or
     "" for a legacy file written before the audit column existed.
     """
-    path = DATA_DIR / slug / "projects.csv"
+    path = out_path(slug)
     if not path.exists():
         return set(), set(), ""
     slugs: set[str] = set()

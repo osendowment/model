@@ -114,9 +114,25 @@ def extract_package(*texts: str) -> tuple[str, str]:
     return "", ""
 
 
+# Each foundation's project list is one file under data/sources/funding/
+# foundations/, named by the foundation's full (kebab-case) name. The scraper
+# SLUG (the short host label used in host-by-repo.csv) maps to that filename here.
+FOUNDATION_FILE = {
+    "apache": "apache-software-foundation",
+    "cncf": "cloud-native-computing-foundation",
+    "eclipse": "eclipse-foundation",
+    "lf": "linux-foundation",
+    "numfocus": "numfocus",
+    "openjs": "openjs-foundation",
+    "psf": "python-software-foundation",
+    "sfc": "software-freedom-conservancy",
+}
+
+
 def out_path(slug: str) -> Path:
-    """Standard output path: data/sources/funding/{slug}/projects.csv."""
-    p = DATA_DIR / slug / "projects.csv"
+    """Project-list path: data/sources/funding/foundations/<full-name>.csv."""
+    name = FOUNDATION_FILE.get(slug, slug)
+    p = DATA_DIR / "foundations" / f"{name}.csv"
     p.parent.mkdir(parents=True, exist_ok=True)
     return p
 
