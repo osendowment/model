@@ -26,9 +26,9 @@ columns are computed by `build_funding.py`.
 Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 │
 ├── GitHub Sponsors
-│   ├── gh_sponsors_in        ← GraphQL sponsorshipsAsMaintainer (owner + FUNDING.yml github logins)  [most recent]
-│   ├── gh_sponsors_out       ← GraphQL sponsorshipsAsSponsor   (repo owner account)                  [most recent]
-│   ├── gh_sponsorships       ← derived (in + out, total engagement)                                  [most recent]
+│   ├── has_gh_sponsors       ← GraphQL hasSponsorsListing on the OWNER (Sponsors enabled → intent)   [most recent]
+│   ├── gh_sponsors           ← GraphQL sponsorshipsAsMaintainer of the OWNER only (inbound count)    [most recent]
+│   ├── gh_sponsorships       ← derived (gh_sponsors + outbound, total engagement — score axis only)  [most recent]
 │   └── gh_sponsorships_p     ← derived (worst-pinned CDF risk percentile of gh_sponsorships)         [most recent]
 │
 ├── Funding links  (GraphQL repository.fundingLinks — the "Sponsor" widget)
@@ -106,20 +106,28 @@ Five sources feed the build. Each fetcher records a `*_status` and/or
 `gh_stars` / `gh_forks` are read from `data/sources/github/repos.csv` (GitHub
 `/repos`) and carried as informational columns — they are **not** scored.
 
-### GitHub Sponsors — inbound vs outbound
+### GitHub Sponsors — ownership rule, inbound vs outbound
 
-GitHub sponsorship has two directions, and they mean opposite things:
+Sponsors are attributed to a repo **only when the sponsored account owns it.**
+A co-maintainer named in a repo's FUNDING.yml is not the owner, and their
+personal Sponsors fund their *whole portfolio* (e.g. `ljharb` backs dozens of
+packages), so crediting all of those to one repo over-states its funding. We
+therefore count only the repo **owner's** sponsors. The FUNDING.yml link still
+marks the repo as having a funding channel (`has_funding_link`); we just don't
+inflate its measured count with a non-owner's sponsors.
 
 | Metric | GraphQL field | Meaning |
 |---|---|---|
-| `gh_sponsors_in` | `sponsorshipsAsMaintainer` | accounts **sponsoring** this repo's owner (+ `github:` logins in FUNDING.yml) |
-| `gh_sponsors_out` | `sponsorshipsAsSponsor` | accounts the repo's **owner sponsors** (the org's "Sponsoring N") |
+| `has_gh_sponsors` | `hasSponsorsListing` (owner) | the owner has GitHub Sponsors **enabled** — a funding channel exists even at 0 sponsors → **intent** |
+| `gh_sponsors` | `sponsorshipsAsMaintainer` (owner) | accounts **sponsoring** the repo's owner (inbound count) |
+| outbound | `sponsorshipsAsSponsor` (owner) | accounts the **owner sponsors** — folded into `gh_sponsorships`, see below |
 
-`gh_sponsors_out` is an account-level property, so `sponsorships.csv` is keyed
-by `login` (~412 owner logins, ~half the per-repo count) and gap-fills only new
-owners. A repo whose owner sponsors others (e.g. `astral-sh`, "Sponsoring 39")
-is a *resourced* backer, not an unfunded project — which is why the score uses
-**`in + out`** rather than `in − out`.
+Outbound sponsoring is an account-level property, so `sponsorships.csv` is keyed
+by `login` (~412 owner logins) and gap-fills only new owners. A repo whose owner
+sponsors others (e.g. `astral-sh`, "Sponsoring 39") is a *resourced* backer, not
+an unfunded project — so the **score** axis `gh_sponsorships` adds outbound to
+inbound (`gh_sponsors + outbound`). Outbound is **not** an intent signal, though:
+funding *others* is not a funding channel for this repo.
 
 ### funding.json from the FLOSS Fund directory
 
@@ -157,7 +165,7 @@ in `.env` to lift it. `oc_avg_funding` is the mean over years with data.
 
 | Column | Formula |
 |---|---|
-| `gh_sponsorships` | `gh_sponsors_in + gh_sponsors_out` |
+| `gh_sponsorships` | `gh_sponsors + outbound` (outbound from `sponsorships.csv`) |
 | `channels_count` | distinct platforms across funding links ∪ funding.json ∪ org-level channels |
 | `has_funding_json` | repo URL present in the FLOSS Fund export (incl. redirect-resolved) |
 | `org_fundable` | repo's owner has an org-level FLOSS manifest (`github.com/<org>`) |
@@ -242,9 +250,9 @@ in each source file.
 | Column | Description |
 |---|---|
 | `repo`, `repo_id` | identity |
-| `gh_sponsors_in` | inbound GitHub Sponsors count |
-| `gh_sponsors_out` | outbound sponsoring count (owner) |
-| `gh_sponsorships` | `in + out` |
+| `has_gh_sponsors` | owner has GitHub Sponsors **enabled** (`hasSponsorsListing`) — a funding channel → intent |
+| `gh_sponsors` | inbound GitHub Sponsors count for the **owner only** |
+| `gh_sponsorships` | `gh_sponsors + outbound` (owner's outbound from `sponsorships.csv`) — score axis only |
 | `gh_sponsorships_p` | risk percentile of `gh_sponsorships` |
 | `gh_stars`, `gh_forks` | GitHub stars / forks (informational, not scored) |
 | `has_funding_link` | repo declares ≥1 funding link (GitHub's resolved `fundingLinks`) |
@@ -277,11 +285,14 @@ signals and joins them into `risk.csv`:
 
 ### `intent` and `nonprofit` flags
 
-**`intent`** (`bool`, default `false`) — `true` when the repo shows at least
-one funding signal: GitHub Sponsors (inbound or outbound), a `.github/FUNDING.yml`,
-a `funding.json` (FLOSS Fund), an npm `funding` field, a PyPI project-URLs
-funding entry, an Open Collective slug, or an institutional host or owner.
-"Intent" means the project is actively seeking or accepting support.
+**`intent`** (`bool`, default `false`) — `true` when the repo has expressed a way
+to be funded: GitHub Sponsors **enabled** on the owner (`has_gh_sponsors`) or with
+sponsors (`gh_sponsors > 0`), a `.github/FUNDING.yml`, a `funding.json` (FLOSS
+Fund), an npm `funding` field, a PyPI project-URLs funding entry, an Open
+Collective slug, or an institutional host or owner. "Intent" means the project
+is set up to seek or accept support — it is the endowment's candidate filter.
+Outbound sponsoring (the owner funding *others*) is **not** intent: it is not a
+funding channel for this repo, only a resourcing proxy in the score.
 
 **`nonprofit`** (`bool`, default `true`) — `false` only when a corporate entity
 (Meta, Google, Microsoft, AWS, …) is the project's host or owner, as determined by
@@ -304,8 +315,8 @@ for current per-channel coverage over the top repos and the score distribution.
   override and no scraped foundation host still shows little off-platform signal
   (corporate payroll, private grants, VC) — except via
   the outbound-sponsoring proxy. `astral-sh/ruff` is the canonical case: VC-backed
-  yet `gh_sponsors_in = 0`, landing at `score` 48 only because its outbound signal
-  flags it as a well-resourced backer.
+  yet `gh_sponsors = 0`, landing at `score` 48 only because its outbound signal
+  flags it as a well-resourced backer (outbound feeds the score but not intent).
 - **funding.json is still negligible** (6 repos) — the structured-manifest
   ecosystem hasn't reached this cohort. `has_funding_json` is informational, not
   yet a scoring input.

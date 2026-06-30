@@ -5,18 +5,10 @@ from src.sources.github.fetch_sponsors import (
 )
 
 
-def test_logins_owner_plus_yml():
-    yml = {"owner/repo": "alice,bob"}  # funding_yml_github map
-    assert logins_for_repo("owner/repo", yml) == ["owner", "alice", "bob"]
-
-
-def test_logins_owner_only_when_no_yml():
-    assert logins_for_repo("owner/repo", {}) == ["owner"]
-
-
-def test_logins_dedupe_owner_in_yml():
-    yml = {"owner/repo": "owner,carol"}
-    assert logins_for_repo("owner/repo", yml) == ["owner", "carol"]
+def test_logins_owner_only():
+    # Sponsors count only for the account that OWNS the repo — never co-maintainers.
+    assert logins_for_repo("owner/repo") == ["owner"]
+    assert logins_for_repo("Owner/Repo") == ["owner"]  # lower-cased
 
 
 def test_status_ok_vs_error():
@@ -26,9 +18,9 @@ def test_status_ok_vs_error():
 
 def test_has_sponsor_signal():
     # no signal → rechecked on the short window
-    assert _has_sponsor_signal({"github_sponsors": "0", "owner_has_sponsors_listing": "False"}) is False
+    assert _has_sponsor_signal({"gh_sponsors": "0", "has_gh_sponsors": "False"}) is False
     assert _has_sponsor_signal({}) is False
-    assert _has_sponsor_signal({"github_sponsors": "", "owner_has_sponsors_listing": ""}) is False
-    # any signal → cached for the full TTL
-    assert _has_sponsor_signal({"github_sponsors": "5", "owner_has_sponsors_listing": "False"}) is True
-    assert _has_sponsor_signal({"github_sponsors": "0", "owner_has_sponsors_listing": "True"}) is True
+    assert _has_sponsor_signal({"gh_sponsors": "", "has_gh_sponsors": ""}) is False
+    # any signal (sponsors count OR Sponsors enabled) → cached for the full TTL
+    assert _has_sponsor_signal({"gh_sponsors": "5", "has_gh_sponsors": "False"}) is True
+    assert _has_sponsor_signal({"gh_sponsors": "0", "has_gh_sponsors": "True"}) is True

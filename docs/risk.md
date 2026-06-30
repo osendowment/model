@@ -55,7 +55,7 @@ Risk
 │   └── bestpractices_badge_id        ← deps.dev (OpenSSF Best Practices) [most recent]
 │
 ├── Funding (signals only — not scored)  →  data/risk/funding.csv
-│   ├── github_sponsors               ← GitHub Sponsors API             [most recent]
+│   ├── has_gh_sponsors, gh_sponsors     ← GitHub Sponsors API (owner only) [most recent]
 │   ├── has_funding_link, _link_platforms ← GraphQL repository.fundingLinks [most recent]
 │   ├── has_funding_json              ← repo /funding.json (FLOSS/fund)  [most recent]
 │   ├── host / host_type             ← foundation rosters + funding/overrides.csv [most recent]
@@ -229,10 +229,10 @@ Scorecard axis; CVEs only re-rank the minority that carry them, above the neutra
 Two flag columns in `risk.csv` that describe the repo's funding context — they
 are **not scored dimensions** and do not affect `score`.
 
-- **`intent`** (`bool`, default `false`) — `true` when the repo shows at least
-  one funding signal: GitHub Sponsors (inbound or outbound),
-  a `.github/FUNDING.yml`, a `funding.json` (FLOSS Fund), an npm `funding`
-  field, a PyPI project-URLs funding entry, an Open Collective slug, or an
+- **`intent`** (`bool`, default `false`) — `true` when the repo has expressed a
+  way to be funded: GitHub Sponsors enabled / received (`has_gh_sponsors` /
+  `gh_sponsors`), a `.github/FUNDING.yml`, a `funding.json` (FLOSS Fund), an npm
+  `funding` field, a PyPI project-URLs funding entry, an Open Collective slug, or an
   institutional host or owner. "Intent" means the project is
   actively seeking or accepting support.
 - **`nonprofit`** (`bool`, default `true`) — `false` only when a corporate

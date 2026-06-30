@@ -3,10 +3,15 @@
 Writes data/sources/github/sponsors.csv:
     repo, repo_id, github_sponsors, owner_has_sponsors_listing, sponsors_status, fetched_at
 
-`github_sponsors` (inbound) = public sponsorships *received* by the repo owner
-plus every `github:` login in the repo's FUNDING.yml (read from
-data/sources/github/funding-yml.csv — run fetch_funding_yml first). Outbound
-sponsoring is a separate signal — see src.github.fetch_sponsorships.
+`github_sponsors` (inbound) = public sponsorships *received* by the repo OWNER
+only. Sponsors are attributed to a repo solely when the sponsored account owns
+it: a `github:` login in the repo's FUNDING.yml that is NOT the owner (a
+co-maintainer) is *not* counted — their sponsors fund that person's whole
+portfolio, not this one repo, so crediting them here over-states the repo's
+funding. The FUNDING.yml link still marks the repo as having a funding channel
+(`has_funding_link`, handled by build_funding); this fetcher just measures the
+owner's actual sponsor count. Outbound sponsoring is a separate signal — see
+src.github.fetch_sponsorships.
 `owner_has_sponsors_listing` = the repo OWNER has an active GitHub Sponsors
 profile (`hasSponsorsListing`), i.e. is set up to receive sponsors even when the
 public count is 0 — a sustainability-intent signal in its own right. Scoped to
@@ -49,9 +54,8 @@ log = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "sponsors.csv"
-FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
-FIELDS = ["repo", "repo_id", "github_sponsors", "owner_has_sponsors_listing",
+FIELDS = ["repo", "repo_id", "gh_sponsors", "has_gh_sponsors",
           "sponsors_status", "fetched_at"]
 
 SPONSORS_QUERY = """
@@ -66,17 +70,15 @@ query($login: String!) {
 """
 
 
-def logins_for_repo(repo: str, yml_github: dict[str, str]) -> list[str]:
-    """Owner login + FUNDING.yml `github:` logins (deduped, owner first)."""
-    owner = repo.split("/", 1)[0].lower()
-    extra = [u.strip().lower() for u in (yml_github.get(repo, "") or "").split(",") if u.strip()]
-    seen: set[str] = set()
-    out: list[str] = []
-    for u in [owner, *extra]:
-        if u and u not in seen:
-            seen.add(u)
-            out.append(u)
-    return out
+def logins_for_repo(repo: str) -> list[str]:
+    """The login whose inbound sponsors count for this repo: its OWNER, only.
+
+    Sponsors are attributed to a repo solely when the sponsored account owns it.
+    A co-maintainer named in FUNDING.yml does not own the repo, and their personal
+    sponsors fund their whole portfolio rather than this project — so we do not
+    count them here (the FUNDING.yml link is still a funding-channel signal,
+    surfaced separately via has_funding_link)."""
+    return [repo.split("/", 1)[0].lower()]
 
 
 def status_from_counts(counts: list[int], any_error: bool) -> str:
@@ -85,15 +87,15 @@ def status_from_counts(counts: list[int], any_error: bool) -> str:
 
 
 def _has_sponsor_signal(row: dict) -> bool:
-    """True if a stored row already carries an inbound-sponsor signal — a non-zero
-    public sponsor count or an active owner Sponsors listing. Rows without one are
-    rechecked on the shorter funding window (they may gain sponsors)."""
+    """True if a stored row already carries a sponsor signal — a non-zero public
+    sponsor count or GitHub Sponsors enabled (an active listing). Rows without one
+    are rechecked on the shorter funding window (they may gain sponsors)."""
     try:
-        count = int((row.get("github_sponsors") or "0").strip() or "0")
+        count = int((row.get("gh_sponsors") or "0").strip() or "0")
     except ValueError:
         count = 0
-    listing = (row.get("owner_has_sponsors_listing") or "").strip() == "True"
-    return count > 0 or listing
+    enabled = (row.get("has_gh_sponsors") or "").strip() == "True"
+    return count > 0 or enabled
 
 
 async def fetch_sponsors_for_login(session, limiter, login: str) -> tuple[int, bool, bool]:
@@ -120,19 +122,15 @@ async def fetch_sponsors_for_login(session, limiter, login: str) -> tuple[int, b
     return count, listing, True
 
 
-async def fetch_one(session, limiter, repo: str, yml_github: dict[str, str]) -> dict:
-    logins = logins_for_repo(repo, yml_github)
-    results = await asyncio.gather(
-        *(fetch_sponsors_for_login(session, limiter, login) for login in logins))
-    total = sum(c for c, _, _ in results)
-    any_error = any(not ok for _, _, ok in results)
-    # logins_for_repo puts the repo OWNER first; the listing signal is owner-scoped.
-    owner_listing = results[0][1] if results else False
+async def fetch_one(session, limiter, repo: str) -> dict:
+    # Only the repo OWNER's sponsors count (see logins_for_repo / module docstring).
+    (owner,) = logins_for_repo(repo)
+    count, enabled, ok = await fetch_sponsors_for_login(session, limiter, owner)
     return {
         "repo": repo,
-        "github_sponsors": str(total),
-        "owner_has_sponsors_listing": "True" if owner_listing else "False",
-        "sponsors_status": status_from_counts([c for c, _, _ in results], any_error),
+        "gh_sponsors": str(count),
+        "has_gh_sponsors": "True" if enabled else "False",
+        "sponsors_status": status_from_counts([count], not ok),
     }
 
 
@@ -168,7 +166,6 @@ def _write(rows: dict[str, dict]) -> None:
 async def batch(repos: list[str], force: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
     repo_ids = _load_map(GH_REPOS_FILE, "repo", "repo_id")
-    yml_github = _load_map(FUNDING_YML_FILE, "repo", "github")
     # A re-run is a no-op within the TTL (idempotent); an "error" sponsors_status
     # is never fresh, so failed fetches are always retried. A repo with no sponsor
     # signal yet (0 sponsors AND no owner listing) is rechecked on the shorter
@@ -191,7 +188,7 @@ async def batch(repos: list[str], force: bool, limit: int | None, concurrency: i
     async def one(repo: str) -> dict:
         async with sem:
             try:
-                return await fetch_one(session, limiter, repo, yml_github)
+                return await fetch_one(session, limiter, repo)
             except RuntimeError as e:
                 log.warning("sponsors failed for %s: %s", repo, e)
                 return {"repo": repo, "_error": str(e)}

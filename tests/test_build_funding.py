@@ -8,7 +8,7 @@ from src.risk.build_funding import _intent_flag, _nonprofit_flag
 
 def _row(**kw):
     base = {
-        "gh_sponsors_in": "", "gh_sponsors_out": "", "owner_has_sponsors_listing": "False",
+        "gh_sponsors": "", "has_gh_sponsors": "False",
         "has_funding_link": "False", "has_funding_json": "False", "org_fundable": "False",
         "has_npm_funding": "False", "has_pypi_funding": "False",
         "oc_slug": "", "host": "", "owner": "",
@@ -22,9 +22,8 @@ def test_intent_false_when_no_signal():
 
 
 def test_intent_each_single_signal_is_true():
-    assert _intent_flag(_row(gh_sponsors_in="3")) is True
-    assert _intent_flag(_row(gh_sponsors_out="1")) is True
-    assert _intent_flag(_row(owner_has_sponsors_listing="True")) is True
+    assert _intent_flag(_row(gh_sponsors="3")) is True
+    assert _intent_flag(_row(has_gh_sponsors="True")) is True   # Sponsors enabled → intent
     assert _intent_flag(_row(has_funding_link="True")) is True
     assert _intent_flag(_row(has_funding_json="True")) is True
     assert _intent_flag(_row(org_fundable="True")) is True
@@ -36,7 +35,7 @@ def test_intent_each_single_signal_is_true():
 
 
 def test_intent_zero_counts_are_false():
-    assert _intent_flag(_row(gh_sponsors_in="0", gh_sponsors_out="0")) is False
+    assert _intent_flag(_row(gh_sponsors="0")) is False
 
 
 def test_nonprofit_default_true():
@@ -66,7 +65,7 @@ def test_oc_avg_funding_zero_default():
 def test_assemble_row_stars_forks_sponsorships():
     row = bf.assemble_row(
         repo="o/r", repo_id="1",
-        sponsors={"github_sponsors": "12"},
+        sponsors={"gh_sponsors": "12"},
         yml={"has_funding_link": "True", "funding_link_platforms": "github"},
         export={}, host="", host_type="", owner="", owner_type="",
         repo_meta={"stars": "5000", "forks": "300"},
@@ -74,9 +73,9 @@ def test_assemble_row_stars_forks_sponsorships():
     )
     assert row["has_funding_link"] == "True"
     assert row["org_fundable"] == "False"      # no org-level manifest
-    assert row["gh_sponsors_in"] == "12"
-    assert row["gh_sponsors_out"] == "39"
-    assert row["gh_sponsorships"] == "51"      # in + out
+    assert row["gh_sponsors"] == "12"          # inbound (owner only)
+    assert "gh_sponsors_out" not in row        # outbound folded into gh_sponsorships
+    assert row["gh_sponsorships"] == "51"      # in + out (out from sponsoring_count)
     assert row["gh_stars"] == "5000"           # info column
     assert row["gh_forks"] == "300"            # info column
     assert row["oc_avg_funding"] == "0"        # no OC attributed → $0
@@ -91,7 +90,7 @@ def _base_mocks(monkeypatch, repos):
     """
     def rows_by_repo(p):
         if "sponsors.csv" in str(p):
-            return {"rich/r": {"github_sponsors": "100"}}
+            return {"rich/r": {"gh_sponsors": "100"}}
         return {}
     monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
     monkeypatch.setattr(bf, "load_rows_by_repo", rows_by_repo)
@@ -119,7 +118,7 @@ def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
     counted. An identical repo with no declared channel stays at 100."""
     def rows_by_repo(p):
         if "sponsors.csv" in str(p):
-            return {"rich/r": {"github_sponsors": "100"}}
+            return {"rich/r": {"gh_sponsors": "100"}}
         if "npm/funding.csv" in str(p):
             return {"npm/d": {"has_npm_funding": "True",
                               "npm_funding_url": "https://github.com/sponsors/x"}}
@@ -331,7 +330,7 @@ def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
             return {"link/lp": {"has_funding_link": "True", "funding_link_platforms": "liberapay"},
                     "gh/only": {"has_funding_link": "True", "funding_link_platforms": "github"}}
         if "sponsors.csv" in s:
-            return {"rich/r": {"github_sponsors": "100"}}
+            return {"rich/r": {"gh_sponsors": "100"}}
         return {}
     monkeypatch.setattr(bf, "load_top_repos",
                         lambda: [E("link/lp"), E("gh/only"), E("plain/p"), E("rich/r")])
