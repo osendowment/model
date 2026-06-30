@@ -23,8 +23,9 @@ GitHub's GraphQL `FundingPlatform` enum covers every platform in
 FUNDING_PLATFORMS except `otechie` (a dead platform GitHub dropped) — its
 column stays in the schema but is never populated here.
 
-TTL-controlled: re-runs only fetch repos missing or older than the shared
-funding TTL (FUNDING_TTL_DAYS = 365), so a re-run inside the window is a no-op.
+TTL-controlled: a repo that already declares a funding link is cached for the
+full funding TTL (FUNDING_TTL_DAYS = 365); a repo with no link yet is rechecked
+on the shorter FUNDING_EMPTY_RECHECK_DAYS window (it may have just added one).
 Repos are fetched in GraphQL batches (one aliased query per BATCH_SIZE repos),
 which is far cheaper than the previous one-REST-call-per-repo approach.
 
@@ -54,7 +55,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
-from src.common.freshness import row_is_fresh
+from src.common.freshness import funding_ttl_for, row_is_fresh
 from src.common.funding_platforms import FUNDING_PLATFORMS
 from src.common.repos import load_top_repos
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
@@ -236,7 +237,12 @@ def _write(rows: dict[str, dict]) -> None:
 async def batch(repos: list[str], force: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
     repo_ids = _load_repo_id_map()
-    fresh = set() if force else {r for r, row in existing.items() if row_is_fresh(row)}
+    # A repo with no funding link yet is rechecked sooner (funding_ttl_for); one
+    # that already declares a link is cached for the full TTL.
+    fresh = set() if force else {
+        r for r, row in existing.items()
+        if row_is_fresh(row, funding_ttl_for(row.get("has_funding_link") == "True"))
+    }
     to_fetch = [r for r in repos if r not in fresh]
     if limit and limit < len(to_fetch):
         to_fetch = to_fetch[:limit]

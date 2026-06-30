@@ -2,7 +2,7 @@
 """Build data/risk/funding.csv — funding signals + risk score per risk-scope repo.
 
 Reads (all under data/sources/):
-    github/sponsors.csv        — github_sponsors (inbound)  (src.github.fetch_sponsors)
+    github/sponsors.csv        — gh_sponsorships_in (inbound), has_gh_sponsors (src.github.fetch_sponsors)
     github/sponsorships.csv    — sponsoring_count (outbound) (src.github.fetch_sponsorships)
     github/funding-yml.csv     — has_funding_link / platforms (src.github.fetch_funding_yml)
     github/repos.csv           — stars, forks (info)          (src.github.fetch_repo_owner_data)
@@ -80,8 +80,9 @@ DECLARED_FUNDING_CAP = 79
 MEASURED_PLATFORMS = {"github", "open_collective"}
 
 FIELDS = ["repo", "repo_id",
-          "gh_sponsors_in", "gh_sponsors_out", "owner_has_sponsors_listing",
-          "gh_sponsorships", "gh_sponsorships_p",
+          "has_gh_sponsors",
+          "gh_sponsorships_in", "gh_sponsorships_out", "gh_sponsorships",
+          "gh_sponsorships_p",
           "gh_stars", "gh_forks",
           "has_funding_link", "funding_link_platforms", "has_funding_json", "org_fundable",
           "has_npm_funding", "npm_funding_url",
@@ -118,12 +119,15 @@ def _nonprofit_flag(host_type: str, owner_type: str) -> bool:
 
 
 def _intent_flag(row: dict) -> bool:
-    """Sustainability intent: True if the repo shows any funding signal — a live
-    sponsorship, the owner's GitHub Sponsors listing, a declared channel
-    (FUNDING.yml / funding.json / npm / PyPI / OC), or an institutional host/owner."""
+    """Sustainability intent: True if the repo has expressed a way to be funded —
+    GitHub Sponsors enabled on the owner (`has_gh_sponsors`) or with sponsors
+    (`gh_sponsorships_in`), a declared channel (FUNDING.yml / funding.json / npm / PyPI /
+    OC), or an institutional host/owner. Outbound sponsoring (the owner funding
+    *others*, folded into `gh_sponsorships`) is NOT intent — it is not a funding
+    channel for this repo, only a resourcing proxy used by the score."""
     return (
-        _to_int(row.get("gh_sponsors_in")) + _to_int(row.get("gh_sponsors_out")) > 0
-        or (row.get("owner_has_sponsors_listing") or "").strip() == "True"
+        _to_int(row.get("gh_sponsorships_in")) > 0
+        or (row.get("has_gh_sponsors") or "").strip() == "True"
         or (row.get("has_funding_link") or "").strip() == "True"
         or (row.get("has_funding_json") or "").strip() == "True"
         or (row.get("org_fundable") or "").strip() == "True"
@@ -217,14 +221,17 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         channels = channels | {"npm"}
     if has_pypi:
         channels = channels | {"pypi"}
-    gh_in = (sponsors.get("github_sponsors") or "").strip()
+    gh_in = (sponsors.get("gh_sponsorships_in") or "").strip()
+    # Outbound sponsoring (owner funds others) — a "resourced backer" proxy used by
+    # the score (gh_sponsorships = in + out) but NOT an intent signal: funding
+    # others is not a funding channel for this repo.
     gh_out = (sponsoring_count or "").strip()
     row = {
         "repo": repo,
         "repo_id": repo_id,
-        "gh_sponsors_in": gh_in,
-        "gh_sponsors_out": gh_out,
-        "owner_has_sponsors_listing": (sponsors.get("owner_has_sponsors_listing") or "").strip(),
+        "has_gh_sponsors": (sponsors.get("has_gh_sponsors") or "").strip(),
+        "gh_sponsorships_in": gh_in,
+        "gh_sponsorships_out": gh_out,
         "gh_sponsorships": str(_to_int(gh_in) + _to_int(gh_out)),
         "gh_stars": (repo_meta.get("stars") or "").strip(),
         "gh_forks": (repo_meta.get("forks") or "").strip(),
@@ -304,8 +311,8 @@ def _load_sponsoring(path: Path) -> dict[str, str]:
     return out
 
 
-def _load_funding_overrides(path: Path) -> dict[str, dict]:
-    """{repo_lower: {host, host_type, owner, owner_type}} from overrides.csv.
+def _load_funding_overrides(path: Path) -> tuple[dict[str, dict], dict[str, dict]]:
+    """Curated institutional backing → ``(by_repo, by_org)`` from overrides.csv.
 
     Schema: ``repo, host, host_type, gh_user, owner, owner_type, oc_slug``.
     `host` and `owner` are **domains** (the domain is the canonical name — no
@@ -313,29 +320,44 @@ def _load_funding_overrides(path: Path) -> dict[str, dict]:
     `oc_slug` is a curated Open Collective slug for projects that fund via OC but
     declare no FUNDING.yml (e.g. socketio).
 
-    Curated per-repo institutional backing — the foundation/company that hosts a
-    project and the entity that owns it. **Only a *legally connected* host
+    Two row shapes share the file:
+
+    - **Per-repo** rows (``owner/name``) → `by_repo`, keyed by the exact slug.
+    - **Org-level** rows whose `repo` is an ``owner/*`` glob → `by_org`, keyed by
+      the owner login. They apply to **every** risk-scope repo under that owner
+      that has no per-repo row — so one row covers a whole corporate org (e.g.
+      ``boto/* → amazon.com``, ``npm/* → github.com``) instead of N near-identical
+      rows. A per-repo row always wins over an org row (see build()).
+
+    Curated per-repo/per-org institutional backing — the foundation/company that
+    hosts a project and the entity that owns it. **Only a *legally connected* host
     counts**: the foundation must legally steward the project (e.g. the Apache
     Software Foundation legally holds Apache projects, the Rust Foundation holds
-    Rust) — a loose marketing/community association is not a host. A company that
-    legally owns the project is recorded as the `owner` instead.
+    the rust-lang org) — a loose marketing/community association is not a host. A
+    company that legally owns the project is recorded as the `owner` instead. An
+    ``owner/*`` row is only valid when the *whole* org is uniformly backed.
     """
-    out: dict[str, dict] = {}
+    by_repo: dict[str, dict] = {}
+    by_org: dict[str, dict] = {}
     if not path.exists():
-        return out
+        return by_repo, by_org
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             repo = (row.get("repo") or "").strip().lower()
             if not repo:
                 continue
-            out[repo] = {
+            rec = {
                 "host": (row.get("host") or "").strip(),
                 "host_type": (row.get("host_type") or "").strip(),
                 "owner": (row.get("owner") or "").strip(),
                 "owner_type": (row.get("owner_type") or "").strip(),
                 "oc_slug": (row.get("oc_slug") or "").strip(),
             }
-    return out
+            if repo.endswith("/*"):
+                by_org[repo[:-2]] = rec  # "boto/*" → key "boto"
+            else:
+                by_repo[repo] = rec
+    return by_repo, by_org
 
 
 def build() -> list[dict]:
@@ -344,7 +366,7 @@ def build() -> list[dict]:
     yml = load_rows_by_repo(FUNDING_YML_FILE)
     repos_meta = load_rows_by_repo(REPOS_FILE)
     foundations = load_column_by_repo(FOUNDATIONS_FILE, "host")
-    overrides = _load_funding_overrides(OVERRIDES_FILE)
+    overrides, org_overrides = _load_funding_overrides(OVERRIDES_FILE)
     export = _export_by_repo(FLOSS_FUND_FILE)
     fundable_orgs = _fundable_orgs(FLOSS_FUND_FILE)
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
@@ -379,7 +401,8 @@ def build() -> list[dict]:
     for entry in eligible:
         repo = entry.repo
         owner_login = repo.split("/", 1)[0].lower()
-        ov = overrides.get(repo.lower(), {})
+        # Per-repo override wins; else fall back to an org-level (owner/*) row.
+        ov = overrides.get(repo.lower()) or org_overrides.get(owner_login) or {}
         # host: override wins; otherwise the scraped FOSS-foundation host, which
         # is a nonprofit by definition. owner: from the override only.
         scraped_host = foundations.get(repo, "")

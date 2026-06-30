@@ -29,6 +29,7 @@ FETCHERS = [
     Step("npm-funding",   "src.sources.npm.fetch_funding",                fetch=True),
     Step("pypi-funding",  "src.sources.pypi.fetch_funding",               fetch=True),
     Step("sponsors",      "src.sources.github.fetch_sponsors",            fetch=True),
+    Step("sponsorships",  "src.sources.github.fetch_sponsorships",        fetch=True),
     Step("floss-fund",    "src.sources.floss_fund.funding_json",          fetch=True),
     Step("oc-collectives", "src.sources.opencollective.fetch_collectives", fetch=True),
     Step("opencollective", "src.sources.opencollective.fetch_budgets",    fetch=True),
