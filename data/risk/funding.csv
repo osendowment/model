@@ -47,7 +47,7 @@ aws/aws-sdk-js-v3,87228090,0,1,False,1,55.31,3610,677,False,,False,False,False,,
 axios/axios,23088740,20,0,True,20,33.41,109033,11654,True,"github,open_collective",False,False,False,,False,,2,axios,32031.31,1.68,,,,,1,18,True,True
 azure/azure-sdk-for-js,108311273,0,0,False,0,100.0,2290,1362,False,,False,False,False,,False,,0,,0,100.0,,,microsoft.com,company,0,1,True,False
 azure/azure-sdk-for-python,4127088,0,0,False,0,100.0,5531,3289,False,,False,False,False,,False,,0,,0,100.0,,,microsoft.com,company,0,1,True,False
-azuread/microsoft-authentication-library-for-python,67243113,0,0,False,0,100.0,958,214,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+azuread/microsoft-authentication-library-for-python,67243113,0,0,False,0,100.0,958,214,False,,False,False,False,,False,,0,,0,100.0,,,microsoft.com,company,0,1,True,False
 babel/babel,24560307,42,0,True,42,24.92,43896,5812,True,"github,open_collective",False,False,False,,False,,2,babel,65464.75,0.67,,,,,1,12,True,True
 babel/babel-polyfills,190579283,42,0,True,42,24.92,356,61,True,"github,open_collective",False,False,False,,False,,2,babel,65464.75,0.67,,,,,1,12,True,True
 babel/minify,55723051,42,0,True,42,24.92,4376,219,True,"github,open_collective",False,False,False,,False,,2,babel,65464.75,0.67,,,,,1,12,True,True
@@ -59,7 +59,7 @@ bitflags/bitflags,29287955,0,0,False,0,100.0,1124,163,False,,False,False,False,,
 blakeembrey/array-flatten,17789771,10,3,True,13,38.44,86,20,True,github,False,False,False,,False,,1,,0,100.0,,,,,1,73,True,True
 blakeembrey/change-case,9440238,10,3,True,13,38.44,2402,102,True,github,False,False,False,,False,,1,,0,100.0,,,,,1,73,True,True
 bluss/bencher,65987276,0,0,True,0,100.0,92,16,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
-bminor/glibc,13868694,0,0,False,0,100.0,1863,464,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+bminor/glibc,13868694,0,0,False,0,100.0,1863,464,False,,False,False,False,,False,,0,,0,100.0,fsf.org,nonprofit,,,0.5,79,True,True
 boto/boto3,24774658,0,0,False,0,100.0,9775,1968,False,,False,False,False,,False,,0,,0,100.0,,,amazon.com,company,0,1,True,False
 boto/botocore,6670942,0,0,False,0,100.0,1613,1153,False,,False,False,False,,False,,0,,0,100.0,,,amazon.com,company,0,1,True,False
 boto/s3transfer,49535299,0,0,False,0,100.0,232,152,False,,False,False,False,,False,,0,,0,100.0,,,amazon.com,company,0,1,True,False
@@ -82,8 +82,8 @@ burntsushi/ucd-generate,123997498,110,2,True,112,14.64,117,26,True,github,False,
 burntsushi/walkdir,42685794,110,2,True,112,14.64,1497,125,True,github,False,False,False,,False,,1,,0,100.0,,,,,1,53,True,True
 burntsushi/winapi-util,146040682,110,2,True,112,14.64,75,20,True,github,False,False,False,,False,,1,,0,100.0,,,,,1,53,True,True
 businho/pytest-ruff,599731435,0,0,False,0,100.0,35,9,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-bytecodealliance/rustix,295544240,0,0,False,0,100.0,1973,260,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-bytecodealliance/wasi-rs,196445196,0,0,False,0,100.0,351,63,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+bytecodealliance/rustix,295544240,0,0,False,0,100.0,1973,260,False,,False,False,False,,False,,0,,0,100.0,bytecodealliance.org,nonprofit,,,0.5,79,True,True
+bytecodealliance/wasi-rs,196445196,0,0,False,0,100.0,351,63,False,,False,False,False,,False,,0,,0,100.0,bytecodealliance.org,nonprofit,,,0.5,79,True,True
 c-ares/c-ares,571708,0,0,False,0,100.0,2132,658,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 calvinmetcalf/minimalistic-assert,29144257,0,0,False,0,100.0,19,4,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 calvinmetcalf/process-nextick-args,36039131,0,0,False,0,100.0,33,16,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
@@ -866,7 +866,7 @@ vuejs/core,137078487,156,0,False,156,10.84,53546,9100,True,"github,open_collecti
 wasm-bindgen/wasm-bindgen,114685405,4,0,False,4,48.72,8970,1208,True,github,False,False,False,,False,,1,,0,100.0,,,,,1,79,True,True
 watson/ci-info,71475907,2,0,False,2,52.63,364,56,True,github,False,False,True,https://github.com/sponsors/sibiraj-s,False,,2,,0,100.0,,,,,1,79,True,True
 wbond/asn1crypto,36823669,4,0,True,4,48.72,359,146,True,"github,tidelift",False,False,False,,False,,2,,0,100.0,,,,,1,79,True,True
-webmproject/libwebp,23368445,0,0,False,0,100.0,2309,598,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+webmproject/libwebp,23368445,0,0,False,0,100.0,2309,598,False,,False,False,False,,False,,0,,0,100.0,,,google.com,company,0,1,True,False
 webpack/enhanced-resolve,5400204,0,0,False,0,100.0,982,203,True,open_collective,False,False,False,,False,,1,webpack,27844.67,2.46,,,,,1,29,True,True
 webpack/minimizer-webpack-plugin,143057914,0,0,False,0,100.0,1961,166,True,open_collective,False,False,False,,False,,1,webpack,27844.67,2.46,,,,,1,29,True,True
 webpack/schema-utils,80306715,0,0,False,0,100.0,249,42,True,open_collective,False,False,True,https://opencollective.com/webpack,False,,2,webpack,27844.67,2.46,,,,,1,29,True,True

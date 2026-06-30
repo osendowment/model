@@ -47,7 +47,7 @@ aws/aws-sdk-js-v3,87228090,74,96,41,50,62,True,False
 axios/axios,23088740,8,79,21,27,24,True,True
 azure/azure-sdk-for-js,108311273,6,94,44,46,33,True,False
 azure/azure-sdk-for-python,4127088,2,96,40,69,27,True,False
-azuread/microsoft-authentication-library-for-python,67243113,82,68,16,73,51,False,True
+azuread/microsoft-authentication-library-for-python,67243113,82,68,16,73,51,True,False
 babel/babel,24560307,14,94,38,43,38,True,True
 babel/babel-polyfills,190579283,69,90,49,78,70,True,True
 babel/minify,55723051,71,78,69,72,72,True,True
@@ -59,7 +59,7 @@ bitflags/bitflags,29287955,73,49,27,31,42,False,True
 blakeembrey/array-flatten,17789771,68,20,63,30,40,True,True
 blakeembrey/change-case,9440238,78,49,57,44,56,True,True
 bluss/bencher,65987276,100,41,67,84,69,True,True
-bminor/glibc,13868694,4,98,88,76,40,False,True
+bminor/glibc,13868694,4,98,88,76,40,True,True
 boto/boto3,24774658,83,55,20,21,37,True,False
 boto/botocore,6670942,79,71,12,48,42,True,False
 boto/s3transfer,49535299,22,52,10,70,30,True,False
@@ -82,8 +82,8 @@ burntsushi/ucd-generate,123997498,74,75,66,50,65,True,True
 burntsushi/walkdir,42685794,65,50,69,81,65,True,True
 burntsushi/winapi-util,146040682,73,24,52,48,46,True,True
 businho/pytest-ruff,599731435,76,20,62,38,44,False,True
-bytecodealliance/rustix,295544240,79,85,55,71,72,False,True
-bytecodealliance/wasi-rs,196445196,22,72,38,78,47,False,True
+bytecodealliance/rustix,295544240,79,85,55,71,72,True,True
+bytecodealliance/wasi-rs,196445196,22,72,38,78,47,True,True
 c-ares/c-ares,571708,79,83,47,71,68,False,True
 calvinmetcalf/minimalistic-assert,29144257,100,2,70,21,23,False,True
 calvinmetcalf/process-nextick-args,36039131,100,16,68,38,45,False,True
@@ -866,7 +866,7 @@ vuejs/core,137078487,47,91,49,72,62,True,True
 wasm-bindgen/wasm-bindgen,114685405,3,86,29,75,27,True,True
 watson/ci-info,71475907,52,33,66,41,46,True,True
 wbond/asn1crypto,36823669,73,76,50,87,70,True,True
-webmproject/libwebp,23368445,60,91,84,69,75,False,True
+webmproject/libwebp,23368445,60,91,84,69,75,True,False
 webpack/enhanced-resolve,5400204,21,70,31,61,41,True,True
 webpack/minimizer-webpack-plugin,143057914,23,70,36,64,44,True,True
 webpack/schema-utils,80306715,28,66,50,41,44,True,True

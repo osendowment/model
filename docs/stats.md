@@ -163,14 +163,14 @@ Microsoft, …). See [funding.md](components/funding.md).
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 660 | 73.7% |
-| intent — no funding signal | 235 | 26.3% |
-| nonprofit — community / independent | 836 | 93.4% |
-| nonprofit — company-backed | 59 | 6.6% |
+| intent — any funding signal | 665 | 74.3% |
+| intent — no funding signal | 230 | 25.7% |
+| nonprofit — community / independent | 834 | 93.2% |
+| nonprofit — company-backed | 61 | 6.8% |
 
-The 59 company-backed repos are **kept in `risk.csv`** and flagged
+The 61 company-backed repos are **kept in `risk.csv`** and flagged
 `nonprofit=false` (they are already resourced; filter by the flag to restrict
-to endowment candidates). The 235 repos with `intent=False` are not actively
+to endowment candidates). The 230 repos with `intent=False` are not actively
 soliciting support — a higher-priority target for outreach.
 
 ### Workload
