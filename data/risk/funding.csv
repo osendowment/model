@@ -513,7 +513,7 @@ moment/moment,1424470,0,0,False,0,100.0,47987,7001,False,,False,False,False,,Fal
 more-itertools/more-itertools,4144530,0,0,False,0,100.0,4057,316,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 motdotla/dotenv,11205780,5,0,True,5,45.47,20402,935,True,"github,custom",False,False,True,https://dotenvx.com,False,,3,dotenv,142.25,17.65,,,,,1,43,True,True
 moxystudio/node-cross-spawn,21335844,0,0,False,0,100.0,1169,140,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-mozilla/source-map,2014930,0,0,False,0,100.0,3720,370,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+mozilla/source-map,2014930,0,0,False,0,100.0,3720,370,False,,False,False,False,,False,,0,,0,100.0,mozilla.org,nonprofit,,,0.5,79,True,True
 mrabarnett/mrab-regex,309446978,0,0,False,0,100.0,583,71,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 mrmlnc/fast-glob,77467076,0,0,False,0,100.0,2808,137,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 msgpack/msgpack-python,2242705,0,0,False,0,100.0,2080,244,False,,False,False,False,,False,,0,,0,100.0,,,,,1,100,False,True

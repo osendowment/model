@@ -513,7 +513,7 @@ moment/moment,1424470,59,97,90,97,84,True,True
 more-itertools/more-itertools,4144530,19,66,46,52,42,False,True
 motdotla/dotenv,11205780,79,39,48,17,40,True,True
 moxystudio/node-cross-spawn,21335844,80,38,84,79,67,False,True
-mozilla/source-map,2014930,13,64,57,25,33,False,True
+mozilla/source-map,2014930,13,64,57,25,33,True,True
 mrabarnett/mrab-regex,309446978,83,91,49,91,76,False,True
 mrmlnc/fast-glob,77467076,82,71,65,73,72,False,True
 msgpack/msgpack-python,2242705,69,70,31,49,52,False,True
