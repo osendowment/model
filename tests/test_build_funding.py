@@ -96,7 +96,7 @@ def _base_mocks(monkeypatch, repos):
     monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
     monkeypatch.setattr(bf, "load_rows_by_repo", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
-    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
@@ -131,7 +131,7 @@ def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
                         lambda: [E("plain/p"), E("npm/d"), E("pypi/d"), E("rich/r")])
     monkeypatch.setattr(bf, "load_rows_by_repo", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
-    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
@@ -172,15 +172,61 @@ def test_build_funding_company_owner_override_zeros_risk(monkeypatch):
     backer (the company) wins.
     """
     _base_mocks(monkeypatch, [E("plain/p"), E("corp/c"), E("rich/r")])
-    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({
         "corp/c": {"host": "x.foundation", "host_type": "nonprofit",
-                   "owner": "bigco.com", "owner_type": "company"}})
+                   "owner": "bigco.com", "owner_type": "company"}}, {}))
 
     rows = {r["repo"]: r for r in bf.build()}
     assert rows["plain/p"]["score"] == 100
     assert rows["corp/c"]["owner_type"] == "company"
     assert rows["corp/c"]["host_score"] == "0"       # min(0.5, 0) = 0
     assert rows["corp/c"]["score"] == 1              # company backing → floor
+
+
+def test_load_funding_overrides_splits_repo_and_org(tmp_path):
+    """An ``owner/*`` row is parsed into the org map (keyed by owner); a plain
+    ``owner/name`` row goes to the per-repo map."""
+    p = tmp_path / "overrides.csv"
+    p.write_text(
+        "repo,host,host_type,gh_user,owner,owner_type,oc_slug\n"
+        "boto/*,,,boto,amazon.com,company,\n"
+        "rust-lang/rust,rustfoundation.org,nonprofit,rust-lang,,,\n",
+        encoding="utf-8")
+    by_repo, by_org = bf._load_funding_overrides(p)
+    assert "boto" in by_org and by_org["boto"]["owner"] == "amazon.com"
+    assert "boto/*" not in by_repo            # the glob is not a per-repo key
+    assert by_repo["rust-lang/rust"]["host"] == "rustfoundation.org"
+
+
+def test_build_funding_org_level_override_applies_with_per_repo_win(monkeypatch):
+    """An ``owner/*`` override backs every repo under the owner, but a per-repo
+    row for one of them wins.
+
+    org `corp` is company-owned via `corp/* → bigco.com`. `corp/a` and `corp/b`
+    both inherit it (host_score 0 → score floors at 1, nonprofit False). `corp/c`
+    has its own per-repo row (a nonprofit foundation host, no company owner) which
+    must override the org rule → host_score 0.5, score 79, nonprofit True.
+    """
+    _base_mocks(monkeypatch, [E("corp/a"), E("corp/b"), E("corp/c"),
+                              E("indie/x"), E("rich/r")])
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: (
+        {"corp/c": {"host": "x.foundation", "host_type": "nonprofit",
+                    "owner": "", "owner_type": ""}},
+        {"corp": {"host": "", "host_type": "",
+                  "owner": "bigco.com", "owner_type": "company"}}))
+
+    rows = {r["repo"]: r for r in bf.build()}
+    for repo in ("corp/a", "corp/b"):
+        assert rows[repo]["owner"] == "bigco.com"      # inherited from corp/*
+        assert rows[repo]["owner_type"] == "company"
+        assert rows[repo]["nonprofit"] == "False"
+        assert rows[repo]["score"] == 1                # company backing → floor
+    assert rows["corp/c"]["owner"] == ""               # per-repo row wins
+    assert rows["corp/c"]["host"] == "x.foundation"
+    assert rows["corp/c"]["nonprofit"] == "True"
+    assert rows["corp/c"]["score"] == 79               # nonprofit host only
+    assert rows["indie/x"]["owner"] == ""              # other org untouched
+    assert rows["indie/x"]["intent"] == "False"
 
 
 def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
@@ -197,7 +243,7 @@ def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
     monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
     monkeypatch.setattr(bf, "load_rows_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
-    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -226,7 +272,7 @@ def test_build_funding_real_zero_oc_counts_as_intent(monkeypatch):
     monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
     monkeypatch.setattr(bf, "load_rows_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
-    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -262,9 +308,9 @@ def test_build_funding_override_oc_slug_authoritative(monkeypatch):
     # reverse-map would auto-match org `big` to the junk collective…
     monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({}, {"big": "junk"}))
     # …but overrides win: junkmatch → empty (no OC), keep → explicit slug.
-    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({
         "big/junkmatch": {"oc_slug": ""},
-        "big/keep": {"oc_slug": "real"}})
+        "big/keep": {"oc_slug": "real"}}, {}))
 
     rows = {r["repo"]: r for r in bf.build()}
     assert rows["big/junkmatch"]["oc_slug"] == ""        # empty override → suppressed
@@ -291,7 +337,7 @@ def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
                         lambda: [E("link/lp"), E("gh/only"), E("plain/p"), E("rich/r")])
     monkeypatch.setattr(bf, "load_rows_by_repo", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_repo", lambda p, c: {})
-    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {})
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})

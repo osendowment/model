@@ -304,8 +304,8 @@ def _load_sponsoring(path: Path) -> dict[str, str]:
     return out
 
 
-def _load_funding_overrides(path: Path) -> dict[str, dict]:
-    """{repo_lower: {host, host_type, owner, owner_type}} from overrides.csv.
+def _load_funding_overrides(path: Path) -> tuple[dict[str, dict], dict[str, dict]]:
+    """Curated institutional backing → ``(by_repo, by_org)`` from overrides.csv.
 
     Schema: ``repo, host, host_type, gh_user, owner, owner_type, oc_slug``.
     `host` and `owner` are **domains** (the domain is the canonical name — no
@@ -313,29 +313,44 @@ def _load_funding_overrides(path: Path) -> dict[str, dict]:
     `oc_slug` is a curated Open Collective slug for projects that fund via OC but
     declare no FUNDING.yml (e.g. socketio).
 
-    Curated per-repo institutional backing — the foundation/company that hosts a
-    project and the entity that owns it. **Only a *legally connected* host
+    Two row shapes share the file:
+
+    - **Per-repo** rows (``owner/name``) → `by_repo`, keyed by the exact slug.
+    - **Org-level** rows whose `repo` is an ``owner/*`` glob → `by_org`, keyed by
+      the owner login. They apply to **every** risk-scope repo under that owner
+      that has no per-repo row — so one row covers a whole corporate org (e.g.
+      ``boto/* → amazon.com``, ``npm/* → github.com``) instead of N near-identical
+      rows. A per-repo row always wins over an org row (see build()).
+
+    Curated per-repo/per-org institutional backing — the foundation/company that
+    hosts a project and the entity that owns it. **Only a *legally connected* host
     counts**: the foundation must legally steward the project (e.g. the Apache
     Software Foundation legally holds Apache projects, the Rust Foundation holds
-    Rust) — a loose marketing/community association is not a host. A company that
-    legally owns the project is recorded as the `owner` instead.
+    the rust-lang org) — a loose marketing/community association is not a host. A
+    company that legally owns the project is recorded as the `owner` instead. An
+    ``owner/*`` row is only valid when the *whole* org is uniformly backed.
     """
-    out: dict[str, dict] = {}
+    by_repo: dict[str, dict] = {}
+    by_org: dict[str, dict] = {}
     if not path.exists():
-        return out
+        return by_repo, by_org
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             repo = (row.get("repo") or "").strip().lower()
             if not repo:
                 continue
-            out[repo] = {
+            rec = {
                 "host": (row.get("host") or "").strip(),
                 "host_type": (row.get("host_type") or "").strip(),
                 "owner": (row.get("owner") or "").strip(),
                 "owner_type": (row.get("owner_type") or "").strip(),
                 "oc_slug": (row.get("oc_slug") or "").strip(),
             }
-    return out
+            if repo.endswith("/*"):
+                by_org[repo[:-2]] = rec  # "boto/*" → key "boto"
+            else:
+                by_repo[repo] = rec
+    return by_repo, by_org
 
 
 def build() -> list[dict]:
@@ -344,7 +359,7 @@ def build() -> list[dict]:
     yml = load_rows_by_repo(FUNDING_YML_FILE)
     repos_meta = load_rows_by_repo(REPOS_FILE)
     foundations = load_column_by_repo(FOUNDATIONS_FILE, "host")
-    overrides = _load_funding_overrides(OVERRIDES_FILE)
+    overrides, org_overrides = _load_funding_overrides(OVERRIDES_FILE)
     export = _export_by_repo(FLOSS_FUND_FILE)
     fundable_orgs = _fundable_orgs(FLOSS_FUND_FILE)
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
@@ -379,7 +394,8 @@ def build() -> list[dict]:
     for entry in eligible:
         repo = entry.repo
         owner_login = repo.split("/", 1)[0].lower()
-        ov = overrides.get(repo.lower(), {})
+        # Per-repo override wins; else fall back to an org-level (owner/*) row.
+        ov = overrides.get(repo.lower()) or org_overrides.get(owner_login) or {}
         # host: override wins; otherwise the scraped FOSS-foundation host, which
         # is a nonprofit by definition. owner: from the override only.
         scraped_host = foundations.get(repo, "")
