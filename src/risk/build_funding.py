@@ -2,9 +2,9 @@
 """Build data/risk/funding.csv — funding signals + risk score per risk-scope repo.
 
 Reads (all under data/sources/):
-    github/sponsors.csv        — gh_sponsorships_in (inbound), has_gh_sponsors (src.github.fetch_sponsors)
+    github/sponsors.csv        — gh_sponsorships_in (inbound), gh_sponsors_enabled (src.github.fetch_sponsors)
     github/sponsorships.csv    — sponsoring_count (outbound) (src.github.fetch_sponsorships)
-    github/funding-yml.csv     — has_funding_link / platforms (src.github.fetch_funding_yml)
+    github/funding-yml.csv     — has_funding_links / platforms (src.github.fetch_funding_yml)
     github/repos.csv           — stars, forks (info)          (src.github.fetch_repo_owner_data)
     floss-fund/funding-json.csv — FLOSS Fund directory export  (src.sources.floss_fund.funding_json)
     opencollective/budgets.csv — annual gross raised per OC slug (src.sources.opencollective.fetch_budgets)
@@ -21,11 +21,11 @@ less funded = riskier) is the geometric mean of THREE direction-aware risk axes:
     oc_avg_funding_p   ← oc_avg_funding ($0 when none),  lower → riskier
     host_score×100     ← combined host/owner backing (company 0, nonprofit 50, none 100)
 A repo that DECLARES a funding channel — a registry channel (`has_npm_funding` /
-`has_pypi_funding`) or a fundable owner/org (`org_fundable`) — has its score
-capped at DECLARED_FUNDING_CAP (79): it is not maximally unfunded even when no $
-is measured. npm/pypi are repo/package-level (catching channels the owner-level
-checks miss); `org_fundable` is owner-level (a FLOSS Fund manifest registered for
-the whole GitHub org).
+`has_pypi_funding`) or a FLOSS Fund manifest (`has_funding_json`, repo- or
+owner-level) — has its score capped at DECLARED_FUNDING_CAP (79): it is not
+maximally unfunded even when no $ is measured. npm/pypi are repo/package-level
+(catching channels the owner-level checks miss); `has_funding_json` also covers
+an owner-level manifest registered for the whole GitHub org.
 `gh_stars` / `gh_forks` are informational popularity columns (not scored);
 their fetch timestamp lives in data/sources/github/repos.csv. No per-signal
 `fetched_at` is rolled up here. The script also writes two boolean flag columns:
@@ -80,11 +80,11 @@ DECLARED_FUNDING_CAP = 79
 MEASURED_PLATFORMS = {"github", "open_collective"}
 
 FIELDS = ["repo", "repo_id",
-          "has_gh_sponsors",
+          "gh_sponsors_enabled",
           "gh_sponsorships_in", "gh_sponsorships_out", "gh_sponsorships",
           "gh_sponsorships_p",
           "gh_stars", "gh_forks",
-          "has_funding_link", "funding_link_platforms", "has_funding_json", "org_fundable",
+          "has_funding_links", "funding_link_platforms", "has_funding_json",
           "has_npm_funding", "npm_funding_url",
           "has_pypi_funding", "pypi_funding_platforms", "channels_count",
           "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
@@ -120,17 +120,17 @@ def _nonprofit_flag(host_type: str, owner_type: str) -> bool:
 
 def _intent_flag(row: dict) -> bool:
     """Sustainability intent: True if the repo has expressed a way to be funded —
-    GitHub Sponsors enabled on the owner (`has_gh_sponsors`) or with sponsors
-    (`gh_sponsorships_in`), a declared channel (FUNDING.yml / funding.json / npm / PyPI /
-    OC), or an institutional host/owner. Outbound sponsoring (the owner funding
-    *others*, folded into `gh_sponsorships`) is NOT intent — it is not a funding
-    channel for this repo, only a resourcing proxy used by the score."""
+    GitHub Sponsors enabled on the owner (`gh_sponsors_enabled`), a resolved
+    funding link (`has_funding_links`), a FLOSS Fund manifest for the repo or its
+    owner (`has_funding_json`), an npm / PyPI funding field, an Open Collective,
+    or an institutional host/owner. The inbound sponsor count is NOT checked
+    separately — any count implies the listing is enabled, so `gh_sponsors_enabled`
+    already covers it. Outbound sponsoring (the owner funding *others*, folded into
+    `gh_sponsorships`) is NOT intent — it is not a funding channel for this repo."""
     return (
-        _to_int(row.get("gh_sponsorships_in")) > 0
-        or (row.get("has_gh_sponsors") or "").strip() == "True"
-        or (row.get("has_funding_link") or "").strip() == "True"
+        (row.get("gh_sponsors_enabled") or "").strip() == "True"
+        or (row.get("has_funding_links") or "").strip() == "True"
         or (row.get("has_funding_json") or "").strip() == "True"
-        or (row.get("org_fundable") or "").strip() == "True"
         or (row.get("has_npm_funding") or "").strip() == "True"
         or (row.get("has_pypi_funding") or "").strip() == "True"
         or bool((row.get("oc_slug") or "").strip())
@@ -154,16 +154,16 @@ def _platform_set(csv_value: str) -> set[str]:
 def _declares_unmeasured_channel(row: dict) -> bool:
     """True if the repo declares a funding channel whose $ we don't measure.
 
-    A registry channel (npm `funding` / PyPI `project_urls`), a fundable
-    owner/org (`org_fundable`), or a funding **link** to any platform other than
-    GitHub Sponsors / Open Collective (those two are measured in dollars
-    elsewhere). Such a repo has set up *a way* to be funded → not maximally
-    unfunded, so its score is capped at DECLARED_FUNDING_CAP.
+    A registry channel (npm `funding` / PyPI `project_urls`), a FLOSS Fund
+    manifest for the repo or its owner (`has_funding_json`), or a funding **link**
+    to any platform other than GitHub Sponsors / Open Collective (those two are
+    measured in dollars elsewhere). Such a repo has set up *a way* to be funded →
+    not maximally unfunded, so its score is capped at DECLARED_FUNDING_CAP.
     """
     return (
         row.get("has_npm_funding") == "True"
         or row.get("has_pypi_funding") == "True"
-        or row.get("org_fundable") == "True"
+        or row.get("has_funding_json") == "True"
         or bool(_platform_set(row.get("funding_link_platforms")) - MEASURED_PLATFORMS)
     )
 
@@ -207,7 +207,7 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
     funding declarations (npm package.json `funding` field / PyPI `project_urls`) —
     extra declared funding channels. `export` is the repo's OWN FLOSS Fund manifest;
     `org_export` is an ORG-level manifest (registered for the whole GitHub org), so
-    its channels apply to every repo the org owns — `org_fundable` flags those.
+    its channels apply to every repo the org owns — folded into `has_funding_json`.
     """
     npm_funding = npm_funding or {}
     pypi_funding = pypi_funding or {}
@@ -229,16 +229,16 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
     row = {
         "repo": repo,
         "repo_id": repo_id,
-        "has_gh_sponsors": (sponsors.get("has_gh_sponsors") or "").strip(),
+        "gh_sponsors_enabled": (sponsors.get("gh_sponsors_enabled") or "").strip(),
         "gh_sponsorships_in": gh_in,
         "gh_sponsorships_out": gh_out,
         "gh_sponsorships": str(_to_int(gh_in) + _to_int(gh_out)),
         "gh_stars": (repo_meta.get("stars") or "").strip(),
         "gh_forks": (repo_meta.get("forks") or "").strip(),
-        "has_funding_link": (yml.get("has_funding_link") or "").strip(),
+        "has_funding_links": (yml.get("has_funding_links") or "").strip(),
         "funding_link_platforms": (yml.get("funding_link_platforms") or "").strip(),
-        "has_funding_json": "True" if export else "False",
-        "org_fundable": "True" if org_export else "False",
+        # FLOSS Fund presence for the repo OR its owner (org-level manifest).
+        "has_funding_json": "True" if (export or org_export) else "False",
         "has_npm_funding": "True" if has_npm else "False",
         "npm_funding_url": (npm_funding.get("npm_funding_url") or "").strip(),
         "has_pypi_funding": "True" if has_pypi else "False",
@@ -494,8 +494,8 @@ def main() -> None:
                   header_style="bold dim", padding=(0, 1))
     table.add_column("Field", style="bold")
     table.add_column("Populated", justify="right")
-    for col in ("gh_sponsorships", "gh_stars", "has_funding_link", "has_funding_json",
-                "org_fundable", "channels_count", "oc_avg_funding", "host", "owner", "score"):
+    for col in ("gh_sponsorships", "gh_stars", "has_funding_links", "has_funding_json",
+                "channels_count", "oc_avg_funding", "host", "owner", "score"):
         n = sum(1 for r in rows if str(r.get(col, "")) not in ("", "0", "False"))
         table.add_row(col, f"{n:,}")
     console.print(table)

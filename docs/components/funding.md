@@ -21,11 +21,9 @@ funding *others*) is **not** intent: it is not a funding channel for this repo.
 
 | Signal | Criteria | Sources |
 |---|---|---|
-| `has_gh_sponsors` | the repo owner has GitHub Sponsors enabled — a listing exists even with zero sponsors | `github` |
-| `gh_sponsorships_in` | the repo owner has at least one sponsor (owner only — co-maintainers are not counted) | `github` |
-| `has_funding_link` | the repo declares a funding link in its FUNDING.yml | `github` |
-| `has_funding_json` | the repo is registered in the FLOSS Fund directory | `floss_fund` |
-| `org_fundable` | the repo's owner has an org-wide FLOSS Fund manifest | `floss_fund` |
+| `gh_sponsors_enabled` | the repo owner has GitHub Sponsors enabled — a listing exists even with zero sponsors | `github` |
+| `has_funding_links` | the repo's resolved Sponsor widget (owner + repo) shows at least one funding link | `github` |
+| `has_funding_json` | the repo or its owner is registered in the FLOSS Fund directory | `floss_fund` |
 | `has_npm_funding` | the repo's npm package declares a funding field | `npm` |
 | `has_pypi_funding` | the repo's PyPI project declares a funding URL | `pypi` |
 | `oc_slug` | the repo or its org maps to a real Open Collective | `opencollective` |
@@ -51,7 +49,7 @@ floss-fund → opencollective → (npm/pypi) → build.
 | Source | Fetcher | Gathers |
 |---|---|---|
 | `github/funding-yml.csv` | `github.fetch_funding_yml` | resolved FUNDING.yml funding links (platforms + handles) |
-| `github/sponsors.csv` | `github.fetch_sponsors` | owner Sponsors enabled (`has_gh_sponsors`) + inbound count (`gh_sponsorships_in`, owner-only) |
+| `github/sponsors.csv` | `github.fetch_sponsors` | owner Sponsors enabled (`gh_sponsors_enabled`) + inbound count (`gh_sponsorships_in`, owner-only) |
 | `github/sponsorships.csv` | `github.fetch_sponsorships` | owner outbound sponsoring count (score proxy only) |
 | `floss-fund/funding-json.csv` | `floss_fund.funding_json` | FLOSS Fund manifest directory (repo + org-level) |
 | `opencollective/collectives.csv` | `opencollective.fetch_collectives` | OC collective↔repo map |

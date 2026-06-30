@@ -1,7 +1,7 @@
 """Fetch GitHub Sponsors counts per risk-scope repo.
 
 Writes data/sources/github/sponsors.csv:
-    repo, repo_id, gh_sponsorships_in, has_gh_sponsors, sponsors_status, fetched_at
+    repo, repo_id, gh_sponsorships_in, gh_sponsors_enabled, sponsors_status, fetched_at
 
 `gh_sponsorships_in` (inbound) = public sponsorships *received* by the repo OWNER
 only. Sponsors are attributed to a repo solely when the sponsored account owns
@@ -9,10 +9,10 @@ it: a `github:` login in the repo's FUNDING.yml that is NOT the owner (a
 co-maintainer) is *not* counted — their sponsors fund that person's whole
 portfolio, not this one repo, so crediting them here over-states the repo's
 funding. The FUNDING.yml link still marks the repo as having a funding channel
-(`has_funding_link`, handled by build_funding); this fetcher just measures the
+(`has_funding_links`, handled by build_funding); this fetcher just measures the
 owner's actual sponsor count. Outbound sponsoring is a separate signal — see
 src.github.fetch_sponsorships.
-`has_gh_sponsors` = the repo OWNER has GitHub Sponsors enabled (an active
+`gh_sponsors_enabled` = the repo OWNER has GitHub Sponsors enabled (an active
 `hasSponsorsListing`), i.e. is set up to receive sponsors even when the public
 count is 0 — a sustainability-intent signal in its own right. Scoped to the
 owner only (not FUNDING.yml co-logins), since intent attaches to the repo's
@@ -55,7 +55,7 @@ log = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "sponsors.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
-FIELDS = ["repo", "repo_id", "gh_sponsorships_in", "has_gh_sponsors",
+FIELDS = ["repo", "repo_id", "gh_sponsorships_in", "gh_sponsors_enabled",
           "sponsors_status", "fetched_at"]
 
 SPONSORS_QUERY = """
@@ -77,7 +77,7 @@ def logins_for_repo(repo: str) -> list[str]:
     A co-maintainer named in FUNDING.yml does not own the repo, and their personal
     sponsors fund their whole portfolio rather than this project — so we do not
     count them here (the FUNDING.yml link is still a funding-channel signal,
-    surfaced separately via has_funding_link)."""
+    surfaced separately via has_funding_links)."""
     return [repo.split("/", 1)[0].lower()]
 
 
@@ -94,7 +94,7 @@ def _has_sponsor_signal(row: dict) -> bool:
         count = int((row.get("gh_sponsorships_in") or "0").strip() or "0")
     except ValueError:
         count = 0
-    enabled = (row.get("has_gh_sponsors") or "").strip() == "True"
+    enabled = (row.get("gh_sponsors_enabled") or "").strip() == "True"
     return count > 0 or enabled
 
 
@@ -129,7 +129,7 @@ async def fetch_one(session, limiter, repo: str) -> dict:
     return {
         "repo": repo,
         "gh_sponsorships_in": str(count),
-        "has_gh_sponsors": "True" if enabled else "False",
+        "gh_sponsors_enabled": "True" if enabled else "False",
         "sponsors_status": status_from_counts([count], not ok),
     }
 

@@ -32,7 +32,7 @@ import time
 # guarantee for *positive* results).
 FUNDING_TTL_DAYS = 365
 
-# A record with NO funding signal yet (`has_funding_link=False`, 0 sponsors, …)
+# A record with NO funding signal yet (`has_funding_links=False`, 0 sponsors, …)
 # is the one most likely to GAIN one and the cheapest to re-query, so it is
 # rechecked on this much shorter window instead of the full TTL. This is what
 # keeps a freshly-added FUNDING.yml from staying invisible for up to a year

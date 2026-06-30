@@ -9,10 +9,10 @@ org-level `.github` default), so it catches channels a raw
 at all — the old contents-API fetch recorded it as unfunded.
 
 Writes data/sources/github/funding-yml.csv:
-    repo, repo_id, has_funding_link, funding_link_platforms,
+    repo, repo_id, has_funding_links, funding_link_platforms,
     <one column per platform in FUNDING_PLATFORMS>, fetched_at
 
-`has_funding_link` = the repo declares at least one funding link (the columns
+`has_funding_links` = the repo declares at least one funding link (the columns
 are named for the GraphQL `fundingLinks` source, not a raw FUNDING.yml file).
 `funding_link_platforms` = the canonical platform keys present (github, patreon, …).
 Each platform column holds that platform's handle(s) (comma-joined for a list):
@@ -67,7 +67,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 FIELDS = (
-    ["repo", "repo_id", "has_funding_link", "funding_link_platforms"]
+    ["repo", "repo_id", "has_funding_links", "funding_link_platforms"]
     + FUNDING_PLATFORMS
     + ["fetched_at"]
 )
@@ -132,7 +132,7 @@ def build_row(repo: str, funding_links: list[dict]) -> dict:
             bucket.append(handle)
     row = {
         "repo": repo,
-        "has_funding_link": "True" if by_platform else "False",
+        "has_funding_links": "True" if by_platform else "False",
         "funding_link_platforms": ",".join(by_platform),
     }
     for p in FUNDING_PLATFORMS:
@@ -166,7 +166,7 @@ def rows_from_response(batch: list[str], body: dict) -> dict[str, dict]:
     """Turn a GraphQL response body into {repo: row} for the batch.
 
     A repo whose alias errored with `NOT_FOUND` (deleted/renamed) is recorded
-    as "checked, no funding" (`has_funding_link=False`). A null alias *without*
+    as "checked, no funding" (`has_funding_links=False`). A null alias *without*
     a NOT_FOUND error is a fetch failure — it is skipped, not written as False,
     so a transient error never masquerades as "no funding" (auditability).
     """
@@ -241,7 +241,7 @@ async def batch(repos: list[str], force: bool, limit: int | None, concurrency: i
     # that already declares a link is cached for the full TTL.
     fresh = set() if force else {
         r for r, row in existing.items()
-        if row_is_fresh(row, funding_ttl_for(row.get("has_funding_link") == "True"))
+        if row_is_fresh(row, funding_ttl_for(row.get("has_funding_links") == "True"))
     }
     to_fetch = [r for r in repos if r not in fresh]
     if limit and limit < len(to_fetch):

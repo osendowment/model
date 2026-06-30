@@ -18,9 +18,9 @@ def test_status_ok_vs_error():
 
 def test_has_sponsor_signal():
     # no signal → rechecked on the short window
-    assert _has_sponsor_signal({"gh_sponsorships_in": "0", "has_gh_sponsors": "False"}) is False
+    assert _has_sponsor_signal({"gh_sponsorships_in": "0", "gh_sponsors_enabled": "False"}) is False
     assert _has_sponsor_signal({}) is False
-    assert _has_sponsor_signal({"gh_sponsorships_in": "", "has_gh_sponsors": ""}) is False
+    assert _has_sponsor_signal({"gh_sponsorships_in": "", "gh_sponsors_enabled": ""}) is False
     # any signal (sponsors count OR Sponsors enabled) → cached for the full TTL
-    assert _has_sponsor_signal({"gh_sponsorships_in": "5", "has_gh_sponsors": "False"}) is True
-    assert _has_sponsor_signal({"gh_sponsorships_in": "0", "has_gh_sponsors": "True"}) is True
+    assert _has_sponsor_signal({"gh_sponsorships_in": "5", "gh_sponsors_enabled": "False"}) is True
+    assert _has_sponsor_signal({"gh_sponsorships_in": "0", "gh_sponsors_enabled": "True"}) is True

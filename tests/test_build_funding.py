@@ -8,8 +8,8 @@ from src.risk.build_funding import _intent_flag, _nonprofit_flag
 
 def _row(**kw):
     base = {
-        "gh_sponsorships_in": "", "has_gh_sponsors": "False",
-        "has_funding_link": "False", "has_funding_json": "False", "org_fundable": "False",
+        "gh_sponsorships_in": "", "gh_sponsors_enabled": "False",
+        "has_funding_links": "False", "has_funding_json": "False",
         "has_npm_funding": "False", "has_pypi_funding": "False",
         "oc_slug": "", "host": "", "owner": "",
     }
@@ -22,11 +22,9 @@ def test_intent_false_when_no_signal():
 
 
 def test_intent_each_single_signal_is_true():
-    assert _intent_flag(_row(gh_sponsorships_in="3")) is True
-    assert _intent_flag(_row(has_gh_sponsors="True")) is True   # Sponsors enabled → intent
-    assert _intent_flag(_row(has_funding_link="True")) is True
-    assert _intent_flag(_row(has_funding_json="True")) is True
-    assert _intent_flag(_row(org_fundable="True")) is True
+    assert _intent_flag(_row(gh_sponsors_enabled="True")) is True   # Sponsors enabled → intent
+    assert _intent_flag(_row(has_funding_links="True")) is True
+    assert _intent_flag(_row(has_funding_json="True")) is True      # repo OR owner in FLOSS Fund
     assert _intent_flag(_row(has_npm_funding="True")) is True
     assert _intent_flag(_row(has_pypi_funding="True")) is True
     assert _intent_flag(_row(oc_slug="babel")) is True
@@ -34,7 +32,11 @@ def test_intent_each_single_signal_is_true():
     assert _intent_flag(_row(owner="meta.com")) is True
 
 
-def test_intent_zero_counts_are_false():
+def test_intent_sponsor_count_alone_is_not_intent():
+    # The inbound count is not a separate signal — any count implies the listing
+    # is enabled, so gh_sponsors_enabled covers it. Count alone (without the
+    # enabled flag) is never intent.
+    assert _intent_flag(_row(gh_sponsorships_in="3")) is False
     assert _intent_flag(_row(gh_sponsorships_in="0")) is False
 
 
@@ -66,13 +68,13 @@ def test_assemble_row_stars_forks_sponsorships():
     row = bf.assemble_row(
         repo="o/r", repo_id="1",
         sponsors={"gh_sponsorships_in": "12"},
-        yml={"has_funding_link": "True", "funding_link_platforms": "github"},
+        yml={"has_funding_links": "True", "funding_link_platforms": "github"},
         export={}, host="", host_type="", owner="", owner_type="",
         repo_meta={"stars": "5000", "forks": "300"},
         sponsoring_count="39",
     )
-    assert row["has_funding_link"] == "True"
-    assert row["org_fundable"] == "False"      # no org-level manifest
+    assert row["has_funding_links"] == "True"
+    assert row["has_funding_json"] == "False"  # no FLOSS manifest (repo or owner)
     assert row["gh_sponsorships_in"] == "12"          # inbound (owner only)
     assert "gh_sponsors_out" not in row        # outbound folded into gh_sponsorships
     assert row["gh_sponsorships"] == "51"      # in + out (out from sponsoring_count)
@@ -327,8 +329,8 @@ def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
     def rows_by_repo(p):
         s = str(p)
         if "funding-yml.csv" in s:
-            return {"link/lp": {"has_funding_link": "True", "funding_link_platforms": "liberapay"},
-                    "gh/only": {"has_funding_link": "True", "funding_link_platforms": "github"}}
+            return {"link/lp": {"has_funding_links": "True", "funding_link_platforms": "liberapay"},
+                    "gh/only": {"has_funding_links": "True", "funding_link_platforms": "github"}}
         if "sponsors.csv" in s:
             return {"rich/r": {"gh_sponsorships_in": "100"}}
         return {}
@@ -349,11 +351,11 @@ def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
     assert rows["plain/p"]["score"] == 100   # no channel at all
 
 
-def test_build_funding_org_fundable_caps_score_and_counts_channel(monkeypatch):
+def test_build_funding_org_manifest_caps_score_and_counts_channel(monkeypatch):
     """A fundable ORG (FLOSS manifest registered for the whole GitHub org) marks
-    every repo it owns: org_fundable=True, its channels count, and the score is
-    capped at DECLARED_FUNDING_CAP even with $0 measured. A repo in a different,
-    non-fundable org stays at the 100 plateau.
+    every repo it owns: has_funding_json=True (owner-level), its channels count,
+    and the score is capped at DECLARED_FUNDING_CAP even with $0 measured. A repo
+    in a different, non-fundable org stays at the 100 plateau.
     """
     _base_mocks(monkeypatch, [E("zulip/zulip"), E("zulip/zulip-mobile"),
                               E("plain/p"), E("rich/r")])
@@ -363,8 +365,8 @@ def test_build_funding_org_fundable_caps_score_and_counts_channel(monkeypatch):
 
     rows = {r["repo"]: r for r in bf.build()}
     for repo in ("zulip/zulip", "zulip/zulip-mobile"):
-        assert rows[repo]["org_fundable"] == "True"          # inherited by ALL org repos
+        assert rows[repo]["has_funding_json"] == "True"      # owner-level FLOSS → all org repos
         assert rows[repo]["channels_count"] == "2"           # org channels counted
         assert rows[repo]["score"] == bf.DECLARED_FUNDING_CAP  # 100 → 79 (cap)
-    assert rows["plain/p"]["org_fundable"] == "False"
+    assert rows["plain/p"]["has_funding_json"] == "False"
     assert rows["plain/p"]["score"] == 100                   # different org → no cap
