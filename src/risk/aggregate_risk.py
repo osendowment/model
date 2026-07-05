@@ -98,6 +98,12 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
         # Completeness rule: only score a repo whose every dimension is present.
         row["score"] = overall_score(present) if complete else ""
         rows.append(row)
+
+    # Ranked by overall risk score, highest first; unscored (incomplete) repos
+    # sink to the end, ordered by repo for a stable, deterministic file.
+    rows.sort(key=lambda r: (r["score"] == "",
+                             -int(r["score"]) if r["score"] else 0,
+                             (r["repo"] or "").lower()))
     return rows
 
 

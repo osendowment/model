@@ -220,6 +220,16 @@ def apply(value_file: Path = OUTPUT_FILE,
         if blended is not None:
             row["score"] = f"{blended:.2f}"
 
+    # Ranked by value score, highest first. Unscored rows (below the
+    # 2-component floor — mostly class B/C) sink to the end, kept in their
+    # top_eco_pct-desc importance order, then repo for determinism.
+    def _sort_key(r: dict) -> tuple:
+        sc = (r.get("score") or "").strip()
+        tp = (r.get("top_eco_pct") or "").strip()
+        return (sc == "", -float(sc) if sc else 0.0,
+                -float(tp) if tp else 0.0, (r.get("repo") or "").lower())
+
+    rows.sort(key=_sort_key)
     write_value_data(rows, value_file)
     return rows
 
