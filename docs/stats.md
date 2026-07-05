@@ -42,7 +42,7 @@ follow. **GitHub unique** counts only GitHub-hosted repos — the other 1,580
 a GitHub repo that resolves (API 200), a GitLab project that resolves (GitLab
 API — these also get a `gl/{host}-id` / `gl/id` repo_id), *or* any other
 upstream that resolves (`git ls-remote`). It is therefore measured over all
-12,020 repos and can exceed the GitHub-unique count — only 816 (url-less orphans
+12,017 repos and can exceed the GitHub-unique count — only 774 (url-less orphans
 + dead URLs) are invalid. Archived GitHub mirrors of a live upstream stay *valid*
 (they resolve). The numeric `repo_id` is GitHub + GitLab only, and
 risk/eligibility scope is still GitHub-gated (`settings.json top_repos.platforms`)
@@ -52,8 +52,8 @@ risk/eligibility scope is still GitHub-gated (`settings.json top_repos.platforms
 |---|--:|--:|--:|--:|---|
 | Packages | 3,411 | 4,704 | 9,251 | 17,366 | package universe (after dep tree) |
 | GitHub total repos | 3,374 | 4,286 | 8,088 | 15,748 | package appearances in a github group |
-| GitHub unique repos | 916 | 2,721 | 6,803 | 10,440 | deduped; + 1,580 orphans = 12,020 repos |
-| **Valid repos** | **949** | **2,947** | **7,308** | **11,204** | upstream resolves — github/gitlab API or non-github ls-remote; incl. archived mirrors |
+| GitHub unique repos | 916 | 2,721 | 6,803 | 10,440 | deduped; + 1,577 orphans = 12,017 repos |
+| **Valid repos** | **949** | **2,947** | **7,347** | **11,243** | upstream resolves — github/gitlab API or non-github ls-remote; incl. archived mirrors |
 
 ### Repo class distribution
 
@@ -67,11 +67,11 @@ Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 | npm | 570 | 1,403 | 2,411 |
 | pypi | 165 | 636 | 1,711 |
 | crates | 131 | 528 | 2,889 |
-| cpp | 89 | 571 | 961 |
-| **Repos** | **953** | **3,133** | **7,934** |
-| GitHub % | 96.1% | 86.8% | 85.7% |
+| cpp | 89 | 571 | 958 |
+| **Repos** | **953** | **3,133** | **7,931** |
+| GitHub % | 96.1% | 86.8% | 85.8% |
 | Git % | 99.6% | 94.8% | 93.6% |
-| Valid % | 99.6% | 94.1% | 92.1% |
+| Valid % | 99.6% | 94.1% | 92.6% |
 
 
 ## Risk
