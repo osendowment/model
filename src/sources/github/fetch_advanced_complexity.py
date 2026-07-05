@@ -35,9 +35,13 @@ Output format:
     when run after. `elapsed_s` is logged but NOT persisted.
 
 Usage:
-    uv run python -m src.sources.github.fetch_advanced_complexity --limit 10
-    uv run python -m src.sources.github.fetch_advanced_complexity --limit 0   # full set
+    uv run python -m src.sources.github.fetch_advanced_complexity             # full set, TTL-incremental
     uv run python -m src.sources.github.fetch_advanced_complexity --repos a/b c/d
+    uv run python -m src.sources.github.fetch_advanced_complexity --limit 10  # random sample (experiments)
+
+This is a risk-pipeline fetch step ("cyclomatic" in run_risk_pipeline):
+`cyclomatic_max` is one of the two inputs of the complexity *score*, so a
+repo without these rows cannot be scored at all.
 """
 from __future__ import annotations
 
@@ -86,10 +90,18 @@ SCC_LONG_FILE = f"{DATA_DIR}/git/scc.csv"
 OUTPUT_FILE = f"{DATA_DIR}/git/lizard.csv"
 COMPARISON_FILE = "/tmp/cyclo-vs-scc.md"
 
-DEFAULT_LIMIT = 10
+# Pipeline-step defaults, mirroring fetch_cognitive: full risk scope,
+# incremental via the sha-pinned TTL filter. The old sampling defaults
+# (limit 10, ttl 0 = always re-run) date from this script's origin as a
+# cyclo-vs-scc validation experiment — as a pipeline step they would
+# re-analyze 10 random repos per run and never converge on full coverage.
+DEFAULT_LIMIT = 0
 DEFAULT_SEED = 42
 DEFAULT_CONCURRENCY = int(os.environ.get("CYCLO_WORKERS") or 4)
-DEFAULT_TTL_DAYS = 0  # 0 = always re-run
+# Rows are sha-pinned (same sha -> same complexity, forever) and a changed
+# sha always re-analyzes regardless of TTL — so the TTL only gates pointless
+# same-sha re-analysis. 365 matches the repo-wide freshness convention.
+DEFAULT_TTL_DAYS = 365
 
 # A single source file larger than this is skipped. Files this big are
 # minified bundles, generated parsers or vendored amalgamations — not
