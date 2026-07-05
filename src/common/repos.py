@@ -34,6 +34,7 @@ log = logging.getLogger(__name__)
 
 VALUE_FILE = "data/value/value.csv"
 REPOS_FILE = "data/sources/github/repos.csv"
+GITLAB_PROJECTS_FILE = "data/sources/gitlab/projects.csv"
 OVERRIDES_FILE = "data/value/overrides.csv"
 
 # Class precedence — highest class wins if a repo has multiple rows.
@@ -112,6 +113,39 @@ def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]
     return canon, meta
 
 
+def _read_gitlab_projects(path: str = GITLAB_PROJECTS_FILE) -> dict[str, RepoEntry]:
+    """Read data/sources/gitlab/projects.csv → {gl/ repo_id: RepoEntry}.
+
+    The GitLab analogue of `_read_github_repos`'s `meta`, keyed by the stable
+    `gl/{host}-{id}` repo_id the value stage stamps onto value.csv — so a GitLab
+    top repo enriches from the GitLab project API (archived / stars / valid /
+    path) instead of the GitHub Repos API. Only valid (fetched, 200) projects
+    with a gl/ id are indexed; `size_kb` stays 0 (the project API doesn't expose
+    repo size cheaply). No rename `canon` map: gl/ ids are already stable.
+    """
+    meta: dict[str, RepoEntry] = {}
+    if not os.path.exists(path):
+        return meta
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            rid = (row.get("repo_id") or "").strip()
+            if not rid.startswith("gl/"):
+                continue
+            full = (row.get("path_with_namespace") or "").strip().lower()
+            meta[rid] = RepoEntry(
+                repo=full,
+                repo_id=rid,
+                size_kb=0,
+                stars=int(row.get("stars") or 0),
+                archived=(row.get("archived") or "").strip().lower() in ("true", "1"),
+                enriched=True,
+                valid=(row.get("valid") or "").strip().lower() in ("true", "1"),
+                full_name=full,
+                mirror_url="",
+            )
+    return meta
+
+
 def _read_live_upstream_mirror_slugs(path: str) -> set[str]:
     """Read data/value/overrides.csv → set of lowercased `repo` slugs
     that are GitHub *mirrors* of a live non-GitHub upstream.
@@ -173,44 +207,61 @@ def load_top_repos(
     - Repos missing from github/repos.csv are returned with `enriched=False`
       and default metadata; those still get processed.
     """
-    canon, meta = _read_github_repos(repos_file)
+    canon, gh_meta = _read_github_repos(repos_file)
+    gl_meta = _read_gitlab_projects()
     # Live-upstream GitHub mirrors (archived mirror flag, live non-github
     # upstream) — resolved to canonical slugs, exempt from skip_archived.
     mirror_exempt = {
         canon.get(s, s) for s in _read_live_upstream_mirror_slugs(overrides_file)
     }
-    chosen: dict[str, str] = {}
+    # chosen: dedup key -> (class, platform, repo_id, slug). The key is the
+    # canonical github slug for github repos and the stable gl/ repo_id for
+    # gitlab repos, so a same-named repo on both hosts never collapses.
+    chosen: dict[str, tuple[str, str, str, str]] = {}
     with open(value_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             cls = (row.get("class") or "").strip()
             if cls not in TOP_REPO_CLASSES:
                 continue
-            # Scope platforms are configured in settings.json (top_repos.platforms).
-            # GitHub-only today — the pipeline enriches every repo via the GitHub
-            # API, so other platforms (gitlab/codeberg/custom) are excluded here
-            # rather than 404-ing downstream — but the gate is host-agnostic, so
-            # adding "gitlab" to settings pulls in valid GitLab repos.
-            if (row.get("platform") or "").strip().lower() not in TOP_REPO_PLATFORMS:
+            # Scope platforms are configured in settings.json (top_repos.platforms);
+            # the git_valid gate below applies to every configured platform.
+            platform = (row.get("platform") or "").strip().lower()
+            if platform not in TOP_REPO_PLATFORMS:
                 continue
             raw = (row.get("repo") or "").strip().lower()
             if not raw:
                 continue
             # git_valid is the renamed column (was `valid`); fall back for pre-rename CSVs.
-            # The valid gate applies to every configured platform, not just github.
             git_valid_val = (row.get("git_valid") or "").strip()
             if skip_invalid and git_valid_val != "True":
                 continue
-            slug = canon.get(raw, raw)  # resolve renamed repos to current name
-            if slug not in chosen or _RANK.get(cls, 0) > _RANK.get(chosen[slug], 0):
-                chosen[slug] = cls
+            rid = to_repo_id((row.get("repo_id") or "").strip())
+            if platform == "github":
+                slug = canon.get(raw, raw)      # resolve renamed repos
+                key = slug
+            else:
+                slug = raw                       # non-github: value.csv path is canonical
+                key = rid or f"{platform}:{raw}"
+            if key not in chosen or _RANK.get(cls, 0) > _RANK.get(chosen[key][0], 0):
+                chosen[key] = (cls, platform, rid, slug)
 
     entries: list[RepoEntry] = []
     dropped_archived: list[str] = []
-    for slug, cls in chosen.items():
-        e = meta.get(slug) or RepoEntry(repo=slug)
+    for key, (cls, platform, rid, slug) in chosen.items():
+        if platform == "github":
+            e = gh_meta.get(slug) or RepoEntry(repo=slug)
+        elif platform == "gitlab":
+            e = gl_meta.get(rid) or RepoEntry(repo=slug, repo_id=rid)
+        else:
+            e = RepoEntry(repo=slug, repo_id=rid)
         e.repo = slug
         e.value_class = cls
-        if skip_archived and e.archived and slug not in mirror_exempt:
+        if not e.repo_id:
+            e.repo_id = rid
+        # The mirror-exemption is a GitHub concept (archived mirror of a live
+        # non-github upstream); it never applies to a gitlab/other row.
+        exempt = platform == "github" and slug in mirror_exempt
+        if skip_archived and e.archived and not exempt:
             dropped_archived.append(slug)
             continue
         entries.append(e)
