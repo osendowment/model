@@ -2,7 +2,7 @@
 
 Output: ``data/sources/github/git/commits-years.csv`` with columns
 
-    repo, year, first_sha, last_sha, commits, fetched_at
+    repo, repo_id, git_url, year, first_sha, last_sha, commits, fetched_at
 
 This file is foundational for all SHA-pinned analyses (scc, lizard,
 semgrep, churn). Each downstream tool reads it to find a year-end
@@ -35,17 +35,22 @@ import datetime
 import logging
 import os
 import random
+from functools import lru_cache
 from urllib.parse import parse_qs, quote, urlparse
 
 import aiohttp
 from rich.console import Console
 from rich.progress import (
-    BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn,
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
 )
 
+from src.common.repos import load_default_branches, load_top_repos
 from src.sources.github.display import _ETAColumn
 from src.sources.github.github_client import GITHUB_API, get_revolver
-from src.common.repos import load_default_branches, load_top_repos
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -56,7 +61,7 @@ DEFAULT_YEARS = [2021, 2022, 2023, 2024, 2025]
 DEFAULT_CONCURRENCY = 32
 FLUSH_EVERY = 500
 
-SHA_FIELDS = ["repo", "year", "first_sha", "last_sha", "commits", "fetched_at"]
+SHA_FIELDS = ["repo", "repo_id", "git_url", "year", "first_sha", "last_sha", "commits", "fetched_at"]
 
 
 # ────────────────────────────── CSV I/O ────────────────────────────────
@@ -82,23 +87,54 @@ def load_sha_data(filepath: str) -> dict[tuple[str, str], dict[str, str]]:
     return data
 
 
+@lru_cache(maxsize=1)
+def _load_github_repo_ids() -> tuple[tuple[str, str], ...]:
+    """repo slug -> numeric GitHub id (from github/repos.csv), as a hashable
+    tuple so lru_cache can hold it. Best-effort: empty on any load failure."""
+    try:
+        from src.common.repos import load_repo_ids
+        return tuple(load_repo_ids().items())
+    except Exception:
+        return ()
+
+
 def write_sha_data(
     filepath: str,
     data: dict[tuple[str, str], dict[str, str]],
+    repo_ids: dict[str, str] | None = None,
 ) -> None:
-    """Write commits-years.csv sorted by (repo, year)."""
+    """Write commits-years.csv sorted by (repo, year).
+
+    Each row carries the durable identity columns `repo_id` (= gh/{numeric id}
+    from github/repos.csv, blank if unknown) and `git_url`, derived from the
+    slug so they survive every rewrite (resolve_head.py also writes through
+    here, so both anchor writers stay consistent).
+    """
+    ids = dict(repo_ids) if repo_ids is not None else dict(_load_github_repo_ids())
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
     with open(filepath, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=SHA_FIELDS, extrasaction="ignore")
         writer.writeheader()
         for (repo, year), row in sorted(data.items()):
+            rid = (ids.get(repo) or "").strip()
             writer.writerow({
-                "repo": repo, "year": year,
+                "repo": repo,
+                "repo_id": f"gh/{rid}" if rid else "",
+                "git_url": f"https://github.com/{repo}.git",
+                "year": year,
                 "first_sha": row.get("first_sha", ""),
                 "last_sha":  row.get("last_sha", ""),
                 "commits":   row.get("commits", ""),
                 "fetched_at": row.get("fetched_at", ""),
             })
+
+
+def backfill(sha_file: str = SHA_FILE, repo_ids: dict[str, str] | None = None) -> int:
+    """Rewrite an existing commits-years.csv through write_sha_data so it gains
+    the repo_id + git_url columns. Idempotent. Returns rows written."""
+    data = load_sha_data(sha_file)
+    write_sha_data(sha_file, data, repo_ids=repo_ids)
+    return len(data)
 
 
 # ───────────────────────── snapshot SHA cascade ─────────────────────────
@@ -313,11 +349,18 @@ def main() -> None:
                         help=f"Parallel requests (default: {DEFAULT_CONCURRENCY})")
     parser.add_argument("--force", action="store_true",
                         help="Re-fetch all (repo, year) SHAs even if already cached.")
+    parser.add_argument("--backfill", action="store_true",
+                        help="Rewrite commits-years.csv to add repo_id + git_url, then exit.")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
+
+    if args.backfill:
+        n = backfill(args.sha_file)
+        console.print(f"[green]backfilled {n} rows with repo_id + git_url → {args.sha_file}[/green]")
+        return
 
     started = datetime.datetime.now()
     years = sorted(args.years)
