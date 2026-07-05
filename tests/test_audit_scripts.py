@@ -191,7 +191,7 @@ def test_valid_repos_are_github_with_canonical_url():
     if not value_csv.exists():
         pytest.skip("value.csv not present")
     with value_csv.open() as f:
-        rows = [r for r in csv.DictReader(f) if r.get("valid") == "True"]
+        rows = [r for r in csv.DictReader(f) if r.get("git_valid") == "True"]
     if not rows:
         pytest.skip("no valid repos in value.csv")
 

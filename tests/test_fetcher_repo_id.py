@@ -23,11 +23,11 @@ def test_commits_years_write_round_trips_and_stamps_repo_id(tmp_path, monkeypatc
     }
     cy.write_sha_data(str(path), data)
     rows = {r["repo"]: r for r in csv.DictReader(open(path))}
-    assert rows["a/a"]["repo_id"] == "111"     # kept from the row
-    assert rows["b/b"]["repo_id"] == "222"     # stamped from the map
+    assert rows["a/a"]["repo_id"] == "gh/111"  # kept from the row (gh/-normalised)
+    assert rows["b/b"]["repo_id"] == "gh/222"  # stamped from the map (gh/-normalised)
     # and the loader carries it back (full round trip, e.g. via resolve_head)
     again = cy.load_sha_data(str(path))
-    assert again[("a/a", "2025")]["repo_id"] == "111"
+    assert again[("a/a", "2025")]["repo_id"] == "gh/111"
 
 
 def test_git_contributors_long_rows_carry_and_heal_repo_id(tmp_path):

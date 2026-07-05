@@ -218,7 +218,7 @@ def test_results_columns():
     expected = (
         ["package", "github_repo", "git", "eco_guess", "avg_downloads"]
         + YEAR_COLS
-        + ["top", "pagerank", "value_class", "license"]
+        + ["top", "pagerank", "value_class", "license", "repo_id", "mirror_url"]
     )
     assert cols == expected
 

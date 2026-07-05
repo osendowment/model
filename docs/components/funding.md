@@ -3,8 +3,9 @@
 How well-resourced is a project? The funding component of the
 [Eligibility stage](../eligibility.md) gathers every public
 signal that a repo receives (or gives) financial support — GitHub Sponsors,
-`FUNDING.yml` platforms, the FLOSS Fund directory, OpenCollective budgets, and
-FOSS-foundation hosting — and distills them into:
+`FUNDING.yml` platforms, the FLOSS Fund directory, OpenCollective budgets,
+personal Sponsors of the repo's bus-factor maintainers, and FOSS-foundation
+hosting — and distills them into:
 
 1. a **funding-risk score (`score`, 0–100, higher = more at-risk)** stored in
    `data/eligibility/funding.csv` (informational — not carried into any
@@ -50,6 +51,10 @@ Funding  → data/eligibility/funding.csv  (one row per top repo, archived inclu
 │   ├── oc_avg_funding        ← OC GraphQL totalAmountReceived (gross, mean of years; $0 if none)     [2021–2025]
 │   └── oc_avg_funding_p      ← derived (worst-pinned CDF risk percentile of oc_avg_funding)          [2021–2025]
 │
+├── Bus-factor maintainer Sponsors  (github/maintainer-sponsors.csv)
+│   └── bf_maintainer_fundable ← any bus-factor maintainer (wrote ≥50% of the repo) has a personal
+│                                GitHub Sponsors listing (GraphQL hasSponsorsListing, keyed by user id)  [most recent]
+│
 ├── Institutional backing  (funding/host-by-repo.csv ∪ data/eligibility/overrides.csv)
 │   ├── host, host_type      ← legally-connected steward domain (e.g. apache.org, react.foundation)  [most recent]
 │   ├── owner, owner_type     ← owning-entity domain (e.g. meta.com), from overrides.csv               [most recent]
@@ -66,7 +71,7 @@ Funding  → data/eligibility/funding.csv  (one row per top repo, archived inclu
 
 ## How It Works
 
-1. **Collect** — five fetchers pull raw funding signals into `data/sources/`,
+1. **Collect** — six fetchers pull raw funding signals into `data/sources/`,
    each TTL-controlled so re-runs only fetch what's missing or stale.
 2. **Join** — `build_funding.py` joins the sources onto the top repos
    (archived included; by `repo`, by owner `login` for outbound sponsoring,
@@ -89,7 +94,7 @@ already present, so a re-run only fills gaps); pass `--skip-fetch` to rebuild
 from existing data without fetching:
 
 ```
-funding-yml → npm-funding → pypi-funding → sponsors → floss-fund → oc-collectives → opencollective → foundation scrapers → match-hosts → funding-build
+funding-yml → npm-funding → pypi-funding → sponsors → maintainer-sponsors → floss-fund → oc-collectives → opencollective → foundation scrapers → match-hosts → funding-build
 ```
 
 (The same runner also fetches the license and EOL signals for the stage's
@@ -97,13 +102,14 @@ other dimensions — see [eligibility.md](../eligibility.md).)
 
 ## Collection
 
-Five sources feed the build. Each fetcher records a `*_status` and/or
+Six sources feed the build. Each fetcher records a `*_status` and/or
 `fetched_at`, so a `0`/`False` value is distinguishable from a failed fetch.
 
 | Source file (`data/sources/` unless noted) | Fetcher | Collects | Key |
 |---|---|---|---|
 | `github/sponsors.csv` | `src/sources/github/fetch_sponsors.py` | inbound GitHub Sponsors count | `repo` |
 | `github/sponsorships.csv` | `src/sources/github/fetch_sponsorships.py` | outbound sponsoring count | `login` |
+| `github/maintainer-sponsors.csv` | `src/sources/github/fetch_maintainer_sponsors.py` | personal Sponsors listing per bus-factor maintainer | `user_id` |
 | `github/funding-yml.csv` | `src/sources/github/fetch_funding_yml.py` | resolved funding links (GraphQL `fundingLinks`) — platforms + handles | `repo` |
 | `floss-fund/funding-json.csv` | `src/sources/floss_fund/funding_json.py` | FLOSS Fund manifest directory | `id` |
 | `opencollective/budgets.csv` | `src/sources/opencollective/fetch_budgets.py` | OC gross annual budgets | `slug` |
@@ -127,6 +133,36 @@ by `login` (~412 owner logins, ~half the per-repo count) and gap-fills only new
 owners. A repo whose owner sponsors others (e.g. `astral-sh`, "Sponsoring 39")
 is a *resourced* backer, not an unfunded project — which is why the score uses
 **`in + out`** rather than `in − out`.
+
+### Bus-factor maintainer Sponsors (`bf_maintainer_fundable`)
+
+`fetch_sponsors` (above) asks whether a repo's **owner** has Sponsors enabled.
+For a repo under a *project org* — `acornjs/acorn`, `serde-rs/json`,
+`crossbeam-rs/crossbeam` — the owner is the org, which almost never has a
+listing, even though the maintainer who actually wrote the repo does
+(marijnh, dtolnay, taiki-e all have personal Sponsors). That intent was
+invisible.
+
+`fetch_maintainer_sponsors.py` closes the gap. For every top repo it takes the
+**bus-factor set** — the fewest top contributors whose commits cumulatively
+reach 50% of the repo (`src/sources/github/bf_contributors.py`, the same
+population `build_concentration` counts as `bf_commits_gh_alltime`) — and checks
+whether *any of them personally* has a GitHub Sponsors listing
+(GraphQL `hasSponsorsListing`). If so, the repo is `bf_maintainer_fundable` — a
+funding-intent signal in its own right (someone who carries this repo can be
+funded directly).
+
+Two deliberate choices keep it honest and stable:
+
+- **Bus-factor only, not any contributor.** Restricting to the people who wrote
+  ≥50% of the repo means a drive-by contributor who merely happens to have
+  Sponsors cannot manufacture intent for a project they did not build.
+- **Keyed by numeric user id.** `maintainer-sponsors.csv` is keyed by the
+  account's immutable `databaseId` (mirroring the `gh/<n>` repo_id convention),
+  so a maintainer who carries several repos (dtolnay → serde/syn/quote…) is
+  checked once, and the identity survives a GitHub rename. `login` is stored
+  alongside for the join back from the (login-keyed) contributor data and for
+  audit; `status` distinguishes a resolved "not fundable" from a failed lookup.
 
 ### funding.json from the FLOSS Fund directory
 
@@ -168,6 +204,7 @@ in `.env` to lift it. `oc_avg_funding` is the mean over years with data.
 | `channels_count` | distinct platforms across funding links ∪ funding.json ∪ org-level channels |
 | `has_funding_json` | repo URL present in the FLOSS Fund export (incl. redirect-resolved) |
 | `org_fundable` | repo's owner has an org-level FLOSS manifest (`github.com/<org>`) |
+| `bf_maintainer_fundable` | any bus-factor maintainer (≥50%-of-commits set) has a personal GitHub Sponsors listing |
 | `oc_avg_funding` | mean of OC `raised_*` years (**`0`** when no OC presence) |
 
 ### The percentiles (`_p`)
@@ -206,7 +243,18 @@ association); `owner` is the owning entity (a domain). Each is classified
 of the two** (`min`), so a single value ∈ {0, 0.5, 1}:
 
 - A scraped FOSS-foundation host (`funding/host-by-repo.csv`) defaults to
-  nonprofit, so Apache/LF/CNCF/NumFOCUS/PSF repos drop from 100 → 50 as before.
+  nonprofit, so Apache/CNCF/Eclipse/OpenJS/PSF/NumFOCUS/LF, the **GNU project**
+  (host `fsf/gnu` — every GNU package is FSF-stewarded), the **FSF** itself,
+  **Software Freedom Conservancy** members (incl. Sourceware-hosted libs like
+  `libffi`), the **GNOME Foundation** (`gnome/*`, gnome.org), and the **X.Org
+  Foundation** (its gitlab.freedesktop.org/xorg projects, e.g. `libxcb`) repos
+  drop from 100 → 50. `match_repos` joins each roster to a repo by exact
+  `owner/name` slug, a curated foundation org-prefix (`autotools-mirror/*`,
+  `gcc-mirror/*`, `coreutils/*` → GNU; `GNOME/*` → GNOME), or apex/suffix domain
+  (`*.gnu.org` → GNU, `sfconservancy.org` → SFC, `gnome.org` → GNOME, `x.org` →
+  X.Org — but NOT `freedesktop.org`, a broader umbrella that would
+  over-attribute). Reference-only subdomains (`peps.python.org`, docs pages) are
+  excluded so a repo that merely links to a foundation is not miscredited.
 - A curated `data/eligibility/overrides.csv` row sets either side by domain.
   `facebook/react` (host `react.foundation` nonprofit, owner `meta.com` company)
   → host_score `min(0.5, 0)` = 0 → ∛(100·100·0) = **1**; `rust-lang/rust` (host
@@ -258,6 +306,7 @@ timestamps stay in each source file.
 | `funding_link_platforms` | declared platform keys (comma-sep) |
 | `has_funding_json` | repo registered in the FLOSS Fund directory (incl. redirect-resolved URL) |
 | `org_fundable` | repo's **owner** has an org-level FLOSS manifest — counts as a funding channel (caps `score` at 79) |
+| `bf_maintainer_fundable` | a bus-factor maintainer (≥50%-of-commits set) has a personal GitHub Sponsors listing |
 | `channels_count` | distinct funding platforms (links ∪ funding.json ∪ org-level) |
 | `oc_avg_funding` | mean OC gross annual budget (`0` if none) |
 | `oc_avg_funding_p` | risk percentile of `oc_avg_funding` |
@@ -291,8 +340,9 @@ are two of the four checks behind
 **`intent`** (`bool`, default `false`) — `true` when the repo shows at least
 one funding signal: GitHub Sponsors (inbound or outbound), a `.github/FUNDING.yml`,
 a `funding.json` (FLOSS Fund), an npm `funding` field, a PyPI project-URLs
-funding entry, an Open Collective slug, or an institutional host or owner.
-"Intent" means the project is actively seeking or accepting support.
+funding entry, a bus-factor maintainer who is personally fundable on GitHub
+Sponsors (`bf_maintainer_fundable`), an Open Collective slug, or an institutional
+host or owner. "Intent" means the project is actively seeking or accepting support.
 
 **`nonprofit`** (`bool`, default `true`) — `false` only when a corporate entity
 (Meta, Google, Microsoft, AWS, …) is the project's host or owner, as determined by

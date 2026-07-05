@@ -124,7 +124,8 @@ def value_stats() -> dict:
     m = len(rows)
     gh = sum(1 for r in rows if _is_github(r))
     git = sum(1 for r in rows if _present(r.get("git_url")))
-    valid = sum(1 for r in rows if _truthy(r.get("valid")))
+    # git_valid is the renamed column (was `valid`); fall back for pre-rename CSVs.
+    valid = sum(1 for r in rows if _truthy(r.get("git_valid")))
     orphan = m - gh
 
     def _is_active(r: dict) -> bool:
@@ -150,7 +151,7 @@ def value_stats() -> dict:
             "github": sum(1 for r in sub if _is_github(r)),
             "active": sum(1 for r in sub if _is_active(r)),
             "git": sum(1 for r in sub if _present(r.get("git_url"))),
-            "valid": sum(1 for r in sub if _truthy(r.get("valid"))),
+            "valid": sum(1 for r in sub if _truthy(r.get("git_valid"))),
         }
 
     # Packages per repo class, from value.csv's own `packages` column (every
@@ -319,6 +320,7 @@ def eligibility_stats() -> dict:
 
     licenses = {
         "resolved": sum(1 for r in lic if _present(r.get("license"))),
+        "override": sum(1 for r in lic if r.get("license_source") == "override"),
         "registry": sum(1 for r in lic if r.get("license_source") == "registry"),
         "github": sum(1 for r in lic if r.get("license_source") == "github"),
         "oss_true": sum(1 for r in lic if r.get("oss") == "True"),
@@ -427,6 +429,7 @@ def dashboard(v: dict, r: dict, e: dict) -> None:
     t.add_column("Repos", justify="right")
     t.add_column("%", justify="right")
     for label, cnt in (("license resolved", lic["resolved"]),
+                       ("· from override", lic["override"]),
                        ("· from registry", lic["registry"]),
                        ("· from GitHub", lic["github"]),
                        ("oss=True (OSI-approved)", lic["oss_true"]),
@@ -535,6 +538,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a("|---|---:|---:|")
     a(f"| input top repos (incl. archived) | {ne} | 100% |")
     for label, cnt in (("license resolved", lic["resolved"]),
+                       ("· from override", lic["override"]),
                        ("· from registry", lic["registry"]),
                        ("· from GitHub", lic["github"]),
                        ("**oss=True (OSI-approved)**", lic["oss_true"]),

@@ -66,7 +66,7 @@ def test_cell_fetched_at_round_trips(tmp_path):
     assert out["2023"] == ""
 
 
-def test_load_value_repo_ids_strips_prefix_and_filters_platform(tmp_path):
+def test_load_value_repo_ids_canonical_form_and_filters_platform(tmp_path):
     from src.common.repos import load_value_repo_ids
     f = tmp_path / "value.csv"
     f.write_text(
@@ -74,4 +74,4 @@ def test_load_value_repo_ids_strips_prefix_and_filters_platform(tmp_path):
         'react/react,github,gh/10270250\n'
         'gl/thing,gitlab,gl/9\n'
     )
-    assert load_value_repo_ids(str(f)) == {"react/react": "10270250"}
+    assert load_value_repo_ids(str(f)) == {"react/react": "gh/10270250"}

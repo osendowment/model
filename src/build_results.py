@@ -44,8 +44,8 @@ FIELDS = ["repo_id", "repo", "ecosystem", "value_score", "risk_score"]
 def _value_maps() -> tuple[dict[str, dict], dict[str, dict]]:
     """(by_id, by_slug) maps onto value.csv rows.
 
-    value.csv stores the platform-prefixed `gh/<n>` id; the bare numeric part
-    is the primary join key (rename-proof, matches eligibility's `repo_id`).
+    value.csv's canonical `gh/<n>` id is the primary join key (rename-proof,
+    matches eligibility's `repo_id`, which carries the same form).
     The slug map remains as fallback for rows without an id (non-GitHub or
     unresolved)."""
     by_id: dict[str, dict] = {}
@@ -54,7 +54,7 @@ def _value_maps() -> tuple[dict[str, dict], dict[str, dict]]:
         return by_id, by_slug
     with open(VALUE_FILE, encoding="utf-8") as f:
         for r in csv.DictReader(f):
-            rid = (r.get("repo_id") or "").strip().removeprefix("gh/")
+            rid = (r.get("repo_id") or "").strip()
             if rid:
                 by_id.setdefault(rid, r)
             slug = (r.get("repo") or "").strip().lower()

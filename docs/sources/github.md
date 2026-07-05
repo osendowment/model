@@ -45,6 +45,8 @@ In `data/sources/git/` (long-format sha-pinned, schema: `repo, repo_id, commit_s
 |--------|---------|
 | `src/sources/github/fetch_top_repos.py` | Search repos by language/stars; backfill ecosystem repos |
 | `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
+| `src/sources/github/bf_contributors.py` | Bus-factor contributor membership (which logins make up `bf_commits_gh_alltime`) |
+| `src/sources/github/fetch_maintainer_sponsors.py` | Personal GitHub Sponsors listing per bus-factor maintainer (→ funding-intent `bf_maintainer_fundable`) |
 | `src/sources/git/commits_years.py` | Resolve per (repo, year) `last_sha` + `commits` |
 | `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (writes long format) |
 | `src/sources/github/fetch_advanced_complexity.py` | Lizard cyclomatic + multimetric Halstead + MI |

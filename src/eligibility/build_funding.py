@@ -15,6 +15,10 @@ Reads (all under data/sources/ except the stage-level overrides):
                                  src.sources.npm.fetch_funding) — a declared channel
     pypi/funding.csv           — PyPI `project_urls` funding link (pypi repos only,
                                  src.sources.pypi.fetch_funding) — a declared channel
+    github/maintainer-sponsors.csv — personal GitHub Sponsors listing per
+                                 bus-factor maintainer (src.sources.github.fetch_maintainer_sponsors);
+                                 joined via the repo's bus-factor set (bf_contributors)
+                                 into the `bf_maintainer_fundable` intent signal
 
 Writes data/eligibility/funding.csv. The funding **score** (0-100, higher =
 less funded = riskier) is the geometric mean of THREE direction-aware risk axes:
@@ -51,6 +55,7 @@ from src.common.repos import canonical_repo_map, load_top_repos
 from src.common.stats import geometric_mean
 from src.common.tables import load_column_by_id, load_rows_by_id
 from src.sources.floss_fund.directory import export_repo_slug, github_org_page
+from src.sources.github.bf_contributors import load_bf_contributors
 from src.sources.opencollective.fetch_collectives import load_index as _load_oc_index
 
 console = Console()
@@ -66,6 +71,7 @@ FOUNDATIONS_FILE = DATA_DIR / "sources" / "funding" / "host-by-repo.csv"
 OVERRIDES_FILE = DATA_DIR / "eligibility" / "overrides.csv"
 NPM_FUNDING_FILE = DATA_DIR / "sources" / "npm" / "funding.csv"
 PYPI_FUNDING_FILE = DATA_DIR / "sources" / "pypi" / "funding.csv"
+MAINTAINER_SPONSORS_FILE = DATA_DIR / "sources" / "github" / "maintainer-sponsors.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility" / "funding.csv"
 
 # A repo that DECLARES a funding channel whose $ we cannot measure is not
@@ -87,7 +93,8 @@ FIELDS = ["repo", "repo_id",
           "gh_stars", "gh_forks",
           "has_funding_links", "has_funding_yml", "funding_link_platforms", "has_funding_json",
           "has_npm_funding", "npm_funding_url",
-          "has_pypi_funding", "pypi_funding_platforms", "channels_count",
+          "has_pypi_funding", "pypi_funding_platforms",
+          "bf_maintainer_fundable", "channels_count",
           "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
           "host", "host_type", "owner", "owner_type", "host_score",
           "score", "intent", "nonprofit"]
@@ -125,8 +132,9 @@ def _intent_flag(row: dict) -> bool:
     funding link (`has_funding_links`), a FUNDING.yml file present for the repo or
     owner even if it resolves to no links (`has_funding_yml`), a FLOSS Fund
     manifest for the repo or its owner (`has_funding_json`), an npm / PyPI funding
-    field, an Open Collective, or an institutional host/owner. The inbound sponsor
-    count is NOT checked
+    field, a bus-factor maintainer who is personally fundable on GitHub Sponsors
+    (`bf_maintainer_fundable`), an Open Collective, or an institutional host/owner.
+    The inbound sponsor count is NOT checked
     separately — any count implies the listing is enabled, so `gh_sponsors_enabled`
     already covers it. Outbound sponsoring (the owner funding *others*, folded into
     `gh_sponsorships`) is NOT intent — it is not a funding channel for this repo."""
@@ -137,6 +145,7 @@ def _intent_flag(row: dict) -> bool:
         or (row.get("has_funding_json") or "").strip() == "True"
         or (row.get("has_npm_funding") or "").strip() == "True"
         or (row.get("has_pypi_funding") or "").strip() == "True"
+        or (row.get("bf_maintainer_fundable") or "").strip() == "True"
         or bool((row.get("oc_slug") or "").strip())
         or bool((row.get("host") or "").strip())
         or bool((row.get("owner") or "").strip())
@@ -202,7 +211,8 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
                  oc_slug: str = "", oc_avg: str = "0",
                  npm_funding: dict | None = None,
                  pypi_funding: dict | None = None,
-                 org_export: dict | None = None) -> dict:
+                 org_export: dict | None = None,
+                 bf_maintainer_fundable: bool = False) -> dict:
     """Join one repo's raw funding signals (percentiles filled later in build()).
 
     `oc_slug` / `oc_avg` are the Open Collective attribution resolved in build():
@@ -248,6 +258,13 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "npm_funding_url": (npm_funding.get("npm_funding_url") or "").strip(),
         "has_pypi_funding": "True" if has_pypi else "False",
         "pypi_funding_platforms": (pypi_funding.get("pypi_funding_platforms") or "").strip(),
+        # A bus-factor maintainer (someone who wrote ≥50% of the repo) is
+        # personally fundable on GitHub Sponsors — see fetch_maintainer_sponsors.
+        # Intent-only by design: unlike org_fundable it does NOT count as a
+        # channel or trigger DECLARED_FUNDING_CAP, because a personal Sponsors
+        # listing funds the maintainer's whole portfolio, not this one repo (the
+        # same reason fetch_sponsors refuses to credit co-maintainer sponsors).
+        "bf_maintainer_fundable": "True" if bf_maintainer_fundable else "False",
         "channels_count": str(len(channels)),
         "oc_slug": oc_slug,
         "oc_avg_funding": oc_avg,
@@ -329,6 +346,25 @@ def _load_sponsoring(path: Path) -> dict[str, str]:
                 login = (row.get("login") or "").strip().lower()
                 if login:
                     out[login] = (row.get("sponsoring_count") or "").strip()
+    return out
+
+
+def _load_maintainer_fundable(path: Path) -> set[str]:
+    """{login} of maintainers with an active GitHub Sponsors listing.
+
+    From maintainer-sponsors.csv (keyed by user id). Only rows that resolved
+    (`status == ok`) with `has_sponsors_listing == True` count — a failed lookup
+    (`status == error`) is not a negative. Logins are lowercased to match the
+    bus-factor membership keys.
+    """
+    out: set[str] = set()
+    if path.exists():
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                login = (row.get("login") or "").strip().lower()
+                if (login and (row.get("has_sponsors_listing") or "").strip() == "True"
+                        and (row.get("status") or "").strip() == "ok"):
+                    out.add(login)
     return out
 
 
@@ -414,6 +450,11 @@ def build() -> list[dict]:
     sponsoring = _load_sponsoring(SPONSORSHIPS_FILE)
     npm_funding = load_rows_by_id(NPM_FUNDING_FILE) if NPM_FUNDING_FILE.exists() else {}
     pypi_funding = load_rows_by_id(PYPI_FUNDING_FILE) if PYPI_FUNDING_FILE.exists() else {}
+    # Bus-factor maintainer sponsorship: {repo_id: [bf logins]} × {fundable login}.
+    # A repo is bf_maintainer_fundable when any maintainer who carries it (wrote
+    # ≥50% of it) personally has a GitHub Sponsors listing.
+    bf_by_repo = load_bf_contributors()
+    fundable_maintainers = _load_maintainer_fundable(MAINTAINER_SPONSORS_FILE)
 
     # Open Collective attribution is driven by the reverse-map (collectives.csv),
     # which records whether each collective's GitHub link names a specific repo or
@@ -479,6 +520,7 @@ def build() -> list[dict]:
             oc_slug, oc_amt = "", 0.0
 
         rid = str(entry.repo_id)
+        bf_fundable = any(l in fundable_maintainers for l in bf_by_repo.get(rid, []))
         rows.append(assemble_row(
             repo=repo, repo_id=entry.repo_id,
             sponsors=sponsors.get(rid, {}), yml=yml.get(rid, {}),
@@ -492,7 +534,8 @@ def build() -> list[dict]:
             oc_slug=oc_slug, oc_avg=_fmt_money(oc_amt),
             npm_funding=npm_funding.get(rid, {}),
             pypi_funding=pypi_funding.get(rid, {}),
-            org_export=fundable_orgs.get(owner_login, {})))    # FLOSS org: by owner
+            org_export=fundable_orgs.get(owner_login, {}),     # FLOSS org: by owner
+            bf_maintainer_fundable=bf_fundable))               # BF maintainer sponsors
 
     # Funding risk score: both axes are `lower_is_worse` (less funding → riskier).
     # add_percentiles writes the two risk percentiles; we then recompute `score`

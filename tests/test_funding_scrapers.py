@@ -131,7 +131,8 @@ class TestMatchReposHostChecked:
     def _write_repos(self, tmp_path, rows):
         p = tmp_path / "top-repos.csv"
         with open(p, "w", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=["repo", "homepage"])
+            w = csv.DictWriter(f, fieldnames=["repo", "repo_id", "homepage"],
+                               extrasaction="ignore")
             w.writeheader()
             w.writerows(rows)
         return p
@@ -174,5 +175,72 @@ class TestMatchReposHostChecked:
             {"cncf/etcd": "cncf"}, {}, {},
             fetched_at_by_host={"cncf": "2025-01-01T00:00:00+00:00"},
         )
-        assert set(rows[0]) == {"repo", "host", "host_source", "host_checked"}
+        assert set(rows[0]) == {"repo", "repo_id", "host", "host_source", "host_checked"}
         assert rows[0]["host"] == "lf/cncf"  # qualified parent/child unchanged
+
+    def test_repo_id_carried_through(self, tmp_path, monkeypatch):
+        # host-by-repo.csv joins into build_funding on the STABLE repo_id — if
+        # match_repos drops it, every foundation-host intent silently vanishes.
+        repos = self._write_repos(
+            tmp_path, [{"repo": "cncf/etcd", "repo_id": "11225014", "homepage": ""}])
+        monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
+        rows = match_repos.classify({"cncf/etcd": "cncf"}, {}, {}, fetched_at_by_host={})
+        assert rows[0]["repo_id"] == "11225014"
+
+    def test_gnu_org_prefix_maps_to_fsf_gnu(self, tmp_path, monkeypatch):
+        # A GNU mirror org (autotools-mirror/*) is attributed to the GNU project
+        # under its FSF parent → host "fsf/gnu", so m4/autoconf/libtool flip intent.
+        repos = self._write_repos(
+            tmp_path, [{"repo": "autotools-mirror/m4", "repo_id": "66880383",
+                        "homepage": ""}])
+        monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
+        rows = match_repos.classify({}, match_repos.ORG_HOST, {}, fetched_at_by_host={})
+        assert rows[0]["host"] == "fsf/gnu"
+        assert rows[0]["host_source"] == "org_prefix"
+
+    def test_gnome_org_prefix_maps_to_gnome(self, tmp_path, monkeypatch):
+        # GNOME mirrors gitlab.gnome.org to github.com/GNOME/* → org-prefix host.
+        repos = self._write_repos(
+            tmp_path, [{"repo": "gnome/pango", "repo_id": "1", "homepage": ""}])
+        monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
+        rows = match_repos.classify({}, match_repos.ORG_HOST, {}, fetched_at_by_host={})
+        assert rows[0]["host"] == "gnome"
+
+    def test_xorg_exact_slug_maps_to_xorg(self, tmp_path, monkeypatch):
+        # X.Org GitHub mirrors live in a MIXED third-party org, so libxcb matches
+        # only by the exact per-project slug from the roster (not an org rule).
+        repos = self._write_repos(
+            tmp_path, [{"repo": "gitlab-freedesktop-mirrors/libxcb",
+                        "repo_id": "1", "homepage": ""}])
+        monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
+        rows = match_repos.classify(
+            {"gitlab-freedesktop-mirrors/libxcb": "xorg"}, {}, {}, fetched_at_by_host={})
+        assert rows[0]["host"] == "xorg"
+
+    def test_freedesktop_domain_does_not_over_attribute_to_xorg(self, tmp_path, monkeypatch):
+        # x.org → xorg, but freedesktop.org is a broader umbrella (wayland,
+        # dbus, pipewire) and must NOT be attributed to X.Org.
+        repos = self._write_repos(tmp_path, [
+            {"repo": "xorg/thing", "repo_id": "1", "homepage": "https://www.x.org/"},
+            {"repo": "fd/thing", "repo_id": "2", "homepage": "https://www.freedesktop.org/"},
+        ])
+        monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
+        rows = {r["repo"]: r for r in
+                match_repos.classify({}, {}, {}, fetched_at_by_host={})}
+        assert rows["xorg/thing"]["host"] == "xorg"
+        assert rows["fd/thing"]["host"] == ""
+
+    def test_reference_subdomain_never_attributes_host(self, tmp_path, monkeypatch):
+        # A repo whose homepage is a PEP/docs page (peps.python.org) merely
+        # *links* to the foundation — it must NOT become host=psf. Guards the
+        # rogdham/backports.zstd → peps.python.org/pep-0784 false positive.
+        repos = self._write_repos(tmp_path, [
+            {"repo": "rogdham/backports.zstd", "repo_id": "1",
+             "homepage": "https://peps.python.org/pep-0784/"},
+            {"repo": "psf/real", "repo_id": "2", "homepage": "https://www.python.org/"},
+        ])
+        monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
+        rows = {r["repo"]: r for r in
+                match_repos.classify({}, {}, {}, fetched_at_by_host={})}
+        assert rows["rogdham/backports.zstd"]["host"] == ""   # reference link, not a host
+        assert rows["psf/real"]["host"] == "psf"              # real python.org home still matches

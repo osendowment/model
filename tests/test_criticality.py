@@ -34,9 +34,9 @@ def test_heal_rows_is_idempotent_and_keeps_distinct_repos():
     assert rows["c/c"]["repo_id"] == ""      # unresolvable stays blank, not invented
 
 
-def test_value_repo_ids_strips_gh_prefix(tmp_path):
+def test_value_repo_ids_canonical_gh_form(tmp_path):
     """value.csv carries platform-prefixed ids (gh/123); the fallback map
-    must expose bare numeric ids keyed by the canonical slug."""
+    must expose canonical gh/<id> ids keyed by the canonical slug."""
     from src.sources.openssf.criticality import _value_repo_ids
     f = tmp_path / "value.csv"
     f.write_text(
@@ -46,4 +46,4 @@ def test_value_repo_ids_strips_gh_prefix(tmp_path):
         'no-id/repo,github,\n'
     )
     ids = _value_repo_ids(str(f))
-    assert ids == {"react/react": "10270250"}
+    assert ids == {"react/react": "gh/10270250"}

@@ -293,7 +293,7 @@ def check_value_criticality() -> list[Result]:
                                     encoding="utf-8")))
     gate = [r for r in disk
             if (r.get("platform") or "").lower() == "github"
-            and (r.get("valid") or "") == "True"
+            and (r.get("git_valid") or "") == "True"
             and (r.get("class") or "") == "A"]
     blank = [r["repo"] for r in gate if not (r.get("criticality") or "").strip()]
     if blank:

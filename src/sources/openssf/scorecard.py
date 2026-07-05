@@ -30,6 +30,8 @@ Usage:
 
 import argparse
 import asyncio
+import csv
+import functools
 import json
 import logging
 import os
@@ -44,8 +46,8 @@ from rich.table import Table
 
 from src.common.repos import load_repo_ids as load_repo_id_map
 from src.common.repos import load_top_slugs
+from src.sources.git.long_format import _file_lock, upsert_snapshot
 from src.sources.git.long_format import read as read_long
-from src.sources.git.long_format import upsert_snapshot
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -53,6 +55,7 @@ console = Console()
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DATA_OUTPUT = ROOT / "data" / "sources" / "openssf" / "data.json"
 DEFAULT_LONG_OUTPUT = ROOT / "data" / "sources" / "git" / "openssf.csv"
+GITLAB_PROJECTS = ROOT / "data" / "sources" / "gitlab" / "projects.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -164,7 +167,34 @@ SCORECARD_CHECKS = os.environ.get("SCORECARD_CHECKS", ",".join([
 ]))
 
 
-def run_scorecard(repo: str, token: str) -> dict:
+# Scorecard checks applicable to GitLab. The GitHub-Actions/statuses specific
+# checks are excluded: CI-Tests errors (commit-statuses 404 on GitLab), and
+# Dangerous-Workflow / Packaging / Pinned-Dependencies / Signed-Releases /
+# Token-Permissions are Actions-only (return inconclusive). Branch-Protection
+# is omitted for the same admin-scope reason as GitHub. SAST is kept even
+# though it 403s on the pipelines API for many repos — that per-repo error
+# makes the CLI exit non-zero but the aggregate is still computed, and the
+# GitLab path's tolerate_partial recovers it (so we keep the signal where
+# SAST *does* resolve rather than dropping the check for everyone).
+GITLAB_SCORECARD_CHECKS = os.environ.get("GITLAB_SCORECARD_CHECKS", ",".join([
+    "Binary-Artifacts",
+    "CII-Best-Practices",
+    "Code-Review",
+    "Contributors",
+    "Dependency-Update-Tool",
+    "Fuzzing",
+    "License",
+    "Maintained",
+    "SAST",
+    "Security-Policy",
+    "Vulnerabilities",
+]))
+
+
+def run_scorecard(repo: str, token: str, *,
+                  token_env: str = "GITHUB_AUTH_TOKEN",
+                  checks: str = SCORECARD_CHECKS,
+                  tolerate_partial: bool = False) -> dict:
     """Run the scorecard CLI for a single repo and return parsed JSON.
 
     Wraps the subprocess in a hard timeout so we don't get stuck on
@@ -172,8 +202,10 @@ def run_scorecard(repo: str, token: str) -> dict:
     for 7+ min per call). On timeout or non-zero exit we record an
     error row and move on.
 
-    Passes ``--checks=<SCORECARD_CHECKS>`` so we don't fail on
-    Branch-Protection (admin scope required) — see the constant above.
+    ``token_env`` is the env var the token is passed through — ``GITHUB_AUTH_TOKEN``
+    for github.com repos, ``GITLAB_AUTH_TOKEN`` for ``{host}/{path}`` GitLab
+    targets. ``checks`` selects the check subset (Branch-Protection is omitted
+    for admin scope; GitLab uses ``GITLAB_SCORECARD_CHECKS``).
     """
     try:
         result = subprocess.run(
@@ -181,12 +213,12 @@ def run_scorecard(repo: str, token: str) -> dict:
                 _scorecard_bin(),
                 "--repo", repo,
                 "--format", "json",
-                f"--checks={SCORECARD_CHECKS}",
+                f"--checks={checks}",
             ],
             capture_output=True,
             text=True,
             timeout=SUBPROCESS_TIMEOUT_S,
-            env={**os.environ, "GITHUB_AUTH_TOKEN": token},
+            env={**os.environ, token_env: token or ""},
         )
     except subprocess.TimeoutExpired:
         log.warning("scorecard timed out for %s after %ds", repo, SUBPROCESS_TIMEOUT_S)
@@ -198,6 +230,23 @@ def run_scorecard(repo: str, token: str) -> dict:
 
     if result.returncode != 0:
         msg = result.stderr.strip()[:500]
+        # Scorecard exits non-zero if ANY single check hits an internal error,
+        # but with --format json it still emits the full result (the aggregate
+        # score is computed from the checks that succeeded). On GitLab a
+        # per-repo permission gap on one endpoint (e.g. SAST's 403 on the
+        # pipelines API) is common and shouldn't cost us the whole repo, so the
+        # GitLab path recovers the partial-but-valid JSON from stdout.
+        if tolerate_partial and result.stdout.strip():
+            try:
+                data = json.loads(result.stdout)
+            except json.JSONDecodeError:
+                data = None
+            if isinstance(data, dict) and (
+                data.get("score") is not None or data.get("checks")
+            ):
+                log.info("scorecard partial for %s (a check errored): %s",
+                         repo, msg[:160])
+                return data
         log.warning("scorecard failed for %s: %s", repo, msg)
         return {"error": True, "repo": repo, "message": msg}
     if not result.stdout.strip():
@@ -268,24 +317,108 @@ async def fetch_all(
 
 
 # ---------------------------------------------------------------------------
+# GitLab
+# ---------------------------------------------------------------------------
+
+
+def load_gitlab_targets(hosts: set[str] | None = None) -> list[dict]:
+    """Valid GitLab projects from data/sources/gitlab/projects.csv.
+
+    Returns ``[{project, host, repo_id}]`` where ``project`` = ``"{host}/{path}"``
+    is a valid Scorecard ``--repo`` target (e.g. ``gitlab.com/gnutls/gnutls``)
+    and ``repo_id`` = ``gl/{host}/{id}``. Optionally filter to ``hosts``.
+    """
+    out: list[dict] = []
+    if not GITLAB_PROJECTS.exists():
+        return out
+    with open(GITLAB_PROJECTS, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            if (r.get("valid") or "") != "True" or not r.get("repo_id"):
+                continue
+            if hosts and r.get("host") not in hosts:
+                continue
+            out.append({"project": r["project"], "host": r["host"],
+                        "repo_id": r["repo_id"]})
+    return out
+
+
+async def fetch_all_gitlab(
+    targets: list[dict],
+    token_map: dict[str, str],
+    concurrency: int = 5,
+) -> dict[str, dict]:
+    """Run Scorecard on GitLab targets, keyed on the ``gl/{host}/{id}`` repo_id.
+
+    Each subprocess gets its host's token via ``GITLAB_AUTH_TOKEN`` and the
+    GitLab check subset. Upserts to the same ``data.json`` + ``openssf.csv``
+    outputs as the GitHub path (long rows carry the ``gl/`` repo_id).
+    """
+    repo_ids = {t["project"]: t["repo_id"] for t in targets}
+    semaphore = asyncio.Semaphore(concurrency)
+    results: dict[str, dict] = {}
+    completed = 0
+    total = len(targets)
+
+    async def bounded_run(t: dict) -> None:
+        nonlocal completed
+        async with semaphore:
+            token = token_map.get(t["host"], "")
+            loop = asyncio.get_running_loop()
+            data = await loop.run_in_executor(
+                None,
+                functools.partial(run_scorecard, t["project"], token,
+                                  token_env="GITLAB_AUTH_TOKEN",
+                                  checks=GITLAB_SCORECARD_CHECKS,
+                                  tolerate_partial=True),
+            )
+            results[t["project"]] = data
+            upsert_json(DEFAULT_DATA_OUTPUT, {t["project"]: data})
+            upsert_long(DEFAULT_LONG_OUTPUT, {t["project"]: data}, repo_ids=repo_ids)
+            completed += 1
+            progress.advance(task)
+            if completed % 25 == 0 or completed == total:
+                tag = "ok" if not data.get("error") else "err"
+                console.print(f"[dim]{completed}/{total} ({tag}: {t['project']})[/dim]")
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold blue]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Scanning GitLab repos", total=total)
+        await asyncio.gather(*(bounded_run(t) for t in targets))
+
+    return results
+
+
+# ---------------------------------------------------------------------------
 # Upsert helpers
 # ---------------------------------------------------------------------------
 
 
 def upsert_json(data_path: Path, new_results: dict[str, dict]) -> dict[str, dict]:
-    """Upsert full scorecard responses into the JSON file (keyed by owner/repo)."""
-    existing: dict[str, dict] = {}
-    if data_path.exists():
-        existing = json.loads(data_path.read_text())
+    """Upsert full scorecard responses into the JSON file (keyed by owner/repo).
 
-    for repo, data in new_results.items():
-        if data.get("error"):
-            console.print(f"  [yellow]⚠ Skipping {repo}: {data.get('message', 'unknown error')[:100]}[/yellow]")
-            continue
-        existing[repo] = data
-
+    The read-merge-write runs under the same inter-process lock the
+    long-format CSV uses, so two concurrent scorecard runs (e.g. a GitHub
+    scan and a ``--gitlab`` scan in separate terminals) writing this shared
+    ``data.json`` can't lose each other's just-scored repos.
+    """
     data_path.parent.mkdir(parents=True, exist_ok=True)
-    data_path.write_text(json.dumps(existing, indent=2) + "\n")
+    with _file_lock(data_path):
+        existing: dict[str, dict] = {}
+        if data_path.exists():
+            existing = json.loads(data_path.read_text())
+
+        for repo, data in new_results.items():
+            if data.get("error"):
+                console.print(f"  [yellow]⚠ Skipping {repo}: {data.get('message', 'unknown error')[:100]}[/yellow]")
+                continue
+            existing[repo] = data
+
+        data_path.write_text(json.dumps(existing, indent=2) + "\n")
     return existing
 
 
@@ -383,12 +516,69 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Re-scan repos even if they already have a score row in data/sources/git/openssf.csv",
     )
+    parser.add_argument(
+        "--gitlab",
+        action="store_true",
+        help="Score GitLab projects from data/sources/gitlab/projects.csv using "
+             "per-host GITLAB tokens (GITLAB_TOKENS). Output keyed on gl/{host}/{id}.",
+    )
+    parser.add_argument(
+        "--host",
+        nargs="+",
+        default=None,
+        help="With --gitlab: limit to these GitLab hosts (e.g. --host gitlab.com).",
+    )
     return parser
+
+
+async def _run_gitlab(args: argparse.Namespace) -> None:
+    """Score GitLab projects (per-host tokens) → same data.json + openssf.csv."""
+    from src.sources.gitlab.gitlab_client import load_token_map
+
+    if args.repos or args.file:
+        console.print("[yellow]--gitlab ignores positional repos / --file; "
+                      "targets come from data/sources/gitlab/projects.csv.[/yellow]")
+
+    hosts = set(args.host) if args.host else None
+    targets = load_gitlab_targets(hosts)
+    token_map = load_token_map()
+
+    # Only score hosts we hold a token for (Scorecard's GitLab checks 401 anon).
+    present = {t["host"] for t in targets}
+    have_token = {h for h in present if token_map.get(h)}
+    missing = present - have_token
+    targets = [t for t in targets if t["host"] in have_token]
+    if missing:
+        console.print(f"[yellow]No GITLAB token for {sorted(missing)} — "
+                      f"skipping those hosts (set GITLAB_TOKENS).[/yellow]")
+
+    if not args.force:
+        scored = load_already_scored(DEFAULT_LONG_OUTPUT)
+        before = len(targets)
+        targets = [t for t in targets if t["project"] not in scored]
+        if before - len(targets):
+            console.print(f"[dim]Skipping {before - len(targets)} already-scored "
+                          f"GitLab project(s). Use --force to rescan.[/dim]")
+
+    if not targets:
+        console.print("[green]No GitLab targets to score (all scored, or no token).[/green]")
+        return
+
+    console.print(f"[bold]Scoring {len(targets)} GitLab project(s) "
+                  f"across {len({t['host'] for t in targets})} instance(s)...[/bold]\n")
+    results = await fetch_all_gitlab(targets, token_map, concurrency=args.concurrency)
+    display_summary(results)
+    console.print(f"\n[green]Raw JSON  → {DEFAULT_DATA_OUTPUT}[/green]")
+    console.print(f"[green]Long CSV  → {DEFAULT_LONG_OUTPUT}[/green]")
 
 
 async def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
+
+    if args.gitlab:
+        await _run_gitlab(args)
+        return
 
     repos: list[str] = list(args.repos) if args.repos else []
     if args.file:

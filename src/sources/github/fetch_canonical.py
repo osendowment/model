@@ -43,6 +43,7 @@ from rich.progress import (
 )
 
 from src.common.freshness import row_is_fresh
+from src.common.repos import to_repo_id
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
 
 console = Console()
@@ -98,7 +99,7 @@ def rows_from_response(batch: list[str], body: dict) -> dict[str, dict]:
             rows[repo] = {
                 "repo": repo,
                 "canonical_repo": (node.get("nameWithOwner") or repo).lower(),
-                "repo_id": str(node.get("databaseId") or ""),
+                "repo_id": to_repo_id(node.get("databaseId")),
                 "status": "ok",
             }
         elif alias in not_found:

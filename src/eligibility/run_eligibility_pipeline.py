@@ -39,6 +39,9 @@ FETCHERS = [
     Step("npm-funding",   "src.sources.npm.fetch_funding",                fetch=True),
     Step("pypi-funding",  "src.sources.pypi.fetch_funding",               fetch=True),
     Step("sponsors",      "src.sources.github.fetch_sponsors",            fetch=True),
+    # personal Sponsors of each repo's bus-factor maintainers (needs the risk
+    # pipeline's github/contributor-commits.csv; no-ops if that is absent)
+    Step("maintainer-sponsors", "src.sources.github.fetch_maintainer_sponsors", fetch=True),
     Step("floss-fund",    "src.sources.floss_fund.funding_json",          fetch=True),
     Step("oc-collectives", "src.sources.opencollective.fetch_collectives", fetch=True),
     Step("opencollective", "src.sources.opencollective.fetch_budgets",    fetch=True),
@@ -46,7 +49,11 @@ FETCHERS = [
     Step("apache",        "src.sources.funding.apache",                   fetch=True),
     Step("cncf",          "src.sources.funding.cncf",                     fetch=True),
     Step("eclipse",       "src.sources.funding.eclipse",                  fetch=True),
+    Step("fsf",           "src.sources.funding.fsf",                      fetch=True),
+    Step("gnome",         "src.sources.funding.gnome",                    fetch=True),
+    Step("gnu",           "src.sources.funding.gnu",                      fetch=True),
     Step("lf",            "src.sources.funding.lf",                       fetch=True),
+    Step("xorg",          "src.sources.funding.xorg",                     fetch=True),
     Step("numfocus",      "src.sources.funding.numfocus",                 fetch=True),
     Step("openjs",        "src.sources.funding.openjs",                   fetch=True),
     Step("psf",           "src.sources.funding.psf",                      fetch=True),

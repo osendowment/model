@@ -1,14 +1,15 @@
-"""Value pipeline runner — ecosystem pipelines, then unify + verify.
+"""Value pipeline runner — ecosystem pipelines, then unify + validate.
 
 Runs the four ecosystem pipelines (npm, crates, pypi, cpp — cpp itself
 composes Debian + Homebrew), then the cross-ecosystem value steps:
 per-ecosystem stats (data/value/stats.csv), git-URL classification, the
-unified per-repo value table, git-URL verification, and the validation
-rollup (`validation.csv` + the per-repo `valid` column).
+unified per-repo value table, and the validation rollup (`validation.csv`
++ the per-repo `valid` column).
 
 Usage:
     uv run python -m src.value.run_value_pipeline
-    uv run python -m src.value.run_value_pipeline --skip-fetch
+    uv run python -m src.value.run_value_pipeline --offline
+    uv run python -m src.value.run_value_pipeline --refresh
     uv run python -m src.value.run_value_pipeline --rollup
     uv run python -m src.value.run_value_pipeline --from unify
     uv run python -m src.value.run_value_pipeline --list
@@ -16,17 +17,16 @@ Usage:
 from src.common.pipeline_runner import Step, build_parser, run_pipeline
 
 STEPS = [
-    Step("npm",       "src.value.npm_pipeline",     fetch=True, pipeline=True),
-    Step("crates",    "src.value.crates_pipeline",  fetch=True, pipeline=True),
-    Step("pypi",      "src.value.pypi_pipeline",    fetch=True, pipeline=True),
+    Step("npm",        "src.value.npm_pipeline",     fetch=True, pipeline=True),
+    Step("crates",     "src.value.crates_pipeline",  fetch=True, pipeline=True),
+    Step("pypi",       "src.value.pypi_pipeline",    fetch=True, pipeline=True),
     Step("cpp",        "src.value.cpp_pipeline",     fetch=True, pipeline=True),
     Step("stats",      "src.value.build_stats"),
     Step("git-urls",   "src.value.build_git_urls"),
-    Step("eco-fetch",  "src.sources.ecosystems.candidates", fetch=True),
-    Step("eco-resolve", "src.value.apply_ecosystems_authority"),
+    Step("eco-fetch",  "src.sources.ecosystems.candidates",      net=True),
+    Step("resolve",    "src.value.apply_ecosystems_authority",   net=True),
     Step("unify",      "src.value.unify_value_data"),
-    Step("verify",     "src.value.verify_git_urls"),
-    Step("validation", "src.value.build_validation"),
+    Step("validation", "src.value.build_validation",             net=True),
     Step("criticality", "src.value.apply_criticality"),
     Step("eco-audit",  "src.value.audit_ecosystems"),
 ]
@@ -36,24 +36,27 @@ STEPS = [
 # overrides.csv — no raw ecosystem data (e.g. the crates db-dump), so it runs
 # even when those large inputs are unmaterialised LFS pointers.
 #
-# The ecosyste.ms authoritative layer runs inside the rollup, around unify:
-#   eco-fetch   — pull ecosyste.ms repo identity for every top package (network;
-#                 `fetch` step, so `--rollup --skip-fetch` keeps the rollup offline)
-#   eco-resolve — rewrite results.csv git/github_repo: override > eco > prior
+# Net steps use TTL caches — pass --offline to hard-forbid network (pure-cache
+# run) or --refresh to force refetch ignoring TTL.
+#
+#   eco-fetch   — pull ecosyste.ms repo identity for every top package (network)
+#   resolve     — rewrite results.csv git/github_repo: override > eco > prior
+#   unify       — merge per-eco results into value.csv
+#   validation  — ls-remote non-GitHub URLs; stamp git_valid on value.csv
+#   criticality — stamp the OpenSSF criticality score onto value.csv
 #   eco-audit   — read-only diff of the result against value.csv
-# All three need only results.csv / packages.csv / overrides.csv — no native raw.
-ROLLUP_LABELS = ("eco-fetch", "eco-resolve", "unify", "verify", "validation",
-                 "criticality", "eco-audit")
+ROLLUP_LABELS = ("eco-fetch", "resolve", "unify", "validation", "criticality",
+                 "eco-audit")
 
 
 def main() -> int:
     parser = build_parser("value pipeline runner")
     parser.add_argument(
         "--rollup", action="store_true",
-        help="Run only the cross-ecosystem rollup (unify -> verify -> validation) "
-             "that turns existing per-eco results.csv into value.csv. Skips the "
-             "ecosystem sub-pipelines, stats, and URL re-derivation, so no raw "
-             "ecosystem data is needed.",
+        help="Run only the cross-ecosystem rollup (eco-fetch → resolve → unify → "
+             "validation → eco-audit) that turns existing per-eco results.csv into "
+             "value.csv. Skips the ecosystem sub-pipelines, stats, and URL "
+             "re-derivation, so no raw ecosystem data is needed.",
     )
     args = parser.parse_args()
     steps = [s for s in STEPS if s.label in ROLLUP_LABELS] if args.rollup else STEPS

@@ -13,7 +13,7 @@ def _write_csv(path, rows, fields):
 def _value_row(**over):
     row = {f: "" for f in _FIELDS}
     row.update({"repo": "a/a", "platform": "github", "repo_id": "gh/1",
-                "valid": "True", "class": "A"})
+                "git_valid": "True", "class": "A"})
     row.update(over)
     return row
 
@@ -66,6 +66,6 @@ def test_report_flags_blank_valid_class_a_github_rows():
         _value_row(repo="ok/ok", criticality="0.5"),
         _value_row(repo="bad/bad", criticality=""),               # violation
         _value_row(repo="b/b", **{"class": "B"}, criticality=""),  # B: not gated
-        _value_row(repo="inv/inv", valid="False", criticality=""),  # invalid: not gated
+        _value_row(repo="inv/inv", git_valid="False", criticality=""),  # invalid: not gated
     ]
     assert report(rows) == ["bad/bad"]

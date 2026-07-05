@@ -40,7 +40,10 @@ CRITICALITY_FILE = ROOT / "data" / "sources" / "openssf" / "criticality.csv"
 
 
 def load_criticality(path: Path = CRITICALITY_FILE) -> tuple[dict, dict]:
-    """({bare_repo_id: score}, {slug: score}) from status=ok criticality rows."""
+    """({repo_id: score}, {slug: score}) from status=ok criticality rows.
+
+    Ids are the canonical `gh/<id>` form on both sides of the join
+    (criticality.csv and value.csv), so no prefix juggling here."""
     by_id: dict[str, str] = {}
     by_slug: dict[str, str] = {}
     if not path.exists():
@@ -73,7 +76,7 @@ def apply(value_file: Path = OUTPUT_FILE,
         row["criticality"] = ""
         if (row.get("platform") or "").strip().lower() != "github":
             continue
-        rid = (row.get("repo_id") or "").strip().removeprefix("gh/")
+        rid = (row.get("repo_id") or "").strip()
         slug = (row.get("repo") or "").strip().lower()
         score = by_id.get(rid) if rid else None
         if score is None:
@@ -90,7 +93,7 @@ def report(rows: list[dict]) -> list[str]:
     """Print coverage; return the violating repos (valid A github, blank)."""
     gate = [r for r in rows
             if (r.get("platform") or "").lower() == "github"
-            and (r.get("valid") or "") == "True"
+            and (r.get("git_valid") or "") == "True"
             and (r.get("class") or "") == "A"]
     violations = [r["repo"] for r in gate if not (r.get("criticality") or "").strip()]
 

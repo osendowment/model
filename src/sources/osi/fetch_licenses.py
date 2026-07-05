@@ -212,6 +212,22 @@ EXTRAS: dict[str, str] = {
     #                https://en.wikipedia.org/wiki/D._Richard_Hipp
     "blessing":    "Public-domain dedication; SQLite "
                    "(D. Richard Hipp)",
+
+    # ── x11-distribute-modifications-variant ────────────────────────
+    # The X11-style permissive license used by ncurses (maintained by
+    # Thomas E. Dickey / invisible-island.net, an official GNU package).
+    # ncurses is core terminal infrastructure — the curses/terminfo
+    # library behind nearly every Unix TUI (vim, less, htop, the shells'
+    # line editors) and shipped in every Linux distro, macOS and the BSDs.
+    # This SPDX id is a genuine MIT/X11-family permissive OSS license
+    # (FSF-free, GPL-compatible); it simply post-dates / falls outside
+    # OSI's formal-approval list, exactly like the other extras here.
+    #   SPDX:    https://spdx.org/licenses/X11-distribute-modifications-variant.html
+    #   ncurses: https://invisible-island.net/ncurses/ncurses-license.html
+    #   GNU:     https://www.gnu.org/software/ncurses/
+    "x11-distribute-modifications-variant":
+                   "MIT/X11-family permissive; ncurses "
+                   "(Thomas E. Dickey / GNU)",
 }
 
 
