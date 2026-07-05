@@ -124,7 +124,8 @@ def value_stats() -> dict:
     m = len(rows)
     gh = sum(1 for r in rows if _is_github(r))
     git = sum(1 for r in rows if _present(r.get("git_url")))
-    valid = sum(1 for r in rows if _truthy(r.get("valid")))
+    # git_valid is the renamed column (was `valid`); fall back for pre-rename CSVs.
+    valid = sum(1 for r in rows if _truthy(r.get("git_valid") or r.get("valid")))
     orphan = m - gh
 
     def _is_active(r: dict) -> bool:
@@ -150,7 +151,7 @@ def value_stats() -> dict:
             "github": sum(1 for r in sub if _is_github(r)),
             "active": sum(1 for r in sub if _is_active(r)),
             "git": sum(1 for r in sub if _present(r.get("git_url"))),
-            "valid": sum(1 for r in sub if _truthy(r.get("valid"))),
+            "valid": sum(1 for r in sub if _truthy(r.get("git_valid") or r.get("valid"))),
         }
 
     # Packages per repo class, from value.csv's own `packages` column (every

@@ -2,8 +2,8 @@
 
 Source of truth: `data/value/value.csv` — `load_top_repos` returns repos
 whose `class` is one of `settings.json risk_input.value_classes`
-(default {A}) and whose `valid` column is `True`; this is the set the risk
-pipeline runs on. Repo metadata (`repo_id`, `archived`, `size`, `stars`)
+(default {A}) and whose `git_valid` column is `True`; this is the set the
+risk pipeline runs on. Repo metadata (`repo_id`, `archived`, `size`, `stars`)
 is enriched from `data/sources/github/repos.csv`, the authoritative GitHub-API
 record populated by `src.sources.github.fetch_repo_owner_data`.
 
@@ -136,8 +136,8 @@ def load_top_repos(
     `valid` column is `True`.
 
     - Keeps rows whose `platform` is `github`, `class` in RISK_INPUT_CLASSES,
-      a non-empty `repo`, and `valid == "True"`. The `valid` gate is on by
-      default (drops failed/404/invalid targets); pass `skip_invalid=False`
+      a non-empty `repo`, and `git_valid == "True"`. The `git_valid` gate is
+      on by default (drops failed/404/invalid targets); pass `skip_invalid=False`
       to include rows regardless of validity. The eligibility stage shares
       this exact scope (valid class-A repos).
     - Slugs are canonicalised against `github/repos.csv` `full_name`, so a
@@ -173,7 +173,9 @@ def load_top_repos(
             raw = (row.get("repo") or "").strip().lower()
             if not raw:
                 continue
-            if skip_invalid and (row.get("valid") or "").strip() != "True":
+            # git_valid is the renamed column (was `valid`); fall back for pre-rename CSVs.
+            git_valid_val = (row.get("git_valid") or row.get("valid") or "").strip()
+            if skip_invalid and git_valid_val != "True":
                 continue
             slug = canon.get(raw, raw)  # resolve renamed repos to current name
             if slug not in chosen or _RANK.get(cls, 0) > _RANK.get(chosen[slug], 0):

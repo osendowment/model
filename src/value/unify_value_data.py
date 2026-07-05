@@ -11,7 +11,7 @@ Reads `data/sources/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crat
 cpp), groups packages by canonical `git_url` (or by a per-package synthetic
 key for orphans), and writes `data/value/value.csv` with **one row per repo**:
 
-    repo, platform, repo_id, git_url, mirror_url, valid,
+    repo, platform, repo_id, git_url, mirror_url, git_valid,
     ecosystems, packages, top_eco, top_eco_pkg,
     top_eco_pct, class, class_npm, class_pypi, class_crates, class_cpp
 
@@ -33,7 +33,7 @@ upstream a GitHub *mirror* repo syncs from (GitHub's own `mirror_url` field,
 e.g. `gcc-mirror/gcc` → `git://gcc.gnu.org/git/gcc.git`); empty for
 non-mirror and non-github rows. Both are set by `verify_git_urls`. cpp is the
 unified C/C++ ecosystem (Debian + Homebrew, joined via Repology) -- see
-`src/sources/cpp/process_data.py`. The per-repo `valid` column is filled by the
+`src/sources/cpp/process_data.py`. The per-repo `git_valid` column is filled by the
 `build_validation` step (a rollup of the GitHub API + `git ls-remote`
 validation caches).
 
@@ -96,7 +96,7 @@ ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
 CLASS_RANK = {"A": 0, "B": 1, "C": 2}
 
 FIELDS = (
-    ["repo", "platform", "repo_id", "git_url", "mirror_url", "valid",
+    ["repo", "platform", "repo_id", "git_url", "mirror_url", "git_valid",
      "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
@@ -512,8 +512,8 @@ def aggregate_by_repo(
             "repo_id": group_repo_id,
             "git_url": agg_git_url,
             "mirror_url": agg_mirror_url,
-            # `valid` is left empty here; build_validation fills the verdict.
-            "valid": "",
+            # `git_valid` is left empty here; build_validation fills the verdict.
+            "git_valid": "",
             "packages": len(members),
         }
         present_ecos: list[str] = []
@@ -720,7 +720,7 @@ def main() -> None:  # pragma: no cover
     aggs = aggregate_by_repo(all_rows)
     write_value_data(aggs)
 
-    # `repo_id` is populated by `verify_git_urls`, and the `valid` column
+    # `repo_id` is populated by `verify_git_urls`, and the `git_valid` column
     # by `build_validation` — both run after this step by run_value_pipeline.
 
     _print_funnel_table(stats_per_eco)
