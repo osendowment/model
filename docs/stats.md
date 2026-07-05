@@ -63,10 +63,10 @@ risk/eligibility scope is still GitHub-gated (`settings.json top_repos.platforms
 | Signal | Filled | Comment |
 |---|--:|---|
 | `openssf_crit` | 919 | GitHub-only; valid class-A GitHub gate **916 / 916** (enforced by `pipeline_health.py`) |
-| `eco_crit` | 949 | resolved class-A packages — 789 critical (`1`) / 160 not (`0`); covers GitHub **and** GitLab |
-| `score` | 952 | ≥ 2 components present; **all 26 GitLab class-A repos scored** (from `eco_crit` + `top_eco_pct`) |
+| `eco_crit` | 795 | explicit flags only — 789 critical (`1`) / 6 not (`0`); a checked-but-blank flag (spack/debian cpp) is left empty, never 0 |
+| `score` | 921 | ≥ 2 components present; 2 GitLab class-A repos scored — only those with an explicit `eco_crit`; the rest have just `top_eco_pct` and stay blank |
 
-`score` range 0–100: **min 12.6 / mean 51.4 / max 81.4**.
+`score` range 0–100: **min 17.9 / mean 53.7 / max 81.4**.
 
 ### Repo class distribution
 

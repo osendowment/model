@@ -10,12 +10,12 @@ value.csv and blends them into a single 0–100 `score`:
     other hosts). Joined by repo id (value.csv `gh/<id>` ↔ criticality.csv id)
     with a canonical-slug fallback.
   - `eco_crit` — the ecosyste.ms critical flag, fetched by
-    `src.sources.ecosystems.criticality`: `1` = resolved and on the critical
-    list, `0` = resolved but not on it (explicit False *or* the registry omitted
-    the flag), blank = the fetch did not resolve (`ok=False`) or the repo wasn't
-    checked. Covers GitHub AND GitLab, so GitLab class-A repos (which have no
-    `openssf_crit`) still get an importance signal. Joined by repo id, then by
-    normalized git URL.
+    `src.sources.ecosystems.criticality`: `1` = on the critical list, `0` =
+    explicitly not on it (`critical=False`), blank = unknown — the fetch didn't
+    resolve, the registry omitted the flag (common for spack/debian cpp
+    packages), or the repo wasn't checked. Covers GitHub AND GitLab, so a GitLab
+    class-A repo with an explicit flag gets an importance signal even though it
+    has no `openssf_crit`. Joined by repo id, then by normalized git URL.
   - `score` — a 0–100 pro-rata blend of whichever of the three components
     (`openssf_crit·100`, `eco_crit·100`, `top_eco_pct`) are present, renormalized
     by their weight total (settings.json → value_score). A row needs at least
@@ -97,12 +97,19 @@ def _norm_url(git_url: str) -> str:
 def _eco_crit_value(row: dict) -> str:
     """value.csv `eco_crit` for one ecosyste.ms criticality row: "1" / "0" / "".
 
-    Blank iff the fetch did not resolve (`ok != True`) — an unresolved fetch is
-    "unchecked", never a real 0. A resolved row is `1` when on the critical list,
-    else `0` (explicit False or the registry omitted the flag)."""
+    Only an EXPLICIT flag becomes 0/1: `1` = on the critical list, `0` =
+    explicitly not on it (`critical=False`). Blank whenever the signal is
+    unknown — the fetch didn't resolve (`ok != True`), or it resolved but the
+    registry omitted the `critical` field (common for spack/debian cpp packages).
+    A blank is never a real 0: "checked, no flag" is unknown, not "not critical"."""
     if (row.get("ok") or "").strip().lower() != "true":
         return ""
-    return "1" if (row.get("critical") or "").strip() == "True" else "0"
+    crit = (row.get("critical") or "").strip()
+    if crit == "True":
+        return "1"
+    if crit == "False":
+        return "0"
+    return ""  # resolved but the registry gave no critical flag → unknown
 
 
 def load_eco_crit(path: Path = ECO_CRIT_FILE) -> tuple[dict, dict]:

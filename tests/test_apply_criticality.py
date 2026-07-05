@@ -148,6 +148,30 @@ def test_eco_crit_ok_false_row_stays_blank_not_zero(tmp_path):
     assert row["score"] == "47.50"
 
 
+def test_eco_crit_checked_but_blank_flag_is_empty_not_zero(tmp_path):
+    """A resolved fetch (ok=True) whose registry omitted the `critical` field
+    yields blank eco_crit (unknown), never 0 — only an explicit `critical=False`
+    is 0. Common for spack/debian cpp packages."""
+    value = tmp_path / "value.csv"
+    crit = tmp_path / "criticality.csv"
+    eco = tmp_path / "eco.csv"
+    _write_csv(value, [
+        _value_row(repo="lib/glib", repo_id="gl/9", platform="gitlab",
+                   git_url="https://gitlab.gnome.org/lib/glib.git", top_eco_pct="46"),
+    ], _FIELDS)
+    _write_csv(crit, [], ["repo", "repo_id", "criticality_score", "status"])
+    _write_csv(eco, [
+        {"repo_id": "gl/9", "repository_url": "https://gitlab.gnome.org/lib/glib",
+         "ok": "True", "critical": ""},          # resolved, no flag → unknown
+    ], ["repo_id", "repository_url", "ok", "critical"])
+
+    from src.value.apply_criticality import apply
+    row = apply(value, crit, eco)[0]
+    assert row["eco_crit"] == ""                       # checked-but-blank → blank
+    # no openssf (gitlab) + eco blank → only top_eco_pct → 1 component → no score
+    assert row["score"] == ""
+
+
 def test_apply_is_idempotent_and_written_file_round_trips(tmp_path):
     value = tmp_path / "value.csv"
     crit = tmp_path / "criticality.csv"
