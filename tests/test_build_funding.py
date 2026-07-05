@@ -524,3 +524,27 @@ def test_load_maintainer_fundable_filters_status_and_flag(tmp_path):
 
 def test_load_maintainer_fundable_missing_file(tmp_path):
     assert _load_maintainer_fundable(tmp_path / "absent.csv") == set()
+
+
+def test_overrides_use_canonical_host_codes():
+    """Regression guard for host-key fragmentation: every foundation-backed
+    override in overrides.csv must carry the canonical short code the roster
+    matcher emits (e.g. `fsf/gnu`, `lf/openjs`, `sfc`, `xorg`, `lf`), NOT the
+    raw foundation domain (`fsf.org`, `openjsf.org`, `sfconservancy.org`,
+    `x.org`, `linuxfoundation.org`). A raw domain that has a canonical code
+    splits one steward across two host keys, breaking host-level grouping.
+    Domains with NO canonical code (rustfoundation.org, react.foundation, …)
+    are legitimately unique and allowed."""
+    import csv
+    from src.sources.funding.match_repos import DOMAIN_SUFFIX_HOST
+
+    aliased_domains = {domain for domain, _code in DOMAIN_SUFFIX_HOST}
+    offenders = []
+    with open(bf.OVERRIDES_FILE, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            host = (row.get("host") or "").strip()
+            if host in aliased_domains:
+                offenders.append((row.get("repo"), host))
+    assert not offenders, (
+        "overrides.csv uses raw foundation domains that collide with canonical "
+        f"host codes (normalize to the host-by-repo.csv code): {offenders}")

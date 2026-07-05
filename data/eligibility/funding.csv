@@ -60,7 +60,7 @@ bitflags/bitflags,gh/29287955,False,0,0,0,100.0,1124,163,False,False,,False,Fals
 blakeembrey/array-flatten,gh/17789771,True,10,3,13,27.29,86,20,True,True,github,False,False,,False,,True,1,,0,100.0,,,,,1,65,True,True
 blakeembrey/change-case,gh/9440238,True,10,3,13,27.29,2402,102,True,True,github,False,False,,False,,True,1,,0,100.0,,,,,1,65,True,True
 bluss/bencher,gh/65987276,True,0,0,0,100.0,92,16,False,False,,False,False,,False,,True,0,,0,100.0,,,,,1,100,True,True
-bminor/glibc,gh/13868694,False,0,0,0,100.0,1863,464,False,False,,False,False,,False,,False,0,,0,100.0,fsf.org,nonprofit,,,0.5,79,True,True
+bminor/glibc,gh/13868694,False,0,0,0,100.0,1863,464,False,False,,False,False,,False,,False,0,,0,100.0,fsf/gnu,nonprofit,,,0.5,79,True,True
 boto/boto3,gh/24774658,False,0,0,0,100.0,9775,1968,False,False,,False,False,,False,,False,0,,0,100.0,,,amazon.com,company,0,1,True,False
 boto/botocore,gh/6670942,False,0,0,0,100.0,1613,1153,False,False,,False,False,,False,,False,0,,0,100.0,,,amazon.com,company,0,1,True,False
 boto/s3transfer,gh/49535299,False,0,0,0,100.0,232,152,False,False,,False,False,,False,,False,0,,0,100.0,,,amazon.com,company,0,1,True,False
@@ -242,10 +242,10 @@ fsevents/fsevents,gh/1402936,False,0,0,0,100.0,568,119,False,False,,False,False,
 fsspec/filesystem_spec,gh/130727736,False,0,0,0,100.0,1306,440,False,False,,False,False,,False,,True,0,,0,100.0,,,,,1,100,True,True
 fsspec/s3fs,gh/53987953,False,0,0,0,100.0,1023,290,False,False,,False,False,,False,,True,0,,0,100.0,,,,,1,100,True,True
 garycourt/uri-js,gh/989080,False,0,0,0,100.0,317,65,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
-gcc-mirror/gcc,gh/22711503,False,0,0,0,100.0,10877,4745,False,False,,False,False,,False,,False,0,,0,100.0,fsf.org,nonprofit,,,0.5,79,True,True
+gcc-mirror/gcc,gh/22711503,False,0,0,0,100.0,10877,4745,False,False,,False,False,,False,,False,0,,0,100.0,fsf/gnu,nonprofit,,,0.5,79,True,True
 getsentry/sentry-javascript,gh/3328572,False,0,0,0,100.0,8642,1767,True,True,custom,False,False,,False,,True,1,,0,100.0,,,sentry.io,company,0,1,True,False
 giampaolo/psutil,gh/20101515,True,6,0,6,33.73,11150,1477,True,True,"github,tidelift,open_collective,custom",False,False,,False,,True,4,psutil,82.92,17.69,,,,,1,39,True,True
-git/git,gh/36502,False,0,0,0,100.0,60617,27847,False,False,,False,False,,False,,False,0,,0,100.0,sfconservancy.org,nonprofit,,,0.5,79,True,True
+git/git,gh/36502,False,0,0,0,100.0,60617,27847,False,False,,False,False,,False,,False,0,,0,100.0,sfc,nonprofit,,,0.5,79,True,True
 gitlab-freedesktop-mirrors/libxcb,gh/444023705,False,0,0,0,100.0,1,1,False,False,,False,False,,False,,False,0,,0,100.0,xorg,nonprofit,,,0.5,79,True,True
 gitoxidelabs/gitoxide,gh/136510559,False,0,0,0,100.0,11239,455,True,True,"github,open_collective",False,False,,False,,True,2,,0,100.0,,,,,1,100,True,True
 gitpython-developers/gitdb,gh/1126093,False,0,0,0,100.0,225,68,False,False,,False,False,,False,,True,0,,0,100.0,,,,,1,100,True,True
@@ -254,7 +254,7 @@ gkz/levn,gh/13287279,False,0,0,0,100.0,86,8,False,False,,False,False,,False,,Fal
 gkz/optionator,gh/13435927,False,0,0,0,100.0,166,16,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
 gkz/prelude-ls,gh/4457759,False,0,0,0,100.0,427,58,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
 gkz/type-check,gh/13182168,False,0,0,0,100.0,211,16,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
-gmp-mirror/gmp,gh/681340775,False,0,0,0,100.0,25,7,False,False,,False,False,,False,,False,0,,0,100.0,fsf.org,nonprofit,,,0.5,79,True,True
+gmp-mirror/gmp,gh/681340775,False,0,0,0,100.0,25,7,False,False,,False,False,,False,,False,0,,0,100.0,fsf/gnu,nonprofit,,,0.5,79,True,True
 gnome/pango,gh/4537144,False,0,0,0,100.0,182,51,False,False,,False,False,,False,,False,0,,0,100.0,gnome,nonprofit,,,0.5,79,True,True
 google/brotli,gh/24993138,False,0,0,0,100.0,14674,1337,False,False,,False,False,,False,,False,0,,0,100.0,,,google.com,company,0,1,True,False
 google/zerocopy,gh/534354967,False,0,0,0,100.0,2279,151,False,False,,False,False,,False,,False,0,,0,100.0,,,google.com,company,0,1,True,False
@@ -441,8 +441,8 @@ libexpat/libexpat,gh/80314213,False,0,0,0,100.0,1322,504,False,False,,False,Fals
 libffi/libffi,gh/321154,False,0,0,0,100.0,4233,807,False,False,,False,False,,False,,False,0,,0,100.0,sfc,nonprofit,,,0.5,79,True,True
 libjpeg-turbo/libjpeg-turbo,gh/39760454,True,9,0,9,29.69,4295,1142,True,True,github,True,False,,False,,False,2,,0,100.0,,,,,1,67,True,True
 libjxl/libjxl,gh/340219494,False,0,0,0,100.0,3460,357,False,False,,False,False,,False,,False,0,,0,100.0,,,google.com,company,0,1,True,False
-libpixman/pixman,gh/81675971,False,0,0,0,100.0,38,3,False,False,,False,False,,False,,False,0,,0,100.0,x.org,nonprofit,,,0.5,79,True,True
-libuv/libuv,gh/14812739,False,0,0,0,100.0,26792,3866,False,False,,False,False,,False,,False,0,,0,100.0,openjsf.org,nonprofit,,,0.5,79,True,True
+libpixman/pixman,gh/81675971,False,0,0,0,100.0,38,3,False,False,,False,False,,False,,False,0,,0,100.0,xorg,nonprofit,,,0.5,79,True,True
+libuv/libuv,gh/14812739,False,0,0,0,100.0,26792,3866,False,False,,False,False,,False,,False,0,,0,100.0,lf/openjs,nonprofit,,,0.5,79,True,True
 linusu/buffer-from,gh/66025821,True,3,0,3,39.19,25,9,False,False,,False,False,,False,,True,0,,0,100.0,,,,,1,73,True,True
 linux-audit/audit-userspace,gh/52464964,False,0,0,0,100.0,707,239,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
 linux-pam/linux-pam,gh/76264690,False,0,0,0,100.0,768,345,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
@@ -518,7 +518,7 @@ microsoft/tslib,gh/34414315,False,0,1,1,42.79,1336,145,False,False,,False,False,
 microsoft/typescript,gh/20929025,False,0,1,1,42.79,108681,13373,False,False,,False,False,,False,,True,0,,0,100.0,,,microsoft.com,company,0,1,True,False
 microsoft/windows-rs,gh/208102250,False,0,1,1,42.79,12133,612,False,False,,False,False,,False,,False,0,,0,100.0,,,microsoft.com,company,0,1,True,False
 minimistjs/minimist,gh/549230701,False,0,0,0,100.0,661,46,True,True,"github,tidelift",False,True,https://github.com/sponsors/ljharb,False,,True,3,,0,100.0,,,,,1,79,True,True
-mirror/ncurses,gh/22324756,False,0,0,0,100.0,586,128,False,False,,False,False,,False,,False,0,,0,100.0,gnu.org,nonprofit,,,0.5,79,True,True
+mirror/ncurses,gh/22324756,False,0,0,0,100.0,586,128,False,False,,False,False,,False,,False,0,,0,100.0,fsf/gnu,nonprofit,,,0.5,79,True,True
 mitsuhiko/insta,gh/165561258,True,25,0,25,19.21,2833,148,True,True,github,False,False,,False,,True,1,,0,100.0,,,,,1,58,True,True
 mm2/little-cms,gh/507969,False,0,0,0,100.0,716,213,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
 moment/moment,gh/1424470,False,0,0,0,100.0,47987,7001,False,False,,False,False,,False,,False,0,,0,100.0,lf/openjs,nonprofit,,,0.5,79,True,True
@@ -857,7 +857,7 @@ tokio-rs/tracing,gh/165289175,True,114,0,114,12.34,6653,885,False,False,,False,F
 toml-rs/toml,gh/95902102,False,0,0,0,100.0,1029,149,True,True,github,False,False,,False,,True,1,,0,100.0,,,,,1,100,True,True
 tootallnate/proxy-agents,gh/11293703,False,0,0,0,100.0,1136,276,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
 tootallnate/util-deprecate,gh/19321056,False,0,0,0,100.0,37,14,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
-torvalds/linux,gh/2325298,False,0,0,0,100.0,233666,62374,False,False,,False,False,,False,,False,0,,0,100.0,linuxfoundation.org,nonprofit,,,0.5,79,True,True
+torvalds/linux,gh/2325298,False,0,0,0,100.0,233666,62374,False,False,,False,False,,False,,False,0,,0,100.0,lf,nonprofit,,,0.5,79,True,True
 tower-rs/tower,gh/98244646,False,0,0,0,100.0,4171,328,False,False,,False,False,,False,,True,0,tokio,57452.74,0.87,,,,,1,21,True,True
 tox-dev/filelock,gh/17098256,True,3,0,3,39.19,952,128,True,False,tidelift,False,False,,False,,True,1,,0,100.0,,,,,1,73,True,True
 tox-dev/platformdirs,gh/367032142,True,3,0,3,39.19,933,80,True,False,tidelift,False,False,,False,,True,1,,0,100.0,,,,,1,73,True,True
