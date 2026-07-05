@@ -129,10 +129,34 @@ def resolve(prior_git: str, prior_github: str, strong: list[str], weak: list[str
     return git, github, guess
 
 
+# ── GitHub canonical (rename) authority ─────────────────────────────────────────
+
+CANONICAL_FILE = DATA_DIR / "sources" / "github" / "canonical-repos.csv"
+
+
+def load_canonical_map() -> dict[str, str]:
+    """{old_slug: canonical_slug} for repos GitHub has renamed/moved.
+
+    From `src.sources.github.fetch_canonical` (`repository.nameWithOwner`). This
+    is the TOP rename authority — GitHub is ground truth and never lags a move,
+    unlike ecosyste.ms `repo_full_name` (which trailed React's move to the `react`
+    org). Only entries whose canonical name actually differs are kept.
+    """
+    out: dict[str, str] = {}
+    if CANONICAL_FILE.exists():
+        with open(CANONICAL_FILE, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                repo = (r.get("repo") or "").strip().lower()
+                canon = (r.get("canonical_repo") or "").strip().lower()
+                if (r.get("status") or "") == "ok" and canon and canon != repo:
+                    out[repo] = canon
+    return out
+
+
 # ── per-ecosystem rewrite ───────────────────────────────────────────────────────
 
 
-def apply_eco(ecosystem: str, overrides: dict, is_invalid) -> dict:
+def apply_eco(ecosystem: str, overrides: dict, is_invalid, canonical: dict) -> dict:
     results_path = DATA_DIR / "sources" / ecosystem / "results.csv"
     if not results_path.exists():
         return {"ecosystem": ecosystem, "total": 0}
@@ -156,6 +180,11 @@ def apply_eco(ecosystem: str, overrides: dict, is_invalid) -> dict:
             prior_git, prior_gh, e.get("strong", []), e.get("weak", []),
             overrides.get((pkg, ecosystem)), is_invalid,
         )
+        # GitHub canonical authority (top rename layer): remap a renamed/moved
+        # repo to its current slug so unify groups it under the canonical URL.
+        canon = canonical.get(gh)
+        if canon and canon != gh:
+            gh, git = canon, f"https://github.com/{canon}.git"
         if guess == "eco":
             c["eco"] += 1
         elif guess == "override":
@@ -211,10 +240,12 @@ def main() -> None:
 
     overrides = load_repo_overrides()
     is_invalid = _load_invalid_lookup()
+    canonical = load_canonical_map()
     ecosystems = ECOSYSTEMS if args.eco == "all" else [args.eco]
     console.print(f"[bold]ecosyste.ms authoritative layer[/bold]  "
-                  f"[dim]{len(overrides)} overrides | priority: override > eco_strong > prior > eco_weak[/dim]")
-    stats = [apply_eco(e, overrides, is_invalid) for e in ecosystems]
+                  f"[dim]{len(overrides)} overrides | {len(canonical)} GitHub renames | "
+                  "priority: override > github-canonical > eco_strong > prior > eco_weak[/dim]")
+    stats = [apply_eco(e, overrides, is_invalid, canonical) for e in ecosystems]
     _print(stats)
 
 

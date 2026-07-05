@@ -48,7 +48,7 @@ from src.common.funding_platforms import normalize_oc_slug
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_top_repos
 from src.common.stats import geometric_mean
-from src.common.tables import load_column_by_repo, load_rows_by_repo
+from src.common.tables import load_column_by_id, load_rows_by_id
 from src.sources.floss_fund.directory import export_repo_slug, github_org_page
 from src.sources.opencollective.fetch_collectives import load_index as _load_oc_index
 
@@ -316,17 +316,19 @@ def _load_sponsoring(path: Path) -> dict[str, str]:
 
 
 def _load_funding_overrides(path: Path) -> tuple[dict[str, dict], dict[str, dict]]:
-    """Curated institutional backing → ``(by_repo, by_org)`` from overrides.csv.
+    """Curated institutional backing → ``(by_id, by_org)`` from overrides.csv.
 
-    Schema: ``repo, host, host_type, gh_user, owner, owner_type, oc_slug``.
+    Schema: ``repo, repo_id, host, host_type, gh_user, owner, owner_type, oc_slug``.
     `host` and `owner` are **domains** (the domain is the canonical name — no
     separate `*_domain` column); `gh_user` is the GitHub login (informational);
     `oc_slug` is a curated Open Collective slug for projects that fund via OC but
-    declare no FUNDING.yml (e.g. socketio).
+    declare no FUNDING.yml (e.g. socketio). `repo` is the human-readable slug (may
+    drift on a rename); `repo_id` is GitHub's immutable numeric id — the join key.
 
     Two row shapes share the file:
 
-    - **Per-repo** rows (``owner/name``) → `by_repo`, keyed by the exact slug.
+    - **Per-repo** rows (``owner/name``) → `by_id`, keyed by the stable `repo_id`
+      so the row survives a GitHub rename (`facebook/react` → `react/react`).
     - **Org-level** rows whose `repo` is an ``owner/*`` glob → `by_org`, keyed by
       the owner login. They apply to **every** risk-scope repo under that owner
       that has no per-repo row — so one row covers a whole corporate org (e.g.
@@ -341,10 +343,10 @@ def _load_funding_overrides(path: Path) -> tuple[dict[str, dict], dict[str, dict
     company that legally owns the project is recorded as the `owner` instead. An
     ``owner/*`` row is only valid when the *whole* org is uniformly backed.
     """
-    by_repo: dict[str, dict] = {}
+    by_id: dict[str, dict] = {}
     by_org: dict[str, dict] = {}
     if not path.exists():
-        return by_repo, by_org
+        return by_id, by_org
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             repo = (row.get("repo") or "").strip().lower()
@@ -358,25 +360,35 @@ def _load_funding_overrides(path: Path) -> tuple[dict[str, dict], dict[str, dict
                 "oc_slug": (row.get("oc_slug") or "").strip(),
             }
             if repo.endswith("/*"):
-                by_org[repo[:-2]] = rec  # "boto/*" → key "boto"
+                by_org[repo[:-2]] = rec  # "boto/*" → key "boto" (org name)
             else:
-                by_repo[repo] = rec
-    return by_repo, by_org
+                # Per-repo rows join on the STABLE repo_id, not the name, so a
+                # curated override survives a GitHub rename (facebook/react →
+                # react/react keeps the same id).
+                rid = (row.get("repo_id") or "").strip()
+                if rid:
+                    by_id[rid] = rec
+                else:
+                    console.print(f"[yellow]override for {repo} has no repo_id — skipped[/yellow]")
+    return by_id, by_org
 
 
 def build() -> list[dict]:
     eligible = load_top_repos()
-    sponsors = load_rows_by_repo(SPONSORS_FILE)
-    yml = load_rows_by_repo(FUNDING_YML_FILE)
-    repos_meta = load_rows_by_repo(REPOS_FILE)
-    foundations = load_column_by_repo(FOUNDATIONS_FILE, "host")
-    overrides, org_overrides = _load_funding_overrides(OVERRIDES_FILE)
+    # GitHub-repo signals join on the stable repo_id (rename-proof); the external
+    # matches below (outbound sponsoring by login, OC by slug, FLOSS by URL) keep
+    # their own key, where repo_id is irrelevant.
+    sponsors = load_rows_by_id(SPONSORS_FILE)
+    yml = load_rows_by_id(FUNDING_YML_FILE)
+    repos_meta = load_rows_by_id(REPOS_FILE)
+    foundations = load_column_by_id(FOUNDATIONS_FILE, "host")
+    overrides_by_id, org_overrides = _load_funding_overrides(OVERRIDES_FILE)
     export = _export_by_repo(FLOSS_FUND_FILE)
     fundable_orgs = _fundable_orgs(FLOSS_FUND_FILE)
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
     sponsoring = _load_sponsoring(SPONSORSHIPS_FILE)
-    npm_funding = load_rows_by_repo(NPM_FUNDING_FILE) if NPM_FUNDING_FILE.exists() else {}
-    pypi_funding = load_rows_by_repo(PYPI_FUNDING_FILE) if PYPI_FUNDING_FILE.exists() else {}
+    npm_funding = load_rows_by_id(NPM_FUNDING_FILE) if NPM_FUNDING_FILE.exists() else {}
+    pypi_funding = load_rows_by_id(PYPI_FUNDING_FILE) if PYPI_FUNDING_FILE.exists() else {}
 
     # Open Collective attribution is driven by the reverse-map (collectives.csv),
     # which records whether each collective's GitHub link names a specific repo or
@@ -405,11 +417,12 @@ def build() -> list[dict]:
     for entry in eligible:
         repo = entry.repo
         owner_login = repo.split("/", 1)[0].lower()
-        # Per-repo override wins; else fall back to an org-level (owner/*) row.
-        ov = overrides.get(repo.lower()) or org_overrides.get(owner_login) or {}
+        # Per-repo override (matched by stable repo_id) wins; else an org-level
+        # (owner/*) row keyed by owner name.
+        ov = overrides_by_id.get(str(entry.repo_id)) or org_overrides.get(owner_login) or {}
         # host: override wins; otherwise the scraped FOSS-foundation host, which
         # is a nonprofit by definition. owner: from the override only.
-        scraped_host = foundations.get(repo, "")
+        scraped_host = foundations.get(str(entry.repo_id), "")
         host = ov.get("host") or scraped_host
         host_type = ov.get("host_type") or ("nonprofit" if scraped_host else "")
 
@@ -426,7 +439,7 @@ def build() -> list[dict]:
         # guarded by `_avg(...) > 0`: an org-only $0 collective is usually junk
         # (e.g. `for-the-mage` claiming github.com/facebook), so we don't spread its
         # slug across the org's repos.
-        if repo.lower() in overrides:
+        if str(entry.repo_id) in overrides_by_id:
             s = normalize_oc_slug(ov.get("oc_slug"))
             oc_slug, oc_amt = (s, _avg(s)) if s else ("", 0.0)
         elif oc_by_repo.get(repo.lower()) and _real_oc(oc_by_repo[repo.lower()]):
@@ -440,18 +453,19 @@ def build() -> list[dict]:
         else:
             oc_slug, oc_amt = "", 0.0
 
+        rid = str(entry.repo_id)
         rows.append(assemble_row(
             repo=repo, repo_id=entry.repo_id,
-            sponsors=sponsors.get(repo, {}), yml=yml.get(repo, {}),
-            export=export.get(repo.lower(), {}),
+            sponsors=sponsors.get(rid, {}), yml=yml.get(rid, {}),
+            export=export.get(repo.lower(), {}),   # FLOSS: matched by URL/slug
             host=host, host_type=host_type,
             owner=ov.get("owner", ""), owner_type=ov.get("owner_type", ""),
-            repo_meta=repos_meta.get(repo, {}),
-            sponsoring_count=sponsoring.get(owner_login, ""),
+            repo_meta=repos_meta.get(rid, {}),
+            sponsoring_count=sponsoring.get(owner_login, ""),  # outbound: by owner login
             oc_slug=oc_slug, oc_avg=_fmt_money(oc_amt),
-            npm_funding=npm_funding.get(repo, {}),
-            pypi_funding=pypi_funding.get(repo, {}),
-            org_export=fundable_orgs.get(owner_login, {})))
+            npm_funding=npm_funding.get(rid, {}),
+            pypi_funding=pypi_funding.get(rid, {}),
+            org_export=fundable_orgs.get(owner_login, {})))    # FLOSS org: by owner
 
     # Funding risk score: both axes are `lower_is_worse` (less funding → riskier).
     # add_percentiles writes the two risk percentiles; we then recompute `score`

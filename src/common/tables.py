@@ -43,3 +43,35 @@ def load_column_by_repo(path: Path | str, column: str) -> dict[str, str]:
         repo: (row.get(column) or "").strip()
         for repo, row in load_rows_by_repo(path).items()
     }
+
+
+def load_rows_by_id(path: Path | str) -> dict[str, dict[str, str]]:
+    """Read a wide CSV → ``{repo_id: row}``, keyed by GitHub's stable numeric id.
+
+    This is the rename-proof analogue of `load_rows_by_repo`: joining on
+    `repo_id` means a renamed/moved repo (`facebook/react` → `react/react`) still
+    matches its already-collected data. Use it for every join keyed on the repo's
+    GitHub identity; keep `load_rows_by_repo` (or an external key) only where
+    repo_id is irrelevant — a funding match on another platform (OpenCollective
+    slug, outbound sponsoring by owner login, a FLOSS-manifest URL).
+
+    Rows with a blank `repo_id` are skipped; last row wins on a duplicate id.
+    """
+    out: dict[str, dict[str, str]] = {}
+    if not os.path.exists(path):
+        return out
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            rid = (row.get("repo_id") or "").strip()
+            if rid:
+                out[rid] = row
+    return out
+
+
+def load_column_by_id(path: Path | str, column: str) -> dict[str, str]:
+    """Read a wide CSV → ``{repo_id: row[column]}`` (value stripped). The
+    repo_id-keyed analogue of `load_column_by_repo`."""
+    return {
+        rid: (row.get(column) or "").strip()
+        for rid, row in load_rows_by_id(path).items()
+    }
