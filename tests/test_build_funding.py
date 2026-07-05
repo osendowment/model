@@ -2,8 +2,21 @@
 
 from dataclasses import dataclass
 
+import pytest
+
 from src.eligibility import build_funding as bf
-from src.eligibility.build_funding import _intent_flag, _nonprofit_flag
+from src.eligibility.build_funding import (
+    _intent_flag, _load_maintainer_fundable, _nonprofit_flag,
+)
+
+
+@pytest.fixture(autouse=True)
+def _isolate_bf_sources(monkeypatch):
+    """Keep every build() test off the real contributor-commits / maintainer-
+    sponsors files. A test that exercises the bus-factor-maintainer signal
+    overrides these two explicitly."""
+    monkeypatch.setattr(bf, "load_bf_contributors", lambda *a, **k: {})
+    monkeypatch.setattr(bf, "_load_maintainer_fundable", lambda p: set())
 
 
 def _row(**kw):
@@ -11,6 +24,7 @@ def _row(**kw):
         "gh_sponsorships_in": "", "gh_sponsors_enabled": "False",
         "has_funding_links": "False", "has_funding_yml": "False", "has_funding_json": "False",
         "has_npm_funding": "False", "has_pypi_funding": "False",
+        "bf_maintainer_fundable": "False",
         "oc_slug": "", "host": "", "owner": "",
     }
     base.update(kw)
@@ -28,6 +42,7 @@ def test_intent_each_single_signal_is_true():
     assert _intent_flag(_row(has_funding_json="True")) is True      # repo OR owner in FLOSS Fund
     assert _intent_flag(_row(has_npm_funding="True")) is True
     assert _intent_flag(_row(has_pypi_funding="True")) is True
+    assert _intent_flag(_row(bf_maintainer_fundable="True")) is True  # a BF maintainer has Sponsors
     assert _intent_flag(_row(oc_slug="babel")) is True
     assert _intent_flag(_row(host="apache")) is True
     assert _intent_flag(_row(owner="meta.com")) is True
@@ -378,3 +393,42 @@ def test_build_funding_org_manifest_caps_score_and_counts_channel(monkeypatch):
         assert rows[repo]["score"] == bf.DECLARED_FUNDING_CAP  # 100 → 79 (cap)
     assert rows["plain/p"]["has_funding_json"] == "False"
     assert rows["plain/p"]["score"] == 100                   # different org → no cap
+
+
+def test_build_funding_bf_maintainer_fundable_flips_intent(monkeypatch):
+    """A repo with NO other funding signal gains intent when a bus-factor
+    maintainer is personally fundable; a repo whose fundable contributor is NOT
+    in its bus-factor set stays intent=False (the signal only fires for people
+    who carry the repo)."""
+    _base_mocks(monkeypatch, [E("solo/lib", repo_id="gh/1"),
+                              E("drive/by", repo_id="gh/2"),
+                              E("rich/r", repo_id="gh/9")])
+    # solo/lib: its BF maintainer `maint` is fundable → intent.
+    # drive/by: `maint` also appears but is NOT in its BF set → no intent.
+    monkeypatch.setattr(bf, "load_bf_contributors",
+                        lambda *a, **k: {"gh/1": ["maint"], "gh/2": ["nobody"]})
+    monkeypatch.setattr(bf, "_load_maintainer_fundable", lambda p: {"maint"})
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["solo/lib"]["bf_maintainer_fundable"] == "True"
+    assert rows["solo/lib"]["intent"] == "True"
+    assert rows["drive/by"]["bf_maintainer_fundable"] == "False"
+    assert rows["drive/by"]["intent"] == "False"
+
+
+def test_load_maintainer_fundable_filters_status_and_flag(tmp_path):
+    """Only rows that resolved (status=ok) with an active listing count; a
+    network error or a False listing is excluded; logins are lowercased."""
+    p = tmp_path / "maintainer-sponsors.csv"
+    p.write_text(
+        "user_id,login,has_sponsors_listing,status,fetched_at\n"
+        "1,MarijnH,True,ok,2026-07-05T00:00:00+00:00\n"      # fundable → kept (lowercased)
+        "2,amanieu,False,ok,2026-07-05T00:00:00+00:00\n"     # resolved, not fundable → excluded
+        "3,ghost,True,error,2026-07-05T00:00:00+00:00\n",    # True but failed lookup → excluded
+        encoding="utf-8",
+    )
+    assert _load_maintainer_fundable(p) == {"marijnh"}
+
+
+def test_load_maintainer_fundable_missing_file(tmp_path):
+    assert _load_maintainer_fundable(tmp_path / "absent.csv") == set()
