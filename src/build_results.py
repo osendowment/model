@@ -41,18 +41,26 @@ OUTPUT_FILE = DATA_DIR / "results.csv"
 FIELDS = ["repo_id", "repo", "ecosystem", "value_score", "risk_score"]
 
 
-def _value_by_slug() -> dict[str, dict]:
-    """{canonical repo slug (lower) → value.csv row}. value.csv `repo_id` is the
-    `gh/<n>` platform form, so the slug is the join key shared with eligibility."""
-    out: dict[str, dict] = {}
+def _value_maps() -> tuple[dict[str, dict], dict[str, dict]]:
+    """(by_id, by_slug) maps onto value.csv rows.
+
+    value.csv stores the platform-prefixed `gh/<n>` id; the bare numeric part
+    is the primary join key (rename-proof, matches eligibility's `repo_id`).
+    The slug map remains as fallback for rows without an id (non-GitHub or
+    unresolved)."""
+    by_id: dict[str, dict] = {}
+    by_slug: dict[str, dict] = {}
     if not VALUE_FILE.exists():
-        return out
+        return by_id, by_slug
     with open(VALUE_FILE, encoding="utf-8") as f:
         for r in csv.DictReader(f):
+            rid = (r.get("repo_id") or "").strip().removeprefix("gh/")
+            if rid:
+                by_id.setdefault(rid, r)
             slug = (r.get("repo") or "").strip().lower()
             if slug:
-                out[slug] = r
-    return out
+                by_slug[slug] = r
+    return by_id, by_slug
 
 
 def _risk_score_by_id() -> dict[str, str]:
@@ -76,7 +84,7 @@ def _num(x: str) -> float:
 
 
 def build() -> list[dict]:
-    value = _value_by_slug()
+    value_by_id, value_by_slug = _value_maps()
     risk = _risk_score_by_id()
 
     rows: list[dict] = []
@@ -86,7 +94,7 @@ def build() -> list[dict]:
                 continue
             repo = (e.get("repo") or "").strip()
             rid = (e.get("repo_id") or "").strip()
-            v = value.get(repo.lower(), {})
+            v = value_by_id.get(rid) or value_by_slug.get(repo.lower(), {})
             rows.append({
                 "repo_id": rid,
                 "repo": repo,

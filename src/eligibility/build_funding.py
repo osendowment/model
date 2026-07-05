@@ -47,7 +47,7 @@ from rich.table import Table
 
 from src.common.funding_platforms import normalize_oc_slug
 from src.common.percentiles import add_percentiles
-from src.common.repos import load_top_repos
+from src.common.repos import canonical_repo_map, load_top_repos
 from src.common.stats import geometric_mean
 from src.common.tables import load_column_by_id, load_rows_by_id
 from src.sources.floss_fund.directory import export_repo_slug, github_org_page
@@ -263,15 +263,22 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
 
 
 def _export_by_repo(path: Path) -> dict[str, dict]:
-    """{owner/repo: manifest row} for repo-level FLOSS manifests (resolved-or-raw)."""
+    """{owner/repo: manifest row} for repo-level FLOSS manifests (resolved-or-raw).
+
+    The slug comes from the manifest's own URL, which can predate a GitHub
+    rename (funding-json.csv carries no repo_id), so it is resolved through
+    `canonical_repo_map` — the lookup key must be the same canonical slug
+    `load_top_repos` hands the builder.
+    """
     out: dict[str, dict] = {}
     if not path.exists():
         return out
+    canon = canonical_repo_map()
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             repo = export_repo_slug(row)
             if repo:
-                out[repo] = row
+                out[canon.get(repo, repo)] = row
     return out
 
 
