@@ -49,7 +49,7 @@ OUT_FILE = DATA_DIR / "host-by-repo.csv"
 # parent / umbrella ones (CNCF and OpenJS both live under the Linux
 # Foundation, so they win over `lf` on overlap).
 SLUGS = ["apache", "cncf", "eclipse", "openjs", "psf", "numfocus", "gnu", "fsf",
-         "sfc", "lf"]
+         "gnome", "xorg", "sfc", "lf"]
 
 # Parent foundation hierarchy. When a host has a parent (e.g. CNCF and OpenJS
 # both live under the Linux Foundation), the emitted host string is
@@ -108,6 +108,8 @@ ORG_HOST: dict[str, str] = {
     "autotools-mirror": "gnu",
     "coreutils": "gnu",
     "gcc-mirror": "gnu",
+    # GNOME mirrors every gitlab.gnome.org project to github.com/GNOME/*.
+    "gnome": "gnome",
 }
 
 # Domain suffixes whose subdomains all belong to a single foundation.
@@ -125,6 +127,11 @@ DOMAIN_SUFFIX_HOST: list[tuple[str, str]] = [
     # FSF's own sites (email self-defense, the directory software, RYF). The
     # substantive FSF-stewarded software is GNU (tracked separately above).
     ("fsf.org", "fsf"),
+    # GNOME Foundation (gnome.org, gitlab.gnome.org, *.gnome.org).
+    ("gnome.org", "gnome"),
+    # X.Org Foundation. Only x.org — NOT freedesktop.org, which is a broader
+    # umbrella (wayland/dbus/pipewire/… are not X.Org) and would over-attribute.
+    ("x.org", "xorg"),
     # PSF / PyPA
     ("python.org", "psf"),
     ("pypa.io", "psf"),

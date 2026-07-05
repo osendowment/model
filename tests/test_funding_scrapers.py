@@ -198,6 +198,38 @@ class TestMatchReposHostChecked:
         assert rows[0]["host"] == "fsf/gnu"
         assert rows[0]["host_source"] == "org_prefix"
 
+    def test_gnome_org_prefix_maps_to_gnome(self, tmp_path, monkeypatch):
+        # GNOME mirrors gitlab.gnome.org to github.com/GNOME/* → org-prefix host.
+        repos = self._write_repos(
+            tmp_path, [{"repo": "gnome/pango", "repo_id": "1", "homepage": ""}])
+        monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
+        rows = match_repos.classify({}, match_repos.ORG_HOST, {}, fetched_at_by_host={})
+        assert rows[0]["host"] == "gnome"
+
+    def test_xorg_exact_slug_maps_to_xorg(self, tmp_path, monkeypatch):
+        # X.Org GitHub mirrors live in a MIXED third-party org, so libxcb matches
+        # only by the exact per-project slug from the roster (not an org rule).
+        repos = self._write_repos(
+            tmp_path, [{"repo": "gitlab-freedesktop-mirrors/libxcb",
+                        "repo_id": "1", "homepage": ""}])
+        monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
+        rows = match_repos.classify(
+            {"gitlab-freedesktop-mirrors/libxcb": "xorg"}, {}, {}, fetched_at_by_host={})
+        assert rows[0]["host"] == "xorg"
+
+    def test_freedesktop_domain_does_not_over_attribute_to_xorg(self, tmp_path, monkeypatch):
+        # x.org → xorg, but freedesktop.org is a broader umbrella (wayland,
+        # dbus, pipewire) and must NOT be attributed to X.Org.
+        repos = self._write_repos(tmp_path, [
+            {"repo": "xorg/thing", "repo_id": "1", "homepage": "https://www.x.org/"},
+            {"repo": "fd/thing", "repo_id": "2", "homepage": "https://www.freedesktop.org/"},
+        ])
+        monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
+        rows = {r["repo"]: r for r in
+                match_repos.classify({}, {}, {}, fetched_at_by_host={})}
+        assert rows["xorg/thing"]["host"] == "xorg"
+        assert rows["fd/thing"]["host"] == ""
+
     def test_reference_subdomain_never_attributes_host(self, tmp_path, monkeypatch):
         # A repo whose homepage is a PEP/docs page (peps.python.org) merely
         # *links* to the foundation — it must NOT become host=psf. Guards the
