@@ -1,4 +1,4 @@
-"repo","platform","repo_id","git_url","mirror_url","git_valid","ecosystems","packages","top_eco","top_eco_pkg","top_eco_pct","class","class_npm","class_pypi","class_crates","class_cpp","openssf_crit","eco_crit","score"
+"repo","platform","repo_id","git_url","mirror_url","git_valid","ecosystems","packages","top_eco","top_eco_pkg","top_eco_pct","class","class_npm","class_pypi","class_crates","class_cpp","openssf_crit","eco_crit","value_score"
 "babel/babel","github","gh/24560307","https://github.com/babel/babel.git","","True","npm","203","npm","@babel/helper-plugin-utils","92.2381","A","A","","","","0.71526","1","81.36"
 "definitelytyped/definitelytyped","github","gh/6093316","https://github.com/definitelytyped/definitelytyped.git","","True","npm","208","npm","@types/node","89.3843","A","A","","","","0.70189","1","79.99"
 "googleapis/google-cloud-python","github","gh/16316451","https://github.com/googleapis/google-cloud-python.git","","True","pypi","64","pypi","google-auth","92.0864","A","","A","","","0.68348","1","79.43"

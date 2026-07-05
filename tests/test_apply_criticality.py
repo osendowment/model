@@ -81,19 +81,19 @@ def test_apply_joins_openssf_eco_crit_and_scores_gitlab(tmp_path):
     # a/a: 0.6*(0.5*100) + 0.2*(1*100) + 0.2*40 = 58.00
     assert rows["a/a"]["openssf_crit"] == "0.5"
     assert rows["a/a"]["eco_crit"] == "1"
-    assert rows["a/a"]["score"] == "58.00"
+    assert rows["a/a"]["value_score"] == "58.00"
     # b/b: openssf matched by slug, no eco row → 2 comps 0.75/0.25 → 47.50
     assert rows["b/b"]["openssf_crit"] == "0.5"
     assert rows["b/b"]["eco_crit"] == ""
-    assert rows["b/b"]["score"] == "47.50"
+    assert rows["b/b"]["value_score"] == "47.50"
     # g/g: gitlab (no openssf), eco=1 + top 40 → 0.5/0.5 → 70.00 (newly scored)
     assert rows["g/g"]["openssf_crit"] == ""
     assert rows["g/g"]["eco_crit"] == "1"
-    assert rows["g/g"]["score"] == "70.00"
+    assert rows["g/g"]["value_score"] == "70.00"
     # d/d: openssf error (blank) + no eco → only top_eco_pct → 1 comp → blank
     assert rows["d/d"]["openssf_crit"] == ""
     assert rows["d/d"]["eco_crit"] == ""
-    assert rows["d/d"]["score"] == ""
+    assert rows["d/d"]["value_score"] == ""
 
 
 def test_eco_crit_url_fallback_and_zero_flag(tmp_path):
@@ -120,7 +120,7 @@ def test_eco_crit_url_fallback_and_zero_flag(tmp_path):
     row = apply(value, crit, eco)[0]
     assert row["eco_crit"] == "0"                      # URL fallback hit
     # 0.6*(0.5*100) + 0.2*(0*100) + 0.2*40 = 38.00
-    assert row["score"] == "38.00"
+    assert row["value_score"] == "38.00"
 
 
 def test_eco_crit_ok_false_row_stays_blank_not_zero(tmp_path):
@@ -145,7 +145,7 @@ def test_eco_crit_ok_false_row_stays_blank_not_zero(tmp_path):
     row = apply(value, crit, eco)[0]
     assert row["eco_crit"] == ""                       # unresolved → blank
     # eco absent → openssf + centrality only → 0.75/0.25 → 47.50
-    assert row["score"] == "47.50"
+    assert row["value_score"] == "47.50"
 
 
 def test_eco_crit_checked_but_blank_flag_is_empty_not_zero(tmp_path):
@@ -169,7 +169,7 @@ def test_eco_crit_checked_but_blank_flag_is_empty_not_zero(tmp_path):
     row = apply(value, crit, eco)[0]
     assert row["eco_crit"] == ""                       # checked-but-blank → blank
     # no openssf (gitlab) + eco blank → only top_eco_pct → 1 component → no score
-    assert row["score"] == ""
+    assert row["value_score"] == ""
 
 
 def test_apply_is_idempotent_and_written_file_round_trips(tmp_path):
@@ -190,17 +190,17 @@ def test_apply_is_idempotent_and_written_file_round_trips(tmp_path):
     # 0.6*70 + 0.2*100 + 0.2*50 = 72.00
     assert rows[0]["openssf_crit"] == "0.7"
     assert rows[0]["eco_crit"] == "1"
-    assert rows[0]["score"] == "72.00"
+    assert rows[0]["value_score"] == "72.00"
     on_disk = list(csv.DictReader(open(value, encoding="utf-8")))
     assert on_disk[0]["openssf_crit"] == "0.7"
     assert on_disk[0]["eco_crit"] == "1"
-    assert on_disk[0]["score"] == "72.00"
+    assert on_disk[0]["value_score"] == "72.00"
 
 
 def test_report_flags_blank_valid_class_a_github_rows():
     from src.value.apply_criticality import report
     rows = [
-        _value_row(repo="ok/ok", openssf_crit="0.5", score="40.00"),
+        _value_row(repo="ok/ok", openssf_crit="0.5", value_score="40.00"),
         _value_row(repo="bad/bad", openssf_crit=""),               # violation
         _value_row(repo="b/b", **{"class": "B"}, openssf_crit=""),  # B: not gated
         _value_row(repo="inv/inv", git_valid="False", openssf_crit=""),  # invalid: not gated

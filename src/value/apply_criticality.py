@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the value factors onto value.csv as `openssf_crit`, `eco_crit`, `score`.
+"""Apply the value factors onto value.csv as `openssf_crit`, `eco_crit`, `value_score`.
 
 Roll-up step, run after `unify_value_data` / `build_validation` (both rebuild
 value.csv without these columns' values). Joins two per-repo signals onto
@@ -16,10 +16,10 @@ value.csv and blends them into a single 0–100 `score`:
     packages), or the repo wasn't checked. Covers GitHub AND GitLab, so a GitLab
     class-A repo with an explicit flag gets an importance signal even though it
     has no `openssf_crit`. Joined by repo id, then by normalized git URL.
-  - `score` — a 0–100 pro-rata blend of whichever of the three components
+  - `value_score` — a 0–100 pro-rata blend of whichever of the three components
     (`openssf_crit·100`, `eco_crit·100`, `top_eco_pct`) are present, renormalized
     by their weight total (settings.json → value_score). A row needs at least
-    `min_components` present or `score` stays blank. See docs/value.md.
+    `min_components` present or `value_score` stays blank. See docs/value.md.
 
 An error/unresolved fetch must never masquerade as a real 0: openssf error rows
 (`status != ok`) and eco_crit `ok=False` rows leave their column blank, and a
@@ -134,7 +134,7 @@ def load_eco_crit(path: Path = ECO_CRIT_FILE) -> tuple[dict, dict]:
 
 def compute_score(openssf_crit: float | None, eco_crit: float | None,
                   top_eco_pct: float | None) -> float | None:
-    """value.csv `score` — a 0–100 pro-rata blend of the present components.
+    """value.csv `value_score` — a 0–100 pro-rata blend of the present components.
 
     Each argument is the raw component value, or ``None`` when absent for this
     repo:
@@ -186,7 +186,7 @@ def apply(value_file: Path = OUTPUT_FILE,
     for row in rows:
         row["openssf_crit"] = ""
         row["eco_crit"] = ""
-        row["score"] = ""
+        row["value_score"] = ""
         platform = (row.get("platform") or "").strip().lower()
         rid = (row.get("repo_id") or "").strip()
         slug = (row.get("repo") or "").strip().lower()
@@ -218,13 +218,13 @@ def apply(value_file: Path = OUTPUT_FILE,
 
         blended = compute_score(openssf, eco, top_eco_pct)
         if blended is not None:
-            row["score"] = f"{blended:.2f}"
+            row["value_score"] = f"{blended:.2f}"
 
     # Ranked by value score, highest first. Unscored rows (below the
     # 2-component floor — mostly class B/C) sink to the end, kept in their
     # top_eco_pct-desc importance order, then repo for determinism.
     def _sort_key(r: dict) -> tuple:
-        sc = (r.get("score") or "").strip()
+        sc = (r.get("value_score") or "").strip()
         tp = (r.get("top_eco_pct") or "").strip()
         return (sc == "", -float(sc) if sc else 0.0,
                 -float(tp) if tp else 0.0, (r.get("repo") or "").lower())
@@ -244,12 +244,12 @@ def report(rows: list[dict]) -> list[str]:
 
     filled_oc = sum(1 for r in rows if (r.get("openssf_crit") or "").strip())
     filled_ec = sum(1 for r in rows if (r.get("eco_crit") or "").strip())
-    scored = [r for r in rows if (r.get("score") or "").strip()]
-    scores = [float(r["score"]) for r in scored]
+    scored = [r for r in rows if (r.get("value_score") or "").strip()]
+    scores = [float(r["value_score"]) for r in scored]
     gl_total = sum(1 for r in rows if (r.get("platform") or "").lower() == "gitlab")
     gl_scored = sum(1 for r in scored if (r.get("platform") or "").lower() == "gitlab")
 
-    table = Table(title="[bold]value.csv openssf_crit / eco_crit / score coverage[/bold]",
+    table = Table(title="[bold]value.csv openssf_crit / eco_crit / value_score coverage[/bold]",
                   show_header=True, header_style="bold dim", padding=(0, 1))
     table.add_column("Scope", style="bold")
     table.add_column("Filled", justify="right")
@@ -259,11 +259,11 @@ def report(rows: list[dict]) -> list[str]:
     table.add_row("valid class-A github (openssf gate)",
                   f"{len(gate) - len(violations):,}", f"{len(gate):,}",
                   style="bold")
-    table.add_row("rows with score", f"{len(scored):,}", f"{len(rows):,}")
+    table.add_row("rows with value_score", f"{len(scored):,}", f"{len(rows):,}")
     table.add_row("gitlab rows scored", f"{gl_scored:,}", f"{gl_total:,}")
     console.print(table)
     if scores:
-        console.print(f"[dim]score  min/mean/max: {min(scores):.1f} / "
+        console.print(f"[dim]value_score  min/mean/max: {min(scores):.1f} / "
                       f"{sum(scores) / len(scores):.1f} / {max(scores):.1f}[/dim]")
 
     if violations:
@@ -280,7 +280,7 @@ def report(rows: list[dict]) -> list[str]:
 
 
 def main() -> None:
-    console.print("[bold]Applying openssf_crit + eco_crit + score onto value.csv...[/bold]\n")
+    console.print("[bold]Applying openssf_crit + eco_crit + value_score onto value.csv...[/bold]\n")
     rows = apply()
     report(rows)
 
