@@ -304,8 +304,67 @@ def check_value_criticality() -> list[Result]:
              f"{len(gate)}/{len(gate)} valid class-A github rows scored")]
 
 
+# Source CSVs whose rows the builders join by the stable repo_id. A fetcher
+# rewrite that drops or blanks the column silently blanks entire dimensions
+# (this happened: contributor-commits, commits-years, and the GitHub
+# contributor file were all clobbered by schema-unaware rewrites in one run).
+ID_JOINED_SOURCES = [
+    "sources/git/contributor-commits.csv",
+    "sources/git/scc.csv",
+    "sources/git/lizard.csv",
+    "sources/git/openssf.csv",
+    "sources/git/semgrep.csv",
+    "sources/github/contributor-commits.csv",
+    "sources/github/git/commits-years.csv",
+    "sources/github/git/churn.csv",
+    "sources/github/issues.csv",
+    "sources/osv/cves.csv",
+]
+
+
+def check_source_repo_id_integrity() -> list[Result]:
+    """Every id-joined source CSV keeps its repo_id column populated for
+    in-scope repos.
+
+    Two failure modes, both observed in the wild:
+      1. header lost the repo_id column entirely (schema-unaware rewrite);
+      2. rows for in-scope repos carry a blank repo_id (id map lagged a
+         rename), so the id-keyed builder joins silently drop them.
+    Out-of-scope rows may legitimately be blank (legacy/orphan slugs), so
+    the gate only covers slugs in the current risk scope.
+    """
+    from src.common.repos import load_top_repos
+
+    scope = {e.repo for e in load_top_repos(skip_archived=False)}
+    out: list[Result] = []
+    for rel in ID_JOINED_SOURCES:
+        path = ROOT / "data" / rel
+        if not path.exists():
+            out.append((f"{rel}:repo_id", False, "file missing"))
+            continue
+        with open(path, encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            if "repo_id" not in (reader.fieldnames or []):
+                out.append((f"{rel}:repo_id", False,
+                            "repo_id column MISSING from header (schema clobbered)"))
+                continue
+            blank: set[str] = set()
+            for row in reader:
+                slug = (row.get("repo") or "").strip().lower()
+                if slug in scope and not (row.get("repo_id") or "").strip():
+                    blank.add(slug)
+        if blank:
+            sample = ", ".join(sorted(blank)[:3]) + ("…" if len(blank) > 3 else "")
+            out.append((f"{rel}:repo_id", False,
+                        f"{len(blank)} in-scope repo(s) with blank repo_id: {sample}"))
+        else:
+            out.append((f"{rel}:repo_id", True, "in-scope rows fully id-keyed"))
+    return out
+
+
 CHECKS = [check_dimension_csvs, check_risk_data, check_eligibility_data,
           check_value_data, check_value_criticality,
+          check_source_repo_id_integrity,
           check_score_component_coverage,
           check_score_input_completeness, check_long_format_keys]
 
