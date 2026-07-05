@@ -542,13 +542,22 @@ def _write_results(path: str, results: list[RepoComplexity]) -> None:
     """Upsert each successful result into `data/sources/git/lizard.csv`.
 
     Drops results without an `analyzed_sha` (HEAD-resolved snapshots can't be
-    pinned in the long format). `elapsed_s` is logged separately, never
-    persisted.
+    pinned in the long format), and results that analyzed **zero files** —
+    a `files == 0` outcome (empty/partial checkout, or a crashed analysis
+    worker) means "not measured"; `RepoComplexity`'s zero-valued dataclass
+    defaults would otherwise persist a real `cyclomatic_max=0` that deflates
+    the complexity score and is then shielded by the TTL for a year. Mirrors
+    the guard in `fetch_cognitive._write_results`. `elapsed_s` is logged
+    separately, never persisted.
     """
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     written = 0
     for rc in results:
         if rc.error or not rc.analyzed_sha:
+            continue
+        if rc.files == 0:
+            log.warning("%s@%s: 0 files analyzed — skipping (not a real 0)",
+                        rc.repo, rc.analyzed_sha[:10])
             continue
         metrics = {m: getattr(rc, m) for m in CYCLO_METRICS}
         upsert_snapshot(
