@@ -17,8 +17,16 @@ import csv
 from collections import Counter
 from pathlib import Path
 
-DATA = Path(__file__).resolve().parent.parent / "data" / "risk"
-CSVS = ["risk", "complexity", "concentration", "security", "funding", "workload"]
+DATA = Path(__file__).resolve().parent.parent / "data"
+# name → CSV path relative to data/ (funding lives in the eligibility stage)
+CSVS = {
+    "risk": "risk/risk.csv",
+    "complexity": "risk/complexity.csv",
+    "concentration": "risk/concentration.csv",
+    "security": "risk/security.csv",
+    "funding": "eligibility/funding.csv",
+    "workload": "risk/workload.csv",
+}
 
 # Columns where a negative value is legitimate (trends / deltas / slopes).
 SIGNED_SUFFIXES = ("net_new_issues_5y", "slope_opened", "slope_closed",
@@ -49,7 +57,7 @@ def _numeric_columns(header: list[str], rows: list[dict]) -> list[str]:
 
 
 def investigate(name: str) -> None:
-    path = DATA / f"{name}.csv"
+    path = DATA / CSVS[name]
     if not path.exists():
         print(f"== {name}.csv: NOT FOUND ==\n")
         return

@@ -12,13 +12,11 @@ across repos, so a repo missing any component score is left with a blank overall
 `score`. `scripts/pipeline_health.py` enforces it.
 
 Writes data/risk/risk.csv with:
-    repo, repo_id, concentration, complexity, security, workload,
-    score, intent, nonprofit
+    repo, repo_id, concentration, complexity, security, workload, score
 
-`intent` (True/False) — whether the repo has any declared or inferred funding
-intent. `nonprofit` (True/False) — False when the repo is company-backed (Meta,
-Google, …). Company-backed repos remain in risk.csv and are flagged
-`nonprofit=False` rather than being dropped, so callers can filter as needed.
+Funding signals (`intent` / `nonprofit`) are no longer part of the risk table —
+they live in the eligibility stage (data/eligibility/funding.csv, rolled up
+into data/eligibility/eligibility.csv by src.eligibility.build_eligibility).
 
 (All other per-metric columns stay in the component CSVs.)
 
@@ -50,9 +48,8 @@ COMPONENTS = {
     "security":      DATA_DIR / "risk" / "security.csv",
     "workload":      DATA_DIR / "risk" / "workload.csv",
 }
-FUNDING_FILE = DATA_DIR / "risk" / "funding.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "risk.csv"
-FIELDS = ["repo", "repo_id", *COMPONENTS, "score", "intent", "nonprofit"]
+FIELDS = ["repo", "repo_id", *COMPONENTS, "score"]
 
 def _scores_by_repo(path: Path) -> dict[str, int]:
     """{repo_lowercased: int(score)} from a component CSV; blanks skipped."""
@@ -71,23 +68,6 @@ def _scores_by_repo(path: Path) -> dict[str, int]:
     return out
 
 
-def _funding_flags(funding_csv: Path) -> dict[str, dict[str, str]]:
-    """{repo_lower: {"intent": .., "nonprofit": ..}} from funding.csv. Missing
-    repo → intent defaults False (no signal), nonprofit defaults True (not corporate)."""
-    out: dict[str, dict[str, str]] = {}
-    if not funding_csv.exists():
-        return out
-    with open(funding_csv, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            repo = (row.get("repo") or "").strip().lower()
-            if repo:
-                out[repo] = {
-                    "intent": (row.get("intent") or "").strip() or "False",
-                    "nonprofit": (row.get("nonprofit") or "").strip() or "True",
-                }
-    return out
-
-
 def overall_score(component_scores: list[int]) -> str:
     """Overall risk score = geometric mean of present component scores (int)."""
     if not component_scores:
@@ -98,7 +78,6 @@ def overall_score(component_scores: list[int]) -> str:
 def aggregate(sample: set[str] | None = None) -> list[dict]:
     eligible = load_top_repos()
     by_component = {name: _scores_by_repo(path) for name, path in COMPONENTS.items()}
-    flags = _funding_flags(FUNDING_FILE)
 
     rows: list[dict] = []
     for entry in eligible:
@@ -117,9 +96,6 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
                 present.append(s)
         # Completeness rule: only score a repo whose every dimension is present.
         row["score"] = overall_score(present) if complete else ""
-        f = flags.get(repo.lower(), {})
-        row["intent"] = f.get("intent", "False")
-        row["nonprofit"] = f.get("nonprofit", "True")
         rows.append(row)
     return rows
 
@@ -158,12 +134,6 @@ def main() -> None:
         w.writerows(rows)
 
     _print_coverage(rows)
-    si = sum(1 for r in rows if r.get("intent") == "True")
-    corp = sum(1 for r in rows if r.get("nonprofit") == "False")
-    console.print(
-        f"[dim]intent=True: {si:,}/{len(rows):,} "
-        f"({100*si/len(rows):.1f}%) · nonprofit=False (corporate): {corp:,}[/dim]"
-    )
     console.print(f"\n[dim]Wrote {len(rows):,} repos × {len(FIELDS)} columns → {OUTPUT_FILE}[/dim]")
 
 

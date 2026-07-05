@@ -11,10 +11,13 @@ live CSVs so a refresh is one command instead of a hand-audit:
                                                # against docs/stats.md (drift gate)
 
 Every figure is derived from data, never hard-coded:
-  - Value tables   ← data/value/value.csv (+ data/value/stats.csv top-of-funnel,
-                     per-eco data/sources/<eco>/results.csv).
-  - Risk tables    ← data/risk/*.csv scoped to `load_top_repos()` (the top repos),
-                     plus the source CSVs each funnel step reads.
+  - Value tables       ← data/value/value.csv (+ data/value/stats.csv
+                         top-of-funnel, per-eco data/sources/<eco>/results.csv).
+  - Risk tables        ← data/risk/*.csv scoped to `load_top_repos()` (the top
+                         repos), plus the source CSVs each funnel step reads.
+  - Eligibility tables ← data/eligibility/*.csv scoped to
+                         `load_top_repos(skip_archived=False)` (top repos
+                         INCLUDING archived — they surface as active=False).
 
 The Risk denominator is the top-repo set (`load_top_repos()`), matching what the
 builders actually score; a blank score is therefore a real coverage gap, except
@@ -272,10 +275,6 @@ def risk_stats() -> dict:
                       for label, kind, col in steps]
                for name, steps in RISK_FUNNELS.items()}
 
-    # intent / nonprofit coverage (from risk.csv — already loaded above)
-    intent_count = _count(risk, scope, "bool", "intent")
-    nonprofit_count = _count(risk, scope, "bool", "nonprofit")
-
     # headline prose figures
     conc = dims["concentration"]
     bf_vals = [_num(r.get("bf_commits_git_5y")) for r in conc if r["repo"] in scope]
@@ -284,10 +283,63 @@ def risk_stats() -> dict:
 
     return {
         "scope": n, "distribution": distribution, "funnels": funnels,
-        "intent_count": intent_count, "nonprofit_count": nonprofit_count,
         "overall_scored": o_scored, "overall_gap": n - o_scored,
         "bf1_pct": 100 * bf1 / len(bf_computed) if bf_computed else 0,
     }
+
+
+# ── eligibility ──────────────────────────────────────────────────────────────
+
+ELIGIBILITY_FLAGS = ("oss", "intent", "nonprofit", "active")
+
+
+def eligibility_scope_set() -> set[str]:
+    """The eligibility denominator — top repos INCLUDING archived ones.
+
+    Wider than the risk scope: archived repos stay in so the stage can mark
+    them active=False instead of silently dropping them.
+    """
+    return {e.repo for e in load_top_repos(skip_archived=False) if e.repo}
+
+
+def eligibility_stats() -> dict:
+    scope = eligibility_scope_set()
+    n = len(scope)
+    lic = [r for r in _load("data/eligibility/licenses.csv") if r["repo"] in scope]
+    act = [r for r in _load("data/eligibility/active.csv") if r["repo"] in scope]
+    fund = _load("data/eligibility/funding.csv")
+    elig = [r for r in _load("data/eligibility/eligibility.csv") if r["repo"] in scope]
+
+    licenses = {
+        "resolved": sum(1 for r in lic if _present(r.get("license"))),
+        "registry": sum(1 for r in lic if r.get("license_source") == "registry"),
+        "github": sum(1 for r in lic if r.get("license_source") == "github"),
+        "oss_true": sum(1 for r in lic if r.get("oss") == "True"),
+        "oss_false": sum(1 for r in lic if r.get("oss") == "False"),
+        "oss_unknown": sum(1 for r in lic if (r.get("oss") or "").strip() == ""),
+    }
+    active = {
+        "eol": sum(1 for r in act if _truthy(r.get("eol"))),
+        "archived": sum(1 for r in act if _truthy(r.get("archived"))),
+        "mirror": sum(1 for r in act
+                      if _truthy(r.get("archived")) and _truthy(r.get("mirror"))),
+        "active": sum(1 for r in act if _truthy(r.get("active"))),
+    }
+    intent_count = _count(fund, scope, "bool", "intent")
+    nonprofit_count = _count(fund, scope, "bool", "nonprofit")
+
+    rollup = {f: sum(1 for r in elig if _truthy(r.get(f)))
+              for f in ELIGIBILITY_FLAGS}
+    rollup["eligible"] = sum(1 for r in elig if _truthy(r.get("eligible")))
+    # repos failing ONLY this flag — what fixing it alone would unlock
+    sole = {f: sum(1 for r in elig
+                   if not _truthy(r.get(f))
+                   and all(_truthy(r.get(g)) for g in ELIGIBILITY_FLAGS if g != f))
+            for f in ELIGIBILITY_FLAGS}
+
+    return {"scope": n, "licenses": licenses, "active": active,
+            "intent_count": intent_count, "nonprofit_count": nonprofit_count,
+            "rollup": rollup, "sole": sole}
 
 
 # ── rendering: rich dashboard ────────────────────────────────────────────────
@@ -300,7 +352,7 @@ def _pct(n: int, d: int) -> str:
     return "100%" if n == d else f"{p:.1f}%"
 
 
-def dashboard(v: dict, r: dict) -> None:
+def dashboard(v: dict, r: dict, e: dict) -> None:
     console.rule("[bold]Pipeline statistics[/bold]")
     console.print(f"value.csv rows: [bold]{v['rows']:,}[/bold]   "
                   f"risk scope (top repos): [bold]{r['scope']:,}[/bold]\n")
@@ -326,8 +378,8 @@ def dashboard(v: dict, r: dict) -> None:
     for c in ("A", "B", "C"):
         t.add_column(c, justify="right")
     cl, bc = v["classes"], v["by_class"]
-    for e in ECOSYSTEMS:
-        t.add_row(e, *[f"{cl[c][e]:,}" for c in ("A", "B", "C")])
+    for eco in ECOSYSTEMS:
+        t.add_row(eco, *[f"{cl[c][eco]:,}" for c in ("A", "B", "C")])
     t.add_section()
     t.add_row("Repos", *[f"{cl[c]['strongest']:,}" for c in ("A", "B", "C")],
               style="bold")
@@ -357,25 +409,63 @@ def dashboard(v: dict, r: dict) -> None:
             t.add_row(label.replace("`", ""), str(cnt), _pct(cnt, n))
         console.print(t)
 
-    t = Table(title="Risk — intent and nonprofit", header_style="bold dim")
-    t.add_column("Category")
-    t.add_column("Repos", justify="right")
-    t.add_column("%", justify="right")
-    it, npt = r["intent_count"], r["nonprofit_count"]
-    t.add_row("intent — any funding signal", str(it), _pct(it, n))
-    t.add_row("intent — no funding signal", str(n - it), _pct(n - it, n))
-    t.add_row("nonprofit — community / independent", str(npt), _pct(npt, n))
-    t.add_row("nonprofit — company-backed", str(n - npt), _pct(n - npt, n))
-    console.print(t)
-
     console.print(f"\n[dim]bus-factor-1: {r['bf1_pct']:.1f}% of computed · "
                   f"overall score: {r['overall_scored']}/{n} scored "
                   f"({r['overall_gap']} blank — incomplete, mostly missing workload)[/dim]")
 
+    ne = e["scope"]
+    lic, act = e["licenses"], e["active"]
+    t = Table(title=f"Eligibility — licenses (scope {ne})", header_style="bold dim")
+    t.add_column("Step")
+    t.add_column("Repos", justify="right")
+    t.add_column("%", justify="right")
+    for label, cnt in (("license resolved", lic["resolved"]),
+                       ("· from registry", lic["registry"]),
+                       ("· from GitHub", lic["github"]),
+                       ("oss=True (OSI-approved)", lic["oss_true"]),
+                       ("oss=False (known non-OSS)", lic["oss_false"]),
+                       ("oss unknown (no signal)", lic["oss_unknown"])):
+        t.add_row(label, str(cnt), _pct(cnt, ne))
+    console.print(t)
+
+    t = Table(title="Eligibility — activity", header_style="bold dim")
+    t.add_column("Category")
+    t.add_column("Repos", justify="right")
+    t.add_column("%", justify="right")
+    for label, cnt in (("eol (override)", act["eol"]),
+                       ("archived", act["archived"]),
+                       ("archived but mirror-exempt", act["mirror"]),
+                       ("active", act["active"])):
+        t.add_row(label, str(cnt), _pct(cnt, ne))
+    console.print(t)
+
+    t = Table(title="Eligibility — intent and nonprofit", header_style="bold dim")
+    t.add_column("Category")
+    t.add_column("Repos", justify="right")
+    t.add_column("%", justify="right")
+    it, npt = e["intent_count"], e["nonprofit_count"]
+    t.add_row("intent — any funding signal", str(it), _pct(it, ne))
+    t.add_row("intent — no funding signal", str(ne - it), _pct(ne - it, ne))
+    t.add_row("nonprofit — community / independent", str(npt), _pct(npt, ne))
+    t.add_row("nonprofit — company-backed", str(ne - npt), _pct(ne - npt, ne))
+    console.print(t)
+
+    t = Table(title="Eligibility — rollup", header_style="bold dim")
+    t.add_column("Check")
+    t.add_column("True", justify="right")
+    t.add_column("%", justify="right")
+    t.add_column("sole blocker", justify="right")
+    for f in ELIGIBILITY_FLAGS:
+        t.add_row(f, str(e["rollup"][f]), _pct(e["rollup"][f], ne), str(e["sole"][f]))
+    t.add_section()
+    t.add_row("[bold]eligible[/bold]", f"[bold]{e['rollup']['eligible']}[/bold]",
+              f"[bold]{_pct(e['rollup']['eligible'], ne)}[/bold]", "")
+    console.print(t)
+
 
 # ── rendering: markdown (stats.md tables) ────────────────────────────────────
 
-def markdown(v: dict, r: dict) -> str:
+def markdown(v: dict, r: dict, e: dict) -> str:
     out: list[str] = []
     a = out.append
     a("### Repo identity coverage\n")
@@ -400,8 +490,8 @@ def markdown(v: dict, r: dict) -> str:
     a("| Metric | A | B | C |")
     a("|---|--:|--:|--:|")
     cl = v["classes"]
-    for e in ECOSYSTEMS:
-        a(f"| {e} | {cl['A'][e]:,} | {cl['B'][e]:,} | {cl['C'][e]:,} |")
+    for eco in ECOSYSTEMS:
+        a(f"| {eco} | {cl['A'][eco]:,} | {cl['B'][eco]:,} | {cl['C'][eco]:,} |")
     a(f"| **Repos** | **{cl['A']['strongest']:,}** | "
       f"**{cl['B']['strongest']:,}** | **{cl['C']['strongest']:,}** |")
     bc = v["by_class"]
@@ -430,20 +520,56 @@ def markdown(v: dict, r: dict) -> str:
             mark = "**" if label.endswith(" score") else ""
             a(f"| {mark}{label}{mark} | {mark}{cnt}{mark} | {mark}{_pct(cnt, n)}{mark} |")
 
-    it, npt = r["intent_count"], r["nonprofit_count"]
+    # ── Eligibility sections ──
+    ne = e["scope"]
+    lic, act = e["licenses"], e["active"]
+    a(f"\n### Licenses (scope {ne})\n")
+    a("| Step | Repos | % |")
+    a("|---|---:|---:|")
+    a(f"| input top repos (incl. archived) | {ne} | 100% |")
+    for label, cnt in (("license resolved", lic["resolved"]),
+                       ("· from registry", lic["registry"]),
+                       ("· from GitHub", lic["github"]),
+                       ("**oss=True (OSI-approved)**", lic["oss_true"]),
+                       ("oss=False (known non-OSS)", lic["oss_false"]),
+                       ("oss unknown (no signal)", lic["oss_unknown"])):
+        mark = "**" if label.startswith("**") else ""
+        clean = label.strip("*")
+        a(f"| {mark}{clean}{mark} | {mark}{cnt}{mark} | {mark}{_pct(cnt, ne)}{mark} |")
+
+    a("\n### Activity\n")
+    a("| Category | Repos | % |")
+    a("|---|---:|---:|")
+    for label, cnt in (("eol (override)", act["eol"]),
+                       ("archived", act["archived"]),
+                       ("archived but mirror-exempt", act["mirror"]),
+                       ("**active**", act["active"])):
+        mark = "**" if label.startswith("**") else ""
+        clean = label.strip("*")
+        a(f"| {mark}{clean}{mark} | {mark}{cnt}{mark} | {mark}{_pct(cnt, ne)}{mark} |")
+
+    it, npt = e["intent_count"], e["nonprofit_count"]
     a("\n### Intent and nonprofit\n")
     a("| Category | Repos | % |")
     a("|---|---:|---:|")
-    a(f"| intent — any funding signal | {it} | {_pct(it, n)} |")
-    a(f"| intent — no funding signal | {n - it} | {_pct(n - it, n)} |")
-    a(f"| nonprofit — community / independent | {npt} | {_pct(npt, n)} |")
-    a(f"| nonprofit — company-backed | {n - npt} | {_pct(n - npt, n)} |")
+    a(f"| intent — any funding signal | {it} | {_pct(it, ne)} |")
+    a(f"| intent — no funding signal | {ne - it} | {_pct(ne - it, ne)} |")
+    a(f"| nonprofit — community / independent | {npt} | {_pct(npt, ne)} |")
+    a(f"| nonprofit — company-backed | {ne - npt} | {_pct(ne - npt, ne)} |")
+
+    a("\n### Eligibility rollup\n")
+    a("| Check | True | % | sole blocker |")
+    a("|---|---:|---:|---:|")
+    for f in ELIGIBILITY_FLAGS:
+        a(f"| {f} | {e['rollup'][f]} | {_pct(e['rollup'][f], ne)} | {e['sole'][f]} |")
+    a(f"| **eligible** | **{e['rollup']['eligible']}** | "
+      f"**{_pct(e['rollup']['eligible'], ne)}** | |")
     return "\n".join(out)
 
 
 # ── drift check ──────────────────────────────────────────────────────────────
 
-def check(v: dict, r: dict) -> int:
+def check(v: dict, r: dict, e: dict) -> int:
     """Verify docs/stats.md is current; exit 1 on drift.
 
     Every generated table DATA row (any `| … |` line carrying a digit — headers
@@ -453,7 +579,7 @@ def check(v: dict, r: dict) -> int:
     are not generated here, so they are not checked.
     """
     text = (ROOT / "docs" / "stats.md").read_text(encoding="utf-8")
-    rows = [ln.strip() for ln in markdown(v, r).splitlines()
+    rows = [ln.strip() for ln in markdown(v, r, e).splitlines()
             if ln.strip().startswith("|") and any(ch.isdigit() for ch in ln)]
     missing = [ln for ln in rows if ln not in text]
     if missing:
@@ -473,13 +599,13 @@ def main() -> int:
                     help="exit 1 if docs/stats.md headline numbers drift")
     args = ap.parse_args()
 
-    v, r = value_stats(), risk_stats()
+    v, r, e = value_stats(), risk_stats(), eligibility_stats()
     if args.check:
-        return check(v, r)
+        return check(v, r, e)
     if args.markdown:
-        print(markdown(v, r))
+        print(markdown(v, r, e))
         return 0
-    dashboard(v, r)
+    dashboard(v, r, e)
     return 0
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build data/risk/funding.csv — funding signals + risk score per risk-scope repo.
+"""Build data/eligibility/funding.csv — funding signals + score per top repo.
 
-Reads (all under data/sources/):
+Reads (all under data/sources/ except the stage-level overrides):
     github/sponsors.csv        — github_sponsors (inbound)  (src.github.fetch_sponsors)
     github/sponsorships.csv    — sponsoring_count (outbound) (src.github.fetch_sponsorships)
     github/funding-yml.csv     — has_funding_link / platforms (src.github.fetch_funding_yml)
@@ -9,13 +9,14 @@ Reads (all under data/sources/):
     floss-fund/funding-json.csv — FLOSS Fund directory export  (src.sources.floss_fund.funding_json)
     opencollective/budgets.csv — annual gross raised per OC slug (src.sources.opencollective.fetch_budgets)
     funding/host-by-repo.csv   — scraped FOSS-foundation host per repo
-    funding/overrides.csv      — curated host/owner institutional backing per repo
+    data/eligibility/overrides.csv — curated host/owner institutional backing per
+                                 repo (stage overrides, shared with build_active)
     npm/funding.csv            — npm package.json `funding` field (npm repos only,
                                  src.sources.npm.fetch_funding) — a declared channel
     pypi/funding.csv           — PyPI `project_urls` funding link (pypi repos only,
                                  src.sources.pypi.fetch_funding) — a declared channel
 
-Writes data/risk/funding.csv. The funding risk **score** (0-100, higher =
+Writes data/eligibility/funding.csv. The funding **score** (0-100, higher =
 less funded = riskier) is the geometric mean of THREE direction-aware risk axes:
     gh_sponsorships_p  ← gh_sponsorships (in + out), lower → riskier
     oc_avg_funding_p   ← oc_avg_funding ($0 when none),  lower → riskier
@@ -31,10 +32,10 @@ their fetch timestamp lives in data/sources/github/repos.csv. No per-signal
 `fetched_at` is rolled up here. The script also writes two boolean flag columns:
 `intent` (True when ≥1 funding signal is present) and `nonprofit` (False only
 when host_type or owner_type == "company"). These flags are joined into
-data/risk/risk.csv by aggregate_risk.py.
+data/eligibility/eligibility.csv by build_eligibility.py.
 
 Usage:
-    uv run python -m src.risk.build_funding
+    uv run python -m src.eligibility.build_funding
 """
 
 import csv
@@ -62,10 +63,10 @@ REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 FLOSS_FUND_FILE = DATA_DIR / "sources" / "floss-fund" / "funding-json.csv"
 OC_BUDGETS_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
 FOUNDATIONS_FILE = DATA_DIR / "sources" / "funding" / "host-by-repo.csv"
-OVERRIDES_FILE = DATA_DIR / "sources" / "funding" / "overrides.csv"
+OVERRIDES_FILE = DATA_DIR / "eligibility" / "overrides.csv"
 NPM_FUNDING_FILE = DATA_DIR / "sources" / "npm" / "funding.csv"
 PYPI_FUNDING_FILE = DATA_DIR / "sources" / "pypi" / "funding.csv"
-OUTPUT_FILE = DATA_DIR / "risk" / "funding.csv"
+OUTPUT_FILE = DATA_DIR / "eligibility" / "funding.csv"
 
 # A repo that DECLARES a funding channel whose $ we cannot measure is not
 # maximally unfunded even if no $ is observed — cap its funding risk at the "has
@@ -307,7 +308,9 @@ def _load_sponsoring(path: Path) -> dict[str, str]:
 def _load_funding_overrides(path: Path) -> dict[str, dict]:
     """{repo_lower: {host, host_type, owner, owner_type}} from overrides.csv.
 
-    Schema: ``repo, host, host_type, gh_user, owner, owner_type, oc_slug``.
+    Schema: ``repo, host, host_type, gh_user, owner, owner_type, oc_slug, eol,
+    reason`` — this reader consumes the funding columns; `eol` is read by
+    build_active, and `reason` is free-text audit context for any override.
     `host` and `owner` are **domains** (the domain is the canonical name — no
     separate `*_domain` column); `gh_user` is the GitHub login (informational);
     `oc_slug` is a curated Open Collective slug for projects that fund via OC but
@@ -339,7 +342,10 @@ def _load_funding_overrides(path: Path) -> dict[str, dict]:
 
 
 def build() -> list[dict]:
-    eligible = load_top_repos()
+    # Eligibility scope = top repos INCLUDING archived ones (unlike risk):
+    # archived repos must appear in the stage output so build_eligibility can
+    # mark them active=False instead of silently dropping them.
+    eligible = load_top_repos(skip_archived=False)
     sponsors = load_rows_by_repo(SPONSORS_FILE)
     yml = load_rows_by_repo(FUNDING_YML_FILE)
     repos_meta = load_rows_by_repo(REPOS_FILE)

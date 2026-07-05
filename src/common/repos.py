@@ -190,6 +190,23 @@ def load_top_slugs(*args, **kwargs) -> list[str]:
     return [e.repo for e in load_top_repos(*args, **kwargs)]
 
 
+def load_live_upstream_mirrors(
+    overrides_file: str = OVERRIDES_FILE,
+    repos_file: str = REPOS_FILE,
+) -> set[str]:
+    """Canonical slugs of live-upstream GitHub mirrors (archived-exempt).
+
+    The same exemption set `load_top_repos` applies internally to its
+    `skip_archived` drop, exposed for callers that load the scope with
+    `skip_archived=False` and apply the exemption themselves — the
+    eligibility stage's `build_active` marks archived repos `active=False`
+    EXCEPT these mirrors (archived flag on the GitHub mirror, live upstream
+    elsewhere).
+    """
+    canon, _ = _read_github_repos(repos_file)
+    return {canon.get(s, s) for s in _read_live_upstream_mirror_slugs(overrides_file)}
+
+
 def canonical_repo_map(repos_file: str = REPOS_FILE) -> dict[str, str]:
     """Map every known repo slug -> its canonical lowercased `full_name`.
 

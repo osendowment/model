@@ -130,7 +130,7 @@ def main():
     plan.append(("build_complexity",    ["uv", "run", "python", "-m", "src.risk.build_complexity"], 0))
     plan.append(("build_security",      ["uv", "run", "python", "-m", "src.risk.build_security"], 0))
     plan.append(("build_concentration", ["uv", "run", "python", "-m", "src.risk.build_concentration"], 0))
-    plan.append(("build_funding",       ["uv", "run", "python", "-m", "src.risk.build_funding"], 0))
+    plan.append(("build_funding",       ["uv", "run", "python", "-m", "src.eligibility.build_funding"], 0))
     plan.append(("build_workload",      ["uv", "run", "python", "-m", "src.risk.build_workload"], 0))
     plan.append(("risk",                ["uv", "run", "python", "-m", "src.risk.aggregate_risk"], 0))
 

@@ -2,7 +2,7 @@
 
 Shared by the FUNDING.yml fetcher (`src.sources.github.fetch_funding_yml`), the FLOSS
 Fund export parser (`src.sources.floss_fund.funding_json`), and the funding builder
-(`src.risk.build_funding`). FUNDING.yml uses these keys directly;
+(`src.eligibility.build_funding`). FUNDING.yml uses these keys directly;
 funding.json declares free-form channel `address` URLs, which we map back to
 the same platform vocabulary so the two sources can be unioned.
 """

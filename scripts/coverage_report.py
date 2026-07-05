@@ -54,7 +54,7 @@ CATEGORY_FILES = [
     ("complexity",    "data/risk/complexity.csv"),
     ("security",      "data/risk/security.csv"),
     ("concentration", "data/risk/concentration.csv"),
-    ("funding",       "data/risk/funding.csv"),
+    ("funding",       "data/eligibility/funding.csv"),
     ("workload",      "data/risk/workload.csv"),
 ]
 
