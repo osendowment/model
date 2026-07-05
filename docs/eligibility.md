@@ -19,6 +19,14 @@ eligible = oss AND intent AND nonprofit AND active
 `data/eligibility/eligibility.csv`. Coverage counts live in
 [stats.md](stats.md#eligibility).
 
+It also stamps three **signal-completeness** columns (independent of the
+`eligible` verdict): `value_comps` and `risk_comps` count how many value
+components (`openssf_crit`, `eco_crit`, `top_eco_pct`) and risk components
+(`concentration`, `complexity`, `security`, `workload`) carry a real
+(non-empty, **non-zero**) value, and `complete = value_comps ≥ 2 AND
+risk_comps = 4` flags a repo with full coverage. Archived repos are absent
+from the risk stage, so they have `risk_comps = 0` and are never `complete`.
+
 ## Scope
 
 Input is the top-repo set — valid class-A repos from `data/value/value.csv`
