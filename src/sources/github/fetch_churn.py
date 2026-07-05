@@ -23,7 +23,7 @@ We deliberately don't try to identify the *default* branch — a bare
 clone from a fresh URL has its HEAD pointing at whatever the remote's
 default is, which is exactly what we want.
 
-Output: data/sources/github/git/churn.csv
+Output: data/sources/git/churn.csv
 
 Columns:
   repo, analyzed_through_year, commits_5y_examined,
@@ -62,12 +62,12 @@ from rich.table import Table
 from src.sources.git.clone import SOURCE_EXTS
 from src.sources.git.disk import check_disk_or_exit, make_clone_tmpdir, print_disk_banner, sweep_stale_clone_dirs
 from src.sources.github.display import _ETAColumn
-from src.common.repos import load_repo_ids, load_top_repos
+from src.common.repos import git_url_for, load_git_urls, load_repo_ids, load_top_repos
 
 log = logging.getLogger(__name__)
 console = Console()
 
-OUTPUT_FILE = "data/sources/github/git/churn.csv"
+OUTPUT_FILE = "data/sources/git/churn.csv"
 
 PERIOD_START = "2021-01-01"
 PERIOD_END_EXCLUSIVE = "2026-01-01"  # git log --until is exclusive at midnight UTC
@@ -83,7 +83,7 @@ SOURCE_SUFFIXES: tuple[str, ...] = tuple(
 )
 
 OUTPUT_FIELDS = [
-    "repo", "repo_id", "analyzed_through_year", "commits_5y_examined",
+    "repo", "repo_id", "git_url", "analyzed_through_year", "commits_5y_examined",
     "churn_5y_added", "churn_5y_deleted", "churn_5y_total",
     "churn_files_count",
     "top_file_path", "top_file_churn",
@@ -352,9 +352,11 @@ def _write_csv(
             "fetched_at": now,
         }
 
+    gitmap = load_git_urls()
     for slug, row in existing.items():
         if not (row.get("repo_id") or "").strip():
             row["repo_id"] = ids.get(slug, "")
+        row["git_url"] = git_url_for(row.get("repo_id", ""), slug, gitmap)
 
     rows = sorted(
         existing.values(),

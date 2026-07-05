@@ -8,7 +8,7 @@ Six metrics emitted per snapshot:
     files, loc, sloc, uloc, complexity, complexity_density
 
 Strategy:
-    1. Read ``data/sources/github/git/commits-years.csv`` → per-repo list of
+    1. Read ``data/sources/git/commits-years.csv`` → per-repo list of
        ``last_sha`` per year. We pin scc to the **most recent** populated
        last_sha (cascading back across earlier years if needed) so each
        repo is analysed once at its newest known snapshot.
@@ -66,7 +66,7 @@ log = logging.getLogger(__name__)
 console = Console()
 
 REPOS_FILE = "data/value/value.csv"
-SHA_FILE = "data/sources/github/git/commits-years.csv"
+SHA_FILE = "data/sources/git/commits-years.csv"
 OUTPUT_FILE = "data/sources/git/scc.csv"
 
 DEFAULT_YEARS = [2021, 2022, 2023, 2024, 2025]

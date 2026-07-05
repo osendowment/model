@@ -315,8 +315,8 @@ ID_JOINED_SOURCES = [
     "sources/git/openssf.csv",
     "sources/git/semgrep.csv",
     "sources/github/contributor-commits.csv",
-    "sources/github/git/commits-years.csv",
-    "sources/github/git/churn.csv",
+    "sources/git/commits-years.csv",
+    "sources/git/churn.csv",
     "sources/github/issues.csv",
     "sources/osv/cves.csv",
 ]
@@ -372,8 +372,8 @@ SOURCE_SCHEMA_CONTRACT: dict[str, object] = {
     "sources/github/contributor-commits.csv":
         ("sidecar", "sources/github/contributor-commits.status.csv", "fetched_at"),
     "sources/osv/cves.csv": ("sidecar", "sources/osv/queried.csv", "fetched_at"),
-    "sources/github/git/commits-years.csv": "fetched_at",
-    "sources/github/git/churn.csv": "fetched_at",
+    "sources/git/commits-years.csv": "fetched_at",
+    "sources/git/churn.csv": "fetched_at",
     "sources/github/issues.csv": "fetched_at",
     "sources/git/scc.csv": "checked_at",
     "sources/git/lizard.csv": "checked_at",

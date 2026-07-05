@@ -40,7 +40,7 @@ SOURCES = [
     ("data/sources/git/semgrep.csv", "repo", ["sast_findings_total"], []),
     ("data/sources/osv/cves.csv", "repo", ["cve_count_5y"], []),
     ("data/sources/github/issues.csv", "repo", ["issues_opened_5y", "issues_closed_5y"], []),
-    ("data/sources/github/git/churn.csv", "repo", ["churn_5y_total"], []),
+    ("data/sources/git/churn.csv", "repo", ["churn_5y_total"], []),
     ("data/sources/git/contributor-commits.csv", "repo",
      ["bf_commits_git_5y", "hhi_commits_git_5y"],
      ["data/sources/github/contributor-commits.csv"]),

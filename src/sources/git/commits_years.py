@@ -1,6 +1,6 @@
 """Fetch per-(repo, year) first/last commit SHAs from the GitHub Commits API.
 
-Output: ``data/sources/github/git/commits-years.csv`` with columns
+Output: ``data/sources/git/commits-years.csv`` with columns
 
     repo, repo_id, git_url, year, first_sha, last_sha, commits, fetched_at
 
@@ -57,7 +57,7 @@ log = logging.getLogger(__name__)
 console = Console()
 
 REPOS_FILE = "data/value/value.csv"
-SHA_FILE = "data/sources/github/git/commits-years.csv"
+SHA_FILE = "data/sources/git/commits-years.csv"
 DEFAULT_YEARS = [2021, 2022, 2023, 2024, 2025]
 DEFAULT_CONCURRENCY = 32
 FLUSH_EVERY = 500
@@ -115,6 +115,17 @@ def _to_gh(rid: str) -> str:
     return to_repo_id(rid)
 
 
+@lru_cache(maxsize=1)
+def _git_url_map() -> dict[str, str]:
+    """repo_id -> git_url from value.csv (host-agnostic clone URL). Cached;
+    write_sha_data flushes often. Empty on failure."""
+    from src.common.repos import load_git_urls
+    try:
+        return load_git_urls()
+    except Exception:
+        return {}
+
+
 def write_sha_data(
     filepath: str,
     data: dict[tuple[str, str], dict[str, str]],
@@ -128,17 +139,20 @@ def write_sha_data(
     id map. Downstream builders join by the stable id — dropping the column
     silently blanks their entire output, which a schema-unaware rewrite did once.
     """
+    from src.common.repos import git_url_for
     ids = dict(repo_ids) if repo_ids is not None else _repo_id_map()
+    gitmap = _git_url_map()
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
     with open(filepath, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=SHA_FIELDS, extrasaction="ignore")
         writer.writeheader()
         for (repo, year), row in sorted(data.items()):
             rid = (ids.get(repo) or "").strip()
+            row_rid = _to_gh(row.get("repo_id") or rid)
             writer.writerow({
                 "repo": repo,
-                "repo_id": _to_gh(row.get("repo_id") or rid),
-                "git_url": f"https://github.com/{repo}.git",
+                "repo_id": row_rid,
+                "git_url": git_url_for(row_rid, repo, gitmap),
                 "year": year,
                 "first_sha": row.get("first_sha", ""),
                 "last_sha":  row.get("last_sha", ""),

@@ -88,11 +88,11 @@ value is distinguishable from a failed fetch.
 
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
 |---|---|---|---|
-| `github/git/commits-years.csv` | `src/sources/git/commits_years.py` | per-(repo, year) `last_sha` + `commits` | `repo`, `year` |
+| `git/commits-years.csv` | `src/sources/git/commits_years.py` | per-(repo, year) `last_sha` + `commits` | `repo`, `year` |
 | `git/scc.csv` | `src/sources/git/fetch_scc.py` | scc loc, sloc, complexity, complexity_density | `repo`, `sha` |
 | `git/lizard.csv` (cyclomatic) | `src/sources/github/fetch_advanced_complexity.py` | lizard cyclomatic_{total,avg,max} | `repo`, `sha` |
 | `git/lizard.csv` (cognitive) | `src/sources/github/fetch_cognitive.py` | lizard cognitive_{total,avg,max} | `repo`, `sha` |
-| `github/git/churn.csv` | git churn (bare clone) | 5-year added+deleted lines | `repo` |
+| `git/churn.csv` | git churn (bare clone) | 5-year added+deleted lines | `repo` |
 
 scc and lizard are stored long-format (one row per `(repo, sha, metric)`) and
 read via `src.sources.git.long_format.read`; the build indexes them by

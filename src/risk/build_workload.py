@@ -4,7 +4,7 @@
 Reads:
     data/value/value.csv                                 — A/B value-class set
     data/sources/github/repos.csv                               — created_at, has_issues, pushed_at
-    data/sources/github/git/commits-years.csv                   — per (repo, year) commits
+    data/sources/git/commits-years.csv                   — per (repo, year) commits
     data/sources/openssf/checks.csv                             — per-check Scorecard scores
     data/sources/github/issues.csv                              — long: repo, repo_id, year, metric, value
                                                           (metric ∈ {opened_issues, closed_issues})
@@ -79,7 +79,7 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
-COMMITS_YEARS_FILE = DATA_DIR / "sources" / "github" / "git" / "commits-years.csv"
+COMMITS_YEARS_FILE = DATA_DIR / "sources" / "git" / "commits-years.csv"
 OPENSSF_CHECKS_FILE = DATA_DIR / "sources" / "openssf" / "checks.csv"
 ISSUES_FILE = DATA_DIR / "sources" / "github" / "issues.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "workload.csv"

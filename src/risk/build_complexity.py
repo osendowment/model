@@ -3,10 +3,10 @@
 
 Reads (long-format, sha-pinned):
     data/value/value.csv                     — A/B value-class set
-    data/sources/github/git/commits-years.csv       — per (repo, year) last_sha + commits
+    data/sources/git/commits-years.csv       — per (repo, year) last_sha + commits
     data/sources/git/scc.csv                        — long: scc metrics per (repo, sha)
     data/sources/git/lizard.csv                     — long: lizard metrics per (repo, sha)
-    data/sources/github/git/churn.csv               — for `churn_5y_total` (hotspot inputs)
+    data/sources/git/churn.csv               — for `churn_5y_total` (hotspot inputs)
 
 Writes:
     data/risk/complexity.csv  with columns:
@@ -83,10 +83,10 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 GIT_LONG_DIR = DATA_DIR / "sources" / "git"
-COMMITS_YEARS_FILE = DATA_DIR / "sources" / "github" / "git" / "commits-years.csv"
+COMMITS_YEARS_FILE = DATA_DIR / "sources" / "git" / "commits-years.csv"
 SCC_FILE = GIT_LONG_DIR / "scc.csv"
 LIZARD_FILE = GIT_LONG_DIR / "lizard.csv"
-CHURN_FILE = DATA_DIR / "sources" / "github" / "git" / "churn.csv"
+CHURN_FILE = DATA_DIR / "sources" / "git" / "churn.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "complexity.csv"
 
 SCC_METRICS = ["loc", "sloc", "complexity", "complexity_density"]

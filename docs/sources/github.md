@@ -28,16 +28,17 @@ In `data/sources/github/contributors/` (wide format: `repo, 2021...2025, 2021-20
 - `commits.csv` -- human commit count
 - `years.csv` -- long format: repo, year, first_date, last_date
 
-In `data/sources/github/git/`:
+All git-clone / git-analysis raw data lives under `data/sources/git/` (host-agnostic:
+every row carries both `repo_id` — `gh/` or `gl/` — and the `git_url` it was cloned
+from, so a fetcher clones the real host rather than assuming `github.com/{repo}`):
 - `commits-years.csv` -- per (repo, year) `last_sha` + `commits` (foundation for sha-pinned snapshots)
 - `churn.csv` -- 5y added/deleted lines per repo (range-based)
-
-In `data/sources/git/` (long-format sha-pinned, schema: `repo, repo_id, commit_sha, metric, value, checked_at`):
-- `scc.csv` -- scc metrics: `loc`, `sloc`, `files`, `uloc`, `complexity`, `complexity_density`
-- `lizard.csv` -- lizard cognitive + cyclomatic + halstead + maintainability_index
-- `semgrep.csv` -- semgrep findings (rulepack-prefixed metrics, e.g. `p_default.total`)
-- `openssf.csv` -- OpenSSF Scorecard `score` + 18 per-check scores
-- `depsdev.csv` -- deps.dev-mirrored Scorecard score + checks (fall-back when local row missing)
+- long-format sha-pinned (schema: `repo, repo_id, git_url, commit_sha, metric, value, checked_at`):
+  - `scc.csv` -- scc metrics: `loc`, `sloc`, `files`, `uloc`, `complexity`, `complexity_density`
+  - `lizard.csv` -- lizard cognitive + cyclomatic + halstead + maintainability_index
+  - `semgrep.csv` -- semgrep findings (rulepack-prefixed metrics, e.g. `p_default.total`)
+  - `openssf.csv` -- OpenSSF Scorecard `score` + 18 per-check scores
+  - `depsdev.csv` -- deps.dev-mirrored Scorecard score + checks (fall-back when local row missing)
 
 ## Scripts
 

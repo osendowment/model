@@ -3,7 +3,7 @@
 
 Reads (long-format, sha-pinned where applicable):
     data/value/value.csv                     — A/B value-class set
-    data/sources/github/git/commits-years.csv       — per (repo, year) last_sha
+    data/sources/git/commits-years.csv       — per (repo, year) last_sha
     data/sources/git/openssf.csv                    — long: scorecard `score` + 18
                                               individual checks per (repo, sha)
     data/sources/git/depsdev.csv                    — long: deps.dev-mirrored Scorecard
@@ -94,7 +94,7 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 GIT_LONG_DIR = DATA_DIR / "sources" / "git"
-COMMITS_YEARS_FILE = DATA_DIR / "sources" / "github" / "git" / "commits-years.csv"
+COMMITS_YEARS_FILE = DATA_DIR / "sources" / "git" / "commits-years.csv"
 OPENSSF_FILE = GIT_LONG_DIR / "openssf.csv"
 DEPSDEV_LONG_FILE = GIT_LONG_DIR / "depsdev.csv"
 SEMGREP_FILE = GIT_LONG_DIR / "semgrep.csv"

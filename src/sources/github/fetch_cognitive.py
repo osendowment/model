@@ -33,7 +33,7 @@ captures different signal (nesting penalty, logical-operator chain toggles)
 that the cyclo-halstead pass already covers separately.
 
 Period semantics:
-    For each repo, look up `data/sources/github/git/commits-years.csv` to find the
+    For each repo, look up `data/sources/git/commits-years.csv` to find the
     most recent year ≤ 2025 with commits>0; use that year's `last_sha`. If
     no per-year SHA is recorded fall back to HEAD (and we DO NOT persist
     HEAD-resolved snapshots — without a pinned sha we can't key them in the
@@ -105,7 +105,7 @@ log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = "data/sources"
-COMMITS_YEARS_FILE = f"{DATA_DIR}/github/git/commits-years.csv"
+COMMITS_YEARS_FILE = f"{DATA_DIR}/git/commits-years.csv"
 SCC_LONG_FILE = f"{DATA_DIR}/git/scc.csv"
 LIZARD_LONG_FILE = f"{DATA_DIR}/git/lizard.csv"
 OUTPUT_FILE = LIZARD_LONG_FILE

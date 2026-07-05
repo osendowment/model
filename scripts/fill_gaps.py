@@ -72,7 +72,7 @@ def main():
 
     if not args.build_only:
         # 1. Foundation: commits-years for any repos missing
-        missing = eligible - _covered(ROOT / "data/sources/github/git/commits-years.csv")
+        missing = eligible - _covered(ROOT / "data/sources/git/commits-years.csv")
         if missing:
             plan.append(("commits-years", ["uv", "run", "python", "-m", "src.sources.git.commits_years", "--concurrency", "10"], len(missing)))
 
@@ -82,7 +82,7 @@ def main():
 
         # 2. Resolve HEAD for dormant repos (no last_sha at any year)
         sha_data: dict[str, set[str]] = {}
-        with (ROOT / "data/sources/github/git/commits-years.csv").open() as f:
+        with (ROOT / "data/sources/git/commits-years.csv").open() as f:
             for r in csv.DictReader(f):
                 if (r.get("last_sha") or "").strip():
                     sha_data.setdefault(r["repo"], set()).add(r.get("year", ""))
@@ -110,7 +110,7 @@ def main():
         if depsdev_missing:
             plan.append(("depsdev", ["uv", "run", "python", "-m", "src.sources.depsdev.fetch", "--concurrency", "20"], len(depsdev_missing)))
 
-        churn_missing = eligible - _covered(ROOT / "data/sources/github/git/churn.csv")
+        churn_missing = eligible - _covered(ROOT / "data/sources/git/churn.csv")
         if churn_missing:
             plan.append(("churn", ["uv", "run", "python", "-m", "src.sources.github.fetch_churn", "--concurrency", "4"], len(churn_missing)))
 

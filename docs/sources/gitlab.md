@@ -106,7 +106,7 @@ A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honour th
 
 ## Related
 
-The GitHub SHA anchor `data/sources/github/git/commits-years.csv` was also given the durable
+The GitHub SHA anchor `data/sources/git/commits-years.csv` was also given the durable
 `repo_id` (= `gh/{id}`) and `git_url` columns (see `src/sources/git/commits_years.py` — both its
 writer and `resolve_head.py` emit them; `--backfill` rewrites the existing file), so both anchors
 join on the same identity scheme.

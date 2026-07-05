@@ -82,7 +82,7 @@ build outputs this component depends on, joined by `repo`.
 |---|---|---|---|
 | `data/value/value.csv` | value pipeline | A/B risk-repo scope | `repo` |
 | `data/sources/github/repos.csv` | `src/sources/github/fetch_repos.py` (GH /repos) | `created_at`, `has_issues`, `pushed_at` | `repo` |
-| `data/sources/github/git/commits-years.csv` | git-clone commit analysis | per `(repo, year)` commit counts → `push_cadence_years` | `repo` |
+| `data/sources/git/commits-years.csv` | git-clone commit analysis | per `(repo, year)` commit counts → `push_cadence_years` | `repo` |
 | `data/sources/openssf/checks.csv` | `src/sources/openssf/` (Scorecard) | "Maintained" sub-check (0–10) | `repo` |
 | `data/sources/github/issues.csv` | `src/sources/github/fetch_issue_metrics.py` | long: `repo, repo_id, year, metric, value` (metric ∈ opened_issues, closed_issues) | `repo` |
 | `data/risk/complexity.csv` | `src/risk/build_complexity.py` | `loc_eoy` (codebase size) | `repo` |

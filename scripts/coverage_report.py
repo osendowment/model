@@ -30,13 +30,13 @@ from src.common.repos import load_top_repos  # noqa: E402
 #   expectation_per_repo = how many rows per repo we expect at minimum.
 #   For long-format sha-pinned files it's the metric count for one snapshot.
 SOURCES = [
-    ("commits-years", "data/sources/github/git/commits-years.csv", "repo", 1),
+    ("commits-years", "data/sources/git/commits-years.csv", "repo", 1),
     ("scc",           "data/sources/git/scc.csv",                    "repo", 6),  # 6 metrics
     ("lizard",        "data/sources/git/lizard.csv",                 "repo", 4),  # min: cognitive set
     ("openssf",       "data/sources/git/openssf.csv",                "repo", 19), # score+18 checks
     ("depsdev",       "data/sources/git/depsdev.csv",                "repo", 1),
     ("semgrep",       "data/sources/git/semgrep.csv",                "repo", 8),  # findings_*
-    ("churn",         "data/sources/github/git/churn.csv",           "repo", 1),
+    ("churn",         "data/sources/git/churn.csv",           "repo", 1),
     ("issues",        "data/sources/github/issues.csv",              "repo", 1),
     ("cves-queried",  "data/sources/osv/queried.csv",                "repo", 1),
     ("repos",         "data/sources/github/repos.csv",               "repo", 1),

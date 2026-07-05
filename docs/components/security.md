@@ -94,7 +94,7 @@ metric per sha — and are joined on the snapshot sha. The rest join on `repo`.
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
 |---|---|---|---|
 | `value/value.csv` | (value stage) | class-A value-class scope | `repo` |
-| `github/git/commits-years.csv` | `src.sources.git.commits_years` | per-(repo, year) `last_sha` — the snapshot pin | `repo`, `year` |
+| `git/commits-years.csv` | `src.sources.git.commits_years` | per-(repo, year) `last_sha` — the snapshot pin | `repo`, `year` |
 | `git/openssf.csv` | `src/sources/openssf/scorecard.py` | OpenSSF Scorecard `score` + 18 checks per `(repo, sha)` — see [openssf.md](../sources/openssf.md) | `repo`, `sha` |
 | `git/depsdev.csv` | `src/sources/depsdev/fetch.py` | deps.dev-mirrored Scorecard `score` + checks (**fallback** when local row missing) | `repo`, `sha` |
 | `git/semgrep.csv` | `src/sources/github/fetch_semgrep.py` | semgrep findings per `(repo, sha, rulepack-prefixed metric)`; locked to `p_default` | `repo`, `sha` |
