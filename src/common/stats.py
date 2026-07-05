@@ -109,3 +109,21 @@ def geom_mean_composite(rows: list[list[float | None]]) -> list[float | None]:
         else:
             out.append(geometric_mean(comps))
     return out
+
+
+def max_composite(rows: list[list[float | None]]) -> list[float | None]:
+    """Per-repo maximum ("worst-of") of component percentiles.
+
+    Same shape and completeness rule as `geom_mean_composite`: returns the
+    max when the row is non-empty and every component is present, else None.
+    Use this when the axes should NOT compound — either bad axis alone is
+    enough to mark the repo high-risk (a bad component isn't diluted by a
+    neutral sibling).
+    """
+    out: list[float | None] = []
+    for comps in rows:
+        if not comps or any(c is None for c in comps):
+            out.append(None)
+        else:
+            out.append(max(comps))
+    return out

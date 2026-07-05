@@ -38,8 +38,8 @@ Writes:
         cve_score,                          (0–100 neutral-anchored CVE risk
                                             score: 0 known CVEs → 50, ≥1 CVE
                                             ranked into (50, 100], worst → 100)
-        score,                              (geometric mean of openssf_score_p
-                                            and cve_score; "" if either
+        score,                              (max of openssf_score_p and
+                                            cve_score; "" if either
                                             openssf_score or cve_count_5y missing)
         fetched_at                          (checked_at of openssf row used)
 
@@ -56,15 +56,19 @@ lexicographic pick).
 
 Security score
 --------------
-`score` is the geometric mean of two direction-aware risk axes: `cve_score`
+`score` is the max ("worst-of") of two direction-aware risk axes: `cve_score`
 (0 known CVEs → 50, ≥1 CVE ranked into (50, 100]) and `openssf_score_p`
 (lower Scorecard score → higher risk). It is populated only when both
-`openssf_score` and `cve_count_5y` are present.
+`openssf_score` and `cve_count_5y` are present. Max rather than geometric mean
+means the two axes do not compound: either a bad Scorecard alone or a real CVE
+alone is enough to flag the repo, and neither dilutes the other.
 
 ~78% of risk-scope repos have zero CVEs and all share `cve_score = 50` — a
 neutral baseline ("none known" ≠ "proven secure"), not the worst-pinned CDF's
-78. For those repos `score` tracks the OpenSSF axis, with the CVE axis only
-re-ranking the minority that carry CVEs, above the neutral 50.
+78. For those repos `score` = openssf_score_p whenever that axis clears 50 (it
+does for most), so the score tracks the OpenSSF axis; the CVE axis takes over
+only for the minority carrying CVEs whose `cve_score` exceeds the openssf axis —
+a repo with real CVEs is never masked by otherwise-good hygiene.
 
 Usage:
     uv run python -m src.risk.build_security
@@ -82,7 +86,7 @@ from rich.table import Table
 from src.common.params import YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import canonical_repo_map, load_top_repos
-from src.common.stats import floor_anchored_risk
+from src.common.stats import floor_anchored_risk, max_composite
 from src.common.tables import load_column_by_repo
 from src.sources.git.long_format import read as read_long
 
@@ -379,7 +383,11 @@ def build() -> list[dict]:
         r["cve_score"] = "" if s is None else round(s, 2)
 
     # Second pass — openssf risk percentile + the informational sast pctls, then
-    # the composite `score` = geom-mean(openssf_score_p, cve_score).
+    # the composite `score` = max(openssf_score_p, cve_score). Max ("worst-of")
+    # rather than geometric mean: a bad Scorecard OR a real CVE is on its own
+    # enough to flag the repo — neither axis dilutes the other. In particular a
+    # repo with known CVEs is not masked by otherwise-good hygiene, and the ~78%
+    # of repos with zero CVEs (neutral cve_score=50) score purely on openssf.
     add_percentiles(
         rows,
         pctl_specs=[
@@ -389,6 +397,7 @@ def build() -> list[dict]:
         ],
         composite_cols=["openssf_score_p", "cve_score"],
         dim_col="score",
+        composite_fn=max_composite,
     )
 
     return rows
