@@ -226,18 +226,30 @@ def _shas_per_repo(
     return by_repo
 
 
-def _load_ossfuzz() -> set[str]:
-    """Return the set of GitHub repos enrolled in OSS-Fuzz (canonical slugs)."""
-    out: set[str] = set()
+def _load_ossfuzz() -> tuple[set[str], set[str]]:
+    """Return OSS-Fuzz enrollment as (repo_ids, canonical slugs).
+
+    Rows in ossfuzz/projects.csv that carry a stable `repo_id` join by id —
+    rename-proof, like every other GitHub-identity join in this builder.
+    Rows with a blank `repo_id` (out-of-scope slugs the fetcher could not
+    resolve) fall back to canonical-slug matching, as before.
+    """
+    ids: set[str] = set()
+    slugs: set[str] = set()
     if not OSSFUZZ_FILE.exists():
-        return out
+        return ids, slugs
     canon = canonical_repo_map()
     with open(OSSFUZZ_FILE, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             slug = (row.get("github_repo") or "").strip().lower()
-            if slug:
-                out.add(canon.get(slug, slug))
-    return out
+            if not slug:
+                continue
+            rid = (row.get("repo_id") or "").strip()
+            if rid:
+                ids.add(rid)
+            else:
+                slugs.add(canon.get(slug, slug))
+    return ids, slugs
 
 
 def _load_cve_counts_5y() -> dict[str, int]:
@@ -302,7 +314,7 @@ def build() -> list[dict]:
     depsdev_shas = _shas_per_repo(depsdev_idx)
     semgrep_shas = _shas_per_repo(semgrep_idx)
 
-    fuzz = _load_ossfuzz()
+    fuzz_ids, fuzz_slugs = _load_ossfuzz()
     cve_counts = _load_cve_counts_5y()
     queried = _load_osv_queried()
     badges = load_column_by_id(DEPSDEV_REPOS_FILE, "bestpractices_badge_id")
@@ -311,8 +323,8 @@ def build() -> list[dict]:
     for entry in eligible:
         repo = entry.repo
         # Every GitHub-identity join keys on the stable repo_id (rename-proof);
-        # only the OSS-Fuzz enrollment match below stays slug-based (its source
-        # list carries no repo_id — see _load_ossfuzz).
+        # OSS-Fuzz rows the fetcher could not resolve to an id fall back to
+        # canonical-slug matching (see _load_ossfuzz).
         rid = str(entry.repo_id)
         priority = per_year.get(rid, [])
 
@@ -370,9 +382,11 @@ def build() -> list[dict]:
             "openssf_score": ossf_score,
             "openssf_score_source": ossf_source,
             "cve_count_5y": cve_5y,
-            # OSS-Fuzz enrollment matches the external project list by slug (no
-            # repo_id in that source); `repo` is already canonical.
-            "ossfuzz_enrolled": "True" if repo in fuzz else "False",
+            # OSS-Fuzz enrollment: repo_id first (rename-proof), canonical-slug
+            # fallback for source rows with a blank repo_id.
+            "ossfuzz_enrolled": (
+                "True" if rid in fuzz_ids or repo in fuzz_slugs else "False"
+            ),
             "sast_findings_total": sast_total,
             "sast_findings_error": sast_error,
             "sast_findings_security": sast_security,

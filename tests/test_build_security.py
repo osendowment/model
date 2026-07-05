@@ -40,7 +40,7 @@ def test_build_recovers_renamed_repo_by_repo_id(monkeypatch):
                         lambda: [E("react/react", "10270250")])
     monkeypatch.setattr(bs, "_per_year_shas", lambda f: {})   # force sha fallback
     monkeypatch.setattr(bs, "read_long", fake_read_long)
-    monkeypatch.setattr(bs, "_load_ossfuzz", lambda: set())
+    monkeypatch.setattr(bs, "_load_ossfuzz", lambda: (set(), set()))
     monkeypatch.setattr(bs, "_load_cve_counts_5y", lambda: {"10270250": 3})
     monkeypatch.setattr(bs, "_load_osv_queried", lambda: {"10270250"})
     monkeypatch.setattr(bs, "load_column_by_id", lambda p, c: {"10270250": "gold"})
@@ -50,6 +50,44 @@ def test_build_recovers_renamed_repo_by_repo_id(monkeypatch):
     assert row["openssf_score_source"] == "openssf_local"
     assert row["cve_count_5y"] == "3"               # CVE join by repo_id
     assert row["bestpractices_badge_id"] == "gold"  # badge join by repo_id
+
+
+def test_ossfuzz_enrollment_joins_by_repo_id_with_slug_fallback(tmp_path, monkeypatch):
+    """OSS-Fuzz enrollment is repo_id-first: a projects.csv row still carrying
+    the OLD slug but the correct stable repo_id marks the renamed repo enrolled
+    (facebook/react → react/react). Rows with a blank repo_id (out-of-scope
+    slugs the fetcher couldn't resolve) still match by canonical slug."""
+    from src.risk import build_security as bs
+
+    projects = tmp_path / "projects.csv"
+    projects.write_text(
+        '"project","language","github_repo","repo_id","main_repo","homepage","fetched_at"\n'
+        # OLD slug, correct repo_id → must join by id despite the rename.
+        '"react","javascript","facebook/react","10270250",'
+        '"https://github.com/facebook/react","","2026-05-31T14:41:16+01:00"\n'
+        # Blank repo_id → slug-fallback path.
+        '"curl","c","curl/curl","",'
+        '"https://github.com/curl/curl","curl.se","2026-05-31T14:41:16+01:00"\n',
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(bs, "OSSFUZZ_FILE", projects)
+    monkeypatch.setattr(bs, "canonical_repo_map", lambda: {})  # slugs map to themselves
+    monkeypatch.setattr(bs, "load_top_repos", lambda: [
+        E("curl/curl", "310711"),
+        E("react/react", "10270250"),        # renamed since collection
+        E("torvalds/linux", "2325298"),      # not enrolled
+    ])
+    monkeypatch.setattr(bs, "_per_year_shas", lambda f: {})
+    monkeypatch.setattr(bs, "read_long", lambda path, *a, **k: {})
+    monkeypatch.setattr(bs, "_load_cve_counts_5y", lambda: {})
+    monkeypatch.setattr(bs, "_load_osv_queried", lambda: set())
+    monkeypatch.setattr(bs, "load_column_by_id", lambda p, c: {})
+
+    rows = {r["repo"]: r for r in bs.build()}
+    assert rows["react/react"]["ossfuzz_enrolled"] == "True"     # id join (rename)
+    assert rows["curl/curl"]["ossfuzz_enrolled"] == "True"       # slug fallback
+    assert rows["torvalds/linux"]["ossfuzz_enrolled"] == "False"
 
 
 def test_security_score_uses_neutral_cve_anchor():
