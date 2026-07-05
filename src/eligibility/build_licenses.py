@@ -4,6 +4,12 @@
 For every top repo (valid class-A, archived included) resolve one SPDX
 license string and classify it against the OSI-approved set:
 
+- **manual override** (highest priority) — the `license` column of
+  data/eligibility/overrides.csv, a curated SPDX assertion for repos whose
+  license detection fails upstream: GitHub's Licensee returns `noassertion`
+  on bundled / dual / stacked LICENSE files (node, cpython, linux, icu,
+  libjpeg-turbo, cairo) or the repo ships no standard LICENSE file at all
+  (wmi — MIT declared only in PyPI metadata). Joined on the stable repo_id.
 - **registry license** (primary) — the `license` column of each ecosystem's
   results.csv (npm/pypi/crates/cpp, populated by the per-eco fetch_licenses
   scripts), joined package → github_repo. Multiple packages can map to the
@@ -45,6 +51,7 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 OSI_FILE = DATA_DIR / "sources" / "osi" / "oss-licenses.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
+OVERRIDES_FILE = DATA_DIR / "eligibility" / "overrides.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility" / "licenses.csv"
 
 ECOSYSTEMS = ("npm", "pypi", "crates", "cpp")
@@ -147,6 +154,27 @@ def load_registry_licenses() -> dict[str, str]:
     }
 
 
+def load_license_overrides(path: Path = OVERRIDES_FILE) -> dict[str, str]:
+    """{repo_id: license} — manual SPDX assertions from overrides.csv.
+
+    The `license` column pins a repo's SPDX string when upstream detection
+    fails (GitHub Licensee `noassertion` on bundled/dual/stacked LICENSE
+    files, or a repo with no standard LICENSE file). Keyed on the stable
+    repo_id so the assertion survives a GitHub rename, and applied above the
+    registry/GitHub signals in build().
+    """
+    out: dict[str, str] = {}
+    if not path.exists():
+        return out
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            rid = (row.get("repo_id") or "").strip()
+            lic = (row.get("license") or "").strip().lower()
+            if rid and lic:
+                out[rid] = lic
+    return out
+
+
 def load_github_licenses() -> dict[str, str]:
     """{slug: license} from github/repos.csv, keyed by both the looked-up
     `repo` slug and the rename-resolved `full_name` (lowercased SPDX)."""
@@ -170,13 +198,17 @@ def build() -> list[dict]:
     # stay in so the rollup can show WHY they are ineligible.
     eligible = load_top_repos(skip_archived=False)
     approved = load_oss_approved()
+    overrides = load_license_overrides()
     registry = load_registry_licenses()
     github = load_github_licenses()
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
-        if registry.get(repo):
+        rid = str(entry.repo_id).strip()
+        if overrides.get(rid):
+            lic, source = overrides[rid], "override"
+        elif registry.get(repo):
             lic, source = registry[repo], "registry"
         elif github.get(repo):
             lic, source = github[repo], "github"
@@ -222,7 +254,8 @@ def main() -> None:
     console.print(summary)
 
     by_source = Counter(r["license_source"] for r in rows)
-    console.print(f"[dim]license source — registry: {by_source.get('registry', 0):,} · "
+    console.print(f"[dim]license source — override: {by_source.get('override', 0):,} · "
+                  f"registry: {by_source.get('registry', 0):,} · "
                   f"github: {by_source.get('github', 0):,} · "
                   f"none: {by_source.get('', 0):,}[/dim]")
 

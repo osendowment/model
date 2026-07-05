@@ -58,7 +58,10 @@ class TestOssPolicy:
     def test_extras_are_oss(self):
         approved = _read_real_approved()
         for spdx in ("curl", "ftl", "libpng-2.0", "mit-cmu",
-                     "psf-2.0", "blessing"):
+                     "psf-2.0", "blessing",
+                     # ncurses' X11 permissive variant — genuinely OSS but
+                     # outside OSI's formal list (added to curated extras).
+                     "x11-distribute-modifications-variant"):
             assert bl.classify_oss(spdx, approved) is True, spdx
 
     def test_content_licenses_are_not_oss(self):
@@ -74,3 +77,38 @@ class TestOssPolicy:
         approved = _read_real_approved()
         assert bl.classify_oss("gpl-2.0", approved) is True
         assert bl.classify_oss("lgpl-2.1", approved) is True
+
+
+class TestLicenseOverrides:
+    """The manual `license` assertion in eligibility/overrides.csv — the
+    highest-priority source, fixing repos whose LICENSE detection fails
+    upstream (GitHub Licensee `noassertion` on bundled/dual/stacked files)."""
+
+    def test_load_maps_repo_id_to_lowercased_license(self, tmp_path):
+        p = tmp_path / "overrides.csv"
+        p.write_text(
+            "repo,repo_id,host,host_type,gh_user,owner,owner_type,oc_slug,license,eol,reason\n"
+            "nodejs/node,27193779,,,nodejs,,,,MIT,,noassertion fix\n"
+            "no-id/skipme,,,,,,,,,mit,,\n"          # no repo_id → skipped
+            "no-lic/skipme,999,,,,,,,,,\n"          # no license → skipped
+        )
+        out = bl.load_license_overrides(p)
+        assert out == {"27193779": "mit"}           # lowercased, id-keyed
+
+    def test_load_missing_file_is_empty(self, tmp_path):
+        assert bl.load_license_overrides(tmp_path / "nope.csv") == {}
+
+    def test_asserted_license_classifies_oss(self):
+        # The seven assertions we ship must all classify as OSS.
+        approved = _read_real_approved()
+        for spdx in ("mit", "python-2.0", "gpl-2.0-only", "unicode-3.0",
+                     "bsd-3-clause", "lgpl-2.1-only or mpl-1.1"):
+            assert bl.classify_oss(spdx, approved) is True, spdx
+
+    def test_real_overrides_file_has_node_assertion(self):
+        """The shipped overrides.csv pins node's license (regression guard
+        against the `noassertion` false-negative that excluded it)."""
+        if not bl.OVERRIDES_FILE.exists():
+            pytest.skip("overrides.csv not present")
+        out = bl.load_license_overrides()
+        assert out.get("27193779") == "mit"          # nodejs/node

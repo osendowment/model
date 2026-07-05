@@ -319,6 +319,7 @@ def eligibility_stats() -> dict:
 
     licenses = {
         "resolved": sum(1 for r in lic if _present(r.get("license"))),
+        "override": sum(1 for r in lic if r.get("license_source") == "override"),
         "registry": sum(1 for r in lic if r.get("license_source") == "registry"),
         "github": sum(1 for r in lic if r.get("license_source") == "github"),
         "oss_true": sum(1 for r in lic if r.get("oss") == "True"),
@@ -427,6 +428,7 @@ def dashboard(v: dict, r: dict, e: dict) -> None:
     t.add_column("Repos", justify="right")
     t.add_column("%", justify="right")
     for label, cnt in (("license resolved", lic["resolved"]),
+                       ("· from override", lic["override"]),
                        ("· from registry", lic["registry"]),
                        ("· from GitHub", lic["github"]),
                        ("oss=True (OSI-approved)", lic["oss_true"]),
@@ -535,6 +537,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a("|---|---:|---:|")
     a(f"| input top repos (incl. archived) | {ne} | 100% |")
     for label, cnt in (("license resolved", lic["resolved"]),
+                       ("· from override", lic["override"]),
                        ("· from registry", lic["registry"]),
                        ("· from GitHub", lic["github"]),
                        ("**oss=True (OSI-approved)**", lic["oss_true"]),
