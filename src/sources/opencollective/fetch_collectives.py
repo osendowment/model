@@ -53,8 +53,20 @@ _RESERVED = {"sponsors", "orgs", "apps", "marketplace", "about", "topics", "coll
 _GH_RE = re.compile(r"github\.com/([A-Za-z0-9_.-]+)(?:/([A-Za-z0-9_.-]+))?", re.IGNORECASE)
 
 
+def _is_search_url(url: str | None) -> bool:
+    """A github.com **search-results** URL (e.g. ``github.com/apache?q=grails-``)
+    — a filtered listing, NOT a profile/repo claim. Treating it as an org link
+    over-attributes the collective to the WHOLE org (the "Friends of Apache
+    Grails" collective linked its Grails-scoped search here and leaked onto every
+    apache/* repo). Reject it so neither the owner nor a repo is extracted."""
+    u = (url or "").lower()
+    return "github.com/" in u and ("?q=" in u or "&q=" in u)
+
+
 def _gh_parse(url: str | None) -> tuple[str, str]:
     """(owner, repo) from a GitHub URL; repo is '' for an org-only URL. ('','') if not GitHub."""
+    if _is_search_url(url):
+        return "", ""
     m = _GH_RE.search((url or "").strip())
     if not m:
         return "", ""
@@ -137,6 +149,11 @@ def load_index(path: Path = OUTPUT_FILE) -> tuple[dict[str, str], dict[str, str]
         for r in csv.DictReader(f):
             slug = (r.get("slug") or "").strip()
             if not slug:
+                continue
+            # Skip search-results links (github.com/<org>?q=…): a Grails-scoped
+            # search must not seed an org-level claim on the whole apache org.
+            # Guards existing rows written before _gh_parse learned to reject them.
+            if _is_search_url(r.get("github_url")):
                 continue
             repo = (r.get("github_repo") or "").strip().lower()
             owner = (r.get("github_owner") or "").strip().lower()
