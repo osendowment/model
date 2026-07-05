@@ -101,12 +101,13 @@ FIELDS = (
      "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
-    # `openssf_crit` (OpenSSF criticality score, 0-1) and `score` (the 0-100
-    # value blend, 0.8*openssf_crit*100 + 0.2*top_eco_pct) are not computed
-    # here — `src.value.apply_criticality` fills both as a later pipeline step,
-    # and the rewriters in between (verify_git_urls, build_validation) round-trip
-    # them. They are in FIELDS so write_value_data never drops them.
-    + ["openssf_crit", "score"]
+    # `openssf_crit` (OpenSSF criticality score, 0-1), `eco_crit` (ecosyste.ms
+    # critical flag: 1 critical / 0 resolved-but-not-critical / blank unchecked),
+    # and `score` (the 0-100 pro-rata value blend of the three) are not computed
+    # here — `src.value.apply_criticality` fills all three as a later pipeline
+    # step, and the rewriters in between (verify_git_urls, build_validation)
+    # round-trip them. They are in FIELDS so write_value_data never drops them.
+    + ["openssf_crit", "eco_crit", "score"]
 )
 
 # Internal scratch keys carried on each aggregate dict during computation.

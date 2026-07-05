@@ -49,13 +49,18 @@ RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]
 TOP_REPO_PLATFORMS: set[str] = set(_P["top_repos"]["platforms"])
 TOP_REPO_CLASSES: set[str] = set(_P["top_repos"]["classes"])
 
-# Value score — value.csv `score`, a 0–100 blend of OpenSSF criticality
-# (popularity/activity) and ecosystem centrality (top_eco_pct, PageRank
-# percentile). score = CRIT_WEIGHT*(openssf_crit*100) + CENTRALITY_WEIGHT*top_eco_pct.
-# Criticality-dominant (0.8/0.2) so foundational-but-quiet micro-deps don't
-# outrank genuinely critical projects; see docs/value.md.
+# Value score — value.csv `score`, a 0–100 pro-rata blend of up to three
+# components: OpenSSF criticality (openssf_crit, 0-1 → *100), the ecosyste.ms
+# critical flag (eco_crit, 0/1 → *100), and ecosystem centrality (top_eco_pct,
+# a PageRank percentile already 0-100). Only present (non-blank) components are
+# weighted, then renormalized by their weight sum; a row needs at least
+# MIN_COMPONENTS present or `score` is blank. Criticality-dominant (0.6/0.2/0.2)
+# so foundational-but-quiet micro-deps don't outrank genuinely critical
+# projects; see docs/value.md.
 VALUE_SCORE_CRIT_WEIGHT:       float = _P["value_score"]["criticality_weight"]
+VALUE_SCORE_ECO_CRIT_WEIGHT:   float = _P["value_score"]["eco_crit_weight"]
 VALUE_SCORE_CENTRALITY_WEIGHT: float = _P["value_score"]["centrality_weight"]
+VALUE_SCORE_MIN_COMPONENTS:    int   = _P["value_score"]["min_components"]
 
 # Concentration window length (complete years). The bus-factor/HHI '_5y'
 # columns cover the last CONCENTRATION_WINDOW_YEARS complete years, anchored

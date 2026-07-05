@@ -1,23 +1,29 @@
 #!/usr/bin/env python3
-"""Apply the OpenSSF criticality score onto value.csv as `openssf_crit` + `score`.
+"""Apply the value factors onto value.csv as `openssf_crit`, `eco_crit`, `score`.
 
 Roll-up step, run after `unify_value_data` / `build_validation` (both rebuild
-value.csv without these columns' values). Reads the per-repo score fetched by
-`src.sources.openssf.criticality` and joins it onto every GitHub row of
-value.csv by repo id (value.csv `gh/<id>` ↔ criticality.csv id), with a
-canonical-slug fallback for rows whose id is missing on either side.
+value.csv without these columns' values). Joins two per-repo signals onto
+value.csv and blends them into a single 0–100 `score`:
 
-Two columns are stamped:
-  - `openssf_crit` — the OpenSSF criticality score (0–1).
-  - `score` — a 0–100 value blend, criticality-dominant:
-        score = 0.8·(openssf_crit·100) + 0.2·top_eco_pct
-    (weights in settings.json → value_score). top_eco_pct is the repo's
-    PageRank percentile in its top ecosystem; the blend rewards genuinely
-    critical projects over foundational-but-quiet micro-deps. See docs/value.md.
+  - `openssf_crit` — the OpenSSF criticality score (0–1), fetched by
+    `src.sources.openssf.criticality`. GitHub-only (the tool doesn't support
+    other hosts). Joined by repo id (value.csv `gh/<id>` ↔ criticality.csv id)
+    with a canonical-slug fallback.
+  - `eco_crit` — the ecosyste.ms critical flag, fetched by
+    `src.sources.ecosystems.criticality`: `1` = resolved and on the critical
+    list, `0` = resolved but not on it (explicit False *or* the registry omitted
+    the flag), blank = the fetch did not resolve (`ok=False`) or the repo wasn't
+    checked. Covers GitHub AND GitLab, so GitLab class-A repos (which have no
+    `openssf_crit`) still get an importance signal. Joined by repo id, then by
+    normalized git URL.
+  - `score` — a 0–100 pro-rata blend of whichever of the three components
+    (`openssf_crit·100`, `eco_crit·100`, `top_eco_pct`) are present, renormalized
+    by their weight total (settings.json → value_score). A row needs at least
+    `min_components` present or `score` stays blank. See docs/value.md.
 
-Only rows with a successfully fetched score (`status = ok`) get values —
-an error row must never masquerade as a real 0. Non-GitHub rows stay blank
-(the tool is GitHub-only), and `score` is blank wherever `openssf_crit` is.
+An error/unresolved fetch must never masquerade as a real 0: openssf error rows
+(`status != ok`) and eco_crit `ok=False` rows leave their column blank, and a
+blank component is simply dropped from the blend (not treated as zero).
 
 Coverage contract: **every valid class-A GitHub repo must end up with a
 non-empty `openssf_crit`** — that is the fetcher's scope (archived included),
@@ -42,6 +48,8 @@ from rich.table import Table
 from src.common.params import (
     VALUE_SCORE_CENTRALITY_WEIGHT,
     VALUE_SCORE_CRIT_WEIGHT,
+    VALUE_SCORE_ECO_CRIT_WEIGHT,
+    VALUE_SCORE_MIN_COMPONENTS,
 )
 from src.value.unify_value_data import OUTPUT_FILE, write_value_data
 
@@ -49,6 +57,7 @@ console = Console()
 
 ROOT = Path(__file__).resolve().parents[2]
 CRITICALITY_FILE = ROOT / "data" / "sources" / "openssf" / "criticality.csv"
+ECO_CRIT_FILE = ROOT / "data" / "sources" / "ecosystems" / "criticality.csv"
 
 
 def load_criticality(path: Path = CRITICALITY_FILE) -> tuple[dict, dict]:
@@ -76,66 +85,165 @@ def load_criticality(path: Path = CRITICALITY_FILE) -> tuple[dict, dict]:
     return by_id, by_slug
 
 
-def compute_score(openssf_crit: float, top_eco_pct: float) -> float:
-    """value.csv `score` — 0–100 blend of criticality and ecosystem centrality.
+def _norm_url(git_url: str) -> str:
+    """Lowercased repository URL without a trailing `.git` / slash — the join key
+    shared with ecosyste.ms criticality.csv's `repository_url`."""
+    u = (git_url or "").strip()
+    if u.endswith(".git"):
+        u = u[:-4]
+    return u.rstrip("/").lower()
 
-    openssf_crit is 0–1; ·100 puts it on the same 0–100 scale as top_eco_pct
-    (already a percentile). With the default 0.8/0.2 weights the result is
-    bounded to [0, 100]."""
-    return (VALUE_SCORE_CRIT_WEIGHT * (openssf_crit * 100.0)
-            + VALUE_SCORE_CENTRALITY_WEIGHT * top_eco_pct)
+
+def _eco_crit_value(row: dict) -> str:
+    """value.csv `eco_crit` for one ecosyste.ms criticality row: "1" / "0" / "".
+
+    Blank iff the fetch did not resolve (`ok != True`) — an unresolved fetch is
+    "unchecked", never a real 0. A resolved row is `1` when on the critical list,
+    else `0` (explicit False or the registry omitted the flag)."""
+    if (row.get("ok") or "").strip().lower() != "true":
+        return ""
+    return "1" if (row.get("critical") or "").strip() == "True" else "0"
+
+
+def load_eco_crit(path: Path = ECO_CRIT_FILE) -> tuple[dict, dict]:
+    """({repo_id: eco_crit}, {normalized_url: eco_crit}) from the ecosyste.ms
+    criticality table. Both maps let apply() join by value.csv's unified repo_id
+    first, then fall back to the normalized git URL."""
+    by_id: dict[str, str] = {}
+    by_url: dict[str, str] = {}
+    if not path.exists():
+        return by_id, by_url
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            ec = _eco_crit_value(row)
+            rid = (row.get("repo_id") or "").strip()
+            url = _norm_url(row.get("repository_url") or "")
+            if rid:
+                by_id[rid] = ec
+            if url:
+                by_url[url] = ec
+    return by_id, by_url
+
+
+def compute_score(openssf_crit: float | None, eco_crit: float | None,
+                  top_eco_pct: float | None) -> float | None:
+    """value.csv `score` — a 0–100 pro-rata blend of the present components.
+
+    Each argument is the raw component value, or ``None`` when absent for this
+    repo:
+      - ``openssf_crit`` — OpenSSF criticality, 0–1, scaled ·100 here.
+      - ``eco_crit``     — ecosyste.ms critical flag, 0/1, scaled ·100 here.
+      - ``top_eco_pct``  — PageRank percentile in the top ecosystem, already 0–100.
+
+    Present components are weighted (settings.json → value_score) and the sum is
+    renormalized by their weight total, so a repo missing one still lands on the
+    same 0–100 scale (e.g. openssf_crit + top_eco_pct only → 0.75/0.25). Returns
+    ``None`` — a blank `score` — when fewer than ``VALUE_SCORE_MIN_COMPONENTS``
+    components are present, so a single lone signal never masquerades as a full
+    score."""
+    parts: list[tuple[float, float]] = []  # (weight, value on 0–100)
+    if openssf_crit is not None:
+        parts.append((VALUE_SCORE_CRIT_WEIGHT, openssf_crit * 100.0))
+    if eco_crit is not None:
+        parts.append((VALUE_SCORE_ECO_CRIT_WEIGHT, eco_crit * 100.0))
+    if top_eco_pct is not None:
+        parts.append((VALUE_SCORE_CENTRALITY_WEIGHT, top_eco_pct))
+    if len(parts) < VALUE_SCORE_MIN_COMPONENTS:
+        return None
+    wsum = sum(w for w, _ in parts)
+    if wsum <= 0:
+        return None
+    return sum(w * v for w, v in parts) / wsum
+
+
+def _as_float(value: str | None) -> float | None:
+    """Parse a non-blank numeric cell to float; blank/garbage → None (absent)."""
+    s = (value or "").strip()
+    if not s:
+        return None
+    try:
+        return float(s)
+    except ValueError:
+        return None
 
 
 def apply(value_file: Path = OUTPUT_FILE,
-          criticality_file: Path = CRITICALITY_FILE) -> list[dict]:
-    """Join `openssf_crit` + `score` onto value.csv rows in place; return rows."""
+          criticality_file: Path = CRITICALITY_FILE,
+          eco_crit_file: Path = ECO_CRIT_FILE) -> list[dict]:
+    """Join `openssf_crit` + `eco_crit`, blend `score`, onto value.csv in place."""
     by_id, by_slug = load_criticality(criticality_file)
+    eco_by_id, eco_by_url = load_eco_crit(eco_crit_file)
     with open(value_file, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
 
-    matched = 0
     for row in rows:
         row["openssf_crit"] = ""
+        row["eco_crit"] = ""
         row["score"] = ""
-        if (row.get("platform") or "").strip().lower() != "github":
-            continue
+        platform = (row.get("platform") or "").strip().lower()
         rid = (row.get("repo_id") or "").strip()
         slug = (row.get("repo") or "").strip().lower()
-        crit = by_id.get(rid) if rid else None
-        if crit is None:
-            crit = by_slug.get(slug)
-        if crit is not None:
-            row["openssf_crit"] = crit
-            try:
-                tep = float(row.get("top_eco_pct") or 0.0)
-            except ValueError:
-                tep = 0.0
-            row["score"] = f"{compute_score(float(crit), tep):.2f}"
-            matched += 1
+        url = _norm_url(row.get("git_url") or "")
+
+        # openssf_crit — GitHub-only tool; join by id, fall back to slug.
+        openssf: float | None = None
+        if platform == "github":
+            crit = by_id.get(rid) if rid else None
+            if crit is None:
+                crit = by_slug.get(slug)
+            if crit is not None:
+                row["openssf_crit"] = crit
+                openssf = _as_float(crit)
+
+        # eco_crit — GitHub + GitLab; join by id, fall back to URL. An ok=False
+        # row matches as "" (unresolved) — kept distinct from None (no row at
+        # all), though both leave the column blank / the component absent.
+        ec_str: str | None = None
+        if rid and rid in eco_by_id:
+            ec_str = eco_by_id[rid]
+        elif url and url in eco_by_url:
+            ec_str = eco_by_url[url]
+        row["eco_crit"] = ec_str or ""
+        eco: float | None = float(ec_str) if ec_str in ("0", "1") else None
+
+        # top_eco_pct — already a 0–100 percentile.
+        top_eco_pct = _as_float(row.get("top_eco_pct"))
+
+        blended = compute_score(openssf, eco, top_eco_pct)
+        if blended is not None:
+            row["score"] = f"{blended:.2f}"
 
     write_value_data(rows, value_file)
     return rows
 
 
 def report(rows: list[dict]) -> list[str]:
-    """Print coverage; return the violating repos (valid A github, blank)."""
+    """Print coverage; return the violating repos (valid A github, blank crit)."""
     gate = [r for r in rows
             if (r.get("platform") or "").lower() == "github"
             and (r.get("git_valid") or "") == "True"
             and (r.get("class") or "") == "A"]
     violations = [r["repo"] for r in gate if not (r.get("openssf_crit") or "").strip()]
 
-    filled_all = sum(1 for r in rows if (r.get("openssf_crit") or "").strip())
-    scores = [float(r["score"]) for r in rows if (r.get("score") or "").strip()]
-    table = Table(title="[bold]value.csv openssf_crit / score coverage[/bold]",
+    filled_oc = sum(1 for r in rows if (r.get("openssf_crit") or "").strip())
+    filled_ec = sum(1 for r in rows if (r.get("eco_crit") or "").strip())
+    scored = [r for r in rows if (r.get("score") or "").strip()]
+    scores = [float(r["score"]) for r in scored]
+    gl_total = sum(1 for r in rows if (r.get("platform") or "").lower() == "gitlab")
+    gl_scored = sum(1 for r in scored if (r.get("platform") or "").lower() == "gitlab")
+
+    table = Table(title="[bold]value.csv openssf_crit / eco_crit / score coverage[/bold]",
                   show_header=True, header_style="bold dim", padding=(0, 1))
     table.add_column("Scope", style="bold")
     table.add_column("Filled", justify="right")
     table.add_column("Total", justify="right")
-    table.add_row("all rows", f"{filled_all:,}", f"{len(rows):,}")
-    table.add_row("valid class-A github (gate)",
+    table.add_row("openssf_crit (all rows)", f"{filled_oc:,}", f"{len(rows):,}")
+    table.add_row("eco_crit (all rows)", f"{filled_ec:,}", f"{len(rows):,}")
+    table.add_row("valid class-A github (openssf gate)",
                   f"{len(gate) - len(violations):,}", f"{len(gate):,}",
                   style="bold")
+    table.add_row("rows with score", f"{len(scored):,}", f"{len(rows):,}")
+    table.add_row("gitlab rows scored", f"{gl_scored:,}", f"{gl_total:,}")
     console.print(table)
     if scores:
         console.print(f"[dim]score  min/mean/max: {min(scores):.1f} / "
@@ -155,7 +263,7 @@ def report(rows: list[dict]) -> list[str]:
 
 
 def main() -> None:
-    console.print("[bold]Applying criticality + score onto value.csv...[/bold]\n")
+    console.print("[bold]Applying openssf_crit + eco_crit + score onto value.csv...[/bold]\n")
     rows = apply()
     report(rows)
 
