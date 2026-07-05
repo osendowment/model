@@ -6,6 +6,7 @@ gh/63465664,ethers-io/ethers.js,npm,29.3439,85
 gh/23853482,retep998/winapi-rs,crates,37.6312,83
 gh/1792941,medikoo/es5-ext,npm,45.3871,81
 gh/34372735,freedesktop-unofficial-mirror/cairo,cpp,31.5863,81
+gh/2699072,yaml/libyaml,cpp,25.9832,80
 gh/4325614,nodeca/argparse,npm,58.3116,79
 gh/39760454,libjpeg-turbo/libjpeg-turbo,cpp,38.1703,78
 gh/67236461,csstree/csstree,npm,36.6757,77
@@ -25,6 +26,7 @@ gh/55723051,babel/minify,npm,25.3705,73
 gh/63155638,stub42/pytz,pypi,46.1926,72
 gh/12107007,chaijs/type-detect,npm,43.9085,72
 gh/444023705,gitlab-freedesktop-mirrors/libxcb,cpp,33.4978,72
+gh/4307702,krb5/krb5,cpp,30.0565,72
 gh/4537144,gnome/pango,cpp,28.7772,72
 gh/17144859,grantjenks/python-sortedcontainers,pypi,25.2982,72
 gh/95052330,nodejs/string_decoder,npm,56.2724,71
@@ -47,6 +49,7 @@ gh/12001360,mathiasbynens/cssesc,npm,49.0173,69
 gh/19117456,formatjs/formatjs,npm,36.6146,69
 gh/66880383,autotools-mirror/m4,cpp,34.8576,69
 gh/20101515,giampaolo/psutil,pypi,32.9504,69
+gh/13100677,primus/eventemitter3,npm,31.8805,69
 gh/930576948,pydantic/typing-inspection,pypi,30.1344,69
 gh/65987276,bluss/bencher,crates,27.5727,69
 gh/84886212,isaacs/minipass,npm,71.3663,68
@@ -59,6 +62,7 @@ gh/759017108,burntsushi/jiff,crates,25.3307,68
 gh/14367737,serde-rs/serde,crates,88.7911,67
 gh/91262163,pyparsing/pyparsing,pypi,45.52,67
 gh/330043541,7rulnik/source-map-js,npm,44.5439,67
+gh/35566048,crossbeam-rs/crossbeam,crates,43.5433,67
 gh/213836768,dtolnay/thiserror,crates,40.8381,67
 gh/2833537,jquery/esprima,npm,38.8066,67
 gh/48974178,tapjs/stack-utils,npm,25.3045,67
@@ -77,6 +81,7 @@ gh/127254922,guillaumegomez/doc-comment,crates,55.985,65
 gh/689109338,ljharb/define-data-property,npm,47.3428,65
 gh/19176350,indutny/bn.js,npm,40.2875,65
 gh/160789418,facelessuser/soupsieve,pypi,36.7076,65
+gh/22187098,acornjs/acorn-jsx,npm,32.7333,65
 gh/24911025,jonschlinkert/get-value,npm,32.2564,65
 gh/60489570,istanbuljs/test-exclude,npm,25.7368,65
 gh/93333933,epoberezkin/json-schema-traverse,npm,52.811,64
@@ -92,6 +97,7 @@ gh/100129252,nvzqz/static-assertions,crates,41.9648,63
 gh/159271175,sqlalchemy/sqlalchemy,pypi,40.4456,63
 gh/60477053,ajv-validator/ajv-keywords,npm,39.2193,63
 gh/108103016,epoberezkin/fast-json-stable-stringify,npm,35.7786,63
+gh/424722460,assert-rs/snapbox,crates,34.7128,63
 gh/165561258,mitsuhiko/insta,crates,29.6786,63
 gh/245704608,colinhacks/zod,npm,25.4367,63
 gh/27890669,rust-lang/regex,crates,58.3893,62
@@ -109,6 +115,7 @@ gh/36964214,jsdom/tr46,npm,43.2977,61
 gh/37290652,burntsushi/memchr,crates,43.13,61
 gh/8862593,inikulin/parse5,npm,42.1235,61
 gh/75104123,prettier/prettier,npm,33.2753,61
+gh/3967764,justmoon/node-extend,npm,32.8787,61
 gh/71014420,jsdom/whatwg-mimetype,npm,27.703,61
 gh/41388258,qix-/node-error-ex,npm,27.1446,61
 gh/174421655,lukeed/dequal,npm,26.3894,61
@@ -119,6 +126,7 @@ gh/1874305,qix-/color-convert,npm,61.7725,60
 gh/3172629,fb55/entities,npm,54.8862,60
 gh/12519245,kaelzhang/node-ignore,npm,43.4706,60
 gh/704249795,ljharb/set-function-length,npm,40.8022,60
+gh/7682781,evanw/node-source-map-support,npm,38.8748,60
 gh/17755831,ljharb/object.assign,npm,37.1703,60
 gh/3858354,isaacs/chownr,npm,32.8299,60
 gh/3411063,fb55/css-select,npm,30.0875,60
@@ -143,6 +151,7 @@ gh/37490572,streamich/memfs,npm,28.1615,59
 gh/597893818,joshuakgoldberg/ts-api-utils,npm,27.1812,59
 gh/78375612,burntsushi/same-file,crates,25.4457,59
 gh/184941159,dtolnay/trybuild,crates,85.6639,58
+gh/35894511,serde-rs/json,crates,65.9627,58
 gh/77307442,rustcrypto/utils,crates,60.1913,58
 gh/54980593,pypa/setuptools,pypi,58.3494,58
 gh/243395141,unicode-org/icu4x,crates,52.7763,58
@@ -155,11 +164,13 @@ gh/406051759,rustcrypto/formats,crates,37.3475,58
 gh/33009186,jonschlinkert/has-values,npm,33.4771,58
 gh/429511342,ardatan/whatwg-node,npm,29.022,58
 gh/2279062,fb55/htmlparser2,npm,27.8551,58
+gh/1402936,fsevents/fsevents,npm,26.2499,58
 gh/67273122,dtolnay/quote,crates,77.7613,57
 gh/9440238,blakeembrey/change-case,npm,68.3764,57
 gh/711160838,sindresorhus/get-east-asian-width,npm,64.7387,57
 gh/41053676,chalk/wrap-ansi,npm,55.7957,57
 gh/21224182,jonschlinkert/normalize-path,npm,48.3699,57
+gh/6449370,gweis/isodate,pypi,42.6165,57
 gh/211950686,istanbuljs/schema,npm,32.6373,57
 gh/14568009,browserify/node-util,npm,29.7956,57
 gh/7730829,psycopg/psycopg2,pypi,28.5082,57
@@ -176,6 +187,7 @@ gh/6627949,fb55/domutils,npm,35.8376,56
 gh/119439276,eemeli/yaml,npm,32.3986,56
 gh/209673558,lokathor/bytemuck,crates,31.3858,56
 gh/47662711,autotools-mirror/libtool,cpp,27.3041,56
+gh/86326466,withoutboats/heck,crates,26.9107,56
 gh/183990447,dtolnay/rustversion,crates,69.2396,55
 gh/2743221,pillarjs/iconv-lite,npm,53.8943,55
 gh/10498729,mathiasbynens/jsesc,npm,48.7981,55
@@ -186,6 +198,7 @@ gh/18464187,jquast/wcwidth,pypi,34.2808,55
 gh/61231712,isaacs/fs.realpath,npm,31.5099,55
 gh/568240379,eslint-community/eslint-utils,npm,30.9637,55
 gh/634056857,isaacs/cliui,npm,29.8786,55
+gh/87358441,serde-rs/bytes,crates,26.4013,55
 gh/2056549,isaacs/minimatch,npm,69.6451,54
 gh/55077261,rust-lang/futures-rs,crates,67.3937,54
 gh/68573418,inspect-js/has-symbols,npm,64.9956,54
@@ -201,6 +214,7 @@ gh/49804297,isaacs/isexe,npm,57.9561,53
 gh/95902102,toml-rs/toml,crates,54.6707,53
 gh/1915099,browserify/resolve,npm,53.3461,53
 gh/447694800,agronholm/exceptiongroup,pypi,44.8561,53
+gh/39720886,yargs/y18n,npm,42.2875,53
 gh/78972540,kilian/electron-to-chromium,npm,40.5064,53
 gh/43191689,chalk/slice-ansi,npm,37.6134,53
 gh/505548145,browserslist/update-db,npm,36.4331,53
@@ -209,6 +223,7 @@ gh/209510094,rust-random/rngs,crates,35.9926,53
 gh/901188921,ljharb/side-channel-weakmap,npm,31.6022,53
 gh/1945034,pallets/itsdangerous,pypi,29.8543,53
 gh/16523712,sinonjs/fake-timers,npm,29.1823,53
+gh/2242705,msgpack/msgpack-python,pypi,28.9004,53
 gh/47662429,autotools-mirror/autoconf,cpp,28.2684,53
 gh/122441239,terkelg/sisteransi,npm,26.495,53
 gh/33943153,cssnano/cssnano,npm,75.6917,52
@@ -235,6 +250,8 @@ gh/14732255,mafintosh/end-of-stream,npm,40.5802,51
 gh/11458302,micromatch/anymatch,npm,37.3584,51
 gh/24008065,jimp-dev/jimp,npm,35.0811,51
 gh/216847853,taiki-e/pin-project-lite,crates,33.2574,51
+gh/25396227,teambition/merge2,npm,32.4463,51
+gh/15778059,pyca/pyopenssl,pypi,31.0318,51
 gh/11836813,andrewrk/node-pend,npm,28.7053,51
 gh/140393403,lukeed/kleur,npm,28.4708,51
 gh/114682758,es-shims/string.prototype.trimend,npm,27.5146,51
@@ -243,6 +260,7 @@ gh/41795086,syntax-tree/unist-util-is,npm,25.4699,51
 gh/49538897,feross/safe-buffer,npm,76.9927,50
 gh/11855195,chalk/chalk,npm,76.1124,50
 gh/13868694,bminor/glibc,cpp,75.7109,50
+gh/5932749,acornjs/acorn,npm,64.4899,50
 gh/28179425,micromatch/is-glob,npm,58.1328,50
 gh/15489525,feross/ieee754,npm,55.3309,50
 gh/173074854,dtolnay/automod,crates,51.5931,50
@@ -250,6 +268,7 @@ gh/4494405,paulmillr/readdirp,npm,50.6044,50
 gh/8678904,dcodeio/long.js,npm,49.8003,50
 gh/40633359,jonschlinkert/define-property,npm,49.4627,50
 gh/98346885,pypa/wheel,pypi,48.3295,50
+gh/34287546,yargs/cliui,npm,47.7494,50
 gh/24578130,inspect-js/is-core-module,npm,45.8638,50
 gh/791446923,eslint/rewrite,npm,45.6727,50
 gh/434708679,vitest-dev/vitest,npm,44.8223,50
@@ -259,12 +278,14 @@ gh/71526722,sindresorhus/p-map,npm,36.0149,50
 gh/15930063,inspect-js/is-regex,npm,35.253,50
 gh/17533192,pillarjs/parseurl,npm,33.5279,50
 gh/751048078,inspect-js/is-data-view,npm,32.3511,50
+gh/26316179,unshiftio/requires-port,npm,29.5894,50
 gh/29094022,sindresorhus/normalize-url,npm,27.3658,50
 gh/48289082,jaraco/jaraco.develop,pypi,26.8084,50
 gh/114682105,es-shims/string.prototype.trimstart,npm,26.7444,50
 gh/10114077,sboudrias/inquirer.js,npm,54.0332,49
 gh/48222381,isaacs/yallist,npm,52.2977,49
 gh/80306715,webpack/schema-utils,npm,51.6738,49
+gh/50258379,yargs/yargs-parser,npm,50.9561,49
 gh/44264225,sindresorhus/get-stream,npm,49.6875,49
 gh/43708371,inspect-js/which-typed-array,npm,46.5451,49
 gh/45750507,cosmiconfig/cosmiconfig,npm,40.1421,49
@@ -285,6 +306,7 @@ gh/81482340,istanbuljs/istanbuljs,npm,62.6187,48
 gh/156211895,micromatch/picomatch,npm,60.3733,48
 gh/2206953,tj/commander.js,npm,58.4926,48
 gh/41723004,sindresorhus/find-up,npm,56.7571,48
+gh/53987953,fsspec/s3fs,pypi,44.199,48
 gh/14468669,sindresorhus/strip-json-comments,npm,40.6539,48
 gh/143001748,sinonjs/commons,npm,38.6709,48
 gh/608018848,crate-py/rpds,pypi,36.9263,48
@@ -350,6 +372,8 @@ gh/5400204,webpack/enhanced-resolve,npm,28.0077,45
 gh/282262730,knurling-rs/defmt,crates,27.9849,45
 gh/24119524,webpack/watchpack,npm,27.2179,45
 gh/201685155,inspect-js/which-boxed-primitive,npm,26.8891,45
+gh/14087781,jviereck/regjsparser,npm,25.906,45
+gh/10706095,rvagg/bl,npm,25.6697,45
 gh/73665728,sindresorhus/crypto-random-string,npm,25.5695,45
 gh/24560307,babel/babel,npm,92.2381,44
 gh/27729880,grpc/grpc,pypi,71.0143,44
@@ -362,6 +386,7 @@ gh/15186239,sindresorhus/globals,npm,44.6364,44
 gh/23806086,jshttp/http-errors,npm,42.3698,44
 gh/21069494,sindresorhus/globby,npm,39.8548,44
 gh/32247847,reactivex/rxjs,npm,36.737,44
+gh/42479602,rayon-rs/either,crates,36.2578,44
 gh/9146732,litejs/natural-compare-lite,npm,32.0207,44
 gh/33456236,servo/rust-smallvec,crates,31.0237,44
 gh/4627131,jshttp/range-parser,npm,30.0034,44
@@ -376,11 +401,13 @@ gh/27620277,eslint/js,npm,69.9711,43
 gh/734244,pallets/markupsafe,pypi,60.8843,43
 gh/306448340,python/importlib_metadata,pypi,60.0183,43
 gh/898274312,es-shims/dunder-proto,npm,50.0281,43
+gh/130727736,fsspec/filesystem_spec,pypi,49.9978,43
 gh/29154915,gulpjs/glob-parent,npm,49.1277,43
 gh/90776169,sindresorhus/make-dir,npm,43.7329,43
 gh/3072629,python-jsonschema/jsonschema,pypi,37.1497,43
 gh/5265803,pillarjs/path-to-regexp,npm,35.1381,43
 gh/161875917,tokio-rs/loom,crates,33.7334,43
+gh/1865144,gitpython-developers/smmap,pypi,32.767,43
 gh/30010185,inspect-js/is-string,npm,31.927,43
 gh/84983058,hyperium/http,crates,30.6729,43
 gh/21686666,zesterer/spin-rs,crates,30.1673,43
@@ -400,15 +427,18 @@ gh/64756820,aio-libs/yarl,pypi,36.4925,42
 gh/88415331,sindresorhus/is-wsl,npm,35.3683,42
 gh/2110585,whitequark/ipaddr.js,npm,34.0995,42
 gh/9345558,thlorenz/deep-is,npm,31.0087,42
+gh/34637906,unicode-rs/unicode-xid,crates,30.8481,42
 gh/29773710,sindresorhus/decamelize,npm,28.863,42
 gh/62838930,sindresorhus/clean-stack,npm,28.627,42
 gh/4617552,jshttp/fresh,npm,27.6651,42
 gh/90668463,davidhalter/parso,pypi,26.0379,42
 gh/62262074,snowflakedb/snowflake-connector-python,pypi,25.6107,42
+gh/58830287,yargs/set-blocking,npm,25.1071,42
 gh/17559913,burntsushi/quickcheck,crates,56.7326,41
 gh/48707028,sindresorhus/npm-run-path,npm,39.15,41
 gh/12118126,mafintosh/pump,npm,35.6608,41
 gh/41790094,sindresorhus/read-pkg,npm,35.0243,41
+gh/11452676,nghttp2/nghttp2,cpp,34.295,41
 gh/419317518,fastify/fast-uri,npm,33.7329,41
 gh/21672939,sindresorhus/figures,npm,32.5894,41
 gh/866565706,aio-libs/propcache,pypi,30.8697,41
@@ -420,6 +450,7 @@ gh/10270250,react/react,npm,70.3049,40
 gh/175398594,sindresorhus/type-fest,npm,67.1929,40
 gh/773229339,es-shims/es-object-atoms,npm,60.1802,40
 gh/71381729,sindresorhus/mimic-function,npm,55.1793,40
+gh/14210523,yargs/yargs,npm,49.3505,40
 gh/13258039,aio-libs/aiohttp,pypi,48.7359,40
 gh/481834578,inspect-js/has-property-descriptors,npm,48.2658,40
 gh/23241722,rust-lang/glob,crates,40.472,40
@@ -427,11 +458,13 @@ gh/204197530,aio-libs/frozenlist,pypi,39.9507,40
 gh/11205780,motdotla/dotenv,npm,35.4263,40
 gh/61962375,dtolnay/itoa,crates,34.2131,40
 gh/179492861,encode/httpx,pypi,33.5167,40
+gh/267368764,smol-rs/fastrand,crates,33.4946,40
 gh/29991041,inspect-js/is-date-object,npm,31.19,40
 gh/17789771,blakeembrey/array-flatten,npm,28.7446,40
 gh/15669006,expressjs/body-parser,npm,27.8931,40
 gh/372026120,jaraco/pytest-perf,pypi,26.9224,40
 gh/17464338,expressjs/serve-static,npm,26.7086,40
+gh/1126093,gitpython-developers/gitdb,pypi,26.5862,40
 gh/24208073,isaacs/wrappy,npm,62.8379,39
 gh/29436825,sindresorhus/is-stream,npm,54.7407,39
 gh/1203139,uuidjs/uuid,npm,53.756,39
@@ -459,9 +492,11 @@ gh/41658845,inspect-js/is-descriptor,npm,46.7428,38
 gh/42106515,mcollina/reusify,npm,43.2112,38
 gh/33590534,sindresorhus/is-docker,npm,42.8708,38
 gh/20576837,sindresorhus/indent-string,npm,38.2025,38
+gh/22360263,rust-itertools/itertools,crates,35.4724,38
 gh/18991884,cheeriojs/dom-serializer,npm,35.3105,38
 gh/5171600,python-pillow/pillow,pypi,35.2583,38
 gh/30062547,tokio-rs/bytes,crates,34.4612,38
+gh/487934134,annotated-types/annotated-types,pypi,33.7069,38
 gh/18469325,sindresorhus/open,npm,33.4263,38
 gh/548993448,ljharb/concat-map,npm,33.0756,38
 gh/155119796,rust-lang/hashbrown,crates,33.0296,38
@@ -510,6 +545,7 @@ gh/205007356,aio-libs/aiosignal,pypi,31.3569,35
 gh/62350380,seanmonstar/reqwest,crates,29.841,35
 gh/703350811,inspect-js/hasown,npm,68.067,34
 gh/29918975,python-attrs/attrs,pypi,51.951,34
+gh/90591032,rust-fuzz/arbitrary,crates,45.7699,34
 gh/207021895,feross/queue-microtask,npm,43.1257,34
 gh/348660847,sindresorhus/is-unicode-supported,npm,43.0402,34
 gh/38923193,sindresorhus/is-plain-obj,npm,41.9606,34
@@ -591,6 +627,7 @@ gh/21169121,sindresorhus/escape-string-regexp,npm,59.0379,24
 gh/39222301,sindresorhus/is-fullwidth-code-point,npm,53.0774,23
 gh/18938743,sindresorhus/callsites,npm,47.6472,23
 gh/47504070,sindresorhus/resolve-cwd,npm,30.8288,23
+gh/27038309,colorjs/color-name,npm,74.05,22
 gh/1408162,jpadilla/pyjwt,pypi,42.9093,22
 gh/11516031,sindresorhus/slash,npm,50.7208,21
 gh/60721766,pillarjs/encodeurl,npm,35.1955,21
@@ -603,4 +640,5 @@ gh/30903733,sindresorhus/shebang-regex,npm,55.0317,17
 gh/10227611,juliangruber/isarray,npm,51.9199,17
 gh/16864585,fb55/boolbase,npm,36.3729,16
 gh/29771015,sindresorhus/binary-extensions,npm,43.3841,15
+gh/263697285,tsconfig/bases,npm,37.808,15
 gh/843222,scikit-learn/scikit-learn,pypi,25.7154,15

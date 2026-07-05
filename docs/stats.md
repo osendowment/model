@@ -221,19 +221,20 @@ mirror while the real upstream is alive.
 
 `intent` = at least one funding signal — GitHub Sponsors (inbound or outbound), a
 declared channel (`FUNDING.yml`, funding.json, npm/PyPI funding field, OpenCollective
-slug), or an institutional host/owner. `nonprofit` = not company-backed (Meta, Google,
-Microsoft, …). See [funding.md](components/funding.md).
+slug), a bus-factor maintainer who is personally fundable on GitHub Sponsors
+(`bf_maintainer_fundable`), or an institutional host/owner. `nonprofit` = not
+company-backed (Meta, Google, Microsoft, …). See [funding.md](components/funding.md).
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 672 | 73.4% |
-| intent — no funding signal | 244 | 26.6% |
+| intent — any funding signal | 710 | 77.5% |
+| intent — no funding signal | 206 | 22.5% |
 | nonprofit — community / independent | 856 | 93.4% |
 | nonprofit — company-backed | 60 | 6.6% |
 
-The 61 company-backed repos are **kept in `eligibility.csv`** and flagged
+The 60 company-backed repos are **kept in `eligibility.csv`** and flagged
 `nonprofit=False` (they are already resourced; the flag makes them ineligible
-without hiding them). The 246 repos with `intent=False` are not actively
+without hiding them). The 206 repos with `intent=False` are not actively
 soliciting support — a higher-priority target for outreach.
 
 ### Eligibility rollup
@@ -244,7 +245,7 @@ unlock. Missing intent is by far the binding constraint.
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
 | oss | 910 | 99.3% | 1 |
-| intent | 672 | 73.4% | 224 |
+| intent | 710 | 77.5% | 186 |
 | nonprofit | 856 | 93.4% | 59 |
 | active | 894 | 97.6% | 6 |
-| **eligible** | **605** | **66.0%** | |
+| **eligible** | **643** | **70.2%** | |
