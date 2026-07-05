@@ -11,7 +11,7 @@ Reads `data/sources/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crat
 cpp), groups packages by canonical `git_url` (or by a per-package synthetic
 key for orphans), and writes `data/value/value.csv` with **one row per repo**:
 
-    repo, platform, repo_id, git_url, valid,
+    repo, platform, repo_id, git_url, mirror_url, valid,
     ecosystems, packages, top_eco, top_eco_pkg,
     top_eco_pct, class, class_npm, class_pypi, class_crates, class_cpp
 
@@ -28,8 +28,11 @@ canonical `git_url`:
 
 `git_url` is the canonical clone URL from `results.csv`'s `git` column
 (lowercased), which already covers GitHub plus GitLab / Codeberg / Sourcehut /
-Bitbucket / custom hosts (sourceware, savannah, etc.). cpp is the unified
-C/C++ ecosystem (Debian + Homebrew, joined via Repology) -- see
+Bitbucket / custom hosts (sourceware, savannah, etc.). `mirror_url` is the
+upstream a GitHub *mirror* repo syncs from (GitHub's own `mirror_url` field,
+e.g. `gcc-mirror/gcc` → `git://gcc.gnu.org/git/gcc.git`); empty for
+non-mirror and non-github rows. Both are set by `verify_git_urls`. cpp is the
+unified C/C++ ecosystem (Debian + Homebrew, joined via Repology) -- see
 `src/sources/cpp/process_data.py`. The per-repo `valid` column is filled by the
 `build_validation` step (a rollup of the GitHub API + `git ls-remote`
 validation caches).
@@ -94,7 +97,7 @@ ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
 CLASS_RANK = {"A": 0, "B": 1, "C": 2}
 
 FIELDS = (
-    ["repo", "platform", "repo_id", "git_url", "valid",
+    ["repo", "platform", "repo_id", "git_url", "mirror_url", "valid",
      "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]

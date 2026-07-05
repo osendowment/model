@@ -96,3 +96,49 @@ class TestRepoCurrentName:
                  "top_eco_pkg": "p"}]
         out, _ = verify_urls_in_aggregates(aggs)
         assert out[0]["repo"] == "dead/repo"
+
+
+# ── mirror_url ───────────────────────────────────────────────────────────────
+
+class TestMirrorUrl:
+    def _write_with_mirror(self, tmp_path, monkeypatch, rows):
+        """repos.csv fixture that includes the `mirror_url` column."""
+        repos_csv = tmp_path / "repos.csv"
+        repos_csv.parent.mkdir(parents=True, exist_ok=True)
+        with open(repos_csv, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f, quoting=csv.QUOTE_ALL)
+            w.writerow(["repo", "valid", "repo_id", "full_name", "mirror_url"])
+            w.writerows(rows)
+        monkeypatch.setattr(gh_mod, "REPOS_OUT", repos_csv)
+        monkeypatch.setattr(gh_mod, "fetch_and_persist", lambda **kw: {})
+        monkeypatch.setattr(vgu, "_verify_non_github", lambda urls, **kw: {})
+
+    def test_populates_mirror_url_for_github_mirror(self, tmp_path, monkeypatch):
+        # GitHub's mirror_url (the upstream a mirror repo syncs from) is copied
+        # onto the value row; git_url still points at the github mirror.
+        self._write_with_mirror(tmp_path, monkeypatch, [
+            ["gcc-mirror/gcc", "True", "22711503", "gcc-mirror/gcc",
+             "git://gcc.gnu.org/git/gcc.git"]])
+        aggs = [{"repo": "gcc-mirror/gcc", "platform": "github", "git_url": "",
+                 "top_eco_pkg": "gcc"}]
+        out, _ = verify_urls_in_aggregates(aggs)
+        assert out[0]["mirror_url"] == "git://gcc.gnu.org/git/gcc.git"
+        assert out[0]["git_url"] == "https://github.com/gcc-mirror/gcc.git"
+
+    def test_non_mirror_repo_has_blank_mirror_url(self, tmp_path, monkeypatch):
+        # An ordinary github repo (no upstream) gets an empty mirror_url.
+        self._write_with_mirror(tmp_path, monkeypatch, [
+            ["facebook/react", "True", "10270250", "facebook/react", ""]])
+        aggs = [{"repo": "facebook/react", "platform": "github", "git_url": "",
+                 "top_eco_pkg": "react"}]
+        out, _ = verify_urls_in_aggregates(aggs)
+        assert out[0]["mirror_url"] == ""
+
+    def test_non_github_row_has_blank_mirror_url(self, tmp_path, monkeypatch):
+        # A non-github row is itself the upstream — no mirror_url.
+        self._write_with_mirror(tmp_path, monkeypatch, [])
+        aggs = [{"repo": "gnome/glib", "platform": "gitlab",
+                 "git_url": "https://gitlab.gnome.org/gnome/glib.git",
+                 "top_eco_pkg": "glib"}]
+        out, _ = verify_urls_in_aggregates(aggs)
+        assert out[0]["mirror_url"] == ""

@@ -3,16 +3,17 @@
 
 Runs after `unify_value_data` has written `data/value/value.csv`. Reads that
 file back, refreshes the two validation caches, sets the `repo_id`
-(identity) column, canonicalises a github `repo` to its current (post-rename)
-name, and rewrites the file.
+(identity) and `mirror_url` columns, canonicalises a github `repo` to its
+current (post-rename) name, and rewrites the file.
 
 Two strategies, chosen per row's `platform`:
 
   1. platform == github → `src.sources.github.fetch_repo_owner_data.fetch_and_persist`
      hits `/repos/{owner}/{repo}` via the GitHub API. Persists richer
      metadata to `data/sources/github/repos.csv` (valid, license, owner,
-     stars, …) so downstream pipelines (eligibility) don't re-fetch. The
-     `repo_id` column is set to `gh/<numeric>`.
+     stars, mirror_url, …) so downstream pipelines (eligibility) don't
+     re-fetch. The `repo_id` column is set to `gh/<numeric>`, and `mirror_url`
+     to the upstream a github mirror syncs from (empty for non-mirror repos).
   2. non-github canonical git URL → `git ls-remote --exit-code` against the
      URL itself. Persists OK/FAIL to `data/sources/git/urls.csv`; `repo_id`
      stays empty (no numeric id for non-github hosts).
@@ -447,6 +448,12 @@ def verify_urls_in_aggregates(aggs: list[dict],
         # 404 rows and every non-github repo have none.
         rid = (meta.get("repo_id") or "").strip() if is_valid else ""
         a["repo_id"] = f"gh/{rid}" if rid else ""
+
+        # mirror_url: the upstream a GitHub *mirror* repo syncs from (GitHub's
+        # own `mirror_url`), e.g. gcc-mirror/gcc → git://gcc.gnu.org/git/gcc.git.
+        # Non-empty only for github mirror repos; empty for ordinary repos and
+        # every non-github / orphan row.
+        a["mirror_url"] = (meta.get("mirror_url") or "").strip() if is_valid else ""
 
         # Tally by the row's single target. github rows by the GitHub API
         # verdict; non-github rows by the ls-remote result; the rest no-URL.

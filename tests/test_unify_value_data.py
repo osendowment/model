@@ -874,8 +874,10 @@ class TestInvariants:
     def test_valid_column_present_and_legacy_columns_dropped(self):
         # The unified `valid` column replaces the old gh_valid/git_valid pair;
         # llm_guess is removed entirely. Verdicts now live in validation.csv.
+        # Column order: git_url → mirror_url → valid.
         assert "valid" in FIELDS
-        assert FIELDS[FIELDS.index("git_url") + 1] == "valid"
+        assert FIELDS[FIELDS.index("git_url") + 1] == "mirror_url"
+        assert FIELDS[FIELDS.index("mirror_url") + 1] == "valid"
         for dropped in ("gh_valid", "git_valid", "llm_guess"):
             assert dropped not in FIELDS
 
