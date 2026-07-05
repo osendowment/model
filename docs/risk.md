@@ -9,7 +9,7 @@ derives metrics, and produces the `score` it contributes to `risk.csv`:
 
 | Component | Doc | Score (0–100, higher = riskier) |
 |---|---|---|
-| Concentration | [components/concentration.md](components/concentration.md) | geom-mean of 5y bus-factor + HHI percentiles |
+| Concentration | [components/concentration.md](components/concentration.md) | geom-mean of absolute 5y scales 100/bf + HHI/100 |
 | Complexity | [components/complexity.md](components/complexity.md) | geom-mean of LOC + cyclomatic-max percentiles |
 | Security | [components/security.md](components/security.md) | geom-mean of OpenSSF-score + CVE-count percentiles |
 | Workload | [components/workload.md](components/workload.md) | geom-mean of LOC/CVE/net-issues-per-contributor percentiles |
@@ -106,13 +106,16 @@ All scoring parameters (windows, weights) are defined in `src/settings.json`.
 ## How It Works
 
 Four independent scored risk dimensions — **concentration, complexity,
-security, workload**. Each dimension percentile-ranks its raw metrics
-(direction-aware, so a higher percentile always means *more* risk), takes the
-geometric mean of a designated subset of those percentiles, and emits a single
-**0–100 `score`** for the dimension (higher = riskier). The four dimension
-scores are combined into the overall `risk.csv` `score` via a geometric mean.
-Risk is expressed as continuous scores and percentiles end-to-end — there are
-**no discrete risk classes or tiers**.
+security, workload**. Each dimension takes the geometric mean of a designated
+subset of its 0–100 risk metrics and emits a single **0–100 `score`** for the
+dimension (higher = riskier). Complexity, security, and workload score
+percentile-ranked metrics (direction-aware, so a higher percentile always
+means *more* risk); concentration scores its two metrics on absolute scales
+(`100/bf`, `HHI/100`) because its percentile version collapsed into
+bus-factor-1 tie blocks. The four dimension scores are combined into the
+overall `risk.csv` `score` via a geometric mean. Risk is expressed as
+continuous scores end-to-end — there are **no discrete risk classes or
+tiers**.
 
 Percentiles use the Hazen position `100·(rank−0.5)/n`, ranked across the
 risk-scope set, strictly within 0–100. "Direction-aware" means each metric is
@@ -139,9 +142,11 @@ Built from two metrics, each resolved by two methods (git-clone log + GitHub
   commit shares. High HHI → higher risk.
 
 The `_5y` git axis (last `concentration.window_years` complete years) feeds the
-dimension `score`: `bf_commits_git_5y_p` and `hhi_commits_git_5y_p` are
-geometric-meaned. The `_full` / `_gh_alltime` percentiles are computed for
-context but not scored.
+dimension `score`: the geometric mean of the absolute scales `100 /
+bf_commits_git_5y` and `hhi_commits_git_5y / 100` (concentration is the one
+dimension scored on absolute scales, not percentiles — see
+[components/concentration.md](components/concentration.md) for why). All `*_p`
+percentiles are computed for context but not scored.
 
 ### Complexity
 

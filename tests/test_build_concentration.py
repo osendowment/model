@@ -1,23 +1,27 @@
 """Tests for src/risk/build_concentration.py."""
 
 
-def test_bus_factor_one_scores_100_concentration():
-    from src.common.percentiles import add_percentiles
-    rows = [
-        {"bf_commits_git_5y": "1", "hhi_commits_git_5y": "9000"},
-        {"bf_commits_git_5y": "5", "hhi_commits_git_5y": "2000"},
-        {"bf_commits_git_5y": "3", "hhi_commits_git_5y": "5000"},
-    ]
-    add_percentiles(
-        rows,
-        pctl_specs=[("bf_commits_git_5y", False),
-                    ("hhi_commits_git_5y", True)],
-        composite_cols=["bf_commits_git_5y_p", "hhi_commits_git_5y_p"],
-        dim_col="score",
-    )
-    assert rows[0]["bf_commits_git_5y_p"] == 100.0
-    assert rows[0]["hhi_commits_git_5y_p"] == 100.0
-    assert rows[0]["score"] == 100.0
+def test_concentration_score_absolute_scale():
+    """score = geomean(100/bf, hhi/100) = sqrt(hhi/bf) — absolute scales, so
+    a repo's score doesn't depend on the rest of the population."""
+    from src.risk.build_concentration import _concentration_score
+    # Single author writing everything: the theoretical maximum.
+    assert _concentration_score(1, 10000) == 100
+    # bf=1 but with a contributor tail (HHI 9000): sqrt(9000) ≈ 94.9.
+    assert _concentration_score("1", "9000") == 95
+    # Two-person / moderate HHI: sqrt(2744/2) ≈ 37.04.
+    assert _concentration_score(2, 2744) == 37
+    # Broad, even contributor base scores low but never 0 (floor 1).
+    assert _concentration_score(50, 190) == 2
+    assert _concentration_score(100, 100) == 1
+
+
+def test_concentration_score_blank_on_missing_inputs():
+    """Fetch failure leaves bf/hhi blank -> score blank, never a fake number."""
+    from src.risk.build_concentration import _concentration_score
+    assert _concentration_score("", "") == ""
+    assert _concentration_score("", "5000") == ""
+    assert _concentration_score("2", "") == ""
 
 
 def test_bus_factor_hhi_blank_when_no_contributors():
