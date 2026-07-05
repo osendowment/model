@@ -116,7 +116,7 @@ real CVE alone flags the repo without the axes diluting each other;
 concentration scores its two metrics on absolute scales
 (`100/bf`, `HHI/100`) because its percentile version collapsed into
 bus-factor-1 tie blocks. The four dimension scores are combined into the
-overall `risk.csv` `score` via a geometric mean. Risk is expressed as
+overall `risk.csv` `risk_score` via a geometric mean. Risk is expressed as
 continuous scores end-to-end — there are **no discrete risk classes or
 tiers**.
 

@@ -1,4 +1,4 @@
-repo,repo_id,concentration,complexity,security,workload,score
+repo,repo_id,concentration,complexity,security,workload,risk_score
 estools/escodegen,gh/3611422,100,91,96,92,95
 ronaldoussoren/pyobjc,gh/243933900,99,96,81,90,91
 ethers-io/ethers.js,gh/63465664,100,91,77,92,90

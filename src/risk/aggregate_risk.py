@@ -3,16 +3,16 @@
 
 Each dimension builder writes a per-component CSV whose `score` column is that
 dimension's risk score (integer 0-100, higher = riskier). This aggregator joins
-the four component scores per repo and computes the overall `score` =
+the four component scores per repo and computes the overall `risk_score` =
 geometric mean of the four component scores (floored to 1).
 
-**Completeness rule:** the overall `score` is calculable only if *every* one of
-the four component scores is present. A partial geometric mean is not comparable
-across repos, so a repo missing any component score is left with a blank overall
-`score`. `scripts/pipeline_health.py` enforces it.
+**Completeness rule:** the overall `risk_score` is calculable only if *every*
+one of the four component scores is present. A partial geometric mean is not
+comparable across repos, so a repo missing any component score is left with a
+blank overall `risk_score`. `scripts/pipeline_health.py` enforces it.
 
 Writes data/risk/risk.csv with:
-    repo, repo_id, concentration, complexity, security, workload, score
+    repo, repo_id, concentration, complexity, security, workload, risk_score
 
 Funding signals (`intent` / `nonprofit`) are no longer part of the risk table —
 they live in the eligibility stage (data/eligibility/funding.csv, rolled up
@@ -49,7 +49,7 @@ COMPONENTS = {
     "workload":      DATA_DIR / "risk" / "workload.csv",
 }
 OUTPUT_FILE = DATA_DIR / "risk" / "risk.csv"
-FIELDS = ["repo", "repo_id", *COMPONENTS, "score"]
+FIELDS = ["repo", "repo_id", *COMPONENTS, "risk_score"]
 
 def _scores_by_repo(path: Path) -> dict[str, int]:
     """{repo_lowercased: int(score)} from a component CSV; blanks skipped."""
@@ -96,13 +96,13 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
             else:
                 present.append(s)
         # Completeness rule: only score a repo whose every dimension is present.
-        row["score"] = overall_score(present) if complete else ""
+        row["risk_score"] = overall_score(present) if complete else ""
         rows.append(row)
 
     # Ranked by overall risk score, highest first; unscored (incomplete) repos
     # sink to the end, ordered by repo for a stable, deterministic file.
-    rows.sort(key=lambda r: (r["score"] == "",
-                             -int(r["score"]) if r["score"] else 0,
+    rows.sort(key=lambda r: (r["risk_score"] == "",
+                             -int(r["risk_score"]) if r["risk_score"] else 0,
                              (r["repo"] or "").lower()))
     return rows
 
@@ -114,7 +114,7 @@ def _print_coverage(rows: list[dict]) -> None:
     table.add_column("Column", style="bold")
     table.add_column("Scored", justify="right")
     table.add_column("Coverage", justify="right")
-    for col in (*COMPONENTS, "score"):
+    for col in (*COMPONENTS, "risk_score"):
         n = sum(1 for r in rows if str(r.get(col, "")) != "")
         pct = 100 * n / total if total else 0
         table.add_row(col, f"{n:,}", f"{pct:.1f}%")

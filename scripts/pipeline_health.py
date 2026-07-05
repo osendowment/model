@@ -234,6 +234,10 @@ SCORE_INPUTS: dict[str, list[str]] = {
     "risk/risk.csv":          ["concentration", "complexity", "security", "workload"],
 }
 
+# Column holding each file's aggregated score (default "score"; the top-level
+# risk.csv names it "risk_score", value.csv would be "value_score").
+SCORE_COLUMN: dict[str, str] = {"risk/risk.csv": "risk_score"}
+
 
 def check_score_input_completeness() -> list[Result]:
     """A component score / the risk score may be present only if ALL its scored
@@ -252,7 +256,8 @@ def check_score_input_completeness() -> list[Result]:
             out.append((f"{fname} score⟸inputs", False, "file missing"))
             continue
         rows = list(csv.DictReader(open(path, encoding="utf-8")))
-        scored = [r for r in rows if str(r.get("score", "")).strip()]
+        score_col = SCORE_COLUMN.get(fname, "score")
+        scored = [r for r in rows if str(r.get(score_col, "")).strip()]
         bad = [r.get("repo", "?") for r in scored
                if not all(str(r.get(c, "")).strip() for c in inputs)]
         ok = not bad

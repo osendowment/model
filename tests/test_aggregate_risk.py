@@ -13,7 +13,7 @@ def test_risk_csv_is_narrow():
     """Funding (and its intent/nonprofit flags) moved to the eligibility
     stage — risk.csv is the four component scores plus the overall score."""
     assert FIELDS == ["repo", "repo_id", "concentration", "complexity",
-                      "security", "workload", "score"]
+                      "security", "workload", "risk_score"]
     assert "funding" not in COMPONENTS
 
 
@@ -51,6 +51,6 @@ def test_aggregate_requires_all_components(monkeypatch):
     monkeypatch.setattr(ar, "_scores_by_repo", lambda p: by_name[Path(p).stem])
 
     rows = {r["repo"]: r for r in ar.aggregate()}
-    assert rows["o/full"]["score"] == "50"        # all present → scored
+    assert rows["o/full"]["risk_score"] == "50"   # all present → scored
     assert rows["o/partial"]["workload"] == ""    # the missing input
-    assert rows["o/partial"]["score"] == ""       # …so no overall score
+    assert rows["o/partial"]["risk_score"] == ""  # …so no overall score
