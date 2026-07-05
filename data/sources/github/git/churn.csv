@@ -248,6 +248,7 @@ mm2/little-cms,507969,2025,498,12628,6004,18632,82,Projects/Xcode_26/lcms2/threa
 psf/requests,1362490,2025,271,9975,8563,18538,51,tests/test_requests.py,2658,18.5,2026-05-03T17:22:01Z
 more-itertools/more-itertools,4144530,2025,846,12179,6339,18518,10,more_itertools/more.py,6857,2.0,2026-05-03T17:22:01Z
 acornjs/acorn,5932749,2025,294,16301,2103,18404,87,test/tests-class-features-2022.js,6529,9.0,2026-05-03T17:22:01Z
+servo/core-foundation-rs,5621513,2025,232,12398,5934,18332,109,cocoa/src/appkit.rs,2362,1.0,2026-07-05T16:47:02Z
 marshallpierce/rust-base64,47371310,2025,146,9372,8662,18034,36,src/engine/tests.rs,3759,1.7,2026-05-03T17:22:01Z
 pyca/pynacl,8350032,2025,153,12040,5943,17983,216,src/libsodium/src/libsodium/crypto_aead/aes256gcm/aesni/aead_aes256gcm_aesni.c,1800,61.5,2026-05-03T17:22:01Z
 tootallnate/proxy-agents,11293703,2025,149,12876,5004,17880,121,packages/agent-base/test/test-legacy.js,1378,2.7,2026-05-03T17:22:01Z
