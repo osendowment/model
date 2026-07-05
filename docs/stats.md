@@ -36,16 +36,22 @@ Note that after dep tree is de-duplicated, cpp unions the Debian + Homebrew grap
 
 From the package universe down to the valid repos, per `class` and total. Each
 row is classed by the repo's `class` (A/B/C). Packages → GitHub total are
-appearance-level (a repo counts once per ecosystem); unique → valid are distinct
-repos. Orphans / non-GitHub-only projects drop out at *unique*; archived GitHub
-mirrors of a live upstream stay *valid* (they resolve).
+appearance-level (a repo counts once per ecosystem); the distinct-repo rows
+follow. **GitHub unique** counts only GitHub-hosted repos — the other 1,580
+(gitlab / other-host / url-less) are the "orphans". **Valid** is host-agnostic:
+a GitHub repo that resolves (API 200) *or* a non-GitHub upstream that resolves
+(`git ls-remote`). It is therefore measured over all 12,020 repos and can exceed
+the GitHub-unique count — only 834 (url-less orphans + dead URLs) are invalid.
+Archived GitHub mirrors of a live upstream stay *valid* (they resolve). Note the
+numeric `repo_id` stays GitHub-only, and risk/eligibility scope is still
+GitHub-gated — a valid non-GitHub upstream is recorded, not pulled into scope.
 
 | Step | A | B | C | Total | Comment |
 |---|--:|--:|--:|--:|---|
 | Packages | 3,411 | 4,704 | 9,251 | 17,366 | package universe (after dep tree) |
 | GitHub total repos | 3,374 | 4,286 | 8,088 | 15,748 | package appearances in a github group |
 | GitHub unique repos | 916 | 2,721 | 6,803 | 10,440 | deduped; + 1,580 orphans = 12,020 repos |
-| **Valid repos** | **916** | **2,712** | **6,752** | **10,380** | github repo resolves (200); incl. archived mirrors |
+| **Valid repos** | **949** | **2,929** | **7,308** | **11,186** | upstream resolves — github API 200 or non-github ls-remote; incl. archived mirrors |
 
 ### Repo class distribution
 
@@ -63,7 +69,7 @@ Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 | **Repos** | **953** | **3,133** | **7,934** |
 | GitHub % | 96.1% | 86.8% | 85.7% |
 | Git % | 99.6% | 94.8% | 93.6% |
-| Valid % | 96.1% | 86.6% | 85.1% |
+| Valid % | 99.6% | 93.5% | 92.1% |
 
 
 ## Risk

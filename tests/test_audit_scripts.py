@@ -180,12 +180,15 @@ def test_eligibility_flags_are_boolean():
                 f"{r.get('repo')}.{col}={r.get(col)!r}"
 
 
-def test_valid_repos_are_github_with_canonical_url():
-    """A valid repo must be a github repo (platform=github) with a `repo` slug
-    AND the canonical github clone URL. Validity is github-only: orphans and
-    non-github-only upstreams are invalid. Regression for (a) git_url stripped
-    from github repos, (b) non-github / orphan rows being marked valid, and
-    (c) a github `repo` ever coexisting with a non-github git_url.
+def test_valid_repos_have_a_reachable_upstream():
+    """A valid repo's upstream must resolve, on any host. Validity is
+    host-agnostic (a reachable non-github git_url counts), but the numeric
+    `repo_id` stays github-only. Invariants for every git_valid=True row:
+    (a) it has a git_url (orphans — no upstream — are never valid);
+    (b) a github row carries the canonical github clone URL AND a `gh/` repo_id;
+    (c) a non-github row has NO repo_id (the numeric id is github-only).
+    Regression for git_url stripped from valid rows, orphans marked valid,
+    non-canonical github URLs, and repo_id leaking onto non-github repos.
     """
     value_csv = ROOT / "data" / "value" / "value.csv"
     if not value_csv.exists():
@@ -195,33 +198,34 @@ def test_valid_repos_are_github_with_canonical_url():
     if not rows:
         pytest.skip("no valid repos in value.csv")
 
-    not_github = [r for r in rows if (r.get("platform") or "").strip() != "github"]
-    assert not not_github, (
-        f"{len(not_github)} valid repos are not platform=github, e.g. "
-        f"{[(r.get('platform'), r.get('git_url')) for r in not_github[:5]]}"
-    )
-
-    no_repo = [r for r in rows if not (r.get("repo") or "").strip()]
-    assert not no_repo, (
-        f"{len(no_repo)} valid repos have no repo slug, e.g. "
-        f"{[r.get('git_url') for r in no_repo[:5]]}"
-    )
-
+    # (a) every valid repo has a git_url — an orphan (no upstream) is not valid.
     no_git = [r for r in rows if not (r.get("git_url") or "").strip()]
     assert not no_git, (
-        f"{len(no_git)} valid repos have no git_url, e.g. "
-        f"{[r.get('repo') for r in no_git[:5]]}"
+        f"{len(no_git)} valid repos have no git_url (orphans must be invalid), "
+        f"e.g. {[r.get('repo') for r in no_git[:5]]}"
     )
 
+    github = [r for r in rows if (r.get("platform") or "").strip() == "github"]
+    non_github = [r for r in rows if (r.get("platform") or "").strip() != "github"]
+
+    # (b) github valid rows: a repo slug, the canonical clone URL, a gh/ repo_id.
     def canonical(slug: str) -> str:
         return f"https://github.com/{slug.strip().lower()}.git"
 
-    mismatched = [
-        r for r in rows
-        if (r.get("repo") or "").strip()
-        and (r.get("git_url") or "").strip().lower() != canonical(r["repo"])
+    bad_github = [
+        r for r in github
+        if not (r.get("repo") or "").strip()
+        or (r.get("git_url") or "").strip().lower() != canonical(r.get("repo", ""))
+        or not (r.get("repo_id") or "").strip().startswith("gh/")
     ]
-    assert not mismatched, (
-        f"{len(mismatched)} valid github repos have a non-canonical git_url, e.g. "
-        f"{[(r['repo'], r['git_url']) for r in mismatched[:5]]}"
+    assert not bad_github, (
+        f"{len(bad_github)} valid github repos lack a slug / canonical url / gh/ "
+        f"repo_id, e.g. {[(r['repo'], r['git_url'], r['repo_id']) for r in bad_github[:5]]}"
+    )
+
+    # (c) non-github valid rows carry NO numeric repo_id (github-only).
+    id_on_nongithub = [r for r in non_github if (r.get("repo_id") or "").strip()]
+    assert not id_on_nongithub, (
+        f"{len(id_on_nongithub)} non-github valid repos carry a repo_id, e.g. "
+        f"{[(r.get('platform'), r.get('repo_id')) for r in id_on_nongithub[:5]]}"
     )

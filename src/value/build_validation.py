@@ -196,20 +196,24 @@ def join_valid(
     value_rows: list[dict],
     target_valid: dict[tuple[str, str], bool],
 ) -> list[dict]:
-    """Set each row's `git_valid`: True iff the repo has a validated GitHub repo.
+    """Set each row's `git_valid`: True iff the repo's upstream is reachable.
 
-    A repo is fundable only if it has a GitHub repo (or mirror) that resolves
-    (HTTP 200). Everything else is `False`:
-    - orphans (no upstream repo at all),
-    - non-GitHub-only upstreams (sourceware / savannah / gitlab / …) — a
-      non-GitHub `git_url` does not make a repo git_valid on its own; add a
-      GitHub mirror to `overrides.csv` to bring one into scope,
-    - a github `repo` that 404s.
+    A row's validation target is the one `_row_target` returns — its GitHub repo
+    (`github_repo`, checked via the API) or, for a non-GitHub platform, its
+    canonicalised `git_url` (`git_url`, checked via `git ls-remote`). `git_valid`
+    is True whenever that target's verdict is True, so a reachable non-GitHub
+    upstream (sourceware / savannah / gitlab / …) is valid on its own — not only
+    a GitHub repo. `False` covers: orphans (no upstream target at all), a target
+    whose reachability check failed, and a github `repo` that 404s.
+
+    `git_valid` is host-agnostic, but the numeric `repo_id` stays GitHub-only and
+    `load_top_repos` still scopes the risk/eligibility pipeline to
+    `platform == github` — so marking a non-GitHub upstream valid does NOT pull
+    it into the GitHub-API-driven scope; it only records that the URL resolves.
     """
     for row in value_rows:
-        repo = (row.get("repo") or "").strip().lower()
-        is_github = (row.get("platform") or "").strip().lower() == "github"
-        valid = is_github and bool(repo) and target_valid.get((repo, "github_repo")) is True
+        key = _row_target(row)
+        valid = key is not None and target_valid.get(key) is True
         row["git_valid"] = "True" if valid else "False"
     return value_rows
 
