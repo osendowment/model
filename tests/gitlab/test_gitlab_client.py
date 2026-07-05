@@ -55,3 +55,50 @@ class TestUrlBuilders:
     def test_make_repo_id(self):
         assert gc.make_repo_id("salsa.debian.org", 678) == "gl/salsa.debian.org/678"
         assert gc.make_repo_id("gitlab.com", "278964") == "gl/gitlab.com/278964"
+
+
+class FakeResp:
+    def __init__(self, status=200, headers=None):
+        self.status = status
+        self.headers = headers or {}
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        return False
+
+
+class FakeSession:
+    """Captures the headers/url of each GET and returns a scripted response."""
+    def __init__(self, resp):
+        self._resp = resp
+        self.last_headers = None
+        self.last_url = None
+
+    async def get(self, url, headers=None, timeout=None):
+        self.last_url = url
+        self.last_headers = headers
+        return self._resp
+
+
+class TestGitLabLimiter:
+    def test_token_for_host(self):
+        lim = gc.GitLabLimiter(token_map={"salsa.debian.org": "glpat-x"})
+        assert lim.token_for("salsa.debian.org") == "glpat-x"
+        assert lim.token_for("gitlab.com") is None
+
+    async def test_get_sets_private_token_header_when_token_present(self):
+        lim = gc.GitLabLimiter(token_map={"salsa.debian.org": "glpat-x"})
+        sess = FakeSession(FakeResp(200, {"RateLimit-Remaining": "1999"}))
+        async with await lim.get(sess, "salsa.debian.org", "https://salsa.debian.org/api/v4/version"):
+            pass
+        assert sess.last_headers["PRIVATE-TOKEN"] == "glpat-x"
+        assert lim.n == 1
+
+    async def test_get_omits_token_header_when_anonymous(self):
+        lim = gc.GitLabLimiter(token_map={})
+        sess = FakeSession(FakeResp(200, {}))
+        async with await lim.get(sess, "gitlab.com", "https://gitlab.com/api/v4/version"):
+            pass
+        assert "PRIVATE-TOKEN" not in sess.last_headers

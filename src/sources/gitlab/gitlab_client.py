@@ -104,3 +104,51 @@ def load_token_map() -> dict[str, str]:
         except (ValueError, AttributeError):
             log.warning("GITLAB_TOKENS is not valid JSON — ignoring")
     return out
+
+
+class _Deferred(Exception):
+    """Raised on a transient network/timeout error — caller may retry later."""
+
+
+class GitLabLimiter:
+    """Bounded-concurrency async GETs with per-host rate-limit backoff.
+
+    GitLab returns `RateLimit-Remaining` / `RateLimit-Reset` (epoch seconds)
+    headers per instance. Budgets are per-host, so state is tracked per host.
+    A single global semaphore bounds total in-flight requests across all hosts.
+    """
+
+    def __init__(self, token_map: dict[str, str] | None = None,
+                 max_concurrent: int = 10) -> None:
+        self._sem = asyncio.Semaphore(max_concurrent)
+        self._tokens = token_map if token_map is not None else load_token_map()
+        self._state: dict[str, tuple[int, float]] = {}   # host -> (remaining, reset_at)
+        self._n = 0
+
+    def token_for(self, host: str) -> str | None:
+        return self._tokens.get(host)
+
+    async def get(self, session: aiohttp.ClientSession, host: str,
+                  url: str) -> aiohttp.ClientResponse:
+        async with self._sem:
+            remaining, reset_at = self._state.get(host, (1, 0.0))
+            if remaining <= 0:
+                wait = max(reset_at - time.time() + 0.5, 0)
+                if wait > 0:
+                    log.info("%s rate-limited, sleeping %.1fs", host, wait)
+                    await asyncio.sleep(wait)
+            headers = {"Accept": "application/json"}
+            token = self.token_for(host)
+            if token:
+                headers["PRIVATE-TOKEN"] = token
+            resp = await session.get(url, headers=headers, timeout=30)
+            rem = resp.headers.get("RateLimit-Remaining")
+            rst = resp.headers.get("RateLimit-Reset")
+            if rem is not None:
+                self._state[host] = (int(rem), float(rst) if rst else 0.0)
+            self._n += 1
+            return resp
+
+    @property
+    def n(self) -> int:
+        return self._n
