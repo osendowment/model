@@ -181,6 +181,25 @@ def resolve_repo_redirects(rows: list[dict], resolver=_resolve_url,
     return len(mapping)
 
 
+def _disk_repo_ids(path) -> dict[str, str]:
+    """{manifest repo slug -> repo_id} already recorded in the output file.
+
+    Base layer of the id map so a directory refresh (whole-file rewrite)
+    never wipes an id resolved earlier — in particular the out-of-scope ids
+    resolved once via the GitHub API, which the local maps don't know.
+    """
+    out: dict[str, str] = {}
+    if not os.path.exists(path):
+        return out
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            rid = (row.get("repo_id") or "").strip()
+            slug = export_repo_slug(row)
+            if rid and slug:
+                out.setdefault(slug, rid)
+    return out
+
+
 def resolve_repo_ids(rows: list[dict], ids: dict[str, str] | None = None,
                      canon: dict[str, str] | None = None) -> int:
     """Populate `repo_id` on every row; return the count resolved.
@@ -188,13 +207,16 @@ def resolve_repo_ids(rows: list[dict], ids: dict[str, str] | None = None,
     The manifest's repo slug (`export_repo_slug`: resolved-redirect-or-raw URL,
     lowercased) is passed through `canonical_repo_map` (a manifest URL can
     predate a GitHub rename) and looked up in the model's slug → id maps:
-    `load_repo_ids` (github/repos.csv) overlaid with `load_value_repo_ids`
-    (value.csv wins — repos.csv lags renames). Org-level manifests, non-GitHub
-    hosts, and slugs outside the model's scope get an empty repo_id — the id is
-    never invented.
+    ids already on disk in the output file (base layer — preserves ids
+    resolved once via the GitHub API for out-of-scope repos, unknown to the
+    local maps), then `load_repo_ids` (github/repos.csv) overlaid with
+    `load_value_repo_ids` (value.csv wins — repos.csv lags renames).
+    Org-level manifests, non-GitHub hosts, and unresolvable slugs get an
+    empty repo_id — the id is never invented.
     """
     if ids is None:
-        ids = {**load_repo_ids(), **load_value_repo_ids()}
+        ids = {**_disk_repo_ids(OUTPUT_FILE),
+               **load_repo_ids(), **load_value_repo_ids()}
     if canon is None:
         canon = canonical_repo_map()
     resolved = 0
