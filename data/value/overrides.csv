@@ -1,6 +1,5 @@
 package,ecosystem,repo,git_url,valid,reason
 @sinclair/typebox,npm,sinclairzx81/typebox,,,"npm registry metadata is wrong upstream: the latest @sinclair/typebox version (0.34.x) and top-level `repository` point at github.com/sinclairzx81/sinclair-typebox, an 8-star placeholder repo created 2025-12-24. The real repo is sinclairzx81/typebox (6.7k stars, created 2017, actively maintained). Older versions (0.8.x/0.9.x) still carry the correct URL."
-filelock,pypi,tox-dev/filelock,,,git URL is the pre-rename name tox-dev/py-filelock; the repo was renamed to tox-dev/filelock
 tomlkit,pypi,python-poetry/tomlkit,,,git URL names the original-author repo sdispater/tomlkit; the project moved to the python-poetry org
 crashtest,pypi,python-poetry/crashtest,,,git URL names sdispater/crashtest; the project moved to the python-poetry org
 pendulum,pypi,python-pendulum/pendulum,,,git URL names sdispater/pendulum; the project moved to the python-pendulum org
@@ -8,11 +7,6 @@ deepdiff,pypi,seperman/deepdiff,,,git URL points at the fork qlustered/deepdiff;
 sphinxcontrib-httpdomain,pypi,sphinx-contrib/httpdomain,,,git URL is the placeholder github.com/me/spam; the real repo is sphinx-contrib/httpdomain
 types-aiofiles,pypi,python/typeshed,,,git URL points at typeshed-internal/stub_uploader (the stub-upload tool); the 38 types-* stub packages are sourced from python/typeshed
 microsoft-kiota-abstractions,pypi,microsoft/kiota-python,,,git URL names the multi-language generator repo microsoft/kiota; the Python kiota libraries live in microsoft/kiota-python
-dulwich,pypi,jelmer/dulwich,,,git URL slug dulwich/dulwich redirects to jelmer/dulwich; the old field value jelmer/dulwich is the canonical name
-aiodns,pypi,aio-libs/aiodns,,,git URL slug saghul/aiodns redirects to aio-libs/aiodns; the old field value aio-libs/aiodns is the canonical name
-oauth2client,pypi,googleapis/oauth2client,,,git URL slug google/oauth2client redirects to googleapis/oauth2client; the old field value googleapis/oauth2client is the canonical name
-webencodings,pypi,gsnedders/python-webencodings,,,git URL slug simonsapin/python-webencodings redirects to gsnedders/python-webencodings; the old field value gsnedders/python-webencodings is the canonical name
-pickleshare,pypi,ipython/pickleshare,,,git URL slug pickleshare/pickleshare redirects to ipython/pickleshare; the old field value ipython/pickleshare is the canonical name
 binutils,cpp,,https://sourceware.org/git/binutils-gdb.git,,"dead GitHub slug bminor/binutils-gdb (404) removed; binutils-gdb is canonically hosted at sourceware.org (verified git ls-remote OK)"
 xorgproto,cpp,,https://gitlab.freedesktop.org/xorg/proto/xorgproto.git,,"dead GitHub slug freedesktop/xorg-xorgproto (404) removed; xorgproto lives on freedesktop GitLab (verified git ls-remote OK)"
 libunistring,cpp,,https://git.savannah.gnu.org/git/libunistring.git,,"no GitHub repo; canonical GNU source on Savannah (replaces dead git.jff.email cgit mirror; verified ls-remote OK)"
@@ -50,10 +44,8 @@ pixman,cpp,libpixman/pixman,https://gitlab.freedesktop.org/pixman/pixman.git,,"e
 python,cpp,python/cpython,https://github.com/python/cpython.git,,"ex-LLM-guess URL, dropped when the LLM git-URL tier was removed (conf 0.99). CPython upstream — the value-data entry 10der/homeassistant-custom_components-awtrix is bogus (random user's HA component). verified reachable via git ls-remote / GitHub API"
 python3-defaults,cpp,,https://salsa.debian.org/cpython-team/python3-defaults.git,,"ex-LLM-guess URL, dropped when the LLM git-URL tier was removed (conf 0.85). Pure Debian metapackage — no real upstream. Should be filtered out of cpp pipeline. Not a fundable project. verified reachable via git ls-remote / GitHub API"
 sqlite,cpp,sqlite/sqlite,https://github.com/sqlite/sqlite.git,,"ex-LLM-guess URL, dropped when the LLM git-URL tier was removed (conf 0.90). SQLite's primary VCS is Fossil at sqlite.org/cgi/src; sqlite/sqlite on GitHub is the project's official Git mirror. verified reachable via git ls-remote / GitHub API"
-atob,npm,node-browser-compat/atob,https://github.com/node-browser-compat/atob.git,,"ex-LLM-guess URL, dropped when the LLM git-URL tier was removed (conf 0.85). Redirected from coolaj86/atob to node-browser-compat/atob. verified reachable via git ls-remote / GitHub API"
 decorator,pypi,micheles/decorator,https://github.com/micheles/decorator.git,,"ex-LLM-guess URL, dropped when the LLM git-URL tier was removed (conf 0.92). HTTP-verified. Michele Simionato's decorator library. verified reachable via git ls-remote / GitHub API"
 py,pypi,pytest-dev/py,https://github.com/pytest-dev/py.git,,"ex-LLM-guess URL, dropped when the LLM git-URL tier was removed (conf 0.92). HTTP-verified. Deprecated `py` library that pytest historically used. verified reachable via git ls-remote / GitHub API"
-py4j,pypi,py4j/py4j,https://github.com/py4j/py4j.git,,"ex-LLM-guess URL, dropped when the LLM git-URL tier was removed (conf 0.95). HTTP-verified. V1 GUESS UPDATED: I guessed bartdag/py4j (Barthélémy Dagenais's personal account); that URL still works but redirects to py4j/py4j (org-named canonical). verified reachable via git ls-remote / GitHub API"
 pycodestyle,pypi,PyCQA/pycodestyle,https://github.com/PyCQA/pycodestyle.git,,"ex-LLM-guess URL, dropped when the LLM git-URL tier was removed (conf 0.95). Python Code Quality Authority. verified reachable via git ls-remote / GitHub API"
 sortedcontainers,pypi,grantjenks/python-sortedcontainers,https://github.com/grantjenks/python-sortedcontainers.git,,"ex-LLM-guess URL, dropped when the LLM git-URL tier was removed (conf 0.95). HTTP-verified. Grant Jenks's sorted collections. verified reachable via git ls-remote / GitHub API"
 wmi,pypi,tjguk/wmi,https://github.com/tjguk/wmi.git,,"ex-LLM-guess URL, dropped when the LLM git-URL tier was removed (conf 0.92). HTTP-verified. Tim Golden's Windows WMI wrapper. verified reachable via git ls-remote / GitHub API"
