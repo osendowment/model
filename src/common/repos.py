@@ -7,14 +7,18 @@ pipeline runs on. Repo metadata (`repo_id`, `archived`, `size`, `stars`)
 is enriched from `data/sources/github/repos.csv`, the authoritative GitHub-API
 record populated by `src.sources.github.fetch_repo_owner_data`.
 
+The risk pipeline is GitHub-only (metadata is enriched via the GitHub API), so
+`load_top_repos` keeps only `value.csv` rows whose `platform` is `github`;
+non-GitHub repos (gitlab / codeberg / custom hosts) are out of scope.
+
 Scope = valid class-A AND not-archived, EXCEPT *live-upstream GitHub mirrors*.
 Some class-A repos are GitHub mirrors of a live non-GitHub upstream (e.g.
 `bminor/glibc` mirrors sourceware.org; `libpixman/pixman` mirrors
 gitlab.freedesktop.org). The GitHub mirror is often flagged `archived=True`
 even though the real upstream is alive and updated daily — those mirrors are
 identified from `data/value/overrides.csv` (a row with both a non-empty
-`github_repo` and a non-empty non-github `git_url`) and are kept in scope
-despite the archived mirror flag, so they still get a risk score.
+`repo` and a non-empty non-github `git_url`) and are kept in scope despite the
+archived mirror flag, so they still get a risk score.
 """
 
 from __future__ import annotations
@@ -86,11 +90,11 @@ def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]
 
 
 def _read_live_upstream_mirror_slugs(path: str) -> set[str]:
-    """Read data/value/overrides.csv → set of lowercased `github_repo` slugs
+    """Read data/value/overrides.csv → set of lowercased `repo` slugs
     that are GitHub *mirrors* of a live non-GitHub upstream.
 
-    A mirror row carries BOTH a non-empty `github_repo` AND a non-empty
-    `git_url` whose host is not github.com (e.g. glibc: `bminor/glibc`
+    A mirror row carries BOTH a non-empty `repo` (a GitHub slug) AND a
+    non-empty `git_url` whose host is not github.com (e.g. glibc: `bminor/glibc`
     mirrors `https://sourceware.org/git/glibc.git`; pixman: `libpixman/pixman`
     mirrors `https://gitlab.freedesktop.org/pixman/pixman.git`). GitHub often
     flags the mirror `archived=True` even though the real upstream is alive
@@ -103,7 +107,7 @@ def _read_live_upstream_mirror_slugs(path: str) -> set[str]:
         return slugs
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            gh = (row.get("github_repo") or "").strip().lower()
+            gh = (row.get("repo") or "").strip().lower()
             git_url = (row.get("git_url") or "").strip()
             if gh and git_url and not git_url.lower().startswith("https://github.com/"):
                 slugs.add(gh)
@@ -125,8 +129,8 @@ def load_top_repos(
     `settings.json risk_input.value_classes` (default {A}) AND whose unified
     `valid` column is `True`.
 
-    - Keeps rows with `class` in RISK_INPUT_CLASSES, a non-empty
-      `github_repo`, and `valid == "True"`. The `valid` gate is on by
+    - Keeps rows whose `platform` is `github`, `class` in RISK_INPUT_CLASSES,
+      a non-empty `repo`, and `valid == "True"`. The `valid` gate is on by
       default (drops failed/404/invalid targets); pass `skip_invalid=False`
       to include rows regardless of validity. The eligibility stage shares
       this exact scope (valid class-A repos).
@@ -155,7 +159,12 @@ def load_top_repos(
             cls = (row.get("class") or "").strip()
             if cls not in RISK_INPUT_CLASSES:
                 continue
-            raw = (row.get("github_repo") or "").strip().lower()
+            # Risk scope is GitHub-only — the pipeline enriches every repo via
+            # the GitHub API, so non-github platforms (gitlab/codeberg/custom)
+            # are excluded here rather than 404-ing downstream.
+            if (row.get("platform") or "").strip().lower() != "github":
+                continue
+            raw = (row.get("repo") or "").strip().lower()
             if not raw:
                 continue
             if skip_invalid and (row.get("valid") or "").strip() != "True":
@@ -193,7 +202,7 @@ def load_top_slugs(*args, **kwargs) -> list[str]:
 def canonical_repo_map(repos_file: str = REPOS_FILE) -> dict[str, str]:
     """Map every known repo slug -> its canonical lowercased `full_name`.
 
-    For risk scripts that read `github_repo` straight from value-data.csv
+    For risk scripts that read a `repo` slug straight from value.csv
     or a per-ecosystem results.csv: pass each raw slug through this map so
     a renamed repo (`gozala/events`) resolves to the same canonical name
     `load_top_repos` uses (`browserify/events`). Unknown slugs map to

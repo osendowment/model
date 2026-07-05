@@ -1,8 +1,9 @@
 """Tests for src/value/verify_git_urls.py.
 
 Focus: `verify_urls_in_aggregates` reading back `data/sources/github/repos.csv`
-to annotate each value-data row with the GitHub repo's stable numeric id
-(`gh_repo_id`) and its *current* name (renamed repos are canonicalised).
+to annotate each value-data row with the GitHub repo's stable id
+(`repo_id`, formatted `gh/<numeric>`) and its *current* name (renamed repos
+are canonicalised into the `repo` column).
 
 The GitHub fetch and the `git ls-remote` pass are both stubbed, so no
 network is touched — only the read-back + annotation logic is exercised.
@@ -37,57 +38,61 @@ def _patch(tmp_path, monkeypatch, repo_rows):
     monkeypatch.setattr(vgu, "_verify_non_github", lambda urls, **kw: {})
 
 
-# ── gh_repo_id ───────────────────────────────────────────────────────────────
+# ── repo_id ──────────────────────────────────────────────────────────────────
 
-class TestGhRepoId:
+class TestRepoId:
     def test_populates_id_for_valid_repo(self, tmp_path, monkeypatch):
         _patch(tmp_path, monkeypatch,
                [["facebook/react", "True", "10270250", "facebook/react"]])
-        aggs = [{"github_repo": "facebook/react", "git_url": "",
+        aggs = [{"repo": "facebook/react", "platform": "github", "git_url": "",
                  "top_eco_pkg": "react"}]
         out, _ = verify_urls_in_aggregates(aggs)
-        assert out[0].get("gh_repo_id") == "10270250"
+        assert out[0].get("repo_id") == "gh/10270250"
 
     def test_invalid_repo_has_blank_id(self, tmp_path, monkeypatch):
         # A 404'd repo has no numeric id.
         _patch(tmp_path, monkeypatch, [["dead/repo", "False", "", ""]])
-        aggs = [{"github_repo": "dead/repo", "git_url": "", "top_eco_pkg": "p"}]
+        aggs = [{"repo": "dead/repo", "platform": "github", "git_url": "",
+                 "top_eco_pkg": "p"}]
         out, _ = verify_urls_in_aggregates(aggs)
-        assert out[0].get("gh_repo_id") == ""
+        assert out[0].get("repo_id") == ""
 
     def test_no_github_repo_has_blank_id(self, tmp_path, monkeypatch):
+        # A non-github / orphan row (platform != github) carries no repo_id.
         _patch(tmp_path, monkeypatch, [])
-        aggs = [{"github_repo": "", "git_url": "", "top_eco_pkg": "p"}]
+        aggs = [{"repo": "", "platform": "", "git_url": "", "top_eco_pkg": "p"}]
         out, _ = verify_urls_in_aggregates(aggs)
-        assert out[0].get("gh_repo_id") == ""
+        assert out[0].get("repo_id") == ""
 
 
-# ── github_repo canonicalisation ─────────────────────────────────────────────
+# ── repo canonicalisation ────────────────────────────────────────────────────
 
-class TestGithubRepoCurrentName:
+class TestRepoCurrentName:
     def test_rewrites_to_current_name_when_renamed(self, tmp_path, monkeypatch):
         # We queried `old/name`; the GitHub API follows renames, so its
         # `full_name` reports the repo's live slug. value-data.csv must
         # carry that current name, not the stale one we asked for.
         _patch(tmp_path, monkeypatch,
                [["old/name", "True", "777", "new/name"]])
-        aggs = [{"github_repo": "old/name", "git_url": "", "top_eco_pkg": "p"}]
+        aggs = [{"repo": "old/name", "platform": "github", "git_url": "",
+                 "top_eco_pkg": "p"}]
         out, _ = verify_urls_in_aggregates(aggs)
-        assert out[0]["github_repo"] == "new/name"
-        assert out[0].get("gh_repo_id") == "777"
+        assert out[0]["repo"] == "new/name"
+        assert out[0].get("repo_id") == "gh/777"
 
     def test_unrenamed_repo_keeps_its_name(self, tmp_path, monkeypatch):
         _patch(tmp_path, monkeypatch,
                [["torvalds/linux", "True", "2325298", "torvalds/linux"]])
-        aggs = [{"github_repo": "torvalds/linux", "git_url": "",
+        aggs = [{"repo": "torvalds/linux", "platform": "github", "git_url": "",
                  "top_eco_pkg": "p"}]
         out, _ = verify_urls_in_aggregates(aggs)
-        assert out[0]["github_repo"] == "torvalds/linux"
+        assert out[0]["repo"] == "torvalds/linux"
 
     def test_invalid_repo_is_not_renamed(self, tmp_path, monkeypatch):
         # A repo that failed validation keeps the slug we asked for —
         # there is no trustworthy current name to rewrite it to.
         _patch(tmp_path, monkeypatch, [["dead/repo", "False", "", ""]])
-        aggs = [{"github_repo": "dead/repo", "git_url": "", "top_eco_pkg": "p"}]
+        aggs = [{"repo": "dead/repo", "platform": "github", "git_url": "",
+                 "top_eco_pkg": "p"}]
         out, _ = verify_urls_in_aggregates(aggs)
-        assert out[0]["github_repo"] == "dead/repo"
+        assert out[0]["repo"] == "dead/repo"

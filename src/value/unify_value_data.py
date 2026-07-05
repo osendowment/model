@@ -11,18 +11,32 @@ Reads `data/sources/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crat
 cpp), groups packages by canonical `git_url` (or by a per-package synthetic
 key for orphans), and writes `data/value/value.csv` with **one row per repo**:
 
-    id, github_repo, gh_repo_id, git_url, valid,
+    repo, platform, repo_id, git_url, valid,
     ecosystems, packages, top_eco, top_eco_pkg,
     top_eco_pct, class, class_npm, class_pypi, class_crates, class_cpp
 
-`github_repo` is normalised to lowercase `owner/repo`. `git_url` is the
-canonical clone URL from `results.csv`'s `git` column (lowercased), which
-already covers GitHub plus GitLab / Codeberg / Sourcehut / Bitbucket /
-custom hosts (sourceware, savannah, etc.). cpp is the unified C/C++
-ecosystem (Debian + Homebrew, joined via Repology) -- see
+Repo identity is a `(platform, repo, repo_id)` triple, all derived from the
+canonical `git_url`:
+
+  - `platform` — the host class of `git_url` (`github`, `gitlab`, `bitbucket`,
+    `sourcehut`, `codeberg`, `custom`), or empty for orphan rows with no URL.
+  - `repo` — the project path on that host, normalised to lowercase (github
+    `owner/repo`; gitlab's arbitrarily-nested `owner/.../repo`; custom's
+    best-effort path). Derived via `build_git_urls.platform_and_slug`.
+  - `repo_id` — `gh/<numeric>` for GitHub (the stable GitHub Repos API id),
+    empty for every other platform. Set by `verify_git_urls`.
+
+`git_url` is the canonical clone URL from `results.csv`'s `git` column
+(lowercased), which already covers GitHub plus GitLab / Codeberg / Sourcehut /
+Bitbucket / custom hosts (sourceware, savannah, etc.). cpp is the unified
+C/C++ ecosystem (Debian + Homebrew, joined via Repology) -- see
 `src/sources/cpp/process_data.py`. The per-repo `valid` column is filled by the
 `build_validation` step (a rollup of the GitHub API + `git ls-remote`
-validation caches); `gh_repo_id` is set by `verify_git_urls`.
+validation caches).
+
+NOTE: the per-ecosystem `results.csv` inputs keep their upstream `github_repo`
+column (a bare GitHub slug); only the unified `value.csv` uses the
+`(platform, repo, repo_id)` model.
 
 Per-ecosystem class is computed by summing each group's package PR within
 the ecosystem, ranking groups by that sum desc, and applying the same
@@ -56,6 +70,7 @@ from rich.table import Table
 
 from src.common.params import assign_value_class
 from src.common.repos import canonical_repo_map
+from src.value.build_git_urls import platform_and_slug
 
 console = Console()
 
@@ -66,20 +81,20 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 SOURCES_DIR = DATA_DIR / "sources"
 OUTPUT_FILE = DATA_DIR / "value" / "value.csv"
 
-# Curated repo overrides — forces the correct `github_repo` for packages
+# Curated repo overrides — forces the correct `repo` for packages
 # whose upstream registry metadata points at the wrong repository. This is
 # a GAP-CORRECTING layer for bad *upstream* data, not a parsing bug:
 # e.g. `@sinclair/typebox`'s latest npm version names a placeholder repo.
 # Applied as the LAST step of `aggregate_by_repo` so it survives every
 # pipeline re-run; `verify_git_urls` (the next stage) then re-derives the
-# corrected repo's `gh_repo_id` from the GitHub API.
+# corrected repo's `repo_id` from the GitHub API.
 OVERRIDES_FILE = DATA_DIR / "value" / "overrides.csv"
 
 ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
 CLASS_RANK = {"A": 0, "B": 1, "C": 2}
 
 FIELDS = (
-    ["github_repo", "gh_repo_id", "git_url", "valid",
+    ["repo", "platform", "repo_id", "git_url", "valid",
      "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
@@ -282,6 +297,23 @@ def _github_git_url(slug: str) -> str:
     return f"https://github.com/{slug}.git"
 
 
+def _identity(github_slug: str, git_url: str) -> tuple[str, str]:
+    """Return the group's `(platform, repo)`.
+
+    GitHub wins when a slug is present — `_select_group_github_repo` only
+    yields one from a GitHub URL or a member fallback, and `verify_git_urls`
+    later reconciles `git_url` to `https://github.com/<slug>.git`, so the
+    (platform=github, repo=slug) pair is always internally consistent in the
+    final table. Otherwise the identity is read straight off the non-GitHub
+    `git_url` via `platform_and_slug`; orphan groups (no URL) get `("", "")`.
+    """
+    if github_slug:
+        return ("github", github_slug)
+    if git_url:
+        return platform_and_slug(git_url)
+    return ("", "")
+
+
 def _canonicalise_git_urls(rows: list[dict], canon: dict[str, str]) -> list[dict]:
     """Rewrite each row's GitHub `git_url` to its post-rename canonical form.
 
@@ -319,15 +351,17 @@ def load_repo_overrides(path: Path = OVERRIDES_FILE) -> dict[tuple[str, str], di
     `(package, ecosystem)` and carries up to three corrections plus a required
     free-text `reason`:
 
-    - `github_repo` — force the corrected GitHub slug (lowercased).
-    - `git_url`     — force a corrected non-GitHub clone URL (lowercased).
-    - `valid`       — manually pin the target's validity (`True`/`False`),
-                      consumed later by `build_validation` (NOT applied here).
+    - `repo`    — force the corrected GitHub slug (lowercased). The overrides
+                  file's `repo` column is always a GitHub `owner/repo`; forcing
+                  a non-GitHub identity is done via the `git_url` column.
+    - `git_url` — force a corrected non-GitHub clone URL (lowercased).
+    - `valid`   — manually pin the target's validity (`True`/`False`),
+                  consumed later by `build_validation` (NOT applied here).
 
-    Each value is `{"github_repo": str, "git_url": str, "valid": str}` (any
-    field may be empty). Rows with a blank `reason` are rejected (these are
-    curated and must be explained). A row that sets none of the three is
-    skipped (nothing to do). Missing file → no overrides.
+    Each value is `{"repo": str, "git_url": str, "valid": str}` (any field may
+    be empty). Rows with a blank `reason` are rejected (these are curated and
+    must be explained). A row that sets none of the three is skipped (nothing
+    to do). Missing file → no overrides.
     """
     if not path.exists():
         return {}
@@ -345,7 +379,7 @@ def load_repo_overrides(path: Path = OVERRIDES_FILE) -> dict[tuple[str, str], di
                 )
                 continue
             override = {
-                "github_repo": _normalise_repo(r.get("github_repo") or ""),
+                "repo": _normalise_repo(r.get("repo") or ""),
                 "git_url": (r.get("git_url") or "").strip().lower(),
                 "valid": (r.get("valid") or "").strip(),
             }
@@ -360,21 +394,21 @@ def apply_repo_overrides(
     all_rows: list[dict],
     overrides: dict[tuple[str, str], dict] | None = None,
 ) -> list[dict]:
-    """Force the correct `github_repo` / `git_url` for overridden packages.
+    """Force the correct `(platform, repo)` / `git_url` for overridden packages.
 
     Last step of `aggregate_by_repo`. For every repo aggregate that contains
     a constituent package listed in `overrides.csv`, rewrite the group's
     identity from the curated override — overriding whatever the (wrong)
     registry metadata produced. This is the single chokepoint: it runs after
     grouping and class assignment, and before `verify_git_urls` re-derives
-    `gh_repo_id` for the corrected repo.
+    `repo_id` for the corrected repo.
 
     Identity rules (per override row):
-    - `github_repo` set → set the group's `github_repo` to the slug AND its
+    - `repo` set → set the group to (platform=github, repo=slug) AND its
       `git_url` to the matching github clone URL (github wins when both
       identity fields are present).
-    - else `git_url` set → set the group's `git_url`, leaving `github_repo`
-      to its member-derived value.
+    - else `git_url` set → set the group's `git_url` and re-derive
+      `(platform, repo)` from it, clearing any member-derived github identity.
     The `valid` pin is intentionally NOT applied here — validity is computed
     later by `build_validation`; `load_repo_overrides` only surfaces it.
 
@@ -408,16 +442,18 @@ def apply_repo_overrides(
         ov = override_by_group.get(key)
         if not ov:
             continue
-        if ov.get("github_repo"):
-            a["github_repo"] = ov["github_repo"]
-            a["git_url"] = _github_git_url(ov["github_repo"])
+        if ov.get("repo"):
+            a["platform"] = "github"
+            a["repo"] = ov["repo"]
+            a["git_url"] = _github_git_url(ov["repo"])
         elif ov.get("git_url"):
             # A git_url-only override declares a non-GitHub canonical source, so
-            # also clear any (often wrong/dead) member-derived github_repo —
-            # otherwise it would still win as the validation target. This is how
-            # a dead GitHub slug is removed via override.
+            # re-derive `(platform, repo)` from it, dropping any (often
+            # wrong/dead) member-derived github identity — otherwise it would
+            # still win as the validation target. This is how a dead GitHub
+            # slug is removed via override.
             a["git_url"] = ov["git_url"]
-            a["github_repo"] = ""
+            a["platform"], a["repo"] = _identity("", ov["git_url"])
     return aggs
 
 
@@ -459,13 +495,17 @@ def aggregate_by_repo(
     aggs: list[dict] = []
     for key, members in groups.items():
         # `git_url` first (it's the grouping key — one of the members must
-        # have it unless this is an orphan group). `github_repo` is then
-        # selected to be consistent with `git_url` when possible; see
-        # `_select_group_github_repo` for the tie-break logic.
+        # have it unless this is an orphan group). The `(platform, repo)`
+        # identity is then derived from it (github slug consistent with the
+        # URL when possible; see `_select_group_github_repo` for the tie-break).
         group_git_url = next((m["git_url"] for m in members if m.get("git_url")), "")
+        platform, repo = _identity(
+            _select_group_github_repo(members, group_git_url), group_git_url,
+        )
         a: dict = {
             "group_key": key,
-            "github_repo": _select_group_github_repo(members, group_git_url),
+            "repo": repo,
+            "platform": platform,
             "git_url": group_git_url,
             # `valid` is left empty here; build_validation fills the verdict.
             "valid": "",
@@ -532,7 +572,7 @@ def aggregate_by_repo(
     # Sort by top_eco_pct desc. Every group has a numeric percentile (set
     # above), so no special handling for missing values is needed; ties
     # broken by repo name for stability.
-    aggs.sort(key=lambda a: (-a["top_eco_pct"], a["github_repo"] or a["group_key"]))
+    aggs.sort(key=lambda a: (-a["top_eco_pct"], a["repo"] or a["group_key"]))
     return [_strip_internals(a) for a in aggs]
 
 
@@ -675,7 +715,7 @@ def main() -> None:  # pragma: no cover
     aggs = aggregate_by_repo(all_rows)
     write_value_data(aggs)
 
-    # `gh_repo_id` is populated by `verify_git_urls`, and the `valid` column
+    # `repo_id` is populated by `verify_git_urls`, and the `valid` column
     # by `build_validation` — both run after this step by run_value_pipeline.
 
     _print_funnel_table(stats_per_eco)
@@ -686,11 +726,13 @@ def main() -> None:  # pragma: no cover
     console.print()
     _print_repo_class_table(aggs)
     console.print()
-    n_grouped = sum(1 for a in aggs if a["github_repo"])
+    n_grouped = sum(1 for a in aggs if a["repo"])
     n_orphan = len(aggs) - n_grouped
+    n_github = sum(1 for a in aggs if a["platform"] == "github")
     console.print(
         f"[dim]Written {len(aggs):,} repo rows "
-        f"({n_grouped:,} github groups + {n_orphan:,} orphan packages) "
+        f"({n_grouped:,} with a repo — {n_github:,} github + "
+        f"{n_grouped - n_github:,} other host + {n_orphan:,} orphan packages) "
         f"→ {OUTPUT_FILE}[/dim]"
     )
 

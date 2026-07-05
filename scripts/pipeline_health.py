@@ -132,16 +132,16 @@ def check_value_data() -> list[Result]:
         return [("value.csv", False,
                  f"row count differs (unify {len(built)}, disk {len(disk)})")]
 
-    def cls_by_gh(rows: list[dict]) -> dict[str, str]:
-        seen = Counter((r.get("github_repo") or "").strip().lower() for r in rows)
+    def cls_by_repo(rows: list[dict]) -> dict[str, str]:
+        seen = Counter((r.get("repo") or "").strip().lower() for r in rows)
         return {
-            (r.get("github_repo") or "").strip().lower(): r.get("class", "")
+            (r.get("repo") or "").strip().lower(): r.get("class", "")
             for r in rows
-            if (r.get("github_repo") or "").strip()
-            and seen[(r.get("github_repo") or "").strip().lower()] == 1
+            if (r.get("repo") or "").strip()
+            and seen[(r.get("repo") or "").strip().lower()] == 1
         }
 
-    b, d = cls_by_gh(built), cls_by_gh(disk)
+    b, d = cls_by_repo(built), cls_by_repo(disk)
     mismatch = sum(1 for g in set(b) & set(d) if b[g] != d[g])
     return [("value.csv", mismatch == 0,
              f"class assignments in sync ({len(set(b) & set(d)):,} repos)"

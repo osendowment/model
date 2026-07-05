@@ -1,4 +1,4 @@
-package,ecosystem,github_repo,git_url,valid,reason
+package,ecosystem,repo,git_url,valid,reason
 @sinclair/typebox,npm,sinclairzx81/typebox,,,"npm registry metadata is wrong upstream: the latest @sinclair/typebox version (0.34.x) and top-level `repository` point at github.com/sinclairzx81/sinclair-typebox, an 8-star placeholder repo created 2025-12-24. The real repo is sinclairzx81/typebox (6.7k stars, created 2017, actively maintained). Older versions (0.8.x/0.9.x) still carry the correct URL."
 filelock,pypi,tox-dev/filelock,,,git URL is the pre-rename name tox-dev/py-filelock; the repo was renamed to tox-dev/filelock
 tomlkit,pypi,python-poetry/tomlkit,,,git URL names the original-author repo sdispater/tomlkit; the project moved to the python-poetry org

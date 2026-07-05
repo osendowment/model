@@ -171,11 +171,12 @@ def test_risk_intent_and_nonprofit_are_boolean_flags():
                 f"{r.get('repo')}.{col}={r.get(col)!r}"
 
 
-def test_valid_repos_have_github_repo_and_git_url():
-    """A valid repo must have a github_repo (mirror) AND the canonical github
-    clone URL. Validity is github-only: orphans and non-github-only upstreams
-    are invalid. Regression for (a) git_url stripped from github repos and
-    (b) non-github / orphan rows being marked valid.
+def test_valid_repos_are_github_with_canonical_url():
+    """A valid repo must be a github repo (platform=github) with a `repo` slug
+    AND the canonical github clone URL. Validity is github-only: orphans and
+    non-github-only upstreams are invalid. Regression for (a) git_url stripped
+    from github repos, (b) non-github / orphan rows being marked valid, and
+    (c) a github `repo` ever coexisting with a non-github git_url.
     """
     value_csv = ROOT / "data" / "value" / "value.csv"
     if not value_csv.exists():
@@ -185,16 +186,22 @@ def test_valid_repos_have_github_repo_and_git_url():
     if not rows:
         pytest.skip("no valid repos in value.csv")
 
-    no_gh = [r for r in rows if not (r.get("github_repo") or "").strip()]
-    assert not no_gh, (
-        f"{len(no_gh)} valid repos have no github_repo, e.g. "
-        f"{[r.get('git_url') or r.get('id') for r in no_gh[:5]]}"
+    not_github = [r for r in rows if (r.get("platform") or "").strip() != "github"]
+    assert not not_github, (
+        f"{len(not_github)} valid repos are not platform=github, e.g. "
+        f"{[(r.get('platform'), r.get('git_url')) for r in not_github[:5]]}"
+    )
+
+    no_repo = [r for r in rows if not (r.get("repo") or "").strip()]
+    assert not no_repo, (
+        f"{len(no_repo)} valid repos have no repo slug, e.g. "
+        f"{[r.get('git_url') for r in no_repo[:5]]}"
     )
 
     no_git = [r for r in rows if not (r.get("git_url") or "").strip()]
     assert not no_git, (
         f"{len(no_git)} valid repos have no git_url, e.g. "
-        f"{[r.get('github_repo') or r.get('id') for r in no_git[:5]]}"
+        f"{[r.get('repo') for r in no_git[:5]]}"
     )
 
     def canonical(slug: str) -> str:
@@ -202,10 +209,10 @@ def test_valid_repos_have_github_repo_and_git_url():
 
     mismatched = [
         r for r in rows
-        if (r.get("github_repo") or "").strip()
-        and (r.get("git_url") or "").strip().lower() != canonical(r["github_repo"])
+        if (r.get("repo") or "").strip()
+        and (r.get("git_url") or "").strip().lower() != canonical(r["repo"])
     ]
     assert not mismatched, (
         f"{len(mismatched)} valid github repos have a non-canonical git_url, e.g. "
-        f"{[(r['github_repo'], r['git_url']) for r in mismatched[:5]]}"
+        f"{[(r['repo'], r['git_url']) for r in mismatched[:5]]}"
     )

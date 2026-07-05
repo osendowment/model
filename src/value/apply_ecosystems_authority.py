@@ -96,10 +96,11 @@ def resolve(prior_git: str, prior_github: str, strong: list[str], weak: list[str
         {"eco_strong": strong, "prior": prior, "eco_weak": weak}, is_invalid,
     )
 
-    # Curated override is absolute.
+    # Curated override is absolute. The overrides file's `repo` column is
+    # always a GitHub slug (non-GitHub identities are set via `git_url`).
     if ov:
-        if ov.get("github_repo"):
-            _, canon = classify(f"https://github.com/{ov['github_repo']}")
+        if ov.get("repo"):
+            _, canon = classify(f"https://github.com/{ov['repo']}")
             if canon:
                 merged["github"] = canon
                 srcs["github"] = "override"

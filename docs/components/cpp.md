@@ -77,10 +77,10 @@ C / C++ (Debian + Homebrew + Repology)
 
 - **Value** — `value_class` feeds the `class_cpp` column of
   `data/value/value.csv`.
-- **Risk** (and the manual eligibility review) — both key off `github_repo`, and cpp identity is
+- **Risk** (and the manual eligibility review) — both filter to `platform == github`, and cpp identity is
   **GitHub-only**. Many flagship cpp upstreams live off GitHub — glibc
   (sourceware.org), gcc (Savannah), glib (gitlab.gnome.org), mpfr (gitlab.inria.fr),
-  curl (curl.se) — so they carry a `git_url` in `value.csv` but `github_repo=""`,
+  curl (curl.se) — so they carry a non-github `platform` + `git_url` in `value.csv`,
   and slip out of Risk (and the manual eligibility review). Counting non-GitHub
   Git hosts (sourceware, Savannah, GNOME) lifts coverage well above the
   GitHub-only figure — most non-GitHub upstreams are the load-bearing class-A

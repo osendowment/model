@@ -14,11 +14,11 @@ def _write(path, header, rows):
 
 def test_load_top_repos_filters_classes_and_enriches(tmp_path, monkeypatch):
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "valid", "class"], [
-        {"github_repo": "Owner/A", "valid": "True", "class": "A"},
-        {"github_repo": "owner/b", "valid": "True", "class": "B"},
-        {"github_repo": "owner/c", "valid": "True", "class": "C"},
-        {"github_repo": "", "valid": "True", "class": "A"},
+    _write(value, ["repo", "valid", "class", "platform"], [
+        {"repo": "Owner/A", "valid": "True", "class": "A", "platform": "github"},
+        {"repo": "owner/b", "valid": "True", "class": "B", "platform": "github"},
+        {"repo": "owner/c", "valid": "True", "class": "C", "platform": "github"},
+        {"repo": "", "valid": "True", "class": "A", "platform": ""},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
@@ -36,10 +36,10 @@ def test_load_top_repos_filters_classes_and_enriches(tmp_path, monkeypatch):
 def test_load_top_repos_filters_valid_by_default(tmp_path, monkeypatch):
     """valid is gated by default — only valid==True in-class rows are kept."""
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "valid", "class"], [
-        {"github_repo": "owner/live", "valid": "True", "class": "A"},
-        {"github_repo": "owner/dead", "valid": "False", "class": "A"},
-        {"github_repo": "owner/blank", "valid": "", "class": "B"},
+    _write(value, ["repo", "valid", "class", "platform"], [
+        {"repo": "owner/live", "valid": "True", "class": "A", "platform": "github"},
+        {"repo": "owner/dead", "valid": "False", "class": "A", "platform": "github"},
+        {"repo": "owner/blank", "valid": "", "class": "B", "platform": "github"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [])
@@ -53,8 +53,8 @@ def test_load_top_repos_filters_valid_by_default(tmp_path, monkeypatch):
 
 def test_load_top_repos_keeps_archived_when_flag_off(tmp_path, monkeypatch):
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "valid", "class"], [
-        {"github_repo": "owner/b", "valid": "True", "class": "B"},
+    _write(value, ["repo", "valid", "class", "platform"], [
+        {"repo": "owner/b", "valid": "True", "class": "B", "platform": "github"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
@@ -70,9 +70,9 @@ def test_load_top_repos_keeps_archived_live_upstream_mirror(tmp_path, monkeypatc
     overrides.csv) is KEPT; a plain archived repo (no mirror override) is
     DROPPED."""
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "valid", "class"], [
-        {"github_repo": "bminor/glibc", "valid": "True", "class": "A"},
-        {"github_repo": "owner/plainarchived", "valid": "True", "class": "A"},
+    _write(value, ["repo", "valid", "class", "platform"], [
+        {"repo": "bminor/glibc", "valid": "True", "class": "A", "platform": "github"},
+        {"repo": "owner/plainarchived", "valid": "True", "class": "A", "platform": "github"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
@@ -82,12 +82,12 @@ def test_load_top_repos_keeps_archived_live_upstream_mirror(tmp_path, monkeypatc
          "archived": "True", "size": "1", "stars": "1"},
     ])
     overrides = tmp_path / "overrides.csv"
-    _write(overrides, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"], [
+    _write(overrides, ["package", "ecosystem", "repo", "git_url", "valid", "reason"], [
         # mirror: non-github git_url -> exempt from skip_archived
-        {"package": "glibc", "ecosystem": "cpp", "github_repo": "bminor/glibc",
+        {"package": "glibc", "ecosystem": "cpp", "repo": "bminor/glibc",
          "git_url": "https://sourceware.org/git/glibc.git", "valid": "", "reason": "mirror"},
         # not a mirror: github git_url -> NOT exempt (but it's not archived here anyway)
-        {"package": "x", "ecosystem": "cpp", "github_repo": "owner/plainarchived",
+        {"package": "x", "ecosystem": "cpp", "repo": "owner/plainarchived",
          "git_url": "https://github.com/owner/plainarchived.git", "valid": "", "reason": "x"},
     ])
     monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
@@ -100,9 +100,9 @@ def test_load_top_repos_keeps_archived_live_upstream_mirror(tmp_path, monkeypatc
 
 def test_load_top_repos_dedup_highest_class_wins(tmp_path, monkeypatch):
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "valid", "class"], [
-        {"github_repo": "owner/dup", "valid": "True", "class": "B"},
-        {"github_repo": "Owner/Dup", "valid": "True", "class": "A"},
+    _write(value, ["repo", "valid", "class", "platform"], [
+        {"repo": "owner/dup", "valid": "True", "class": "B", "platform": "github"},
+        {"repo": "Owner/Dup", "valid": "True", "class": "A", "platform": "github"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
@@ -117,8 +117,8 @@ def test_load_top_repos_dedup_highest_class_wins(tmp_path, monkeypatch):
 def test_load_top_repos_canonicalises_renamed_repo(tmp_path, monkeypatch):
     """A stale slug in value-data.csv resolves to the repo's current name."""
     value = tmp_path / "value.csv"
-    _write(value, ["github_repo", "valid", "class"], [
-        {"github_repo": "gozala/events", "valid": "True", "class": "A"},
+    _write(value, ["repo", "valid", "class", "platform"], [
+        {"repo": "gozala/events", "valid": "True", "class": "A", "platform": "github"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "full_name", "archived", "size", "stars"], [
