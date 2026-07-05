@@ -171,25 +171,9 @@ def load_existing(path: Path) -> dict[str, dict]:
 
 
 def _value_repo_ids(value_file: str = VALUE_FILE) -> dict[str, str]:
-    """{repo slug -> bare GitHub id} from value.csv (`gh/<id>` stripped).
-
-    Fallback for `load_repo_ids` (github/repos.csv): a freshly renamed repo
-    (facebook/react -> react/react) reaches value.csv under its new canonical
-    slug before github/repos.csv catches up, so repos.csv alone leaves the
-    new slug unresolvable and the fetched row lands with an empty repo_id.
-    """
-    out: dict[str, str] = {}
-    if not os.path.exists(value_file):
-        return out
-    with open(value_file, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            if (row.get("platform") or "").strip().lower() != "github":
-                continue
-            slug = (row.get("repo") or "").strip().lower()
-            rid = (row.get("repo_id") or "").strip().removeprefix("gh/")
-            if slug and rid:
-                out.setdefault(slug, rid)
-    return out
+    """{repo slug -> bare GitHub id} from value.csv — see load_value_repo_ids."""
+    from src.common.repos import load_value_repo_ids
+    return load_value_repo_ids(value_file)
 
 
 def _repo_id_map() -> dict[str, str]:

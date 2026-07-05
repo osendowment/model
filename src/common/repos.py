@@ -228,6 +228,29 @@ def canonical_repo_map(repos_file: str = REPOS_FILE) -> dict[str, str]:
     return _read_github_repos(repos_file)[0]
 
 
+def load_value_repo_ids(value_file: str = VALUE_FILE) -> dict[str, str]:
+    """Map canonical repo slug -> bare GitHub id from value.csv (`gh/<id>`).
+
+    Fallback/overlay for `load_repo_ids` (github/repos.csv): a freshly
+    renamed repo reaches value.csv under its new canonical slug before
+    github/repos.csv catches up, so a repos.csv-only map leaves the new
+    slug unresolvable and fetched rows land with a blank repo_id — which
+    the id-keyed builder joins then silently drop.
+    """
+    out: dict[str, str] = {}
+    if not os.path.exists(value_file):
+        return out
+    with open(value_file, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            if (row.get("platform") or "").strip().lower() != "github":
+                continue
+            slug = (row.get("repo") or "").strip().lower()
+            rid = (row.get("repo_id") or "").strip().removeprefix("gh/")
+            if slug and rid:
+                out.setdefault(slug, rid)
+    return out
+
+
 def load_repo_ids(repos_file: str = REPOS_FILE) -> dict[str, str]:
     """Map repo slug -> repo_id from data/sources/github/repos.csv.
 
