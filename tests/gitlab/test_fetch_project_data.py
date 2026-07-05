@@ -158,3 +158,41 @@ class TestNamespace:
         key, row, status = await _fetch_namespace(lim, None, item)
         assert status == "404"
         assert row is None
+
+
+import datetime as dt
+
+from src.sources.gitlab.fetch_project_data import (PROJECT_FIELDS, _filter_stale,
+                                                   upsert)
+
+
+def _iso_days_ago(n):
+    return (dt.datetime.now(dt.UTC) - dt.timedelta(days=n)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+class TestUpsertAndStale:
+    def test_upsert_roundtrip(self, tmp_path):
+        out = tmp_path / "projects.csv"
+        n = upsert(out, "project", PROJECT_FIELDS,
+                   [{"project": "gitlab.com/a/b", "valid": True,
+                     "repo_id": "gl/gitlab.com/1", "fetched_at": _iso_days_ago(0)}])
+        assert n == 1
+        # re-upsert same key overwrites, not appends
+        n2 = upsert(out, "project", PROJECT_FIELDS,
+                    [{"project": "gitlab.com/a/b", "valid": True,
+                      "repo_id": "gl/gitlab.com/1", "fetched_at": _iso_days_ago(0)}])
+        assert n2 == 1
+
+    def test_filter_stale_skips_fresh_keeps_old_and_missing(self, tmp_path):
+        existing = {
+            "gitlab.com/a/b": {"project": "gitlab.com/a/b", "fetched_at": _iso_days_ago(10)},
+            "gitlab.com/c/d": {"project": "gitlab.com/c/d", "fetched_at": _iso_days_ago(200)},
+        }
+        items = [
+            {"project": "gitlab.com/a/b"}, {"project": "gitlab.com/c/d"},
+            {"project": "gitlab.com/e/f"},
+        ]
+        to_fetch, fresh, missing = _filter_stale(items, existing, "project", False)
+        keys = sorted(x["project"] for x in to_fetch)
+        assert keys == ["gitlab.com/c/d", "gitlab.com/e/f"]   # old + missing
+        assert fresh == 1 and missing == 1

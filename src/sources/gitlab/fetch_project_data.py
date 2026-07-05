@@ -27,13 +27,10 @@ from pathlib import Path
 
 import aiohttp
 from rich.console import Console
-from rich.progress import (BarColumn, MofNCompleteColumn, Progress, TextColumn,
-                           TimeElapsedColumn)
+from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
 
 from src.common.freshness import row_is_fresh
-from src.sources.gitlab.gitlab_client import (GitLabLimiter, api_base,
-                                              encode_project_path, make_repo_id,
-                                              parse_git_url)
+from src.sources.gitlab.gitlab_client import GitLabLimiter, api_base, encode_project_path, make_repo_id, parse_git_url
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(message)s")
@@ -196,3 +193,165 @@ async def _fetch_namespace(limiter, session, item: dict) -> tuple[str, dict | No
                 continue
             return key, None, f"http_{resp.status}"
     return key, None, "error"
+
+
+def _load_existing(path: Path, key: str) -> dict[str, dict]:
+    if not path.exists():
+        return {}
+    out: dict[str, dict] = {}
+    with open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            k = (r.get(key) or "").lower()
+            if k:
+                out[k] = r
+    return out
+
+
+def _atomic_write(path: Path, rows: list[dict], fieldnames: list[str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(tmp, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=fieldnames,
+                           quoting=csv.QUOTE_MINIMAL, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(rows)
+    os.replace(tmp, path)
+
+
+def _filter_stale(items: list[dict], existing: dict[str, dict], key: str,
+                  force: bool) -> tuple[list[dict], int, int]:
+    """Return (to_fetch, fresh_count, missing_count) using a 90-day TTL.
+
+    A row whose stored `valid` is the string "False" is still re-checked only
+    once its `fetched_at` ages past TTL (dead-repo backoff), exactly like the
+    GitHub fetcher — `row_is_fresh` handles the timestamp; missing rows always
+    fetch.
+    """
+    to_fetch, fresh, missing = [], 0, 0
+    for it in items:
+        row = existing.get(it[key].lower())
+        if row and not force and row_is_fresh(row, ttl_days=TTL_DAYS):
+            fresh += 1
+        else:
+            to_fetch.append(it)
+            if not row:
+                missing += 1
+    return to_fetch, fresh, missing
+
+
+async def fetch_many(items: list[dict], fetch_one, label: str
+                     ) -> tuple[list[dict], dict[str, int]]:
+    """Drive async fetches with a rich progress bar; collect rows + status counts."""
+    token_map = None  # GitLabLimiter loads from env by default
+    limiter = GitLabLimiter(token_map)
+    rows: list[dict] = []
+    status_counts: dict[str, int] = {}
+    progress = Progress(
+        TextColumn("[bold cyan]{task.description}"), BarColumn(bar_width=30),
+        MofNCompleteColumn(), TimeElapsedColumn(),
+        TextColumn("[dim]{task.fields[status]}"), console=console,
+    )
+    async with aiohttp.ClientSession() as session:
+        with progress:
+            task = progress.add_task(label, total=len(items), status="")
+            sem = asyncio.Semaphore(MAX_CONCURRENT)
+
+            async def _wrap(item):
+                async with sem:
+                    return await fetch_one(limiter, session, item)
+
+            coros = [asyncio.create_task(_wrap(it)) for it in items]
+            for coro in asyncio.as_completed(coros):
+                _, row, status = await coro
+                if row:
+                    rows.append(row)
+                status_counts[status] = status_counts.get(status, 0) + 1
+                progress.update(task, advance=1,
+                                status=f"{limiter.n} api calls · "
+                                       f"{', '.join(f'{k}={v}' for k, v in status_counts.items())}")
+    return rows, status_counts
+
+
+def upsert(out_path: Path, key: str, fields: list[str], new_rows: list[dict]) -> int:
+    """Merge new rows into the CSV by `key`. Returns total written."""
+    existing = _load_existing(out_path, key)
+    for r in new_rows:
+        k = (r.get(key) or "").lower()
+        if k:
+            existing[k] = r
+    sorted_rows = sorted(existing.values(), key=lambda r: (r.get(key) or "").lower())
+    _atomic_write(out_path, sorted_rows, fields)
+    return len(sorted_rows)
+
+
+def _namespaces_from_projects() -> list[dict]:
+    """Derive namespace targets from projects.csv (after the project phase)."""
+    if not PROJECTS_OUT.exists():
+        return []
+    seen: dict[str, dict] = {}
+    with open(PROJECTS_OUT, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            host = r.get("host") or ""
+            full = r.get("namespace_path") or ""
+            if host and full:
+                key = f"{host}/{full}".lower()
+                seen[key] = {"host": host, "full_path": full, "namespace": key}
+    return sorted(seen.values(), key=lambda x: x["namespace"])
+
+
+def fetch_and_persist(target: str = "projects", force: bool = False,
+                      limit: int | None = None, quiet: bool = False) -> dict:
+    """Fetch GitLab projects (+ namespaces). Idempotent under the 90-day TTL."""
+    if not quiet:
+        console.rule("[bold cyan]gitlab/fetch_project_data")
+        console.print(f"  TTL=[dim]{TTL_DAYS}d[/dim]  force=[dim]{force}[/dim]  target=[dim]{target}[/dim]")
+    out: dict = {"elapsed_s": 0.0}
+    t0 = time.monotonic()
+
+    if target in ("projects", "both"):
+        items = load_gitlab_rows()
+        existing = _load_existing(PROJECTS_OUT, "project")
+        to_fetch, fresh, missing = _filter_stale(items, existing, "project", force)
+        if limit:
+            to_fetch = to_fetch[:limit]
+        if not quiet:
+            console.print(f"  [bold]Projects:[/bold] fresh={fresh:,} missing={missing:,} "
+                          f"to_fetch={len(to_fetch):,}")
+        new_rows, statuses = (asyncio.run(fetch_many(to_fetch, _fetch_project, "projects"))
+                              if to_fetch else ([], {}))
+        total = upsert(PROJECTS_OUT, "project", PROJECT_FIELDS, new_rows)
+        out["projects"] = {"fresh": fresh, "fetched": len(new_rows),
+                           "statuses": statuses, "total": total}
+
+    if target in ("namespaces", "both"):
+        items = _namespaces_from_projects()
+        existing = _load_existing(NAMESPACES_OUT, "namespace")
+        to_fetch, fresh, missing = _filter_stale(items, existing, "namespace", force)
+        if limit:
+            to_fetch = to_fetch[:limit]
+        if not quiet:
+            console.print(f"  [bold]Namespaces:[/bold] fresh={fresh:,} missing={missing:,} "
+                          f"to_fetch={len(to_fetch):,}")
+        new_rows, statuses = (asyncio.run(fetch_many(to_fetch, _fetch_namespace, "namespaces"))
+                              if to_fetch else ([], {}))
+        total = upsert(NAMESPACES_OUT, "namespace", NAMESPACE_FIELDS, new_rows)
+        out["namespaces"] = {"fresh": fresh, "fetched": len(new_rows),
+                             "statuses": statuses, "total": total}
+
+    out["elapsed_s"] = time.monotonic() - t0
+    if not quiet:
+        console.print(f"  [dim]elapsed {out['elapsed_s']:.1f}s[/dim]")
+    return out
+
+
+def main() -> None:
+    p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    p.add_argument("--target", choices=["projects", "namespaces", "both"], default="both")
+    p.add_argument("--limit", type=int, default=None)
+    p.add_argument("--force", action="store_true")
+    args = p.parse_args()
+    fetch_and_persist(target=args.target, force=args.force, limit=args.limit)
+
+
+if __name__ == "__main__":
+    main()
