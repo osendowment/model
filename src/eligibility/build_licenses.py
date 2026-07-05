@@ -51,6 +51,7 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 OSI_FILE = DATA_DIR / "sources" / "osi" / "oss-licenses.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
+GL_PROJECTS_FILE = DATA_DIR / "sources" / "gitlab" / "projects.csv"
 OVERRIDES_FILE = DATA_DIR / "eligibility" / "overrides.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility" / "licenses.csv"
 
@@ -193,6 +194,25 @@ def load_github_licenses() -> dict[str, str]:
     return out
 
 
+def load_gitlab_licenses() -> dict[str, str]:
+    """{gl/ repo_id: license} from gitlab/projects.csv (lowercased SPDX).
+
+    The GitLab project API returns a `license.key` (SPDX-ish) that the fetcher
+    flattens into the `license` column — the GitLab analogue of the GitHub
+    Licensee fallback, keyed by the stable gl/ repo_id rather than a slug.
+    """
+    out: dict[str, str] = {}
+    if not GL_PROJECTS_FILE.exists():
+        return out
+    with open(GL_PROJECTS_FILE, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            rid = (row.get("repo_id") or "").strip()
+            lic = (row.get("license") or "").strip().lower()
+            if rid.startswith("gl/") and lic:
+                out[rid] = lic
+    return out
+
+
 def build() -> list[dict]:
     # Same scope rationale as the other eligibility builders: archived repos
     # stay in so the rollup can show WHY they are ineligible.
@@ -201,6 +221,7 @@ def build() -> list[dict]:
     overrides = load_license_overrides()
     registry = load_registry_licenses()
     github = load_github_licenses()
+    gitlab = load_gitlab_licenses()
 
     rows: list[dict] = []
     for entry in eligible:
@@ -212,6 +233,8 @@ def build() -> list[dict]:
             lic, source = registry[repo], "registry"
         elif github.get(repo):
             lic, source = github[repo], "github"
+        elif gitlab.get(rid):
+            lic, source = gitlab[rid], "gitlab"
         else:
             lic, source = "", ""
         oss = classify_oss(lic, approved)
