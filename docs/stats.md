@@ -183,22 +183,24 @@ AND active`. Methodology: [eligibility.md](eligibility.md) +
 
 ### Licenses (scope 916)
 
-Per-repo license resolution ([eligibility.md](eligibility.md)) — registry
-license first (per-eco results.csv), GitHub Licensee fallback; `oss` = the
+Per-repo license resolution ([eligibility.md](eligibility.md)) — manual
+`license` assertion in `overrides.csv` first (detection-failure fix), then
+registry license (per-eco results.csv), GitHub Licensee fallback; `oss` = the
 SPDX id (or any component of an SPDX expression) is OSI-approved ∪ curated
 extras. Unknown (no license signal) is tracked separately from known non-OSS.
 
 | Step | Repos | % |
 |---|---:|---:|
 | input top repos (incl. archived) | 918 | 100% |
-| license resolved | 917 | 99.9% |
+| license resolved | 918 | 100% |
+| · from override | 7 | 0.8% |
 | · from registry | 895 | 97.5% |
-| · from GitHub | 22 | 2.4% |
-| **oss=True (OSI-approved)** | **897** | **97.7%** |
-| oss=False (known non-OSS) | 5 | 0.5% |
-| oss unknown (no signal) | 16 | 1.7% |
+| · from GitHub | 16 | 1.7% |
+| **oss=True (OSI-approved)** | **905** | **98.6%** |
+| oss=False (known non-OSS) | 4 | 0.4% |
+| oss unknown (no signal) | 9 | 1.0% |
 
-The 5 known non-OSS are content-licensed data repos (CC0/CC-BY — free for
+The 4 known non-OSS are content-licensed data repos (CC0/CC-BY — free for
 documents, not software OSS by this model's strict policy).
 
 ### Activity
@@ -224,14 +226,14 @@ Microsoft, …). See [funding.md](components/funding.md).
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 660 | 71.9% |
-| intent — no funding signal | 258 | 28.1% |
-| nonprofit — community / independent | 856 | 93.2% |
-| nonprofit — company-backed | 62 | 6.8% |
+| intent — any funding signal | 665 | 72.4% |
+| intent — no funding signal | 253 | 27.6% |
+| nonprofit — community / independent | 857 | 93.4% |
+| nonprofit — company-backed | 61 | 6.6% |
 
-The 33 company-backed repos are **kept in `eligibility.csv`** and flagged
+The 61 company-backed repos are **kept in `eligibility.csv`** and flagged
 `nonprofit=False` (they are already resourced; the flag makes them ineligible
-without hiding them). The 286 repos with `intent=False` are not actively
+without hiding them). The 253 repos with `intent=False` are not actively
 soliciting support — a higher-priority target for outreach.
 
 ### Eligibility rollup
@@ -241,8 +243,8 @@ unlock. Missing intent is by far the binding constraint.
 
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
-| oss | 897 | 97.7% | 10 |
-| intent | 660 | 71.9% | 232 |
-| nonprofit | 856 | 93.2% | 61 |
+| oss | 905 | 98.6% | 5 |
+| intent | 665 | 72.4% | 230 |
+| nonprofit | 857 | 93.4% | 60 |
 | active | 896 | 97.6% | 6 |
-| **eligible** | **582** | **63.4%** | |
+| **eligible** | **593** | **64.6%** | |

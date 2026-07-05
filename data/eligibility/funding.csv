@@ -35,7 +35,7 @@ ardatan/graphql-tools,54432168,True,3,0,3,39.0,5425,828,True,True,github,False,F
 ardatan/whatwg-node,429511342,True,3,0,3,39.0,194,37,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,73,True,True
 assert-rs/snapbox,424722460,False,0,0,0,100.0,174,26,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 astanin/python-tabulate,205875548,False,0,0,0,100.0,2548,186,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-astral-sh/ruff,523043277,False,0,38,38,17.65,47269,2030,False,False,,False,False,,False,,0,astral-sh,2000,5.99,,,openai.com,company,0,1,True,False
+astral-sh/ruff,523043277,False,0,38,38,17.65,47269,2030,False,False,,False,False,,False,,0,astral-sh,2000,5.99,,,astral.sh,company,0,1,True,False
 auth0/node-jwa,8116861,False,0,0,0,100.0,102,45,False,False,,False,False,,False,,0,,0,100.0,,,auth0.com,company,0,1,True,False
 autotools-mirror/autoconf,47662429,False,0,0,0,100.0,66,25,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 autotools-mirror/libtool,47662711,False,0,0,0,100.0,51,28,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
@@ -91,7 +91,7 @@ calvinmetcalf/process-nextick-args,36039131,False,0,0,0,100.0,33,16,False,False,
 caolan/async,698041,False,0,0,0,100.0,28173,2381,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 certbot/certbot,26516210,False,0,0,0,100.0,33013,3495,True,True,custom,False,False,,False,,1,,0,100.0,eff.org,nonprofit,,,0.5,79,True,True
 certifi/python-certifi,3060959,False,0,0,0,100.0,966,288,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-chaijs/type-detect,12107007,False,0,0,0,100.0,127,30,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+chaijs/type-detect,12107007,False,0,0,0,100.0,127,30,False,False,,False,False,,False,,0,chaijs,0,100.0,,,,,1,100,True,True
 chalk/ansi-regex,20451415,False,0,0,0,100.0,202,90,True,False,"github,tidelift",False,True,https://github.com/chalk/ansi-regex?sponsor=1,False,,3,,0,100.0,,,,,1,79,True,True
 chalk/ansi-styles,11803168,False,0,0,0,100.0,458,81,True,False,"github,tidelift",False,True,https://github.com/chalk/ansi-styles?sponsor=1,False,,3,,0,100.0,,,,,1,79,True,True
 chalk/chalk,11855195,False,0,0,0,100.0,23161,959,True,False,"github,open_collective,tidelift,custom",False,True,https://github.com/chalk/chalk?sponsor=1,False,,5,,0,100.0,,,,,1,79,True,True
@@ -234,7 +234,7 @@ floating-ui/floating-ui,54994103,True,1,0,1,42.59,32577,1679,True,True,"github,o
 follow-redirects/follow-redirects,6697086,False,0,0,0,100.0,581,180,True,True,github,False,True,https://github.com/sponsors/RubenVerborgh,False,,2,,0,100.0,,,,,1,79,True,True
 form-data/form-data,1755793,False,0,0,0,100.0,2347,390,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 formatjs/formatjs,19117456,False,0,0,0,100.0,14707,1385,False,False,,False,False,,False,,0,formatjs,80,17.86,,,,,1,56,True,True
-freedesktop-unofficial-mirror/cairo,34372735,False,0,0,0,100.0,0,0,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+freedesktop-unofficial-mirror/cairo,34372735,False,0,0,0,100.0,0,0,False,False,,False,False,,False,,0,,0,100.0,freedesktop.org,nonprofit,,,0.5,79,True,True
 freetype/freetype,187000659,False,0,0,0,100.0,816,402,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 frenic/csstype,104001328,False,0,0,0,100.0,1815,75,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 frommi/miniz_oxide,96124162,False,0,0,0,100.0,233,71,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
@@ -254,7 +254,7 @@ gkz/levn,13287279,False,0,0,0,100.0,86,8,False,False,,False,False,,False,,0,,0,1
 gkz/optionator,13435927,False,0,0,0,100.0,166,16,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 gkz/prelude-ls,4457759,False,0,0,0,100.0,427,58,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 gkz/type-check,13182168,False,0,0,0,100.0,211,16,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-gmp-mirror/gmp,681340775,False,0,0,0,100.0,25,7,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+gmp-mirror/gmp,681340775,False,0,0,0,100.0,25,7,False,False,,False,False,,False,,0,,0,100.0,fsf.org,nonprofit,,,0.5,79,True,True
 gnome/pango,4537144,False,0,0,0,100.0,182,51,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 google/brotli,24993138,False,0,0,0,100.0,14674,1337,False,False,,False,False,,False,,0,,0,100.0,,,google.com,company,0,1,True,False
 google/zerocopy,534354967,False,0,0,0,100.0,2279,151,False,False,,False,False,,False,,0,,0,100.0,,,google.com,company,0,1,True,False
@@ -441,7 +441,7 @@ libexpat/libexpat,80314213,False,0,0,0,100.0,1322,504,False,False,,False,False,,
 libffi/libffi,321154,False,0,0,0,100.0,4233,807,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 libjpeg-turbo/libjpeg-turbo,39760454,True,9,0,9,29.52,4295,1142,True,True,github,True,False,,False,,2,,0,100.0,,,,,1,67,True,True
 libjxl/libjxl,340219494,False,0,0,0,100.0,3460,357,False,False,,False,False,,False,,0,,0,100.0,,,google.com,company,0,1,True,False
-libpixman/pixman,81675971,False,0,0,0,100.0,38,3,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+libpixman/pixman,81675971,False,0,0,0,100.0,38,3,False,False,,False,False,,False,,0,,0,100.0,x.org,nonprofit,,,0.5,79,True,True
 libuv/libuv,14812739,False,0,0,0,100.0,26792,3866,False,False,,False,False,,False,,0,,0,100.0,openjsf.org,nonprofit,,,0.5,79,True,True
 linusu/buffer-from,66025821,True,3,0,3,39.0,25,9,False,False,,False,False,,False,,0,,0,100.0,,,,,1,73,True,True
 linux-audit/audit-userspace,52464964,False,0,0,0,100.0,707,239,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
@@ -518,7 +518,7 @@ microsoft/tslib,34414315,False,0,1,1,42.59,1336,145,False,False,,False,False,,Fa
 microsoft/typescript,20929025,False,0,1,1,42.59,108681,13373,False,False,,False,False,,False,,0,,0,100.0,,,microsoft.com,company,0,1,True,False
 microsoft/windows-rs,208102250,False,0,1,1,42.59,12133,612,False,False,,False,False,,False,,0,,0,100.0,,,microsoft.com,company,0,1,True,False
 minimistjs/minimist,549230701,False,0,0,0,100.0,661,46,True,True,"github,tidelift",False,True,https://github.com/sponsors/ljharb,False,,3,,0,100.0,,,,,1,79,True,True
-mirror/ncurses,22324756,False,0,0,0,100.0,586,128,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+mirror/ncurses,22324756,False,0,0,0,100.0,586,128,False,False,,False,False,,False,,0,,0,100.0,gnu.org,nonprofit,,,0.5,79,True,True
 mitsuhiko/insta,165561258,True,25,0,25,19.06,2833,148,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,58,True,True
 mm2/little-cms,507969,False,0,0,0,100.0,716,213,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 moment/moment,1424470,False,0,0,0,100.0,47987,7001,False,False,,False,False,,False,,0,,0,100.0,lf/openjs,nonprofit,,,0.5,79,True,True
@@ -542,7 +542,7 @@ node-fetch/node-fetch,29849956,True,4,0,4,37.04,8857,1052,True,True,"github,open
 nodeca/argparse,4325614,True,4,0,4,37.04,508,75,True,True,"open_collective,patreon,tidelift",False,False,,False,,3,nodeca,190.70,16.99,,,,,1,40,True,True
 nodeca/js-yaml,2504175,True,4,0,4,37.04,6564,807,True,True,github,True,True,https://github.com/sponsors/puzrin,False,,3,nodeca,190.70,16.99,,,,,1,40,True,True
 nodeca/pako,16231859,True,4,0,4,37.04,6065,802,True,True,github,False,True,https://github.com/sponsors/puzrin,False,,2,nodeca,190.70,16.99,,,,,1,40,True,True
-nodejs/node,27193779,True,55,0,55,17.1,116940,35445,True,True,"github,open_collective",False,False,,False,,2,nodejs-google-summer-of-code,0,100.0,lf/openjs,nonprofit,,,0.5,44,True,True
+nodejs/node,27193779,True,55,0,55,17.1,116940,35445,True,True,"github,open_collective",False,False,,False,,2,,0,100.0,lf/openjs,nonprofit,,,0.5,44,True,True
 nodejs/readable-stream,5187096,True,55,0,55,17.1,1045,237,True,True,"github,open_collective",False,False,,False,,2,nodejs-google-summer-of-code,0,100.0,lf/openjs,nonprofit,,,0.5,44,True,True
 nodejs/string_decoder,95052330,True,55,0,55,17.1,35,23,True,True,"github,open_collective",False,False,,False,,2,nodejs-google-summer-of-code,0,100.0,,,,,1,56,True,True
 nodejs/undici,133092972,True,55,0,55,17.1,7532,756,True,True,"github,open_collective",False,False,,False,,2,nodejs-google-summer-of-code,0,100.0,,,,,1,56,True,True
@@ -658,7 +658,7 @@ rayon-rs/either,42479602,False,0,0,0,100.0,552,71,False,False,,False,False,,Fals
 rayon-rs/rayon,24725038,False,0,0,0,100.0,12930,586,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 react/create-react-app,63537249,False,0,,0,100.0,103307,26974,True,True,open_collective,False,False,,False,,1,create-react-app,203.20,16.67,,,meta.com,company,0,1,True,False
 react/metro,76504246,False,0,,0,100.0,5608,684,False,False,,False,False,,False,,0,,0,100.0,,,meta.com,company,0,1,True,False
-react/react,10270250,False,0,,0,100.0,246249,51204,False,False,,False,False,,False,,0,,0,100.0,react.foundation,nonprofit,meta.com,company,0,1,True,False
+react/react,10270250,False,0,,0,100.0,246249,51204,False,False,,False,False,,False,,0,,0,100.0,react.foundation,nonprofit,,,0.5,79,True,True
 reactivex/rxjs,32247847,False,0,0,0,100.0,31662,2988,False,False,,False,False,,False,,0,rxjs,10,18.19,,,,,1,57,True,True
 realpython/pytest-mypy,69576530,False,0,0,0,100.0,258,33,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 remix-run/react-router,19872456,False,0,2,2,40.31,56374,10849,True,True,open_collective,False,False,,False,,1,,0,100.0,,,shopify.com,company,0,1,True,False

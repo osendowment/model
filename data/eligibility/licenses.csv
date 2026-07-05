@@ -234,7 +234,7 @@ floating-ui/floating-ui,54994103,mit,registry,True
 follow-redirects/follow-redirects,6697086,mit,registry,True
 form-data/form-data,1755793,mit,registry,True
 formatjs/formatjs,19117456,mit,registry,True
-freedesktop-unofficial-mirror/cairo,34372735,noassertion,github,
+freedesktop-unofficial-mirror/cairo,34372735,lgpl-2.1-only or mpl-1.1,override,True
 freetype/freetype,187000659,ftl,registry,True
 frenic/csstype,104001328,mit,registry,True
 frommi/miniz_oxide,96124162,mit or zlib or apache-2.0,registry,True
@@ -439,7 +439,7 @@ lddubeau/xmlchars,139881982,mit,registry,True
 legrandin/pycryptodome,19378935,bsd-3-clause,registry,True
 libexpat/libexpat,80314213,mit,registry,True
 libffi/libffi,321154,mit,registry,True
-libjpeg-turbo/libjpeg-turbo,39760454,noassertion,github,
+libjpeg-turbo/libjpeg-turbo,39760454,bsd-3-clause,override,True
 libjxl/libjxl,340219494,bsd-3-clause,github,True
 libpixman/pixman,81675971,mit,registry,True
 libuv/libuv,14812739,mit,registry,True
@@ -518,7 +518,7 @@ microsoft/tslib,34414315,0bsd,registry,True
 microsoft/typescript,20929025,apache-2.0,registry,True
 microsoft/windows-rs,208102250,mit or apache-2.0,registry,True
 minimistjs/minimist,549230701,mit,registry,True
-mirror/ncurses,22324756,x11-distribute-modifications-variant,registry,False
+mirror/ncurses,22324756,x11-distribute-modifications-variant,registry,True
 mitsuhiko/insta,165561258,apache-2.0,registry,True
 mm2/little-cms,507969,mit,github,True
 moment/moment,1424470,mit,registry,True
@@ -542,7 +542,7 @@ node-fetch/node-fetch,29849956,mit,registry,True
 nodeca/argparse,4325614,python-2.0,registry,True
 nodeca/js-yaml,2504175,mit,registry,True
 nodeca/pako,16231859,(mit and zlib),registry,True
-nodejs/node,27193779,noassertion,github,
+nodejs/node,27193779,mit,override,True
 nodejs/readable-stream,5187096,mit,registry,True
 nodejs/string_decoder,95052330,mit,registry,True
 nodejs/undici,133092972,mit,registry,True
@@ -638,7 +638,7 @@ python-jsonschema/referencing,569027868,mit,registry,True
 python-pillow/pillow,5171600,mit-cmu,registry,True
 python-poetry/tomlkit,140365570,mit,registry,True
 python-trio/sniffio,142657210,apache-2.0,registry,True
-python/cpython,81598961,noassertion,github,
+python/cpython,81598961,python-2.0,override,True
 python/importlib_metadata,306448340,apache-2.0,registry,True
 python/importlib_resources,306147182,apache-2.0,registry,True
 python/mypy,7053637,mit,registry,True
@@ -848,7 +848,7 @@ tim-kos/node-retry,1738798,mit,registry,True
 time-rs/time,26459635,mit or apache-2.0,registry,True
 tj/commander.js,2206953,mit,registry,True
 tj/node-cookie-signature,6229722,mit,registry,True
-tjguk/wmi,23124645,,,
+tjguk/wmi,23124645,mit,override,True
 tkem/cachetools,18006791,mit,registry,True
 tokio-rs/bytes,30062547,mit,registry,True
 tokio-rs/loom,161875917,mit,registry,True
@@ -859,7 +859,7 @@ tokio-rs/tracing,165289175,mit,registry,True
 toml-rs/toml,95902102,mit or apache-2.0,registry,True
 tootallnate/proxy-agents,11293703,mit,registry,True
 tootallnate/util-deprecate,19321056,mit,registry,True
-torvalds/linux,2325298,noassertion,github,
+torvalds/linux,2325298,gpl-2.0-only,override,True
 tower-rs/tower,98244646,mit,registry,True
 tox-dev/filelock,17098256,mit,registry,True
 tox-dev/platformdirs,367032142,mit,registry,True
@@ -871,7 +871,7 @@ tsconfig/bases,263697285,mit,registry,True
 tukaani-project/xz,553665726,0bsd and gpl-2.0-or-later,registry,True
 typescript-eslint/typescript-eslint,165536154,mit,registry,True
 typeshed-internal/stub_uploader,331669593,apache-2.0,registry,True
-unicode-org/icu,49244766,noassertion,github,
+unicode-org/icu,49244766,unicode-3.0,override,True
 unicode-org/icu4x,243395141,unicode-3.0,registry,True
 unicode-rs/unicode-xid,34637906,mit or apache-2.0,registry,True
 unshiftio/requires-port,26316179,mit,registry,True

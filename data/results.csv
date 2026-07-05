@@ -1,9 +1,13 @@
 repo_id,repo,ecosystem,value_score,risk_score
+22324756,mirror/ncurses,cpp,36.8528,90
+81675971,libpixman/pixman,cpp,25.849,86
 1424470,moment/moment,npm,25.0748,86
 63465664,ethers-io/ethers.js,npm,29.3439,85
 23853482,retep998/winapi-rs,crates,37.7109,83
 1792941,medikoo/es5-ext,npm,45.3871,81
+34372735,freedesktop-unofficial-mirror/cairo,cpp,31.5863,81
 4325614,nodeca/argparse,npm,58.3116,79
+39760454,libjpeg-turbo/libjpeg-turbo,cpp,38.1703,78
 67236461,csstree/csstree,npm,36.6757,77
 119609,paramiko/paramiko,pypi,27.5105,77
 67307930,indygreg/python-zstandard,pypi,38.0609,75
@@ -18,6 +22,7 @@ repo_id,repo,ecosystem,value_score,risk_score
 295544240,bytecodealliance/rustix,crates,32.2364,73
 2317381,pvorb/clone,npm,26.8528,73
 63155638,stub42/pytz,pypi,46.1926,72
+12107007,chaijs/type-detect,npm,43.9085,72
 17144859,grantjenks/python-sortedcontainers,pypi,25.2982,72
 95052330,nodejs/string_decoder,npm,56.2724,71
 190579283,babel/babel-polyfills,npm,53.6186,71
@@ -30,6 +35,7 @@ repo_id,repo,ecosystem,value_score,risk_score
 238967485,antonk52/lilconfig,npm,27.9694,71
 67305738,dtolnay/syn,crates,71.2836,70
 157420458,micromark/micromark,npm,63.2813,70
+681340775,gmp-mirror/gmp,cpp,51.3627,70
 26459635,time-rs/time,crates,35.0448,70
 11031844,uqfoundation/dill,pypi,27.3906,70
 27113310,jonschlinkert/fill-range,npm,57.4323,69
@@ -400,6 +406,7 @@ repo_id,repo,ecosystem,value_score,risk_score
 98244646,tower-rs/tower,crates,29.479,41
 32450614,jonschlinkert/map-cache,npm,28.3157,41
 15484233,jshttp/type-is,npm,27.6273,41
+10270250,react/react,npm,70.3049,40
 175398594,sindresorhus/type-fest,npm,67.1929,40
 773229339,es-shims/es-object-atoms,npm,60.1802,40
 71381729,sindresorhus/mimic-function,npm,55.1793,40
@@ -479,6 +486,7 @@ repo_id,repo,ecosystem,value_score,risk_score
 99401299,ai/nanoid,npm,40.0699,36
 43528820,inspect-js/is-typed-array,npm,38.6031,36
 7730086,webpack/tapable,npm,38.4686,36
+27193779,nodejs/node,cpp,33.2484,36
 23512396,sindresorhus/cli-cursor,npm,32.9278,36
 25997846,feross/is-buffer,npm,30.386,36
 45977026,inspect-js/is-array-buffer,npm,28.2,36
@@ -547,6 +555,7 @@ repo_id,repo,ecosystem,value_score,risk_score
 24216676,jshttp/content-disposition,npm,27.4773,29
 2410676,urllib3/urllib3,pypi,86.1833,28
 908607,numpy/numpy,pypi,67.6202,28
+2325298,torvalds/linux,cpp,62.1135,28
 6627835,fb55/domelementtype,npm,56.4322,28
 18444852,sindresorhus/strip-bom,npm,44.1773,28
 33884891,apache/airflow,pypi,43.5433,28
@@ -558,6 +567,7 @@ repo_id,repo,ecosystem,value_score,risk_score
 34965664,sindresorhus/path-exists,npm,43.9971,27
 220524743,open-telemetry/opentelemetry-python-contrib,pypi,35.864,27
 26516210,certbot/certbot,pypi,39.4597,26
+49244766,unicode-org/icu,cpp,34.5745,26
 71534796,sindresorhus/p-try,npm,34.4196,26
 102982143,isaacs/fs-minipass,npm,31.464,26
 21673868,sindresorhus/log-symbols,npm,28.9423,26
@@ -571,6 +581,7 @@ repo_id,repo,ecosystem,value_score,risk_score
 47504070,sindresorhus/resolve-cwd,npm,30.8288,23
 1408162,jpadilla/pyjwt,pypi,42.9093,22
 11516031,sindresorhus/slash,npm,50.7208,21
+81598961,python/cpython,cpp,39.1147,21
 60721766,pillarjs/encodeurl,npm,35.1955,21
 29771247,sindresorhus/is-binary-path,npm,31.4181,20
 21005682,sindresorhus/array-union,npm,30.9187,20

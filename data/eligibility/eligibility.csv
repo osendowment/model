@@ -91,7 +91,7 @@ calvinmetcalf/process-nextick-args,36039131,True,False,True,True,False
 caolan/async,698041,True,False,True,True,False
 certbot/certbot,26516210,True,True,True,True,True
 certifi/python-certifi,3060959,True,False,True,True,False
-chaijs/type-detect,12107007,True,False,True,True,False
+chaijs/type-detect,12107007,True,True,True,True,True
 chalk/ansi-regex,20451415,True,True,True,True,True
 chalk/ansi-styles,11803168,True,True,True,True,True
 chalk/chalk,11855195,True,True,True,True,True
@@ -234,7 +234,7 @@ floating-ui/floating-ui,54994103,True,True,True,True,True
 follow-redirects/follow-redirects,6697086,True,True,True,True,True
 form-data/form-data,1755793,True,False,True,True,False
 formatjs/formatjs,19117456,True,True,True,True,True
-freedesktop-unofficial-mirror/cairo,34372735,False,False,True,True,False
+freedesktop-unofficial-mirror/cairo,34372735,True,True,True,True,True
 freetype/freetype,187000659,True,False,True,True,False
 frenic/csstype,104001328,True,False,True,True,False
 frommi/miniz_oxide,96124162,True,False,True,True,False
@@ -254,7 +254,7 @@ gkz/levn,13287279,True,False,True,True,False
 gkz/optionator,13435927,True,False,True,True,False
 gkz/prelude-ls,4457759,True,False,True,True,False
 gkz/type-check,13182168,True,False,True,True,False
-gmp-mirror/gmp,681340775,True,False,True,True,False
+gmp-mirror/gmp,681340775,True,True,True,True,True
 gnome/pango,4537144,True,False,True,True,False
 google/brotli,24993138,True,True,False,True,False
 google/zerocopy,534354967,True,True,False,True,False
@@ -439,9 +439,9 @@ lddubeau/xmlchars,139881982,True,False,True,False,False
 legrandin/pycryptodome,19378935,True,False,True,True,False
 libexpat/libexpat,80314213,True,False,True,True,False
 libffi/libffi,321154,True,False,True,True,False
-libjpeg-turbo/libjpeg-turbo,39760454,False,True,True,True,False
+libjpeg-turbo/libjpeg-turbo,39760454,True,True,True,True,True
 libjxl/libjxl,340219494,True,True,False,True,False
-libpixman/pixman,81675971,True,False,True,True,False
+libpixman/pixman,81675971,True,True,True,True,True
 libuv/libuv,14812739,True,True,True,True,True
 linusu/buffer-from,66025821,True,True,True,True,True
 linux-audit/audit-userspace,52464964,True,False,True,True,False
@@ -518,7 +518,7 @@ microsoft/tslib,34414315,True,True,False,True,False
 microsoft/typescript,20929025,True,True,False,True,False
 microsoft/windows-rs,208102250,True,True,False,True,False
 minimistjs/minimist,549230701,True,True,True,True,True
-mirror/ncurses,22324756,False,False,True,True,False
+mirror/ncurses,22324756,True,True,True,True,True
 mitsuhiko/insta,165561258,True,True,True,True,True
 mm2/little-cms,507969,True,False,True,True,False
 moment/moment,1424470,True,True,True,True,True
@@ -542,7 +542,7 @@ node-fetch/node-fetch,29849956,True,True,True,True,True
 nodeca/argparse,4325614,True,True,True,True,True
 nodeca/js-yaml,2504175,True,True,True,True,True
 nodeca/pako,16231859,True,True,True,True,True
-nodejs/node,27193779,False,True,True,True,False
+nodejs/node,27193779,True,True,True,True,True
 nodejs/readable-stream,5187096,True,True,True,True,True
 nodejs/string_decoder,95052330,True,True,True,True,True
 nodejs/undici,133092972,True,True,True,True,True
@@ -638,7 +638,7 @@ python-jsonschema/referencing,569027868,True,True,True,True,True
 python-pillow/pillow,5171600,True,True,True,True,True
 python-poetry/tomlkit,140365570,True,True,True,True,True
 python-trio/sniffio,142657210,True,True,True,True,True
-python/cpython,81598961,False,True,True,True,False
+python/cpython,81598961,True,True,True,True,True
 python/importlib_metadata,306448340,True,True,True,True,True
 python/importlib_resources,306147182,True,True,True,True,True
 python/mypy,7053637,True,True,True,True,True
@@ -658,7 +658,7 @@ rayon-rs/either,42479602,True,False,True,True,False
 rayon-rs/rayon,24725038,True,False,True,True,False
 react/create-react-app,63537249,True,True,False,True,False
 react/metro,76504246,True,True,False,True,False
-react/react,10270250,True,True,False,True,False
+react/react,10270250,True,True,True,True,True
 reactivex/rxjs,32247847,True,True,True,True,True
 realpython/pytest-mypy,69576530,True,False,True,True,False
 remix-run/react-router,19872456,True,True,False,True,False
@@ -848,7 +848,7 @@ tim-kos/node-retry,1738798,True,False,True,True,False
 time-rs/time,26459635,True,True,True,True,True
 tj/commander.js,2206953,True,True,True,True,True
 tj/node-cookie-signature,6229722,True,True,True,True,True
-tjguk/wmi,23124645,False,False,True,True,False
+tjguk/wmi,23124645,True,False,True,True,False
 tkem/cachetools,18006791,True,True,True,True,True
 tokio-rs/bytes,30062547,True,True,True,True,True
 tokio-rs/loom,161875917,True,True,True,True,True
@@ -859,7 +859,7 @@ tokio-rs/tracing,165289175,True,True,True,True,True
 toml-rs/toml,95902102,True,True,True,True,True
 tootallnate/proxy-agents,11293703,True,False,True,True,False
 tootallnate/util-deprecate,19321056,True,False,True,True,False
-torvalds/linux,2325298,False,True,True,True,False
+torvalds/linux,2325298,True,True,True,True,True
 tower-rs/tower,98244646,True,True,True,True,True
 tox-dev/filelock,17098256,True,True,True,True,True
 tox-dev/platformdirs,367032142,True,True,True,True,True
@@ -871,7 +871,7 @@ tsconfig/bases,263697285,True,False,True,True,False
 tukaani-project/xz,553665726,True,True,True,True,True
 typescript-eslint/typescript-eslint,165536154,True,True,True,True,True
 typeshed-internal/stub_uploader,331669593,True,False,True,True,False
-unicode-org/icu,49244766,False,True,True,True,False
+unicode-org/icu,49244766,True,True,True,True,True
 unicode-org/icu4x,243395141,True,True,True,True,True
 unicode-rs/unicode-xid,34637906,True,False,True,True,False
 unshiftio/requires-port,26316179,True,False,True,True,False
