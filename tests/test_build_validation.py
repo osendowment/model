@@ -38,7 +38,8 @@ class TestCollectTargets:
         t = bv.collect_targets(rows)
         # github row keyed by lowercased slug; its derived github git_url ignored
         assert t[("owner/repo", "github_repo")] == {"npm", "pypi"}
-        assert t[("https://example.com/x.git", "git_url")] == {"crates"}
+        # non-github git URLs are canonicalized (https→git://) before keying
+        assert t[("git://example.com/x.git", "git_url")] == {"crates"}
         # orphan contributes no target
         assert len(t) == 2
 

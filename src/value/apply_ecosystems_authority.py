@@ -162,7 +162,8 @@ def load_canonical_map() -> dict[str, str]:
 # ── GitHub identity resolution ─────────────────────────────────────────────────
 
 
-def _resolve_github(rows: list[dict], repos_file: str | None = None) -> None:
+def _resolve_github(rows: list[dict], repos_file: str | None = None,
+                    offline: bool = False, force: bool = False) -> None:
     """In-place: stamp repo_id, github_repo, git, mirror_url from github/repos.csv.
 
     After the eco-authority rewrite, each row's git URL is canonicalised
@@ -193,12 +194,14 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None) -> None:
     slugs = {_slug(r) for r in rows} - {""}
 
     # Step 3: TTL-gated fetch (90d).  Already-fresh rows cost ~0 network.
-    if slugs:
+    # --offline skips the fetch entirely (hard-forbid network);
+    # --refresh forces a refetch ignoring the TTL.
+    if slugs and not offline:
         fetch_and_persist(
             repos=sorted(slugs),
             owners=owners_from_repos(sorted(slugs)),
             target="repos",
-            force=False,
+            force=force,
             quiet=True,
         )
 
@@ -233,7 +236,8 @@ PLATFORM_RESOLVERS: dict[str, object] = {"github": _resolve_github}
 # ── per-ecosystem rewrite ───────────────────────────────────────────────────────
 
 
-def apply_eco(ecosystem: str, overrides: dict, is_invalid, canonical: dict) -> dict:
+def apply_eco(ecosystem: str, overrides: dict, is_invalid, canonical: dict,
+              offline: bool = False, force: bool = False) -> dict:
     results_path = DATA_DIR / "sources" / ecosystem / "results.csv"
     if not results_path.exists():
         return {"ecosystem": ecosystem, "total": 0}
@@ -277,7 +281,7 @@ def apply_eco(ecosystem: str, overrides: dict, is_invalid, canonical: dict) -> d
     for col in ("repo_id", "mirror_url"):
         if col not in fields:
             fields.append(col)
-    _resolve_github(rows)
+    _resolve_github(rows, offline=offline, force=force)
 
     tmp = results_path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:
@@ -315,6 +319,10 @@ def _print(stats: list[dict]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--eco", choices=ECOSYSTEMS + ["all"], default="all")
+    parser.add_argument("--offline", action="store_true",
+                        help="Skip network fetches; use only existing caches.")
+    parser.add_argument("--refresh", action="store_true",
+                        help="Force refetch, ignoring TTL caches.")
     args = parser.parse_args()
 
     if not PACKAGES_CSV.exists():
@@ -329,7 +337,8 @@ def main() -> None:
     console.print(f"[bold]ecosyste.ms authoritative layer[/bold]  "
                   f"[dim]{len(overrides)} overrides | {len(canonical)} GitHub renames | "
                   "priority: override > github-canonical > eco_strong > prior > eco_weak[/dim]")
-    stats = [apply_eco(e, overrides, is_invalid, canonical) for e in ecosystems]
+    stats = [apply_eco(e, overrides, is_invalid, canonical,
+                       offline=args.offline, force=args.refresh) for e in ecosystems]
     _print(stats)
 
 

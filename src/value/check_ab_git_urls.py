@@ -89,7 +89,7 @@ def main() -> int:
     console.print(
         f"\n[yellow]Add a corrected repo / canonical git_url (or a valid "
         f"pin) for each in data/value/overrides.csv, then re-run "
-        f"unify → verify_git_urls → build_validation to refresh git_valid.[/yellow]"
+        f"unify → resolve → validation to refresh git_valid.[/yellow]"
     )
     return 1
 

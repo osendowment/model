@@ -18,7 +18,7 @@ all validation signals:
      - `data/sources/git/urls.csv`      (`valid` + `checked_at`).
   4. Apply manual `valid` pins from `data/value/overrides.csv` (override wins).
   5. **Hard gate:** every target must have a verdict. A target with none is a
-     pipeline error (run `verify_git_urls` first) — never silently invalid.
+     pipeline error (run the resolve step first) — never silently invalid.
   6. Write `data/value/validation.csv` (target, type, sources, checked_at,
      valid) and join the per-repo `git_valid` verdict back into `value.csv`:
      `True` iff the repo has a validated github `repo` (mirror); `False`
@@ -39,7 +39,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.value.git_urls import _verify_non_github
+from src.value.git_urls import _canonicalize_git_url, _verify_non_github
 from src.value.unify_value_data import (
     OUTPUT_FILE as VALUE_FILE,
     load_repo_overrides,
@@ -64,13 +64,17 @@ def _row_target(row: dict) -> tuple[str, str] | None:
     non-GitHub `git_url` is validated via `git ls-remote` (type `git_url`). A
     row with neither is an orphan. The github branch wins, so a github row's
     derived github `git_url` is never double-counted as a separate target.
+
+    Non-GitHub git URLs are canonicalized (https→git://, path cleanup) before
+    being used as keys so they match the ls-remote cache entries.
     """
     repo = (row.get("repo") or "").strip().lower()
     gu = (row.get("git_url") or "").strip()
     if (row.get("platform") or "").strip().lower() == "github" and "/" in repo:
         return (repo, "github_repo")
     if gu:
-        return (gu, "git_url")
+        canonical = _canonicalize_git_url(gu)
+        return (canonical or gu, "git_url")
     return None
 
 
@@ -169,7 +173,7 @@ def build(
         raise SystemExit(
             f"build_validation: {len(missing)} target(s) have no validation "
             f"verdict:\n{listing}\n"
-            "Run `uv run python -m src.value.verify_git_urls` first."
+            "Run `uv run python -m src.value.run_value_pipeline --rollup` first."
         )
 
     validation_rows: list[dict] = []
