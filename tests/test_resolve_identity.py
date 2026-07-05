@@ -149,3 +149,19 @@ class TestMirrorUrl:
         # canonicalize converts https:// → git:// for sourceware
         assert rows[0]["git"] == "git://sourceware.org/git/glibc.git"
         assert rows[0]["repo_id"] == ""
+
+
+# ── invalid GitHub repo preserves git URL ──────────────────────────────────────
+
+class TestInvalidGithubRepoPreservesGitUrl:
+    def test_invalid_repo_with_github_url_preserves_git(self, tmp_path, monkeypatch):
+        # A row whose GitHub slug resolves to an invalid/404 repo (valid=False)
+        # must keep its GitHub clone URL — NOT become an orphan (git="").
+        # repo_id must remain empty (not a valid resolved repo).
+        repos_csv = _patch(tmp_path, monkeypatch,
+                           [["dead/repo", "False", "", "", ""]])
+        rows = [{"git": "https://github.com/dead/repo.git",
+                 "github_repo": "dead/repo"}]
+        _resolve_github(rows, repos_file=str(repos_csv))
+        assert rows[0]["git"] == "https://github.com/dead/repo.git"
+        assert rows[0]["repo_id"] == ""

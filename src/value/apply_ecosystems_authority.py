@@ -222,6 +222,8 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None) -> None:
         else:
             r.setdefault("repo_id", "")
             r.setdefault("mirror_url", "")
+            if slug:  # had a GitHub slug → keep its clone URL so it's not an orphan
+                r["git"] = f"https://github.com/{slug}.git"
 
 
 # Dispatcher so other platforms can slot in later.
