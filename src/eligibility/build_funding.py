@@ -19,6 +19,10 @@ Reads (all under data/sources/ except the stage-level overrides):
                                  bus-factor maintainer (src.sources.github.fetch_maintainer_sponsors);
                                  joined via the repo's bus-factor set (bf_contributors)
                                  into the `bf_maintainer_fundable` intent signal
+    data/eligibility/maintainer-overrides.csv — curated (login,reason) maintainers
+                                 who solicit funding through a channel the fetch can't
+                                 see (external profile funding link, off-GitHub donation
+                                 page); UNIONED into the fundable-maintainer set
 
 Writes data/eligibility/funding.csv. The funding **score** (0-100, higher =
 less funded = riskier) is the geometric mean of THREE direction-aware risk axes:
@@ -73,6 +77,7 @@ OVERRIDES_FILE = DATA_DIR / "eligibility" / "overrides.csv"
 NPM_FUNDING_FILE = DATA_DIR / "sources" / "npm" / "funding.csv"
 PYPI_FUNDING_FILE = DATA_DIR / "sources" / "pypi" / "funding.csv"
 MAINTAINER_SPONSORS_FILE = DATA_DIR / "sources" / "github" / "maintainer-sponsors.csv"
+MAINTAINER_OVERRIDES_FILE = DATA_DIR / "eligibility" / "maintainer-overrides.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility" / "funding.csv"
 
 # A repo that DECLARES a funding channel whose $ we cannot measure is not
@@ -370,13 +375,17 @@ def _load_sponsoring(path: Path) -> dict[str, str]:
     return out
 
 
-def _load_maintainer_fundable(path: Path) -> set[str]:
-    """{login} of maintainers with an active GitHub Sponsors listing.
+def _load_maintainer_fundable(path: Path,
+                              overrides_path: Path | None = None) -> set[str]:
+    """{login} of maintainers who are personally fundable.
 
-    From maintainer-sponsors.csv (keyed by user id). Only rows that resolved
-    (`status == ok`) with `has_sponsors_listing == True` count — a failed lookup
-    (`status == error`) is not a negative. Logins are lowercased to match the
-    bus-factor membership keys.
+    From maintainer-sponsors.csv (keyed by user id): rows that resolved
+    (`status == ok`) with `has_sponsors_listing == True`; a failed lookup
+    (`status == error`) is not a negative. UNIONED with a curated override file
+    (maintainer-overrides.csv, `login,reason`) — maintainers who solicit funding
+    through a channel the automated fetch can't see (an external profile funding
+    link, an off-GitHub donation page, etc.), so `hasSponsorsListing` reads False.
+    Logins are lowercased to match the bus-factor membership keys.
     """
     out: set[str] = set()
     if path.exists():
@@ -385,6 +394,12 @@ def _load_maintainer_fundable(path: Path) -> set[str]:
                 login = (row.get("login") or "").strip().lower()
                 if (login and (row.get("has_sponsors_listing") or "").strip() == "True"
                         and (row.get("status") or "").strip() == "ok"):
+                    out.add(login)
+    if overrides_path and overrides_path.exists():
+        with open(overrides_path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                login = (row.get("login") or "").strip().lower()
+                if login:
                     out.add(login)
     return out
 
@@ -473,7 +488,8 @@ def build() -> list[dict]:
     # A repo is bf_maintainer_fundable when any maintainer who carries it (wrote
     # ≥50% of it) personally has a GitHub Sponsors listing.
     bf_by_repo = load_bf_contributors()
-    fundable_maintainers = _load_maintainer_fundable(MAINTAINER_SPONSORS_FILE)
+    fundable_maintainers = _load_maintainer_fundable(
+        MAINTAINER_SPONSORS_FILE, MAINTAINER_OVERRIDES_FILE)
 
     # Open Collective attribution is driven by the reverse-map (collectives.csv),
     # which records whether each collective's GitHub link names a specific repo or

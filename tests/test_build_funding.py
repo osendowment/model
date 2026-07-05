@@ -20,7 +20,7 @@ def _isolate_bf_sources(monkeypatch):
     sponsors files. A test that exercises the bus-factor-maintainer signal
     overrides these two explicitly."""
     monkeypatch.setattr(bf, "load_bf_contributors", lambda *a, **k: {})
-    monkeypatch.setattr(bf, "_load_maintainer_fundable", lambda p: set())
+    monkeypatch.setattr(bf, "_load_maintainer_fundable", lambda *a, **k: set())
 
 
 def _row(**kw):
@@ -124,6 +124,28 @@ def test_build_funding_owner_intent_propagates_but_not_nonprofit(monkeypatch):
     assert rows["corp/b"]["intent"] == "True"          # inherited from corp/a
     assert rows["corp/b"]["nonprofit"] == "False"      # company owner → still ineligible
     assert rows["lonely/x"]["intent"] == "False"       # no channel in its org
+
+
+def test_load_maintainer_fundable_unions_curated_override(tmp_path):
+    """The fetched Sponsors-listing set is UNIONED with the curated
+    maintainer-overrides.csv (login,reason) — a maintainer who solicits via a
+    channel the fetch can't see (external profile funding link) is fundable even
+    with has_sponsors_listing=False."""
+    sponsors = tmp_path / "maintainer-sponsors.csv"
+    sponsors.write_text(
+        "user_id,login,has_sponsors_listing,status,fetched_at\n"
+        "1,marijnh,True,ok,2026-07-05\n"          # real Sponsors listing → fundable
+        "2,hartwork,False,ok,2026-07-05\n"        # no listing (solicits via FSFE link)
+        "3,nobody,False,ok,2026-07-05\n",         # genuinely not fundable
+        encoding="utf-8")
+    overrides = tmp_path / "maintainer-overrides.csv"
+    overrides.write_text("login,reason\nhartwork,external FSFE funding link\n",
+                         encoding="utf-8")
+    # call the imported name directly (the autouse fixture only mocks bf.<attr>)
+    # without the override, only the real listing counts
+    assert _load_maintainer_fundable(sponsors) == {"marijnh"}
+    # with it, the curated login is unioned in (case-insensitive), nobody stays out
+    assert _load_maintainer_fundable(sponsors, overrides) == {"marijnh", "hartwork"}
 
 
 def test_nonprofit_default_true():
@@ -477,7 +499,7 @@ def test_build_funding_bf_maintainer_fundable_flips_intent(monkeypatch):
     # drive/by: `maint` also appears but is NOT in its BF set → no intent.
     monkeypatch.setattr(bf, "load_bf_contributors",
                         lambda *a, **k: {"gh/1": ["maint"], "gh/2": ["nobody"]})
-    monkeypatch.setattr(bf, "_load_maintainer_fundable", lambda p: {"maint"})
+    monkeypatch.setattr(bf, "_load_maintainer_fundable", lambda *a, **k: {"maint"})
 
     rows = {r["repo"]: r for r in bf.build()}
     assert rows["solo/lib"]["bf_maintainer_fundable"] == "True"

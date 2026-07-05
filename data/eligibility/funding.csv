@@ -437,7 +437,7 @@ langchain-ai/langchain,gh/552661142,False,0,0,0,100.0,135127,22347,False,False,,
 laurent-laporte-pro/deprecated,gh/111412148,False,0,0,0,100.0,333,42,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
 lddubeau/xmlchars,gh/139881982,,,,0,100.0,3,2,,,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
 legrandin/pycryptodome,gh/19378935,False,0,0,0,100.0,3226,553,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
-libexpat/libexpat,gh/80314213,False,0,0,0,100.0,1322,504,False,False,,False,False,,False,,False,0,,0,100.0,,,,,1,100,False,True
+libexpat/libexpat,gh/80314213,False,0,0,0,100.0,1322,504,False,False,,False,False,,False,,True,0,,0,100.0,,,,,1,100,True,True
 libffi/libffi,gh/321154,False,0,0,0,100.0,4233,807,False,False,,False,False,,False,,False,0,,0,100.0,sfc,nonprofit,,,0.5,79,True,True
 libjpeg-turbo/libjpeg-turbo,gh/39760454,True,9,0,9,29.69,4295,1142,True,True,github,True,False,,False,,False,2,,0,100.0,,,,,1,67,True,True
 libjxl/libjxl,gh/340219494,False,0,0,0,100.0,3460,357,False,False,,False,False,,False,,False,0,,0,100.0,,,google.com,company,0,1,True,False

@@ -227,14 +227,14 @@ company-backed (Meta, Google, Microsoft, …). See [funding.md](components/fundi
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 717 | 78.3% |
-| intent — no funding signal | 199 | 21.7% |
+| intent — any funding signal | 718 | 78.4% |
+| intent — no funding signal | 198 | 21.6% |
 | nonprofit — community / independent | 856 | 93.4% |
 | nonprofit — company-backed | 60 | 6.6% |
 
 The 60 company-backed repos are **kept in `eligibility.csv`** and flagged
 `nonprofit=False` (they are already resourced; the flag makes them ineligible
-without hiding them). The 199 repos with `intent=False` are not actively
+without hiding them). The 198 repos with `intent=False` are not actively
 soliciting support — a higher-priority target for outreach.
 
 ### Eligibility rollup
@@ -245,7 +245,7 @@ unlock. Missing intent is by far the binding constraint.
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
 | oss | 910 | 99.3% | 1 |
-| intent | 717 | 78.3% | 183 |
+| intent | 718 | 78.4% | 182 |
 | nonprofit | 856 | 93.4% | 59 |
 | active | 894 | 97.6% | 10 |
-| **eligible** | **646** | **70.5%** | |
+| **eligible** | **647** | **70.6%** | |
