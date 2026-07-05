@@ -326,7 +326,9 @@ def build() -> list[dict]:
 
         rows.append(row)
     # The six *_p columns are audit/cross-check references (where does a repo
-    # sit within the current risk set?) — none of them feed `score`.
+    # sit within the current risk set?) — none of them feed `score` (which is
+    # the population-independent absolute formula below). The CDFs rank the whole
+    # top-repo population (github + gitlab together); platform does not matter.
     add_percentiles(
         rows,
         pctl_specs=[

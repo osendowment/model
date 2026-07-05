@@ -268,8 +268,13 @@ def build() -> list[dict]:
 
         # False-zero guard: scc measured real branching but lizard found zero
         # functions → lizard analysed an off-mainline (template) tree. Drop the
-        # bogus lizard metrics so they read as missing, not a real zero.
-        if _is_lizard_false_zero(scc_vals, lz_vals):
+        # bogus lizard metrics so they read as missing, not a real zero. This is
+        # a GitHub-only artefact: the off-mainline (CI-template) checkout comes
+        # from `corrected_clone_sha`, which sha-metrics applies to GitHub repos
+        # only. Non-GitHub (gl/…) repos sparse-clone the exact pinned SHA scc
+        # measured, so a lizard zero there is a genuine function-free
+        # (data/shell) repo, not an artefact — keep it.
+        if not rid.startswith("gl/") and _is_lizard_false_zero(scc_vals, lz_vals):
             lz_vals = {}
 
         # Hotspot: combine churn × scc_complexity_eoy.
@@ -307,6 +312,8 @@ def build() -> list[dict]:
             "hotspot_log": hotspot_log_val,
         })
 
+    # Percentile CDFs rank the whole top-repo population (github + gitlab
+    # together); platform does not matter.
     add_percentiles(
         rows,
         pctl_specs=[

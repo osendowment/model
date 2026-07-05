@@ -346,8 +346,12 @@ def build() -> list[dict]:
         # A repo whose issues were never fetched has a blank nni_per_ac. When its
         # LOC and CVE burdens are both present, treat the unknown issue-backlog
         # burden as neutral (median percentile 50) so the row still scores; if
-        # LOC or CVE is also missing the row stays blank (no lone 50).
+        # LOC or CVE is also missing the row stays blank (no lone 50). GitLab
+        # repos have no GitHub-issue data, so this fill is what lets them score
+        # once LOC + CVE are present.
         neutral_fill={"nni_per_ac_p": 50},
+        # Percentiles rank the whole top-repo population (github + gitlab
+        # together); platform does not matter.
     )
     return rows
 

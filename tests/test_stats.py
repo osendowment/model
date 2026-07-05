@@ -5,6 +5,7 @@ from src.common.stats import (
     geom_mean_composite,
     geometric_mean,
     max_composite,
+    max_composite_any,
     risk_percentiles,
     risk_percentiles_aligned,
 )
@@ -83,6 +84,19 @@ class TestRiskPercentilesAligned:
 
     def test_all_none(self):
         assert risk_percentiles_aligned([None, None], higher_is_worse=True) == [None, None]
+
+
+class TestMaxCompositeAny:
+    def test_scores_off_present_axis(self):
+        # openssf missing (None), cve present → score off cve alone.
+        assert max_composite_any([[None, 73.0]]) == [73.0]
+
+    def test_identical_to_max_when_all_present(self):
+        assert max_composite_any([[25.0, 100.0]]) == max_composite([[25.0, 100.0]])
+
+    def test_none_only_when_all_missing(self):
+        assert max_composite_any([[None, None]]) == [None]
+        assert max_composite_any([[]]) == [None]
 
 
 class TestGeomMeanComposite:

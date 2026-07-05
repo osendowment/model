@@ -119,6 +119,7 @@ conventional-changelog/conventional-changelog,gh/15639771,True,False,True,True,F
 cosmiconfig/cosmiconfig,gh/45750507,True,True,True,True,True
 coveragepy/coveragepy,gh/138421996,True,True,True,True,True
 cpburnz/python-pathspec,gh/14648551,True,False,True,True,False
+cpython-team/python3-defaults,gl/salsa.debian.org-27547,False,False,True,True,False
 crate-py/rpds,gh/608018848,True,True,True,True,True
 criterion-rs/criterion.rs,gh/1081104682,True,False,True,True,False
 crossbeam-rs/crossbeam,gh/35566048,True,True,True,True,True
@@ -136,6 +137,10 @@ davidhalter/parso,gh/90668463,True,True,True,True,True
 davisjam/safe-regex,gh/90781457,True,False,True,True,False
 dchest/tweetnacl-js,gh/15649752,True,False,True,True,False
 dcodeio/long.js,gh/8678904,True,True,True,True,True
+debian/bzip2,gl/salsa.debian.org-9696,False,False,True,True,False
+debian/ca-certificates,gl/salsa.debian.org-2995,False,False,True,True,False
+debian/gdbm,gl/salsa.debian.org-32157,True,False,True,True,False
+debian/giflib,gl/salsa.debian.org-12522,True,False,True,True,False
 debug-js/debug,gh/2871998,True,True,True,True,True
 definitelytyped/definitelytyped,gh/6093316,True,True,False,True,False
 defunctzombie/node-process,gh/7580644,True,False,True,True,False
@@ -232,6 +237,7 @@ fitzgen/glob-to-regexp,gh/11461122,True,False,True,False,False
 floatdrop/require-from-string,gh/39301848,True,False,True,False,False
 floating-ui/floating-ui,gh/54994103,True,True,True,True,True
 follow-redirects/follow-redirects,gh/6697086,True,True,True,True,True
+fontconfig/fontconfig,gl/gitlab.freedesktop.org-890,False,False,True,True,False
 form-data/form-data,gh/1755793,True,False,True,True,False
 formatjs/formatjs,gh/19117456,True,True,True,True,True
 freedesktop-unofficial-mirror/cairo,gh/34372735,True,True,True,True,True
@@ -255,7 +261,12 @@ gkz/optionator,gh/13435927,True,False,True,True,False
 gkz/prelude-ls,gh/4457759,True,False,True,True,False
 gkz/type-check,gh/13182168,True,False,True,True,False
 gmp-mirror/gmp,gh/681340775,True,True,True,True,True
+gnome/gdk-pixbuf,gl/gitlab.gnome.org-1548,True,False,True,True,False
+gnome/glib,gl/gitlab.gnome.org-658,False,False,True,True,False
+gnome/libxml2,gl/gitlab.gnome.org-1665,False,False,True,True,False
 gnome/pango,gh/4537144,True,True,True,True,True
+gnutls/gnutls,gl/179611,True,False,True,True,False
+gnutls/libtasn1,gl/919981,False,False,True,True,False
 google/brotli,gh/24993138,True,True,False,True,False
 google/zerocopy,gh/534354967,True,True,False,True,False
 googleapis/google-cloud-python,gh/16316451,True,True,False,True,False
@@ -276,6 +287,7 @@ gyscos/zstd-rs,gh/52115335,True,False,True,True,False
 hapijs/hoek,gh/5831189,True,True,True,True,True
 harfbuzz/harfbuzz,gh/5050525,True,True,True,True,True
 hiddentao/fast-levenshtein,gh/9490451,True,False,True,True,False
+holmgren/nettle,gl/salsa.debian.org-50952,False,False,True,True,False
 httplib2/httplib2,gh/53002916,True,False,True,True,False
 huggingface/huggingface_hub,gh/323591830,True,True,False,True,False
 hukkin/tomli,gh/370616797,True,False,True,True,False
@@ -439,9 +451,11 @@ lddubeau/xmlchars,gh/139881982,True,False,True,False,False
 legrandin/pycryptodome,gh/19378935,True,False,True,True,False
 libexpat/libexpat,gh/80314213,True,True,True,True,True
 libffi/libffi,gh/321154,True,True,True,True,True
+libidn/libidn2,gl/2882658,True,False,True,True,False
 libjpeg-turbo/libjpeg-turbo,gh/39760454,True,True,True,True,True
 libjxl/libjxl,gh/340219494,True,True,False,True,False
 libpixman/pixman,gh/81675971,True,True,True,True,True
+libtiff/libtiff,gl/4720790,False,False,True,True,False
 libuv/libuv,gh/14812739,True,True,True,True,True
 linusu/buffer-from,gh/66025821,True,True,True,True,True
 linux-audit/audit-userspace,gh/52464964,True,False,True,True,False
@@ -498,6 +512,7 @@ matklad/once_cell,gh/143220272,True,False,True,True,False
 matplotlib/matplotlib,gh/1385122,True,True,True,True,True
 mcollina/fastq,gh/37368217,True,True,True,True,True
 mcollina/reusify,gh/42106515,True,True,True,True,True
+md/tcp-wrappers,gl/salsa.debian.org-28852,False,False,True,True,False
 mdn/data,gh/70901646,False,False,True,True,False
 medikoo/d,gh/10817569,True,True,True,True,True
 medikoo/es5-ext,gh/1792941,True,True,True,True,True
@@ -526,9 +541,12 @@ more-itertools/more-itertools,gh/4144530,True,False,True,True,False
 motdotla/dotenv,gh/11205780,True,True,True,True,True
 moxystudio/node-cross-spawn,gh/21335844,True,False,True,True,False
 mozilla/source-map,gh/2014930,True,True,True,True,True
+mpc/mpc,gl/gitlab.inria.fr-22470,False,False,True,True,False
+mpfr/mpfr,gl/gitlab.inria.fr-33626,True,False,True,True,False
 mrabarnett/mrab-regex,gh/309446978,True,False,True,True,False
 mrmlnc/fast-glob,gh/77467076,True,False,True,True,False
 msgpack/msgpack-python,gh/2242705,True,True,True,True,True
+multimedia-team/aom,gl/salsa.debian.org-29534,True,False,True,True,False
 myrne/performance-now,gh/10219264,True,False,True,True,False
 mysticatea/abort-controller,gh/105228556,True,True,True,True,True
 mysticatea/event-target-shim,gh/31137469,True,True,True,True,True
@@ -829,6 +847,7 @@ systemd/systemd,gh/32873313,True,True,True,True,True
 taiki-e/pin-project,gh/164668916,True,True,True,True,True
 taiki-e/pin-project-lite,gh/216847853,True,True,True,True,True
 taiki-e/portable-atomic,gh/448365131,True,True,True,True,True
+takluyver/jeepney,gl/2780772,True,False,True,True,False
 tapjs/signal-exit,gh/35711072,True,True,True,True,True
 tapjs/stack-utils,gh/48974178,True,True,True,True,True
 tartley/colorama,gh/18892209,True,True,True,True,True
@@ -876,6 +895,7 @@ unshiftio/requires-port,gh/26316179,True,True,True,True,True
 uqfoundation/dill,gh/11031844,True,True,True,True,True
 urllib3/urllib3,gh/2410676,True,True,True,True,True
 util-linux/util-linux,gh/2339555,True,False,True,True,False
+utopia-team/dbus,gl/salsa.debian.org-9742,False,False,True,True,False
 uuidjs/uuid,gh/1203139,True,True,True,True,True
 vercel/ai,gh/644461337,True,True,False,True,False
 vercel/ms,gh/3655872,True,True,False,True,False
@@ -902,6 +922,12 @@ wesleytodd/setprototypeof,gh/30301031,True,True,True,True,True
 whitequark/ipaddr.js,gh/2110585,True,True,True,True,True
 withoutboats/heck,gh/86326466,True,True,True,True,True
 xiph/ogg,gh/33956205,True,True,True,True,True
+xorg-team/lib/libx11,gl/salsa.debian.org-4306,True,False,True,True,False
+xorg-team/lib/libxau,gl/salsa.debian.org-4307,False,False,True,True,False
+xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,False,False,True,True,False
+xorg-team/lib/libxext,gl/salsa.debian.org-4314,False,False,True,True,False
+xorg-team/lib/libxrender,gl/salsa.debian.org-4328,False,False,True,True,False
+xorg/proto/xorgproto,gl/gitlab.freedesktop.org-788,False,False,True,True,False
 xtuc/webassemblyjs,gh/113006071,True,False,True,True,False
 yahoo/serialize-javascript,gh/24106944,True,True,False,True,False
 yaml/libyaml,gh/2699072,True,True,True,True,True

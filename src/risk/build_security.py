@@ -78,7 +78,7 @@ from rich.table import Table
 from src.common.params import YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import canonical_repo_map, load_top_repos
-from src.common.stats import floor_anchored_risk, max_composite
+from src.common.stats import floor_anchored_risk, max_composite_any
 from src.common.tables import load_column_by_id
 from src.sources.git.long_format import read as read_long
 
@@ -362,7 +362,9 @@ def build() -> list[dict]:
 
     # CVE risk score — neutral-anchored. 0 known CVEs → 50 (not the worst-pinned
     # CDF's 78); "none known" is treated as neutral, not proven secure. Repos
-    # with ≥1 CVE rank among themselves into (50, 100], worst → 100.
+    # with ≥1 CVE rank among the above-floor set into (50, 100], worst → 100.
+    # Percentiles are computed over the whole top-repo population (github +
+    # gitlab together) — platform does not matter.
     def _num(s: str) -> float | None:
         s = (s or "").strip()
         try:
@@ -371,7 +373,7 @@ def build() -> list[dict]:
             return None
 
     cve_scores = floor_anchored_risk(
-        [_num(r.get("cve_count_5y", "")) for r in rows], floor=0.0, anchor=50.0
+        [_num(r.get("cve_count_5y", "")) for r in rows], floor=0.0, anchor=50.0,
     )
     for r, s in zip(rows, cve_scores):
         r["cve_score"] = "" if s is None else round(s, 2)
@@ -379,9 +381,12 @@ def build() -> list[dict]:
     # Second pass — openssf risk percentile, then the composite
     # `score` = max(openssf_score_p, cve_score). Max ("worst-of") rather than
     # geometric mean: a bad Scorecard OR a real CVE is on its own enough to flag
-    # the repo — neither axis dilutes the other. In particular a repo with known
-    # CVEs is not masked by otherwise-good hygiene, and the ~78% of repos with
-    # zero CVEs (neutral cve_score=50) score purely on openssf.
+    # the repo — neither axis dilutes the other. `max_composite_any` scores off
+    # whichever axis is present: a repo with a CVE count but no OpenSSF Scorecard
+    # (the common GitLab case — Scorecard's GitLab scan is a separate, gated run)
+    # still gets a security score from the CVE axis alone. When both axes are
+    # present it is identical to the strict max, so no GitHub row (all of which
+    # carry both axes) changes.
     add_percentiles(
         rows,
         pctl_specs=[
@@ -389,7 +394,7 @@ def build() -> list[dict]:
         ],
         composite_cols=["openssf_score_p", "cve_score"],
         dim_col="score",
-        composite_fn=max_composite,
+        composite_fn=max_composite_any,
     )
 
     return rows

@@ -24,9 +24,9 @@
     "comment": "Risk pipeline runs on valid class-A repos (value/value.csv class == 'A'). Kept as the documented risk scope; load_top_repos reads top_repos below."
   },
   "top_repos": {
-    "platforms": ["github"],
+    "platforms": ["github", "gitlab"],
     "classes": ["A"],
-    "comment": "load_top_repos scope — a value.csv row is a 'top repo' iff platform in platforms AND class in classes AND git_valid==True. GitHub-only for now (risk/eligibility fetchers are GitHub-API-driven); add 'gitlab' once gl/ repo_id enrichment is wired. classes must match risk_input.value_classes."
+    "comment": "load_top_repos scope — a value.csv row is a 'top repo' iff platform in platforms AND class in classes AND git_valid==True. GitHub + GitLab: the risk builders rank each percentile-based dimension over the full top-repo population (github + gitlab together — platform does not matter), so GitLab repos rank in alongside GitHub. classes must match risk_input.value_classes."
   },
   "value_score": {
     "criticality_weight": 0.8,

@@ -45,7 +45,7 @@ def add_percentiles(
     """
     for col, higher_is_worse in pctl_specs:
         ps = risk_percentiles_aligned(
-            [_cell(r.get(col, "")) for r in rows], higher_is_worse=higher_is_worse
+            [_cell(r.get(col, "")) for r in rows], higher_is_worse=higher_is_worse,
         )
         for r, p in zip(rows, ps):
             r[col + "_p"] = "" if p is None else round(p, 2)

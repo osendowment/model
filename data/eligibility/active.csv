@@ -119,6 +119,7 @@ conventional-changelog/conventional-changelog,gh/15639771,False,False,False,True
 cosmiconfig/cosmiconfig,gh/45750507,False,False,False,True
 coveragepy/coveragepy,gh/138421996,False,False,False,True
 cpburnz/python-pathspec,gh/14648551,False,False,False,True
+cpython-team/python3-defaults,gl/salsa.debian.org-27547,False,False,False,True
 crate-py/rpds,gh/608018848,False,False,False,True
 criterion-rs/criterion.rs,gh/1081104682,False,False,False,True
 crossbeam-rs/crossbeam,gh/35566048,False,False,False,True
@@ -136,6 +137,10 @@ davidhalter/parso,gh/90668463,False,False,False,True
 davisjam/safe-regex,gh/90781457,False,False,False,True
 dchest/tweetnacl-js,gh/15649752,False,False,False,True
 dcodeio/long.js,gh/8678904,False,False,False,True
+debian/bzip2,gl/salsa.debian.org-9696,False,False,False,True
+debian/ca-certificates,gl/salsa.debian.org-2995,False,False,False,True
+debian/gdbm,gl/salsa.debian.org-32157,False,False,False,True
+debian/giflib,gl/salsa.debian.org-12522,False,False,False,True
 debug-js/debug,gh/2871998,False,False,False,True
 definitelytyped/definitelytyped,gh/6093316,False,False,False,True
 defunctzombie/node-process,gh/7580644,False,False,False,True
@@ -232,6 +237,7 @@ fitzgen/glob-to-regexp,gh/11461122,False,True,False,False
 floatdrop/require-from-string,gh/39301848,False,True,False,False
 floating-ui/floating-ui,gh/54994103,False,False,False,True
 follow-redirects/follow-redirects,gh/6697086,False,False,False,True
+fontconfig/fontconfig,gl/gitlab.freedesktop.org-890,False,False,False,True
 form-data/form-data,gh/1755793,False,False,False,True
 formatjs/formatjs,gh/19117456,False,False,False,True
 freedesktop-unofficial-mirror/cairo,gh/34372735,False,False,True,True
@@ -255,7 +261,12 @@ gkz/optionator,gh/13435927,False,False,False,True
 gkz/prelude-ls,gh/4457759,False,False,False,True
 gkz/type-check,gh/13182168,False,False,False,True
 gmp-mirror/gmp,gh/681340775,False,False,False,True
+gnome/gdk-pixbuf,gl/gitlab.gnome.org-1548,False,False,False,True
+gnome/glib,gl/gitlab.gnome.org-658,False,False,False,True
+gnome/libxml2,gl/gitlab.gnome.org-1665,False,False,False,True
 gnome/pango,gh/4537144,False,False,True,True
+gnutls/gnutls,gl/179611,False,False,False,True
+gnutls/libtasn1,gl/919981,False,False,False,True
 google/brotli,gh/24993138,False,False,False,True
 google/zerocopy,gh/534354967,False,False,False,True
 googleapis/google-cloud-python,gh/16316451,False,False,False,True
@@ -276,6 +287,7 @@ gyscos/zstd-rs,gh/52115335,False,False,False,True
 hapijs/hoek,gh/5831189,False,False,False,True
 harfbuzz/harfbuzz,gh/5050525,False,False,False,True
 hiddentao/fast-levenshtein,gh/9490451,False,False,False,True
+holmgren/nettle,gl/salsa.debian.org-50952,False,False,False,True
 httplib2/httplib2,gh/53002916,False,False,False,True
 huggingface/huggingface_hub,gh/323591830,False,False,False,True
 hukkin/tomli,gh/370616797,False,False,False,True
@@ -439,9 +451,11 @@ lddubeau/xmlchars,gh/139881982,False,True,False,False
 legrandin/pycryptodome,gh/19378935,False,False,False,True
 libexpat/libexpat,gh/80314213,False,False,False,True
 libffi/libffi,gh/321154,False,False,False,True
+libidn/libidn2,gl/2882658,False,False,False,True
 libjpeg-turbo/libjpeg-turbo,gh/39760454,False,False,False,True
 libjxl/libjxl,gh/340219494,False,False,False,True
 libpixman/pixman,gh/81675971,False,True,True,True
+libtiff/libtiff,gl/4720790,False,False,False,True
 libuv/libuv,gh/14812739,False,False,False,True
 linusu/buffer-from,gh/66025821,False,False,False,True
 linux-audit/audit-userspace,gh/52464964,False,False,False,True
@@ -498,6 +512,7 @@ matklad/once_cell,gh/143220272,False,False,False,True
 matplotlib/matplotlib,gh/1385122,False,False,False,True
 mcollina/fastq,gh/37368217,False,False,False,True
 mcollina/reusify,gh/42106515,False,False,False,True
+md/tcp-wrappers,gl/salsa.debian.org-28852,False,False,False,True
 mdn/data,gh/70901646,False,False,False,True
 medikoo/d,gh/10817569,False,False,False,True
 medikoo/es5-ext,gh/1792941,False,False,False,True
@@ -526,9 +541,12 @@ more-itertools/more-itertools,gh/4144530,False,False,False,True
 motdotla/dotenv,gh/11205780,False,False,False,True
 moxystudio/node-cross-spawn,gh/21335844,False,False,False,True
 mozilla/source-map,gh/2014930,False,False,False,True
+mpc/mpc,gl/gitlab.inria.fr-22470,False,False,False,True
+mpfr/mpfr,gl/gitlab.inria.fr-33626,False,False,False,True
 mrabarnett/mrab-regex,gh/309446978,False,False,False,True
 mrmlnc/fast-glob,gh/77467076,False,False,False,True
 msgpack/msgpack-python,gh/2242705,False,False,False,True
+multimedia-team/aom,gl/salsa.debian.org-29534,False,False,False,True
 myrne/performance-now,gh/10219264,False,False,False,True
 mysticatea/abort-controller,gh/105228556,False,False,False,True
 mysticatea/event-target-shim,gh/31137469,False,False,False,True
@@ -829,6 +847,7 @@ systemd/systemd,gh/32873313,False,False,False,True
 taiki-e/pin-project,gh/164668916,False,False,False,True
 taiki-e/pin-project-lite,gh/216847853,False,False,False,True
 taiki-e/portable-atomic,gh/448365131,False,False,False,True
+takluyver/jeepney,gl/2780772,False,False,False,True
 tapjs/signal-exit,gh/35711072,False,False,False,True
 tapjs/stack-utils,gh/48974178,False,False,False,True
 tartley/colorama,gh/18892209,False,False,False,True
@@ -876,6 +895,7 @@ unshiftio/requires-port,gh/26316179,False,False,False,True
 uqfoundation/dill,gh/11031844,False,False,False,True
 urllib3/urllib3,gh/2410676,False,False,False,True
 util-linux/util-linux,gh/2339555,False,False,False,True
+utopia-team/dbus,gl/salsa.debian.org-9742,False,False,False,True
 uuidjs/uuid,gh/1203139,False,False,False,True
 vercel/ai,gh/644461337,False,False,False,True
 vercel/ms,gh/3655872,False,False,False,True
@@ -902,6 +922,12 @@ wesleytodd/setprototypeof,gh/30301031,False,False,False,True
 whitequark/ipaddr.js,gh/2110585,False,False,False,True
 withoutboats/heck,gh/86326466,False,False,False,True
 xiph/ogg,gh/33956205,False,False,False,True
+xorg-team/lib/libx11,gl/salsa.debian.org-4306,False,False,False,True
+xorg-team/lib/libxau,gl/salsa.debian.org-4307,False,False,False,True
+xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,False,False,False,True
+xorg-team/lib/libxext,gl/salsa.debian.org-4314,False,False,False,True
+xorg-team/lib/libxrender,gl/salsa.debian.org-4328,False,False,False,True
+xorg/proto/xorgproto,gl/gitlab.freedesktop.org-788,False,False,False,True
 xtuc/webassemblyjs,gh/113006071,False,False,False,True
 yahoo/serialize-javascript,gh/24106944,False,False,False,True
 yaml/libyaml,gh/2699072,False,False,False,True

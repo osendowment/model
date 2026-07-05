@@ -39,7 +39,8 @@ def risk_percentiles(values: list[float], higher_is_worse: bool) -> list[float |
 
 
 def risk_percentiles_aligned(
-    values: list[float | None], higher_is_worse: bool
+    values: list[float | None],
+    higher_is_worse: bool,
 ) -> list[float | None]:
     """`risk_percentiles` over a list that may contain None (missing) values.
 
@@ -58,7 +59,7 @@ def risk_percentiles_aligned(
 
 
 def floor_anchored_risk(
-    values: list[float | None], floor: float = 0.0, anchor: float = 50.0
+    values: list[float | None], floor: float = 0.0, anchor: float = 50.0,
 ) -> list[float | None]:
     """Risk score (0-100) that pins the floor value to a neutral `anchor`.
 
@@ -76,12 +77,16 @@ def floor_anchored_risk(
     for i, v in enumerate(values):
         if v is not None and v <= floor:
             out[i] = float(anchor)
-    if above:
-        ordered = sorted(v for _, v in above)
-        m = len(above)
-        for i, v in above:
-            cdf = bisect.bisect_right(ordered, v) / m   # (0, 1], worst -> 1
-            out[i] = anchor + (100.0 - anchor) * cdf
+    if not above:
+        return out
+    base = [v for _, v in above]
+    if not base:
+        return out
+    ordered = sorted(base)
+    m = len(base)
+    for i, v in above:
+        cdf = min(bisect.bisect_right(ordered, v) / m, 1.0)   # (0, 1], worst -> 1
+        out[i] = anchor + (100.0 - anchor) * cdf
     return out
 
 
@@ -126,4 +131,23 @@ def max_composite(rows: list[list[float | None]]) -> list[float | None]:
             out.append(None)
         else:
             out.append(max(comps))
+    return out
+
+
+def max_composite_any(rows: list[list[float | None]]) -> list[float | None]:
+    """Per-repo "worst-of" that scores off whichever axes are present.
+
+    Like `max_composite`, but relaxes the all-present completeness rule: the
+    result is the max over the *present* components, and None only when every
+    component is missing. Use when either axis on its own is a complete signal
+    and a missing sibling should not blank the score — e.g. a repo with a real
+    CVE count but no OpenSSF Scorecard (a common GitLab case) should still get a
+    security score from the CVE axis alone. When both axes are present this is
+    identical to `max_composite`, so it never changes a row that already had
+    every component.
+    """
+    out: list[float | None] = []
+    for comps in rows:
+        present = [c for c in comps if c is not None]
+        out.append(max(present) if present else None)
     return out

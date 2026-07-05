@@ -293,6 +293,21 @@ def load_top_slugs(*args, **kwargs) -> list[str]:
     return [e.repo for e in load_top_repos(*args, **kwargs)]
 
 
+def load_github_top_slugs(*args, **kwargs) -> list[str]:
+    """`load_top_slugs` restricted to GitHub repos (skip gl/… non-GitHub ids).
+
+    The GitHub-API fetchers (contributor-metrics, issue-metrics, churn) hit
+    ``github.com`` / the GitHub REST+Search API and cannot service a GitLab
+    target — a GitLab slug like ``gnome/glib`` would resolve to an unrelated
+    GitHub mirror and pollute the output. This is the fetch list they use so a
+    ``gitlab`` entry in ``top_repos.platforms`` never reaches a GitHub call.
+    """
+    return [
+        e.repo for e in load_top_repos(*args, **kwargs)
+        if not str(e.repo_id or "").startswith("gl/")
+    ]
+
+
 def load_live_upstream_mirrors(
     overrides_file: str = OVERRIDES_FILE,
     repos_file: str = REPOS_FILE,
