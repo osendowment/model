@@ -5,8 +5,7 @@ download volume with dependency graph analysis (PageRank).
 
 ## Pipeline overview
 
-Two automated stages (run in order, each feeds the next), followed by a
-separate **manual** review:
+Three automated stages (run in order, each feeds the next):
 
 ```
 1. **Value** (`src.value.run_value_pipeline`) → `data/value/value.csv` — picks the
@@ -14,46 +13,45 @@ separate **manual** review:
    download-weighted PageRank, then unifies per-package classes into one
    row per GitHub repo. All classes A/B/C are included. (this doc)
 2. **Risk** (`src.risk.run_risk_pipeline`) → `data/risk/risk.csv` — concentration
-   + complexity + issue-debt scoring for **valid class-A repos** read
+   + complexity + security + workload scoring for **valid class-A repos** read
    directly from `data/value/value.csv`. Target classes are configured in
    `src/settings.json` under `risk_input.value_classes` (default
    `["A"]`). See [docs/risk.md](risk.md).
+3. **Eligibility** (`src.eligibility.run_eligibility_pipeline`) →
+   `data/eligibility/eligibility.csv` — four checks per **top repo** (the
+   same valid class-A set, **archived included**): OSI-approved license
+   (`oss`), funding intent (`intent`), not company-backed (`nonprofit`),
+   not EOL/archived (`active`); `eligible` = AND of the four. See
+   [docs/eligibility.md](eligibility.md).
 ```
-
-**Eligibility** is no longer an automated pipeline stage. It is a manual
-review of the top-ranked candidates surfaced by Value + Risk, checking OSS
-license, end-of-life (EOL) status, and independence (no corporate
-trademarks, no associated startups, community-led). The source signals
-that inform it (OSI license lists, foundation membership, per-ecosystem
-`check_eol.py` / `fetch_licenses.py`) are still collected under
-`src/sources/`, but there is no automated eligibility runner and no
-eligibility stage output.
 
 ### Dataflow at a glance
 
 ```
-                Value pipeline                    Risk           Manual review
-                ───────────────                   ────           ─────────────
+                Value pipeline                    Risk             Eligibility
+                ───────────────                   ────             ───────────
 ecosystem ──► top packages ──► dep tree ──► PageRank ──► A/B/C
 registries     (95% cum dl)    (BFS)       ↓
                                       value.csv
                                             │
-                                            └─► class A repos ──► contributors + scc
-                                                (settings.json          │
-                                                 risk_input.            │
-                                                 value_classes)    risk.csv
-                                                                       │
-                                                                       ▼
-                                                              top candidates
-                                                                       │
-                                                              manual eligibility
-                                                              (OSS license · EOL ·
-                                                               independence)
+                                            ├─► class A repos ──► contributors + scc
+                                            │   (settings.json          │
+                                            │    risk_input.            │
+                                            │    value_classes)     risk.csv
+                                            │
+                                            └─► top repos ──────► licenses · funding
+                                                (archived          · EOL/archived
+                                                 included)               │
+                                                                  eligibility.csv
+                                                                  (oss · intent ·
+                                                                   nonprofit · active
+                                                                   → eligible)
 ```
 
-The two automated stages stop at `risk.csv`. Eligibility is a manual review
-of the top candidates — the `github_repo`-keyed license/EOL signals below
-are inputs to that review, not an automated output.
+Risk and Eligibility both read their scope directly from `value.csv`: Risk
+scores the valid class-A repos (non-archived), while Eligibility runs on the
+same top set with archived repos included — archived repos surface there as
+`active=False` instead of being silently dropped.
 
 Source-specific details live in [`docs/sources/`](sources/) (one `.md` per source).
 
@@ -146,7 +144,7 @@ per-ecosystem funnel counts and repo-coverage percentages.
 
 Each language assembles the steps above from its own sources. The per-language
 component docs cover **what data is collected from each source and which pipeline
-stage uses it** (Value → Risk, plus the manual eligibility review):
+stage uses it** (Value → Risk → Eligibility):
 
 | Language | Registry / sources | Pipeline doc | Raw-fetch reference |
 |---|---|---|---|
@@ -277,11 +275,12 @@ ecosystems (the `class` column in `value.csv`).
 See [docs/stats.md → Value](stats.md#repo-class-distribution) for the per-class ×
 per-ecosystem counts and the GitHub-group / orphan split.
 
-EOL information is intentionally **not** stored here — it feeds the manual
-eligibility review, not the value table. The per-ecosystem `check_eol.py`
-scripts compute it and write `data/sources/{eco}/eol.csv`; joining that with
-the matching `data/sources/{eco}/results.csv` yields per-repo `is_eol` for the
-top candidates under manual review.
+EOL information is intentionally **not** stored here — it feeds the
+Eligibility stage, not the value table. The per-ecosystem `check_eol.py`
+scripts compute it and write `data/sources/{eco}/eol.csv`; those are
+advisory inputs to the manual `eol` override column in
+`data/eligibility/overrides.csv`, which `src.eligibility.build_active`
+consumes (see [eligibility.md](eligibility.md)).
 
 Per-package data isn't preserved here either — see each ecosystem's
 `data/sources/{eco}/results.csv` and `data/sources/{eco}/eol.csv` for the package-level
@@ -311,8 +310,8 @@ overlay.
 
 ### Project identity is GitHub-only
 
-Every downstream consumer (risk, EOL, GitHub-derived contributor metrics,
-and the manual eligibility review) keys off the `github_repo` field.
+Every downstream consumer (risk, eligibility, EOL, GitHub-derived
+contributor metrics) keys off the `github_repo` field.
 Projects that don't live on GitHub are present in `value.csv` with
 `github_repo=""` and are silently excluded from those analyses.
 
@@ -327,8 +326,8 @@ the value-pipeline level. Per-ecosystem GitHub vs Git coverage (and the
 load-bearing class-A subset) is in
 [docs/stats.md → Value](stats.md#repo-identity-coverage-valuecsv).
 
-Downstream consumers (risk, EOL, GitHub contributor metrics, the manual
-eligibility review) still key off `github_repo`, so a non-GitHub-only
+Downstream consumers (risk, eligibility, EOL, GitHub contributor metrics)
+still key off `github_repo`, so a non-GitHub-only
 project (glibc, gcc, etc.) still slips out of those analyses even though
 it's now visible in `value.csv` with a populated `git_url`. To fully fix:
 per-host adapters for license/EOL/contributor checks against GitLab API,
@@ -339,8 +338,8 @@ savannah, sourceware, etc.
 `results.csv` admits everything in the top 95% cumulative download set
 plus its transitive deps — no license check, no age cutoff, no popularity
 floor, no archive/EOL gate. Quality filtering happens *downstream*: the
-per-ecosystem `check_eol.py` / `fetch_licenses.py` signals feed the manual
-eligibility review of the top candidates. This is intentional (keeps the
+per-ecosystem `check_eol.py` / `fetch_licenses.py` signals feed the
+Eligibility stage's checks on the top repos. This is intentional (keeps the
 value scoring untouched by signal-quality concerns), but means the raw
 value class distribution overstates how many projects we'd actually fund.
 

@@ -14,9 +14,12 @@ derives metrics, and produces the `score` it contributes to `risk.csv`:
 | Security | [components/security.md](components/security.md) | geom-mean of OpenSSF-score + CVE-count percentiles |
 | Workload | [components/workload.md](components/workload.md) | geom-mean of LOC/CVE/net-issues-per-contributor percentiles |
 
-Funding signals are collected but **not a scored dimension** — they feed the
-`intent` and `nonprofit` flag columns (see [components/funding.md](components/funding.md)
-and the [Intent and nonprofit](#intent-and-nonprofit) section below).
+Funding is **not part of the risk stage** — the funding signals and the
+`intent` / `nonprofit` flags they feed moved to the Eligibility stage
+([eligibility.md](eligibility.md)): the signals build
+`data/eligibility/funding.csv` and roll into
+`data/eligibility/eligibility.csv`. Methodology stays in
+[components/funding.md](components/funding.md).
 
 ## Metrics Roadmap
 
@@ -54,14 +57,6 @@ Risk
 │   ├── sast_findings_{total,error,security}  ← semgrep p/default        [2025 EOY]
 │   └── bestpractices_badge_id        ← deps.dev (OpenSSF Best Practices) [most recent]
 │
-├── Funding (signals only — not scored)  →  data/risk/funding.csv
-│   ├── github_sponsors               ← GitHub Sponsors API             [most recent]
-│   ├── has_funding_link, _link_platforms ← GraphQL repository.fundingLinks [most recent]
-│   ├── has_funding_json              ← repo /funding.json (FLOSS/fund)  [most recent]
-│   ├── host / host_type             ← foundation rosters + funding/overrides.csv [most recent]
-│   ├── owner / owner_type            ← funding/overrides.csv (GitHub-org backing)  [most recent]
-│   └── → intent, nonprofit           ← boolean flags joined into risk.csv (not scored)
-│
 └── Workload  →  data/risk/workload.csv
     ├── repo_age_years                ← GitHub /repos created_at        [EOY, last complete yr]
     ├── push_cadence_years            ← commits-years.csv (years w/ commits) [2021–2025]
@@ -97,14 +92,12 @@ graph LR
         concentration["Contributor Concentration"]
         complexity["Codebase Complexity"]
         security["Security"]
-        funding["Funding (signals only — not scored)"]
         workload["Workload (incl. issue debt + trend)"]
     end
 
     github --> concentration
     github --> complexity
     github --> security
-    github --> funding
     github --> workload
 ```
 
@@ -224,27 +217,6 @@ neutral baseline), so for those the score is effectively driven by the OpenSSF
 Scorecard axis; CVEs only re-rank the minority that carry them, above the neutral
 50. (CVE coverage is in [stats.md → Risk → Security](stats.md#security).)
 
-### Intent and nonprofit
-
-Two flag columns in `risk.csv` that describe the repo's funding context — they
-are **not scored dimensions** and do not affect `score`.
-
-- **`intent`** (`bool`, default `false`) — `true` when the repo shows at least
-  one funding signal: GitHub Sponsors (inbound or outbound),
-  a `.github/FUNDING.yml`, a `funding.json` (FLOSS Fund), an npm `funding`
-  field, a PyPI project-URLs funding entry, an Open Collective slug, or an
-  institutional host or owner. "Intent" means the project is
-  actively seeking or accepting support.
-- **`nonprofit`** (`bool`, default `true`) — `false` only when a corporate
-  entity (Meta, Google, Microsoft, AWS, …) is the project's host or owner,
-  as determined by `host_type` / `owner_type == "company"` in
-  `data/risk/funding.csv`. Community-run and foundation-backed projects are
-  `nonprofit=true`. Corporate-backed repos remain in `risk.csv` with their
-  score intact; callers filter by `nonprofit=true` to restrict to endowment
-  candidates.
-
-Coverage numbers live in [stats.md → Risk → Intent and nonprofit](stats.md#intent-and-nonprofit).
-
 ## Data Sources
 
 | Source | Fields extracted for Risk |
@@ -298,7 +270,7 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 | `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
 | `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (the `scc` fetcher) |
 | `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall risk `score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload). **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)**. Company-backed repos (`host_type`/`owner_type == company`) are **kept and flagged `nonprofit=false`** — they are not excluded from `risk.csv`. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
+| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall risk `score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload). **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)**. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
 
 ## Source-file coverage
 
@@ -318,7 +290,7 @@ repo, not a data-collection bug:
 - **Scorecard files (~99%)** — a mix of brand-new risk-scope additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
 - **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos. The `/stats/contributors` per-year breakdown and `data/concentration-data.csv` are retired.
 - **churn** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
-- **Structurally-sparse columns** — `bestpractices_badge_id` (only CII-enrolled repos), `foundation_host` (only FOSS-foundation members), `funding_link_platforms` (only repos that declare funding links), `cognitive_*` (only languages with a Lizard cognitive parser), and `issue_trend_score` (only repos with `mean_opened_per_year ≥ 1`) are sparse by definition. Their coverage is in [stats.md](stats.md#risk).
+- **Structurally-sparse columns** — `bestpractices_badge_id` (only CII-enrolled repos), `cognitive_*` (only languages with a Lizard cognitive parser), and `issue_trend_score` (only repos with `mean_opened_per_year ≥ 1`) are sparse by definition. Their coverage is in [stats.md](stats.md#risk).
 
 ## Output
 
@@ -327,8 +299,7 @@ repo, not a data-collection bug:
 One row per risk-scope repo. The four scored-dimension columns are each a
 **0–100 risk score** (higher = riskier) — the geometric-mean rollup of that
 dimension's scored percentiles — and `score` is the geometric mean of those
-four scores. Two flag columns (`intent`, `nonprofit`) describe the repo's
-funding context but do not affect `score`. The detailed per-dimension metric
+four scores. The detailed per-dimension metric
 and `*_p` percentile columns live in the per-dimension files
 (`data/risk/{concentration,complexity,security,workload}.csv`) and are
 documented in the component docs linked at the top of this page.
@@ -342,5 +313,7 @@ documented in the component docs linked at the top of this page.
 | `security` | Security risk score (0–100) |
 | `workload` | Per-contributor workload risk score (0–100) |
 | `score` | Overall risk score (0–100) — geometric mean of the four dimensions |
-| `intent` | `true` if the repo has at least one funding signal (incl. host/owner) |
-| `nonprofit` | `true` for community/foundation-backed repos; `false` if company-backed |
+
+The `intent` and `nonprofit` flags that used to sit alongside `score` are now
+part of the Eligibility stage — built into `data/eligibility/funding.csv` and
+rolled into `data/eligibility/eligibility.csv` (see [eligibility.md](eligibility.md)).

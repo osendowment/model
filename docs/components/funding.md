@@ -1,19 +1,25 @@
-# Funding (risk component)
+# Funding (eligibility component)
 
-How well-resourced is a project? The funding component gathers every public
+How well-resourced is a project? The funding component of the
+[Eligibility stage](../eligibility.md) gathers every public
 signal that a repo receives (or gives) financial support — GitHub Sponsors,
 `FUNDING.yml` platforms, the FLOSS Fund directory, OpenCollective budgets, and
 FOSS-foundation hosting — and distills them into:
 
 1. a **funding-risk score (`score`, 0–100, higher = more at-risk)** stored in
-   `data/risk/funding.csv` (not carried into `risk.csv` — see below), and
-2. two boolean flags — **`intent`** and **`nonprofit`** — that are joined into
-   `risk.csv`.
+   `data/eligibility/funding.csv` (informational — not carried into any
+   aggregate; see below), and
+2. two boolean flags — **`intent`** and **`nonprofit`** — that
+   `src/eligibility/build_eligibility.py` joins into
+   `data/eligibility/eligibility.csv` as two of the four eligibility checks.
 
-Scope: the class-A value-class repos in the risk pipeline (counts in
-[stats.md → Risk → Intent and nonprofit](../stats.md#intent-and-nonprofit);
+Scope: the top repos — valid class-A, **archived included**
+(`load_top_repos(skip_archived=False)`), so an archived repo keeps its funding
+row and surfaces downstream as `active=False` rather than being dropped
+(counts in
+[stats.md → Eligibility → Intent and nonprofit](../stats.md#intent-and-nonprofit);
 see [value.md](../value.md)).
-Build step: `src/risk/build_funding.py`.
+Build step: `src/eligibility/build_funding.py`.
 
 ## Metrics Roadmap
 
@@ -23,7 +29,7 @@ window. Raw signals are fetched per-source under `data/sources/`; derived
 columns are computed by `build_funding.py`.
 
 ```
-Funding  → data/risk/funding.csv  (one row per class-A risk repo)
+Funding  → data/eligibility/funding.csv  (one row per top repo, archived included)
 │
 ├── GitHub Sponsors
 │   ├── gh_sponsors_in        ← GraphQL sponsorshipsAsMaintainer (owner + FUNDING.yml github logins)  [most recent]
@@ -44,7 +50,7 @@ Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 │   ├── oc_avg_funding        ← OC GraphQL totalAmountReceived (gross, mean of years; $0 if none)     [2021–2025]
 │   └── oc_avg_funding_p      ← derived (worst-pinned CDF risk percentile of oc_avg_funding)          [2021–2025]
 │
-├── Institutional backing  (funding/host-by-repo.csv ∪ funding/overrides.csv)
+├── Institutional backing  (funding/host-by-repo.csv ∪ data/eligibility/overrides.csv)
 │   ├── host, host_type      ← legally-connected steward domain (e.g. apache.org, react.foundation)  [most recent]
 │   ├── owner, owner_type     ← owning-entity domain (e.g. meta.com), from overrides.csv               [most recent]
 │   └── host_score           ← derived: combined backing, most-funded of host/owner (0 · 0.5 · 1)     [most recent]
@@ -53,17 +59,18 @@ Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 ├── gh_stars, gh_forks        ← GitHub /repos (informational, not scored)                             [most recent]
 │
 ├── score  (funding-risk score)  ← derived (geom-mean of gh_sponsorships_p, oc_avg_funding_p, host_score×100; int 1–100)  [most recent]
-│                                  (NOT carried into risk.csv — funding is not a scored dimension)
-├── intent                     ← derived bool: ≥1 funding signal present (see below)
-└── nonprofit                  ← derived bool: false only when host_type or owner_type == company
+│                                  (NOT carried into eligibility.csv or risk.csv — funding is not a scored dimension)
+├── intent                     ← derived bool: ≥1 funding signal present (see below) → eligibility.csv
+└── nonprofit                  ← derived bool: false only when host_type or owner_type == company → eligibility.csv
 ```
 
 ## How It Works
 
 1. **Collect** — five fetchers pull raw funding signals into `data/sources/`,
    each TTL-controlled so re-runs only fetch what's missing or stale.
-2. **Join** — `build_funding.py` joins the sources onto the risk repos
-   (by `repo`, by owner `login` for outbound sponsoring, by OC `slug`).
+2. **Join** — `build_funding.py` joins the sources onto the top repos
+   (archived included; by `repo`, by owner `login` for outbound sponsoring,
+   by OC `slug`).
 3. **Derive** — combine raw signals (`gh_sponsorships`, `channels_count`,
    `has_funding_json`) and compute the percentiles.
 4. **Score** — `score` = geometric mean of the two channel percentiles, then
@@ -71,26 +78,29 @@ Funding  → data/risk/funding.csv  (one row per class-A risk repo)
    owner: company 0 · nonprofit 0.5 · none 1); integer 0–100, higher = more at-risk.
 5. **Flags** — `build_funding.py` derives the `intent` and `nonprofit` booleans
    from the funding signals (`_intent_flag` / `_nonprofit_flag`) and writes them
-   to `funding.csv`; `aggregate_risk.py` joins just those two columns into
-   `risk.csv` alongside the four scored dimensions. The funding `score` does
-   **not** feed `risk.csv`; funding is a signal-only component, not a scored
-   dimension.
+   to `funding.csv`; `build_eligibility.py` joins just those two columns into
+   `eligibility.csv` alongside the `oss` and `active` checks. The funding
+   `score` does **not** feed `eligibility.csv` (or `risk.csv`); funding is a
+   signal-only component, not a scored dimension.
 
-Pipeline order (`src/risk/run_risk_pipeline.py`). The risk runner fetches these
-sources by default (incremental — each fetcher skips data already present, so a
-re-run only fills gaps); pass `--skip-fetch` to rebuild from existing data without
-fetching:
+Pipeline order (`src/eligibility/run_eligibility_pipeline.py`). The eligibility
+runner fetches these sources by default (incremental — each fetcher skips data
+already present, so a re-run only fills gaps); pass `--skip-fetch` to rebuild
+from existing data without fetching:
 
 ```
-funding-yml → sponsors → sponsorships → floss-fund → opencollective → funding-build
+funding-yml → npm-funding → pypi-funding → sponsors → floss-fund → oc-collectives → opencollective → foundation scrapers → match-hosts → funding-build
 ```
+
+(The same runner also fetches the license and EOL signals for the stage's
+other dimensions — see [eligibility.md](../eligibility.md).)
 
 ## Collection
 
 Five sources feed the build. Each fetcher records a `*_status` and/or
 `fetched_at`, so a `0`/`False` value is distinguishable from a failed fetch.
 
-| Source file (`data/sources/`) | Fetcher | Collects | Key |
+| Source file (`data/sources/` unless noted) | Fetcher | Collects | Key |
 |---|---|---|---|
 | `github/sponsors.csv` | `src/sources/github/fetch_sponsors.py` | inbound GitHub Sponsors count | `repo` |
 | `github/sponsorships.csv` | `src/sources/github/fetch_sponsorships.py` | outbound sponsoring count | `login` |
@@ -98,7 +108,7 @@ Five sources feed the build. Each fetcher records a `*_status` and/or
 | `floss-fund/funding-json.csv` | `src/sources/floss_fund/funding_json.py` | FLOSS Fund manifest directory | `id` |
 | `opencollective/budgets.csv` | `src/sources/opencollective/fetch_budgets.py` | OC gross annual budgets | `slug` |
 | `funding/host-by-repo.csv` | foundations scrapers (`src/sources/funding/`) | scraped FOSS-foundation host | `repo` |
-| `funding/overrides.csv` | curated | per-repo `host`/`owner` **domains** + types (company/nonprofit); schema `repo,host,host_type,gh_user,owner,owner_type` | `repo` |
+| `data/eligibility/overrides.csv` | curated | per-repo `host`/`owner` **domains** + types (company/nonprofit); funding reads `repo,host,host_type,gh_user,owner,owner_type,oc_slug` — the stage-level `eol`/`reason` columns are consumed by `build_active`, not here | `repo` |
 
 `gh_stars` / `gh_forks` are read from `data/sources/github/repos.csv` (GitHub
 `/repos`) and carried as informational columns — they are **not** scored.
@@ -123,7 +133,7 @@ is a *resourced* backer, not an unfunded project — which is why the score uses
 Rather than fetch `funding.json` from ~900 repos individually,
 `funding_json.py` downloads the whole [FLOSS Fund](https://dir.floss.fund)
 directory once and `build_funding` matches `project_repository` URLs against the
-risk repos, with zero per-repo requests. The export also parses each manifest's
+top repos, with zero per-repo requests. The export also parses each manifest's
 channels into per-platform handles + `channel_platforms`. Two matching refinements
 catch manifests a raw URL-equality check would miss:
 
@@ -135,7 +145,7 @@ catch manifests a raw URL-equality check would miss:
   the 30-day export).
 - **Org-level manifests (`org_fundable`).** A manifest whose repo URL is a GitHub
   *org page* (`github.com/<org>`, not a specific repo) declares funding for the
-  whole org. Every risk-scope repo under that owner gets `org_fundable=True` and
+  whole org. Every in-scope repo under that owner gets `org_fundable=True` and
   inherits the org manifest's channels — "if the org is fundable, its repos have
   a funding channel". (GitHub Sponsors and `fundingLinks` are already
   owner/org-inherited per repo, so this only fills the FLOSS-side gap.)
@@ -197,7 +207,7 @@ of the two** (`min`), so a single value ∈ {0, 0.5, 1}:
 
 - A scraped FOSS-foundation host (`funding/host-by-repo.csv`) defaults to
   nonprofit, so Apache/LF/CNCF/NumFOCUS/PSF repos drop from 100 → 50 as before.
-- A curated `funding/overrides.csv` row sets either side by domain.
+- A curated `data/eligibility/overrides.csv` row sets either side by domain.
   `facebook/react` (host `react.foundation` nonprofit, owner `meta.com` company)
   → host_score `min(0.5, 0)` = 0 → ∛(100·100·0) = **1**; `rust-lang/rust` (host
   `rustfoundation.org` nonprofit, no owner) → host_score `min(0.5, 1)` = 0.5 →
@@ -231,10 +241,10 @@ risk voice, not a no-op. (Intent/nonprofit coverage → [stats.md](../stats.md#i
 
 ## Output
 
-### `data/risk/funding.csv` (per-dimension build)
+### `data/eligibility/funding.csv` (per-dimension build)
 
-One row per risk repo. No `fetched_at` — per-signal timestamps stay
-in each source file.
+One row per top repo (archived included). No `fetched_at` — per-signal
+timestamps stay in each source file.
 
 | Column | Description |
 |---|---|
@@ -258,16 +268,20 @@ in each source file.
 | `host_score` | combined backing = `min(type(host), type(owner))` ∈ {`0` company, `0.5` nonprofit, `1` none} — multiplies `score` |
 | `score` | **funding-risk score** (geom-mean of the two `_p` × `host_score`, int 1–100) |
 
-### `data/risk/risk.csv` (aggregate)
+### `data/eligibility/eligibility.csv` (rollup)
 
-The funding component does **not** contribute a scored column to `risk.csv`.
-The overall `risk.csv` `score` is the geometric mean of the **four** scored
-dimensions only: `concentration`, `complexity`, `security`, `workload`.
+The funding `score` does **not** contribute to any aggregate — it feeds
+neither the eligibility rollup nor the `risk.csv` `score` (the geometric mean
+of the four scored risk dimensions: `concentration`, `complexity`, `security`,
+`workload`).
 
-Instead, `aggregate_risk.py` derives two boolean flag columns from the funding
-signals and joins them into `risk.csv`:
+Instead, `src/eligibility/build_eligibility.py` joins the two boolean flag
+columns from `funding.csv` into `data/eligibility/eligibility.csv`, where they
+are two of the four checks behind
+`eligible = oss AND intent AND nonprofit AND active`
+(see [eligibility.md](../eligibility.md)):
 
-| `risk.csv` column | Source | Default |
+| `eligibility.csv` column | Source | Default |
 |---|---|---|
 | `intent` | `true` when the repo has ≥1 funding signal (see below) | `false` |
 | `nonprofit` | `false` only when `host_type`/`owner_type == company` | `true` |
@@ -282,14 +296,14 @@ funding entry, an Open Collective slug, or an institutional host or owner.
 
 **`nonprofit`** (`bool`, default `true`) — `false` only when a corporate entity
 (Meta, Google, Microsoft, AWS, …) is the project's host or owner, as determined by
-`host_type` / `owner_type == "company"` in `data/risk/funding.csv`.
+`host_type` / `owner_type == "company"` in `data/eligibility/funding.csv`.
 Community-run and foundation-backed projects are `nonprofit=true`.
-Corporate-backed repos remain in `risk.csv` with their scores intact; callers
-filter by `nonprofit=true` to restrict to endowment candidates.
+Corporate-backed repos remain in `eligibility.csv` flagged `nonprofit=false` —
+already-resourced projects become ineligible without being hidden.
 
 ## Coverage
 
-See [stats.md → Risk → Intent and nonprofit](../stats.md#intent-and-nonprofit)
+See [stats.md → Eligibility → Intent and nonprofit](../stats.md#intent-and-nonprofit)
 for current per-channel coverage over the top repos and the score distribution.
 
 ## Limitations
@@ -307,9 +321,10 @@ for current per-channel coverage over the top repos and the score distribution.
   ecosystem hasn't reached this cohort. `has_funding_json` is informational, not
   yet a scoring input.
 - **`score` is a percentile, not a class.** It's a 0–100 risk number, not a
-  class tier. It lives in `funding.csv` and is **not** folded into the overall
-  `risk.csv` `score` — the risk aggregate uses four scored dimensions only
-  (concentration, complexity, security, workload).
+  class tier. It lives in `funding.csv` and feeds no aggregate — the risk
+  `score` uses its four scored dimensions only (concentration, complexity,
+  security, workload), and the eligibility rollup consumes just the
+  `intent`/`nonprofit` booleans.
 - **OC is the only $ amount.** GitHub Sponsors and Patreon/Tidelift amounts
   aren't public, so dollar figures exist only for the ~45 OpenCollective repos;
   the sponsorship axis is a *count*, not a *sum*.

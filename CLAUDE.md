@@ -2,8 +2,8 @@
 
 ## Code Organization
 
-`src/` is organized by **role**, mirroring the Value → Risk pipeline (plus a
-manual eligibility review) and the `data/` layout. A script's location tells
+`src/` is organized by **role**, mirroring the three-stage Value → Risk →
+Eligibility pipeline and the `data/` layout. A script's location tells
 you what it is:
 
 - `src/sources/<source>/` — source-related scripts: everything that fetches or
@@ -16,14 +16,13 @@ you what it is:
   (e.g. code `floss_fund/` ↔ data `floss-fund/`).
 - `src/common/` — shared infrastructure used across stages: `params.py`, `repos.py`,
   `tables.py`, `stats.py`, `pipeline_runner.py`, `funding_platforms.py`.
-- `src/value/`, `src/risk/` — pipeline-stage scripts: the per-dimension
-  builders for that stage **plus** its orchestrator (`run_<stage>_pipeline.py`,
-  run via `uv run python -m src.<stage>.run_<stage>_pipeline`). Eligibility
-  has no stage folder of its own — it is a **manual review** of the top
-  candidates, not an automated stage. The source inputs that inform it
-  (`src/sources/osi/`, `src/sources/foundations/`, the per-ecosystem
-  `check_eol.py` / `fetch_licenses.py`, `fetch_repo_owner_data`) are kept
-  under `src/sources/`.
+- `src/value/`, `src/risk/`, `src/eligibility/` — pipeline-stage scripts:
+  the per-dimension builders for that stage **plus** its orchestrator
+  (`run_<stage>_pipeline.py`, run via
+  `uv run python -m src.<stage>.run_<stage>_pipeline`). The eligibility
+  stage's source inputs (`src/sources/osi/`, `src/sources/funding/`, the
+  per-ecosystem `check_eol.py` / `fetch_licenses.py`,
+  `fetch_repo_owner_data`) stay under `src/sources/`.
 - `src/settings.json` — model parameters/config at the `src/` root (loaded by `src/common/params.py`).
 - Only truly general-purpose scripts (tied to no source or stage) go in a top-level
   `scripts/` folder. Never leave a script in a bare `scripts/` folder if it belongs
@@ -31,19 +30,18 @@ you what it is:
 
 ## Data Organization
 
-`data/` mirrors the two-stage pipeline (Value → Risk), with all external-source data isolated under `data/sources/`:
+`data/` mirrors the three-stage pipeline (Value → Risk → Eligibility), with all external-source data isolated under `data/sources/`:
 
 - `data/sources/<source>/` — raw + intermediate data fetched from external sources. One folder per source: ecosystem registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`, `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `endoflife/`, `floss-fund/`, `opencollective/`, `foundations/`).
 - `data/value/` — Value-stage outputs: `value.csv` (the unified per-repo value table; carries a tri-state `valid` column), `validation.csv` (git/GitHub validation audit table — rollup of the source caches), `overrides.csv` (curated manual repo/validity corrections), `stats.csv` (per-ecosystem stats matrix: metric rows × ecosystem columns — downloads per year + package/repo counts).
-- `data/risk/` — Risk-stage outputs: `risk.csv` (final aggregated risk table) plus the per-dimension builds (`concentration.csv`, `complexity.csv`, `security.csv`, `funding.csv`, `workload.csv`). Raw funding signals live under `data/sources/github/` (`sponsors.csv` inbound, `sponsorships.csv` outbound, `funding-yml.csv`), `data/sources/floss-fund/` (`funding-json.csv`), and `data/sources/opencollective/` (`budgets.csv`).
-
-(Eligibility is a manual review, not a pipeline stage — it has no stage output folder. Its source signals live under `data/sources/` (`osi/`, `foundations/`, per-ecosystem `eol.csv`, license data).)
+- `data/risk/` — Risk-stage outputs: `risk.csv` (final aggregated risk table) plus the per-dimension builds (`concentration.csv`, `complexity.csv`, `security.csv`, `workload.csv`).
+- `data/eligibility/` — Eligibility-stage outputs: `eligibility.csv` (the rollup: `eligible = oss AND intent AND nonprofit AND active`) plus the per-dimension builds (`licenses.csv`, `active.csv`, `funding.csv`) and `overrides.csv` (curated per-repo host/owner backing, OC slug, and the manual `eol` verdict). Raw funding signals live under `data/sources/github/` (`sponsors.csv` inbound, `sponsorships.csv` outbound, `funding-yml.csv`), `data/sources/floss-fund/` (`funding-json.csv`), `data/sources/opencollective/` (`budgets.csv`), and `data/sources/funding/` (foundation rosters + `host-by-repo.csv`); license/EOL source signals under `data/sources/osi/` and the per-ecosystem folders.
 
 Rule: a script reading external/fetched data points at `data/sources/<source>/…`; a script reading or writing a stage result points at `data/<stage>/…`. Never write a stage output into `data/sources/`, and never write fetched source data into a stage folder.
 
 ## Documentation
 
-`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md` — plus the cross-cutting **`docs/stats.md`**, with everything else in a subfolder:
+`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md`, `eligibility.md` — plus the cross-cutting **`docs/stats.md`**, with everything else in a subfolder:
 
 - `docs/stats.md` — **the single home for every pipeline/funnel/coverage/distribution number** (see rule below).
 - `docs/sources/<source>.md` — one page per external data source.
@@ -53,9 +51,9 @@ When a doc's content spans multiple stages, fold it into the relevant stage page
 
 ### Stats live only in `docs/stats.md`
 
-**Every pipeline/funnel/coverage/distribution figure belongs in `docs/stats.md` and nowhere else.** That means: per-stage funnel counts (packages → dep tree → results → with-repo), class/score distributions, repo-identity coverage, and per-component "N of the top repos carry signal X" coverage tables. `stats.md` has an `## Value` section and an `## Risk` section (Risk covers **only the top repos** — the valid class-A set), with a funnel-style table per component.
+**Every pipeline/funnel/coverage/distribution figure belongs in `docs/stats.md` and nowhere else.** That means: per-stage funnel counts (packages → dep tree → results → with-repo), class/score distributions, repo-identity coverage, and per-component "N of the top repos carry signal X" coverage tables. `stats.md` has `## Value`, `## Risk`, and `## Eligibility` sections (Risk covers **only the top repos** — the valid class-A set; Eligibility covers the same set **plus archived repos**, which surface as `active=False`), with a funnel-style table per component.
 
-- Methodology pages (`value.md`, `risk.md`, the component and source docs) describe **how** a metric is built (formulas, schemas, column descriptions, worked illustrative examples) and **link to** `stats.md` for **how many** — they must not restate the counts.
+- Methodology pages (`value.md`, `risk.md`, `eligibility.md`, the component and source docs) describe **how** a metric is built (formulas, schemas, column descriptions, worked illustrative examples) and **link to** `stats.md` for **how many** — they must not restate the counts.
 - A single concrete number that *defines* a parameter (e.g. "top = 95% of cumulative downloads") stays in the methodology page — it's config, not a result.
 - One number, one place: when a run changes the counts, only `stats.md` is edited. A coverage/funnel count found in any other page is a bug — move it to `stats.md` and leave a pointer.
 
