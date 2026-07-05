@@ -193,12 +193,12 @@ extras. Unknown (no license signal) is tracked separately from known non-OSS.
 |---|---:|---:|
 | input top repos (incl. archived) | 918 | 100% |
 | license resolved | 918 | 100% |
-| · from override | 7 | 0.8% |
+| · from override | 14 | 1.5% |
 | · from registry | 895 | 97.5% |
-| · from GitHub | 16 | 1.7% |
-| **oss=True (OSI-approved)** | **905** | **98.6%** |
+| · from GitHub | 9 | 1.0% |
+| **oss=True (OSI-approved)** | **912** | **99.3%** |
 | oss=False (known non-OSS) | 4 | 0.4% |
-| oss unknown (no signal) | 9 | 1.0% |
+| oss unknown (no signal) | 2 | 0.2% |
 
 The 4 known non-OSS are content-licensed data repos (CC0/CC-BY — free for
 documents, not software OSS by this model's strict policy).
@@ -226,14 +226,14 @@ Microsoft, …). See [funding.md](components/funding.md).
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 665 | 72.4% |
-| intent — no funding signal | 253 | 27.6% |
+| intent — any funding signal | 670 | 73.0% |
+| intent — no funding signal | 248 | 27.0% |
 | nonprofit — community / independent | 857 | 93.4% |
 | nonprofit — company-backed | 61 | 6.6% |
 
 The 61 company-backed repos are **kept in `eligibility.csv`** and flagged
 `nonprofit=False` (they are already resourced; the flag makes them ineligible
-without hiding them). The 253 repos with `intent=False` are not actively
+without hiding them). The 248 repos with `intent=False` are not actively
 soliciting support — a higher-priority target for outreach.
 
 ### Eligibility rollup
@@ -243,8 +243,8 @@ unlock. Missing intent is by far the binding constraint.
 
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
-| oss | 905 | 98.6% | 5 |
-| intent | 665 | 72.4% | 230 |
+| oss | 912 | 99.3% | 1 |
+| intent | 670 | 73.0% | 228 |
 | nonprofit | 857 | 93.4% | 60 |
 | active | 896 | 97.6% | 6 |
-| **eligible** | **593** | **64.6%** | |
+| **eligible** | **602** | **65.6%** | |
