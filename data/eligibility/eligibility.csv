@@ -246,7 +246,7 @@ gcc-mirror/gcc,22711503,True,True,True,True,True
 getsentry/sentry-javascript,3328572,True,True,False,True,False
 giampaolo/psutil,20101515,True,True,True,True,True
 git/git,36502,True,True,True,True,True
-gitlab-freedesktop-mirrors/libxcb,444023705,True,False,True,True,False
+gitlab-freedesktop-mirrors/libxcb,444023705,True,True,True,True,True
 gitoxidelabs/gitoxide,136510559,True,True,True,True,True
 gitpython-developers/gitdb,1126093,True,False,True,True,False
 gitpython-developers/smmap,1865144,True,False,True,True,False
@@ -255,7 +255,7 @@ gkz/optionator,13435927,True,False,True,True,False
 gkz/prelude-ls,4457759,True,False,True,True,False
 gkz/type-check,13182168,True,False,True,True,False
 gmp-mirror/gmp,681340775,True,True,True,True,True
-gnome/pango,4537144,True,False,True,True,False
+gnome/pango,4537144,True,True,True,True,True
 google/brotli,24993138,True,True,False,True,False
 google/zerocopy,534354967,True,True,False,True,False
 googleapis/google-cloud-python,16316451,True,True,False,True,False

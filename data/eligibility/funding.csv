@@ -246,7 +246,7 @@ gcc-mirror/gcc,22711503,False,0,0,0,100.0,10877,4745,False,False,,False,False,,F
 getsentry/sentry-javascript,3328572,False,0,0,0,100.0,8642,1767,True,True,custom,False,False,,False,,1,,0,100.0,,,sentry.io,company,0,1,True,False
 giampaolo/psutil,20101515,True,6,0,6,33.55,11150,1477,True,True,"github,tidelift,open_collective,custom",False,False,,False,,4,psutil,82.92,17.65,,,,,1,39,True,True
 git/git,36502,False,0,0,0,100.0,60617,27847,False,False,,False,False,,False,,0,,0,100.0,sfconservancy.org,nonprofit,,,0.5,79,True,True
-gitlab-freedesktop-mirrors/libxcb,444023705,False,0,0,0,100.0,1,1,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+gitlab-freedesktop-mirrors/libxcb,444023705,False,0,0,0,100.0,1,1,False,False,,False,False,,False,,0,,0,100.0,xorg,nonprofit,,,0.5,79,True,True
 gitoxidelabs/gitoxide,136510559,False,0,0,0,100.0,11239,455,True,True,"github,open_collective",False,False,,False,,2,,0,100.0,,,,,1,100,True,True
 gitpython-developers/gitdb,1126093,False,0,0,0,100.0,225,68,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 gitpython-developers/smmap,1865144,False,0,0,0,100.0,74,31,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
@@ -255,7 +255,7 @@ gkz/optionator,13435927,False,0,0,0,100.0,166,16,False,False,,False,False,,False
 gkz/prelude-ls,4457759,False,0,0,0,100.0,427,58,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 gkz/type-check,13182168,False,0,0,0,100.0,211,16,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 gmp-mirror/gmp,681340775,False,0,0,0,100.0,25,7,False,False,,False,False,,False,,0,,0,100.0,fsf.org,nonprofit,,,0.5,79,True,True
-gnome/pango,4537144,False,0,0,0,100.0,182,51,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+gnome/pango,4537144,False,0,0,0,100.0,182,51,False,False,,False,False,,False,,0,,0,100.0,gnome,nonprofit,,,0.5,79,True,True
 google/brotli,24993138,False,0,0,0,100.0,14674,1337,False,False,,False,False,,False,,0,,0,100.0,,,google.com,company,0,1,True,False
 google/zerocopy,534354967,False,0,0,0,100.0,2279,151,False,False,,False,False,,False,,0,,0,100.0,,,google.com,company,0,1,True,False
 googleapis/google-cloud-python,16316451,False,0,0,0,100.0,5275,1683,False,False,,False,False,,False,,0,,0,100.0,,,google.com,company,0,1,True,False
