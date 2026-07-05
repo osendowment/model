@@ -79,6 +79,18 @@ When a doc's content spans multiple stages, fold it into the relevant stage page
     measurement (e.g. a non-empty count with a `fetched_at`). When a
     `False`/empty/`0` outcome could equally mean "failed", add an explicit
     status column (e.g. `*_checked`, `*_status`, a sidecar `queried.csv`).
+- **Repo-keyed source schema contract**: any fetched source CSV whose rows
+  are keyed by a GitHub repo *name* must also carry (1) a **`repo_id`**
+  column — the stable numeric GitHub id resolved at fetch time (blank only
+  when genuinely unresolvable, never invented) — and (2) a **fetch-date**
+  column (`fetched_at`/`checked_at`/`date`), either per row or in a
+  documented per-repo `.status.csv` sidecar. Rationale: slugs drift on
+  renames; every downstream join is by `repo_id`, so an id-less rewrite
+  silently blanks whole dimensions. `scripts/pipeline_health.py`
+  (`check_source_repo_id_integrity` + `check_source_schema_contract`)
+  enforces this. Exemptions: value-stage identity-resolution files (they
+  *produce* the ids), vendor dumps (crates db-dump, nice-registry), and
+  files keyed by non-repo entities (OC slugs, user logins).
 
 ## Git
 

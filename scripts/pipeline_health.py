@@ -362,9 +362,78 @@ def check_source_repo_id_integrity() -> list[Result]:
     return out
 
 
+# Repo-keyed source schema contract (see CLAUDE.md ## Auditability): every
+# fetched source CSV keyed by a GitHub repo name must carry repo_id AND a
+# fetch-date column — per row, or in a documented per-repo .status sidecar.
+# Value: the date column name in the file itself, or ("sidecar", <path>, <col>).
+SOURCE_SCHEMA_CONTRACT: dict[str, object] = {
+    "sources/git/contributor-commits.csv":
+        ("sidecar", "sources/git/contributor-commits.status.csv", "fetched_at"),
+    "sources/github/contributor-commits.csv":
+        ("sidecar", "sources/github/contributor-commits.status.csv", "fetched_at"),
+    "sources/osv/cves.csv": ("sidecar", "sources/osv/queried.csv", "fetched_at"),
+    "sources/github/git/commits-years.csv": "fetched_at",
+    "sources/github/git/churn.csv": "fetched_at",
+    "sources/github/issues.csv": "fetched_at",
+    "sources/git/scc.csv": "checked_at",
+    "sources/git/lizard.csv": "checked_at",
+    "sources/git/openssf.csv": "checked_at",
+    "sources/git/semgrep.csv": "checked_at",
+    "sources/git/depsdev.csv": "checked_at",
+    "sources/openssf/checks.csv": "date",
+    "sources/openssf/criticality.csv": "checked_at",
+    "sources/github/repos.csv": "fetched_at",
+    "sources/github/sponsors.csv": "fetched_at",
+    "sources/github/funding-yml.csv": "fetched_at",
+    "sources/npm/funding.csv": "fetched_at",
+    "sources/pypi/funding.csv": "fetched_at",
+    "sources/funding/host-by-repo.csv": "host_checked",
+    "sources/ossfuzz/projects.csv": "fetched_at",
+    "sources/floss-fund/funding-json.csv": "fetched_at",
+}
+
+
+def _header(path) -> list[str]:
+    with open(path, encoding="utf-8") as f:
+        return next(csv.reader(f), [])
+
+
+def check_source_schema_contract() -> list[Result]:
+    """Repo-keyed fetched sources carry repo_id + a fetch-date column.
+
+    Header-presence check only (cheap): fullness of repo_id for in-scope rows
+    is covered by check_source_repo_id_integrity; date cells may legitimately
+    be blank for rows written before date-tracking existed.
+    """
+    out: list[Result] = []
+    for rel, date_spec in SOURCE_SCHEMA_CONTRACT.items():
+        path = ROOT / "data" / rel
+        if not path.exists():
+            out.append((f"{rel}:schema", False, "file missing"))
+            continue
+        cols = _header(path)
+        problems = []
+        if "repo_id" not in cols:
+            problems.append("no repo_id column")
+        if isinstance(date_spec, tuple):
+            _, side_rel, side_col = date_spec
+            side = ROOT / "data" / side_rel
+            if not side.exists():
+                problems.append(f"status sidecar missing ({side_rel})")
+            elif side_col not in _header(side):
+                problems.append(f"sidecar lacks {side_col}")
+        elif date_spec not in cols:
+            problems.append(f"no {date_spec} column")
+        if problems:
+            out.append((f"{rel}:schema", False, "; ".join(problems)))
+        else:
+            out.append((f"{rel}:schema", True, "repo_id + fetch date present"))
+    return out
+
+
 CHECKS = [check_dimension_csvs, check_risk_data, check_eligibility_data,
           check_value_data, check_value_criticality,
-          check_source_repo_id_integrity,
+          check_source_repo_id_integrity, check_source_schema_contract,
           check_score_component_coverage,
           check_score_input_completeness, check_long_format_keys]
 
