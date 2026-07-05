@@ -11,7 +11,7 @@ derives metrics, and produces the `score` it contributes to `risk.csv`:
 |---|---|---|
 | Concentration | [components/concentration.md](components/concentration.md) | geom-mean of 5y bus-factor + HHI percentiles |
 | Complexity | [components/complexity.md](components/complexity.md) | geom-mean of LOC + cyclomatic-max percentiles |
-| Security | [components/security.md](components/security.md) | geom-mean of OpenSSF-score + CVE-count percentiles |
+| Security | [components/security.md](components/security.md) | max (worst-of) OpenSSF-score + CVE-count percentiles |
 | Workload | [components/workload.md](components/workload.md) | geom-mean of LOC/CVE/net-issues-per-contributor percentiles |
 
 Funding is **not part of the risk stage** — the funding signals and the
@@ -107,10 +107,13 @@ All scoring parameters (windows, weights) are defined in `src/settings.json`.
 
 Four independent scored risk dimensions — **concentration, complexity,
 security, workload**. Each dimension percentile-ranks its raw metrics
-(direction-aware, so a higher percentile always means *more* risk), takes the
-geometric mean of a designated subset of those percentiles, and emits a single
-**0–100 `score`** for the dimension (higher = riskier). The four dimension
-scores are combined into the overall `risk.csv` `score` via a geometric mean.
+(direction-aware, so a higher percentile always means *more* risk) and composes
+a designated subset of those percentiles into a single **0–100 `score`** for the
+dimension (higher = riskier). Concentration, complexity, and workload compose by
+**geometric mean**; security composes by **max ("worst-of")** so a bad Scorecard
+or a real CVE alone flags the repo without the axes diluting each other. The four
+dimension scores are combined into the overall `risk.csv` `score` via a geometric
+mean.
 Risk is expressed as continuous scores and percentiles end-to-end — there are
 **no discrete risk classes or tiers**.
 
@@ -210,12 +213,15 @@ percentiles (▴ higher = worse security):
 - `sast_findings_{total,error,security}_p` — percentiles of semgrep
   `p/default` findings (informational).
 
-The dimension `score` is the geometric mean of `openssf_score_p` and
-`cve_score` — a repo ranks worst when it is high-risk on both axes. Most
-risk-scope repos have zero known CVEs and share the same `cve_score = 50` (the
-neutral baseline), so for those the score is effectively driven by the OpenSSF
-Scorecard axis; CVEs only re-rank the minority that carry them, above the neutral
-50. (CVE coverage is in [stats.md → Risk → Security](stats.md#security).)
+The dimension `score` is the **max ("worst-of")** of `openssf_score_p` and
+`cve_score` — either a bad Scorecard *or* real CVEs alone is enough to flag the
+repo, and the two axes do not compound or dilute each other (so a repo with real
+CVEs is never masked by an otherwise-good Scorecard). Most risk-scope repos have
+zero known CVEs and share the same `cve_score = 50` (the neutral baseline), so
+for those `score = openssf_score_p` (which clears 50 for most) and is driven by
+the OpenSSF Scorecard axis; the CVE axis takes over only for the minority whose
+`cve_score` exceeds their openssf axis. (CVE coverage is in
+[stats.md → Risk → Security](stats.md#security).)
 
 ## Data Sources
 
