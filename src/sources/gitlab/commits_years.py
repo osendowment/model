@@ -64,6 +64,10 @@ async def _fetch_year(limiter, session, host: str, path: str, branch: str,
             return "", 0
         data = await resp.json()
         total = resp.headers.get("X-Total")
+        # GitLab omits X-Total on result sets >10,000 commits — in that rare
+        # case we fall back to len(data) (== 1, since per_page=1), which
+        # under-reports the true commit count for that year. `last_sha` (the
+        # anchor SHAs downstream fetchers pin to) is unaffected either way.
         commits = int(total) if total and total.isdigit() else (len(data) if isinstance(data, list) else 0)
         last_sha = data[0]["id"] if isinstance(data, list) and data else ""
         return last_sha, commits
@@ -96,44 +100,62 @@ def _atomic_write(path: Path, rows: list[dict]) -> None:
     os.replace(tmp, path)
 
 
-def _load_existing_ids() -> set[str]:
+def _load_existing_pairs() -> set[tuple[str, str]]:
+    """{(repo_id, year_str)} already anchored in COMMITS_OUT."""
     if not COMMITS_OUT.exists():
         return set()
     with open(COMMITS_OUT, encoding="utf-8") as f:
-        return {r["repo_id"] for r in csv.DictReader(f) if r.get("repo_id")}
+        return {(r["repo_id"], r["year"]) for r in csv.DictReader(f) if r.get("repo_id")}
 
 
-async def _fetch_all(projects: list[dict]) -> list[dict]:
+def _pairs_to_fetch(projects: list[dict], existing_pairs: set[tuple[str, str]],
+                    force: bool) -> list[tuple[dict, int]]:
+    """(project, year) pairs still needing a fetch.
+
+    A pair is skipped only if (repo_id, str(year)) already exists — so a
+    newly-added YEAR (e.g. a new calendar year rolling in) is still picked
+    up for repos that were already anchored in prior years, instead of the
+    whole repo being permanently skipped once it has any row at all.
+    Mirrors src/sources/git/commits_years.py's per-(repo, year) worklist.
+    """
+    out = []
+    for proj in projects:
+        for year in YEARS:
+            if force or (proj["repo_id"], str(year)) not in existing_pairs:
+                out.append((proj, year))
+    return out
+
+
+async def _fetch_all(pairs: list[tuple[dict, int]]) -> list[dict]:
     limiter = GitLabLimiter()
     rows: list[dict] = []
     sem = asyncio.Semaphore(MAX_CONCURRENT)
     async with aiohttp.ClientSession() as session:
-        async def _one(proj):
+        async def _one(proj: dict, year: int):
             async with sem:
-                for year in YEARS:
-                    sha, commits = await _fetch_year(
-                        limiter, session, proj["host"], proj["path"], proj["branch"], year)
-                    rows.append({"repo_id": proj["repo_id"], "git_url": proj["git_url"],
-                                 "project": proj["project"], "year": year,
-                                 "first_sha": "", "last_sha": sha,
-                                 "commits": commits, "fetched_at": _now_iso()})
-        await asyncio.gather(*[_one(p) for p in projects])
+                sha, commits = await _fetch_year(
+                    limiter, session, proj["host"], proj["path"], proj["branch"], year)
+                rows.append({"repo_id": proj["repo_id"], "git_url": proj["git_url"],
+                             "project": proj["project"], "year": year,
+                             "first_sha": "", "last_sha": sha,
+                             "commits": commits, "fetched_at": _now_iso()})
+        await asyncio.gather(*[_one(p, y) for p, y in pairs])
     return rows
 
 
 def fetch_and_persist(limit: int | None = None, force: bool = False,
                       quiet: bool = False) -> dict:
     projects = _load_valid_projects()
-    if not force:
-        done = _load_existing_ids()
-        projects = [p for p in projects if p["repo_id"] not in done]
     if limit:
         projects = projects[:limit]
+    existing_pairs: set[tuple[str, str]] = set() if force else _load_existing_pairs()
+    pairs = _pairs_to_fetch(projects, existing_pairs, force)
     if not quiet:
         console.rule("[bold cyan]gitlab/commits_years")
-        console.print(f"  projects to anchor: [bold]{len(projects)}[/bold]")
+        console.print(f"  projects: [bold]{len(projects)}[/bold] · "
+                      f"pairs to fetch: [bold]{len(pairs)}[/bold]")
     t0 = time.monotonic()
-    new_rows = asyncio.run(_fetch_all(projects)) if projects else []
+    new_rows = asyncio.run(_fetch_all(pairs)) if pairs else []
     # Merge with existing (keep prior repo_ids), keyed on (repo_id, year).
     merged: dict[tuple[str, str], dict] = {}
     if COMMITS_OUT.exists() and not force:
