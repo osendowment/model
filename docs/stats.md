@@ -147,7 +147,7 @@ OSV CVE counts + semgrep SAST.
 | OpenSSF score present | 895 | 99.9% |
 | semgrep SAST present | 873 | 97.4% |
 | CVE count 5y > 0 | 196 | 21.9% |
-| OSS-Fuzz enrolled | 130 | 14.5% |
+| OSS-Fuzz enrolled | 131 | 14.6% |
 | CII Best Practices badge | 30 | 3.3% |
 | **Security score** | **895** | **99.9%** |
 

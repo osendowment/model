@@ -112,7 +112,7 @@ composefs/tar-rs,21946092,7.6,openssf_local,2,False,0,62.54,0,80.99,0,62.66,,5.3
 conventional-changelog/commitlint,51575745,5.5,openssf_local,0,False,3,76.63,0,80.99,3,76.98,,34.41,50.0,41,2026-04-27T16:09:57+01:00
 conventional-changelog/conventional-changelog,15639771,5.1,openssf_local,1,False,26,91.52,1,86.14,26,91.64,,41.34,73.21,55,2026-04-27T16:09:51+01:00
 cosmiconfig/cosmiconfig,45750507,5.2,openssf_local,0,False,12,86.71,0,80.99,12,86.71,,40.22,50.0,45,2026-04-27T16:07:28+01:00
-coveragepy/coveragepy,138421996,7.7,openssf_local,0,False,14,87.97,2,89.92,14,87.97,,4.92,50.0,16,2026-04-27T17:06:17+01:00
+coveragepy/coveragepy,138421996,7.7,openssf_local,0,True,14,87.97,2,89.92,14,87.97,,4.92,50.0,16,2026-04-27T17:06:17+01:00
 cpburnz/python-pathspec,14648551,5.3,openssf_local,0,True,0,62.54,0,80.99,0,62.66,,38.66,50.0,44,2026-04-27T17:06:20+01:00
 crate-py/rpds,608018848,6.9,openssf_local,0,False,0,62.54,0,80.99,0,62.66,,12.4,50.0,25,2026-04-27T16:06:52+01:00
 criterion-rs/criterion.rs,1081104682,5.7,openssf_local,0,False,0,62.54,0,80.99,0,62.66,,31.28,50.0,40,2026-04-27T14:56:03+01:00

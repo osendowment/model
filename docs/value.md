@@ -85,6 +85,9 @@ Value
     ├── git_url                   ← per-eco git.csv union                  [most recent]
     │                                (GitLab/Codeberg/Sourcehut/Bitbucket
     │                                 /custom hosts when no GH match)
+    ├── mirror_url                ← GitHub Repos API `mirror_url`          [most recent]
+    │                                (upstream a github mirror syncs from;
+    │                                 e.g. gcc-mirror/gcc → gcc.gnu.org)
     ├── valid                     ← build_validation (True/False/empty)    [most recent]
     │                                (rollup of GitHub API + git ls-remote
     │                                 caches → value/validation.csv)
@@ -262,6 +265,7 @@ subgraphs.
 | `platform` | Host class of `git_url`: `github` / `gitlab` / `bitbucket` / `sourcehut` / `codeberg` / `custom`. Empty for orphan rows with no URL. Downstream GitHub-only consumers (risk, eligibility) filter on `platform == github`. |
 | `repo_id` | Stable repo id namespaced by platform: `gh/<numeric>` (GitHub Repos API id) for a resolved GitHub repo; empty for non-GitHub platforms (no numeric id) and unresolved/404 repos. |
 | `git_url` | Canonical git clone URL — `https://github.com/<repo>.git` for GitHub repos (so a valid repo always carries both `repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by `verify_git_urls`. Empty only for orphan packages with no upstream repo at all. |
+| `mirror_url` | For a **GitHub mirror repo**, the non-GitHub upstream it syncs from — GitHub's own `mirror_url` field (e.g. `gcc-mirror/gcc` → `git://gcc.gnu.org/git/gcc.git`). Populated by `verify_git_urls` from `data/sources/github/repos.csv`. Sparse: **only** repos GitHub natively imported as mirrors carry it (externally-maintained push-mirrors like `bminor/glibc` do not). Empty for ordinary and non-GitHub rows. Authoritative mirror→upstream link when present. |
 | `ecosystems` | Comma-separated list of ecosystems where the repo has packages (e.g. `crates,npm`) |
 | `packages` | Total package count in the repo |
 | `top_eco` | Ecosystem where the repo is highest-ranked (max PR percentile). `npm` / `pypi` / `crates` / `cpp`. |

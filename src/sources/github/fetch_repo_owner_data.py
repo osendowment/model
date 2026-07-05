@@ -62,7 +62,7 @@ MAX_REDIRECTS = 10  # cap on a rename-redirect chain before we give up
 REPO_FIELDS = [
     "repo", "valid", "repo_id", "node_id",
     "owner_login", "owner_id", "owner_type",
-    "name", "full_name", "description", "homepage",
+    "name", "full_name", "description", "homepage", "mirror_url",
     "default_branch", "license", "language", "topics",
     "size", "stars", "forks", "open_issues", "watchers",
     "fork", "has_downloads", "has_issues", "has_wiki",
@@ -175,17 +175,21 @@ def _now_iso() -> str:
 
 
 def load_ab_repos(classes: set[str]) -> list[str]:
-    """Return unique repo slugs (lowercased, sorted) whose `class` is in `classes`.
+    """Return unique github repo slugs (lowercased, sorted) whose `class` is in `classes`.
 
     Note: `data/value/value.csv` uses column name `class`; per-ecosystem
-    `results.csv` files use `value_class`. We read the unified file here.
+    `results.csv` files use `value_class`. We read the unified file here and
+    keep only rows whose `platform` is `github` (the GitHub API endpoints below
+    only apply to github repos).
     """
     seen: set[str] = set()
     with open(VALUE_FILE, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             if (r.get("class") or "") not in classes:
                 continue
-            repo = (r.get("github_repo") or "").strip().lower()
+            if (r.get("platform") or "").strip().lower() != "github":
+                continue
+            repo = (r.get("repo") or "").strip().lower()
             if repo and "/" in repo:
                 seen.add(repo)
     return sorted(seen)
@@ -215,6 +219,11 @@ def _flat_repo(d: dict, full_name: str) -> dict:
         "full_name": d.get("full_name", ""),
         "description": (d.get("description") or "")[:500],
         "homepage": d.get("homepage") or "",
+        # GitHub records the upstream a mirror repo syncs from (e.g.
+        # gcc-mirror/gcc → git://gcc.gnu.org/git/gcc.git). Non-empty ONLY for
+        # repos GitHub created as mirrors, so it's an authoritative
+        # mirror→upstream link — surfaced as value.csv's `mirror_url` column.
+        "mirror_url": d.get("mirror_url") or "",
         "default_branch": d.get("default_branch", ""),
         "license": lic.get("spdx_id") or lic.get("key") or "",
         "language": d.get("language") or "",
