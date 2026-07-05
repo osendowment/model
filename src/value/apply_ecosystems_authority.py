@@ -41,12 +41,15 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.repos import _read_github_repos
+from src.sources.github.fetch_repo_owner_data import fetch_and_persist, owners_from_repos
 from src.value.build_git_urls import (
     GIT_HOST_PRIORITY,
     _load_invalid_lookup,
     classify,
     merge_urls_with_source,
 )
+from src.value.git_urls import _canonicalize_git_url
 from src.value.unify_value_data import _github_repo_from_url, load_repo_overrides
 
 console = Console()
@@ -54,6 +57,8 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 PACKAGES_CSV = DATA_DIR / "sources" / "ecosystems" / "packages.csv"
 ECOSYSTEMS = ["npm", "pypi", "crates", "cpp"]
+
+_REPOS_FILE_DEFAULT = str(DATA_DIR / "sources" / "github" / "repos.csv")
 
 
 # ── eco source ─────────────────────────────────────────────────────────────────
@@ -154,6 +159,77 @@ def load_canonical_map() -> dict[str, str]:
     return out
 
 
+# ── GitHub identity resolution ─────────────────────────────────────────────────
+
+
+def _resolve_github(rows: list[dict], repos_file: str | None = None) -> None:
+    """In-place: stamp repo_id, github_repo, git, mirror_url from github/repos.csv.
+
+    After the eco-authority rewrite, each row's git URL is canonicalised
+    (GitHub URLs are cleared; non-GitHub URLs normalised), then the GitHub
+    slug is read from the github_repo column and looked up against repos.csv —
+    which is kept fresh via a 90-day TTL fetch.  On a valid hit the row gets:
+        repo_id    = "gh/<numeric>"
+        github_repo = <post-rename canonical full_name>
+        git        = "https://github.com/<full_name>.git"
+        mirror_url  = <upstream URL if this is a GitHub mirror, else "">
+    Unresolved rows get empty repo_id/mirror_url and keep their (canonicalised)
+    git URL.
+    """
+    if repos_file is None:
+        repos_file = _REPOS_FILE_DEFAULT
+
+    # Step 1: canonicalize git URLs.  GitHub URLs are cleared (→ ""); non-GitHub
+    # URLs are normalised (scheme, gitweb paths, …).  The github_repo column is the
+    # fallback slug source for GitHub rows whose git column just became "".
+    for r in rows:
+        r["git"] = _canonicalize_git_url(r.get("git", ""))
+
+    # Step 2: collect candidate GitHub slugs across all rows.
+    def _slug(r: dict) -> str:
+        return (_github_repo_from_url(r.get("git", ""))
+                or (r.get("github_repo") or "").strip().lower())
+
+    slugs = {_slug(r) for r in rows} - {""}
+
+    # Step 3: TTL-gated fetch (90d).  Already-fresh rows cost ~0 network.
+    if slugs:
+        fetch_and_persist(
+            repos=sorted(slugs),
+            owners=owners_from_repos(sorted(slugs)),
+            target="repos",
+            force=False,
+            quiet=True,
+        )
+
+    # Step 4: read back the identity map from repos.csv.
+    canon, meta = _read_github_repos(repos_file)
+
+    # Step 5: stamp each row from the identity map.
+    for r in rows:
+        slug = _slug(r)
+        if not slug:
+            r.setdefault("repo_id", "")
+            r.setdefault("mirror_url", "")
+            continue
+        canonical = canon.get(slug, slug)
+        entry = meta.get(canonical)
+        if entry and entry.valid and entry.repo_id:
+            r["repo_id"] = f"gh/{entry.repo_id}"
+            r["github_repo"] = entry.full_name
+            r["git"] = f"https://github.com/{entry.full_name}.git"
+            r["mirror_url"] = entry.mirror_url or ""
+        else:
+            r.setdefault("repo_id", "")
+            r.setdefault("mirror_url", "")
+            if slug:  # had a GitHub slug → keep its clone URL so it's not an orphan
+                r["git"] = f"https://github.com/{slug}.git"
+
+
+# Dispatcher so other platforms can slot in later.
+PLATFORM_RESOLVERS: dict[str, object] = {"github": _resolve_github}
+
+
 # ── per-ecosystem rewrite ───────────────────────────────────────────────────────
 
 
@@ -195,6 +271,13 @@ def apply_eco(ecosystem: str, overrides: dict, is_invalid, canonical: dict) -> d
         if gh != prior_gh:
             c["gh_changed"] += 1
         r["git"], r["github_repo"], r["eco_guess"] = git, gh, guess
+
+    # ── GitHub identity pass ────────────────────────────────────────────────────
+    # After the eco-authority rewrite, stamp repo_id / mirror_url from repos.csv.
+    for col in ("repo_id", "mirror_url"):
+        if col not in fields:
+            fields.append(col)
+    _resolve_github(rows)
 
     tmp = results_path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:

@@ -50,6 +50,9 @@ class RepoEntry:
     stars: int = 0
     archived: bool = False
     enriched: bool = False  # True iff metadata came from github/repos.csv
+    valid: bool = False
+    full_name: str = ""
+    mirror_url: str = ""
 
 
 def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]:
@@ -85,6 +88,9 @@ def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]
                 stars=int(row.get("stars") or 0),
                 archived=(row.get("archived") or "").strip().lower() in ("true", "1"),
                 enriched=True,
+                valid=(row.get("valid") or "").strip().lower() in ("true", "1"),
+                full_name=full,
+                mirror_url=(row.get("mirror_url") or "").strip(),
             )
     return canon, meta
 

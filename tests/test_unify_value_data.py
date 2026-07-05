@@ -152,27 +152,35 @@ class TestReadHelpers:
 # ── _group_key ───────────────────────────────────────────────────────────────
 
 class TestGroupKey:
-    def test_uses_git_url_when_present(self):
-        # Grouping is by git_url so non-GitHub upstreams collapse correctly.
+    def test_uses_repo_id_when_present(self):
+        # repo_id wins over git_url — it's the stable GitHub numeric id.
+        assert _group_key({"github_repo": "react/react",
+                           "git_url": "https://github.com/react/react.git",
+                           "repo_id": "gh/10270250",
+                           "ecosystem": "npm", "package": "react"}) == "gh/10270250"
+
+    def test_uses_git_url_when_no_repo_id(self):
+        # No repo_id → fall back to git_url.
         assert _group_key({"github_repo": "babel/babel",
                            "git_url": "https://github.com/babel/babel.git",
+                           "repo_id": "",
                            "ecosystem": "npm",
                            "package": "@babel/core"}) == "https://github.com/babel/babel.git"
 
-    def test_synthetic_orphan_key_when_no_git_url(self):
-        key = _group_key({"github_repo": "", "git_url": "",
+    def test_synthetic_orphan_key_when_no_repo_id_and_no_git_url(self):
+        key = _group_key({"github_repo": "", "git_url": "", "repo_id": "",
                           "ecosystem": "cpp", "package": "glibc"})
         assert key == "__orphan__:cpp:glibc"
 
     def test_orphans_are_unique_per_ecosystem(self):
-        a = _group_key({"github_repo": "", "git_url": "",
+        a = _group_key({"github_repo": "", "git_url": "", "repo_id": "",
                         "ecosystem": "npm", "package": "x"})
-        b = _group_key({"github_repo": "", "git_url": "",
+        b = _group_key({"github_repo": "", "git_url": "", "repo_id": "",
                         "ecosystem": "pypi", "package": "x"})
         assert a != b
 
-    def test_missing_git_url_key_is_safe(self):
-        # Defensive: dicts without `git_url` (e.g. ad-hoc test data) are valid.
+    def test_missing_repo_id_and_git_url_keys_are_safe(self):
+        # Defensive: dicts without `repo_id`/`git_url` (e.g. ad-hoc test data).
         assert _group_key({"github_repo": "x/y", "ecosystem": "npm",
                            "package": "p"}) == "__orphan__:npm:p"
 
@@ -272,19 +280,22 @@ _AUTO_GIT = object()
 
 
 def _pkg_row(package, ecosystem, github_repo="", git_url=_AUTO_GIT,
-             pagerank="0.0", value_class="D", is_eol=False) -> dict:
+             pagerank="0.0", value_class="D", is_eol=False,
+             repo_id="", mirror_url="") -> dict:
     """Test fixture for one per-package row.
 
-    Grouping happens on `git_url`, so when only `github_repo` is supplied we
-    auto-derive its canonical github URL — otherwise tests intending to model
-    a monorepo would end up with packages in separate orphan groups. Pass
-    `git_url=""` explicitly to override and force the orphan path.
+    Grouping uses `repo_id` first, then `git_url`. When only `github_repo` is
+    supplied and `repo_id` is "" (default), the auto-derived git_url serves as
+    the group key — tests intending a monorepo should pass the same `github_repo`
+    so they get the same auto-derived git_url. Pass `git_url=""` explicitly to
+    override and force the orphan path.
     """
     if git_url is _AUTO_GIT:
         git_url = f"https://github.com/{github_repo}.git" if github_repo else ""
     return {
         "package": package, "ecosystem": ecosystem,
         "github_repo": github_repo, "git_url": git_url,
+        "repo_id": repo_id, "mirror_url": mirror_url,
         "pagerank": pagerank, "value_class": value_class, "is_eol": is_eol,
     }
 
@@ -292,16 +303,11 @@ def _pkg_row(package, ecosystem, github_repo="", git_url=_AUTO_GIT,
 class TestAggregateByRepo:
     @pytest.fixture(autouse=True)
     def _isolate_overrides(self, monkeypatch):
-        """aggregate_by_repo applies the curated overrides.csv as its last
-        step and canonicalises github URLs via repos.csv; isolate these
-        pure-aggregation tests from both, since fixtures use real package/repo
-        names (glibc, gcc, …) that may appear in overrides.csv / be renamed in
-        repos.csv."""
+        """aggregate_by_repo applies the curated overrides.csv as its last step;
+        isolate these pure-aggregation tests from it, since fixtures use real
+        package/repo names (glibc, gcc, …) that may appear in overrides.csv."""
         monkeypatch.setattr(
             "src.value.unify_value_data.load_repo_overrides", lambda *a, **k: {}
-        )
-        monkeypatch.setattr(
-            "src.value.unify_value_data.canonical_repo_map", lambda *a, **k: {}
         )
 
     def test_empty_input(self):
@@ -540,32 +546,36 @@ class TestAggregateByRepo:
         assert len(aggs) == 1
         assert aggs[0]["repo"] == "typeshed-internal/stub_uploader"
 
-    def test_rename_twins_merge_via_canon(self):
-        """Two packages whose git URLs are the old and new slug of the SAME
-        renamed repo collapse into one group with combined PageRank — not two
-        duplicate rows with a demoted twin. Canonicalisation keys on repos.csv
-        full_name (here injected via `canon`)."""
+    def test_same_repo_id_merges_rename_twins(self):
+        """Two packages with the same repo_id (but different git_urls / slugs)
+        collapse into one group with combined PageRank — the stable numeric id
+        unifies rename-twins natively without a separate canonicalisation map."""
         rows = [
             _pkg_row("jest-old", "npm", github_repo="facebook/jest",
-                     pagerank="0.6"),                       # stale pre-rename slug
+                     git_url="https://github.com/facebook/jest.git",
+                     repo_id="gh/10270250", pagerank="0.6"),
             _pkg_row("@jest/core", "npm", github_repo="jestjs/jest",
-                     pagerank="0.4"),                       # current slug
+                     git_url="https://github.com/jestjs/jest.git",
+                     repo_id="gh/10270250", pagerank="0.4"),
         ]
-        canon = {"facebook/jest": "jestjs/jest", "jestjs/jest": "jestjs/jest"}
-        aggs = aggregate_by_repo(rows, canon=canon)
+        aggs = aggregate_by_repo(rows)
         assert len(aggs) == 1                               # one repo, not two
-        assert aggs[0]["repo"] == "jestjs/jest"
-        assert aggs[0]["platform"] == "github"
+        assert aggs[0]["repo_id"] == "gh/10270250"
         assert aggs[0]["packages"] == 2                     # both pkgs, PR combined
+        assert aggs[0]["platform"] == "github"
 
-    def test_canon_empty_leaves_rename_twins_split(self):
-        """Without a canon map the two slugs stay separate (documents that the
-        fix depends on repos.csv being present)."""
+    def test_blank_repo_id_splits_by_git_url(self):
+        """Without repo_id, packages with different git_urls stay separate groups
+        (documents that the merge depends on repo_id being resolved first)."""
         rows = [
-            _pkg_row("jest-old", "npm", github_repo="facebook/jest", pagerank="0.6"),
-            _pkg_row("@jest/core", "npm", github_repo="jestjs/jest", pagerank="0.4"),
+            _pkg_row("jest-old", "npm", github_repo="facebook/jest",
+                     git_url="https://github.com/facebook/jest.git",
+                     repo_id="", pagerank="0.6"),
+            _pkg_row("@jest/core", "npm", github_repo="jestjs/jest",
+                     git_url="https://github.com/jestjs/jest.git",
+                     repo_id="", pagerank="0.4"),
         ]
-        aggs = aggregate_by_repo(rows, canon={})
+        aggs = aggregate_by_repo(rows)
         assert len(aggs) == 2
 
     def test_packages_count_matches_membership(self):
@@ -724,6 +734,27 @@ class TestRepoOverrides:
         assert aggs[0]["platform"] == "github"
         assert aggs[0]["git_url"] == "https://github.com/sinclairzx81/typebox.git"
 
+    def test_override_repo_plus_nongithub_git_url_sets_mirror_url(self):
+        # An override with both `repo` (GitHub slug) AND a non-GitHub `git_url`
+        # declares a live upstream mirror.  The git_url should be stored as
+        # mirror_url while the aggregate's git_url points at the GitHub mirror.
+        rows = [
+            _pkg_row("glibc", "cpp", github_repo="bminor/glibc",
+                     git_url="https://github.com/bminor/glibc.git",
+                     repo_id="gh/12345", pagerank="1.0"),
+        ]
+        aggs = aggregate_by_repo(rows, drop_d_class=False)
+        overrides = {("glibc", "cpp"): {
+            "repo": "bminor/glibc",
+            "git_url": "https://sourceware.org/git/glibc.git",
+            "valid": "",
+        }}
+        fixed = apply_repo_overrides(aggs, rows, overrides)
+        assert fixed[0]["repo"] == "bminor/glibc"
+        assert fixed[0]["platform"] == "github"
+        assert fixed[0]["git_url"] == "https://github.com/bminor/glibc.git"
+        assert fixed[0]["mirror_url"] == "https://sourceware.org/git/glibc.git"
+
     def test_shipped_overrides_file_includes_typebox(self):
         # The committed override file must carry the typebox correction.
         idx = load_repo_overrides()
@@ -776,13 +807,9 @@ class TestEndToEnd:
     @pytest.fixture(autouse=True)
     def _isolate_overrides(self, monkeypatch):
         """Isolate the end-to-end aggregation from the curated overrides.csv
-        (the `glibc` fixture below would otherwise pick up a real override) and
-        from repos.csv rename canonicalisation."""
+        (the `glibc` fixture below would otherwise pick up a real override)."""
         monkeypatch.setattr(
             "src.value.unify_value_data.load_repo_overrides", lambda *a, **k: {}
-        )
-        monkeypatch.setattr(
-            "src.value.unify_value_data.canonical_repo_map", lambda *a, **k: {}
         )
 
     def test_full_pipeline_two_ecosystems(self, tmp_path):
