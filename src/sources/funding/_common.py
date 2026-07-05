@@ -121,6 +121,8 @@ FOUNDATION_FILE = {
     "apache": "apache-software-foundation",
     "cncf": "cloud-native-computing-foundation",
     "eclipse": "eclipse-foundation",
+    "fsf": "free-software-foundation",
+    "gnu": "gnu-project",
     "lf": "linux-foundation",
     "numfocus": "numfocus",
     "openjs": "openjs-foundation",
