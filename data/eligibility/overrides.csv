@@ -56,6 +56,7 @@ bytecodealliance/*,,bytecodealliance.org,nonprofit,bytecodealliance,,,,,,
 azuread/*,,,,azuread,microsoft.com,company,,,,
 webmproject/libwebp,23368445,,,webmproject,google.com,company,,,,
 mozilla/*,,mozilla.org,nonprofit,mozilla,,,,,,
+xiph/*,,xiph.org,nonprofit,xiph,,,,,,Xiph.Org Foundation 501c3 since 2003 (donate page xiph.org/donate); legal steward of Ogg/Vorbis/FLAC/Opus/Speex/Theora
 tower-rs/tower,98244646,,,tower-rs,,,tokio,,,
 gmp-mirror/gmp,681340775,fsf.org,nonprofit,gmp-mirror,,,,,,GNU MP is an official GNU package; copyright assigned to FSF (501c3)
 libpixman/pixman,81675971,x.org,nonprofit,libpixman,,,,,,X.Org Foundation 501c3 steward; fiscally hosted by Software Freedom Conservancy

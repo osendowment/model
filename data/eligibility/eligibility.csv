@@ -432,7 +432,7 @@ knurling-rs/defmt,282262730,True,True,True,True,True
 kpdecker/jsdiff,1542219,True,False,True,True,False
 krb5/krb5,4307702,True,False,True,True,False
 kriskowal/asap,11295071,True,False,True,True,False
-kriszyp/json-schema,947175,True,True,True,True,True
+kriszyp/json-schema,947175,True,False,True,True,False
 langchain-ai/langchain,552661142,True,True,False,True,False
 laurent-laporte-pro/deprecated,111412148,True,False,True,True,False
 lddubeau/xmlchars,139881982,True,False,True,False,False
@@ -809,7 +809,7 @@ sinonjs/fake-timers,16523712,True,True,True,True,True
 smithy-lang/smithy-rs,308027791,True,True,False,True,False
 smithy-lang/smithy-typescript,208319207,True,True,False,True,False
 smol-rs/fastrand,267368764,True,False,True,True,False
-snowflakedb/snowflake-connector-python,62262074,True,True,True,True,True
+snowflakedb/snowflake-connector-python,62262074,True,False,True,True,False
 socketio/socket.io,557980,True,True,True,True,True
 sqlalchemy/sqlalchemy,159271175,True,True,True,True,True
 sqlite/sqlite,176278485,True,True,False,True,False
@@ -903,7 +903,7 @@ websockets/ws,2744972,True,True,True,True,True
 wesleytodd/setprototypeof,30301031,True,True,True,True,True
 whitequark/ipaddr.js,2110585,True,True,True,True,True
 withoutboats/heck,86326466,True,False,True,True,False
-xiph/ogg,33956205,True,False,True,True,False
+xiph/ogg,33956205,True,True,True,True,True
 xtuc/webassemblyjs,113006071,True,False,True,True,False
 yahoo/serialize-javascript,24106944,True,True,False,True,False
 yaml/libyaml,2699072,True,False,True,True,False

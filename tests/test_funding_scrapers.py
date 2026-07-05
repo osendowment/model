@@ -244,3 +244,24 @@ class TestMatchReposHostChecked:
                 match_repos.classify({}, {}, {}, fetched_at_by_host={})}
         assert rows["rogdham/backports.zstd"]["host"] == ""   # reference link, not a host
         assert rows["psf/real"]["host"] == "psf"              # real python.org home still matches
+
+    def test_registry_and_spec_hub_homepages_never_attribute_host(self, tmp_path, monkeypatch):
+        # "published/cited there ≠ fiscally hosted": a pypi.python.org/pypi/<name>
+        # homepage (old PyPI URL, on every Python package) must NOT become psf via
+        # the python.org suffix; a json-schema.org homepage (the JSON Schema spec
+        # hub, an LF roster domain) must NOT become lf just because an independent
+        # implementation cites it. The real projects match by their exact slug.
+        repos = self._write_repos(tmp_path, [
+            {"repo": "asweigart/pyperclip", "repo_id": "1",
+             "homepage": "https://pypi.python.org/pypi/pyperclip"},
+            {"repo": "kriszyp/json-schema", "repo_id": "2",
+             "homepage": "http://json-schema.org/"},
+            {"repo": "psf/real", "repo_id": "3", "homepage": "https://www.python.org/"},
+        ])
+        monkeypatch.setattr(match_repos, "REPOS_FILE", repos)
+        # json-schema.org is in the LF roster's domain index — still blocked.
+        rows = {r["repo"]: r for r in
+                match_repos.classify({}, {}, {"json-schema.org": "lf"}, fetched_at_by_host={})}
+        assert rows["asweigart/pyperclip"]["host"] == ""   # on PyPI, not PSF-hosted
+        assert rows["kriszyp/json-schema"]["host"] == ""   # cites the spec hub, not LF-hosted
+        assert rows["psf/real"]["host"] == "psf"           # real python.org home still matches

@@ -211,21 +211,31 @@ def _apex(url: str) -> str:
         return ""
 
 
-# Reference / docs subdomains of a foundation site that are NOT a project home:
-# a repo whose homepage is a PEP (peps.python.org) or docs page merely *links*
-# to the foundation — it is not thereby hosted or funded by it. Block these from
-# the suffix match so they don't spuriously attribute a host (e.g.
-# rogdham/backports.zstd → peps.python.org/pep-0784 must NOT become host=psf).
-NON_HOME_SUBDOMAINS: set[str] = {
+# Domains that appear as a project's homepage but do NOT imply the foundation
+# fiscally hosts it — checked before both the exact-apex and suffix matches so
+# they never attribute a host. Three kinds, all "cited/published there ≠ hosted":
+#   1. Foundation reference/docs subdomains — a repo linking to a PEP
+#      (peps.python.org) or docs page merely *references* the foundation (e.g.
+#      rogdham/backports.zstd → peps.python.org/pep-0784 must NOT become psf).
+#   2. Package-registry URLs on a foundation domain — pypi.python.org/pypi/<name>
+#      (old PyPI) and pypi.org are just "published on PyPI"; every Python package
+#      has one, so the `python.org` suffix must not turn them all into psf.
+#   3. Shared spec/standard hubs cited by independent implementations —
+#      json-schema.org is the JSON Schema spec site (an LF roster domain), but
+#      third-party implementations (e.g. kriszyp/json-schema) merely cite it and
+#      are not LF-stewarded; the real project matches by its exact GitHub slug.
+NON_HOSTING_DOMAINS: set[str] = {
     "peps.python.org", "docs.python.org", "discuss.python.org",
     "bugs.python.org", "mail.python.org", "wiki.python.org",
+    "pypi.python.org", "pypi.org",
+    "json-schema.org",
 }
 
 
 def _host_from_domain(host_url: str, domain_idx: dict[str, str]) -> str:
     """Match by exact apex domain, then by trailing suffix (e.g. `*.apache.org`)."""
     apex = _apex(host_url)
-    if not apex or apex in NON_HOME_SUBDOMAINS:
+    if not apex or apex in NON_HOSTING_DOMAINS:
         return ""
     if apex in domain_idx:
         return domain_idx[apex]

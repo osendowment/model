@@ -432,7 +432,7 @@ knurling-rs/defmt,282262730,True,20,1,21,22.66,1166,125,True,True,github,False,F
 kpdecker/jsdiff,1542219,False,0,0,0,100.0,9131,536,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 krb5/krb5,4307702,False,0,0,0,100.0,593,429,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 kriskowal/asap,11295071,False,0,0,0,100.0,612,42,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-kriszyp/json-schema,947175,False,0,0,0,100.0,528,171,False,False,,False,False,,False,,0,,0,100.0,lf,nonprofit,,,0.5,79,True,True
+kriszyp/json-schema,947175,False,0,0,0,100.0,528,171,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 langchain-ai/langchain,552661142,False,0,0,0,100.0,135127,22347,False,False,,False,False,,False,,0,,0,100.0,,,langchain.com,company,0,1,True,False
 laurent-laporte-pro/deprecated,111412148,False,0,0,0,100.0,333,42,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 lddubeau/xmlchars,139881982,,,,0,100.0,3,2,,,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
@@ -809,7 +809,7 @@ sinonjs/fake-timers,16523712,True,1,0,1,42.59,859,118,False,False,,False,False,,
 smithy-lang/smithy-rs,308027791,False,0,0,0,100.0,638,245,False,False,,False,False,,False,,0,,0,100.0,,,amazon.com,company,0,1,True,False
 smithy-lang/smithy-typescript,208319207,False,0,0,0,100.0,314,122,False,False,,False,False,,False,,0,,0,100.0,,,amazon.com,company,0,1,True,False
 smol-rs/fastrand,267368764,False,0,0,0,100.0,579,52,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-snowflakedb/snowflake-connector-python,62262074,False,0,0,0,100.0,720,550,False,False,,False,False,,False,,0,,0,100.0,psf,nonprofit,,,0.5,79,True,True
+snowflakedb/snowflake-connector-python,62262074,False,0,0,0,100.0,720,550,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 socketio/socket.io,557980,False,0,0,0,100.0,63058,10144,False,False,,False,False,,False,,0,socketio,168515.22,0.11,,,,,1,10,True,True
 sqlalchemy/sqlalchemy,159271175,True,24,0,24,19.17,11798,1676,True,True,"github,patreon,tidelift",False,False,,False,,3,,0,100.0,,,,,1,58,True,True
 sqlite/sqlite,176278485,False,0,0,0,100.0,9457,1484,False,False,,False,False,,False,,0,,0,100.0,sqlite.org,,hwaci.com,company,0,1,True,False
@@ -903,7 +903,7 @@ websockets/ws,2744972,False,0,0,0,100.0,22742,2514,True,True,github,False,False,
 wesleytodd/setprototypeof,30301031,True,1,3,4,37.04,53,12,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,72,True,True
 whitequark/ipaddr.js,2110585,True,3,4,7,31.7,631,102,False,False,,False,False,,False,,0,,0,100.0,,,,,1,68,True,True
 withoutboats/heck,86326466,False,0,0,0,100.0,588,47,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-xiph/ogg,33956205,False,0,0,0,100.0,418,201,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+xiph/ogg,33956205,False,0,0,0,100.0,418,201,False,False,,False,False,,False,,0,,0,100.0,xiph.org,nonprofit,,,0.5,79,True,True
 xtuc/webassemblyjs,113006071,False,0,0,0,100.0,831,96,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 yahoo/serialize-javascript,24106944,False,0,0,0,100.0,2921,210,False,False,,False,False,,False,,0,,0,100.0,,,yahooinc.com,company,0,1,True,False
 yaml/libyaml,2699072,False,0,0,0,100.0,1124,356,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True

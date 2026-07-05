@@ -226,8 +226,8 @@ Microsoft, …). See [funding.md](components/funding.md).
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 683 | 74.4% |
-| intent — no funding signal | 235 | 25.6% |
+| intent — any funding signal | 682 | 74.3% |
+| intent — no funding signal | 236 | 25.7% |
 | nonprofit — community / independent | 857 | 93.4% |
 | nonprofit — company-backed | 61 | 6.6% |
 
@@ -236,7 +236,7 @@ funding channel, every repo the owner has is counted `intent=True` (GitHub appli
 an org `.github/FUNDING.yml` and a personal Sponsors listing to all of an owner's
 repos). The 61 company-backed repos are **kept in `eligibility.csv`** and flagged
 `nonprofit=False` (they are already resourced; the flag makes them ineligible
-without hiding them). The 235 repos with `intent=False` are not actively
+without hiding them). The 236 repos with `intent=False` are not actively
 soliciting support — a higher-priority target for outreach.
 
 ### Eligibility rollup
@@ -247,7 +247,7 @@ unlock. Missing intent is by far the binding constraint.
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
 | oss | 912 | 99.3% | 1 |
-| intent | 683 | 74.4% | 219 |
+| intent | 682 | 74.3% | 220 |
 | nonprofit | 857 | 93.4% | 60 |
 | active | 896 | 97.6% | 10 |
-| **eligible** | **611** | **66.6%** | |
+| **eligible** | **610** | **66.4%** | |
