@@ -191,6 +191,17 @@ GITLAB_SCORECARD_CHECKS = os.environ.get("GITLAB_SCORECARD_CHECKS", ",".join([
 ]))
 
 
+# Hosts whose *anonymous* GitLab API is rate-limited hard enough that Scorecard
+# wedges on internal retries — score these only when we hold a token. Every
+# other GitLab instance (salsa.debian.org, gitlab.gnome.org, gitlab.freedesktop.org,
+# invent.kde.org, …) serves its REST API anonymously, so Scorecard scores it
+# token-free: a few auth-only checks (Maintained, Contributors, Dependency-Update-Tool)
+# come back inconclusive, but the aggregate is still computed and tolerate_partial
+# keeps it. gitlab.com is the lone exception because its unauthenticated quota is
+# too small for Scorecard's call volume.
+SCORECARD_ANON_UNRELIABLE = {"gitlab.com"}
+
+
 def run_scorecard(repo: str, token: str, *,
                   token_env: str = "GITHUB_AUTH_TOKEN",
                   checks: str = SCORECARD_CHECKS,
@@ -321,21 +332,35 @@ async def fetch_all(
 # ---------------------------------------------------------------------------
 
 
-def load_gitlab_targets(hosts: set[str] | None = None) -> list[dict]:
+def load_gitlab_targets(hosts: set[str] | None = None,
+                        classes: set[str] | None = None) -> list[dict]:
     """Valid GitLab projects from data/sources/gitlab/projects.csv.
 
     Returns ``[{project, host, repo_id}]`` where ``project`` = ``"{host}/{path}"``
     is a valid Scorecard ``--repo`` target (e.g. ``gitlab.com/gnutls/gnutls``)
-    and ``repo_id`` = ``gl/{host}/{id}``. Optionally filter to ``hosts``.
+    and ``repo_id`` = ``gl/{host}-{id}`` (bare ``gl/{id}`` for gitlab.com; see
+    ``gitlab_client.make_repo_id``). Optionally filter to ``hosts``.
+
+    ``classes`` (e.g. ``{"A"}``) scopes to those value classes by joining to
+    ``value.csv`` on the project key — projects.csv has no class column, so the
+    class comes from the same value.csv the fetcher scopes on. A project absent
+    from that class set (e.g. a class-C row that leaked into projects.csv) is
+    dropped.
     """
     out: list[dict] = []
     if not GITLAB_PROJECTS.exists():
         return out
+    allowed: set[str] | None = None
+    if classes:
+        from src.sources.gitlab.fetch_project_data import load_gitlab_rows
+        allowed = {r["project"] for r in load_gitlab_rows(classes=classes)}
     with open(GITLAB_PROJECTS, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             if (r.get("valid") or "") != "True" or not r.get("repo_id"):
                 continue
             if hosts and r.get("host") not in hosts:
+                continue
+            if allowed is not None and r["project"] not in allowed:
                 continue
             out.append({"project": r["project"], "host": r["host"],
                         "repo_id": r["repo_id"]})
@@ -347,7 +372,7 @@ async def fetch_all_gitlab(
     token_map: dict[str, str],
     concurrency: int = 5,
 ) -> dict[str, dict]:
-    """Run Scorecard on GitLab targets, keyed on the ``gl/{host}/{id}`` repo_id.
+    """Run Scorecard on GitLab targets, keyed on the ``gl/{host}-{id}`` repo_id.
 
     Each subprocess gets its host's token via ``GITLAB_AUTH_TOKEN`` and the
     GitLab check subset. Upserts to the same ``data.json`` + ``openssf.csv``
@@ -520,13 +545,20 @@ def build_parser() -> argparse.ArgumentParser:
         "--gitlab",
         action="store_true",
         help="Score GitLab projects from data/sources/gitlab/projects.csv using "
-             "per-host GITLAB tokens (GITLAB_TOKENS). Output keyed on gl/{host}/{id}.",
+             "per-host GITLAB tokens (GITLAB_TOKENS). Output keyed on gl/{host}-{id}.",
     )
     parser.add_argument(
         "--host",
         nargs="+",
         default=None,
         help="With --gitlab: limit to these GitLab hosts (e.g. --host gitlab.com).",
+    )
+    parser.add_argument(
+        "--classes",
+        nargs="+",
+        default=None,
+        help="With --gitlab: limit to these value classes (e.g. --classes A). "
+             "Default: every valid project in projects.csv.",
     )
     return parser
 
@@ -540,17 +572,25 @@ async def _run_gitlab(args: argparse.Namespace) -> None:
                       "targets come from data/sources/gitlab/projects.csv.[/yellow]")
 
     hosts = set(args.host) if args.host else None
-    targets = load_gitlab_targets(hosts)
+    classes = set(args.classes) if args.classes else None
+    targets = load_gitlab_targets(hosts, classes)
     token_map = load_token_map()
 
-    # Only score hosts we hold a token for (Scorecard's GitLab checks 401 anon).
+    # A token gets a host more checks + higher rate limits, but self-hosted
+    # instances serve their API anonymously, so a tokenless host is scored
+    # anonymously rather than skipped. Only SCORECARD_ANON_UNRELIABLE hosts
+    # (gitlab.com) are dropped when we have no token for them.
     present = {t["host"] for t in targets}
-    have_token = {h for h in present if token_map.get(h)}
-    missing = present - have_token
-    targets = [t for t in targets if t["host"] in have_token]
-    if missing:
-        console.print(f"[yellow]No GITLAB token for {sorted(missing)} — "
-                      f"skipping those hosts (set GITLAB_TOKENS).[/yellow]")
+    tokenless = {h for h in present if not token_map.get(h)}
+    skip = tokenless & SCORECARD_ANON_UNRELIABLE
+    anon = tokenless - skip
+    targets = [t for t in targets if t["host"] not in skip]
+    if skip:
+        console.print(f"[yellow]No GITLAB token for {sorted(skip)} and its "
+                      f"anonymous API is rate-limited — skipping (set GITLAB_TOKENS).[/yellow]")
+    if anon:
+        console.print(f"[dim]Scoring {sorted(anon)} anonymously (no token; a few "
+                      f"auth-only checks come back inconclusive).[/dim]")
 
     if not args.force:
         scored = load_already_scored(DEFAULT_LONG_OUTPUT)
