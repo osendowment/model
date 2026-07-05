@@ -1,9 +1,9 @@
-"""Tests for src/risk/build_funding.py — join, info cols, funding score."""
+"""Tests for src/eligibility/build_funding.py — join, info cols, funding score."""
 
 from dataclasses import dataclass
 
-from src.risk import build_funding as bf
-from src.risk.build_funding import _intent_flag, _nonprofit_flag
+from src.eligibility import build_funding as bf
+from src.eligibility.build_funding import _intent_flag, _nonprofit_flag
 
 
 def _row(**kw):
@@ -100,7 +100,7 @@ def _base_mocks(monkeypatch, repos):
         if "sponsors.csv" in str(p):
             return {"rich/r": {"gh_sponsorships_in": "100"}}
         return {}
-    monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bf, "load_top_repos", lambda **kw: repos)
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
@@ -135,7 +135,7 @@ def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
                                "pypi_funding_platforms": "github"}}
         return {}
     monkeypatch.setattr(bf, "load_top_repos",
-                        lambda: [E("plain/p"), E("npm/d"), E("pypi/d"), E("rich/r")])
+                        lambda **kw: [E("plain/p"), E("npm/d"), E("pypi/d"), E("rich/r")])
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
@@ -249,7 +249,7 @@ def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
     # solo/repo has its own repo-level collective ($500).
     repos = [E("aio/a1", value_class="A"), E("aio/a2", value_class="A"),
              E("aio/b"), E("solo/repo", value_class="A")]
-    monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bf, "load_top_repos", lambda **kw: repos)
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
@@ -278,7 +278,7 @@ def test_build_funding_real_zero_oc_counts_as_intent(monkeypatch):
     at $0 raised — its slug is attributed (with oc_avg_funding $0). A `not_found`
     slug is not a real channel and is never attributed."""
     repos = [E("live/zero", value_class="A"), E("dead/none", value_class="A")]
-    monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bf, "load_top_repos", lambda **kw: repos)
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
@@ -306,7 +306,7 @@ def test_build_funding_override_oc_slug_authoritative(monkeypatch):
     - a non-empty `oc_slug` is used even if it differs from the reverse-map.
     """
     repos = [E("big/junkmatch", "10", value_class="A"), E("big/keep", "11", value_class="A")]
-    monkeypatch.setattr(bf, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bf, "load_top_repos", lambda **kw: repos)
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
@@ -343,7 +343,7 @@ def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
             return {"rich/r": {"gh_sponsorships_in": "100"}}
         return {}
     monkeypatch.setattr(bf, "load_top_repos",
-                        lambda: [E("link/lp"), E("gh/only"), E("plain/p"), E("rich/r")])
+                        lambda **kw: [E("link/lp"), E("gh/only"), E("plain/p"), E("rich/r")])
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))

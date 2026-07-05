@@ -56,10 +56,14 @@ Rust (crates.io)
   ecosystems becomes `class`.
 - **Risk** — class-A crates repos enter `src.risk.run_risk_pipeline` (scope set
   by `risk_input.value_classes` in `src/settings.json`).
-- **Eligibility** — now a **manual review** of the top candidates (OSS license,
-  EOL, independence), not an automated pipeline stage. The per-ecosystem license/EOL
-  signals (`fetch_licenses.py`, `check_eol.py` → `data/sources/crates/eol.csv`) are still
-  produced and feed that review; there is no automated eligibility output.
+- **Eligibility** — the same class-A repos (archived included) enter the
+  automated [Eligibility stage](../eligibility.md)
+  (`src.eligibility.run_eligibility_pipeline`), also keyed off `github_repo`.
+  The per-ecosystem signals feed it: `fetch_licenses.py` fills the `license`
+  column of `results.csv` (the registry-first input to the stage's license
+  check), and `check_eol.py` → `data/sources/crates/eol.csv` produces advisory
+  package-level EOL signals that inform the manual `eol` override in
+  `data/eligibility/overrides.csv`.
 
 ## Outputs
 

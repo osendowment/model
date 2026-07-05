@@ -9,6 +9,7 @@ docs) describe *how* a metric is built and link here for *how many*.
 
 - [Value](#value) — funnel, class distribution, repo identity coverage
 - [Risk](#risk) — per-component coverage funnels over the top repos
+- [Eligibility](#eligibility) — license / activity / funding-flag coverage and the eligible rollup
 
 
 ## Value
@@ -26,7 +27,7 @@ Packages remaining after each Value stage, plus the share with a known upstream 
 | **After dep tree** | **6,370** | **3,139** | **6,218** | **1,639** | **17,366** | Extended via own dependencies |
 | Git URL | 6,318 | 2,929 | 6,137 | 1,311 | 16,695 | Any git host |
 | GitHub repo | 6,310 | 2,899 | 6,009 | 530 | 15,748 | Github repository |
-| Git % | 99% | 93% | 99% | 80% | 96% |  |
+| Git % | 99.6% | 94.8% | 93.6% |
 | **GitHub %** | **99%** | **92%** | **97%** | **32%** | **91%** | |
 
 Note that after dep tree is de-duplicated, cpp unions the Debian + Homebrew graphs, Repology-canonicalised to one name each, and leave only C/C++ packages.
@@ -67,12 +68,11 @@ Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 
 ## Risk
 
-**Risk dimensions cover the 894 top repos** — the valid class-A set
-(`risk_input.value_classes = ["A"]`); each funnel below starts from those 894.
-**`risk.csv` ranks all 894** — the 61 corporate-backed repos (Meta, Google,
-Microsoft, …) are **kept and flagged `nonprofit=false`** (a company already
-resources them; filter via the flag rather than excluding them).
-Methodology: [risk.md](risk.md) + component docs.
+**Risk dimensions cover the 895 top repos** — the valid class-A set
+(`risk_input.value_classes = ["A"]`), non-archived; each funnel below starts
+from those 895. `risk.csv` ranks all 895 on the four scored dimensions; the
+funding signals and the intent/nonprofit flags moved to the
+[Eligibility](#eligibility) stage. Methodology: [risk.md](risk.md) + component docs.
 
 ### Score distribution by component
 
@@ -154,29 +154,6 @@ OSV CVE counts + semgrep SAST.
 ~78% have zero CVEs and tie at the neutral `cve_score` (50), so their score is
 driven by the OpenSSF axis; CVEs re-rank only the minority that carry them.
 
-### Intent and nonprofit
-
-`intent` = at least one funding signal — GitHub Sponsors (inbound or outbound), a
-declared channel (`FUNDING.yml`, funding.json, npm/PyPI funding field, OpenCollective
-slug), or an institutional host/owner. `nonprofit` = not company-backed (Meta, Google,
-Microsoft, …). See [funding.md](components/funding.md).
-
-| Category | Repos | % |
-|---|---:|---:|
-| intent — any funding signal | 654 | 73.2% |
-| intent — no funding signal | 240 | 26.8% |
-| nonprofit — community / independent | 833 | 93.2% |
-| nonprofit — company-backed | 61 | 6.8% |
-
-`intent=true` is the endowment's candidate filter — a repo that expressed a way
-to be funded (a foundation/institutional host, or ≥1 funding channel: GitHub
-Sponsors enabled/received, FUNDING.yml, funding.json, npm/PyPI funding, Open
-Collective). Sponsors count only when the sponsored account **owns** the repo,
-and **outbound** sponsoring (the owner funding others) is not intent — so a
-maintainer who merely sponsors other projects no longer shows false intent.
-The 61 company-backed repos are kept in `risk.csv` flagged `nonprofit=false`
-(already resourced; filter by the flag to restrict to candidates).
-
 ### Workload
 
 Per-contributor burden ([workload.md](components/workload.md)) — LOC / CVE /
@@ -193,3 +170,79 @@ net-new issues per active contributor, plus issue-debt and trend.
 
 - 66 dormant repos (`dormant=1`, zero active contributors) score with AC=1 — the burden on one notional maintainer — rather than blank.
 - No-issue repos still score: `nni_per_ac_p` neutral-filled to 50. `issue_trend_score` needs `mean_opened_per_year ≥ 1`, so quiet repos are omitted.
+
+
+## Eligibility
+
+**Eligibility covers the 916 top repos** — the valid class-A set INCLUDING
+archived repos (895 risk scope + 21 archived, which surface below as
+`active=False` instead of being dropped). Four checks per repo, rolled into
+`data/eligibility/eligibility.csv`: `eligible = oss AND intent AND nonprofit
+AND active`. Methodology: [eligibility.md](eligibility.md) +
+[funding.md](components/funding.md).
+
+### Licenses (scope 916)
+
+Per-repo license resolution ([eligibility.md](eligibility.md)) — registry
+license first (per-eco results.csv), GitHub Licensee fallback; `oss` = the
+SPDX id (or any component of an SPDX expression) is OSI-approved ∪ curated
+extras. Unknown (no license signal) is tracked separately from known non-OSS.
+
+| Step | Repos | % |
+|---|---:|---:|
+| input top repos (incl. archived) | 916 | 100% |
+| license resolved | 915 | 99.9% |
+| · from registry | 886 | 96.7% |
+| · from GitHub | 29 | 3.2% |
+| **oss=True (OSI-approved)** | **893** | **97.5%** |
+| oss=False (known non-OSS) | 5 | 0.5% |
+| oss unknown (no signal) | 18 | 2.0% |
+
+The 5 known non-OSS are content-licensed data repos (CC0/CC-BY — free for
+documents, not software OSS by this model's strict policy).
+
+### Activity
+
+`active` = not end-of-life (manual `eol` override in
+`data/eligibility/overrides.csv`) AND not archived on GitHub — except
+live-upstream mirrors (e.g. `bminor/glibc`), whose archived flag is on the
+mirror while the real upstream is alive.
+
+| Category | Repos | % |
+|---|---:|---:|
+| eol (override) | 0 | 0.0% |
+| archived | 24 | 2.6% |
+| archived but mirror-exempt | 2 | 0.2% |
+| **active** | **894** | **97.6%** |
+
+### Intent and nonprofit
+
+`intent` = at least one funding signal — GitHub Sponsors (inbound or outbound), a
+declared channel (`FUNDING.yml`, funding.json, npm/PyPI funding field, OpenCollective
+slug), or an institutional host/owner. `nonprofit` = not company-backed (Meta, Google,
+Microsoft, …). See [funding.md](components/funding.md).
+
+| Category | Repos | % |
+|---|---:|---:|
+| intent — any funding signal | 660 | 72.1% |
+| intent — no funding signal | 256 | 27.9% |
+| nonprofit — community / independent | 855 | 93.3% |
+| nonprofit — company-backed | 61 | 6.7% |
+
+The 33 company-backed repos are **kept in `eligibility.csv`** and flagged
+`nonprofit=False` (they are already resourced; the flag makes them ineligible
+without hiding them). The 286 repos with `intent=False` are not actively
+soliciting support — a higher-priority target for outreach.
+
+### Eligibility rollup
+
+*sole blocker* = repos failing ONLY that check — what fixing it alone would
+unlock. Missing intent is by far the binding constraint.
+
+| Check | True | % | sole blocker |
+|---|---:|---:|---:|
+| oss | 893 | 97.5% | 10 |
+| intent | 660 | 72.1% | 230 |
+| nonprofit | 855 | 93.3% | 59 |
+| active | 894 | 97.6% | 5 |
+| **eligible** | **583** | **63.6%** | |

@@ -51,7 +51,7 @@ PIPELINE_STAGES = [
     "src.risk.build_complexity",
     "src.risk.build_security",
     "src.risk.build_concentration",
-    "src.risk.build_funding",
+    "src.eligibility.build_funding",
     "src.risk.build_workload",
     "src.risk.aggregate_risk",
 ]

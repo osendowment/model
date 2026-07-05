@@ -2,8 +2,11 @@
 
 By default fetches any MISSING raw data first (incremental — each fetcher
 skips data already present in its output files, so only gaps are fetched),
-then runs the six dimension builders -> aggregate. Pass --skip-fetch to skip
+then runs the four dimension builders -> aggregate. Pass --skip-fetch to skip
 all fetchers and only re-run the builders/aggregate from existing data.
+
+Funding moved to the eligibility stage — its fetchers and builder now live in
+src.eligibility.run_eligibility_pipeline.
 
 Usage:
     uv run python -m src.risk.run_risk_pipeline                # fetch + build + aggregate
@@ -25,21 +28,12 @@ FETCHERS = [
     Step("cves",          "src.sources.osv.fetch_cves",                   fetch=True),
     Step("scorecard",     "src.sources.openssf.scorecard",                fetch=True),
     Step("depsdev",       "src.sources.depsdev.fetch",                    fetch=True),
-    Step("funding-yml",   "src.sources.github.fetch_funding_yml",         fetch=True),
-    Step("npm-funding",   "src.sources.npm.fetch_funding",                fetch=True),
-    Step("pypi-funding",  "src.sources.pypi.fetch_funding",               fetch=True),
-    Step("sponsors",      "src.sources.github.fetch_sponsors",            fetch=True),
-    Step("sponsorships",  "src.sources.github.fetch_sponsorships",        fetch=True),
-    Step("floss-fund",    "src.sources.floss_fund.funding_json",          fetch=True),
-    Step("oc-collectives", "src.sources.opencollective.fetch_collectives", fetch=True),
-    Step("opencollective", "src.sources.opencollective.fetch_budgets",    fetch=True),
 ]
 BUILDERS = [
     Step("concentration", "src.risk.build_concentration"),
     Step("complexity",    "src.risk.build_complexity"),
     Step("security",      "src.risk.build_security"),
     Step("workload",      "src.risk.build_workload"),
-    Step("funding-build", "src.risk.build_funding"),
     Step("aggregate",     "src.risk.aggregate_risk"),
 ]
 

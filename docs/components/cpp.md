@@ -77,14 +77,20 @@ C / C++ (Debian + Homebrew + Repology)
 
 - **Value** — `value_class` feeds the `class_cpp` column of
   `data/value/value.csv`.
-- **Risk** (and the manual eligibility review) — both key off `github_repo`, and cpp identity is
-  **GitHub-only**. Many flagship cpp upstreams live off GitHub — glibc
+- **Risk & Eligibility** — both automated stages (the risk pipeline and the
+  [Eligibility stage](../eligibility.md)) key off `github_repo`, and cpp
+  identity is **GitHub-only**. Many flagship cpp upstreams live off GitHub — glibc
   (sourceware.org), gcc (Savannah), glib (gitlab.gnome.org), mpfr (gitlab.inria.fr),
   curl (curl.se) — so they carry a `git_url` in `value.csv` but `github_repo=""`,
-  and slip out of Risk (and the manual eligibility review). Counting non-GitHub
+  and slip out of both stages. Counting non-GitHub
   Git hosts (sourceware, Savannah, GNOME) lifts coverage well above the
   GitHub-only figure — most non-GitHub upstreams are the load-bearing class-A
-  libraries.
+  libraries. For the repos that do resolve to GitHub, the eligibility stage
+  consumes cpp's per-ecosystem signals: `fetch_licenses.py` fills the `license`
+  column of `results.csv` (the registry-first input to the stage's license
+  check), and `check_eol.py` → `data/sources/cpp/eol.csv` produces advisory
+  package-level EOL signals that inform the manual `eol` override in
+  `data/eligibility/overrides.csv`.
 
 ## Outputs
 
@@ -114,10 +120,10 @@ Per-package class counts await the next full pipeline run — the per-package
 
 - **Runtime-only dep tree** — build infrastructure (cmake, pkgconf) is undervalued;
   PageRank reflects runtime coupling, not build coupling.
-- **GitHub-only identity downstream** — Risk (and the manual eligibility review) miss non-GitHub upstreams
-  even though `value.csv` now exposes their `git_url`. Fully fixing this needs
-  per-host adapters (GitLab API, Savannah, sourceware) for license/EOL/contributor
-  checks.
+- **GitHub-only identity downstream** — Risk and Eligibility miss non-GitHub
+  upstreams even though `value.csv` now exposes their `git_url`. Fully fixing
+  this needs per-host adapters (GitLab API, Savannah, sourceware) for
+  license/EOL/contributor checks.
 - **`is_cpp` drops** — language-agnostic distro packages are filtered out of
   `results.csv`, so the cpp result set is smaller than its raw dep tree.
 - **Wayback-derived installs** — both download proxies have sparse/truncated

@@ -5,27 +5,15 @@ import math
 from src.risk.aggregate_risk import (
     COMPONENTS,
     FIELDS,
-    _funding_flags,
     overall_score,
 )
 
 
-def test_funding_flags_read(tmp_path):
-    """intent/nonprofit are read per repo from funding.csv; missing → safe defaults."""
-    f = tmp_path / "funding.csv"
-    # Flags join on the stable repo_id, not the (renameable) name.
-    f.write_text("repo,repo_id,intent,nonprofit\n"
-                 "a/co,1,True,False\n"
-                 "c/found,2,True,True\n"
-                 "d/none,3,False,True\n")
-    flags = _funding_flags(f)
-    assert flags["1"] == {"intent": "True", "nonprofit": "False"}
-    assert flags["3"] == {"intent": "False", "nonprofit": "True"}
-
-
 def test_risk_csv_is_narrow():
+    """Funding (and its intent/nonprofit flags) moved to the eligibility
+    stage — risk.csv is the four component scores plus the overall score."""
     assert FIELDS == ["repo", "repo_id", "concentration", "complexity",
-                      "security", "workload", "score", "intent", "nonprofit"]
+                      "security", "workload", "score"]
     assert "funding" not in COMPONENTS
 
 
@@ -53,7 +41,6 @@ def test_aggregate_requires_all_components(monkeypatch):
 
     monkeypatch.setattr(ar, "load_top_repos",
                         lambda: [_Entry("o/full"), _Entry("o/partial")])
-    monkeypatch.setattr(ar, "_funding_flags", lambda p: {})
     # `o/full` has all four; `o/partial` is missing workload.
     by_name = {
         "concentration": {"o/full": 50, "o/partial": 50},

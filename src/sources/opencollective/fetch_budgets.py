@@ -56,7 +56,7 @@ log = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
 FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
-OVERRIDES_FILE = DATA_DIR / "sources" / "funding" / "overrides.csv"
+OVERRIDES_FILE = DATA_DIR / "eligibility" / "overrides.csv"
 FLOSS_FUND_FILE = DATA_DIR / "sources" / "floss-fund" / "funding-json.csv"
 
 API_URL = "https://api.opencollective.com/graphql/v2"
@@ -133,7 +133,7 @@ def _slugs_from_export(path: Path, scope: set[str]) -> set[str]:
 
 
 def _slugs_from_overrides(path: Path) -> set[str]:
-    """OC slugs curated per-repo in funding/overrides.csv (`oc_slug` column).
+    """OC slugs curated per-repo in data/eligibility/overrides.csv (`oc_slug` column).
 
     Catches projects that fund via Open Collective but declare no FUNDING.yml
     (e.g. socketio), which the registry/FLOSS-export discovery can't see.

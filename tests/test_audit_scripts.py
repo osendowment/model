@@ -25,6 +25,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS = ROOT / "scripts"
 RISK_DIR = ROOT / "data" / "risk"
+ELIGIBILITY_DIR = ROOT / "data" / "eligibility"
 
 AUDIT_SCRIPTS = [
     "data_anomalies.py",
@@ -72,27 +73,29 @@ def test_stats_md_is_not_stale():
     its --check headline gate must pass, i.e. stats.md reflects the current run.
     Regression for stats.md drifting after a value/scope/risk regeneration."""
     mod = _load_module(SCRIPTS / "stats.py")
-    v, r = mod.value_stats(), mod.risk_stats()
-    assert mod.check(v, r) == 0, "docs/stats.md headline numbers are stale — " \
+    v, r, e = mod.value_stats(), mod.risk_stats(), mod.eligibility_stats()
+    assert mod.check(v, r, e) == 0, "docs/stats.md headline numbers are stale — " \
         "re-run `uv run python scripts/stats.py --markdown`"
 
 
-def test_risk_csv_keeps_company_backed_flagged_nonprofit():
-    """Company-backed repos (funding host_type/owner_type == company) are KEPT in
-    the final risk.csv and flagged nonprofit=False — they are no longer dropped.
-    Regression for the intent/nonprofit reversal in aggregate_risk."""
-    risk, funding = RISK_DIR / "risk.csv", RISK_DIR / "funding.csv"
-    if not (risk.exists() and funding.exists()):
-        pytest.skip("risk/funding csv not present")
+def test_eligibility_csv_keeps_company_backed_flagged_nonprofit():
+    """Company-backed repos (funding host_type/owner_type == company) are KEPT
+    in eligibility.csv and flagged nonprofit=False — they are not dropped.
+    Regression for the intent/nonprofit reversal (originally in aggregate_risk,
+    now in the eligibility rollup)."""
+    eligibility = ELIGIBILITY_DIR / "eligibility.csv"
+    funding = ELIGIBILITY_DIR / "funding.csv"
+    if not (eligibility.exists() and funding.exists()):
+        pytest.skip("eligibility/funding csv not present")
     with funding.open() as f:
         company = {r["repo"].lower() for r in csv.DictReader(f)
                    if "company" in ((r.get("host_type") or "").lower(),
                                     (r.get("owner_type") or "").lower())}
-    with risk.open() as f:
-        risk_rows = {r["repo"].lower(): r for r in csv.DictReader(f)}
-    present = company & set(risk_rows)
-    assert present, "expected company-backed repos to appear in risk.csv"
-    bad = {repo for repo in present if (risk_rows[repo].get("nonprofit") or "") != "False"}
+    with eligibility.open() as f:
+        elig_rows = {r["repo"].lower(): r for r in csv.DictReader(f)}
+    present = company & set(elig_rows)
+    assert present, "expected company-backed repos to appear in eligibility.csv"
+    bad = {repo for repo in present if (elig_rows[repo].get("nonprofit") or "") != "False"}
     assert not bad, f"company-backed repos not flagged nonprofit=False: {sorted(bad)}"
 
 
@@ -111,13 +114,18 @@ def test_score_component_coverage_is_full():
     assert not failed, f"score components below 100%: {failed}"
 
 
-# --- schema invariant sweep over the per-dimension risk CSVs ----------------
+# --- schema invariant sweep over the per-dimension CSVs ----------------------
+# The four risk dimensions plus the eligibility-stage funding build (moved to
+# data/eligibility/ but still a scored, percentile-carrying dimension CSV).
 
 DIMENSION_CSVS = ["complexity", "concentration", "security", "funding", "workload"]
+DIMENSION_PATHS = {
+    "funding": ELIGIBILITY_DIR / "funding.csv",
+}
 
 
 def _rows(name: str) -> list[dict]:
-    path = RISK_DIR / f"{name}.csv"
+    path = DIMENSION_PATHS.get(name, RISK_DIR / f"{name}.csv")
     if not path.exists():
         return []
     with path.open() as f:
@@ -152,20 +160,21 @@ def test_dimension_score_floored_at_one(dim):
         assert 1 <= float(v) <= 100, f"{r.get('repo')}.{dim}.score={v} outside [1,100]"
 
 
-# --- risk.csv aggregate columns: intent + nonprofit --------------------------
+# --- eligibility.csv rollup columns: strict boolean flags --------------------
 
 
-def test_risk_intent_and_nonprofit_are_boolean_flags():
-    """risk.csv intent/nonprofit are present on every row and are 'True'/'False'."""
-    path = RISK_DIR / "risk.csv"
+def test_eligibility_flags_are_boolean():
+    """eligibility.csv flag columns are present on every row and 'True'/'False'
+    (the rollup is strict — the ternary license detail stays in licenses.csv)."""
+    path = ELIGIBILITY_DIR / "eligibility.csv"
     if not path.exists():
-        pytest.skip("risk.csv not present")
+        pytest.skip("eligibility.csv not present")
     with path.open() as f:
         rows = list(csv.DictReader(f))
     if not rows:
-        pytest.skip("risk.csv empty")
-    for col in ("intent", "nonprofit"):
-        assert col in rows[0], f"risk.csv missing {col} column"
+        pytest.skip("eligibility.csv empty")
+    for col in ("oss", "intent", "nonprofit", "active", "eligible"):
+        assert col in rows[0], f"eligibility.csv missing {col} column"
         for r in rows:
             assert (r.get(col) or "").strip() in ("True", "False"), \
                 f"{r.get('repo')}.{col}={r.get(col)!r}"

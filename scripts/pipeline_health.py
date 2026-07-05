@@ -9,9 +9,11 @@ Complements `scripts/data_anomalies.py`, which checks metric *values* for
 outliers/types; this script checks *consistency*.
 
 Checks:
-  1. Each risk dimension CSV (complexity / concentration / funding /
-     security / workload) matches its `build_<dim>.build()`.
-  2. data/risk/risk.csv matches `aggregate_risk.aggregate()`.
+  1. Each dimension CSV — the four risk dimensions (complexity /
+     concentration / security / workload) plus the eligibility-stage builds
+     (funding / licenses / active) — matches its `build_<dim>.build()`.
+  2. data/risk/risk.csv matches `aggregate_risk.aggregate()` and
+     data/eligibility/eligibility.csv matches `build_eligibility.build()`.
   3. data/value/value.csv matches `unify_value_data` (class assignments).
   4. Score-forming component columns are 100%-populated across the risk-scope
      set (a blank = a failed upstream fetch, since edge cases are imputed).
@@ -66,26 +68,32 @@ def _cell_diffs(built: dict, disk: dict) -> int:
 
 
 def check_dimension_csvs() -> list[Result]:
-    """Each dimension CSV must equal its builder's current output."""
+    """Each dimension CSV must equal its builder's current output.
+
+    Covers the four risk dimensions plus the eligibility-stage builds
+    (funding / licenses / active, under data/eligibility/).
+    """
+    from src.eligibility import build_active, build_funding, build_licenses
     from src.risk import (
         build_complexity,
         build_concentration,
-        build_funding,
         build_security,
         build_workload,
     )
 
     builders = [
-        ("complexity", build_complexity),
-        ("concentration", build_concentration),
-        ("funding", build_funding),
-        ("security", build_security),
-        ("workload", build_workload),
+        ("complexity", build_complexity, ROOT / "data" / "risk" / "complexity.csv"),
+        ("concentration", build_concentration, ROOT / "data" / "risk" / "concentration.csv"),
+        ("security", build_security, ROOT / "data" / "risk" / "security.csv"),
+        ("workload", build_workload, ROOT / "data" / "risk" / "workload.csv"),
+        ("funding", build_funding, ROOT / "data" / "eligibility" / "funding.csv"),
+        ("licenses", build_licenses, ROOT / "data" / "eligibility" / "licenses.csv"),
+        ("active", build_active, ROOT / "data" / "eligibility" / "active.csv"),
     ]
     out: list[Result] = []
-    for name, mod in builders:
+    for name, mod, path in builders:
         built = _norm(mod.build())
-        disk = _read_csv_by_repo(ROOT / "data" / "risk" / f"{name}.csv")
+        disk = _read_csv_by_repo(path)
         if set(built) != set(disk):
             out.append((f"{name}.csv", False,
                         f"repo set differs (builder {len(built)}, disk {len(disk)})"))
@@ -111,6 +119,21 @@ def check_risk_data() -> list[Result]:
     return [("risk.csv", diffs == 0,
              "in sync" if diffs == 0
              else f"{diffs} stale cells — re-run aggregate_risk")]
+
+
+def check_eligibility_data() -> list[Result]:
+    """eligibility.csv must equal build_eligibility's join of the stage CSVs."""
+    from src.eligibility.build_eligibility import build
+
+    built = _norm(build())
+    disk = _read_csv_by_repo(ROOT / "data" / "eligibility" / "eligibility.csv")
+    if set(built) != set(disk):
+        return [("eligibility.csv", False,
+                 f"repo set differs (builder {len(built)}, disk {len(disk)})")]
+    diffs = _cell_diffs(built, disk)
+    return [("eligibility.csv", diffs == 0,
+             "in sync" if diffs == 0
+             else f"{diffs} stale cells — re-run build_eligibility")]
 
 
 def check_value_data() -> list[Result]:
@@ -159,11 +182,11 @@ def check_value_data() -> list[Result]:
 # workload is included: a zero-active-contributor repo is scored with AC=1
 # (flagged `dormant`) rather than abstaining, so every top repo gets a score.
 SCORE_COMPONENT_COVERAGE: dict[str, list[str]] = {
-    "concentration.csv": ["bf_commits_git_5y", "hhi_commits_git_5y", "score"],
-    "complexity.csv": ["score"],
-    "security.csv": ["score"],
-    "funding.csv": ["score"],
-    "workload.csv": ["score"],
+    "risk/concentration.csv": ["bf_commits_git_5y", "hhi_commits_git_5y", "score"],
+    "risk/complexity.csv": ["score"],
+    "risk/security.csv": ["score"],
+    "eligibility/funding.csv": ["score"],
+    "risk/workload.csv": ["score"],
 }
 
 
@@ -181,7 +204,7 @@ def check_score_component_coverage() -> list[Result]:
     n = len(repos)
     out: list[Result] = []
     for fname, cols in SCORE_COMPONENT_COVERAGE.items():
-        disk = _read_csv_by_repo(ROOT / "data" / "risk" / fname)
+        disk = _read_csv_by_repo(ROOT / "data" / fname)
         for col in cols:
             missing = [r for r in repos
                        if not str(disk.get(r, {}).get(col, "")).strip()]
@@ -203,12 +226,12 @@ def check_score_component_coverage() -> list[Result]:
 # input blanks the score), so any score-with-a-missing-input on disk is a real
 # inconsistency — a hand-edit or a builder/aggregator regression.
 SCORE_INPUTS: dict[str, list[str]] = {
-    "concentration.csv": ["bf_commits_git_5y_p", "hhi_commits_git_5y_p"],
-    "complexity.csv":    ["loc_eoy_p", "cyclomatic_max_p"],
-    "security.csv":      ["openssf_score_p", "cve_score"],
-    "funding.csv":       ["gh_sponsorships_p", "oc_avg_funding_p"],
-    "workload.csv":      ["loc_per_ac_p", "cve_per_ac_p", "nni_per_ac_p"],
-    "risk.csv":          ["concentration", "complexity", "security", "workload"],
+    "risk/concentration.csv": ["bf_commits_git_5y_p", "hhi_commits_git_5y_p"],
+    "risk/complexity.csv":    ["loc_eoy_p", "cyclomatic_max_p"],
+    "risk/security.csv":      ["openssf_score_p", "cve_score"],
+    "eligibility/funding.csv": ["gh_sponsorships_p", "oc_avg_funding_p"],
+    "risk/workload.csv":      ["loc_per_ac_p", "cve_per_ac_p", "nni_per_ac_p"],
+    "risk/risk.csv":          ["concentration", "complexity", "security", "workload"],
 }
 
 
@@ -224,7 +247,7 @@ def check_score_input_completeness() -> list[Result]:
     """
     out: list[Result] = []
     for fname, inputs in SCORE_INPUTS.items():
-        path = ROOT / "data" / "risk" / fname
+        path = ROOT / "data" / fname
         if not path.exists():
             out.append((f"{fname} score⟸inputs", False, "file missing"))
             continue
@@ -258,9 +281,9 @@ def check_long_format_keys() -> list[Result]:
     return out
 
 
-CHECKS = [check_dimension_csvs, check_risk_data, check_value_data,
-          check_score_component_coverage, check_score_input_completeness,
-          check_long_format_keys]
+CHECKS = [check_dimension_csvs, check_risk_data, check_eligibility_data,
+          check_value_data, check_score_component_coverage,
+          check_score_input_completeness, check_long_format_keys]
 
 
 def main() -> int:

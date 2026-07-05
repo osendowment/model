@@ -32,8 +32,18 @@ sys.path.insert(0, str(ROOT))
 from src.common.repos import load_top_repos  # noqa: E402
 
 RISK_DIR = ROOT / "data" / "risk"
+ELIGIBILITY_DIR = ROOT / "data" / "eligibility"
 SEVERITIES = ("err", "warn", "info")
-DIMENSIONS = ("complexity", "concentration", "security", "funding", "workload")
+# risk.csv component columns (funding is not one — it lives in the
+# eligibility stage; its detail CSV is still range/staleness-checked below).
+RISK_COMPONENTS = ("complexity", "concentration", "security", "workload")
+DIMENSION_FILES = {
+    "complexity": RISK_DIR / "complexity.csv",
+    "concentration": RISK_DIR / "concentration.csv",
+    "security": RISK_DIR / "security.csv",
+    "funding": ELIGIBILITY_DIR / "funding.csv",
+    "workload": RISK_DIR / "workload.csv",
+}
 
 Finding = tuple[str, str, str]  # (severity, category, message)
 
@@ -120,7 +130,7 @@ def main():
 
     # 2. Dimension score range — risk.csv components + each detail CSV `score`
     #    are integer percentile scores floored at 1; 0 or >100 is impossible.
-    for col in (*DIMENSIONS, "score"):
+    for col in (*RISK_COMPONENTS, "score"):
         for r in risk_rows:
             v = (r.get(col) or "").strip()
             if not v:
@@ -132,9 +142,10 @@ def main():
 
     # 3. Per-dimension detail CSVs: numeric ranges, percentile bounds, scores.
     for dim, ranges in DIMENSION_RANGES.items():
-        rows = _read(RISK_DIR / f"{dim}.csv")
+        rows = _read(DIMENSION_FILES[dim])
         if not rows:
-            findings.append(("warn", "missing-file", f"data/risk/{dim}.csv not found or empty"))
+            findings.append(("warn", "missing-file",
+                             f"{DIMENSION_FILES[dim].relative_to(ROOT)} not found or empty"))
             continue
         header = rows[0].keys()
         pct_cols = [c for c in header if c.endswith("_p")]
@@ -171,8 +182,8 @@ def main():
 
     # 4. Stale fetched_at across every detail CSV.
     cutoff = (datetime.datetime.now() - datetime.timedelta(days=90)).isoformat()[:10]
-    for dim in DIMENSIONS:
-        rows = _read(RISK_DIR / f"{dim}.csv")
+    for dim, path in DIMENSION_FILES.items():
+        rows = _read(path)
         if not rows:
             continue
         ts_cols = [c for c in rows[0] if c.endswith("fetched_at")]
