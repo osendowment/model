@@ -35,7 +35,7 @@ def test_disk_ids_survive_rewrite_even_if_maps_forget_the_slug(tmp_path):
 def test_write_long_is_atomic_no_tmp_left_behind(tmp_path):
     from src.sources.github.fetch_issue_metrics import _write_long
     path = str(tmp_path / "issues.csv")
-    n = _write_long(path, {"open": {"a/a": {"2024": "3"}}, "closed": {}},
+    n = _write_long(path, {"opened": {"a/a": {"2024": "3"}}, "closed": {}},
                     {"a/a": "42"})
     assert n == 1
     rows = list(csv.DictReader(open(path)))
