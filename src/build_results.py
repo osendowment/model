@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build data/results.csv — the final fundable-candidate table.
+"""Build data/preview/repos.csv — the final fundable-candidate table.
 
 The pipeline's terminal output. Every **eligible** top repo (eligibility.csv
 `eligible == True`) paired with its value score (top-ecosystem download share)
@@ -12,7 +12,7 @@ Columns:
     repo         canonical owner/name slug
     ecosystem    the repo's top ecosystem            (value.csv `top_eco`)
     value_score  top-ecosystem download share, %     (value.csv `top_eco_pct`)
-    risk_score   overall risk score, 0-100           (risk.csv `score`)
+    risk_score   overall risk score, 0-100           (risk.csv `risk_score`)
 
 Joins: eligibility.csv → risk.csv on the stable `repo_id`; eligibility.csv →
 value.csv on the canonical `repo` slug (value.csv's `repo_id` is the
@@ -36,7 +36,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 ELIGIBILITY_FILE = DATA_DIR / "eligibility" / "eligibility.csv"
 VALUE_FILE = DATA_DIR / "value" / "value.csv"
 RISK_FILE = DATA_DIR / "risk" / "risk.csv"
-OUTPUT_FILE = DATA_DIR / "results.csv"
+OUTPUT_FILE = DATA_DIR / "preview" / "repos.csv"
 
 FIELDS = ["repo_id", "repo", "ecosystem", "value_score", "risk_score"]
 
@@ -64,7 +64,7 @@ def _value_maps() -> tuple[dict[str, dict], dict[str, dict]]:
 
 
 def _risk_score_by_id() -> dict[str, str]:
-    """{repo_id → risk.csv `score`}; join on the stable numeric id."""
+    """{repo_id → risk.csv `risk_score`}; join on the stable numeric id."""
     out: dict[str, str] = {}
     if not RISK_FILE.exists():
         return out
@@ -72,7 +72,7 @@ def _risk_score_by_id() -> dict[str, str]:
         for r in csv.DictReader(f):
             rid = (r.get("repo_id") or "").strip()
             if rid:
-                out[rid] = (r.get("score") or "").strip()
+                out[rid] = (r.get("risk_score") or "").strip()
     return out
 
 

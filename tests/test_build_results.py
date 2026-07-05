@@ -30,7 +30,7 @@ def test_filters_eligible_and_joins(tmp_path, monkeypatch):
     _write(val, ["repo", "platform", "repo_id", "top_eco", "top_eco_pct"],
            [["a/keep", "github", "gh/1", "npm", "55.5"],
             ["b/drop", "github", "gh/2", "pypi", "10.0"]])
-    _write(risk, ["repo", "repo_id", "score"], [["a/keep", "1", "80"], ["b/drop", "2", "20"]])
+    _write(risk, ["repo", "repo_id", "risk_score"], [["a/keep", "1", "80"], ["b/drop", "2", "20"]])
     _patch(monkeypatch, elig, val, risk)
 
     rows = br.build()
@@ -51,7 +51,7 @@ def test_sorted_by_risk_then_value_desc(tmp_path, monkeypatch):
            [["a/lo", "1", "True"], ["b/hi", "2", "True"], ["c/mid", "3", "True"]])
     _write(val, ["repo", "top_eco", "top_eco_pct"],
            [["a/lo", "npm", "1"], ["b/hi", "npm", "2"], ["c/mid", "npm", "9"]])
-    _write(risk, ["repo", "repo_id", "score"],
+    _write(risk, ["repo", "repo_id", "risk_score"],
            [["a/lo", "1", "30"], ["b/hi", "2", "90"], ["c/mid", "3", "90"]])
     _patch(monkeypatch, elig, val, risk)
 
@@ -68,7 +68,7 @@ def test_missing_risk_score_left_blank(tmp_path, monkeypatch):
     risk = tmp_path / "risk.csv"
     _write(elig, ["repo", "repo_id", "eligible"], [["x/norisk", "9", "True"]])
     _write(val, ["repo", "top_eco", "top_eco_pct"], [["x/norisk", "crates", "42"]])
-    _write(risk, ["repo", "repo_id", "score"], [])
+    _write(risk, ["repo", "repo_id", "risk_score"], [])
     _patch(monkeypatch, elig, val, risk)
 
     rows = br.build()
