@@ -71,6 +71,7 @@ class RepoEntry:
     valid: bool = False
     full_name: str = ""
     mirror_url: str = ""
+    git_url: str = ""  # authoritative clone URL from value.csv (host-agnostic)
 
 
 def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]:
@@ -214,10 +215,12 @@ def load_top_repos(
     mirror_exempt = {
         canon.get(s, s) for s in _read_live_upstream_mirror_slugs(overrides_file)
     }
-    # chosen: dedup key -> (class, platform, repo_id, slug). The key is the
-    # canonical github slug for github repos and the stable gl/ repo_id for
-    # gitlab repos, so a same-named repo on both hosts never collapses.
-    chosen: dict[str, tuple[str, str, str, str]] = {}
+    # chosen: dedup key -> (class, platform, repo_id, slug, git_url). The key
+    # is the canonical github slug for github repos and the stable gl/ repo_id
+    # for gitlab repos, so a same-named repo on both hosts never collapses.
+    # git_url is value.csv's authoritative clone URL, carried so the clone-URL
+    # routing (Phase 2) can hand each fetcher the repo's real host.
+    chosen: dict[str, tuple[str, str, str, str, str]] = {}
     with open(value_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             cls = (row.get("class") or "").strip()
@@ -236,6 +239,7 @@ def load_top_repos(
             if skip_invalid and git_valid_val != "True":
                 continue
             rid = to_repo_id((row.get("repo_id") or "").strip())
+            git_url = (row.get("git_url") or "").strip()
             if platform == "github":
                 slug = canon.get(raw, raw)      # resolve renamed repos
                 key = slug
@@ -243,11 +247,11 @@ def load_top_repos(
                 slug = raw                       # non-github: value.csv path is canonical
                 key = rid or f"{platform}:{raw}"
             if key not in chosen or _RANK.get(cls, 0) > _RANK.get(chosen[key][0], 0):
-                chosen[key] = (cls, platform, rid, slug)
+                chosen[key] = (cls, platform, rid, slug, git_url)
 
     entries: list[RepoEntry] = []
     dropped_archived: list[str] = []
-    for key, (cls, platform, rid, slug) in chosen.items():
+    for key, (cls, platform, rid, slug, git_url) in chosen.items():
         if platform == "github":
             e = gh_meta.get(slug) or RepoEntry(repo=slug)
         elif platform == "gitlab":
@@ -258,6 +262,14 @@ def load_top_repos(
         e.value_class = cls
         if not e.repo_id:
             e.repo_id = rid
+        # Clone URL: prefer value.csv's authoritative git_url (host-agnostic).
+        # github/repos.csv enrichment carries no git_url column, so never let it
+        # blank this; a github entry that somehow lacks one falls back to its
+        # canonical github clone URL (byte-identical to the old hardcoded path).
+        if git_url:
+            e.git_url = git_url
+        elif platform == "github" and not e.git_url:
+            e.git_url = f"https://github.com/{slug}.git"
         # The mirror-exemption is a GitHub concept (archived mirror of a live
         # non-github upstream); it never applies to a gitlab/other row.
         exempt = platform == "github" and slug in mirror_exempt

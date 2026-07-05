@@ -364,7 +364,7 @@ def _window_bounds(start_year: int, end_year: int) -> tuple[float, float]:
 # ── per-repo collection ─────────────────────────────────────────────────────
 
 def process_repo(repo: str, repo_id: str, base_dir: str,
-                 timeout: int = 300) -> tuple[list[dict], dict]:
+                 timeout: int = 300, git_url: str = "") -> tuple[list[dict], dict]:
     """Clone one repo, bucket commits by (author, year), clean up.
 
     Returns (long_rows, status_row). Always returns without raising — failures
@@ -375,6 +375,8 @@ def process_repo(repo: str, repo_id: str, base_dir: str,
     `status` ∈ {ok, clone_failed, timeout, no_commits, error}.
     `timeout` (seconds) bounds both the clone and the `git log` — raise it for
     kernel-scale mirrors that overrun the 300s default.
+    `git_url` is the repo's real clone URL (value.csv); empty falls back to the
+    canonical github URL, so a gitlab repo clones its actual host.
     """
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     status_row: dict = {f: "" for f in STATUS_FIELDS}
@@ -385,7 +387,8 @@ def process_repo(repo: str, repo_id: str, base_dir: str,
     dest = os.path.join(base_dir, repo.replace("/", "_"))
     long_rows: list[dict] = []
     try:
-        clone_s, _size = bare_treeless_clone(repo, dest, timeout=timeout)
+        clone_s, _size = bare_treeless_clone(repo, dest, timeout=timeout,
+                                             repo_url=git_url or None)
         commit_rows = log_commits(dest, timeout=timeout)
         if not commit_rows:
             status_row["status"] = "no_commits"
@@ -515,6 +518,7 @@ async def run_batch(
     force: bool,
     max_disk_gb: float,
     timeout: int = 300,
+    git_urls: dict[str, str] | None = None,
 ) -> tuple[dict[str, list[dict]], dict[str, dict]]:
     """Clone + bucket every target concurrently, writing CSVs as it goes.
 
@@ -542,6 +546,7 @@ async def run_batch(
 
     FLUSH_EVERY = 25
     id_map = {repo: rid for repo, rid in targets if rid}
+    url_map = git_urls or {}
     base_dir = make_clone_tmpdir("contributors")
     sem = asyncio.Semaphore(concurrency)
     loop = asyncio.get_running_loop()
@@ -550,7 +555,8 @@ async def run_batch(
     async def _one(repo: str, rid: str) -> tuple[str, list[dict], dict]:
         async with sem:
             long_rows, status_row = await loop.run_in_executor(
-                None, process_repo, repo, rid, base_dir, timeout
+                None, process_repo, repo, rid, base_dir, timeout,
+                url_map.get(repo, ""),
             )
             return repo, long_rows, status_row
 
@@ -633,10 +639,11 @@ def _print_summary(
 def _inspect(repo: str, window: tuple[int, int]) -> int:
     """Clone one repo and dump its merged contributor list — to verify merges."""
     since, until = _window_bounds(*window)
+    git_url = git_url_for(load_repo_ids().get(repo, ""), repo, load_git_urls())
     base_dir = make_clone_tmpdir("contributors")
     dest = os.path.join(base_dir, repo.replace("/", "_"))
     try:
-        clone_s, _ = bare_treeless_clone(repo, dest)
+        clone_s, _ = bare_treeless_clone(repo, dest, repo_url=git_url or None)
         rows = log_commits(dest)
     except Exception as e:  # noqa: BLE001
         console.print(f"[red]{repo}: {e}[/red]")
@@ -708,14 +715,18 @@ def main() -> int:
     if args.inspect:
         return _inspect(args.inspect, window)
 
-    # Build the target list.
+    # Build the target list + per-repo clone URL (value.csv git_url, so a
+    # gitlab repo clones its real host rather than the assumed github.com).
     if args.repos:
         ids = load_repo_ids()
+        gitmap = load_git_urls()
         targets = [(s, ids.get(s, ""))
                    for s in (r.strip().lower() for r in args.repos)]
+        git_urls = {s: git_url_for(rid, s, gitmap) for s, rid in targets}
     else:
         entries = load_top_repos()
         targets = [(e.repo, e.repo_id) for e in entries]
+        git_urls = {e.repo: e.git_url for e in entries}
         if args.limit and args.limit < len(targets):
             random.seed(args.seed)
             targets = random.sample(targets, args.limit)
@@ -731,7 +742,7 @@ def main() -> int:
     t0 = time.monotonic()
     long_by_repo, status_by_repo = asyncio.run(run_batch(
         targets, args.concurrency, OUTPUT_FILE, STATUS_FILE,
-        args.force, args.max_disk_gb, args.timeout,
+        args.force, args.max_disk_gb, args.timeout, git_urls,
     ))
     console.print()
     _print_summary(long_by_repo, status_by_repo, time.monotonic() - t0)

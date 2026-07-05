@@ -59,6 +59,7 @@ import argparse
 import asyncio
 import csv
 import datetime
+import functools
 import json
 import logging
 import math
@@ -292,8 +293,13 @@ async def _fetch_and_scan(
     repo: str, sha: str, analyzed_year: str, rulepack: str,
     timeout_s: int, base_dir: str,
     sem: asyncio.Semaphore, client: httpx.Client,
+    repo_url: str | None = None,
 ) -> RepoFindings:
-    """Sparse-checkout `repo`@`sha`, run semgrep, clean up."""
+    """Sparse-checkout `repo`@`sha`, run semgrep, clean up.
+
+    ``repo_url`` (value.csv clone URL) routes the sparse-clone fallback to the
+    repo's real host; the primary codeload tarball path stays github-only.
+    """
     rf = RepoFindings(
         repo=repo, analyzed_sha=sha, analyzed_year=analyzed_year, rulepack=rulepack,
     )
@@ -314,7 +320,11 @@ async def _fetch_and_scan(
                 if os.path.isdir(dest):
                     shutil.rmtree(dest, ignore_errors=True)
                 dl_elapsed, _ = await loop.run_in_executor(
-                    None, _sparse_clone, repo, dest, 0, sha or None,
+                    None,
+                    functools.partial(
+                        _sparse_clone, repo, dest, 0, sha or None,
+                        repo_url=repo_url,
+                    ),
                 )
                 rf.download_s = dl_elapsed
 
@@ -357,12 +367,15 @@ async def scan_repos(
     max_disk_gb: float = 0.0,
     output_path: str | None = None,
     repo_ids_global: dict[str, str] | None = None,
+    git_urls: dict[str, str] | None = None,
 ) -> list[RepoFindings]:
     """Process every repo concurrently. `shas` maps repo → (year, sha).
 
+    ``git_urls`` routes each repo's sparse-clone fallback to its real host.
     If ``max_disk_gb`` > 0, abort gracefully when free /tmp dips below
     that threshold (waits for in-flight scans to finish).
     """
+    url_map = git_urls or {}
     sem = asyncio.Semaphore(concurrency)
     base_dir = make_clone_tmpdir("semgrep")
     name_width = min(max((len(r) for r in repos), default=20), 38)
@@ -389,6 +402,7 @@ async def scan_repos(
                 rf = await _fetch_and_scan(
                     repo, sha, year, rulepack, timeout_s,
                     base_dir, sem, client,
+                    repo_url=url_map.get(repo, ""),
                 )
                 progress.update(
                     task, advance=1,
@@ -641,6 +655,9 @@ def main() -> None:
     # for the long-format writer (even when the user passes --repos manually).
     risk_repos = load_top_repos()
     repo_ids: dict[str, str] = {e.repo: e.repo_id for e in risk_repos}
+    # value.csv clone URL per repo — routes the sparse-clone fallback to the
+    # repo's real host (github tarball path stays github-only).
+    git_urls: dict[str, str] = {e.repo: e.git_url for e in risk_repos}
     if args.repos:
         repos = [r.strip().lower() for r in args.repos]
     else:
@@ -684,6 +701,7 @@ def main() -> None:
         max_disk_gb=args.max_disk_gb,
         output_path=args.output,
         repo_ids_global=repo_ids,
+        git_urls=git_urls,
     ))
     elapsed = time.monotonic() - t_start
 

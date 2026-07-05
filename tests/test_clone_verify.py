@@ -17,7 +17,11 @@ import subprocess
 
 import pytest
 
-from src.sources.git.clone import resolve_mainline_sha, sparse_clone
+from src.sources.git.clone import (
+    bare_treeless_clone,
+    resolve_mainline_sha,
+    sparse_clone,
+)
 
 
 def _run(cwd, *args, env=None) -> str:
@@ -89,3 +93,22 @@ def test_sparse_clone_raises_on_bad_ref(tmp_path):
     good = tmp_path / "good"
     sparse_clone("x/y", str(good), ref=real_sha, repo_url=url)
     assert (good / "x.py").is_file()
+
+
+def test_bare_treeless_clone_routes_repo_url(tmp_path):
+    # Phase-2 clone-URL routing: bare_treeless_clone must honour repo_url so a
+    # non-github repo (gitlab, …) clones its real host instead of the assumed
+    # github.com/{repo}. Proven offline via a local remote — if repo_url were
+    # ignored, git would try github.com/gnome/glib and this would fail/differ.
+    remote = tmp_path / "remote"
+    remote.mkdir()
+    _run(remote, "-c", "init.defaultBranch=main", "init", "-q")
+    _commit(remote, "a.txt", "2025-01-01T00:00:00")
+    dest = tmp_path / "clone"
+    bare_treeless_clone("gnome/glib", str(dest), repo_url=str(remote))
+    # A bare clone with the origin pointed at our local remote.
+    origin = subprocess.run(
+        ["git", "-C", str(dest), "remote", "get-url", "origin"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    assert origin == str(remote)

@@ -300,6 +300,7 @@ def sparse_clone(
 
 def bare_blobless_clone(
     repo: str, dest: str, ref: str | None = None,
+    *, repo_url: str | None = None,
 ) -> tuple[float, int]:
     """Bare blobless clone: full commit graph, lazy blob fetch.
 
@@ -308,9 +309,12 @@ def bare_blobless_clone(
     fetches it into a local branch `_pinned` so callers can analyze a
     specific commit deterministically.
 
+    ``repo_url`` overrides the clone URL so a non-GitHub repo (gitlab, …)
+    clones its real host instead of the assumed ``github.com/{repo}``.
+
     Returns (elapsed_s, on_disk_bytes_after_clone).
     """
-    url = f"https://github.com/{repo}.git"
+    url = repo_url or f"https://github.com/{repo}.git"
     clone_timeout = 300  # bare blobless clones are smaller than sparse but full graph
     t0 = time.monotonic()
     _run_git(
@@ -335,7 +339,9 @@ def bare_blobless_clone(
     return elapsed, size
 
 
-def bare_treeless_clone(repo: str, dest: str, timeout: int = 300) -> tuple[float, int]:
+def bare_treeless_clone(
+    repo: str, dest: str, timeout: int = 300, *, repo_url: str | None = None,
+) -> tuple[float, int]:
     """Bare clone with ``--filter=tree:0 --no-tags`` — commit graph only.
 
     The lightest possible clone: every commit object, but no trees and no
@@ -346,13 +352,16 @@ def bare_treeless_clone(repo: str, dest: str, timeout: int = 300) -> tuple[float
     every tree object. ``git log`` without ``-p`` / ``--stat`` /
     ``--name-*`` never dereferences a tree, so no lazy fetch is triggered.
 
+    ``repo_url`` overrides the clone URL so a non-GitHub repo (gitlab, …)
+    clones its real host instead of the assumed ``github.com/{repo}``.
+
     Raises ``RuntimeError`` (via ``_check``) on a non-zero clone exit
     (404 / private / network), so batch callers can record the failure
     per repo. ``subprocess.TimeoutExpired`` propagates on timeout.
 
     Returns ``(elapsed_s, on_disk_bytes)``.
     """
-    url = f"https://github.com/{repo}.git"
+    url = repo_url or f"https://github.com/{repo}.git"
     t0 = time.monotonic()
     _check(
         _run_git(

@@ -131,6 +131,60 @@ def test_load_top_repos_canonicalises_renamed_repo(tmp_path, monkeypatch):
     assert out[0].repo_id == "gh/1649251"
 
 
+def test_load_top_repos_sets_git_url_github(tmp_path, monkeypatch):
+    """A github entry carries value.csv's git_url — byte-identical to the
+    canonical github clone URL the old hardcoded clone path built."""
+    value = tmp_path / "value.csv"
+    _write(value, ["repo", "git_url", "git_valid", "class", "platform"], [
+        {"repo": "owner/a", "git_url": "https://github.com/owner/a.git",
+         "git_valid": "True", "class": "A", "platform": "github"},
+    ])
+    gh = tmp_path / "repos.csv"
+    _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
+        {"repo": "owner/a", "valid": "True", "repo_id": "11",
+         "archived": "False", "size": "5", "stars": "9"},
+    ])
+    monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
+    out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
+    assert out[0].git_url == "https://github.com/owner/a.git"
+
+
+def test_load_top_repos_git_url_github_fallback_when_blank(tmp_path, monkeypatch):
+    """A github entry with no git_url in value.csv falls back to its canonical
+    github clone URL; enrichment (no git_url column) never blanks it."""
+    value = tmp_path / "value.csv"
+    _write(value, ["repo", "git_url", "git_valid", "class", "platform"], [
+        {"repo": "owner/a", "git_url": "",
+         "git_valid": "True", "class": "A", "platform": "github"},
+    ])
+    gh = tmp_path / "repos.csv"
+    _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
+        {"repo": "owner/a", "valid": "True", "repo_id": "11",
+         "archived": "False", "size": "5", "stars": "9"},
+    ])
+    monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
+    out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
+    assert out[0].git_url == "https://github.com/owner/a.git"
+
+
+def test_load_top_repos_sets_git_url_gitlab(tmp_path, monkeypatch):
+    """A gitlab entry routes to its real gitlab clone URL, not github."""
+    value = tmp_path / "value.csv"
+    _write(value, ["repo", "repo_id", "git_url", "git_valid", "class", "platform"], [
+        {"repo": "gnome/glib", "repo_id": "gl/gitlab.gnome.org-658",
+         "git_url": "https://gitlab.gnome.org/gnome/glib.git",
+         "git_valid": "True", "class": "A", "platform": "gitlab"},
+    ])
+    gh = tmp_path / "repos.csv"
+    _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [])
+    monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
+    monkeypatch.setattr(repos, "TOP_REPO_PLATFORMS", {"github", "gitlab"})
+    monkeypatch.setattr(repos, "_read_gitlab_projects", lambda *a, **k: {})
+    out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
+    assert [e.repo for e in out] == ["gnome/glib"]
+    assert out[0].git_url == "https://gitlab.gnome.org/gnome/glib.git"
+
+
 def test_load_repo_ids(tmp_path):
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "full_name"], [

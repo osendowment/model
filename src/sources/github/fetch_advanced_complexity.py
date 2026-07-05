@@ -49,6 +49,7 @@ import argparse
 import asyncio
 import csv
 import datetime
+import functools
 import json
 import logging
 import math
@@ -355,6 +356,7 @@ async def _fetch_and_analyze(
     repo: str, repo_id: str, sha: str, analyzed_year: str, base_dir: str,
     sem: asyncio.Semaphore, client: httpx.Client,
     branch: str | None = None, cutoff: str | None = None, size_kb: int = 0,
+    repo_url: str | None = None,
 ) -> RepoComplexity:
     """Sparse-checkout `repo`@`sha`, analyse in an isolated subprocess, clean up.
 
@@ -362,6 +364,11 @@ async def _fetch_and_analyze(
     branch's first-parent mainline via ``corrected_clone_sha`` before checkout
     — an off-mainline CI/template commit would otherwise measure the template,
     not the repo. Metrics are still keyed under the original ``sha``.
+
+    ``repo_url`` (value.csv clone URL) routes the sparse-clone fallback to the
+    repo's real host. The primary tarball path is still codeload.github.com
+    (github-only) — a non-github repo 404s the tarball and lands on this
+    fallback, which now clones the right host.
     """
     rc = RepoComplexity(
         repo=repo, repo_id=repo_id,
@@ -394,7 +401,11 @@ async def _fetch_and_analyze(
                 if os.path.isdir(dest):
                     shutil.rmtree(dest, ignore_errors=True)
                 dl_elapsed, _ = await loop.run_in_executor(
-                    None, _sparse_clone, repo, dest, size_kb, clone_sha or None,
+                    None,
+                    functools.partial(
+                        _sparse_clone, repo, dest, size_kb, clone_sha or None,
+                        repo_url=repo_url,
+                    ),
                 )
                 rc.download_s = dl_elapsed
 
@@ -435,19 +446,22 @@ async def analyze_repos(
     branches: dict[str, str] | None = None,
     cutoffs: dict[str, str] | None = None,
     sizes: dict[str, int] | None = None,
+    git_urls: dict[str, str] | None = None,
 ) -> list[RepoComplexity]:
     """Process every repo concurrently. `shas` maps repo → (year, sha).
 
     ``branches``/``cutoffs`` drive the off-mainline SHA correction (see
     ``corrected_clone_sha``); ``sizes`` (repo size in KB) scales the per-repo
-    analysis timeout. If `output_path` is given, persist each successful
-    result via `upsert_snapshot` so a long run can survive a crash mid-way.
-    If ``max_disk_gb`` > 0, abort gracefully when free /tmp drops below
-    that threshold (waits for in-flight repos to finish).
+    analysis timeout; ``git_urls`` routes each repo's sparse-clone fallback to
+    its real host. If `output_path` is given, persist each successful result
+    via `upsert_snapshot` so a long run can survive a crash mid-way. If
+    ``max_disk_gb`` > 0, abort gracefully when free /tmp drops below that
+    threshold (waits for in-flight repos to finish).
     """
     branches = branches or {}
     cutoffs = cutoffs or {}
     sizes = sizes or {}
+    git_urls = git_urls or {}
     sem = asyncio.Semaphore(concurrency)
     base_dir = make_clone_tmpdir("cyclo")
     name_width = min(max((len(r) for r in repos), default=20), 38)
@@ -478,6 +492,7 @@ async def analyze_repos(
                     base_dir, sem, client,
                     branch=branches.get(repo), cutoff=cutoffs.get(repo),
                     size_kb=sizes.get(repo, 0),
+                    repo_url=git_urls.get(repo, ""),
                 )
                 progress.update(task, advance=1, description=repo[:name_width].ljust(name_width))
                 return rc
@@ -781,6 +796,9 @@ def main() -> None:
         for r, (year, _sha) in targets.items() if year.isdigit()
     }
     sizes: dict[str, int] = {e.repo: e.size_kb for e in risk_repos if e.size_kb}
+    # value.csv clone URL per repo — routes the sparse-clone fallback to the
+    # repo's real host (github tarball path stays github-only).
+    git_urls: dict[str, str] = {e.repo: e.git_url for e in risk_repos}
 
     ttl = 0 if args.force else args.ttl_days
     repos, ttl_skipped = _filter_by_ttl(repos, args.output, ttl, targets)
@@ -800,6 +818,7 @@ def main() -> None:
         output_path=args.output, flush_every=25,
         max_disk_gb=args.max_disk_gb,
         branches=branches, cutoffs=cutoffs, sizes=sizes,
+        git_urls=git_urls,
     ))
     elapsed = time.monotonic() - t_start
 

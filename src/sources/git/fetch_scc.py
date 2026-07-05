@@ -35,6 +35,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import datetime
+import functools
 import json
 import logging
 import os
@@ -234,6 +235,7 @@ async def _process_one(
     repo: str, sha: str, sizes: dict[str, int],
     base_dir: str, sem: asyncio.Semaphore,
     verify_branch: str | None = None, cutoff: str | None = None,
+    repo_url: str | None = None,
 ) -> SccResult:
     """Sparse-clone the snapshot and run scc. Always cleans up its tmp dir.
 
@@ -256,7 +258,11 @@ async def _process_one(
             if verify_branch:
                 try:
                     effective, corrected = await loop.run_in_executor(
-                        None, resolve_mainline_sha, repo, verify_branch, sha, cutoff,
+                        None,
+                        functools.partial(
+                            resolve_mainline_sha, repo, verify_branch, sha,
+                            cutoff, repo_url=repo_url,
+                        ),
                     )
                 except Exception as e:
                     # Branch unfetchable — can't verify; fall back to the
@@ -271,7 +277,11 @@ async def _process_one(
                                     "commit %s instead",
                                     repo, sha[:12], effective[:12])
             await loop.run_in_executor(
-                None, sparse_clone, repo, dest, sizes.get(repo, 0), clone_sha,
+                None,
+                functools.partial(
+                    sparse_clone, repo, dest, sizes.get(repo, 0), clone_sha,
+                    repo_url=repo_url,
+                ),
             )
             if not os.path.isdir(dest):
                 res.error = "clone failed"
@@ -306,6 +316,7 @@ async def run_all(
     output_path: str,
     concurrency: int,
     max_disk_gb: float = 0.0,
+    git_urls: dict[str, str] | None = None,
 ) -> list[SccResult]:
     """Process all (repo, sha) targets concurrently, upsert as each finishes.
 
@@ -313,6 +324,7 @@ async def run_all(
     and stop scheduling new ones once it dips below the threshold. In-flight
     work is awaited so cleanup still runs.
     """
+    url_map = git_urls or {}
     sem = asyncio.Semaphore(concurrency)
     base_dir = make_clone_tmpdir("scc")
     pool = ThreadPoolExecutor(max_workers=concurrency * 2 + 4)
@@ -333,6 +345,7 @@ async def run_all(
                 res = await _process_one(
                     repo, sha, sizes, base_dir, sem,
                     default_branches.get(repo), cutoffs.get(repo),
+                    url_map.get(repo, ""),
                 )
                 if not res.error:
                     upsert_snapshot(
@@ -483,6 +496,9 @@ def main() -> None:
     entries = load_top_repos(value_file=args.input)
     repos_all = [e.repo for e in entries]
     sizes = {e.repo: e.size_kb for e in entries if e.size_kb}
+    # Per-repo clone URL from value.csv, so a gitlab repo sparse-clones its
+    # real host instead of the assumed github.com/{repo}.
+    git_urls = {e.repo: e.git_url for e in entries}
 
     if args.repos:
         want = {r.strip().lower() for r in args.repos.split(",") if r.strip()}
@@ -548,7 +564,7 @@ def main() -> None:
     t0 = time.monotonic()
     results = asyncio.run(run_all(
         pending, sizes, repo_ids, default_branches, cutoffs, args.output,
-        args.concurrency, max_disk_gb=args.max_disk_gb,
+        args.concurrency, max_disk_gb=args.max_disk_gb, git_urls=git_urls,
     ))
     elapsed = time.monotonic() - t0
 
