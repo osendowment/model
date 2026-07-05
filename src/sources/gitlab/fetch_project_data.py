@@ -64,17 +64,22 @@ def _now_iso() -> str:
     return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def load_gitlab_rows(value_file: Path | None = None) -> list[dict]:
+def load_gitlab_rows(value_file: Path | None = None,
+                     classes: set[str] | None = None) -> list[dict]:
     """Unique GitLab targets from value.csv.
 
     Returns [{host, path, project}] where `project` = "{host}/{path}".lower()
     is the dedup + upsert key. Rows whose `git_url` is not a GitLab instance
-    are skipped.
+    are skipped. When `classes` is given (e.g. {"A", "B"}), only rows whose
+    `class` column is in that set are included — mirrors the GitHub owner
+    fetcher's default A/B scoping.
     """
     vf = value_file or VALUE_FILE
     seen: dict[str, dict] = {}
     with open(vf, encoding="utf-8") as f:
         for r in csv.DictReader(f):
+            if classes is not None and (r.get("class") or "").strip() not in classes:
+                continue
             parsed = parse_git_url((r.get("git_url") or "").strip())
             if not parsed:
                 continue
@@ -300,16 +305,23 @@ def _namespaces_from_projects() -> list[dict]:
 
 
 def fetch_and_persist(target: str = "projects", force: bool = False,
-                      limit: int | None = None, quiet: bool = False) -> dict:
-    """Fetch GitLab projects (+ namespaces). Idempotent under the 90-day TTL."""
+                      limit: int | None = None, quiet: bool = False,
+                      classes: set[str] | None = None) -> dict:
+    """Fetch GitLab projects (+ namespaces). Idempotent under the 90-day TTL.
+
+    `classes` (e.g. {"A", "B"}) scopes the projects phase to those value
+    classes; None fetches every GitLab-hosted repo.
+    """
     if not quiet:
         console.rule("[bold cyan]gitlab/fetch_project_data")
-        console.print(f"  TTL=[dim]{TTL_DAYS}d[/dim]  force=[dim]{force}[/dim]  target=[dim]{target}[/dim]")
+        scope = "/".join(sorted(classes)) if classes else "all"
+        console.print(f"  TTL=[dim]{TTL_DAYS}d[/dim]  force=[dim]{force}[/dim]  "
+                      f"target=[dim]{target}[/dim]  classes=[dim]{scope}[/dim]")
     out: dict = {"elapsed_s": 0.0}
     t0 = time.monotonic()
 
     if target in ("projects", "both"):
-        items = load_gitlab_rows()
+        items = load_gitlab_rows(classes=classes)
         existing = _load_existing(PROJECTS_OUT, "project")
         to_fetch, fresh, missing = _filter_stale(items, existing, "project", force)
         if limit:
@@ -349,8 +361,11 @@ def main() -> None:
     p.add_argument("--target", choices=["projects", "namespaces", "both"], default="both")
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--force", action="store_true")
+    p.add_argument("--classes", nargs="+", default=None,
+                   help="value classes to include (e.g. A B); default: all")
     args = p.parse_args()
-    fetch_and_persist(target=args.target, force=args.force, limit=args.limit)
+    fetch_and_persist(target=args.target, force=args.force, limit=args.limit,
+                      classes=set(args.classes) if args.classes else None)
 
 
 if __name__ == "__main__":

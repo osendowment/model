@@ -134,6 +134,20 @@ class TestLoadGitlabRows:
         foo = next(r for r in rows if r["host"] == "salsa.debian.org")
         assert foo["path"] == "debian/foo"
 
+    def test_classes_filter_scopes_to_given_classes(self, tmp_path: Path):
+        csv_text = (
+            "github_repo,gh_repo_id,git_url,valid,class\n"
+            ",,https://salsa.debian.org/debian/aaa.git,False,A\n"
+            ",,https://salsa.debian.org/debian/bbb.git,False,B\n"
+            ",,https://salsa.debian.org/debian/ccc.git,False,C\n"
+        )
+        vf = tmp_path / "value.csv"
+        vf.write_text(csv_text, encoding="utf-8")
+        keys = sorted(r["project"] for r in load_gitlab_rows(vf, classes={"A", "B"}))
+        assert keys == ["salsa.debian.org/debian/aaa", "salsa.debian.org/debian/bbb"]
+        # None (default) keeps every class
+        assert len(load_gitlab_rows(vf)) == 3
+
 
 def _ns_body(nid, full_path, kind="group"):
     return {"id": nid, "name": full_path.split("/")[-1], "path": full_path.split("/")[-1],
