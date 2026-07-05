@@ -70,7 +70,6 @@ boto/botocore,6670942,0,False,ok,2026-06-30T10:25:26+00:00
 boto/s3transfer,49535299,0,False,ok,2026-06-30T10:25:26+00:00
 braveg1rl/performance-now,336187529,,,ok,2026-05-19T11:10:36+00:00
 brianc/node-postgres,991475,16,True,ok,2026-06-30T10:25:27+00:00
-brianloveswords/node-jwa,8116861,,,ok,2026-04-28T00:15:43+00:00
 broofa/mime,534940,5,True,ok,2026-06-30T10:25:27+00:00
 broofa/node-int64,1208666,,,ok,2026-04-28T00:15:21+00:00
 browserify/events,1649251,0,False,ok,2026-06-30T10:25:27+00:00
@@ -127,7 +126,6 @@ cpburnz/python-pathspec,14648551,0,False,ok,2026-06-30T10:25:24+00:00
 crate-py/rpds,608018848,0,False,ok,2026-06-30T10:25:24+00:00
 criterion-rs/criterion.rs,1081104682,0,False,ok,2026-06-30T10:25:24+00:00
 crossbeam-rs/crossbeam,35566048,0,False,ok,2026-06-30T10:25:25+00:00
-crypto-browserify/randombytes,29300004,,,ok,2026-04-28T00:16:04+00:00
 css-modules/icss-utils,42766912,0,False,ok,2026-06-30T10:25:25+00:00
 cssnano/cssnano,33943153,0,False,ok,2026-06-30T10:25:25+00:00
 csstools/postcss-plugins,219192307,6,True,ok,2026-06-30T10:25:25+00:00
@@ -138,12 +136,10 @@ cyan4973/xxhash,19330466,0,False,ok,2026-06-30T10:25:26+00:00
 daaku/nodejs-makeerror,2097803,0,False,ok,2026-06-30T10:25:27+00:00
 daaku/nodejs-tmpl,2171213,0,False,ok,2026-06-30T10:25:27+00:00
 dateutil/dateutil,26876372,0,False,ok,2026-06-30T10:25:27+00:00
-davepacheco/node-extsprintf,4058064,,,ok,2026-04-28T00:16:08+00:00
 davidhalter/parso,90668463,4,True,ok,2026-06-30T10:25:28+00:00
 davisjam/safe-regex,90781457,0,False,ok,2026-06-30T10:25:28+00:00
 dchest/tweetnacl-js,15649752,0,False,ok,2026-06-30T10:25:28+00:00
 dcodeio/long.js,8678904,1,True,ok,2026-06-30T10:25:28+00:00
-dcodeio/protobuf.js,8507859,,,ok,2026-04-28T00:16:10+00:00
 debug-js/debug,2871998,0,False,ok,2026-06-30T10:25:29+00:00
 definitelytyped/definitelytyped,6093316,0,False,ok,2026-06-30T10:25:29+00:00
 defunctzombie/node-process,7580644,0,False,ok,2026-06-30T10:25:29+00:00
@@ -179,7 +175,6 @@ eliben/pycparser,10589864,0,False,ok,2026-06-30T10:25:20+00:00
 emotion-js/emotion,92570536,0,False,ok,2026-06-30T10:25:20+00:00
 encode/httpcore,237210639,32,True,ok,2026-06-30T10:25:20+00:00
 encode/httpx,179492861,32,True,ok,2026-06-30T10:25:21+00:00
-epoberezkin/ajv-keywords,60477053,,,ok,2026-04-28T00:16:24+00:00
 epoberezkin/fast-deep-equal,94483360,14,True,ok,2026-06-30T10:25:21+00:00
 epoberezkin/fast-json-stable-stringify,108103016,14,True,ok,2026-06-30T10:25:21+00:00
 epoberezkin/json-schema-traverse,93333933,14,True,ok,2026-06-30T10:25:21+00:00
@@ -286,7 +281,6 @@ googleapis/python-api-core,226992456,,,ok,2026-04-28T00:16:12+00:00
 googleapis/python-crc32c,159736041,,,ok,2026-04-28T00:16:12+00:00
 googleapis/python-storage,226992639,,,ok,2026-04-28T00:16:13+00:00
 googlechrome/workbox,55424670,0,False,ok,2026-06-30T10:25:27+00:00
-gozala/events,1649251,,,ok,2026-04-28T00:16:14+00:00
 gpg/libgpg-error,42075984,,,ok,2026-05-19T11:11:15+00:00
 grahamdumpleton/wrapt,10357291,0,True,ok,2026-06-30T10:25:27+00:00
 grantjenks/python-sortedcontainers,17144859,0,False,ok,2026-06-30T10:25:27+00:00
@@ -395,7 +389,6 @@ jonschlinkert/global-prefix,31455984,19,True,ok,2026-06-30T10:25:21+00:00
 jonschlinkert/has-value,24310408,19,True,ok,2026-06-30T10:25:21+00:00
 jonschlinkert/has-values,33009186,19,True,ok,2026-06-30T10:25:21+00:00
 jonschlinkert/is-extendable,38225016,19,True,ok,2026-06-30T10:25:22+00:00
-jonschlinkert/is-extglob,31788841,,,ok,2026-04-28T00:16:05+00:00
 jonschlinkert/is-number,24313173,19,True,ok,2026-06-30T10:25:22+00:00
 jonschlinkert/is-plain-object,24306940,19,True,ok,2026-06-30T10:25:22+00:00
 jonschlinkert/isobject,21342886,19,True,ok,2026-06-30T10:25:22+00:00
@@ -484,13 +477,11 @@ ljharb/define-properties,28768789,67,True,ok,2026-06-30T10:25:26+00:00
 ljharb/es-abstract,28995155,67,True,ok,2026-06-30T10:25:27+00:00
 ljharb/es-define-property,756570458,67,True,ok,2026-06-30T10:25:27+00:00
 ljharb/es-errors,752160492,67,True,ok,2026-06-30T10:25:27+00:00
-ljharb/es-object-atoms,773229339,,,ok,2026-04-28T00:15:49+00:00
 ljharb/es-shim-unscopables,480458584,67,True,ok,2026-06-30T10:25:28+00:00
 ljharb/es-to-primitive,32377814,67,True,ok,2026-06-30T10:25:28+00:00
 ljharb/get-intrinsic,308516559,67,True,ok,2026-06-30T10:25:28+00:00
 ljharb/get-proto,911035271,67,True,ok,2026-06-30T10:25:28+00:00
 ljharb/gopd,560708130,67,True,ok,2026-06-30T10:25:29+00:00
-ljharb/has-bigints,201714166,,,ok,2026-04-28T00:15:51+00:00
 ljharb/internal-slot,216159146,67,True,ok,2026-06-30T10:25:29+00:00
 ljharb/object-keys,9103992,67,True,ok,2026-06-30T10:25:29+00:00
 ljharb/object.assign,17755831,67,True,ok,2026-06-30T10:25:29+00:00
@@ -526,7 +517,6 @@ mathiasbynens/unicode-canonical-property-names-ecmascript,88346537,4,True,ok,202
 mathiasbynens/unicode-property-aliases-ecmascript,88333533,4,True,ok,2026-06-30T10:25:13+00:00
 matklad/once_cell,143220272,0,False,ok,2026-06-30T10:25:14+00:00
 matplotlib/matplotlib,1385122,13,True,ok,2026-06-30T10:25:14+00:00
-mcavage/node-assert-plus,4767976,,,ok,2026-04-28T00:16:05+00:00
 mcollina/fastq,37368217,13,True,ok,2026-06-30T10:25:14+00:00
 mcollina/reusify,42106515,13,True,ok,2026-06-30T10:25:14+00:00
 mdn/data,70901646,0,False,ok,2026-06-30T10:25:14+00:00
@@ -561,7 +551,6 @@ mozilla/source-map,2014930,0,False,ok,2026-06-30T10:25:17+00:00
 mrabarnett/mrab-regex,309446978,0,False,ok,2026-06-30T10:25:17+00:00
 mrmlnc/fast-glob,77467076,0,False,ok,2026-06-30T10:25:17+00:00
 msgpack/msgpack-python,2242705,0,False,ok,2026-06-30T10:25:17+00:00
-mvdnes/spin-rs,21686666,,,ok,2026-04-28T00:16:18+00:00
 myrne/performance-now,10219264,0,False,ok,2026-06-30T10:25:17+00:00
 mysticatea/abort-controller,105228556,6,True,ok,2026-06-30T10:25:17+00:00
 mysticatea/event-target-shim,31137469,6,True,ok,2026-06-30T10:25:18+00:00
@@ -581,7 +570,6 @@ nodejs/undici,133092972,55,True,ok,2026-06-30T10:25:19+00:00
 nodelib/nodelib,129310478,0,False,ok,2026-06-30T10:25:19+00:00
 npm/abbrev-js,554893,0,False,ok,2026-06-30T10:25:19+00:00
 npm/cacache,193812470,0,False,ok,2026-06-30T10:25:19+00:00
-npm/fs-minipass,102982143,,,ok,2026-04-28T00:16:25+00:00
 npm/hosted-git-info,25002984,0,False,ok,2026-06-30T10:25:19+00:00
 npm/inflight,19442260,,,ok,2026-04-28T00:16:26+00:00
 npm/ini,2167680,0,False,ok,2026-06-30T10:25:19+00:00
@@ -593,12 +581,10 @@ npm/nopt,1544436,0,False,ok,2026-06-30T10:25:13+00:00
 npm/normalize-package-data,9301720,0,False,ok,2026-06-30T10:25:13+00:00
 npm/ssri,193817839,0,False,ok,2026-06-30T10:25:13+00:00
 npm/unique-slug,35246620,0,False,ok,2026-06-30T10:25:14+00:00
-npm/wrappy,24208073,,,ok,2026-04-28T00:15:39+00:00
 npm/write-file-atomic,23896209,0,False,ok,2026-06-30T10:25:14+00:00
 numpy/numpy,908607,0,False,ok,2026-06-30T10:25:14+00:00
 nv/cssom,1025209,0,False,ok,2026-06-30T10:25:14+00:00
 nvzqz/static-assertions,100129252,5,True,ok,2026-06-30T10:25:14+00:00
-nvzqz/static-assertions-rs,100129252,,,ok,2026-04-28T00:15:41+00:00
 oauthlib/oauthlib,2811323,0,False,ok,2026-06-30T10:25:14+00:00
 octokit/openapi-types.ts,304109193,0,False,ok,2026-06-30T10:25:14+00:00
 octokit/types.ts,216109757,0,False,ok,2026-06-30T10:25:14+00:00
@@ -644,7 +630,6 @@ protocolbuffers/protobuf,23357588,0,False,ok,2026-06-30T10:25:18+00:00
 psf/requests,1362490,19,True,ok,2026-06-30T10:25:18+00:00
 psycopg/psycopg2,7730829,0,True,ok,2026-06-30T10:25:19+00:00
 pvorb/clone,2317381,4,True,ok,2026-06-30T10:25:19+00:00
-pvorb/node-clone,2317381,,,ok,2026-04-28T00:15:57+00:00
 py4j/py4j,1045976,0,False,ok,2026-06-30T10:25:19+00:00
 pyasn1/pyasn1,512723255,0,False,ok,2026-06-30T10:25:19+00:00
 pyasn1/pyasn1-modules,512723354,0,False,ok,2026-06-30T10:25:19+00:00
@@ -763,7 +748,6 @@ serde-rs/test,670894947,,,ok,2026-04-28T00:15:48+00:00
 servo/rust-fnv,33499190,261,True,ok,2026-06-30T10:25:29+00:00
 servo/rust-smallvec,33456236,261,True,ok,2026-06-30T10:25:29+00:00
 servo/rust-url,14934771,261,True,ok,2026-06-30T10:25:30+00:00
-shtylman/node-process,7580644,,,ok,2026-04-28T00:15:49+00:00
 sinclairzx81/sinclair-typebox,1122129819,,,ok,2026-04-28T00:15:21+00:00
 sinclairzx81/typebox,87454905,0,False,ok,2026-06-30T10:25:30+00:00
 sindresorhus/ansi-escapes,40721875,186,True,ok,2026-06-30T10:25:30+00:00
@@ -781,7 +765,6 @@ sindresorhus/escape-string-regexp,21169121,186,True,ok,2026-06-30T10:25:33+00:00
 sindresorhus/execa,47475908,186,True,ok,2026-06-30T10:25:33+00:00
 sindresorhus/figures,21672939,186,True,ok,2026-06-30T10:25:34+00:00
 sindresorhus/file-type,19105307,186,True,ok,2026-06-30T10:25:34+00:00
-sindresorhus/find-cache-dir,48783244,,,ok,2026-04-28T00:15:56+00:00
 sindresorhus/find-cache-directory,48783244,186,True,ok,2026-06-30T10:25:34+00:00
 sindresorhus/find-up,41723004,186,True,ok,2026-06-30T10:25:34+00:00
 sindresorhus/find-up-simple,714044439,186,True,ok,2026-06-30T10:25:35+00:00
@@ -808,7 +791,6 @@ sindresorhus/log-symbols,21673868,186,True,ok,2026-06-30T10:25:14+00:00
 sindresorhus/lowercase-keys,29769737,186,True,ok,2026-06-30T10:25:15+00:00
 sindresorhus/make-dir,90776169,186,True,ok,2026-06-30T10:25:15+00:00
 sindresorhus/meow,25121561,186,True,ok,2026-06-30T10:25:15+00:00
-sindresorhus/mimic-fn,71381729,,,ok,2026-04-28T00:16:06+00:00
 sindresorhus/mimic-function,71381729,186,True,ok,2026-06-30T10:25:15+00:00
 sindresorhus/mimic-response,93189529,186,True,ok,2026-06-30T10:25:15+00:00
 sindresorhus/node-defaults,7985040,186,True,ok,2026-06-30T10:25:15+00:00
@@ -829,11 +811,9 @@ sindresorhus/path-is-absolute,30900285,,,ok,2026-04-28T00:16:13+00:00
 sindresorhus/path-key,48706449,186,True,ok,2026-06-30T10:25:17+00:00
 sindresorhus/path-type,41905436,186,True,ok,2026-06-30T10:25:17+00:00
 sindresorhus/pify,41585934,186,True,ok,2026-06-30T10:25:17+00:00
-sindresorhus/pkg-dir,41724281,,,ok,2026-04-28T00:16:15+00:00
 sindresorhus/quick-lru,86679721,186,True,ok,2026-06-30T10:25:17+00:00
 sindresorhus/read-package-up,41842429,186,True,ok,2026-06-30T10:25:17+00:00
 sindresorhus/read-pkg,41790094,186,True,ok,2026-06-30T10:25:17+00:00
-sindresorhus/read-pkg-up,41842429,,,ok,2026-04-28T00:16:16+00:00
 sindresorhus/resolve-cwd,47504070,186,True,ok,2026-06-30T10:25:17+00:00
 sindresorhus/resolve-from,22022707,186,True,ok,2026-06-30T10:25:17+00:00
 sindresorhus/restore-cursor,23512229,186,True,ok,2026-06-30T10:25:18+00:00
@@ -913,7 +893,6 @@ tqdm/tqdm,36804486,12,True,ok,2026-06-30T10:25:33+00:00
 tritondatacenter/node-assert-plus,4767976,0,False,ok,2026-06-30T10:25:33+00:00
 tritondatacenter/node-extsprintf,4058064,0,False,ok,2026-06-30T10:25:33+00:00
 troygoode/node-require-directory,3053807,0,False,ok,2026-06-30T10:25:34+00:00
-trysound/postcss-value-parser,40920306,,,ok,2026-05-19T11:10:26+00:00
 tsconfig/bases,263697285,0,False,ok,2026-06-30T10:25:34+00:00
 tukaani-project/xz,553665726,0,False,ok,2026-06-30T10:25:34+00:00
 typescript-eslint/typescript-eslint,165536154,0,False,ok,2026-06-30T10:25:34+00:00
@@ -930,7 +909,6 @@ vercel/ai,644461337,0,False,ok,2026-06-30T10:25:21+00:00
 vercel/ms,3655872,0,False,ok,2026-06-30T10:25:21+00:00
 vercel/next.js,70107786,,,ok,2026-05-19T11:10:30+00:00
 visionmedia/bytes.js,4626886,0,False,ok,2026-06-30T10:25:21+00:00
-visionmedia/node-cookie-signature,6229722,,,ok,2026-04-28T00:15:59+00:00
 vitest-dev/vitest,434708679,17,True,ok,2026-06-30T10:25:21+00:00
 vorner/signal-hook,137260008,0,False,ok,2026-06-30T10:25:22+00:00
 vuejs/core,137078487,0,False,ok,2026-06-30T10:25:22+00:00
@@ -943,7 +921,6 @@ webpack/loader-utils,6503675,,,ok,2026-04-28T00:16:02+00:00
 webpack/minimizer-webpack-plugin,143057914,0,False,ok,2026-06-30T10:25:23+00:00
 webpack/schema-utils,80306715,0,False,ok,2026-06-30T10:25:24+00:00
 webpack/tapable,7730086,0,False,ok,2026-06-30T10:25:24+00:00
-webpack/terser-webpack-plugin,143057914,,,ok,2026-05-19T11:10:34+00:00
 webpack/watchpack,24119524,0,False,ok,2026-06-30T10:25:24+00:00
 webpack/webpack-sources,48954523,0,False,ok,2026-06-30T10:25:24+00:00
 webreflection/flatted,131121620,0,False,ok,2026-06-30T10:25:25+00:00
