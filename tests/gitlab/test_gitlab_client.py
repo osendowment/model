@@ -55,8 +55,12 @@ class TestUrlBuilders:
         assert gc.clone_url("gitlab.com", "group/proj") == "https://gitlab.com/group/proj.git"
 
     def test_make_repo_id(self):
-        assert gc.make_repo_id("salsa.debian.org", 678) == "gl/salsa.debian.org/678"
-        assert gc.make_repo_id("gitlab.com", "278964") == "gl/gitlab.com/278964"
+        # self-hosted instances are host-namespaced with a hyphen (no path sep)
+        assert gc.make_repo_id("salsa.debian.org", 678) == "gl/salsa.debian.org-678"
+        assert gc.make_repo_id("Gitlab.Gnome.org", 90) == "gl/gitlab.gnome.org-90"  # lowercased
+        # gitlab.com is the canonical instance → bare gl/{id}
+        assert gc.make_repo_id("gitlab.com", "278964") == "gl/278964"
+        assert gc.make_repo_id("www.gitlab.com", 5) == "gl/5"
 
 
 class FakeResp:
