@@ -671,7 +671,7 @@ rich-harris/magic-string,26143240,True,False,True,True,False
 rob--w/proxy-from-env,52038793,True,False,True,True,False
 rogdham/backports.zstd,977687927,True,False,True,True,False
 rollup/plugins,203607977,True,True,True,True,True
-ronaldoussoren/pyobjc,243933900,True,False,True,True,False
+ronaldoussoren/pyobjc,243933900,True,True,True,True,True
 rust-cli/anstyle,493821282,True,True,True,True,True
 rust-cli/env_logger,96382888,True,True,True,True,True
 rust-embedded/critical-section,365854323,True,False,True,True,False
