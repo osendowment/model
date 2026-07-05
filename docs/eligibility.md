@@ -97,8 +97,9 @@ methodology, score formula and worked examples in
 [components/funding.md](components/funding.md)). `intent` is True when the
 repo shows at least one funding signal: a GitHub sponsorship (in or out),
 the owner's Sponsors listing, a declared channel (FUNDING.yml,
-funding.json, npm/PyPI funding field, a real Open Collective), a bus-factor
-maintainer with a personal Sponsors listing, or an institutional host/owner. `nonprofit` defaults True and flips False only
+funding.json, npm/PyPI funding field, a real Open Collective, a curated
+PayPal.me handle), a bus-factor maintainer with a personal Sponsors
+listing, or an institutional host/owner. `nonprofit` defaults True and flips False only
 when a curated/scraped `company` host or owner backs the repo — those
 repos are already resourced, so they are ineligible but stay visible in
 the table.

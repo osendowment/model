@@ -1,5 +1,7 @@
 """Shared per-builder helper to attach risk-percentile columns to CSV rows."""
 
+from collections.abc import Callable
+
 from src.common.stats import geom_mean_composite, risk_percentiles_aligned
 
 
@@ -22,9 +24,13 @@ def add_percentiles(
     composite_cols: list[str],
     dim_col: str,
     neutral_fill: dict[str, float] | None = None,
+    composite_fn: Callable[
+        [list[list[float | None]]], list[float | None]
+    ] = geom_mean_composite,
 ) -> None:
     """In place: add `<metric>_p` for each (metric, higher_is_worse) spec, then
-    `dim_col` = geometric mean of the already-computed `composite_cols` _p's.
+    `dim_col` = `composite_fn` of the already-computed `composite_cols` _p's
+    (default: geometric mean; pass `max_composite` for worst-of aggregation).
 
     A repo with a missing/unparseable metric gets `<metric>_p = ""`; a constant
     axis yields "" for every repo. The composite is "" unless every component
@@ -51,7 +57,7 @@ def add_percentiles(
             ):
                 r[pcol] = fill
     comp_rows = [[_cell(r.get(c, "")) for c in composite_cols] for r in rows]
-    for r, c in zip(rows, geom_mean_composite(comp_rows)):
+    for r, c in zip(rows, composite_fn(comp_rows)):
         # Composite score: integer 0-100, higher = riskier. Floored at 1 — the
         # worst-pinned percentile is always > 0, so a rounded-down 0 is just the
         # lowest-risk tier, not "no risk"; this also keeps the overall risk

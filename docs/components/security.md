@@ -40,7 +40,7 @@ Security  → data/risk/security.csv  (class-A risk repos)  →  risk.csv col `s
 ├── bestpractices_badge_id    ← deps.dev (OpenSSF Best Practices badge tier)               [most recent]
 ├── fetched_at                ← checked_at of the OpenSSF score row used                   [2025 EOY]
 │
-└── score  (the score)        ← derived (geometric mean of openssf_score_p, cve_score)     [composite]
+└── score  (the score)        ← derived (max / worst-of openssf_score_p, cve_score)        [composite]
     └─ carried into risk.csv as column `security`
 ```
 
@@ -62,7 +62,7 @@ Security  → data/risk/security.csv  (class-A risk repos)  →  risk.csv col `s
    count distinct CVEs, read semgrep findings, set `ossfuzz_enrolled` and
    `bestpractices_badge_id`.
 4. **Score** — `add_percentiles(...)` ranks the population, then `score` =
-   geometric mean of `openssf_score_p` and `cve_score`.
+   max ("worst-of") of `openssf_score_p` and `cve_score`.
 5. **Aggregate** — `aggregate_risk.py` carries **only** this component's `score`
    into `risk.csv` as the column `security`.
 
@@ -139,16 +139,19 @@ percentiles are informational and are NOT inputs to `score`.**
 ### How `score` composes
 
 ```
-score = geometric_mean(openssf_score_p, cve_score)
+score = max(openssf_score_p, cve_score)
 ```
 
-`composite_cols = ["openssf_score_p", "cve_score"]`. `score` is populated
-**only when both `openssf_score` and `cve_count_5y` are present**; otherwise it
-is `""`. The geometric mean means a repo that is bad on *either* axis (low
-Scorecard or many CVEs) carries elevated risk. Because most repos
-have zero CVEs and thus share `cve_score = 50` (neutral), for the majority
-`score` effectively tracks the OpenSSF axis, with the CVE axis re-ranking only
-the minority that carry CVEs.
+`composite_cols = ["openssf_score_p", "cve_score"]`, composed with
+`composite_fn = max_composite`. `score` is populated **only when both
+`openssf_score` and `cve_count_5y` are present**; otherwise it is `""`. Max
+("worst-of") means a repo that is bad on *either* axis (low Scorecard or many
+CVEs) carries that axis's full risk — the two axes do **not** compound and
+neither dilutes the other. In particular a repo with real CVEs is never masked
+by an otherwise-good Scorecard. Because most repos have zero CVEs and thus share
+`cve_score = 50` (neutral), for the majority `score = openssf_score_p` (which
+clears 50 for most), so it tracks the OpenSSF axis; the CVE axis takes over only
+for the minority whose `cve_score` exceeds their openssf axis.
 
 ## Output
 
@@ -170,7 +173,7 @@ file; `fetched_at` here is the `checked_at` of the OpenSSF score row that was us
 | `bestpractices_badge_id` | `passing` \| `silver` \| `gold` \| `in_progress` \| `""` |
 | `openssf_score_p` | risk pctl of `openssf_score` (lower-is-worse) |
 | `cve_score` | neutral-anchored CVE risk score: 0 → 50, ≥1 ranked into (50,100] |
-| `score` | **security-risk score** (geom-mean of the two `_p`; `""` if either missing) |
+| `score` | **security-risk score** (max / worst-of the two `_p`; `""` if either missing) |
 | `fetched_at` | `checked_at` of the OpenSSF score row used |
 
 ### `data/risk/risk.csv` (aggregate)
