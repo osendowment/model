@@ -43,6 +43,9 @@ from rich.table import Table
 
 from src.common.repos import _read_github_repos
 from src.sources.github.fetch_repo_owner_data import fetch_and_persist, owners_from_repos
+from src.sources.gitlab.fetch_project_data import PROJECTS_OUT as _GITLAB_PROJECTS_FILE
+from src.sources.gitlab.fetch_project_data import fetch_and_persist as _gitlab_fetch_and_persist
+from src.sources.gitlab.gitlab_client import parse_git_url as _parse_gitlab_url
 from src.value.build_git_urls import (
     GIT_HOST_PRIORITY,
     _load_invalid_lookup,
@@ -229,8 +232,68 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None,
                 r["git"] = f"https://github.com/{slug}.git"
 
 
-# Dispatcher so other platforms can slot in later.
-PLATFORM_RESOLVERS: dict[str, object] = {"github": _resolve_github}
+def _load_gitlab_repo_ids(path=None) -> dict[str, str]:
+    """`{project_key: repo_id}` from gitlab/projects.csv, valid rows only.
+
+    `project_key = "{host}/{path}".lower()` (the fetcher's upsert key); `repo_id`
+    is the `gl/{host}-{id}` / `gl/{id}` form. Only rows that resolved to a real
+    project (`valid == True`) with a `gl/` id are returned — so an unresolved /
+    404 GitLab URL never gets an id (the validator half of the resolver).
+    """
+    path = path or _GITLAB_PROJECTS_FILE
+    out: dict[str, str] = {}
+    if not path.exists():
+        return out
+    with open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            rid = (r.get("repo_id") or "").strip()
+            key = (r.get("project") or "").strip().lower()
+            if key and rid.startswith("gl/") and (r.get("valid") or "").strip().lower() == "true":
+                out[key] = rid
+    return out
+
+
+def _resolve_gitlab(rows: list[dict], offline: bool = False, force: bool = False) -> None:
+    """In-place: stamp `gl/` repo_id on GitLab rows GitHub left unresolved.
+
+    Runs AFTER `_resolve_github`, so **GitHub wins**: only a row with an empty
+    `repo_id` (GitHub didn't claim it) and a GitLab clone URL is considered.
+    Collects the distinct GitLab targets, TTL-fetches their project metadata into
+    `data/sources/gitlab/projects.csv` (skipped under --offline), then stamps
+    `repo_id = gl/{host}-{id}` (`gl/{id}` for gitlab.com) for every target that
+    resolved to a valid project. A 404 / unreachable GitLab URL keeps an empty
+    repo_id — it groups by `git_url` and gets `git_valid` from the ls-remote pass.
+    """
+    def _target(r: dict):
+        if (r.get("repo_id") or "").strip():
+            return None                      # GitHub already resolved this row
+        return _parse_gitlab_url((r.get("git") or "").strip())
+
+    targets: dict[str, dict] = {}
+    for r in rows:
+        parsed = _target(r)
+        if parsed:
+            host, path = parsed
+            key = f"{host}/{path}".lower()
+            targets[key] = {"host": host, "path": path, "project": key}
+    if not targets:
+        return
+    if not offline:
+        _gitlab_fetch_and_persist(target="projects", targets=list(targets.values()),
+                                  force=force, quiet=True)
+    ids = _load_gitlab_repo_ids()
+    for r in rows:
+        parsed = _target(r)
+        if not parsed:
+            continue
+        rid = ids.get(f"{parsed[0]}/{parsed[1]}".lower())
+        if rid:
+            r["repo_id"] = rid
+
+
+# Dispatcher so other platforms can slot in later. GitHub is applied first
+# (priority); GitLab fills repo_ids GitHub left empty.
+PLATFORM_RESOLVERS: dict[str, object] = {"github": _resolve_github, "gitlab": _resolve_gitlab}
 
 
 # ── per-ecosystem rewrite ───────────────────────────────────────────────────────
@@ -276,12 +339,14 @@ def apply_eco(ecosystem: str, overrides: dict, is_invalid, canonical: dict,
             c["gh_changed"] += 1
         r["git"], r["github_repo"], r["eco_guess"] = git, gh, guess
 
-    # ── GitHub identity pass ────────────────────────────────────────────────────
-    # After the eco-authority rewrite, stamp repo_id / mirror_url from repos.csv.
+    # ── Identity pass (GitHub first — it wins — then GitLab fills the rest) ──────
+    # After the eco-authority rewrite, stamp repo_id / mirror_url from repos.csv,
+    # then stamp gl/ ids on any GitLab rows GitHub left unresolved.
     for col in ("repo_id", "mirror_url"):
         if col not in fields:
             fields.append(col)
     _resolve_github(rows, offline=offline, force=force)
+    _resolve_gitlab(rows, offline=offline, force=force)
 
     tmp = results_path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:

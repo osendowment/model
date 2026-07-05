@@ -206,12 +206,22 @@ def join_valid(
     a GitHub repo. `False` covers: orphans (no upstream target at all), a target
     whose reachability check failed, and a github `repo` that 404s.
 
-    `git_valid` is host-agnostic, but the numeric `repo_id` stays GitHub-only and
-    `load_top_repos` still scopes the risk/eligibility pipeline to
-    `platform == github` — so marking a non-GitHub upstream valid does NOT pull
-    it into the GitHub-API-driven scope; it only records that the URL resolves.
+    `git_valid` is host-agnostic, but the numeric `repo_id` stays GitHub/GitLab
+    only and `load_top_repos` still scopes the risk/eligibility pipeline to the
+    configured platforms — so marking a non-GitHub upstream valid does NOT pull
+    it into scope; it only records that the URL resolves.
+
+    A GitLab `gl/` repo_id is itself a validity proof: the resolver only assigns
+    it when the GitLab **project API** confirmed the project exists (the GitLab
+    resolver *is* the validator). That is more authoritative for GitLab hosts
+    than `git ls-remote`, which can fail on salsa.debian.org's `git://` endpoint
+    even for a live project — so a `gl/` id makes the repo valid regardless of
+    the ls-remote verdict, keeping the `repo_id ⇒ git_valid` invariant.
     """
     for row in value_rows:
+        if (row.get("repo_id") or "").strip().startswith("gl/"):
+            row["git_valid"] = "True"
+            continue
         key = _row_target(row)
         valid = key is not None and target_valid.get(key) is True
         row["git_valid"] = "True" if valid else "False"

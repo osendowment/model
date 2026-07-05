@@ -182,19 +182,26 @@ def test_eligibility_flags_are_boolean():
 
 def test_valid_repos_have_a_reachable_upstream():
     """A valid repo's upstream must resolve, on any host. Validity is
-    host-agnostic (a reachable non-github git_url counts), but the numeric
-    `repo_id` stays github-only. Invariants for every git_valid=True row:
+    host-agnostic; the numeric `repo_id` is platform-namespaced. Invariants for
+    every git_valid=True row:
     (a) it has a git_url (orphans — no upstream — are never valid);
     (b) a github row carries the canonical github clone URL AND a `gh/` repo_id;
-    (c) a non-github row has NO repo_id (the numeric id is github-only).
+    (c) a gitlab row's repo_id, IF present, is a `gl/` id (never `gh/`); it may be
+        empty for a repo not yet fetched from the GitLab API — that is coverage,
+        tracked in stats.md, not an invariant;
+    (d) any other host (codeberg/bitbucket/custom) carries NO repo_id;
+    (e) a `gl/` id appears ONLY on a gitlab row.
+    Plus the global rule: a non-empty repo_id (gh/ or gl/) ⇒ git_valid.
     Regression for git_url stripped from valid rows, orphans marked valid,
-    non-canonical github URLs, and repo_id leaking onto non-github repos.
+    non-canonical github URLs, gl/ ids on non-gitlab rows, and repo_id leaking
+    onto unsupported hosts.
     """
     value_csv = ROOT / "data" / "value" / "value.csv"
     if not value_csv.exists():
         pytest.skip("value.csv not present")
     with value_csv.open() as f:
-        rows = [r for r in csv.DictReader(f) if r.get("git_valid") == "True"]
+        all_rows = list(csv.DictReader(f))
+    rows = [r for r in all_rows if r.get("git_valid") == "True"]
     if not rows:
         pytest.skip("no valid repos in value.csv")
 
@@ -205,8 +212,11 @@ def test_valid_repos_have_a_reachable_upstream():
         f"e.g. {[r.get('repo') for r in no_git[:5]]}"
     )
 
-    github = [r for r in rows if (r.get("platform") or "").strip() == "github"]
-    non_github = [r for r in rows if (r.get("platform") or "").strip() != "github"]
+    def plat(r):
+        return (r.get("platform") or "").strip()
+    github = [r for r in rows if plat(r) == "github"]
+    gitlab = [r for r in rows if plat(r) == "gitlab"]
+    other = [r for r in rows if plat(r) not in ("github", "gitlab")]
 
     # (b) github valid rows: a repo slug, the canonical clone URL, a gh/ repo_id.
     def canonical(slug: str) -> str:
@@ -223,9 +233,43 @@ def test_valid_repos_have_a_reachable_upstream():
         f"repo_id, e.g. {[(r['repo'], r['git_url'], r['repo_id']) for r in bad_github[:5]]}"
     )
 
-    # (c) non-github valid rows carry NO numeric repo_id (github-only).
-    id_on_nongithub = [r for r in non_github if (r.get("repo_id") or "").strip()]
-    assert not id_on_nongithub, (
-        f"{len(id_on_nongithub)} non-github valid repos carry a repo_id, e.g. "
-        f"{[(r.get('platform'), r.get('repo_id')) for r in id_on_nongithub[:5]]}"
+    # (c) a gitlab row's repo_id, if present, is a gl/ id (never gh/). An empty
+    # repo_id is allowed — that repo just hasn't been fetched from the GitLab API
+    # yet (coverage, not an invariant).
+    bad_gitlab = [
+        r for r in gitlab
+        if (r.get("repo_id") or "").strip()
+        and not (r.get("repo_id") or "").strip().startswith("gl/")
+    ]
+    assert not bad_gitlab, (
+        f"{len(bad_gitlab)} valid gitlab repos carry a non-gl/ repo_id, e.g. "
+        f"{[(r.get('repo'), r.get('repo_id')) for r in bad_gitlab[:5]]}"
+    )
+
+    # (d) any other host carries NO numeric repo_id (github + gitlab only today).
+    id_on_other = [r for r in other if (r.get("repo_id") or "").strip()]
+    assert not id_on_other, (
+        f"{len(id_on_other)} non-github/gitlab valid repos carry a repo_id, e.g. "
+        f"{[(r.get('platform'), r.get('repo_id')) for r in id_on_other[:5]]}"
+    )
+
+    # (e) a gl/ id appears only on a gitlab row.
+    gl_on_nongitlab = [
+        r for r in all_rows
+        if (r.get("repo_id") or "").strip().startswith("gl/") and plat(r) != "gitlab"
+    ]
+    assert not gl_on_nongitlab, (
+        f"{len(gl_on_nongitlab)} non-gitlab rows carry a gl/ repo_id, e.g. "
+        f"{[(r.get('platform'), r.get('repo_id')) for r in gl_on_nongitlab[:5]]}"
+    )
+
+    # global: a non-empty repo_id (gh/ or gl/) implies git_valid — an id is only
+    # assigned when the platform API confirmed the repo exists.
+    id_but_invalid = [
+        r for r in all_rows
+        if (r.get("repo_id") or "").strip() and r.get("git_valid") != "True"
+    ]
+    assert not id_but_invalid, (
+        f"{len(id_but_invalid)} repos carry a repo_id but are git_valid!=True, e.g. "
+        f"{[(r.get('repo'), r.get('repo_id')) for r in id_but_invalid[:5]]}"
     )

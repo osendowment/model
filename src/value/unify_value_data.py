@@ -494,7 +494,7 @@ def aggregate_by_repo(
         group_mirror_url = next(
             (m.get("mirror_url", "") for m in members if m.get("mirror_url")), "")
 
-        if group_repo_id:
+        if group_repo_id.startswith("gh/"):
             # GitHub group: identity already resolved per-row by _resolve_github.
             # Read the canonical values directly off a member — all members share the
             # same repo_id so they agree on github_repo/git/mirror_url.
@@ -502,9 +502,19 @@ def aggregate_by_repo(
             repo = next((m.get("github_repo", "") for m in members if m.get("github_repo")), "")
             agg_git_url = f"https://github.com/{repo}.git" if repo else group_git_url
             agg_mirror_url = group_mirror_url
+        elif group_repo_id.startswith("gl/"):
+            # GitLab group: id resolved by _resolve_gitlab (GitHub already declined
+            # it). A gl/ id means the project was GitLab-API-validated, so the
+            # platform is `gitlab` even for a self-hosted host `platform_and_slug`
+            # would otherwise call `custom` (invent.kde.org, code.videolan.org).
+            # `repo` is the project path off the git_url; no GitHub slug/mirror.
+            _plat, repo = _identity("", group_git_url)
+            platform = "gitlab"
+            agg_git_url = group_git_url
+            agg_mirror_url = ""
         else:
-            # Non-GitHub or orphan: derive identity from git_url.
-            # _select_group_github_repo filters reserved-namespace URLs
+            # Non-repo_id upstream (other host w/o id) or orphan: derive from
+            # git_url. _select_group_github_repo filters reserved-namespace URLs
             # (sponsors/*, orgs/*) and prefers the URL-derived slug.
             platform, repo = _identity(
                 _select_group_github_repo(members, group_git_url), group_git_url,
