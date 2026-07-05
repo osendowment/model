@@ -298,6 +298,39 @@ def load_live_upstream_mirrors(
     return {canon.get(s, s) for s in _read_live_upstream_mirror_slugs(overrides_file)}
 
 
+def load_git_urls(value_file: str = VALUE_FILE) -> dict[str, str]:
+    """Map `repo_id` -> `git_url` from value.csv — the authoritative clone URL
+    per repo, host-agnostic (github OR gitlab OR other). Every per-repo
+    git-source file carries a `git_url` column so a downstream fetcher can clone
+    the real host instead of assuming `github.com/{repo}`; this is the map that
+    backfills it and that `git_url_for` resolves against.
+    """
+    out: dict[str, str] = {}
+    if not os.path.exists(value_file):
+        return out
+    with open(value_file, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            rid = to_repo_id((row.get("repo_id") or "").strip())
+            url = (row.get("git_url") or "").strip()
+            if rid and url:
+                out[rid] = url
+    return out
+
+
+def git_url_for(repo_id: str, repo: str, git_urls: dict[str, str]) -> str:
+    """The clone `git_url` for a per-repo source row: the value.csv-mapped URL
+    (from `load_git_urls`) when known, else the canonical GitHub URL. GitHub is
+    the fallback host because legacy github-source rows predate the git_url
+    column and github.com/{repo} is always their clone URL. Empty when neither
+    a mapped URL nor a `repo` slug is available.
+    """
+    rid = to_repo_id((repo_id or "").strip())
+    if rid in git_urls:
+        return git_urls[rid]
+    slug = (repo or "").strip().lower()
+    return f"https://github.com/{slug}.git" if slug else ""
+
+
 def canonical_repo_map(repos_file: str = REPOS_FILE) -> dict[str, str]:
     """Map every known repo slug -> its canonical lowercased `full_name`.
 

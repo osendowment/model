@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import csv
 import fcntl
+import functools
 import math
 import os
 import tempfile
@@ -40,9 +41,34 @@ from pathlib import Path
 from typing import Any, Iterable
 
 FIELDS: tuple[str, ...] = (
-    "repo", "repo_id", "commit_sha", "metric", "value", "checked_at",
+    "repo", "repo_id", "git_url", "commit_sha", "metric", "value", "checked_at",
 )
 KEY: tuple[str, str, str] = ("repo", "commit_sha", "metric")
+
+
+@functools.lru_cache(maxsize=1)
+def _git_url_map() -> dict[str, str]:
+    """Cached repo_id -> git_url map from value.csv (host-agnostic clone URL).
+
+    Loaded once per process; a run rewrites the long file many times, so this
+    avoids re-reading value.csv on every upsert. Best-effort: empty on failure.
+    """
+    from src.common.repos import load_git_urls
+    try:
+        return load_git_urls()
+    except Exception:
+        return {}
+
+
+def _resolve_git_url(repo_id: str, repo: str, git_url: str = "") -> str:
+    """The clone `git_url` for a long-format row: an explicit URL when the
+    caller passes one, else the value.csv-mapped URL (github OR gitlab OR
+    other), else the canonical github.com/{repo}. See repos.git_url_for.
+    """
+    if git_url:
+        return git_url
+    from src.common.repos import git_url_for
+    return git_url_for(repo_id, repo, _git_url_map())
 
 
 def _format_value(value: Any) -> str:
@@ -178,10 +204,14 @@ def upsert_rows(path: str | Path, new_rows: Iterable[dict[str, str]]) -> int:
     Locks the file for the entire read-modify-write cycle so concurrent
     callers serialize and don't overwrite each other's contributions.
     """
-    new_list = [
-        r for r in new_rows
-        if r.get("commit_sha") and r.get("value", "") != ""
-    ]
+    new_list: list[dict[str, str]] = []
+    for r in new_rows:
+        if not (r.get("commit_sha") and r.get("value", "") != ""):
+            continue
+        if not r.get("git_url"):
+            r = {**r, "git_url": _resolve_git_url(
+                r.get("repo_id", ""), r.get("repo", ""))}
+        new_list.append(r)
     with _file_lock(path):
         existing = read(path)
         for row in new_list:
@@ -200,13 +230,19 @@ def upsert_snapshot(
     commit_sha: str,
     metrics: dict[str, Any],
     checked_at: str,
+    git_url: str = "",
 ) -> int:
     """Upsert one repo's snapshot — a metric→value dict at a single sha.
 
-    Empty/None metric values are skipped (no row written for them).
+    Empty/None metric values are skipped (no row written for them). `git_url`
+    is the repo's clone URL; when blank it is resolved host-agnostically from
+    value.csv (github OR gitlab OR other) so a downstream fetcher can re-clone
+    the real host instead of assuming github.com/{repo}.
     """
     if not commit_sha:
         return 0
+    rid = str(repo_id) if repo_id else ""
+    resolved_url = _resolve_git_url(rid, repo, git_url)
     new_rows: list[dict[str, str]] = []
     for metric, value in metrics.items():
         formatted = _format_value(value)
@@ -214,7 +250,8 @@ def upsert_snapshot(
             continue
         new_rows.append({
             "repo": repo,
-            "repo_id": str(repo_id) if repo_id else "",
+            "repo_id": rid,
+            "git_url": resolved_url,
             "commit_sha": commit_sha,
             "metric": metric,
             "value": formatted,

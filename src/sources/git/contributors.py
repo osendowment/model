@@ -56,7 +56,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.common.repos import load_repo_ids, load_top_repos
+from src.common.repos import git_url_for, load_git_urls, load_repo_ids, load_top_repos
 from src.sources.git.clone import bare_treeless_clone
 from src.sources.git.disk import (
     check_disk_or_exit,
@@ -95,11 +95,11 @@ _BOT_EMAILS = {
 # Long raw output: one row per (repo, author_name, author_email, year).
 # repo_id is load-bearing: build_concentration joins this file by the stable
 # id, so a rewrite that drops the column blanks the whole dimension.
-LONG_FIELDS = ["repo", "repo_id", "author_name", "author_email", "year", "commits"]
+LONG_FIELDS = ["repo", "repo_id", "git_url", "author_name", "author_email", "year", "commits"]
 
 # Per-repo status sidecar.
 STATUS_FIELDS = [
-    "repo", "repo_id", "status",
+    "repo", "repo_id", "git_url", "status",
     "distinct_authors", "commits_total",
     "clone_seconds", "error", "fetched_at",
 ]
@@ -474,6 +474,7 @@ def _write_long(path: Path, long_by_repo: dict[str, list[dict]],
     silently vanish from the id-keyed builder joins.
     """
     ids = repo_ids or {}
+    gitmap = load_git_urls()
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:
@@ -481,21 +482,26 @@ def _write_long(path: Path, long_by_repo: dict[str, list[dict]],
         w.writeheader()
         for repo in sorted(long_by_repo):
             for row in long_by_repo[repo]:
-                if not (row.get("repo_id") or "").strip():
-                    row = {**row, "repo_id": ids.get(repo, "")}
+                rid = (row.get("repo_id") or "").strip() or ids.get(repo, "")
+                row = {**row, "repo_id": rid,
+                       "git_url": git_url_for(rid, repo, gitmap)}
                 w.writerow(row)
     os.replace(tmp, path)
 
 
 def _write_status(path: Path, status_by_repo: dict[str, dict]) -> None:
     """Write status sidecar sorted by repo (atomic)."""
+    gitmap = load_git_urls()
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=STATUS_FIELDS, extrasaction="ignore")
         w.writeheader()
         for repo in sorted(status_by_repo):
-            w.writerow(status_by_repo[repo])
+            row = status_by_repo[repo]
+            row = {**row, "git_url": git_url_for(
+                (row.get("repo_id") or "").strip(), repo, gitmap)}
+            w.writerow(row)
     os.replace(tmp, path)
 
 

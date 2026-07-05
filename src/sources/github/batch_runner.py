@@ -30,6 +30,7 @@ from src.sources.github.github_client import (
     _fetch_total_contributors,
 )
 from src.sources.github.models import THRESHOLD
+from src.common.repos import git_url_for, load_git_urls
 
 log = logging.getLogger(__name__)
 
@@ -44,8 +45,8 @@ GH_CONTRIB_FILE = "data/sources/github/contributor-commits.csv"
 GH_CONTRIB_STATUS_FILE = "data/sources/github/contributor-commits.status.csv"
 # repo_id is load-bearing: build_concentration joins this file by the stable
 # id, so a rewrite that drops the column blanks the GitHub cross-check axis.
-GH_CONTRIB_FIELDS = ["repo", "repo_id", "login", "contributions", "account_type"]
-GH_CONTRIB_STATUS_FIELDS = ["repo", "repo_id", "status", "n_contributors", "fetched_at"]
+GH_CONTRIB_FIELDS = ["repo", "repo_id", "git_url", "login", "contributions", "account_type"]
+GH_CONTRIB_STATUS_FIELDS = ["repo", "repo_id", "git_url", "status", "n_contributors", "fetched_at"]
 
 CONCENTRATION_TTL_DAYS = 90  # rows older than this get re-fetched
 GH_REPOS_FILE = "data/sources/github/repos.csv"
@@ -169,16 +170,22 @@ def _upsert_contributor_commits(
     # Atomic write — long file. Heal any round-tripped row missing its
     # repo_id (legacy rows written before the column existed).
     os.makedirs(os.path.dirname(GH_CONTRIB_FILE), exist_ok=True)
+    gitmap = load_git_urls()
     all_rows = [row for repo in sorted(existing_contribs)
                 for row in existing_contribs[repo]]
     for row in all_rows:
         if not (row.get("repo_id") or "").strip():
             row["repo_id"] = repo_ids.get((row.get("repo") or "").strip(), "")
+        row["git_url"] = git_url_for(
+            row.get("repo_id", ""), (row.get("repo") or "").strip(), gitmap)
     _atomic_write_csv(GH_CONTRIB_FILE, GH_CONTRIB_FIELDS, all_rows)
 
     # Atomic write — status file
-    _atomic_write_csv(GH_CONTRIB_STATUS_FILE, GH_CONTRIB_STATUS_FIELDS,
-                      [existing_status[repo] for repo in sorted(existing_status)])
+    status_rows = [existing_status[repo] for repo in sorted(existing_status)]
+    for row in status_rows:
+        row["git_url"] = git_url_for(
+            row.get("repo_id", ""), (row.get("repo") or "").strip(), gitmap)
+    _atomic_write_csv(GH_CONTRIB_STATUS_FILE, GH_CONTRIB_STATUS_FIELDS, status_rows)
 
 
 def _atomic_write_csv(path: str, fields: list[str], rows: list[dict]) -> None:

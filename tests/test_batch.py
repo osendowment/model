@@ -13,12 +13,12 @@ from src.sources.github.batch_runner import (
 class TestContribFields:
     def test_contrib_fields(self):
         assert GH_CONTRIB_FIELDS == [
-            "repo", "repo_id", "login", "contributions", "account_type"
+            "repo", "repo_id", "git_url", "login", "contributions", "account_type"
         ]
 
     def test_status_fields(self):
         assert GH_CONTRIB_STATUS_FIELDS == [
-            "repo", "repo_id", "status", "n_contributors", "fetched_at"
+            "repo", "repo_id", "git_url", "status", "n_contributors", "fetched_at"
         ]
 
 
