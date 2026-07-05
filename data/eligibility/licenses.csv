@@ -8,10 +8,10 @@ agronholm/exceptiongroup,447694800,mit,registry,True
 ai/nanoid,99401299,mit,registry,True
 aio-libs-abandoned/async-timeout,67703198,apache-2.0,registry,True
 aio-libs/aiobotocore,36618494,apache-2.0,registry,True
-aio-libs/aiohttp,13258039,noassertion,github,
+aio-libs/aiohttp,13258039,apache-2.0,override,True
 aio-libs/aiosignal,205007356,apache-2.0,registry,True
 aio-libs/frozenlist,204197530,apache-2.0,registry,True
-aio-libs/multidict,51206425,noassertion,github,
+aio-libs/multidict,51206425,apache-2.0,override,True
 aio-libs/propcache,866565706,apache-2.0,registry,True
 aio-libs/yarl,64756820,apache-2.0,registry,True
 ajv-validator/ajv,35914020,mit,registry,True
@@ -445,7 +445,7 @@ libpixman/pixman,81675971,mit,registry,True
 libuv/libuv,14812739,mit,registry,True
 linusu/buffer-from,66025821,mit,registry,True
 linux-audit/audit-userspace,52464964,gpl-2.0,github,True
-linux-pam/linux-pam,76264690,noassertion,github,
+linux-pam/linux-pam,76264690,bsd-3-clause,override,True
 litejs/natural-compare-lite,9146732,mit,registry,True
 ljharb/call-bind,308533760,mit,registry,True
 ljharb/call-bind-apply-helpers,898190951,mit,registry,True
@@ -642,7 +642,7 @@ python/cpython,81598961,python-2.0,override,True
 python/importlib_metadata,306448340,apache-2.0,registry,True
 python/importlib_resources,306147182,apache-2.0,registry,True
 python/mypy,7053637,mit,registry,True
-python/mypy_extensions,165752308,noassertion,github,
+python/mypy_extensions,165752308,mit,override,True
 python/typing,24604008,python-2.0,registry,True
 python/typing_extensions,494077289,psf-2.0,registry,True
 python/tzdata,242158882,apache-2.0,registry,True
@@ -716,7 +716,7 @@ scikit-learn/scikit-learn,843222,bsd-3-clause,registry,True
 scipy/scipy,1460385,bsd-3-clause,registry,True
 seanmonstar/reqwest,62350380,mit or apache-2.0,registry,True
 sec-ant/readable-stream,569980966,mit,registry,True
-selinuxproject/selinux,20648799,noassertion,github,
+selinuxproject/selinux,20648799,gpl-2.0-only,override,True
 serde-rs/bytes,87358441,mit or apache-2.0,registry,True
 serde-rs/json,35894511,mit or apache-2.0,registry,True
 serde-rs/serde,14367737,mit or apache-2.0,registry,True
@@ -841,7 +841,7 @@ terkelg/sisteransi,122441239,mit,registry,True
 terser/terser,29097127,bsd-2-clause,registry,True
 textualize/rich,220809393,mit,registry,True
 theskumar/python-dotenv,23727790,bsd-3-clause,registry,True
-thkukuk/rpcsvc-proto,55140533,noassertion,github,
+thkukuk/rpcsvc-proto,55140533,bsd-3-clause,override,True
 thlorenz/convert-source-map,8751561,mit,registry,True
 thlorenz/deep-is,9345558,mit,registry,True
 tim-kos/node-retry,1738798,mit,registry,True
@@ -863,7 +863,7 @@ torvalds/linux,2325298,gpl-2.0-only,override,True
 tower-rs/tower,98244646,mit,registry,True
 tox-dev/filelock,17098256,mit,registry,True
 tox-dev/platformdirs,367032142,mit,registry,True
-tqdm/tqdm,36804486,noassertion,github,
+tqdm/tqdm,36804486,mpl-2.0 and mit,override,True
 tritondatacenter/node-assert-plus,4767976,mit,registry,True
 tritondatacenter/node-extsprintf,4058064,mit,registry,True
 troygoode/node-require-directory,3053807,mit,registry,True

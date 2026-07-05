@@ -8,10 +8,10 @@ agronholm/exceptiongroup,447694800,True,True,True,True,True
 ai/nanoid,99401299,True,True,True,True,True
 aio-libs-abandoned/async-timeout,67703198,True,True,True,False,False
 aio-libs/aiobotocore,36618494,True,True,True,True,True
-aio-libs/aiohttp,13258039,False,True,True,True,False
+aio-libs/aiohttp,13258039,True,True,True,True,True
 aio-libs/aiosignal,205007356,True,True,True,True,True
 aio-libs/frozenlist,204197530,True,True,True,True,True
-aio-libs/multidict,51206425,False,True,True,True,False
+aio-libs/multidict,51206425,True,True,True,True,True
 aio-libs/propcache,866565706,True,True,True,True,True
 aio-libs/yarl,64756820,True,True,True,True,True
 ajv-validator/ajv,35914020,True,True,True,True,True
@@ -37,9 +37,9 @@ assert-rs/snapbox,424722460,True,False,True,True,False
 astanin/python-tabulate,205875548,True,False,True,True,False
 astral-sh/ruff,523043277,True,True,False,True,False
 auth0/node-jwa,8116861,True,True,False,True,False
-autotools-mirror/autoconf,47662429,True,False,True,True,False
-autotools-mirror/libtool,47662711,True,False,True,True,False
-autotools-mirror/m4,66880383,True,False,True,True,False
+autotools-mirror/autoconf,47662429,True,True,True,True,True
+autotools-mirror/libtool,47662711,True,True,True,True,True
+autotools-mirror/m4,66880383,True,True,True,True,True
 aws/aws-cli,6780767,True,True,False,True,False
 aws/aws-sdk-js-crypto-helpers,149673986,True,True,False,True,False
 aws/aws-sdk-js-v3,87228090,True,True,False,True,False
@@ -438,14 +438,14 @@ laurent-laporte-pro/deprecated,111412148,True,False,True,True,False
 lddubeau/xmlchars,139881982,True,False,True,False,False
 legrandin/pycryptodome,19378935,True,False,True,True,False
 libexpat/libexpat,80314213,True,False,True,True,False
-libffi/libffi,321154,True,False,True,True,False
+libffi/libffi,321154,True,True,True,True,True
 libjpeg-turbo/libjpeg-turbo,39760454,True,True,True,True,True
 libjxl/libjxl,340219494,True,True,False,True,False
 libpixman/pixman,81675971,True,True,True,True,True
 libuv/libuv,14812739,True,True,True,True,True
 linusu/buffer-from,66025821,True,True,True,True,True
 linux-audit/audit-userspace,52464964,True,False,True,True,False
-linux-pam/linux-pam,76264690,False,False,True,True,False
+linux-pam/linux-pam,76264690,True,False,True,True,False
 litejs/natural-compare-lite,9146732,True,True,True,True,True
 ljharb/call-bind,308533760,True,True,True,True,True
 ljharb/call-bind-apply-helpers,898190951,True,True,True,True,True
@@ -568,7 +568,7 @@ octokit/openapi-types.ts,304109193,True,True,False,True,False
 octokit/types.ts,216109757,True,True,False,True,False
 oozcitak/xmlbuilder-js,1042809,True,True,True,True,True
 open-telemetry/opentelemetry-js,185901023,True,True,True,True,True
-open-telemetry/opentelemetry-js-contrib,255986659,True,False,True,True,False
+open-telemetry/opentelemetry-js-contrib,255986659,True,True,True,True,True
 open-telemetry/opentelemetry-python,185478926,True,True,True,True,True
 open-telemetry/opentelemetry-python-contrib,220524743,True,True,True,True,True
 openssl/openssl,7634677,True,True,True,True,True
@@ -642,7 +642,7 @@ python/cpython,81598961,True,True,True,True,True
 python/importlib_metadata,306448340,True,True,True,True,True
 python/importlib_resources,306147182,True,True,True,True,True
 python/mypy,7053637,True,True,True,True,True
-python/mypy_extensions,165752308,False,True,True,True,False
+python/mypy_extensions,165752308,True,True,True,True,True
 python/typing,24604008,True,True,True,True,True
 python/typing_extensions,494077289,True,True,True,True,True
 python/tzdata,242158882,True,True,True,True,True
@@ -716,7 +716,7 @@ scikit-learn/scikit-learn,843222,True,True,True,True,True
 scipy/scipy,1460385,True,True,True,True,True
 seanmonstar/reqwest,62350380,True,True,True,True,True
 sec-ant/readable-stream,569980966,True,False,True,True,False
-selinuxproject/selinux,20648799,False,False,True,True,False
+selinuxproject/selinux,20648799,True,False,True,True,False
 serde-rs/bytes,87358441,True,False,True,True,False
 serde-rs/json,35894511,True,False,True,True,False
 serde-rs/serde,14367737,True,True,True,True,True
@@ -841,7 +841,7 @@ terkelg/sisteransi,122441239,True,True,True,True,True
 terser/terser,29097127,True,True,True,True,True
 textualize/rich,220809393,True,True,True,True,True
 theskumar/python-dotenv,23727790,True,False,True,True,False
-thkukuk/rpcsvc-proto,55140533,False,False,True,True,False
+thkukuk/rpcsvc-proto,55140533,True,False,True,True,False
 thlorenz/convert-source-map,8751561,True,True,True,True,True
 thlorenz/deep-is,9345558,True,True,True,True,True
 tim-kos/node-retry,1738798,True,False,True,True,False
@@ -863,7 +863,7 @@ torvalds/linux,2325298,True,True,True,True,True
 tower-rs/tower,98244646,True,True,True,True,True
 tox-dev/filelock,17098256,True,True,True,True,True
 tox-dev/platformdirs,367032142,True,True,True,True,True
-tqdm/tqdm,36804486,False,True,True,True,False
+tqdm/tqdm,36804486,True,True,True,True,True
 tritondatacenter/node-assert-plus,4767976,True,False,True,True,False
 tritondatacenter/node-extsprintf,4058064,True,False,True,True,False
 troygoode/node-require-directory,3053807,True,False,True,True,False
