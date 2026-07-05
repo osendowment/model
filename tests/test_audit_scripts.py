@@ -68,6 +68,30 @@ def test_data_anomalies_clean_or_reports():
     assert rc in (0, 1)
 
 
+def test_zero_loc_repos_exempts_only_all_zero(tmp_path, monkeypatch):
+    """_zero_loc_repos flags a repo only when scc loc is 0 at EVERY snapshot.
+
+    scc.csv is long (a loc row per end-of-year sha), so a repo empty in an
+    early year but with code later reads loc>0 somewhere and must NOT be
+    exempted from the complexity/workload coverage gate. Regression for an
+    any-row-is-0 check that wrongly exempted ~300 real repos.
+    """
+    mod = _load_module(SCRIPTS / "pipeline_health.py")
+    scc = tmp_path / "data" / "sources" / "git" / "scc.csv"
+    scc.parent.mkdir(parents=True)
+    with open(scc, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["repo", "repo_id", "commit_sha", "metric", "value", "checked_at"])
+        # grew: 0 loc in an early snapshot, real code later -> NOT exempt
+        w.writerow(["own/grew", "gh/1", "sha1", "loc", "0", "2021-01-01"])
+        w.writerow(["own/grew", "gh/1", "sha2", "loc", "500", "2025-01-01"])
+        # stub: 0 loc at every snapshot -> exempt
+        w.writerow(["own/stub", "gh/2", "sha1", "loc", "0", "2021-01-01"])
+        w.writerow(["own/stub", "gh/2", "sha2", "loc", "0", "2025-01-01"])
+    monkeypatch.setattr(mod, "ROOT", tmp_path)
+    assert mod._zero_loc_repos() == {"own/stub"}
+
+
 def test_stats_md_is_not_stale():
     """scripts/stats.py recomputes every docs/stats.md figure from the live CSVs;
     its --check headline gate must pass, i.e. stats.md reflects the current run.

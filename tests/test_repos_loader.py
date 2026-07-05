@@ -27,10 +27,29 @@ def test_load_top_repos_filters_classes_and_enriches(tmp_path, monkeypatch):
     ])
     monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
     out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
-    # owner/b archived, owner/c out of classes, "" orphan.
-    assert {e.repo for e in out} == {"owner/a"}
+    # archived owner/b KEPT (default now includes archived); owner/c out of
+    # classes, "" orphan.
+    assert {e.repo for e in out} == {"owner/a", "owner/b"}
+    assert out[0].repo == "owner/a"                  # sorted by slug
     assert out[0].repo_id == "gh/11"  # loader namespaces bare GitHub ids
     assert out[0].value_class == "A"
+
+
+def test_load_top_repos_drops_archived_when_flag_on(tmp_path, monkeypatch):
+    """skip_archived=True (opt-in) drops archived repos from the scope."""
+    value = tmp_path / "value.csv"
+    _write(value, ["repo", "git_valid", "class", "platform"], [
+        {"repo": "owner/a", "git_valid": "True", "class": "A", "platform": "github"},
+        {"repo": "owner/b", "git_valid": "True", "class": "B", "platform": "github"},
+    ])
+    gh = tmp_path / "repos.csv"
+    _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
+        {"repo": "owner/a", "valid": "True", "repo_id": "11", "archived": "False", "size": "5", "stars": "9"},
+        {"repo": "owner/b", "valid": "True", "repo_id": "22", "archived": "True", "size": "1", "stars": "1"},
+    ])
+    monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
+    out = repos.load_top_repos(value_file=str(value), repos_file=str(gh), skip_archived=True)
+    assert {e.repo for e in out} == {"owner/a"}      # archived owner/b dropped
 
 
 def test_load_top_repos_filters_valid_by_default(tmp_path, monkeypatch):
@@ -91,8 +110,11 @@ def test_load_top_repos_keeps_archived_live_upstream_mirror(tmp_path, monkeypatc
          "git_url": "https://github.com/owner/plainarchived.git", "valid": "", "reason": "x"},
     ])
     monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
+    # The mirror exemption only bites on the drop path (skip_archived=True):
+    # glibc's archived mirror flag is exempt, a plain archived repo is not.
     out = repos.load_top_repos(
-        value_file=str(value), repos_file=str(gh), overrides_file=str(overrides)
+        value_file=str(value), repos_file=str(gh), overrides_file=str(overrides),
+        skip_archived=True,
     )
     # glibc mirror kept despite archived; plain archived repo dropped.
     assert {e.repo for e in out} == {"bminor/glibc"}

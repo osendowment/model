@@ -6,7 +6,7 @@ adobe/react-spectrum,gh/208362715,True,True,False,True,False,2,4,True
 agronholm/anyio,gh/145337588,True,True,True,True,True,3,4,True
 agronholm/exceptiongroup,gh/447694800,True,True,True,True,True,3,4,True
 ai/nanoid,gh/99401299,True,True,True,True,True,3,4,True
-aio-libs-abandoned/async-timeout,gh/67703198,True,True,True,False,False,3,0,False
+aio-libs-abandoned/async-timeout,gh/67703198,True,True,True,False,False,3,4,True
 aio-libs/aiobotocore,gh/36618494,True,True,True,True,True,3,4,True
 aio-libs/aiohttp,gh/13258039,True,True,True,True,True,3,4,True
 aio-libs/aiosignal,gh/205007356,True,True,True,True,True,3,4,True
@@ -46,7 +46,7 @@ aws/aws-sdk-js-v3,gh/87228090,True,True,False,True,False,3,4,True
 axios/axios,gh/23088740,True,True,True,True,True,3,4,True
 azure/azure-sdk-for-js,gh/108311273,True,True,False,True,False,3,4,True
 azure/azure-sdk-for-python,gh/4127088,True,True,False,True,False,3,4,True
-azure/msrest-for-python,gh/71186468,True,False,True,False,False,3,0,False
+azure/msrest-for-python,gh/71186468,True,False,True,False,False,3,4,True
 azuread/microsoft-authentication-library-for-python,gh/67243113,True,True,False,True,False,3,4,True
 babel/babel,gh/24560307,True,True,True,True,True,3,4,True
 babel/babel-polyfills,gh/190579283,True,True,True,True,True,3,4,True
@@ -55,7 +55,7 @@ bdwgc/bdwgc,gh/2109456,True,False,True,True,False,2,4,True
 beatgammit/base64-js,gh/2853282,True,True,True,True,True,3,4,True
 benjaminp/six,gh/77868600,True,False,True,True,False,3,4,True
 besser82/libxcrypt,gh/35503965,True,False,True,True,False,2,4,True
-bincode-org/bincode,gh/24130045,True,False,True,False,False,3,0,False
+bincode-org/bincode,gh/24130045,True,False,True,False,False,3,2,False
 bitflags/bitflags,gh/29287955,True,False,True,True,False,3,4,True
 blakeembrey/array-flatten,gh/17789771,True,True,True,True,True,3,4,True
 blakeembrey/change-case,gh/9440238,True,True,True,True,True,3,4,True
@@ -66,7 +66,7 @@ boto/botocore,gh/6670942,True,True,False,True,False,3,4,True
 boto/s3transfer,gh/49535299,True,True,False,True,False,3,4,True
 brianc/node-postgres,gh/991475,True,True,True,True,True,3,4,True
 broofa/mime,gh/534940,True,True,True,True,True,3,4,True
-broofa/node-int64,gh/1208666,True,True,True,False,False,3,0,False
+broofa/node-int64,gh/1208666,True,True,True,False,False,3,4,True
 browserify/events,gh/1649251,True,True,True,True,True,3,4,True
 browserify/node-util,gh/14568009,True,True,True,True,True,3,4,True
 browserify/randombytes,gh/29300004,True,True,True,True,True,3,4,True
@@ -143,7 +143,7 @@ django/asgiref,gh/48501860,True,True,True,True,True,3,4,True
 djc/rustc-version-rs,gh/41272773,True,True,True,True,True,3,4,True
 dmitrysoshnikov/regexp-tree,gh/85459304,True,False,True,True,False,2,4,True
 docutils/docutils,gh/44840244,True,False,True,True,False,3,4,True
-dominictarr/through,gh/4885140,True,False,True,False,False,3,0,False
+dominictarr/through,gh/4885140,True,False,True,False,False,3,4,True
 doowb/ansi-colors,gh/47135420,True,True,True,True,True,3,4,True
 douglasdwyer/wasm_sync,gh/668034655,True,False,True,True,False,2,4,True
 dougwilson/nodejs-depd,gh/20848667,True,False,True,True,False,3,4,True
@@ -153,7 +153,7 @@ dtolnay/dissimilar,gh/229514821,True,True,True,True,True,2,4,True
 dtolnay/indoc,gh/54252316,True,True,True,True,True,3,4,True
 dtolnay/itoa,gh/61962375,True,True,True,True,True,3,4,True
 dtolnay/no-panic,gh/143469762,True,True,True,True,True,2,4,True
-dtolnay/paste,gh/155652490,True,True,True,False,False,3,0,False
+dtolnay/paste,gh/155652490,True,True,True,False,False,3,4,True
 dtolnay/proc-macro2,gh/91860126,True,True,True,True,True,3,4,True
 dtolnay/quote,gh/67273122,True,True,True,True,True,3,4,True
 dtolnay/ref-cast,gh/106295902,True,True,True,True,True,2,4,True
@@ -184,7 +184,7 @@ es-shims/regexp.prototype.flags,gh/26932422,True,True,True,True,True,3,4,True
 es-shims/string.prototype.trimend,gh/114682758,True,True,True,True,True,3,4,True
 es-shims/string.prototype.trimstart,gh/114682105,True,True,True,True,True,3,4,True
 eslint-community/eslint-utils,gh/568240379,True,True,True,True,True,3,4,True
-eslint/doctrine,gh/4286644,True,True,True,False,False,3,0,False
+eslint/doctrine,gh/4286644,True,True,True,False,False,3,4,True
 eslint/eslint,gh/11061773,True,True,True,True,True,3,4,True
 eslint/js,gh/27620277,True,True,True,True,True,3,4,True
 eslint/rewrite,gh/791446923,True,True,True,True,True,2,4,True
@@ -202,8 +202,8 @@ executablebooks/mdurl,gh/387293763,True,False,True,True,False,3,4,True
 exodusoss/bytes,gh/885154008,True,False,True,True,False,2,4,True
 expressjs/body-parser,gh/15669006,True,True,True,True,True,3,4,True
 expressjs/serve-static,gh/17464338,True,True,True,True,True,3,4,True
-facebook/prop-types,gh/87597642,True,True,True,False,False,3,0,False
-facebook/regenerator,gh/13346571,True,True,True,False,False,3,0,False
+facebook/prop-types,gh/87597642,True,True,True,False,False,3,4,True
+facebook/regenerator,gh/13346571,True,True,True,False,False,3,4,True
 facebook/watchman,gh/6930489,True,True,False,True,False,3,4,True
 facebook/zstd,gh/29759715,True,True,False,True,False,2,4,True
 facelessuser/soupsieve,gh/160789418,True,True,True,True,True,3,4,True
@@ -228,8 +228,8 @@ feross/run-parallel,gh/18700638,True,True,True,True,True,3,4,True
 feross/safe-buffer,gh/49538897,True,True,True,True,True,3,4,True
 ffmpeg/ffmpeg,gh/1614410,True,True,True,True,True,2,4,True
 firebase/firebase-js-sdk,gh/89290483,True,True,False,True,False,2,4,True
-fitzgen/glob-to-regexp,gh/11461122,True,False,True,False,False,3,0,False
-floatdrop/require-from-string,gh/39301848,True,False,True,False,False,3,0,False
+fitzgen/glob-to-regexp,gh/11461122,True,False,True,False,False,3,4,True
+floatdrop/require-from-string,gh/39301848,True,False,True,False,False,3,4,True
 floating-ui/floating-ui,gh/54994103,True,True,True,True,True,3,4,True
 follow-redirects/follow-redirects,gh/6697086,True,True,True,True,True,3,4,True
 form-data/form-data,gh/1755793,True,False,True,True,False,3,4,True
@@ -259,8 +259,8 @@ gnome/pango,gh/4537144,True,True,True,True,True,2,4,True
 google/brotli,gh/24993138,True,True,False,True,False,2,4,True
 google/zerocopy,gh/534354967,True,True,False,True,False,3,4,True
 googleapis/google-cloud-python,gh/16316451,True,True,False,True,False,3,4,True
-googleapis/python-cloud-core,gh/226992462,True,False,True,False,False,3,0,False
-googleapis/python-crc32c,gh/159736041,True,False,True,False,False,3,0,False
+googleapis/python-cloud-core,gh/226992462,True,False,True,False,False,3,4,True
+googleapis/python-crc32c,gh/159736041,True,False,True,False,False,3,4,True
 googlechrome/workbox,gh/55424670,True,True,False,True,False,2,4,True
 grahamdumpleton/wrapt,gh/10357291,True,True,True,True,True,3,4,True
 grantjenks/python-sortedcontainers,gh/17144859,True,True,True,True,True,3,4,True
@@ -323,7 +323,7 @@ isaacs/cliui,gh/634056857,True,True,True,True,True,3,4,True
 isaacs/core-util-is,gh/12391440,True,True,True,True,True,3,4,True
 isaacs/fs-minipass,gh/102982143,True,True,True,True,True,3,4,True
 isaacs/fs.realpath,gh/61231712,True,True,True,True,True,3,4,True
-isaacs/inflight-deprecated-do-not-use,gh/19442260,True,True,True,False,False,2,0,False
+isaacs/inflight-deprecated-do-not-use,gh/19442260,True,True,True,False,False,2,2,False
 isaacs/inherits,gh/1580001,True,True,True,True,True,3,4,True
 isaacs/isexe,gh/49804297,True,True,True,True,True,3,4,True
 isaacs/minimatch,gh/2056549,True,True,True,True,True,3,4,True
@@ -356,7 +356,7 @@ jbgutierrez/path-parse,gh/34113780,True,False,True,True,False,3,4,True
 jd/tenacity,gh/65468547,True,True,True,True,True,3,4,True
 jensyt/imurmurhash-js,gh/11802843,True,False,True,True,False,3,4,True
 jestjs/jest,gh/15062869,True,True,True,True,True,3,4,True
-jimmywarting/node-domexception,gh/371470141,True,False,True,False,False,3,0,False
+jimmywarting/node-domexception,gh/371470141,True,True,True,False,False,3,4,True
 jimp-dev/jimp,gh/24008065,True,True,True,True,True,2,4,True
 jmespath/jmespath.py,gh/8300763,True,False,True,True,False,3,4,True
 joblib/joblib,gh/654608,True,False,True,True,False,3,4,True
@@ -435,7 +435,7 @@ kriskowal/asap,gh/11295071,True,False,True,True,False,3,4,True
 kriszyp/json-schema,gh/947175,True,False,True,True,False,3,4,True
 langchain-ai/langchain,gh/552661142,True,True,False,True,False,3,4,True
 laurent-laporte-pro/deprecated,gh/111412148,True,False,True,True,False,3,4,True
-lddubeau/xmlchars,gh/139881982,True,False,True,False,False,3,0,False
+lddubeau/xmlchars,gh/139881982,True,False,True,False,False,3,4,True
 legrandin/pycryptodome,gh/19378935,True,False,True,True,False,3,4,True
 libexpat/libexpat,gh/80314213,True,True,True,True,True,2,4,True
 libffi/libffi,gh/321154,True,True,True,True,True,2,4,True
@@ -652,7 +652,7 @@ radix-ui/primitives,gh/273499522,True,True,False,True,False,3,4,True
 raszi/node-tmp,gh/2313213,True,False,True,True,False,3,4,True
 raynos/for-each,gh/6006855,True,True,True,True,True,3,4,True
 raynos/function-bind,gh/10727014,True,True,True,True,True,3,4,True
-raynos/xtend,gh/4419184,True,True,True,False,False,3,0,False
+raynos/xtend,gh/4419184,True,True,True,False,False,3,4,True
 rayon-rs/either,gh/42479602,True,True,True,True,True,3,4,True
 rayon-rs/rayon,gh/24725038,True,False,True,True,False,3,4,True
 react/create-react-app,gh/63537249,True,True,False,True,False,3,4,True
@@ -676,7 +676,7 @@ rust-cli/env_logger,gh/96382888,True,True,True,True,True,3,4,True
 rust-embedded/critical-section,gh/365854323,True,False,True,True,False,2,4,True
 rust-fuzz/arbitrary,gh/90591032,True,True,True,True,True,3,4,True
 rust-itertools/itertools,gh/22360263,True,True,True,True,True,3,4,True
-rust-lang-deprecated/tempdir,gh/31728565,True,False,True,False,False,3,0,False
+rust-lang-deprecated/tempdir,gh/31728565,True,False,True,False,False,3,4,True
 rust-lang-nursery/lazy-static.rs,gh/21157492,True,False,True,True,False,3,4,True
 rust-lang/cc-rs,gh/26039547,True,True,True,True,True,3,4,True
 rust-lang/cfg-if,gh/38723660,True,True,True,True,True,3,4,True
@@ -702,7 +702,7 @@ rustcrypto/hashes,gh/74106774,True,True,True,True,True,3,4,True
 rustcrypto/stream-ciphers,gh/83051505,True,True,True,True,True,3,4,True
 rustcrypto/traits,gh/85605821,True,True,True,True,True,3,4,True
 rustcrypto/utils,gh/77307442,True,True,True,True,True,3,4,True
-rvagg/archived-prr,gh/9151864,True,False,True,False,False,3,0,False
+rvagg/archived-prr,gh/9151864,True,False,True,False,False,3,4,True
 rvagg/bl,gh/10706095,True,True,True,True,True,3,4,True
 rvagg/through2,gh/11808187,True,False,True,True,False,3,4,True
 ryanzim/universalify,gh/87651180,True,False,True,True,False,3,4,True
@@ -780,7 +780,7 @@ sindresorhus/package-directory,gh/41724281,True,True,True,True,True,3,4,True
 sindresorhus/parent-module,gh/50187748,True,True,True,True,True,3,4,True
 sindresorhus/parse-json,gh/41367145,True,True,True,True,True,3,4,True
 sindresorhus/path-exists,gh/34965664,True,True,True,True,True,3,4,True
-sindresorhus/path-is-absolute,gh/30900285,True,True,True,False,False,3,0,False
+sindresorhus/path-is-absolute,gh/30900285,True,True,True,False,False,3,4,True
 sindresorhus/path-key,gh/48706449,True,True,True,True,True,3,4,True
 sindresorhus/path-type,gh/41905436,True,True,True,True,True,3,4,True
 sindresorhus/pify,gh/41585934,True,True,True,True,True,3,4,True
@@ -823,7 +823,7 @@ stub42/pytz,gh/63155638,True,True,True,True,True,3,4,True
 suguru03/neo-async,gh/27030361,True,False,True,True,False,3,4,True
 sval-rs/sval,gh/157205610,True,False,True,True,False,2,4,True
 swc-project/swc,gh/115110181,True,True,True,True,True,3,4,True
-sybrenstuvel/python-rsa,gh/50107469,True,False,True,False,False,3,0,False
+sybrenstuvel/python-rsa,gh/50107469,True,False,True,False,False,3,4,True
 syntax-tree/unist-util-is,gh/41795086,True,True,True,True,True,3,4,True
 systemd/systemd,gh/32873313,True,True,True,True,True,2,4,True
 taiki-e/pin-project,gh/164668916,True,True,True,True,True,3,4,True
@@ -888,7 +888,7 @@ watson/ci-info,gh/71475907,True,True,True,True,True,3,4,True
 wbond/asn1crypto,gh/36823669,True,True,True,True,True,3,4,True
 webmproject/libwebp,gh/23368445,True,True,False,True,False,2,4,True
 webpack/enhanced-resolve,gh/5400204,True,True,True,True,True,3,4,True
-webpack/loader-utils,gh/6503675,True,True,True,False,False,3,0,False
+webpack/loader-utils,gh/6503675,True,True,True,False,False,3,4,True
 webpack/minimizer-webpack-plugin,gh/143057914,True,True,True,True,True,3,4,True
 webpack/schema-utils,gh/80306715,True,True,True,True,True,3,4,True
 webpack/tapable,gh/7730086,True,True,True,True,True,3,4,True

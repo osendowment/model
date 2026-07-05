@@ -68,7 +68,7 @@ def build() -> list[dict]:
     # other id-capable join in the pipeline — a slug join would only be
     # safe while the intermediates are freshly co-generated; across a
     # GitHub rename with a stale intermediate it would misalign the flags.
-    eligible_scope = load_top_repos(skip_archived=False)
+    eligible_scope = load_top_repos()
     oss = load_column_by_id(LICENSES_FILE, "oss")
     intent = load_column_by_id(FUNDING_FILE, "intent")
     nonprofit = load_column_by_id(FUNDING_FILE, "nonprofit")

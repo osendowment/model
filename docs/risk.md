@@ -281,7 +281,7 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 | `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
 | `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (the `scc` fetcher) |
 | `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall risk `score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload). **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)**. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
+| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall risk `score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload). **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)**. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. The pipeline runs **only the score-forming fetchers** (`FETCHERS`); the audit-only fetchers that populate purely informational columns — `fetch_churn` (hotspot), `fetch_semgrep` (SAST), `fetch_cognitive` (cognitive complexity), `fetch_contributors_metrics` (GitHub-method BF/HHI) — live in `AUDIT_FETCHERS` and are run by hand when those columns need refreshing. |
 
 ## Source-file coverage
 
@@ -289,7 +289,7 @@ Per-source-file coverage across the top repos, the `risk.csv` rollup, and the
 sub-100% per-dimension columns all live in
 [docs/stats.md → Risk](stats.md#risk). Refresh them with
 `uv run python scripts/coverage_report.py`. `risk.csv` holds one row per top repo
-— four 0–100 dimension scores plus an overall `score`; the detailed metric and
+— four 0–100 dimension scores plus an overall `risk_score`; the detailed metric and
 `*_p` percentile columns live in the per-dimension `data/risk/*.csv` files.
 
 ### Why the remaining gaps

@@ -13,7 +13,37 @@ def test_fetchers_cover_complexity_score_inputs():
     # complexity score = geomean(loc_eoy_p, cyclomatic_max_p)
     assert "src.sources.git.fetch_scc" in modules                       # loc_eoy
     assert "src.sources.github.fetch_advanced_complexity" in modules   # cyclomatic_max
-    assert "src.sources.github.fetch_cognitive" in modules             # cognitive audit cols
+
+
+def test_pipeline_runs_only_score_forming_fetchers():
+    """FETCHERS holds exactly the steps that feed a risk.csv score column.
+    Audit-only fetchers (informational columns that never enter a score) live
+    in AUDIT_FETCHERS and are NOT run by the pipeline — regression for the
+    pipeline silently re-fetching churn/semgrep/cognitive/github-contributors
+    every run when nothing downstream scores their output."""
+    from src.risk.run_risk_pipeline import FETCHERS, AUDIT_FETCHERS
+    fetch_modules = {s.module for s in FETCHERS}
+    audit_modules = {s.module for s in AUDIT_FETCHERS}
+    # score-forming set, exactly
+    assert fetch_modules == {
+        "src.sources.git.commits_years",
+        "src.sources.git.resolve_head",
+        "src.sources.git.contributors",
+        "src.sources.github.fetch_issue_metrics",
+        "src.sources.git.fetch_scc",
+        "src.sources.github.fetch_advanced_complexity",
+        "src.sources.osv.fetch_cves",
+        "src.sources.openssf.scorecard",
+        "src.sources.depsdev.fetch",
+    }
+    # audit-only fetchers exist on disk but are excluded from the pipeline
+    assert audit_modules == {
+        "src.sources.github.fetch_churn",
+        "src.sources.github.fetch_semgrep",
+        "src.sources.github.fetch_cognitive",
+        "src.sources.github.fetch_contributors_metrics",
+    }
+    assert not (fetch_modules & audit_modules)   # disjoint
 
 
 def test_fetchers_cover_concentration_and_workload_score_inputs():
@@ -35,3 +65,17 @@ def test_lizard_fetchers_default_to_full_scope_incremental():
     assert cog.DEFAULT_LIMIT == 0
     assert cyclo.DEFAULT_TTL_DAYS >= 365
     assert cog.DEFAULT_TTL_DAYS >= 365
+
+
+def test_risk_fetchers_share_the_365_day_freshness_gate():
+    """All TTL-gated risk fetchers use a 365-day freshness window, so an
+    incremental run gap-fills newly-scoped (e.g. archived) repos instead of
+    re-fetching the whole scope every time a month elapses. Regression for
+    churn/semgrep/cves/depsdev silently full-refetching ~900 repos."""
+    from src.sources.github import fetch_churn, fetch_semgrep
+    from src.sources.osv import fetch_cves
+    from src.sources.depsdev import fetch as depsdev
+    assert fetch_churn.DEFAULT_TTL_DAYS >= 365
+    assert fetch_semgrep.DEFAULT_TTL_DAYS >= 365
+    assert fetch_cves.TTL_DAYS_DEFAULT >= 365
+    assert depsdev.TTL_DAYS_DEFAULT >= 365

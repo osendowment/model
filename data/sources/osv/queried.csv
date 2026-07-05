@@ -7,6 +7,7 @@ adobe/react-spectrum,gh/208362715,"npm:@react-types/shared,npm:@react-aria/ssr,n
 agronholm/anyio,gh/145337588,PyPI:anyio,2026-07-05T16:32:21+00:00
 agronholm/exceptiongroup,gh/447694800,PyPI:exceptiongroup,2026-07-05T16:32:21+00:00
 ai/nanoid,gh/99401299,npm:nanoid,2026-07-05T16:32:21+00:00
+aio-libs-abandoned/async-timeout,gh/67703198,PyPI:async-timeout,2026-07-05T23:22:29+00:00
 aio-libs/aiobotocore,gh/36618494,PyPI:aiobotocore,2026-07-05T16:32:21+00:00
 aio-libs/aiohttp,gh/13258039,PyPI:aiohttp,2026-07-05T16:32:22+00:00
 aio-libs/aiosignal,gh/205007356,PyPI:aiosignal,2026-07-05T16:32:21+00:00
@@ -283,6 +284,7 @@ googleapis/google-cloud-node-core,gh/1052931509,"npm:gaxios,npm:google-auth-libr
 googleapis/google-cloud-python,gh/16316451,"PyPI:google-auth,PyPI:google-api-core,PyPI:googleapis-common-protos,PyPI:proto-plus,PyPI:google-cloud-storage,PyPI:google-resumable-media,PyPI:google-auth-oauthlib,PyPI:grpc-google-iam-v1,PyPI:google-auth-httplib2,PyPI:google-cloud-secret-manager,PyPI:google-cloud-logging,PyPI:pandas-gbq,PyPI:google-cloud-appengine-logging,PyPI:google-cloud-resource-manager,PyPI:google-cloud-monitoring,PyPI:google-cloud-dlp,PyPI:google-cloud-vision,PyPI:google-cloud-audit-log,PyPI:google-cloud-spanner,PyPI:google-cloud-kms,PyPI:google-cloud-language,PyPI:google-cloud-tasks,PyPI:google-cloud-videointelligence,PyPI:google-cloud-batch,PyPI:google-cloud-firestore,PyPI:google-cloud-dataproc,PyPI:google-cloud-workflows,PyPI:sqlalchemy-bigquery,PyPI:google-cloud-compute,PyPI:google-cloud-speech,PyPI:google-cloud-redis,PyPI:google-cloud-os-login,PyPI:google-cloud-memcache,PyPI:google-analytics-admin,PyPI:google-cloud-dataform,PyPI:google-cloud-bigquery-datatransfer,PyPI:google-cloud-automl,PyPI:google-cloud-orchestration-airflow,PyPI:google-cloud-dataproc-metastore,PyPI:google-cloud-datacatalog,PyPI:google-cloud-container,PyPI:google-cloud-texttospeech,PyPI:google-cloud-build,PyPI:google-cloud-translate,PyPI:google-cloud-dataplex,PyPI:google-cloud-dataflow-client,PyPI:google-cloud-run,PyPI:google-cloud-datastore,PyPI:google-cloud-storage-transfer,PyPI:google-cloud,PyPI:google-ai-generativelanguage,PyPI:google-cloud-storage-control,PyPI:google-cloud-recommendations-ai,PyPI:google-cloud-trace,PyPI:google-analytics-data,PyPI:google-cloud-bigquery-biglake,PyPI:gcloud,PyPI:google-cloud-alloydb,PyPI:google-cloud-managedkafka,PyPI:bigframes,PyPI:google-cloud-vectorsearch,PyPI:google-cloud-functions,PyPI:google-cloud-modelarmor,PyPI:google-cloud-bigquery-connection",2026-07-05T16:35:03+00:00
 googleapis/google-resumable-media-python,gh/88091939,PyPI:google-resumable-media,2026-05-03T18:58:24+00:00
 googleapis/python-api-core,gh/226992456,PyPI:google-api-core,2026-05-03T18:58:24+00:00
+googleapis/python-cloud-core,gh/226992462,PyPI:google-cloud-core,2026-07-05T23:22:29+00:00
 googleapis/python-crc32c,gh/159736041,PyPI:google-crc32c,2026-05-03T18:58:25+00:00
 googleapis/python-storage,gh/226992639,PyPI:google-cloud-storage,2026-05-03T18:58:25+00:00
 googlechrome/workbox,gh/55424670,"npm:workbox-core,npm:workbox-routing,npm:workbox-strategies,npm:workbox-background-sync,npm:workbox-build,npm:workbox-precaching,npm:workbox-cacheable-response,npm:workbox-expiration,npm:workbox-navigation-preload,npm:workbox-range-requests,npm:workbox-google-analytics,npm:workbox-streams,npm:workbox-sw,npm:workbox-window,npm:workbox-broadcast-update,npm:workbox-webpack-plugin,npm:workbox-recipes",2026-07-05T16:34:17+00:00
@@ -349,6 +351,7 @@ isaacs/cliui,gh/634056857,npm:@isaacs/cliui,2026-07-05T16:34:31+00:00
 isaacs/core-util-is,gh/12391440,npm:core-util-is,2026-07-05T16:34:32+00:00
 isaacs/fs-minipass,gh/102982143,"npm:fs-minipass,npm:@isaacs/fs-minipass",2026-07-05T16:34:32+00:00
 isaacs/fs.realpath,gh/61231712,npm:fs.realpath,2026-07-05T16:34:32+00:00
+isaacs/inflight-deprecated-do-not-use,gh/19442260,npm:inflight,2026-07-05T23:22:29+00:00
 isaacs/inherits,gh/1580001,npm:inherits,2026-07-05T16:34:32+00:00
 isaacs/isexe,gh/49804297,npm:isexe,2026-07-05T16:34:32+00:00
 isaacs/minimatch,gh/2056549,npm:minimatch,2026-07-05T16:34:33+00:00
@@ -721,6 +724,7 @@ rust-cli/env_logger,gh/96382888,"crates.io:env_logger,crates.io:env_filter",2026
 rust-embedded/critical-section,gh/365854323,crates.io:critical-section,2026-07-05T16:36:13+00:00
 rust-fuzz/arbitrary,gh/90591032,"crates.io:arbitrary,crates.io:derive_arbitrary",2026-07-05T16:36:15+00:00
 rust-itertools/itertools,gh/22360263,crates.io:itertools,2026-07-05T16:36:15+00:00
+rust-lang-deprecated/tempdir,gh/31728565,crates.io:tempdir,2026-07-05T23:22:29+00:00
 rust-lang-nursery/lazy-static.rs,gh/21157492,crates.io:lazy_static,2026-07-05T16:36:15+00:00
 rust-lang/cc-rs,gh/26039547,"crates.io:cc,crates.io:find-msvc-tools,crates.io:gcc",2026-07-05T16:36:18+00:00
 rust-lang/cfg-if,gh/38723660,crates.io:cfg-if,2026-07-05T16:36:16+00:00
@@ -747,6 +751,7 @@ rustcrypto/hashes,gh/74106774,"crates.io:sha2,crates.io:sha1,crates.io:md-5,crat
 rustcrypto/stream-ciphers,gh/83051505,"crates.io:chacha20,crates.io:salsa20",2026-07-05T16:36:31+00:00
 rustcrypto/traits,gh/85605821,"crates.io:digest,crates.io:crypto-common,crates.io:cipher,crates.io:signature,crates.io:elliptic-curve,crates.io:aead,crates.io:universal-hash,crates.io:crypto-mac,crates.io:password-hash,crates.io:signature_derive,crates.io:cpubits,crates.io:kem",2026-07-05T16:36:38+00:00
 rustcrypto/utils,gh/77307442,"crates.io:zeroize,crates.io:hex-literal,crates.io:cpufeatures,crates.io:zeroize_derive,crates.io:block-buffer,crates.io:blobby,crates.io:ctutils,crates.io:inout,crates.io:opaque-debug,crates.io:block-padding,crates.io:cmov,crates.io:byte-tools,crates.io:fake-simd,crates.io:cpuid-bool,crates.io:dbl",2026-07-05T16:36:41+00:00
+rvagg/archived-prr,gh/9151864,npm:prr,2026-07-05T23:22:29+00:00
 rvagg/bl,gh/10706095,npm:bl,2026-07-05T16:36:32+00:00
 rvagg/prr,gh/9151864,npm:prr,2026-05-03T19:00:34+00:00
 rvagg/through2,gh/11808187,npm:through2,2026-07-05T16:36:33+00:00

@@ -67,10 +67,10 @@ def load_eol_overrides(
 
 
 def build() -> list[dict]:
-    # Eligibility scope includes archived repos (skip_archived=False) —
-    # this builder is exactly where they surface as active=False instead
-    # of being silently dropped from the stage output.
-    eligible = load_top_repos(skip_archived=False)
+    # Eligibility scope includes archived repos (load_top_repos includes
+    # them by default) — this builder is exactly where they surface as
+    # active=False instead of being silently dropped from the stage output.
+    eligible = load_top_repos()
     eol_by_id, eol_by_slug = load_eol_overrides()
     mirrors = load_live_upstream_mirrors()
 

@@ -78,7 +78,7 @@ query($login: String!) {
 def in_scope_bf_logins() -> list[str]:
     """Distinct bus-factor logins across the eligibility scope (top repos incl.
     archived), lowercased. One entry per person even across many repos."""
-    scope = {e.repo_id for e in load_top_repos(skip_archived=False) if e.repo_id}
+    scope = {e.repo_id for e in load_top_repos() if e.repo_id}
     bf = load_bf_contributors(CONTRIB_FILE)
     logins = {l for rid, members in bf.items() if rid in scope for l in members}
     return sorted(logins)

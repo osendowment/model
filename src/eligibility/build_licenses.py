@@ -216,7 +216,7 @@ def load_gitlab_licenses() -> dict[str, str]:
 def build() -> list[dict]:
     # Same scope rationale as the other eligibility builders: archived repos
     # stay in so the rollup can show WHY they are ineligible.
-    eligible = load_top_repos(skip_archived=False)
+    eligible = load_top_repos()
     approved = load_oss_approved()
     overrides = load_license_overrides()
     registry = load_registry_licenses()
