@@ -174,7 +174,7 @@ def load_top_repos(
             if not raw:
                 continue
             # git_valid is the renamed column (was `valid`); fall back for pre-rename CSVs.
-            git_valid_val = (row.get("git_valid") or row.get("valid") or "").strip()
+            git_valid_val = (row.get("git_valid") or "").strip()
             if skip_invalid and git_valid_val != "True":
                 continue
             slug = canon.get(raw, raw)  # resolve renamed repos to current name
