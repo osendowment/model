@@ -72,7 +72,7 @@ repo_id,repo,ecosystem,value_score,risk_score
 54994103,floating-ui/floating-ui,npm,46.0569,64
 31315121,clap-rs/clap,crates,42.8113,64
 137078487,vuejs/core,npm,41.4847,64
-136510559,gitoxidelabs/gitoxide,crates,17.7777,64
+136510559,gitoxidelabs/gitoxide,crates,28.131,64
 91860126,dtolnay/proc-macro2,crates,80.1574,63
 40355891,micromatch/to-regex-range,npm,62.4028,63
 25867410,jonschlinkert/extend-shallow,npm,46.6436,63
@@ -174,6 +174,7 @@ repo_id,repo,ecosystem,value_score,risk_score
 61231712,isaacs/fs.realpath,npm,31.5099,55
 568240379,eslint-community/eslint-utils,npm,30.9637,55
 634056857,isaacs/cliui,npm,29.8786,55
+55077261,rust-lang/futures-rs,crates,67.3981,54
 68573418,inspect-js/has-symbols,npm,64.9956,54
 36500102,postcss/postcss-selector-parser,npm,57.78,54
 28768789,ljharb/define-properties,npm,56.9221,54
@@ -183,7 +184,6 @@ repo_id,repo,ecosystem,value_score,risk_score
 14993021,ipython/traitlets,pypi,35.0597,54
 140365570,python-poetry/tomlkit,pypi,29.9938,54
 1042809,oozcitak/xmlbuilder-js,npm,28.3932,54
-55077261,rust-lang/futures-rs,crates,0.656,54
 49804297,isaacs/isexe,npm,57.9561,53
 95902102,toml-rs/toml,crates,54.7504,53
 1915099,browserify/resolve,npm,53.3461,53
@@ -206,13 +206,13 @@ repo_id,repo,ecosystem,value_score,risk_score
 997338,pallets/werkzeug,pypi,37.6033,52
 131121620,webreflection/flatted,npm,35.9557,52
 5831189,hapijs/hoek,npm,33.9411,52
+196445196,bytecodealliance/wasi-rs,crates,32.8834,52
 580683868,es-shims/es-set-tostringtag,npm,31.3723,52
 216159146,ljharb/internal-slot,npm,29.4255,52
 138421996,coveragepy/coveragepy,pypi,29.1673,52
 31455984,jonschlinkert/global-prefix,npm,29.102,52
 577580747,inspect-js/has-proto,npm,28.9026,52
 16864923,fb55/nth-check,npm,26.6016,52
-196445196,bytecodealliance/wasi-rs,crates,0.0016,52
 11855007,chalk/supports-color,npm,69.3233,51
 512723255,pyasn1/pyasn1,pypi,64.6103,51
 14494363,feross/buffer,npm,52.0445,51
@@ -457,6 +457,7 @@ repo_id,repo,ecosystem,value_score,risk_score
 30227790,rust-random/rand,crates,73.3737,37
 315531538,sindresorhus/yocto-queue,npm,70.654,37
 756570458,ljharb/es-define-property,npm,63.7553,37
+114685405,wasm-bindgen/wasm-bindgen,crates,61.223,37
 37489525,pytest-dev/pytest,pypi,59.1543,37
 7634677,openssl/openssl,cpp,48.2845,37
 47402913,kevva/shebang-command,npm,45.2923,37
@@ -465,7 +466,6 @@ repo_id,repo,ecosystem,value_score,risk_score
 48783244,sindresorhus/find-cache-directory,npm,30.0453,37
 90292430,sindresorhus/import-local,npm,27.5895,37
 34648097,jorgebucaran/colorette,npm,25.1074,37
-114685405,wasm-bindgen/wasm-bindgen,crates,19.112,37
 74265632,sindresorhus/p-locate,npm,66.9066,36
 185901023,open-telemetry/opentelemetry-js,npm,66.3436,36
 74266248,sindresorhus/locate-path,npm,59.6021,36
