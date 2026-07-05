@@ -65,10 +65,10 @@ boto/botocore,6670942,True,True,False,True,False
 boto/s3transfer,49535299,True,True,False,True,False
 brianc/node-postgres,991475,True,True,True,True,True
 broofa/mime,534940,True,True,True,True,True
-broofa/node-int64,1208666,True,False,True,False,False
+broofa/node-int64,1208666,True,True,True,False,False
 browserify/events,1649251,True,True,True,True,True
 browserify/node-util,14568009,True,True,True,True,True
-browserify/randombytes,29300004,True,False,True,True,False
+browserify/randombytes,29300004,True,True,True,True,True
 browserify/resolve,1915099,True,True,True,True,True
 browserslist/browserslist,27971466,True,True,True,True,True
 browserslist/caniuse-lite,80221890,False,True,True,True,False
@@ -152,7 +152,7 @@ dtolnay/dissimilar,229514821,True,True,True,True,True
 dtolnay/indoc,54252316,True,True,True,True,True
 dtolnay/itoa,61962375,True,True,True,True,True
 dtolnay/no-panic,143469762,True,True,True,True,True
-dtolnay/paste,155652490,True,False,True,False,False
+dtolnay/paste,155652490,True,True,True,False,False
 dtolnay/proc-macro2,91860126,True,True,True,True,True
 dtolnay/quote,67273122,True,True,True,True,True
 dtolnay/ref-cast,106295902,True,True,True,True,True
@@ -323,7 +323,7 @@ isaacs/cliui,634056857,True,True,True,True,True
 isaacs/core-util-is,12391440,True,True,True,True,True
 isaacs/fs-minipass,102982143,True,True,True,True,True
 isaacs/fs.realpath,61231712,True,True,True,True,True
-isaacs/inflight-deprecated-do-not-use,19442260,True,False,True,False,False
+isaacs/inflight-deprecated-do-not-use,19442260,True,True,True,False,False
 isaacs/inherits,1580001,True,True,True,True,True
 isaacs/isexe,49804297,True,True,True,True,True
 isaacs/minimatch,2056549,True,True,True,True,True
@@ -653,7 +653,7 @@ radix-ui/primitives,273499522,True,True,False,True,False
 raszi/node-tmp,2313213,True,False,True,True,False
 raynos/for-each,6006855,True,True,True,True,True
 raynos/function-bind,10727014,True,True,True,True,True
-raynos/xtend,4419184,True,False,True,False,False
+raynos/xtend,4419184,True,True,True,False,False
 rayon-rs/either,42479602,True,False,True,True,False
 rayon-rs/rayon,24725038,True,False,True,True,False
 react/create-react-app,63537249,True,True,False,True,False
@@ -664,7 +664,7 @@ realpython/pytest-mypy,69576530,True,False,True,True,False
 remix-run/react-router,19872456,True,True,False,True,False
 remusao/tldts,97631656,True,False,True,True,False
 requests/requests-oauthlib,6825724,True,True,True,True,True
-requests/toolbelt,15515181,True,False,True,True,False
+requests/toolbelt,15515181,True,True,True,True,True
 retep998/winapi-rs,23853482,True,True,True,True,True
 rich-harris/estree-walker,33668779,True,False,True,True,False
 rich-harris/magic-string,26143240,True,False,True,True,False
@@ -694,7 +694,7 @@ rust-lang/regex,27890669,True,True,True,True,True
 rust-lang/rust,724712,True,True,True,True,True
 rust-num/num-traits,114705611,True,False,True,True,False
 rust-phf/rust-phf,15992970,True,True,True,True,True
-rust-random/getrandom,166545969,True,False,True,True,False
+rust-random/getrandom,166545969,True,True,True,True,True
 rust-random/rand,30227790,True,True,True,True,True
 rust-random/rand_core,1086593277,True,True,True,True,True
 rust-random/rngs,209510094,True,True,True,True,True
@@ -717,10 +717,10 @@ scipy/scipy,1460385,True,True,True,True,True
 seanmonstar/reqwest,62350380,True,True,True,True,True
 sec-ant/readable-stream,569980966,True,False,True,True,False
 selinuxproject/selinux,20648799,True,False,True,True,False
-serde-rs/bytes,87358441,True,False,True,True,False
-serde-rs/json,35894511,True,False,True,True,False
+serde-rs/bytes,87358441,True,True,True,True,True
+serde-rs/json,35894511,True,True,True,True,True
 serde-rs/serde,14367737,True,True,True,True,True
-servo/core-foundation-rs,5621513,True,False,True,True,False
+servo/core-foundation-rs,5621513,True,True,True,True,True
 servo/rust-fnv,33499190,True,True,True,True,True
 servo/rust-smallvec,33456236,True,True,True,True,True
 servo/rust-url,14934771,True,True,True,True,True
@@ -897,7 +897,7 @@ webpack/tapable,7730086,True,True,True,True,True
 webpack/watchpack,24119524,True,True,True,True,True
 webpack/webpack-sources,48954523,True,True,True,True,True
 webreflection/flatted,131121620,True,True,True,True,True
-webreflection/html-escaper,33597730,True,False,True,True,False
+webreflection/html-escaper,33597730,True,True,True,True,True
 websocket-client/websocket-client,1202362,True,False,True,True,False
 websockets/ws,2744972,True,True,True,True,True
 wesleytodd/setprototypeof,30301031,True,True,True,True,True

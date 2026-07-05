@@ -65,10 +65,10 @@ boto/botocore,6670942,False,0,0,0,100.0,1613,1153,False,False,,False,False,,Fals
 boto/s3transfer,49535299,False,0,0,0,100.0,232,152,False,False,,False,False,,False,,0,,0,100.0,,,amazon.com,company,0,1,True,False
 brianc/node-postgres,991475,True,16,0,16,25.49,13114,1309,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,63,True,True
 broofa/mime,534940,True,5,0,5,34.53,2355,322,True,True,github,False,True,https://github.com/sponsors/broofa,False,,2,,0,100.0,,,,,1,70,True,True
-broofa/node-int64,1208666,,,0,0,100.0,205,45,,,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+broofa/node-int64,1208666,,,0,0,100.0,205,45,,,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
 browserify/events,1649251,False,0,0,0,100.0,1409,174,True,True,tidelift,False,False,,False,,1,,0,100.0,,,,,1,79,True,True
 browserify/node-util,14568009,False,0,0,0,100.0,254,92,True,True,tidelift,False,False,,False,,1,,0,100.0,,,,,1,79,True,True
-browserify/randombytes,29300004,False,0,0,0,100.0,102,47,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+browserify/randombytes,29300004,False,0,0,0,100.0,102,47,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
 browserify/resolve,1915099,False,0,0,0,100.0,793,190,True,True,"github,tidelift",True,True,https://github.com/sponsors/ljharb,False,,4,,0,100.0,,,,,1,79,True,True
 browserslist/browserslist,27971466,False,0,0,0,100.0,13527,763,True,True,"github,open_collective,tidelift",False,True,https://opencollective.com/browserslist,False,,4,browserslist,4300.28,5.01,,,,,1,37,True,True
 browserslist/caniuse-lite,80221890,False,0,0,0,100.0,611,84,True,True,"github,open_collective,tidelift",False,True,https://opencollective.com/browserslist,False,,4,,0,100.0,,,,,1,79,True,True
@@ -152,7 +152,7 @@ dtolnay/dissimilar,229514821,True,126,0,126,11.66,238,16,True,True,github,False,
 dtolnay/indoc,54252316,True,126,0,126,11.66,778,24,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,49,True,True
 dtolnay/itoa,61962375,True,126,0,126,11.66,368,44,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,49,True,True
 dtolnay/no-panic,143469762,True,126,0,126,11.66,1190,18,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,49,True,True
-dtolnay/paste,155652490,,,0,0,100.0,1086,70,,,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+dtolnay/paste,155652490,,,0,0,100.0,1086,70,,,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
 dtolnay/proc-macro2,91860126,True,126,0,126,11.66,917,136,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,49,True,True
 dtolnay/quote,67273122,True,126,0,126,11.66,1537,112,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,49,True,True
 dtolnay/ref-cast,106295902,True,126,0,126,11.66,219,20,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,49,True,True
@@ -323,7 +323,7 @@ isaacs/cliui,634056857,True,22,0,22,22.44,2,2,True,True,github,False,False,,Fals
 isaacs/core-util-is,12391440,True,22,0,22,22.44,101,20,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,61,True,True
 isaacs/fs-minipass,102982143,True,22,0,22,22.44,20,4,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,61,True,True
 isaacs/fs.realpath,61231712,True,22,0,22,22.44,25,11,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,61,True,True
-isaacs/inflight-deprecated-do-not-use,19442260,,,0,0,100.0,76,18,,,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+isaacs/inflight-deprecated-do-not-use,19442260,,,0,0,100.0,76,18,,,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
 isaacs/inherits,1580001,True,22,0,22,22.44,353,84,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,61,True,True
 isaacs/isexe,49804297,True,22,0,22,22.44,52,20,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,61,True,True
 isaacs/minimatch,2056549,True,22,0,22,22.44,3500,336,True,True,github,False,True,https://github.com/sponsors/isaacs,False,,2,,0,100.0,,,,,1,61,True,True
@@ -653,7 +653,7 @@ radix-ui/primitives,273499522,False,0,0,0,100.0,18822,1173,False,False,,False,Fa
 raszi/node-tmp,2313213,False,0,4,4,37.04,772,98,False,False,,False,False,,False,,0,,0,100.0,,,,,1,72,False,True
 raynos/for-each,6006855,False,0,0,0,100.0,24,6,True,True,"github,tidelift",False,True,https://github.com/sponsors/ljharb,False,,3,,0,100.0,,,,,1,79,True,True
 raynos/function-bind,10727014,False,0,0,0,100.0,139,26,True,True,"github,tidelift",False,True,https://github.com/sponsors/ljharb,False,,3,,0,100.0,,,,,1,79,True,True
-raynos/xtend,4419184,,,0,0,100.0,306,38,,,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+raynos/xtend,4419184,,,0,0,100.0,306,38,,,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
 rayon-rs/either,42479602,False,0,0,0,100.0,552,71,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 rayon-rs/rayon,24725038,False,0,0,0,100.0,12930,586,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 react/create-react-app,63537249,False,0,,0,100.0,103307,26974,True,True,open_collective,False,False,,False,,1,create-react-app,203.20,16.56,,,meta.com,company,0,1,True,False
@@ -664,7 +664,7 @@ realpython/pytest-mypy,69576530,False,0,0,0,100.0,258,33,False,False,,False,Fals
 remix-run/react-router,19872456,False,0,2,2,40.31,56374,10849,True,True,open_collective,False,False,,False,,1,,0,100.0,,,shopify.com,company,0,1,True,False
 remusao/tldts,97631656,False,0,0,0,100.0,739,26,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 requests/requests-oauthlib,6825724,False,0,0,0,100.0,1771,426,True,True,tidelift,False,False,,False,,1,,0,100.0,,,,,1,79,True,True
-requests/toolbelt,15515181,False,0,0,0,100.0,1034,194,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+requests/toolbelt,15515181,False,0,0,0,100.0,1034,194,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
 retep998/winapi-rs,23853482,False,0,0,0,100.0,1926,389,True,True,patreon,False,False,,False,,1,,0,100.0,,,,,1,79,True,True
 rich-harris/estree-walker,33668779,False,0,0,0,100.0,419,37,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 rich-harris/magic-string,26143240,False,0,0,0,100.0,2701,114,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
@@ -694,7 +694,7 @@ rust-lang/regex,27890669,False,0,0,0,100.0,3955,503,True,True,github,False,False
 rust-lang/rust,724712,False,0,0,0,100.0,112375,14823,True,True,"github,custom",False,False,,False,,2,,0,100.0,rustfoundation.org,nonprofit,,,0.5,79,True,True
 rust-num/num-traits,114705611,False,0,0,0,100.0,929,164,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 rust-phf/rust-phf,15992970,False,0,0,0,100.0,2131,137,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,100,True,True
-rust-random/getrandom,166545969,False,0,0,0,100.0,541,256,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+rust-random/getrandom,166545969,False,0,0,0,100.0,541,256,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
 rust-random/rand,30227790,False,0,0,0,100.0,2026,494,True,True,github,False,False,,False,,1,rust-random,0,100.0,,,,,1,100,True,True
 rust-random/rand_core,1086593277,False,0,0,0,100.0,9,4,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,100,True,True
 rust-random/rngs,209510094,False,0,0,0,100.0,51,40,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,100,True,True
@@ -717,10 +717,10 @@ scipy/scipy,1460385,False,0,0,0,100.0,14643,5713,True,True,"github,tidelift,cust
 seanmonstar/reqwest,62350380,True,61,0,61,16.56,11568,1358,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,55,True,True
 sec-ant/readable-stream,569980966,False,0,0,0,100.0,8,3,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 selinuxproject/selinux,20648799,False,0,0,0,100.0,1573,397,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-serde-rs/bytes,87358441,False,0,0,0,100.0,376,38,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
-serde-rs/json,35894511,False,0,0,0,100.0,5554,639,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+serde-rs/bytes,87358441,False,0,0,0,100.0,376,38,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
+serde-rs/json,35894511,False,0,0,0,100.0,5554,639,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
 serde-rs/serde,14367737,False,0,0,0,100.0,10564,904,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,100,True,True
-servo/core-foundation-rs,5621513,,,0,0,100.0,1236,248,,,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+servo/core-foundation-rs,5621513,,,0,0,100.0,1236,248,,,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
 servo/rust-fnv,33499190,True,261,0,261,0.33,358,32,False,False,,False,False,,False,,0,,0,100.0,,,,,1,15,True,True
 servo/rust-smallvec,33456236,True,261,0,261,0.33,1638,175,False,False,,False,False,,False,,0,,0,100.0,,,,,1,15,True,True
 servo/rust-url,14934771,True,261,0,261,0.33,1538,374,True,True,"github,open_collective",False,False,,False,,2,,0,100.0,,,,,1,15,True,True
@@ -897,7 +897,7 @@ webpack/tapable,7730086,False,0,0,0,100.0,3854,395,True,True,open_collective,Fal
 webpack/watchpack,24119524,False,0,0,0,100.0,397,109,True,True,open_collective,False,False,,False,,1,webpack,23866.86,2.83,,,,,1,30,True,True
 webpack/webpack-sources,48954523,False,0,0,0,100.0,272,76,True,True,open_collective,False,False,,False,,1,webpack,23866.86,2.83,,,,,1,30,True,True
 webreflection/flatted,131121620,False,0,0,0,100.0,1140,84,True,True,custom,False,False,,False,,1,,0,100.0,,,,,1,79,True,True
-webreflection/html-escaper,33597730,False,0,0,0,100.0,110,6,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
+webreflection/html-escaper,33597730,False,0,0,0,100.0,110,6,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,True,True
 websocket-client/websocket-client,1202362,False,0,0,0,100.0,3701,780,False,False,,False,False,,False,,0,,0,100.0,,,,,1,100,False,True
 websockets/ws,2744972,False,0,0,0,100.0,22742,2514,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,100,True,True
 wesleytodd/setprototypeof,30301031,True,1,3,4,37.04,53,12,True,True,github,False,False,,False,,1,,0,100.0,,,,,1,72,True,True

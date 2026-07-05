@@ -30,9 +30,10 @@ an owner-level manifest registered for the whole GitHub org.
 `gh_stars` / `gh_forks` are informational popularity columns (not scored);
 their fetch timestamp lives in data/sources/github/repos.csv. No per-signal
 `fetched_at` is rolled up here. The script also writes two boolean flag columns:
-`intent` (True when ≥1 funding signal is present) and `nonprofit` (False only
-when host_type or owner_type == "company"). These flags are joined into
-data/eligibility/eligibility.csv by build_eligibility.py.
+`intent` (True when ≥1 funding signal is present, then propagated to every repo
+an owner has once ANY of them declares a channel — see _propagate_owner_intent)
+and `nonprofit` (False only when host_type or owner_type == "company"). These
+flags are joined into data/eligibility/eligibility.csv by build_eligibility.py.
 
 Usage:
     uv run python -m src.eligibility.build_funding
@@ -141,6 +142,42 @@ def _intent_flag(row: dict) -> bool:
         or bool((row.get("host") or "").strip())
         or bool((row.get("owner") or "").strip())
     )
+
+
+# Self-declared funding channels — the signals that mean the OWNER (maintainer or
+# org), not just this one repo, has set up a way to be funded. Excludes the
+# institutional host/owner backing (curated per-repo/per-org separately). Used for
+# owner-level intent propagation (see _propagate_owner_intent).
+DECLARED_CHANNEL_COLS = ("gh_sponsors_enabled", "has_funding_links",
+                         "has_funding_yml", "has_funding_json",
+                         "has_npm_funding", "has_pypi_funding")
+
+
+def _declares_funding_channel(row: dict) -> bool:
+    """True if this repo self-declares a funding channel (Sponsors, FUNDING.yml,
+    FLOSS manifest, npm/PyPI funding field, or an Open Collective)."""
+    return (any((row.get(c) or "").strip() == "True" for c in DECLARED_CHANNEL_COLS)
+            or bool((row.get("oc_slug") or "").strip()))
+
+
+def _propagate_owner_intent(rows: list[dict]) -> None:
+    """Owner-level funding-intent propagation (mutates `rows` in place).
+
+    If ANY repo an owner has in our set declares a funding channel, the OWNER has
+    funding intent, so every sibling repo the owner has inherits `intent=True` —
+    even one carrying no FUNDING.yml of its own. This mirrors GitHub's own
+    semantics: an org's `.github/FUNDING.yml` and a personal account's Sponsors
+    listing already apply to every repo the owner has, but a repo that simply omits
+    the file (e.g. `serde-rs/json` while sibling `serde-rs/serde` declares
+    `github: dtolnay`) would otherwise read as un-fundable. Propagation only ADDS
+    intent; `nonprofit` is untouched, so a company-owned org stays ineligible via
+    the nonprofit gate.
+    """
+    funding_owners = {r["repo"].split("/", 1)[0].lower()
+                      for r in rows if _declares_funding_channel(r)}
+    for r in rows:
+        if r["repo"].split("/", 1)[0].lower() in funding_owners:
+            r["intent"] = "True"
 
 
 def _fmt_score(x: float) -> str:
@@ -473,6 +510,10 @@ def build() -> list[dict]:
             npm_funding=npm_funding.get(rid, {}),
             pypi_funding=pypi_funding.get(rid, {}),
             org_export=fundable_orgs.get(owner_login, {})))    # FLOSS org: by owner
+
+    # Owner-level intent propagation: one repo's declared channel makes every repo
+    # the owner has fundable (GitHub org-.github / personal-Sponsors semantics).
+    _propagate_owner_intent(rows)
 
     # Funding risk score: both axes are `lower_is_worse` (less funding → riskier).
     # add_percentiles writes the two risk percentiles; we then recompute `score`

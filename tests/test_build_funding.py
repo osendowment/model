@@ -3,7 +3,12 @@
 from dataclasses import dataclass
 
 from src.eligibility import build_funding as bf
-from src.eligibility.build_funding import _intent_flag, _nonprofit_flag
+from src.eligibility.build_funding import (
+    _declares_funding_channel,
+    _intent_flag,
+    _nonprofit_flag,
+    _propagate_owner_intent,
+)
 
 
 def _row(**kw):
@@ -39,6 +44,72 @@ def test_intent_sponsor_count_alone_is_not_intent():
     # enabled flag) is never intent.
     assert _intent_flag(_row(gh_sponsorships_in="3")) is False
     assert _intent_flag(_row(gh_sponsorships_in="0")) is False
+
+
+def test_declares_funding_channel():
+    # a self-declared channel (Sponsors / FUNDING.yml / FLOSS / registry / OC)…
+    assert _declares_funding_channel(_row(has_funding_yml="True")) is True
+    assert _declares_funding_channel(_row(gh_sponsors_enabled="True")) is True
+    assert _declares_funding_channel(_row(oc_slug="rustcrypto")) is True
+    # …but an institutional host/owner is NOT a self-declared channel (it's the
+    # foundation/company backing, propagated via overrides, not the maintainer).
+    assert _declares_funding_channel(_row(host="apache")) is False
+    assert _declares_funding_channel(_row(owner="meta.com")) is False
+    assert _declares_funding_channel(_row()) is False
+
+
+def test_propagate_owner_intent_spreads_across_siblings():
+    # serde-rs/serde declares a channel; serde-rs/json + bytes declare nothing.
+    rows = [
+        {"repo": "serde-rs/serde", "has_funding_yml": "True", "intent": "True"},
+        {"repo": "serde-rs/json", "intent": "False"},
+        {"repo": "serde-rs/bytes", "intent": "False"},
+        {"repo": "lonely/repo", "intent": "False"},   # owner has no channel anywhere
+    ]
+    _propagate_owner_intent(rows)
+    byrepo = {r["repo"]: r for r in rows}
+    assert byrepo["serde-rs/json"]["intent"] == "True"    # inherited from sibling serde
+    assert byrepo["serde-rs/bytes"]["intent"] == "True"
+    assert byrepo["lonely/repo"]["intent"] == "False"     # no owner channel → unchanged
+
+
+def test_build_funding_owner_intent_propagates_but_not_nonprofit(monkeypatch):
+    """One repo's FUNDING.yml makes every sibling the owner has intent=True, yet a
+    company owner stays nonprofit=False (propagation only adds intent).
+
+    Owner `serde` declares a channel on serde/serde (FUNDING.yml) → serde/json
+    inherits intent. Owner `corp` is company-owned via an override AND declares a
+    channel on corp/a → corp/b inherits intent but both stay nonprofit=False, so
+    the company org gains intent without becoming eligible. `lonely/x` (no channel
+    anywhere in its org) stays intent=False.
+    """
+    def rows_by_repo(p):
+        s = str(p)
+        if "funding-yml.csv" in s:
+            return {"serde/serde": {"has_funding_links": "True", "funding_link_platforms": "github"},
+                    "corp/a": {"has_funding_links": "True", "funding_link_platforms": "github"}}
+        if "sponsors.csv" in s:
+            return {"rich/r": {"gh_sponsorships_in": "100"}}
+        return {}
+    monkeypatch.setattr(bf, "load_top_repos", lambda **kw: [
+        E("serde/serde"), E("serde/json"),
+        E("corp/a"), E("corp/b"), E("lonely/x"), E("rich/r")])
+    monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
+    monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
+    monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
+    monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
+    monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({"rich/r": "rich"}, {}))
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: (
+        {}, {"corp": {"owner": "bigco.com", "owner_type": "company"}}))
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["serde/json"]["intent"] == "True"      # inherited from serde/serde
+    assert rows["serde/json"]["nonprofit"] == "True"
+    assert rows["corp/b"]["intent"] == "True"          # inherited from corp/a
+    assert rows["corp/b"]["nonprofit"] == "False"      # company owner → still ineligible
+    assert rows["lonely/x"]["intent"] == "False"       # no channel in its org
 
 
 def test_nonprofit_default_true():

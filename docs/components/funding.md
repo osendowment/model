@@ -305,6 +305,16 @@ a `funding.json` (FLOSS Fund), an npm `funding` field, a PyPI project-URLs
 funding entry, an Open Collective slug, or an institutional host or owner.
 "Intent" means the project is actively seeking or accepting support.
 
+`intent` then **propagates at the owner level** (`_propagate_owner_intent`): once
+ANY repo an owner has in scope declares a *self-declared* channel (Sponsors,
+FUNDING.yml, FLOSS/registry manifest, or Open Collective — not the institutional
+host/owner backing), every repo the owner has is set `intent=true`. This mirrors
+GitHub's own semantics — an org's `.github/FUNDING.yml` and a personal account's
+Sponsors listing already apply to all of an owner's repos — so a repo that merely
+omits its own `FUNDING.yml` (e.g. `serde-rs/json` while sibling `serde-rs/serde`
+declares `github: dtolnay`) is still counted fundable. Propagation only *adds*
+intent; `nonprofit` is untouched, so a company-owned org stays ineligible.
+
 **`nonprofit`** (`bool`, default `true`) — `false` only when a corporate entity
 (Meta, Google, Microsoft, AWS, …) is the project's host or owner, as determined by
 `host_type` / `owner_type == "company"` in `data/eligibility/funding.csv`.
