@@ -69,7 +69,7 @@ class TestFlatProject:
     def test_maps_fields_and_repo_id(self):
         row = _flat_project(_project_body(678, "debian/foo"), "salsa.debian.org",
                             "salsa.debian.org/debian/foo")
-        assert row["repo_id"] == "gl/salsa.debian.org/678"
+        assert row["repo_id"] == "gl/salsa.debian.org-678"
         assert row["project_id"] == 678
         assert row["valid"] is True
         assert row["owner_type"] == "Organization"   # kind=group → Organization
@@ -93,7 +93,7 @@ class TestFetchProject:
         key, row, status = await _fetch_project(lim, None, item)
         assert status == "ok"
         assert key == "salsa.debian.org/debian/foo"
-        assert row["repo_id"] == "gl/salsa.debian.org/678"
+        assert row["repo_id"] == "gl/salsa.debian.org-678"
 
     async def test_404_returns_sparse_invalid_row(self):
         item = {"host": "gitlab.com", "path": "gone/x", "project": "gitlab.com/gone/x"}
@@ -112,7 +112,7 @@ class TestFetchProject:
         key, row, status = await _fetch_project(lim, None, item)
         assert status == "ok"
         assert key == "gitlab.com/old/x"          # key stays what we asked
-        assert row["repo_id"] == "gl/gitlab.com/9"
+        assert row["repo_id"] == "gl/9"
         assert len(lim.calls) == 2
 
 
@@ -190,12 +190,12 @@ class TestUpsertAndStale:
         out = tmp_path / "projects.csv"
         n = upsert(out, "project", PROJECT_FIELDS,
                    [{"project": "gitlab.com/a/b", "valid": True,
-                     "repo_id": "gl/gitlab.com/1", "fetched_at": _iso_days_ago(0)}])
+                     "repo_id": "gl/1", "fetched_at": _iso_days_ago(0)}])
         assert n == 1
         # re-upsert same key overwrites, not appends
         n2 = upsert(out, "project", PROJECT_FIELDS,
                     [{"project": "gitlab.com/a/b", "valid": True,
-                      "repo_id": "gl/gitlab.com/1", "fetched_at": _iso_days_ago(0)}])
+                      "repo_id": "gl/1", "fetched_at": _iso_days_ago(0)}])
         assert n2 == 1
 
     def test_filter_stale_skips_fresh_keeps_old_and_missing(self, tmp_path):

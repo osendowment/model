@@ -273,7 +273,8 @@ subgraphs.
 | `top_eco_pct` | PR percentile in `top_eco` (`100 − pr_cum_pct`). 0–100, **higher = better**. babel/babel = 92.25; tail near 0. |
 | `class` | Strongest of the per-ecosystem classes (A < B < C) |
 | `class_npm`, `class_pypi`, `class_crates`, `class_cpp` | A/B/C from per-ecosystem cumulative PR share; empty if no package in that ecosystem |
-| `criticality` | OpenSSF criticality score (0–1, higher = more critical), joined from `data/sources/openssf/criticality.csv` by `src.value.apply_criticality` (the last value.csv-writing pipeline step). **Non-empty for every valid class-A GitHub repo, archived included** — that is the fetch scope, and `scripts/pipeline_health.py` gates on it. Empty for non-GitHub rows (the tool is GitHub-only), B/C rows outside the fetch scope, and unresolved/invalid repos. |
+| `openssf_crit` | OpenSSF criticality score (0–1, higher = more critical), joined from `data/sources/openssf/criticality.csv` by `src.value.apply_criticality` (the last value.csv-writing pipeline step). **Non-empty for every valid class-A GitHub repo, archived included** — that is the fetch scope, and `scripts/pipeline_health.py` gates on it. Empty for non-GitHub rows (the tool is GitHub-only), B/C rows outside the fetch scope, and unresolved/invalid repos. |
+| `score` | Value score, a 0–100 blend of criticality and ecosystem centrality: `score = 0.8·(openssf_crit·100) + 0.2·top_eco_pct` (weights in `settings.json → value_score`, criticality-dominant so a foundational-but-quiet micro-dep can't outrank a genuinely critical project). Stamped alongside `openssf_crit` by `src.value.apply_criticality`; empty wherever `openssf_crit` is empty. |
 
 ### Repo class distribution
 

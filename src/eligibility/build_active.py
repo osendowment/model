@@ -36,22 +36,34 @@ OUTPUT_FILE = DATA_DIR / "eligibility" / "active.csv"
 FIELDS = ["repo", "repo_id", "eol", "archived", "mirror", "active"]
 
 
-def load_eol_overrides(path: Path = OVERRIDES_FILE) -> dict[str, bool]:
-    """{repo_lower: eol} from the stage overrides (`eol` column).
+def load_eol_overrides(
+    path: Path = OVERRIDES_FILE,
+) -> tuple[dict[str, bool], dict[str, bool]]:
+    """(by_repo_id, by_slug) eol verdicts from the stage overrides.
 
     Only rows with a non-empty `eol` cell are returned — True marks a
     project declared end-of-life, an explicit False pins a repo alive.
+    `repo_id` is the join key (rename-proof: the override's `repo` slug
+    drifts after a GitHub rename, exactly like the funding columns that
+    `_load_funding_overrides` already joins by id); the slug map is the
+    fallback for hand-added rows without an id.
     """
-    out: dict[str, bool] = {}
+    by_id: dict[str, bool] = {}
+    by_slug: dict[str, bool] = {}
     if not path.exists():
-        return out
+        return by_id, by_slug
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            repo = (row.get("repo") or "").strip().lower()
             eol = (row.get("eol") or "").strip()
-            if repo and eol:
-                out[repo] = eol == "True"
-    return out
+            if not eol:
+                continue
+            rid = (row.get("repo_id") or "").strip()
+            slug = (row.get("repo") or "").strip().lower()
+            if rid:
+                by_id[rid] = eol == "True"
+            elif slug:
+                by_slug[slug] = eol == "True"
+    return by_id, by_slug
 
 
 def build() -> list[dict]:
@@ -59,13 +71,14 @@ def build() -> list[dict]:
     # this builder is exactly where they surface as active=False instead
     # of being silently dropped from the stage output.
     eligible = load_top_repos(skip_archived=False)
-    eol_overrides = load_eol_overrides()
+    eol_by_id, eol_by_slug = load_eol_overrides()
     mirrors = load_live_upstream_mirrors()
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
-        eol = eol_overrides.get(repo.lower(), False)
+        eol = eol_by_id.get(str(entry.repo_id),
+                            eol_by_slug.get(repo.lower(), False))
         mirror = repo in mirrors
         active = (not eol) and (not entry.archived or mirror)
         rows.append({

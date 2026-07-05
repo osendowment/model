@@ -48,6 +48,7 @@ def test_intent_each_single_signal_is_true():
     assert _intent_flag(_row(has_pypi_funding="True")) is True
     assert _intent_flag(_row(bf_maintainer_fundable="True")) is True  # a BF maintainer has Sponsors
     assert _intent_flag(_row(oc_slug="babel")) is True
+    assert _intent_flag(_row(paypal="https://www.paypal.com/paypalme/X")) is True
     assert _intent_flag(_row(host="apache")) is True
     assert _intent_flag(_row(owner="meta.com")) is True
 
@@ -110,7 +111,7 @@ def test_build_funding_owner_intent_propagates_but_not_nonprofit(monkeypatch):
         E("corp/a"), E("corp/b"), E("lonely/x"), E("rich/r")])
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -198,6 +199,23 @@ def test_assemble_row_stars_forks_sponsorships():
     assert "score" not in row                  # filled by build()
 
 
+def test_assemble_row_paypal_is_intent_channel_not_corporate():
+    """A curated PayPal.me handle is a declared funding channel: it sets intent,
+    counts toward channels_count, and — being a personal donation link — leaves
+    the repo nonprofit (it is not corporate backing)."""
+    row = bf.assemble_row(
+        repo="ronaldoussoren/pyobjc", repo_id="243933900",
+        sponsors={}, yml={}, export={},
+        host="", host_type="", owner="", owner_type="",
+        repo_meta={},
+        paypal="https://www.paypal.com/paypalme/RonaldOussoren",
+    )
+    assert row["paypal"] == "https://www.paypal.com/paypalme/RonaldOussoren"
+    assert row["intent"] == "True"             # declared channel → intent
+    assert row["channels_count"] == "1"        # paypal counted as a channel
+    assert row["nonprofit"] == "True"          # personal donation link ≠ corporate
+
+
 def _base_mocks(monkeypatch, repos):
     """Shared setup: rich/r is funded (a repo-level OC worth $10k) so the two
     percentile axes vary. rich/r is in its OWN org so org-level attribution never
@@ -211,7 +229,7 @@ def _base_mocks(monkeypatch, repos):
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -246,7 +264,7 @@ def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -257,6 +275,27 @@ def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
     for d in ("npm/d", "pypi/d"):
         assert rows[d]["channels_count"] == "1"             # registry channel counted
         assert rows[d]["score"] == bf.DECLARED_FUNDING_CAP  # 100 → 79
+
+
+def test_build_funding_paypal_override_caps_score_and_sets_intent(monkeypatch):
+    """A curated PayPal.me override (keyed by repo_id in by_id) on an otherwise-
+    unfunded repo flips intent to True, counts a channel, caps the score at
+    DECLARED_FUNDING_CAP, and leaves the repo nonprofit. An identical repo with
+    no override stays at 100/intent False. (Mirrors ronaldoussoren/pyobjc.)"""
+    _base_mocks(monkeypatch, [E("plain/p"), E("pp/d"), E("rich/r")])
+    # override keyed by the repo's stable id (E defaults repo_id to the slug)
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: (
+        {"pp/d": {"host": "", "host_type": "", "owner": "", "owner_type": "",
+                  "oc_slug": "", "paypal": "https://www.paypal.com/paypalme/X"}}, {}))
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["plain/p"]["score"] == 100                  # unfunded, no channel
+    assert rows["plain/p"]["intent"] == "False"
+    assert rows["pp/d"]["paypal"] == "https://www.paypal.com/paypalme/X"
+    assert rows["pp/d"]["channels_count"] == "1"            # paypal counted
+    assert rows["pp/d"]["score"] == bf.DECLARED_FUNDING_CAP  # 100 → 79
+    assert rows["pp/d"]["intent"] == "True"
+    assert rows["pp/d"]["nonprofit"] == "True"              # not corporate
 
 
 def test_build_funding_scraped_foundation_host_lowers_score(monkeypatch):
@@ -303,14 +342,16 @@ def test_load_funding_overrides_splits_id_and_org(tmp_path):
     the per-repo map keyed by its stable `repo_id` (not the slug)."""
     p = tmp_path / "overrides.csv"
     p.write_text(
-        "repo,repo_id,host,host_type,gh_user,owner,owner_type,oc_slug\n"
-        "boto/*,,,,boto,amazon.com,company,\n"
-        "rust-lang/rust,724712,rustfoundation.org,nonprofit,rust-lang,,,\n",
+        "repo,repo_id,host,host_type,gh_user,owner,owner_type,oc_slug,paypal\n"
+        "boto/*,,,,boto,amazon.com,company,,\n"
+        "rust-lang/rust,724712,rustfoundation.org,nonprofit,rust-lang,,,,\n"
+        "ronaldoussoren/pyobjc,243933900,,,ronaldoussoren,,,,https://www.paypal.com/paypalme/RonaldOussoren\n",
         encoding="utf-8")
     by_id, by_org = bf._load_funding_overrides(p)
     assert "boto" in by_org and by_org["boto"]["owner"] == "amazon.com"
     assert "boto/*" not in by_id              # the glob is not a per-repo key
     assert by_id["724712"]["host"] == "rustfoundation.org"   # keyed by repo_id
+    assert by_id["243933900"]["paypal"] == "https://www.paypal.com/paypalme/RonaldOussoren"
 
 
 def test_build_funding_org_level_override_applies_with_per_repo_win(monkeypatch):
@@ -360,7 +401,7 @@ def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
@@ -389,7 +430,7 @@ def test_build_funding_real_zero_oc_counts_as_intent(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
@@ -416,7 +457,7 @@ def test_build_funding_override_oc_slug_authoritative(monkeypatch):
     monkeypatch.setattr(bf, "load_top_repos", lambda **kw: repos)
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
@@ -454,7 +495,7 @@ def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -464,6 +505,48 @@ def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
     assert rows["link/lp"]["score"] == bf.DECLARED_FUNDING_CAP  # liberapay → capped 79
     assert rows["gh/only"]["score"] == 100   # github-only is measured → no cap, 0 sponsors
     assert rows["plain/p"]["score"] == 100   # no channel at all
+
+
+def test_export_by_repo_splits_id_and_canonical_slug(tmp_path, monkeypatch):
+    """funding-json.csv rows with a repo_id are keyed by id; blank-id rows fall
+    back to the slug map, canonicalized (an old pre-rename slug resolves to the
+    canonical name `load_top_repos` uses)."""
+    p = tmp_path / "funding-json.csv"
+    p.write_text(
+        "id,project_repository,project_repository_resolved,channel_platforms,repo_id\n"
+        "1,https://github.com/old-org/lib,,liberapay,424242\n"
+        "2,https://github.com/gozala/events,,ko_fi,\n",
+        encoding="utf-8")
+    # the blank-id row's slug predates a rename → canonical map resolves it
+    monkeypatch.setattr(bf, "canonical_repo_map",
+                        lambda: {"gozala/events": "browserify/events"})
+    by_id, by_slug = bf._export_by_repo(p)
+    assert by_id["424242"]["channel_platforms"] == "liberapay"
+    assert "old-org/lib" not in by_slug            # id-carrying row is id-keyed only
+    assert by_slug["browserify/events"]["channel_platforms"] == "ko_fi"
+    assert "gozala/events" not in by_slug          # keyed canonical, not raw
+
+
+def test_build_funding_floss_manifest_by_repo_id_survives_rename(monkeypatch):
+    """A manifest recorded under a repo's OLD slug still reaches the renamed
+    entry: the row carries the stable repo_id and build() joins by id first.
+    A blank-id manifest row still matches by canonical slug (fallback)."""
+    _base_mocks(monkeypatch, [E("new-org/lib", "424242"), E("slugonly/tool", "9"),
+                              E("plain/p"), E("rich/r")])
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: (
+        # id-keyed: manifest URL still names the pre-rename slug old-org/lib,
+        # but the fetcher stamped the stable id 424242 (= new-org/lib's id).
+        {"424242": {"channel_platforms": "liberapay"}},
+        # blank-id row: only reachable via the canonical slug fallback.
+        {"slugonly/tool": {"channel_platforms": "ko_fi"}}))
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["new-org/lib"]["has_funding_json"] == "True"    # found by repo_id
+    assert rows["new-org/lib"]["channels_count"] == "1"
+    assert rows["new-org/lib"]["score"] == bf.DECLARED_FUNDING_CAP
+    assert rows["slugonly/tool"]["has_funding_json"] == "True"  # found by slug
+    assert rows["slugonly/tool"]["channels_count"] == "1"
+    assert rows["plain/p"]["has_funding_json"] == "False"       # neither map → no signal
 
 
 def test_build_funding_org_manifest_caps_score_and_counts_channel(monkeypatch):

@@ -128,25 +128,30 @@ class TestBuild:
 # ── join_valid (AND of targets, tri-state) ───────────────────────────────────
 
 class TestJoinValid:
-    def test_valid_requires_github_repo(self):
-        """valid=True iff the repo has a validated github_repo. No github repo
-        (orphan, or non-github git_url — even a reachable one) → False; a
-        github_repo that 404s → False."""
+    def test_valid_follows_the_row_target_verdict(self):
+        """git_valid=True iff the row's target (github_repo OR non-github
+        git_url) is reachable — host-agnostic. A github_repo that 404s → False;
+        a reachable non-github git_url → True; an unreachable one → False; an
+        orphan (no target) → False."""
         target_valid = {
             ("a/b", "github_repo"): True,
             ("c/d", "github_repo"): False,
-            ("u", "git_url"): True,   # reachable non-github url, but no github
+            ("git://sv.gnu.org/x.git", "git_url"): True,    # reachable non-github
+            ("git://dead.example/y.git", "git_url"): False,  # unreachable non-github
         }
         rows = [
             {"repo": "a/b", "platform": "github",
-             "git_url": "https://github.com/a/b.git"},  # valid github
+             "git_url": "https://github.com/a/b.git"},   # valid github → True
             {"repo": "c/d", "platform": "github",
-             "git_url": "https://github.com/c/d.git"},  # github 404
-            {"repo": "", "platform": "", "git_url": "u"},   # non-github, reachable, no github
-            {"repo": "", "platform": "", "git_url": ""},    # orphan
+             "git_url": "https://github.com/c/d.git"},   # github 404 → False
+            {"repo": "gnu/x", "platform": "custom",
+             "git_url": "git://sv.gnu.org/x.git"},       # reachable non-github → True
+            {"repo": "dead/y", "platform": "custom",
+             "git_url": "git://dead.example/y.git"},     # unreachable non-github → False
+            {"repo": "", "platform": "", "git_url": ""},  # orphan → False
         ]
         out = bv.join_valid(rows, target_valid)
-        assert [r["git_valid"] for r in out] == ["True", "False", "False", "False"]
+        assert [r["git_valid"] for r in out] == ["True", "False", "True", "False", "False"]
 
 
 # ── _verify_non_github integration (Part A) ──────────────────────────────────

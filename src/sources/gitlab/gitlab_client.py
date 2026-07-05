@@ -78,8 +78,14 @@ def clone_url(host: str, path: str) -> str:
 
 
 def make_repo_id(host: str, project_id: int | str) -> str:
-    """Host-qualified unified id — gl/{host}/{project_id}."""
-    return f"gl/{host}/{project_id}"
+    """Unified GitLab id. gitlab.com is the canonical instance and gets a bare
+    `gl/{project_id}`; every self-hosted instance is namespaced by its lowercased
+    host as `gl/{host}-{project_id}` (hyphen, so the id carries no path separator).
+    """
+    h = (host or "").strip().lower()
+    if h in ("gitlab.com", "www.gitlab.com"):
+        return f"gl/{project_id}"
+    return f"gl/{h}-{project_id}"
 
 
 def load_token_map() -> dict[str, str]:

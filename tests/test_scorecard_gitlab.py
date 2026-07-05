@@ -139,10 +139,10 @@ class TestLoadGitlabTargets:
 
     def test_selects_valid_repoid_rows_only(self, tmp_path, monkeypatch):
         csv_path = self._write(tmp_path, (
-            "gitlab.com/gnutls/gnutls,gitlab.com,gl/gitlab.com/1,True\n"
-            "gitlab.com/gone/x,gitlab.com,gl/gitlab.com/2,False\n"        # invalid
+            "gitlab.com/gnutls/gnutls,gitlab.com,gl/1,True\n"
+            "gitlab.com/gone/x,gitlab.com,gl/2,False\n"        # invalid
             "gitlab.com/no/id,gitlab.com,,True\n"                          # no repo_id
-            "salsa.debian.org/debian/foo,salsa.debian.org,gl/salsa.debian.org/9,True\n"
+            "salsa.debian.org/debian/foo,salsa.debian.org,gl/salsa.debian.org-9,True\n"
         ))
         monkeypatch.setattr(sc, "GITLAB_PROJECTS", csv_path)
         targets = load_gitlab_targets()
@@ -152,13 +152,13 @@ class TestLoadGitlabTargets:
 
     def test_host_filter(self, tmp_path, monkeypatch):
         csv_path = self._write(tmp_path, (
-            "gitlab.com/a/b,gitlab.com,gl/gitlab.com/1,True\n"
-            "salsa.debian.org/c/d,salsa.debian.org,gl/salsa.debian.org/2,True\n"
+            "gitlab.com/a/b,gitlab.com,gl/1,True\n"
+            "salsa.debian.org/c/d,salsa.debian.org,gl/salsa.debian.org-2,True\n"
         ))
         monkeypatch.setattr(sc, "GITLAB_PROJECTS", csv_path)
         targets = load_gitlab_targets(hosts={"gitlab.com"})
         assert [t["project"] for t in targets] == ["gitlab.com/a/b"]
-        assert targets[0]["repo_id"] == "gl/gitlab.com/1"
+        assert targets[0]["repo_id"] == "gl/1"
 
     def test_missing_file_returns_empty(self, tmp_path, monkeypatch):
         monkeypatch.setattr(sc, "GITLAB_PROJECTS", tmp_path / "nope.csv")
@@ -197,10 +197,10 @@ class TestRunGitlabOrchestration:
 
     async def test_drops_no_token_host_and_already_scored(self, monkeypatch):
         targets = [
-            {"project": "gitlab.com/a/b", "host": "gitlab.com", "repo_id": "gl/gitlab.com/1"},
-            {"project": "gitlab.com/c/d", "host": "gitlab.com", "repo_id": "gl/gitlab.com/2"},
+            {"project": "gitlab.com/a/b", "host": "gitlab.com", "repo_id": "gl/1"},
+            {"project": "gitlab.com/c/d", "host": "gitlab.com", "repo_id": "gl/2"},
             {"project": "salsa.debian.org/x/y", "host": "salsa.debian.org",
-             "repo_id": "gl/salsa.debian.org/3"},
+             "repo_id": "gl/salsa.debian.org-3"},
         ]
         captured = self._wire(monkeypatch, targets=targets,
                               token_map={"gitlab.com": "glpat-x"},       # no salsa token
@@ -212,8 +212,8 @@ class TestRunGitlabOrchestration:
 
     async def test_force_keeps_already_scored(self, monkeypatch):
         targets = [
-            {"project": "gitlab.com/a/b", "host": "gitlab.com", "repo_id": "gl/gitlab.com/1"},
-            {"project": "gitlab.com/c/d", "host": "gitlab.com", "repo_id": "gl/gitlab.com/2"},
+            {"project": "gitlab.com/a/b", "host": "gitlab.com", "repo_id": "gl/1"},
+            {"project": "gitlab.com/c/d", "host": "gitlab.com", "repo_id": "gl/2"},
         ]
         captured = self._wire(monkeypatch, targets=targets,
                               token_map={"gitlab.com": "glpat-x"},
@@ -224,7 +224,7 @@ class TestRunGitlabOrchestration:
 
     async def test_no_token_at_all_makes_no_fetch(self, monkeypatch):
         targets = [{"project": "gitlab.com/a/b", "host": "gitlab.com",
-                    "repo_id": "gl/gitlab.com/1"}]
+                    "repo_id": "gl/1"}]
         captured = self._wire(monkeypatch, targets=targets,
                               token_map={},                    # no tokens for any host
                               already_scored=set())

@@ -38,8 +38,8 @@ Writes:
         cve_score,                          (0–100 neutral-anchored CVE risk
                                             score: 0 known CVEs → 50, ≥1 CVE
                                             ranked into (50, 100], worst → 100)
-        score,                              (geometric mean of openssf_score_p
-                                            and cve_score; "" if either
+        score,                              (max of openssf_score_p and
+                                            cve_score; "" if either
                                             openssf_score or cve_count_5y missing)
         fetched_at                          (checked_at of openssf row used)
 
@@ -56,15 +56,19 @@ lexicographic pick).
 
 Security score
 --------------
-`score` is the geometric mean of two direction-aware risk axes: `cve_score`
+`score` is the max ("worst-of") of two direction-aware risk axes: `cve_score`
 (0 known CVEs → 50, ≥1 CVE ranked into (50, 100]) and `openssf_score_p`
 (lower Scorecard score → higher risk). It is populated only when both
-`openssf_score` and `cve_count_5y` are present.
+`openssf_score` and `cve_count_5y` are present. Max rather than geometric mean
+means the two axes do not compound: either a bad Scorecard alone or a real CVE
+alone is enough to flag the repo, and neither dilutes the other.
 
 ~78% of risk-scope repos have zero CVEs and all share `cve_score = 50` — a
 neutral baseline ("none known" ≠ "proven secure"), not the worst-pinned CDF's
-78. For those repos `score` tracks the OpenSSF axis, with the CVE axis only
-re-ranking the minority that carry CVEs, above the neutral 50.
+78. For those repos `score` = openssf_score_p whenever that axis clears 50 (it
+does for most), so the score tracks the OpenSSF axis; the CVE axis takes over
+only for the minority carrying CVEs whose `cve_score` exceeds the openssf axis —
+a repo with real CVEs is never masked by otherwise-good hygiene.
 
 Usage:
     uv run python -m src.risk.build_security
@@ -82,7 +86,7 @@ from rich.table import Table
 from src.common.params import YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import canonical_repo_map, load_top_repos
-from src.common.stats import floor_anchored_risk
+from src.common.stats import floor_anchored_risk, max_composite
 from src.common.tables import load_column_by_id
 from src.sources.git.long_format import read as read_long
 
@@ -226,18 +230,30 @@ def _shas_per_repo(
     return by_repo
 
 
-def _load_ossfuzz() -> set[str]:
-    """Return the set of GitHub repos enrolled in OSS-Fuzz (canonical slugs)."""
-    out: set[str] = set()
+def _load_ossfuzz() -> tuple[set[str], set[str]]:
+    """Return OSS-Fuzz enrollment as (repo_ids, canonical slugs).
+
+    Rows in ossfuzz/projects.csv that carry a stable `repo_id` join by id —
+    rename-proof, like every other GitHub-identity join in this builder.
+    Rows with a blank `repo_id` (out-of-scope slugs the fetcher could not
+    resolve) fall back to canonical-slug matching, as before.
+    """
+    ids: set[str] = set()
+    slugs: set[str] = set()
     if not OSSFUZZ_FILE.exists():
-        return out
+        return ids, slugs
     canon = canonical_repo_map()
     with open(OSSFUZZ_FILE, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             slug = (row.get("github_repo") or "").strip().lower()
-            if slug:
-                out.add(canon.get(slug, slug))
-    return out
+            if not slug:
+                continue
+            rid = (row.get("repo_id") or "").strip()
+            if rid:
+                ids.add(rid)
+            else:
+                slugs.add(canon.get(slug, slug))
+    return ids, slugs
 
 
 def _load_cve_counts_5y() -> dict[str, int]:
@@ -302,7 +318,7 @@ def build() -> list[dict]:
     depsdev_shas = _shas_per_repo(depsdev_idx)
     semgrep_shas = _shas_per_repo(semgrep_idx)
 
-    fuzz = _load_ossfuzz()
+    fuzz_ids, fuzz_slugs = _load_ossfuzz()
     cve_counts = _load_cve_counts_5y()
     queried = _load_osv_queried()
     badges = load_column_by_id(DEPSDEV_REPOS_FILE, "bestpractices_badge_id")
@@ -311,8 +327,8 @@ def build() -> list[dict]:
     for entry in eligible:
         repo = entry.repo
         # Every GitHub-identity join keys on the stable repo_id (rename-proof);
-        # only the OSS-Fuzz enrollment match below stays slug-based (its source
-        # list carries no repo_id — see _load_ossfuzz).
+        # OSS-Fuzz rows the fetcher could not resolve to an id fall back to
+        # canonical-slug matching (see _load_ossfuzz).
         rid = str(entry.repo_id)
         priority = per_year.get(rid, [])
 
@@ -370,9 +386,11 @@ def build() -> list[dict]:
             "openssf_score": ossf_score,
             "openssf_score_source": ossf_source,
             "cve_count_5y": cve_5y,
-            # OSS-Fuzz enrollment matches the external project list by slug (no
-            # repo_id in that source); `repo` is already canonical.
-            "ossfuzz_enrolled": "True" if repo in fuzz else "False",
+            # OSS-Fuzz enrollment: repo_id first (rename-proof), canonical-slug
+            # fallback for source rows with a blank repo_id.
+            "ossfuzz_enrolled": (
+                "True" if rid in fuzz_ids or repo in fuzz_slugs else "False"
+            ),
             "sast_findings_total": sast_total,
             "sast_findings_error": sast_error,
             "sast_findings_security": sast_security,
@@ -397,7 +415,11 @@ def build() -> list[dict]:
         r["cve_score"] = "" if s is None else round(s, 2)
 
     # Second pass — openssf risk percentile + the informational sast pctls, then
-    # the composite `score` = geom-mean(openssf_score_p, cve_score).
+    # the composite `score` = max(openssf_score_p, cve_score). Max ("worst-of")
+    # rather than geometric mean: a bad Scorecard OR a real CVE is on its own
+    # enough to flag the repo — neither axis dilutes the other. In particular a
+    # repo with known CVEs is not masked by otherwise-good hygiene, and the ~78%
+    # of repos with zero CVEs (neutral cve_score=50) score purely on openssf.
     add_percentiles(
         rows,
         pctl_specs=[
@@ -407,6 +429,7 @@ def build() -> list[dict]:
         ],
         composite_cols=["openssf_score_p", "cve_score"],
         dim_col="score",
+        composite_fn=max_composite,
     )
 
     return rows

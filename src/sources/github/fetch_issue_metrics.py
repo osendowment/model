@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import csv
+import datetime
 import logging
 import os
 import random
@@ -55,7 +56,10 @@ INPUT_FILE = VALUE_FILE
 OUTPUT_FILE = "data/sources/github/issues.csv"
 # Internal "state" name → long-format metric name.
 STATE_METRICS = {"opened": "opened_issues", "closed": "closed_issues"}
-LONG_FIELDS = ["repo", "repo_id", "year", "metric", "value"]
+# fetched_at is per-cell: each (repo, metric, year) count records when it was
+# fetched. Rows written before date-tracking existed carry a blank (honest
+# "date unknown" — never invented); they fill in as cells are re-fetched.
+LONG_FIELDS = ["repo", "repo_id", "year", "metric", "value", "fetched_at"]
 DEFAULT_YEARS = (2021, 2025)
 SEARCH_LIMIT_PER_MIN = 30  # GitHub search-API authenticated quota per token
 # 5% safety margin — stays just under 30/min/token so we never get a 429 from
@@ -74,17 +78,23 @@ TOKEN_INTERVAL = (60.0 / SEARCH_LIMIT_PER_MIN) * PACING_BUFFER  # 2.1s/token
 
 
 
-def _load_long(path: str) -> tuple[dict[str, dict[str, dict[str, str]]], set[str]]:
+def _load_long(path: str) -> tuple[
+    dict[str, dict[str, dict[str, str]]], set[str],
+    dict[tuple[str, str, str], str],
+]:
     """Load long-format issues.csv into rows_by_state[state][repo][year] = value.
 
-    Returns (rows_by_state, years_seen). Initialises both states with empty
-    dicts so callers can safely index `rows_by_state[state]`.
+    Returns (rows_by_state, years_seen, cell_dates) — cell_dates maps
+    (state, repo, year) to the cell's recorded fetched_at ("" rows omitted).
+    Initialises both states with empty dicts so callers can safely index
+    `rows_by_state[state]`.
     """
     rows_by_state: dict[str, dict[str, dict[str, str]]] = {s: {} for s in STATE_METRICS}
+    cell_dates: dict[tuple[str, str, str], str] = {}
     metric_to_state = {m: s for s, m in STATE_METRICS.items()}
     years_seen: set[str] = set()
     if not os.path.exists(path):
-        return rows_by_state, years_seen
+        return rows_by_state, years_seen, cell_dates
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             repo = (row.get("repo") or "").strip()
@@ -97,8 +107,11 @@ def _load_long(path: str) -> tuple[dict[str, dict[str, dict[str, str]]], set[str
             if state is None:
                 continue  # unknown metric — leave it alone (we'll re-write it below)
             rows_by_state[state].setdefault(repo, {})[year] = value
+            fetched = (row.get("fetched_at") or "").strip()
+            if fetched:
+                cell_dates[(state, repo, year)] = fetched
             years_seen.add(year)
-    return rows_by_state, years_seen
+    return rows_by_state, years_seen, cell_dates
 
 
 def _write_long(
@@ -106,6 +119,7 @@ def _write_long(
     rows_by_state: dict[str, dict[str, dict[str, str]]],
     repo_ids: dict[str, str],
     extra_rows: list[dict[str, str]] | None = None,
+    cell_dates: dict[tuple[str, str, str], str] | None = None,
 ) -> int:
     """Write long-format issues.csv stable-sorted by (repo, year, metric).
 
@@ -123,6 +137,7 @@ def _write_long(
     metric) — they're round-tripped untouched. Returns rows written.
     """
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    dates = cell_dates or {}
     out_rows: list[dict[str, str]] = []
     for state, by_repo in rows_by_state.items():
         metric = STATE_METRICS[state]
@@ -137,6 +152,7 @@ def _write_long(
                     "year": year,
                     "metric": metric,
                     "value": value,
+                    "fetched_at": dates.get((state, repo, year), ""),
                 })
     if extra_rows:
         out_rows.extend(extra_rows)
@@ -369,6 +385,7 @@ async def fetch_all(
     output_path: str,
     repo_ids: dict[str, str],
     extra_rows: list[dict[str, str]],
+    cell_dates: dict[tuple[str, str, str], str],
     concurrency: int = 4,
 ) -> tuple[int, int]:
     """Fetch all missing cells and upsert per-repo as soon as a repo finishes.
@@ -390,9 +407,11 @@ async def fetch_all(
     n_repos = len(pending)
 
     flush_lock = asyncio.Lock()
+    run_stamp = datetime.datetime.now(
+        datetime.timezone.utc).isoformat(timespec="seconds")
 
     def _flush() -> None:
-        _write_long(output_path, rows_by_state, repo_ids, extra_rows)
+        _write_long(output_path, rows_by_state, repo_ids, extra_rows, cell_dates)
 
     # Slim layout for narrow terminals: spinner + bar + count + ETA + status.
     # Bar tracks REPOS completed (not individual cells), so the count matches
@@ -424,6 +443,7 @@ async def fetch_all(
                     errors += 1
                 else:
                     rows_by_state[state].setdefault(repo, {})[str(year)] = str(count)
+                    cell_dates[(state, repo, str(year))] = run_stamp
                     ok += 1
                 pending[repo] -= 1
                 if pending[repo] == 0:
@@ -492,7 +512,7 @@ def main() -> None:
         **load_repo_ids(repos_file=args.repos_file),
         **load_value_repo_ids(value_file=args.input),
     }
-    rows_by_state, _existing_years = _load_long(args.output)
+    rows_by_state, _existing_years, cell_dates = _load_long(args.output)
     extra_rows = _load_extra_rows(args.output)
 
     # Find repos with at least one missing cell — these are the fetch candidates.
@@ -532,7 +552,7 @@ def main() -> None:
 
     t_start = time.monotonic()
     ok, errors = asyncio.run(fetch_all(
-        missing, rows_by_state, args.output, repo_ids, extra_rows,
+        missing, rows_by_state, args.output, repo_ids, extra_rows, cell_dates,
         concurrency=args.concurrency,
     ))
     elapsed = time.monotonic() - t_start

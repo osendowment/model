@@ -11,7 +11,14 @@ No authentication required (single tarball download).
 
 ## Raw Data
 
-- `data/sources/ossfuzz/projects.csv` -- project, language, github_repo, main_repo, homepage
+- `data/sources/ossfuzz/projects.csv` -- project, language, github_repo, repo_id, main_repo, homepage, fetched_at
+
+`repo_id` is the stable GitHub numeric id resolved from the `github_repo` slug
+(`github/repos.csv` first, `value.csv` fallback); blank when the slug is out of
+model scope — an id is never invented. It makes the downstream enrollment join
+in `build_security` rename-proof; blank-id rows fall back to canonical-slug
+matching. `fetched_at` is one UTC timestamp per fetch run (backfilled rows
+carry the file's last data-commit date).
 
 ## Scripts
 
@@ -20,5 +27,5 @@ No authentication required (single tarball download).
 | `src/sources/ossfuzz/fetch_ossfuzz_data.py` | Extract project metadata from oss-fuzz repo |
 
 ```bash
-uv run src/sources/ossfuzz/fetch_ossfuzz_data.py
+uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data
 ```

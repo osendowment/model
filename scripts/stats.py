@@ -494,7 +494,8 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a(_id_row("GitHub unique repos", {c: bc[c]["github"] for c in "ABC"},
               f"deduped; + {v['orphan']:,} orphans = {v['rows']:,} repos"))
     a(_id_row("Valid repos", {c: bc[c]["valid"] for c in "ABC"},
-              "github repo resolves (200); incl. archived mirrors", bold=True))
+              "upstream resolves — github/gitlab API or non-github ls-remote; "
+              "incl. archived mirrors", bold=True))
 
     a("\n### Repo class distribution\n")
     a("| Metric | A | B | C |")

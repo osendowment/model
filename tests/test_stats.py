@@ -4,6 +4,7 @@ from src.common.stats import (
     floor_anchored_risk,
     geom_mean_composite,
     geometric_mean,
+    max_composite,
     risk_percentiles,
     risk_percentiles_aligned,
 )
@@ -93,6 +94,23 @@ class TestGeomMeanComposite:
 
     def test_empty_row_is_none(self):
         assert geom_mean_composite([[]]) == [None]
+
+
+class TestMaxComposite:
+    def test_max_of_present(self):
+        # worst-of: the higher axis wins, no dilution by the lower one
+        assert max_composite([[25.0, 100.0]]) == [100.0]
+
+    def test_worst_of_not_geom_mean(self):
+        # a high axis is NOT pulled down by a neutral sibling (geom mean would
+        # give sqrt(100*50)=70.7); max keeps the worst axis intact
+        assert max_composite([[100.0, 50.0]]) == [100.0]
+
+    def test_none_if_any_missing(self):
+        assert max_composite([[100.0, None]]) == [None]
+
+    def test_empty_row_is_none(self):
+        assert max_composite([[]]) == [None]
 
 
 class TestGeometricMean:

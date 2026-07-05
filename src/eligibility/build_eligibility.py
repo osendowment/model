@@ -26,7 +26,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.common.repos import load_top_repos
-from src.common.tables import load_column_by_repo
+from src.common.tables import load_column_by_id
 
 console = Console()
 
@@ -40,22 +40,27 @@ FIELDS = ["repo", "repo_id", "oss", "intent", "nonprofit", "active", "eligible"]
 
 
 def build() -> list[dict]:
+    # The per-dimension CSVs are joined by the stable repo_id, like every
+    # other id-capable join in the pipeline — a slug join would only be
+    # safe while the intermediates are freshly co-generated; across a
+    # GitHub rename with a stale intermediate it would misalign the flags.
     eligible_scope = load_top_repos(skip_archived=False)
-    oss = load_column_by_repo(LICENSES_FILE, "oss")
-    intent = load_column_by_repo(FUNDING_FILE, "intent")
-    nonprofit = load_column_by_repo(FUNDING_FILE, "nonprofit")
-    active = load_column_by_repo(ACTIVE_FILE, "active")
+    oss = load_column_by_id(LICENSES_FILE, "oss")
+    intent = load_column_by_id(FUNDING_FILE, "intent")
+    nonprofit = load_column_by_id(FUNDING_FILE, "nonprofit")
+    active = load_column_by_id(ACTIVE_FILE, "active")
 
     rows: list[dict] = []
     for entry in eligible_scope:
         repo = entry.repo
+        rid = str(entry.repo_id)
         flags = {
-            "oss": oss.get(repo, "") == "True",
-            "intent": intent.get(repo, "") == "True",
+            "oss": oss.get(rid, "") == "True",
+            "intent": intent.get(rid, "") == "True",
             # Missing funding row means "no corporate backer known" → True,
             # matching build_funding's default.
-            "nonprofit": nonprofit.get(repo, "True") != "False",
-            "active": active.get(repo, "") == "True",
+            "nonprofit": nonprofit.get(rid, "True") != "False",
+            "active": active.get(rid, "") == "True",
         }
         rows.append({
             "repo": repo,

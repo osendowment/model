@@ -9,8 +9,9 @@ Reads (all under data/sources/ except the stage-level overrides):
     floss-fund/funding-json.csv — FLOSS Fund directory export  (src.sources.floss_fund.funding_json)
     opencollective/budgets.csv — annual gross raised per OC slug (src.sources.opencollective.fetch_budgets)
     funding/host-by-repo.csv   — scraped FOSS-foundation host per repo
-    data/eligibility/overrides.csv — curated host/owner institutional backing per
-                                 repo (stage overrides, shared with build_active)
+    data/eligibility/overrides.csv — curated host/owner institutional backing +
+                                 a curated PayPal.me handle (`paypal`) per repo
+                                 (stage overrides, shared with build_active)
     npm/funding.csv            — npm package.json `funding` field (npm repos only,
                                  src.sources.npm.fetch_funding) — a declared channel
     pypi/funding.csv           — PyPI `project_urls` funding link (pypi repos only,
@@ -56,7 +57,7 @@ from rich.table import Table
 
 from src.common.funding_platforms import normalize_oc_slug
 from src.common.percentiles import add_percentiles
-from src.common.repos import load_top_repos
+from src.common.repos import canonical_repo_map, load_top_repos
 from src.common.stats import geometric_mean
 from src.common.tables import load_column_by_id, load_rows_by_id
 from src.sources.floss_fund.directory import export_repo_slug, github_org_page
@@ -99,7 +100,7 @@ FIELDS = ["repo", "repo_id",
           "gh_stars", "gh_forks",
           "has_funding_links", "has_funding_yml", "funding_link_platforms", "has_funding_json",
           "has_npm_funding", "npm_funding_url",
-          "has_pypi_funding", "pypi_funding_platforms",
+          "has_pypi_funding", "pypi_funding_platforms", "paypal",
           "bf_maintainer_fundable", "channels_count",
           "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
           "host", "host_type", "owner", "owner_type", "host_score",
@@ -152,6 +153,7 @@ def _intent_flag(row: dict) -> bool:
         or (row.get("has_npm_funding") or "").strip() == "True"
         or (row.get("has_pypi_funding") or "").strip() == "True"
         or (row.get("bf_maintainer_fundable") or "").strip() == "True"
+        or bool((row.get("paypal") or "").strip())
         or bool((row.get("oc_slug") or "").strip())
         or bool((row.get("host") or "").strip())
         or bool((row.get("owner") or "").strip())
@@ -210,15 +212,17 @@ def _declares_unmeasured_channel(row: dict) -> bool:
     """True if the repo declares a funding channel whose $ we don't measure.
 
     A registry channel (npm `funding` / PyPI `project_urls`), a FLOSS Fund
-    manifest for the repo or its owner (`has_funding_json`), or a funding **link**
-    to any platform other than GitHub Sponsors / Open Collective (those two are
-    measured in dollars elsewhere). Such a repo has set up *a way* to be funded →
-    not maximally unfunded, so its score is capped at DECLARED_FUNDING_CAP.
+    manifest for the repo or its owner (`has_funding_json`), a curated PayPal.me
+    handle (`paypal`), or a funding **link** to any platform other than GitHub
+    Sponsors / Open Collective (those two are measured in dollars elsewhere).
+    Such a repo has set up *a way* to be funded → not maximally unfunded, so its
+    score is capped at DECLARED_FUNDING_CAP.
     """
     return (
         row.get("has_npm_funding") == "True"
         or row.get("has_pypi_funding") == "True"
         or row.get("has_funding_json") == "True"
+        or bool((row.get("paypal") or "").strip())
         or bool(_platform_set(row.get("funding_link_platforms")) - MEASURED_PLATFORMS)
     )
 
@@ -254,7 +258,8 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
                  npm_funding: dict | None = None,
                  pypi_funding: dict | None = None,
                  org_export: dict | None = None,
-                 bf_maintainer_fundable: bool = False) -> dict:
+                 bf_maintainer_fundable: bool = False,
+                 paypal: str = "") -> dict:
     """Join one repo's raw funding signals (percentiles filled later in build()).
 
     `oc_slug` / `oc_avg` are the Open Collective attribution resolved in build():
@@ -268,6 +273,7 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
     npm_funding = npm_funding or {}
     pypi_funding = pypi_funding or {}
     org_export = org_export or {}
+    paypal = (paypal or "").strip()
     has_npm = (npm_funding.get("has_npm_funding") or "").strip() == "True"
     has_pypi = (pypi_funding.get("has_pypi_funding") or "").strip() == "True"
     channels = (_platform_set(yml.get("funding_link_platforms"))
@@ -277,6 +283,8 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         channels = channels | {"npm"}
     if has_pypi:
         channels = channels | {"pypi"}
+    if paypal:
+        channels = channels | {"paypal"}
     gh_in = (sponsors.get("gh_sponsorships_in") or "").strip()
     # Outbound sponsoring (owner funds others) — a "resourced backer" proxy used by
     # the score (gh_sponsorships = in + out) but NOT an intent signal: funding
@@ -307,6 +315,7 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         # listing funds the maintainer's whole portfolio, not this one repo (the
         # same reason fetch_sponsors refuses to credit co-maintainer sponsors).
         "bf_maintainer_fundable": "True" if bf_maintainer_fundable else "False",
+        "paypal": paypal,
         "channels_count": str(len(channels)),
         "oc_slug": oc_slug,
         "oc_avg_funding": oc_avg,
@@ -321,17 +330,33 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
     return row
 
 
-def _export_by_repo(path: Path) -> dict[str, dict]:
-    """{owner/repo: manifest row} for repo-level FLOSS manifests (resolved-or-raw)."""
-    out: dict[str, dict] = {}
+def _export_by_repo(path: Path) -> tuple[dict[str, dict], dict[str, dict]]:
+    """``(by_id, by_slug)`` maps for repo-level FLOSS manifests.
+
+    `by_id` keys manifest rows by their stable GitHub `repo_id` (stamped by the
+    fetcher) — the rename-proof join build() tries first. Rows with a blank
+    repo_id (fetched before the id was resolvable, or outside the model's repo
+    maps) land in `by_slug` instead, keyed by the manifest URL's slug
+    (resolved-or-raw). That slug can predate a GitHub rename, so it is passed
+    through `canonical_repo_map` — the fallback key must be the same canonical
+    slug `load_top_repos` hands the builder.
+    """
+    by_id: dict[str, dict] = {}
+    by_slug: dict[str, dict] = {}
     if not path.exists():
-        return out
+        return by_id, by_slug
+    canon = canonical_repo_map()
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             repo = export_repo_slug(row)
-            if repo:
-                out[repo] = row
-    return out
+            if not repo:
+                continue
+            rid = (row.get("repo_id") or "").strip()
+            if rid:
+                by_id[rid] = row
+            else:
+                by_slug[canon.get(repo, repo)] = row
+    return by_id, by_slug
 
 
 def _fundable_orgs(path: Path) -> dict[str, dict]:
@@ -408,14 +433,17 @@ def _load_funding_overrides(path: Path) -> tuple[dict[str, dict], dict[str, dict
     """Curated institutional backing → ``(by_id, by_org)`` from overrides.csv.
 
     Schema: ``repo, repo_id, host, host_type, gh_user, owner, owner_type,
-    oc_slug, eol, reason`` — this reader consumes the funding columns; `eol` is
-    read by build_active, and `reason` is free-text audit context for any
-    override.
+    oc_slug, license, paypal, eol, reason`` — this reader consumes the funding columns;
+    `eol` is read by build_active, and `reason` is free-text audit context for
+    any override.
     `host` and `owner` are **domains** (the domain is the canonical name — no
     separate `*_domain` column); `gh_user` is the GitHub login (informational);
     `oc_slug` is a curated Open Collective slug for projects that fund via OC but
-    declare no FUNDING.yml (e.g. socketio). `repo` is the human-readable slug (may
-    drift on a rename); `repo_id` is GitHub's immutable numeric id — the join key.
+    declare no FUNDING.yml (e.g. socketio); `paypal` is a curated PayPal.me URL
+    for a maintainer who takes donations that way but declares no FUNDING.yml
+    (e.g. ronaldoussoren/pyobjc) — a declared, unmeasured funding channel. `repo`
+    is the human-readable slug (may drift on a rename); `repo_id` is GitHub's
+    immutable numeric id — the join key.
 
     Two row shapes share the file:
 
@@ -450,6 +478,7 @@ def _load_funding_overrides(path: Path) -> tuple[dict[str, dict], dict[str, dict
                 "owner": (row.get("owner") or "").strip(),
                 "owner_type": (row.get("owner_type") or "").strip(),
                 "oc_slug": (row.get("oc_slug") or "").strip(),
+                "paypal": (row.get("paypal") or "").strip(),
             }
             if repo.endswith("/*"):
                 by_org[repo[:-2]] = rec  # "boto/*" → key "boto" (org name)
@@ -470,15 +499,17 @@ def build() -> list[dict]:
     # archived repos must appear in the stage output so build_eligibility can
     # mark them active=False instead of silently dropping them.
     eligible = load_top_repos(skip_archived=False)
-    # GitHub-repo signals join on the stable repo_id (rename-proof); the external
-    # matches below (outbound sponsoring by login, OC by slug, FLOSS by URL) keep
-    # their own key, where repo_id is irrelevant.
+    # GitHub-repo signals join on the stable repo_id (rename-proof) — including
+    # repo-level FLOSS manifests, whose rows carry a fetcher-stamped repo_id
+    # (canonical-slug fallback for blank-id rows). The other external matches
+    # (outbound sponsoring by login, OC by slug, FLOSS org manifests by owner)
+    # keep their own key, where repo_id is irrelevant.
     sponsors = load_rows_by_id(SPONSORS_FILE)
     yml = load_rows_by_id(FUNDING_YML_FILE)
     repos_meta = load_rows_by_id(REPOS_FILE)
     foundations = load_column_by_id(FOUNDATIONS_FILE, "host")
     overrides_by_id, org_overrides = _load_funding_overrides(OVERRIDES_FILE)
-    export = _export_by_repo(FLOSS_FUND_FILE)
+    export_by_id, export_by_slug = _export_by_repo(FLOSS_FUND_FILE)
     fundable_orgs = _fundable_orgs(FLOSS_FUND_FILE)
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
     sponsoring = _load_sponsoring(SPONSORSHIPS_FILE)
@@ -559,7 +590,9 @@ def build() -> list[dict]:
         rows.append(assemble_row(
             repo=repo, repo_id=entry.repo_id,
             sponsors=sponsors.get(rid, {}), yml=yml.get(rid, {}),
-            export=export.get(repo.lower(), {}),   # FLOSS: matched by URL/slug
+            # FLOSS manifest: stable repo_id first (rename-proof), canonical
+            # slug fallback for rows the fetcher could not id.
+            export=export_by_id.get(rid) or export_by_slug.get(repo.lower(), {}),
             host=host, host_type=host_type,
             owner=ov.get("owner", ""), owner_type=ov.get("owner_type", ""),
             repo_meta=repos_meta.get(rid, {}),
@@ -568,7 +601,8 @@ def build() -> list[dict]:
             npm_funding=npm_funding.get(rid, {}),
             pypi_funding=pypi_funding.get(rid, {}),
             org_export=fundable_orgs.get(owner_login, {}),     # FLOSS org: by owner
-            bf_maintainer_fundable=bf_fundable))               # BF maintainer sponsors
+            bf_maintainer_fundable=bf_fundable,                # BF maintainer sponsors
+            paypal=ov.get("paypal", "")))                      # curated PayPal.me handle
 
     # Owner-level intent propagation: one repo's declared channel makes every repo
     # the owner has fundable (GitHub org-.github / personal-Sponsors semantics).

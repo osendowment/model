@@ -30,7 +30,7 @@ secondary rate limit dictates the fetcher design: one repo per invocation,
 throttled, with per-repo backoff-retry. The `depsdev_enabled` column records
 the mode per row.
 
-**Scope**: every valid class-A GitHub repo, **archived included** (`load_top_slugs(skip_archived=False)`) — the `value.csv` `criticality` column is gated non-empty over exactly this set. TTL 365 days; error rows always retry. An idempotent healing pass runs per invocation: it backfills `repo_id`s that were unresolvable at fetch time and drops rows superseded by a repo rename (old-slug row vs new-slug row for the same id).
+**Scope**: every valid class-A GitHub repo, **archived included** (`load_top_slugs(skip_archived=False)`) — the `value.csv` `openssf_crit` column is gated non-empty over exactly this set. TTL 365 days; error rows always retry. An idempotent healing pass runs per invocation: it backfills `repo_id`s that were unresolvable at fetch time and drops rows superseded by a repo rename (old-slug row vs new-slug row for the same id).
 
 ### Raw Data
 

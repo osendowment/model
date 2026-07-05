@@ -306,11 +306,16 @@ def _namespaces_from_projects() -> list[dict]:
 
 def fetch_and_persist(target: str = "projects", force: bool = False,
                       limit: int | None = None, quiet: bool = False,
-                      classes: set[str] | None = None) -> dict:
+                      classes: set[str] | None = None,
+                      targets: list[dict] | None = None) -> dict:
     """Fetch GitLab projects (+ namespaces). Idempotent under the 90-day TTL.
 
     `classes` (e.g. {"A", "B"}) scopes the projects phase to those value
-    classes; None fetches every GitLab-hosted repo.
+    classes; None fetches every GitLab-hosted repo. `targets` (a list of
+    ``{host, path, project}`` dicts, as produced by `load_gitlab_rows`) overrides
+    the value.csv scan entirely — the value-rollup resolver passes the GitLab
+    URLs it is resolving directly, mirroring the GitHub fetcher's explicit
+    `repos=` list.
     """
     if not quiet:
         console.rule("[bold cyan]gitlab/fetch_project_data")
@@ -321,7 +326,7 @@ def fetch_and_persist(target: str = "projects", force: bool = False,
     t0 = time.monotonic()
 
     if target in ("projects", "both"):
-        items = load_gitlab_rows(classes=classes)
+        items = targets if targets is not None else load_gitlab_rows(classes=classes)
         existing = _load_existing(PROJECTS_OUT, "project")
         to_fetch, fresh, missing = _filter_stale(items, existing, "project", force)
         if limit:

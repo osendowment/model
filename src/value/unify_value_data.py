@@ -13,7 +13,8 @@ key for orphans), and writes `data/value/value.csv` with **one row per repo**:
 
     repo, platform, repo_id, git_url, mirror_url, git_valid,
     ecosystems, packages, top_eco, top_eco_pkg,
-    top_eco_pct, class, class_npm, class_pypi, class_crates, class_cpp
+    top_eco_pct, class, class_npm, class_pypi, class_crates, class_cpp,
+    openssf_crit, score
 
 Repo identity is a `(platform, repo, repo_id)` triple, all derived from the
 canonical `git_url`:
@@ -100,11 +101,12 @@ FIELDS = (
      "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
-    # `criticality` (OpenSSF criticality score, 0-1) is not computed here —
-    # `src.value.apply_criticality` fills it as a later pipeline step, and the
-    # rewriters in between (verify_git_urls, build_validation) round-trip it.
-    # It is in FIELDS so write_value_data never drops it.
-    + ["criticality"]
+    # `openssf_crit` (OpenSSF criticality score, 0-1) and `score` (the 0-100
+    # value blend, 0.8*openssf_crit*100 + 0.2*top_eco_pct) are not computed
+    # here — `src.value.apply_criticality` fills both as a later pipeline step,
+    # and the rewriters in between (verify_git_urls, build_validation) round-trip
+    # them. They are in FIELDS so write_value_data never drops them.
+    + ["openssf_crit", "score"]
 )
 
 # Internal scratch keys carried on each aggregate dict during computation.
@@ -492,7 +494,7 @@ def aggregate_by_repo(
         group_mirror_url = next(
             (m.get("mirror_url", "") for m in members if m.get("mirror_url")), "")
 
-        if group_repo_id:
+        if group_repo_id.startswith("gh/"):
             # GitHub group: identity already resolved per-row by _resolve_github.
             # Read the canonical values directly off a member — all members share the
             # same repo_id so they agree on github_repo/git/mirror_url.
@@ -500,9 +502,19 @@ def aggregate_by_repo(
             repo = next((m.get("github_repo", "") for m in members if m.get("github_repo")), "")
             agg_git_url = f"https://github.com/{repo}.git" if repo else group_git_url
             agg_mirror_url = group_mirror_url
+        elif group_repo_id.startswith("gl/"):
+            # GitLab group: id resolved by _resolve_gitlab (GitHub already declined
+            # it). A gl/ id means the project was GitLab-API-validated, so the
+            # platform is `gitlab` even for a self-hosted host `platform_and_slug`
+            # would otherwise call `custom` (invent.kde.org, code.videolan.org).
+            # `repo` is the project path off the git_url; no GitHub slug/mirror.
+            _plat, repo = _identity("", group_git_url)
+            platform = "gitlab"
+            agg_git_url = group_git_url
+            agg_mirror_url = ""
         else:
-            # Non-GitHub or orphan: derive identity from git_url.
-            # _select_group_github_repo filters reserved-namespace URLs
+            # Non-repo_id upstream (other host w/o id) or orphan: derive from
+            # git_url. _select_group_github_repo filters reserved-namespace URLs
             # (sponsors/*, orgs/*) and prefers the URL-derived slug.
             platform, repo = _identity(
                 _select_group_github_repo(members, group_git_url), group_git_url,

@@ -21,7 +21,17 @@
   },
   "risk_input": {
     "value_classes": ["A"],
-    "comment": "Risk pipeline runs on valid class-A repos (value/value.csv class == 'A')."
+    "comment": "Risk pipeline runs on valid class-A repos (value/value.csv class == 'A'). Kept as the documented risk scope; load_top_repos reads top_repos below."
+  },
+  "top_repos": {
+    "platforms": ["github"],
+    "classes": ["A"],
+    "comment": "load_top_repos scope — a value.csv row is a 'top repo' iff platform in platforms AND class in classes AND git_valid==True. GitHub-only for now (risk/eligibility fetchers are GitHub-API-driven); add 'gitlab' once gl/ repo_id enrichment is wired. classes must match risk_input.value_classes."
+  },
+  "value_score": {
+    "criticality_weight": 0.8,
+    "centrality_weight": 0.2,
+    "comment": "value.csv `score` = criticality_weight*(openssf_crit*100) + centrality_weight*top_eco_pct, range 0-100. openssf_crit is the OpenSSF criticality score (0-1); top_eco_pct is the repo's PageRank percentile in its top ecosystem (0-100, already a percentile). Weights should sum to 1; criticality-dominant so a foundational-but-quiet micro-dep can't outrank a genuinely critical project. Only computed where openssf_crit is present (valid class-A GitHub)."
   },
   "concentration": {
     "window_years": 5,
