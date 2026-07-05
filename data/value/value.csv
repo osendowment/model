@@ -11700,7 +11700,7 @@
 "udoprog/unicycle","github","gh/235856047","https://github.com/udoprog/unicycle.git","","True","crates","1","crates","unicycle","0.0043","C","","","C",""
 "","","","","","False","pypi","1","pypi","nvidia-cuda-tileiras","0.0042","C","","C","",""
 "coin-or/cbc","github","gh/173509563","https://github.com/coin-or/cbc.git","","True","cpp","1","cpp","coin-or-cbc","0.0042","C","","","","C"
-"grafana/pyroscope-pprof-rs","github","gh/1167174618","https://github.com/grafana/pyroscope-pprof-rs.git","","True","crates","1","crates","pprof-pyroscope-fork","0.0042","C","","","C",""
+"grafana-cold-storage/pyroscope-pprof-rs","github","gh/1167174618","https://github.com/grafana-cold-storage/pyroscope-pprof-rs.git","","True","crates","1","crates","pprof-pyroscope-fork","0.0042","C","","","C",""
 "loyd/fixnum","github","gh/316157652","https://github.com/loyd/fixnum.git","","True","crates","1","crates","fixnum","0.0042","C","","","C",""
 "axodotdev/axoprocess","github","gh/733681782","https://github.com/axodotdev/axoprocess.git","","True","crates","1","crates","axoprocess","0.0041","C","","","C",""
 "forcir/object-deep-merge","github","gh/668145716","https://github.com/forcir/object-deep-merge.git","","True","npm","1","npm","object-deep-merge","0.0041","C","C","","",""

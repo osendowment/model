@@ -15061,7 +15061,7 @@ crates,postgres-derive,ours_only,github,rust-postgres/rust-postgres,,,True
 crates,postgres-native-tls,ours_only,github,rust-postgres/rust-postgres,,,True
 crates,pp-rs,ours_only,github,kangz/glslpp-rs,,,True
 crates,ppmd-rust,ours_only,github,hasenbanck/ppmd-rust,,,True
-crates,pprof-pyroscope-fork,ours_only,github,grafana/pyroscope-pprof-rs,,,True
+crates,pprof-pyroscope-fork,ours_only,github,grafana-cold-storage/pyroscope-pprof-rs,,,True
 crates,pprof2,ours_only,github,tikv/pprof-rs,,,True
 crates,pprof_util,ours_only,github,polarsignals/rust-jemalloc-pprof,,,True
 crates,pq-src,ours_only,github,sgrif/pq-sys,,,True

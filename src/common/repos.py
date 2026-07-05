@@ -40,6 +40,23 @@ OVERRIDES_FILE = "data/value/overrides.csv"
 _RANK = {"A": 3, "B": 2, "C": 1}
 
 
+def to_repo_id(raw: object) -> str:
+    """Normalise a raw GitHub repo id to the canonical `gh/<id>` form.
+
+    The pipeline's join key is namespaced by host: GitHub repos are keyed by
+    GitHub's stable numeric Repos-API id as `gh/<id>`; GitLab repos use
+    `gl/<host>/<id>` (produced by the value stage). This is idempotent:
+    already-namespaced ids (`gh/…`, `gl/…`) and empties pass through
+    unchanged; a bare legacy numeric id (`119609`) is promoted to
+    `gh/119609`. Both `load_repo_ids` and `RepoEntry.repo_id` return this
+    form, so every stage writer downstream of the loader emits it.
+    """
+    s = ("" if raw is None else str(raw)).strip()
+    if not s or "/" in s:
+        return s
+    return f"gh/{s}"
+
+
 @dataclass
 class RepoEntry:
     """One risk-scope repo with optional enrichment from github/repos.csv."""
@@ -83,7 +100,7 @@ def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]
             canon[full] = full
             meta[full] = RepoEntry(
                 repo=full,
-                repo_id=(row.get("repo_id") or "").strip(),
+                repo_id=to_repo_id(row.get("repo_id")),
                 size_kb=int(row.get("size") or 0),
                 stars=int(row.get("stars") or 0),
                 archived=(row.get("archived") or "").strip().lower() in ("true", "1"),
@@ -250,7 +267,7 @@ def load_repo_ids(repos_file: str = REPOS_FILE) -> dict[str, str]:
         return out
     with open(repos_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            rid = (row.get("repo_id") or "").strip()
+            rid = to_repo_id(row.get("repo_id"))
             if not rid:
                 continue
             slug = (row.get("repo") or "").strip().lower()

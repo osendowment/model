@@ -218,7 +218,7 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None,
         canonical = canon.get(slug, slug)
         entry = meta.get(canonical)
         if entry and entry.valid and entry.repo_id:
-            r["repo_id"] = f"gh/{entry.repo_id}"
+            r["repo_id"] = entry.repo_id  # already namespaced by the loader (gh/<id>)
             r["github_repo"] = entry.full_name
             r["git"] = f"https://github.com/{entry.full_name}.git"
             r["mirror_url"] = entry.mirror_url or ""

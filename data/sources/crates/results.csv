@@ -5757,7 +5757,7 @@
 "axoupdater","axodotdev/axoupdater","https://github.com/axodotdev/axoupdater.git","native","64902","0","0","0","86924","237587","False","4.2e-07","D","mit or apache-2.0","gh/745160054",""
 "compio-buf","compio-rs/compio","https://github.com/compio-rs/compio.git","native","39332","0","0","799","30039","165824","False","4.2e-07","D","mit","gh/684184786",""
 "fixnum","loyd/fixnum","https://github.com/loyd/fixnum.git","native","42052","9852","14088","15204","19491","151629","False","4.2e-07","D","mit or apache-2.0","gh/316157652",""
-"pprof-pyroscope-fork","grafana/pyroscope-pprof-rs","https://github.com/grafana/pyroscope-pprof-rs.git","native","0","0","0","0","0","0","False","4.2e-07","D","apache-2.0","gh/1167174618",""
+"pprof-pyroscope-fork","grafana-cold-storage/pyroscope-pprof-rs","https://github.com/grafana-cold-storage/pyroscope-pprof-rs.git","native","0","0","0","0","0","0","False","4.2e-07","D","apache-2.0","gh/1167174618",""
 "gat-std","craftspider/gat-std","https://github.com/craftspider/gat-std.git","native","4035","0","0","3455","10216","6507","False","4.2e-07","D","mit or apache-2.0","gh/584037210",""
 "xitca-unsafe-collection","hfqr/xitca-web","https://github.com/hfqr/xitca-web.git","native","4619","0","0","78","10964","12056","False","4.1e-07","D","apache-2.0","gh/365686953",""
 "weakref","samsartor/weakref","https://github.com/samsartor/weakref.git","native","287","0","0","0","0","1436","False","4.1e-07","D","mit","gh/1013860984",""

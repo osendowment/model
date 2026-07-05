@@ -41,7 +41,9 @@ Writes:
         bf_commits_git_5y,                 (bus factor, git method, _5y window)
         hhi_commits_git_5y,                (HHI 0-10000, git method, _5y window)
         score,                             (0-100 concentration risk = geometric mean of the
-                                            _5y bf + hhi risk percentiles)
+                                            absolute _5y scales 100/bf and hhi/100,
+                                            i.e. round(sqrt(hhi/bf)); the *_p percentile
+                                            columns are cross-check audit references only)
         github_fetched_at, git_fetched_at
 
 Periods (year-agnostic column names; the boundary lives in settings.json):
@@ -64,6 +66,7 @@ Usage:
 """
 
 import csv
+import math
 from pathlib import Path
 
 from rich.console import Console
@@ -163,6 +166,31 @@ def _bus_factor_hhi(commit_counts: list[int]) -> tuple[int | str, int | str]:
     bf, _sorted, hhi = _compute_bus_factor(
         objs, threshold=BUS_FACTOR_THRESHOLD, include_bots=True)
     return bf, round(hhi * 10000)
+
+
+def _concentration_score(bf: object, hhi: object) -> int | str:
+    """Concentration score = geometric mean of two ABSOLUTE 0-100 scales:
+
+        100 / bf     — bus factor 1 → 100, 2 → 50, 4 → 25, ...
+        hhi / 100    — HHI 10000 (one author writes everything) → 100
+
+    which simplifies to sqrt(hhi / bf). Absolute scales, not within-table
+    percentiles: three quarters of the risk set is bus-factor-1, so a
+    percentile basis compresses the whole distribution into the tie blocks
+    (a 99%-single-author repo like pyobjc landed at p80) and re-ranks every
+    repo whenever the population shifts. The absolute score reads the same
+    inputs at face value and is stable across runs and populations.
+
+    Blank bf/hhi (fetch failure — the only unpopulated case) → blank score.
+    Floored at 1 so the overall risk geometric mean never collapses to 0.
+    """
+    try:
+        bf_f, hhi_f = float(str(bf)), float(str(hhi))
+    except ValueError:
+        return ""
+    if bf_f < 1 or hhi_f <= 0:
+        return ""
+    return max(1, int(round(math.sqrt(hhi_f / bf_f))))
 
 
 def github_metrics(rows: list[dict]) -> dict:
@@ -297,6 +325,8 @@ def build() -> list[dict]:
         ).strip()
 
         rows.append(row)
+    # The six *_p columns are audit/cross-check references (where does a repo
+    # sit within the current risk set?) — none of them feed `score`.
     add_percentiles(
         rows,
         pctl_specs=[
@@ -304,9 +334,12 @@ def build() -> list[dict]:
             ("bf_commits_git_full", False), ("hhi_commits_git_full", True),
             ("bf_commits_git_5y", False), ("hhi_commits_git_5y", True),
         ],
-        composite_cols=["bf_commits_git_5y_p", "hhi_commits_git_5y_p"],
+        composite_cols=[],   # empty composite leaves `score` blank...
         dim_col="score",
     )
+    for row in rows:         # ...which the absolute formula then fills.
+        row["score"] = _concentration_score(
+            row["bf_commits_git_5y"], row["hhi_commits_git_5y"])
     return rows
 
 

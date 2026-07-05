@@ -35,7 +35,7 @@ class TestParseItem:
         slug, row = _parse_item(item, "2025-03-11T00:00:00Z")
         assert slug == "facebook/react"
         assert row["repo"] == "facebook/react"
-        assert row["repo_id"] == 12345
+        assert row["repo_id"] == "gh/12345"  # namespaced at fetch time
         assert row["user_name"] == "facebook"
         assert row["user_type"] == "Organization"
         assert row["language"] == "javascript"

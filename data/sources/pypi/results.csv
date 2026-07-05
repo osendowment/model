@@ -517,7 +517,7 @@
 "time-machine","adamchainz/time-machine","https://github.com/adamchainz/time-machine.git","eco","74954871","516122","1636986","8398934","149787922","214434390","True","0.00022908","C","mit","gh/259841110",""
 "docopt","docopt/docopt","https://github.com/docopt/docopt.git","eco","137559503","83923362","122800730","134993770","159071837","187007815","True","0.00022894","C","mit","gh/3959394",""
 "opentelemetry-instrumentation-requests","open-telemetry/opentelemetry-python-contrib","https://github.com/open-telemetry/opentelemetry-python-contrib.git","eco","157306307","2843167","8145646","11645657","72916044","690981021","True","0.00022809","C","apache-2.0","gh/220524743",""
-"enum34","","","native","89869838","108204374","84657297","83155263","88382281","84949975","True","0.00022786","C","bsd-3-clause","",""
+"enum34","","","eco","89869838","108204374","84657297","83155263","88382281","84949975","True","0.00022786","C","bsd-3-clause","",""
 "sentencepiece","google/sentencepiece","https://github.com/google/sentencepiece.git","eco","158051990","29792109","72654270","119829667","241273124","326710782","True","0.0002276","C","","gh/84183882",""
 "deprecation","briancurtin/deprecation","https://github.com/briancurtin/deprecation.git","eco","132162814","18979967","37802178","92782667","162873638","348375618","True","0.00022748","C","apache-2.0","gh/78771440",""
 "google-cloud-resource-manager","googleapis/google-cloud-python","https://github.com/googleapis/google-cloud-python.git","eco","152406532","2217019","14286159","76163277","212543328","456822875","True","0.00022716","C","apache-2.0","gh/16316451",""

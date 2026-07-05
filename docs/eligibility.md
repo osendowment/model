@@ -37,6 +37,8 @@ Eligibility
 │   └── value_class == A ∩ valid    ← data/value/value.csv (archived kept)
 │
 ├── oss — License (→ licenses.csv)
+│   ├── manual assertion (override) ← data/eligibility/overrides.csv `license`
+│   │                                 (highest priority, detection-failure fix)
 │   ├── registry license (primary)  ← per-eco results.csv `license` column
 │   │                                 (npm registry / PyPI JSON / crates
 │   │                                  db-dump / Homebrew formulas)
@@ -71,9 +73,11 @@ Eligibility
 
 ### `oss` — OSI-approved license
 
-`build_licenses` resolves one SPDX string per repo — the registry license
-first (each ecosystem's `results.csv` `license` column, most common value
-across the repo's packages, ties alphabetical), the GitHub API license as
+`build_licenses` resolves one SPDX string per repo — a manual `license`
+assertion from `overrides.csv` first (highest priority, for repos whose
+LICENSE detection fails upstream), then the registry license (each
+ecosystem's `results.csv` `license` column, most common value across the
+repo's packages, ties alphabetical), the GitHub API license as
 fallback — and classifies it against the OSS-approved set in
 `data/sources/osi/oss-licenses.csv` (SPDX `isOsiApproved` ∪ a small curated
 extras list — curl, ftl, libpng-2.0, mit-cmu, psf-2.0, blessing; content
@@ -128,6 +132,7 @@ One curated row per repo, shared by two builders:
 | `gh_user` | — | GitHub login (informational) |
 | `owner`, `owner_type` | build_funding | entity owning the GitHub org |
 | `oc_slug` | build_funding | curated Open Collective slug; empty on a curated row = authoritative "no OC" |
+| `license` | build_licenses | manual SPDX assertion (highest priority) when upstream detection fails — GitHub Licensee returns `noassertion` on bundled/dual/stacked LICENSE files, or the repo ships no standard LICENSE (e.g. node=`mit`, cpython=`python-2.0`, linux=`gpl-2.0-only`, icu=`unicode-3.0`) |
 | `eol` | build_active | manual end-of-life verdict (True/False/empty) |
 | `reason` | — | free-text audit context for the override |
 
@@ -136,7 +141,7 @@ this file is only for eligibility-stage judgments.)
 
 ## Outputs
 
-- `licenses.csv` — `repo, repo_id, license, license_source (registry/github/""), oss`
+- `licenses.csv` — `repo, repo_id, license, license_source (override/registry/github/""), oss`
 - `active.csv` — `repo, repo_id, eol, archived, mirror, active`
 - `funding.csv` — funding signals + score per repo
   (schema in [components/funding.md](components/funding.md))

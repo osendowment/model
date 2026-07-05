@@ -111,7 +111,7 @@
 "oniguruma","kkos/oniguruma","https://github.com/kkos/oniguruma.git","eco","79218","696339","806452","0.00092092","C","bsd-2-clause","gh/38999874",""
 "openjdk","openjdk/jdk25u","https://github.com/openjdk/jdk25u.git","native","0","1196957","1196957","0.00091657","C","gpl-2.0-only with classpath-exception-2.0","gh/998606537",""
 "db","berkeleydb/libdb","https://github.com/berkeleydb/libdb.git","native","203462","291419","574231","0.00089287","C","","gh/2380364",""
-"gnupg","","","native","228528","759991","1077644","0.00088992","C","gpl-3.0-or-later","",""
+"gnupg","","","","228528","759991","1077644","0.00088992","C","gpl-3.0-or-later","",""
 "tcltk","","","","0","504348","504348","0.00088913","C","","",""
 "ruby-build","rbenv/ruby-build","https://github.com/rbenv/ruby-build.git","native","0","846438","846438","0.00087884","C","mit","gh/2142701",""
 "libarchive","libarchive/libarchive","https://github.com/libarchive/libarchive.git","native","117632","696702","860210","0.00087578","C","bsd-2-clause","gh/3219804",""

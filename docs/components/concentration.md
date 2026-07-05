@@ -14,8 +14,9 @@ Scope: the class-A value-class repos in the risk pipeline (see
 ## Scored components: Bus Factor + HHI
 
 `concentration.csv` carries 25 columns, but the **`score` uses exactly two** —
-both from the git-clone log over the `_5y` window (2021–2025), each turned into a
-direction-aware 0–100 risk percentile and combined as their geometric mean:
+both from the git-clone log over the `_5y` window (2021–2025), each read on an
+**absolute** 0–100 scale (`100 / bf` and `hhi / 100`) and combined as their
+geometric mean:
 
 - **Bus factor** (`bf_commits_git_5y`) — sort the merged, non-bot contributors by
   commits descending and count how many it takes for their cumulative commit
@@ -36,12 +37,24 @@ direction-aware 0–100 risk percentile and combined as their geometric mean:
   measurement. As a result the score is **fully populated** across the risk set.
 
 ```
-score = max(1, round( √( bf_commits_git_5y_p × hhi_commits_git_5y_p ) ))
+score = max(1, round( √( (100 / bf_commits_git_5y) × (hhi_commits_git_5y / 100) ) ))
+      = max(1, round( √( hhi_commits_git_5y / bf_commits_git_5y ) ))
 ```
 
+Both factors are absolute scales, **not within-table percentiles**: `100 / bf`
+maps bus factor 1 → 100, 2 → 50, 4 → 25; `hhi / 100` maps the one-author
+monoculture (HHI 10000) → 100. Percentiles were dropped because the risk set
+is dominated by bus-factor-1 repos, which pinned three quarters of the table
+into one tie block and compressed everything else — a 99%-single-author repo
+(HHI 9868) landed at only p80 because 20% of the population sits even higher.
+The absolute score reads the same inputs at face value, and a repo's score no
+longer shifts when the surrounding population changes. The six `*_p` percentile
+columns remain in the CSV as cross-method audit references.
+
 Every other column — the GitHub `/contributors` `_gh_alltime` figures, the git
-`_full` lifetime figures, and all contributor/commit counts — is emitted for
-inspection and cross-checking only. **None of them feed `score`.**
+`_full` lifetime figures, all contributor/commit counts, and the `*_p`
+percentiles — is emitted for inspection and cross-checking only. **None of
+them feed `score`.**
 
 ## Metrics Roadmap
 
@@ -51,8 +64,7 @@ all commits through the last complete year (`max(settings.years)` = 2025);
 `_gh_alltime` = the GitHub API's uncapped lifetime count as of fetch (no
 per-year breakdown, list capped near 500). Raw long-format signals are fetched
 per-source under `data/sources/`; all derived columns are computed by
-`build_concentration.py`. Only the git `_5y` bus-factor + HHI percentiles feed
-`score`.
+`build_concentration.py`. Only the git `_5y` bus factor + HHI feed `score`.
 
 ```
 Concentration  → data/risk/concentration.csv  (one row per A/B risk repo)
@@ -68,10 +80,10 @@ Concentration  → data/risk/concentration.csv  (one row per A/B risk repo)
 │   └── _5y  (2021–2025 window — the scoring axis)
 │       ├── commits_git_5y               ← Σ non-merge commits in window          [2021–2025]
 │       ├── active_contributors_git_5y   ← derived (merged non-bot, active in win) [2021–2025]
-│       ├── bf_commits_git_5y            ← derived (bus factor)                    [2021–2025]
-│       ├── bf_commits_git_5y_p          ← derived (risk percentile)  ★ scores     [2021–2025]
-│       ├── hhi_commits_git_5y           ← derived (HHI, 0–10000)                  [2021–2025]
-│       └── hhi_commits_git_5y_p         ← derived (risk percentile)  ★ scores     [2021–2025]
+│       ├── bf_commits_git_5y            ← derived (bus factor)       ★ scores     [2021–2025]
+│       ├── bf_commits_git_5y_p          ← derived (risk percentile, audit only)   [2021–2025]
+│       ├── hhi_commits_git_5y           ← derived (HHI, 0–10000)     ★ scores     [2021–2025]
+│       └── hhi_commits_git_5y_p         ← derived (risk percentile, audit only)   [2021–2025]
 │
 ├── GitHub /contributors method  (data/sources/github/contributor-commits.csv)
 │   └── _gh_alltime  (lifetime, list capped ~500 — cross-check only)
@@ -83,8 +95,8 @@ Concentration  → data/risk/concentration.csv  (one row per A/B risk repo)
 │       ├── hhi_commits_gh_alltime          ← derived (HHI, 0–10000)              [lifetime]
 │       └── hhi_commits_gh_alltime_p        ← derived (risk percentile)           [lifetime]
 │
-└── score  (the component score)  ← geometric mean of bf_commits_git_5y_p
-    │                                and hhi_commits_git_5y_p (0–100)
+└── score  (the component score)  ← geometric mean of 100/bf_commits_git_5y
+    │                                and hhi_commits_git_5y/100 (0–100, absolute)
     └─ carried into risk.csv as the column `concentration` (this score only)
 ```
 
@@ -101,9 +113,10 @@ Concentration  → data/risk/concentration.csv  (one row per A/B risk repo)
    compute bus factor, HHI (0–10000), and contributor counts. The git method
    yields both a lifetime (`_full`) and a windowed (`_5y`) figure; the GitHub
    method yields lifetime only (`_gh_alltime`).
-4. **Score** — `add_percentiles` turns the `_5y` bus factor and HHI into risk
-   percentiles (`bf_commits_git_5y_p`, `hhi_commits_git_5y_p`); `score` is their
-   geometric mean, an integer 0–100 (higher = more concentrated = more risk).
+4. **Score** — `score = max(1, round(√(hhi/bf)))` over the `_5y` bus factor and
+   HHI — the geometric mean of the absolute scales `100/bf` and `hhi/100`, an
+   integer 0–100 (higher = more concentrated = more risk). `add_percentiles`
+   still emits the six `*_p` percentile columns as audit references.
 5. **Aggregate** — `aggregate_risk.py` carries **only** `score` into `risk.csv`,
    renamed to the column `concentration`.
 
