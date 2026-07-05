@@ -76,8 +76,12 @@ Value
 │
 └── Cross-ecosystem rollup → value/value.csv
     ├── id                        ← derived (rank by top_eco_pct desc)    [2021–2025]
-    ├── github_repo               ← per-eco package→repo union            [most recent]
-    ├── gh_repo_id                ← GitHub Repos API (numeric repo id)     [most recent]
+    ├── repo                      ← per-eco package→repo union (any host) [most recent]
+    ├── platform                  ← host class of git_url                 [most recent]
+    │                                (github/gitlab/codeberg/bitbucket
+    │                                 /sourcehut/custom, empty for orphans)
+    ├── repo_id                   ← GitHub Repos API id, `gh/<numeric>`   [most recent]
+    │                                (empty for non-GitHub platforms)
     ├── git_url                   ← per-eco git.csv union                  [most recent]
     │                                (GitLab/Codeberg/Sourcehut/Bitbucket
     │                                 /custom hosts when no GH match)
@@ -229,8 +233,8 @@ All dep-tree packages with downloads, PageRank, and value class.
 
 ## Unified output
 
-`data/value/value.csv` is the canonical per-repo table — one row per GitHub
-repo, plus one row per orphan package (no `github_repo`) so nothing is
+`data/value/value.csv` is the canonical per-repo table — one row per repo
+(on any host), plus one row per orphan package (no `repo`) so nothing is
 dropped. **All classes A/B/C are included** — the complete long-tail table
 is kept. Produced by the `unify` step of `uv run python -m src.value.run_value_pipeline`
 (`src/value/unify_value_data.py`), which reads each ecosystem's `results.csv`
@@ -254,8 +258,10 @@ subgraphs.
 | Column | Description |
 |--------|-------------|
 | `id` | Sequential numeric id (sorted by `top_eco_pct` desc) |
-| `github_repo` | Lowercase `owner/repo` slug; empty for orphans |
-| `git_url` | Canonical git clone URL — `https://github.com/<github_repo>.git` for GitHub repos (so a valid repo always carries both `github_repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by `verify_git_urls`. Empty only for orphan packages with no upstream repo at all. |
+| `repo` | Lowercase repo slug on its `platform` — GitHub `owner/repo`, GitLab's arbitrarily-nested `owner/…/repo`, Sourcehut `~user/repo`, custom best-effort path. Empty only for orphans (no upstream repo at all). |
+| `platform` | Host class of `git_url`: `github` / `gitlab` / `bitbucket` / `sourcehut` / `codeberg` / `custom`. Empty for orphan rows with no URL. Downstream GitHub-only consumers (risk, eligibility) filter on `platform == github`. |
+| `repo_id` | Stable repo id namespaced by platform: `gh/<numeric>` (GitHub Repos API id) for a resolved GitHub repo; empty for non-GitHub platforms (no numeric id) and unresolved/404 repos. |
+| `git_url` | Canonical git clone URL — `https://github.com/<repo>.git` for GitHub repos (so a valid repo always carries both `repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by `verify_git_urls`. Empty only for orphan packages with no upstream repo at all. |
 | `ecosystems` | Comma-separated list of ecosystems where the repo has packages (e.g. `crates,npm`) |
 | `packages` | Total package count in the repo |
 | `top_eco` | Ecosystem where the repo is highest-ranked (max PR percentile). `npm` / `pypi` / `crates` / `cpp`. |
@@ -266,9 +272,9 @@ subgraphs.
 
 ### Repo class distribution
 
-After grouping packages by `github_repo` (or as orphans), `value.csv` collapses
-the package rows into one row per repo (GitHub groups) plus one per orphan
-package (no `github_repo`, kept under sequential ids so nothing is dropped).
+After grouping packages by `git_url` / repo (or as orphans), `value.csv` collapses
+the package rows into one row per repo plus one per orphan
+package (no `repo`, kept under sequential ids so nothing is dropped).
 *Strongest* class is the highest class a repo achieves across any of its
 ecosystems (the `class` column in `value.csv`).
 
@@ -311,25 +317,26 @@ overlay.
 ### Project identity is GitHub-only
 
 Every downstream consumer (risk, eligibility, EOL, GitHub-derived
-contributor metrics) keys off the `github_repo` field.
-Projects that don't live on GitHub are present in `value.csv` with
-`github_repo=""` and are silently excluded from those analyses.
+contributor metrics) keys off GitHub identity — `value.csv` rows with
+`platform == github`. Projects that don't live on GitHub carry a non-GitHub
+`platform` (gitlab / codeberg / custom) and are excluded from those analyses.
 
 Examples affected: glibc (sourceware.org), gcc (gcc.gnu.org / Savannah),
 libunistring (savannah), glib (gitlab.gnome.org), mpfr (gitlab.inria.fr),
 curl (curl.se), ImageMagick (own host), many GNU/Apache/X.Org/KDE
 projects, kernel-adjacent code.
 
-**Status update**: `value.csv` now exposes `git_url` alongside
-`github_repo`, so non-GitHub upstreams are no longer silently dropped at
-the value-pipeline level. Per-ecosystem GitHub vs Git coverage (and the
-load-bearing class-A subset) is in
+**Status update**: `value.csv` now models every repo as a
+`(platform, repo, repo_id)` triple alongside `git_url`, so non-GitHub
+upstreams carry a first-class identity (host + slug) and are no longer
+silently dropped at the value-pipeline level. Per-ecosystem GitHub vs Git
+coverage (and the load-bearing class-A subset) is in
 [docs/stats.md → Value](stats.md#repo-identity-coverage-valuecsv).
 
 Downstream consumers (risk, eligibility, EOL, GitHub contributor metrics)
-still key off `github_repo`, so a non-GitHub-only
-project (glibc, gcc, etc.) still slips out of those analyses even though
-it's now visible in `value.csv` with a populated `git_url`. To fully fix:
+still filter to `platform == github`, so a non-GitHub-only project (glibc,
+gcc, etc.) still slips out of those analyses even though it's now visible in
+`value.csv` with a populated `platform` / `repo` / `git_url`. To fully fix:
 per-host adapters for license/EOL/contributor checks against GitLab API,
 savannah, sourceware, etc.
 

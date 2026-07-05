@@ -2,18 +2,20 @@
 """Value pipeline step — verify every repo's git URL accepts a connection.
 
 Runs after `unify_value_data` has written `data/value/value.csv`. Reads that
-file back, refreshes the two validation caches, sets the `gh_repo_id`
-(identity) column, canonicalises `github_repo` to each repo's current
-(post-rename) name, and rewrites the file.
+file back, refreshes the two validation caches, sets the `repo_id`
+(identity) column, canonicalises a github `repo` to its current (post-rename)
+name, and rewrites the file.
 
-Two strategies, chosen per URL:
+Two strategies, chosen per row's `platform`:
 
-  1. github_repo present → `src.sources.github.fetch_repo_owner_data.fetch_and_persist`
+  1. platform == github → `src.sources.github.fetch_repo_owner_data.fetch_and_persist`
      hits `/repos/{owner}/{repo}` via the GitHub API. Persists richer
      metadata to `data/sources/github/repos.csv` (valid, license, owner,
-     stars, …) so downstream pipelines (eligibility) don't re-fetch.
+     stars, …) so downstream pipelines (eligibility) don't re-fetch. The
+     `repo_id` column is set to `gh/<numeric>`.
   2. non-github canonical git URL → `git ls-remote --exit-code` against the
-     URL itself. Persists OK/FAIL to `data/sources/git/urls.csv`.
+     URL itself. Persists OK/FAIL to `data/sources/git/urls.csv`; `repo_id`
+     stays empty (no numeric id for non-github hosts).
 
 Both layers are TTL'd by `GIT_URL_TTL_DAYS`. This step does NOT write a
 validity verdict onto value.csv — the per-repo `valid` column is produced by
@@ -38,6 +40,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.value.build_git_urls import platform_and_slug
 from src.value.unify_value_data import OUTPUT_FILE, write_value_data
 
 console = Console()
@@ -162,7 +165,7 @@ def _canonicalize_git_url(url: str) -> str:
 
     Returns the cleaned URL, or `""` if there's no git equivalent
     (non-git VCS like Mercurial, dead servers, github URL — github URLs
-    are tracked via the `github_repo` column).
+    are tracked via the `repo` / `platform` columns).
     """
     u = (url or "").strip()
     if not u:
@@ -254,8 +257,8 @@ def _canonicalize_git_url(url: str) -> str:
         return ""
 
     # Drop the raw github URL here; the verification loop re-derives the
-    # canonical github clone URL from the (post-rename) `github_repo` slug, so
-    # every github repo ends up with both an owner/repo slug and a git_url.
+    # canonical github clone URL from the (post-rename) `repo` slug, so every
+    # github repo ends up with both an owner/repo slug and a git_url.
     if re.match(r"^https?://github\.com/", u):
         return ""
 
@@ -323,18 +326,20 @@ def _verify_non_github(urls: list[str],
 
 def verify_urls_in_aggregates(aggs: list[dict],
                               force: bool = False) -> tuple[list[dict], dict]:
-    """Refresh the validation caches and set `gh_repo_id` on every row.
+    """Refresh the validation caches and set `repo_id` on every row.
 
-    Two strategies, one per row's target:
-      • github_repo set → trigger `fetch_repo_owner_data.fetch_and_persist`,
+    Two strategies, one per row's `platform`:
+      • platform == github → trigger `fetch_repo_owner_data.fetch_and_persist`,
         refreshing `data/sources/github/repos.csv` (`valid` + metadata).
       • non-github git_url → `git ls-remote`, cached in
         `data/sources/git/urls.csv`.
 
-    Sets `gh_repo_id` (identity) and canonicalises `github_repo` to its
-    current post-rename name. Does NOT write a validity verdict onto the rows
-    — that is `build_validation`'s job. Returns (aggs, summary_stats); the
-    summary counts are derived directly from the caches. Mutates `aggs`.
+    Sets `repo_id` (`gh/<numeric>` for github, empty otherwise), canonicalises
+    a github `repo` to its current post-rename name, and re-derives
+    `(platform, repo)` for non-github rows off the canonicalised URL. Does NOT
+    write a validity verdict onto the rows — that is `build_validation`'s job.
+    Returns (aggs, summary_stats); the summary counts are derived directly from
+    the caches. Mutates `aggs`.
     """
     # Lazy import: keeps CLI startup snappy when not actually verifying.
     from src.sources.github.fetch_repo_owner_data import (
@@ -363,14 +368,30 @@ def verify_urls_in_aggregates(aggs: list[dict],
                       f"rewritten=[cyan]{rewritten}[/cyan] "
                       f"blanked=[red]{blanked}[/red] (non-git VCS)")
 
-    # Split URLs: github vs non-github
+    # A mechanical rewrite can turn a non-github git_url into a github one
+    # (e.g. gnupg gitweb / xiph → a github mirror). Promote those to a github
+    # `(platform, repo)` identity so they are validated via the GitHub API and
+    # receive a `repo_id` below, keeping the "github repo ⟺ github URL" invariant.
+    promoted = 0
+    for a in aggs:
+        gu = (a.get("git_url") or "").strip()
+        if gu and (a.get("platform") or "").strip().lower() != "github":
+            plat, slug = platform_and_slug(gu)
+            if plat == "github" and slug:
+                a["platform"], a["repo"] = "github", slug
+                promoted += 1
+    if promoted:
+        console.print(f"  [dim]promoted to github identity "
+                      f"(rewritten URL):[/dim] [cyan]{promoted}[/cyan]")
+
+    # Split URLs: github (by platform) vs non-github (by URL)
     github_repos: set[str] = set()
     nongithub_urls: set[str] = set()
     for a in aggs:
-        gh = (a.get("github_repo") or "").strip().lower()
+        repo = (a.get("repo") or "").strip().lower()
         gu = (a.get("git_url") or "").strip()
-        if gh and "/" in gh:
-            github_repos.add(gh)
+        if (a.get("platform") or "").strip().lower() == "github" and "/" in repo:
+            github_repos.add(repo)
         elif gu:
             nongithub_urls.add(gu)
 
@@ -402,27 +423,30 @@ def verify_urls_in_aggregates(aggs: list[dict],
     # --- Non-github side ---
     nongithub_ok = _verify_non_github(sorted(nongithub_urls), force=force)
 
-    # --- Annotate identity (gh_repo_id) + canonicalise renamed slugs ---
+    # --- Annotate identity (repo_id) + canonicalise renamed slugs ---
     # Validity verdicts are NOT written onto the rows here — they live in
     # `validation.csv` / the `valid` column produced by the separate
     # `build_validation` step (which rolls up the two caches refreshed above).
-    # This loop only sets `gh_repo_id` (identity), rewrites `github_repo` to
-    # its current post-rename name, and tallies the summary counts directly
+    # This loop only sets `repo_id` (identity), rewrites `repo` to its current
+    # post-rename name (github), re-derives `(platform, repo)` for non-github
+    # rows off the canonicalised URL, and tallies the summary counts directly
     # from the caches (gh_meta / nongithub_ok).
     renamed = 0
     valid_rows = invalid_rows = no_url = 0
     invalid_examples: list[tuple[str, str, str]] = []  # (kind, key, url)
     for a in aggs:
-        gh = (a.get("github_repo") or "").strip().lower()
+        repo = (a.get("repo") or "").strip().lower()
         gu = (a.get("git_url") or "").strip()
-        has_gh = bool(gh and "/" in gh)
+        has_gh = (a.get("platform") or "").strip().lower() == "github" and "/" in repo
 
-        meta = gh_meta.get(gh) if has_gh else None
+        meta = gh_meta.get(repo) if has_gh else None
         is_valid = bool(meta) and meta.get("valid", "").lower() == "true"
 
-        # gh_repo_id: GitHub's stable numeric repo id. Only a repo that
-        # resolved (HTTP 200) carries one — sparse 404 rows have none.
-        a["gh_repo_id"] = (meta.get("repo_id") or "") if is_valid else ""
+        # repo_id: `gh/<numeric>` — GitHub's stable repo id, namespaced by
+        # platform. Only a repo that resolved (HTTP 200) carries one; sparse
+        # 404 rows and every non-github repo have none.
+        rid = (meta.get("repo_id") or "").strip() if is_valid else ""
+        a["repo_id"] = f"gh/{rid}" if rid else ""
 
         # Tally by the row's single target. github rows by the GitHub API
         # verdict; non-github rows by the ls-remote result; the rest no-URL.
@@ -431,7 +455,7 @@ def verify_urls_in_aggregates(aggs: list[dict],
                 valid_rows += 1
             else:
                 invalid_rows += 1
-                invalid_examples.append(("gh", gh, gu))
+                invalid_examples.append(("gh", repo, gu))
         elif gu:
             if nongithub_ok.get(gu, False):
                 valid_rows += 1
@@ -441,25 +465,29 @@ def verify_urls_in_aggregates(aggs: list[dict],
         else:
             no_url += 1
 
-        # github_repo: rewrite to the repo's *current* name. The GitHub API
-        # follows renames, so `full_name` is the live owner/repo even when we
-        # queried a stale slug. Only a validated repo is canonicalised.
-        if is_valid:
-            full = (meta.get("full_name") or "").strip().lower()
-            if full and "/" in full and full != gh:
-                a["github_repo"] = full
-                renamed += 1
-
-        # git_url: every github repo also carries its canonical clone URL, so a
-        # valid repo has both an owner/repo slug AND a git_url. (git_url is no
-        # longer reserved for non-github upstreams.) Derive it from the
-        # post-rename slug; non-github rows keep their canonicalised git_url.
-        final_gh = (a.get("github_repo") or "").strip().lower()
-        if final_gh and "/" in final_gh:
-            a["git_url"] = f"https://github.com/{final_gh}.git"
+        if has_gh:
+            # repo: rewrite to the repo's *current* name. The GitHub API
+            # follows renames, so `full_name` is the live owner/repo even when
+            # we queried a stale slug. Only a validated repo is canonicalised.
+            if is_valid:
+                full = (meta.get("full_name") or "").strip().lower()
+                if full and "/" in full and full != repo:
+                    a["repo"] = full
+                    renamed += 1
+            # git_url: every github repo also carries its canonical clone URL,
+            # so a valid repo has both an owner/repo slug AND a git_url. Derive
+            # it from the post-rename slug.
+            final = (a.get("repo") or "").strip().lower()
+            if final and "/" in final:
+                a["git_url"] = f"https://github.com/{final}.git"
+        else:
+            # non-github: the mechanical canonicalisation may have rewritten
+            # git_url onto a different host, so re-derive (platform, repo) from
+            # the final URL to keep the identity and URL consistent.
+            a["platform"], a["repo"] = platform_and_slug(gu) if gu else ("", "")
 
     if renamed:
-        console.print(f"  [dim]github_repo canonicalised to current "
+        console.print(f"  [dim]github repo canonicalised to current "
                       f"name:[/dim] [cyan]{renamed}[/cyan]")
 
     return aggs, {

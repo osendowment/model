@@ -113,17 +113,24 @@ def _archived_map() -> dict[str, bool]:
     return out
 
 
+def _is_github(r: dict) -> bool:
+    """A value.csv row whose repo lives on GitHub (platform == github)."""
+    return (r.get("platform") or "").strip().lower() == "github" and _present(r.get("repo"))
+
+
 def value_stats() -> dict:
     rows = _load("data/value/value.csv")
     arch = _archived_map()
     m = len(rows)
-    gh = sum(1 for r in rows if _present(r.get("github_repo")))
+    gh = sum(1 for r in rows if _is_github(r))
     git = sum(1 for r in rows if _present(r.get("git_url")))
     valid = sum(1 for r in rows if _truthy(r.get("valid")))
     orphan = m - gh
 
     def _is_active(r: dict) -> bool:
-        s = (r.get("github_repo") or "").strip().lower()
+        if not _is_github(r):
+            return False
+        s = (r.get("repo") or "").strip().lower()
         return bool(s) and not arch.get(s, False)
 
     # class distribution: per-ecosystem column + strongest cross-eco `class`
@@ -140,7 +147,7 @@ def value_stats() -> dict:
         sub = [r for r in rows if (r.get("class") or "").strip() == cls]
         by_class[cls] = {
             "repos": len(sub),
-            "github": sum(1 for r in sub if _present(r.get("github_repo"))),
+            "github": sum(1 for r in sub if _is_github(r)),
             "active": sum(1 for r in sub if _is_active(r)),
             "git": sum(1 for r in sub if _present(r.get("git_url"))),
             "valid": sum(1 for r in sub if _truthy(r.get("valid"))),
@@ -157,7 +164,7 @@ def value_stats() -> dict:
             continue
         p = int(r.get("packages") or 0)
         pkg_class[c] += p
-        if _present(r.get("github_repo")):
+        if _is_github(r):
             ght_class[c] += p
 
     # per-ecosystem funnel: top-of-funnel from stats.csv, tail from results.csv

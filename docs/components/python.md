@@ -80,5 +80,5 @@ Per-package class counts await the next full pipeline run — the per-package
 - **Lowest GitHub coverage of the four ecosystems.** The BigQuery extract
   carried only GitHub URLs at fetch time, so non-GitHub upstreams (GitLab,
   self-hosted) have no `package → repo` link. Because Risk and Eligibility
-  both key off `github_repo`, this caps how many PyPI repos can be scored,
-  even for class-A packages.
+  both filter to `platform == github`, this caps how many PyPI repos can be
+  scored, even for class-A packages.

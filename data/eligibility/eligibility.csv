@@ -6,7 +6,7 @@ adobe/react-spectrum,208362715,True,True,False,True,False
 agronholm/anyio,145337588,True,True,True,True,True
 agronholm/exceptiongroup,447694800,True,True,True,True,True
 ai/nanoid,99401299,True,True,True,True,True
-aio-libs-abandoned/async-timeout,67703198,False,True,True,False,False
+aio-libs-abandoned/async-timeout,67703198,True,True,True,False,False
 aio-libs/aiobotocore,36618494,True,True,True,True,True
 aio-libs/aiohttp,13258039,False,True,True,True,False
 aio-libs/aiosignal,205007356,True,True,True,True,True
@@ -50,7 +50,6 @@ azure/msrest-for-python,71186468,True,False,True,False,False
 azuread/microsoft-authentication-library-for-python,67243113,True,True,False,True,False
 babel/babel,24560307,True,True,True,True,True
 babel/babel-polyfills,190579283,True,True,True,True,True
-babel/minify,55723051,True,True,True,True,True
 bdwgc/bdwgc,2109456,False,False,True,True,False
 beatgammit/base64-js,2853282,True,True,True,True,True
 benjaminp/six,77868600,True,False,True,True,False
@@ -169,6 +168,7 @@ eemeli/yaml,119439276,True,True,True,True,True
 ehmicky/human-signals,214467546,True,False,True,True,False
 eliben/pycparser,10589864,True,False,True,True,False
 emotion-js/emotion,92570536,True,True,True,True,True
+enarx/ciborium,313759241,True,False,True,True,False
 encode/httpcore,237210639,True,True,True,True,True
 encode/httpx,179492861,True,True,True,True,True
 epoberezkin/fast-deep-equal,94483360,True,True,True,True,True
@@ -529,6 +529,7 @@ mozilla/source-map,2014930,True,True,True,True,True
 mrabarnett/mrab-regex,309446978,True,False,True,True,False
 mrmlnc/fast-glob,77467076,True,False,True,True,False
 msgpack/msgpack-python,2242705,True,False,True,True,False
+mui/material-ui,23083156,True,True,False,True,False
 myrne/performance-now,10219264,True,False,True,True,False
 mysticatea/abort-controller,105228556,True,True,True,True,True
 mysticatea/event-target-shim,31137469,True,True,True,True,True
@@ -602,7 +603,7 @@ prettier/prettier,75104123,True,True,True,True,True
 primus/eventemitter3,13100677,True,False,True,True,False
 proptest-rs/proptest,94702898,True,False,True,True,False
 protobufjs/protobuf.js,8507859,True,True,True,True,True
-protocolbuffers/protobuf,23357588,False,True,False,True,False
+protocolbuffers/protobuf,23357588,True,True,False,True,False
 psf/requests,1362490,True,True,True,True,True
 psycopg/psycopg2,7730829,True,True,True,True,True
 pvorb/clone,2317381,True,True,True,True,True
@@ -719,6 +720,7 @@ selinuxproject/selinux,20648799,False,False,True,True,False
 serde-rs/bytes,87358441,True,False,True,True,False
 serde-rs/json,35894511,True,False,True,True,False
 serde-rs/serde,14367737,True,True,True,True,True
+servo/core-foundation-rs,5621513,True,False,True,True,False
 servo/rust-fnv,33499190,True,True,True,True,True
 servo/rust-smallvec,33456236,True,True,True,True,True
 servo/rust-url,14934771,True,True,True,True,True

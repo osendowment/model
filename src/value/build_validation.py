@@ -5,9 +5,9 @@ Runs after `verify_git_urls` (which refreshes the two source caches). This
 step is a pure rollup — it does NO network IO:
 
   1. Collect every distinct validation *target* from `data/value/value.csv`:
-     a row's `github_repo` (type `github_repo`) or, for non-GitHub repos, its
-     `git_url` (type `git_url`). Each target accumulates the `sources` — the
-     ecosystems whose packages resolve to it.
+     a github row's `repo` slug (type `github_repo`) or, for non-GitHub repos,
+     its `git_url` (type `git_url`). Each target accumulates the `sources` —
+     the ecosystems whose packages resolve to it.
   2. Load verdicts from the two caches:
      - `data/sources/github/repos.csv`  (`valid` + `fetched_at`), keyed by both
        the queried `repo` slug and the rename-resolved `full_name`.
@@ -17,9 +17,9 @@ step is a pure rollup — it does NO network IO:
      pipeline error (run `verify_git_urls` first) — never silently invalid.
   5. Write `data/value/validation.csv` (target, type, sources, checked_at,
      valid) and join the per-repo `valid` verdict back into `value.csv`:
-     `True` iff the repo has a validated `github_repo` (mirror); `False`
+     `True` iff the repo has a validated github `repo` (mirror); `False`
      otherwise — no GitHub repo at all (orphan or non-GitHub-only upstream),
-     or a `github_repo` that 404s.
+     or a github `repo` that 404s.
 
 Usage:
     uv run python -m src.value.build_validation
@@ -54,16 +54,16 @@ VALIDATION_FIELDS = ["target", "type", "sources", "checked_at", "valid"]
 def _row_target(row: dict) -> tuple[str, str] | None:
     """Return a value row's single validation target `(target, type)`, or None.
 
-    A row with a `github_repo` is validated via the GitHub API
-    (type `github_repo`); a row with only a non-GitHub `git_url` is validated
-    via `git ls-remote` (type `git_url`). A row with neither is an orphan.
-    The github branch wins, so a github row's derived github `git_url` is never
-    double-counted as a separate target.
+    A row whose `platform` is `github` is validated via the GitHub API
+    (type `github_repo`, keyed by its `repo` slug); a row with only a
+    non-GitHub `git_url` is validated via `git ls-remote` (type `git_url`). A
+    row with neither is an orphan. The github branch wins, so a github row's
+    derived github `git_url` is never double-counted as a separate target.
     """
-    gh = (row.get("github_repo") or "").strip().lower()
+    repo = (row.get("repo") or "").strip().lower()
     gu = (row.get("git_url") or "").strip()
-    if gh and "/" in gh:
-        return (gh, "github_repo")
+    if (row.get("platform") or "").strip().lower() == "github" and "/" in repo:
+        return (repo, "github_repo")
     if gu:
         return (gu, "git_url")
     return None
@@ -127,7 +127,7 @@ def apply_overrides(
 ) -> dict[tuple[str, str], dict]:
     """Force verdicts from `overrides.csv` `valid` pins (override wins).
 
-    A pin resolves to the override's `github_repo` target, else its `git_url`
+    A pin resolves to the override's `repo` (github) target, else its `git_url`
     target. A pin with no resolvable target is skipped. Mutates and returns
     `verdicts`.
     """
@@ -135,14 +135,14 @@ def apply_overrides(
         pin = (ov.get("valid") or "").strip()
         if not pin:
             continue
-        if ov.get("github_repo"):
-            key = (ov["github_repo"].strip().lower(), "github_repo")
+        if ov.get("repo"):
+            key = (ov["repo"].strip().lower(), "github_repo")
         elif ov.get("git_url"):
             key = (ov["git_url"].strip().lower(), "git_url")
         else:
             console.print(
                 f"[yellow]overrides.csv: {pkg}/{eco} pins valid={pin} but has "
-                "no github_repo/git_url target — skipped[/yellow]"
+                "no repo/git_url target — skipped[/yellow]"
             )
             continue
         verdicts[key] = {"valid": pin.lower() == "true", "checked_at": "override"}
@@ -195,11 +195,12 @@ def join_valid(
     - non-GitHub-only upstreams (sourceware / savannah / gitlab / …) — a
       non-GitHub `git_url` does not make a repo valid on its own; add a GitHub
       mirror to `overrides.csv` to bring one into scope,
-    - a `github_repo` that 404s.
+    - a github `repo` that 404s.
     """
     for row in value_rows:
-        gh = (row.get("github_repo") or "").strip().lower()
-        valid = bool(gh) and target_valid.get((gh, "github_repo")) is True
+        repo = (row.get("repo") or "").strip().lower()
+        is_github = (row.get("platform") or "").strip().lower() == "github"
+        valid = is_github and bool(repo) and target_valid.get((repo, "github_repo")) is True
         row["valid"] = "True" if valid else "False"
     return value_rows
 

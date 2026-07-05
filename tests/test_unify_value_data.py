@@ -20,6 +20,7 @@ from src.value.unify_value_data import (
     FIELDS,
     _github_repo_from_url,
     _group_key,
+    _identity,
     _normalise_repo,
     _read_dep_tree_nodes,
     _read_eol_index,
@@ -54,6 +55,32 @@ class TestGithubRepoFromUrl:
         assert _github_repo_from_url("https://github.com/topics/python") == ""
         # a real repo whose owner merely resembles a reserved word is fine.
         assert _github_repo_from_url("https://github.com/orgsync/react-list") == "orgsync/react-list"
+
+
+# ── _identity ────────────────────────────────────────────────────────────────
+
+class TestIdentity:
+    def test_github_slug_wins(self):
+        # A GitHub slug is present → (platform=github, repo=slug), and the
+        # git_url is ignored for the identity (verify_git_urls reconciles it).
+        assert _identity("owner/repo", "https://github.com/owner/repo.git") == (
+            "github", "owner/repo")
+
+    def test_github_slug_wins_over_nongithub_url(self):
+        assert _identity("owner/repo", "https://gitlab.com/x/y.git") == (
+            "github", "owner/repo")
+
+    def test_derives_platform_and_repo_from_gitlab_url(self):
+        # No slug → read (platform, repo) straight off the non-GitHub git_url.
+        assert _identity("", "https://gitlab.com/gnome/glib.git") == (
+            "gitlab", "gnome/glib")
+
+    def test_derives_custom_host_from_url(self):
+        assert _identity("", "https://sourceware.org/git/glibc.git") == (
+            "custom", "git/glibc")
+
+    def test_orphan_no_slug_no_url(self):
+        assert _identity("", "") == ("", "")
 
 
 # ── small unit helpers ───────────────────────────────────────────────────────
@@ -287,7 +314,8 @@ class TestAggregateByRepo:
         ], drop_d_class=False)
         assert len(aggs) == 1
         a = aggs[0]
-        assert a["github_repo"] == "x/y"
+        assert a["repo"] == "x/y"
+        assert a["platform"] == "github"
         assert a["git_url"] == "https://github.com/x/y.git"
         assert a["packages"] == 1
         assert a["ecosystems"] == "npm"
@@ -312,7 +340,8 @@ class TestAggregateByRepo:
                      pagerank="1.0", value_class="A"),
         ], drop_d_class=False)
         assert len(aggs) == 2
-        babel = next(a for a in aggs if a["github_repo"] == "babel/babel")
+        babel = next(a for a in aggs if a["repo"] == "babel/babel")
+        assert babel["platform"] == "github"
         assert babel["packages"] == 2
         # Highest PR within babel monorepo is @babel/parser
         assert babel["top_eco_pkg"] == "@babel/parser"
@@ -326,7 +355,10 @@ class TestAggregateByRepo:
         ], drop_d_class=False)
         assert len(aggs) == 2
         glibc = next(a for a in aggs if a["top_eco_pkg"] == "glibc")
-        assert glibc["github_repo"] == ""
+        # Non-GitHub upstream: identity is derived from the git_url via
+        # platform_and_slug (sourceware cgit → custom host, `git/glibc` path).
+        assert glibc["platform"] == "custom"
+        assert glibc["repo"] == "git/glibc"
         assert glibc["git_url"] == "https://sourceware.org/git/glibc.git"
 
     def test_cross_ecosystem_strongest_class_wins(self):
@@ -344,7 +376,7 @@ class TestAggregateByRepo:
             _pkg_row("xnpm", "npm", github_repo="x/x", pagerank="0.001"),
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
-        x = next(a for a in aggs if a["github_repo"] == "x/x")
+        x = next(a for a in aggs if a["repo"] == "x/x")
         assert set(x["ecosystems"].split(",")) == {"npm", "pypi"}
         assert x["class_pypi"] == "A"
         assert x["class_npm"] == "C"
@@ -363,7 +395,7 @@ class TestAggregateByRepo:
             _pkg_row("p3", "npm", github_repo="r/3", pagerank="8"),   # C
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
-        by_repo = {a["github_repo"]: a["class_npm"] for a in aggs}
+        by_repo = {a["repo"]: a["class_npm"] for a in aggs}
         assert by_repo == {"r/1": "A", "r/2": "B", "r/3": "C"}
 
     def test_sort_orders_by_top_eco_pct_desc(self):
@@ -374,7 +406,7 @@ class TestAggregateByRepo:
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         # `hi` (highest PR) sorts first, `low` last.
-        assert [a["github_repo"] for a in aggs] == ["a/a", "m/m", "z/z"]
+        assert [a["repo"] for a in aggs] == ["a/a", "m/m", "z/z"]
 
     def test_sort_pushes_no_pr_groups_to_end(self):
         rows = [
@@ -384,10 +416,10 @@ class TestAggregateByRepo:
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         # The PR-bearing row must come first; the PR-less row sinks
         first, second = aggs
-        assert first["github_repo"] == "a/a"
+        assert first["repo"] == "a/a"
         assert first["top_eco_pct"] == 0.0  # only entry → cum_share=100% → pct=0
         # The no-PR group has total=0 path; it still gets a class (C) but is sorted after.
-        assert second["github_repo"] == "b/b"
+        assert second["repo"] == "b/b"
 
 
     def test_internals_are_stripped_from_output(self):
@@ -414,7 +446,8 @@ class TestAggregateByRepo:
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         assert len(aggs) == 1
-        assert aggs[0]["github_repo"] == "x/y"
+        assert aggs[0]["repo"] == "x/y"
+        assert aggs[0]["platform"] == "github"
 
     def test_mismatched_github_repo_does_not_collide_with_sibling_repo(self):
         # Regression: when two repos under the same owner share an
@@ -441,7 +474,7 @@ class TestAggregateByRepo:
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         assert len(aggs) == 2
-        slugs = sorted(a["github_repo"] for a in aggs)
+        slugs = sorted(a["repo"] for a in aggs)
         assert slugs == ["org/main", "org/main-contrib"]
 
     def test_keeps_member_github_repo_when_git_column_is_wrong(self):
@@ -457,7 +490,8 @@ class TestAggregateByRepo:
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         assert len(aggs) == 1
-        assert aggs[0]["github_repo"] == "python-attrs/attrs"
+        assert aggs[0]["repo"] == "python-attrs/attrs"
+        assert aggs[0]["platform"] == "github"
 
     def test_sponsors_url_with_two_members_does_not_pick_sponsor_slug(self):
         # Real pypi case: two unrelated packages both carry a wrong
@@ -477,7 +511,7 @@ class TestAggregateByRepo:
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         assert len(aggs) == 1
         # Tied 1-1; URL is filtered (sponsors/); alphabetic tiebreak.
-        assert aggs[0]["github_repo"] == "python-attrs/attrs"
+        assert aggs[0]["repo"] == "python-attrs/attrs"
 
     def test_git_url_slug_is_authoritative_over_member_field(self):
         # The git URL (ecosyste.ms-sourced) wins over the github_repo field.
@@ -491,7 +525,7 @@ class TestAggregateByRepo:
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         assert len(aggs) == 1
-        assert aggs[0]["github_repo"] == "influxdb/influxdb-python"
+        assert aggs[0]["repo"] == "influxdb/influxdb-python"
 
     def test_git_url_slug_beats_member_field_majority(self):
         # Even a unanimous github_repo field loses to a usable git URL slug.
@@ -504,7 +538,7 @@ class TestAggregateByRepo:
                 for i in range(5)]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         assert len(aggs) == 1
-        assert aggs[0]["github_repo"] == "typeshed-internal/stub_uploader"
+        assert aggs[0]["repo"] == "typeshed-internal/stub_uploader"
 
     def test_rename_twins_merge_via_canon(self):
         """Two packages whose git URLs are the old and new slug of the SAME
@@ -520,7 +554,8 @@ class TestAggregateByRepo:
         canon = {"facebook/jest": "jestjs/jest", "jestjs/jest": "jestjs/jest"}
         aggs = aggregate_by_repo(rows, canon=canon)
         assert len(aggs) == 1                               # one repo, not two
-        assert aggs[0]["github_repo"] == "jestjs/jest"
+        assert aggs[0]["repo"] == "jestjs/jest"
+        assert aggs[0]["platform"] == "github"
         assert aggs[0]["packages"] == 2                     # both pkgs, PR combined
 
     def test_canon_empty_leaves_rename_twins_split(self):
@@ -560,7 +595,7 @@ class TestRepoOverrides:
     `@sinclair/typebox`, whose latest npm version points at a placeholder
     repo). Applied as the last step of `aggregate_by_repo`, it must win over
     the registry-derived value. Each override is a dict
-    `{"github_repo", "git_url", "valid"}`; the `valid` pin is surfaced by the
+    `{"repo", "git_url", "valid"}`; the `valid` pin is surfaced by the
     loader but applied later by `build_validation`, not here.
     """
 
@@ -569,31 +604,31 @@ class TestRepoOverrides:
 
     def test_load_overrides_parses_and_normalises(self, tmp_path):
         p = tmp_path / "overrides.csv"
-        _write_csv(p, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"],
+        _write_csv(p, ["package", "ecosystem", "repo", "git_url", "valid", "reason"],
                    [["@sinclair/typebox", "npm", "SinclairZX81/TypeBox", "", "", "bad npm meta"]])
         idx = load_repo_overrides(p)
         # key is (package, ecosystem); slug is lowercased like the rest of the pipeline
         assert idx == {("@sinclair/typebox", "npm"):
-                       {"github_repo": "sinclairzx81/typebox", "git_url": "", "valid": ""}}
+                       {"repo": "sinclairzx81/typebox", "git_url": "", "valid": ""}}
 
     def test_load_overrides_skips_blank_reason(self, tmp_path):
         # A curated override MUST carry a reason; a blank-reason row is dropped.
         p = tmp_path / "overrides.csv"
-        _write_csv(p, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"],
+        _write_csv(p, ["package", "ecosystem", "repo", "git_url", "valid", "reason"],
                    [["pkg", "npm", "owner/repo", "", "", ""]])
         assert load_repo_overrides(p) == {}
 
     def test_load_overrides_surfaces_git_url_and_valid_pin(self, tmp_path):
         # A git_url-only override and a valid-only pin both load (with a reason).
         p = tmp_path / "overrides.csv"
-        _write_csv(p, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"],
+        _write_csv(p, ["package", "ecosystem", "repo", "git_url", "valid", "reason"],
                    [["pkg-a", "pypi", "", "https://Example.com/X.git", "", "non-gh upstream"],
                     ["pkg-b", "crates", "owner/repo", "", "True", "rescue false-negative"]])
         idx = load_repo_overrides(p)
         assert idx[("pkg-a", "pypi")] == {
-            "github_repo": "", "git_url": "https://example.com/x.git", "valid": ""}
+            "repo": "", "git_url": "https://example.com/x.git", "valid": ""}
         assert idx[("pkg-b", "crates")] == {
-            "github_repo": "owner/repo", "git_url": "", "valid": "True"}
+            "repo": "owner/repo", "git_url": "", "valid": "True"}
 
     def test_override_forces_github_repo_over_registry_value(self):
         # A package whose registry-derived github_repo / git_url point at the
@@ -608,19 +643,22 @@ class TestRepoOverrides:
                      pagerank="1.0", value_class="A"),
         ]
         overrides = {("some-pkg", "npm"):
-                     {"github_repo": "real/upstream", "git_url": "", "valid": ""}}
+                     {"repo": "real/upstream", "git_url": "", "valid": ""}}
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         # Without the override the aggregate carries the wrong repo …
-        assert aggs[0]["github_repo"] == "evil/placeholder"
+        assert aggs[0]["repo"] == "evil/placeholder"
         # … applying the override forces the correct repo + consistent git_url.
         fixed = apply_repo_overrides(aggs, rows, overrides)
-        assert fixed[0]["github_repo"] == "real/upstream"
+        assert fixed[0]["repo"] == "real/upstream"
+        assert fixed[0]["platform"] == "github"
         assert fixed[0]["git_url"] == "https://github.com/real/upstream.git"
 
-    def test_git_url_only_override_sets_url_and_clears_github_repo(self):
+    def test_git_url_only_override_sets_url_and_rederives_identity(self):
         # A git_url-only override declares a non-GitHub canonical source: it
-        # rewrites git_url AND clears any member-derived github_repo so the
-        # git_url becomes the validation target.
+        # rewrites git_url AND re-derives (platform, repo) from that URL,
+        # dropping the member-derived github identity so the new git_url
+        # becomes the validation target. Here a GitLab URL → platform=gitlab
+        # and the gitlab project path as repo.
         rows = [
             _pkg_row("some-pkg", "pypi",
                      github_repo="owner/repo",
@@ -628,11 +666,13 @@ class TestRepoOverrides:
                      pagerank="1.0", value_class="A"),
         ]
         overrides = {("some-pkg", "pypi"):
-                     {"github_repo": "", "git_url": "https://example.com/x.git", "valid": ""}}
+                     {"repo": "", "git_url": "https://gitlab.com/gnome/glib.git", "valid": ""}}
         aggs = aggregate_by_repo(rows, drop_d_class=False)
         fixed = apply_repo_overrides(aggs, rows, overrides)
-        assert fixed[0]["git_url"] == "https://example.com/x.git"
-        assert fixed[0]["github_repo"] == ""
+        assert fixed[0]["git_url"] == "https://gitlab.com/gnome/glib.git"
+        assert fixed[0]["platform"] == "gitlab"
+        assert fixed[0]["repo"] == "gnome/glib"
+        assert "github_repo" not in fixed[0]
 
     def test_override_is_keyed_per_ecosystem(self):
         # An override for npm must not touch a same-named pypi package.
@@ -643,22 +683,22 @@ class TestRepoOverrides:
                      git_url="https://github.com/other/repo.git", pagerank="1.0"),
         ]
         overrides = {("typebox", "npm"):
-                     {"github_repo": "right/repo", "git_url": "", "valid": ""}}
+                     {"repo": "right/repo", "git_url": "", "valid": ""}}
         aggs = apply_repo_overrides(
             aggregate_by_repo(rows, drop_d_class=False), rows, overrides)
-        by_pkg = {a["top_eco_pkg"]: a for a in aggs}
         npm_agg = next(a for a in aggs if a["git_url"].endswith("right/repo.git"))
-        assert npm_agg["github_repo"] == "right/repo"
+        assert npm_agg["repo"] == "right/repo"
+        assert npm_agg["platform"] == "github"
         # the pypi typebox group is untouched
-        pypi_agg = next(a for a in aggs if a["github_repo"] == "other/repo")
+        pypi_agg = next(a for a in aggs if a["repo"] == "other/repo")
         assert pypi_agg["git_url"] == "https://github.com/other/repo.git"
 
     def test_no_overrides_is_a_noop(self):
         rows = [_pkg_row("a", "npm", github_repo="x/y", pagerank="1.0")]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
-        before = aggs[0]["github_repo"]
+        before = aggs[0]["repo"]
         after = apply_repo_overrides(aggs, rows, {})
-        assert after[0]["github_repo"] == before
+        assert after[0]["repo"] == before
 
     def test_override_applied_end_to_end_via_aggregate_by_repo(self, tmp_path):
         # Drives the real chokepoint: aggregate_by_repo calls apply_repo_overrides
@@ -666,7 +706,7 @@ class TestRepoOverrides:
         # a temp file so the test is hermetic.
         import src.value.unify_value_data as mod
         ov = tmp_path / "overrides.csv"
-        _write_csv(ov, ["package", "ecosystem", "github_repo", "git_url", "valid", "reason"],
+        _write_csv(ov, ["package", "ecosystem", "repo", "git_url", "valid", "reason"],
                    [["@sinclair/typebox", "npm", "sinclairzx81/typebox", "", "", "wrong upstream"]])
         original = mod.OVERRIDES_FILE
         mod.OVERRIDES_FILE = ov
@@ -680,13 +720,14 @@ class TestRepoOverrides:
             aggs = aggregate_by_repo(rows, drop_d_class=False)
         finally:
             mod.OVERRIDES_FILE = original
-        assert aggs[0]["github_repo"] == "sinclairzx81/typebox"
+        assert aggs[0]["repo"] == "sinclairzx81/typebox"
+        assert aggs[0]["platform"] == "github"
         assert aggs[0]["git_url"] == "https://github.com/sinclairzx81/typebox.git"
 
     def test_shipped_overrides_file_includes_typebox(self):
         # The committed override file must carry the typebox correction.
         idx = load_repo_overrides()
-        assert idx[("@sinclair/typebox", "npm")]["github_repo"] == "sinclairzx81/typebox"
+        assert idx[("@sinclair/typebox", "npm")]["repo"] == "sinclairzx81/typebox"
 
 
 # ── _strip_internals direct test ─────────────────────────────────────────────
@@ -694,12 +735,12 @@ class TestRepoOverrides:
 class TestStripInternals:
     def test_drops_scratch_keys(self):
         d = {
-            "github_repo": "x/y", "_pkgs_npm": 5,
+            "repo": "x/y", "platform": "github", "_pkgs_npm": 5,
             "_pr_sum_npm": 1.0, "_pr_pct_npm": 99.0, "_top_pkg_npm": "x",
             "group_key": "x/y", "class": "A",
         }
         clean = _strip_internals(d)
-        assert clean == {"github_repo": "x/y", "class": "A"}
+        assert clean == {"repo": "x/y", "platform": "github", "class": "A"}
 
 
 # ── write_value_data ─────────────────────────────────────────────────────────
@@ -715,7 +756,8 @@ class TestWriteValueData:
             written = list(reader)
             assert reader.fieldnames == FIELDS
         assert len(written) == 1
-        assert written[0]["github_repo"] == "x/y"
+        assert written[0]["repo"] == "x/y"
+        assert written[0]["platform"] == "github"
         # Single-package universe → cum_share=100% → class C (see
         # test_single_package_single_ecosystem for the reasoning).
         assert written[0]["class"] == "C"
@@ -783,14 +825,17 @@ class TestEndToEnd:
             assert csv.DictReader(f).fieldnames == FIELDS
 
         # Babel monorepo collapsed
-        babel = next(r for r in written if r["github_repo"] == "babel/babel")
+        babel = next(r for r in written if r["repo"] == "babel/babel")
+        assert babel["platform"] == "github"
         assert babel["packages"] == "2"
         assert babel["top_eco_pkg"] == "@babel/core"  # higher pagerank than parser
         assert babel["ecosystems"] == "npm"
 
-        # Glibc orphan keeps its non-GitHub git_url
+        # Glibc's non-GitHub upstream keeps its git_url; identity is derived
+        # from it (sourceware cgit → custom host, `git/glibc` path).
         glibc = next(r for r in written if r["top_eco_pkg"] == "glibc")
-        assert glibc["github_repo"] == ""
+        assert glibc["platform"] == "custom"
+        assert glibc["repo"] == "git/glibc"
         assert glibc["git_url"] == "https://sourceware.org/git/glibc.git"
         assert glibc["ecosystems"] == "cpp"
 
@@ -802,22 +847,29 @@ class TestInvariants:
         assert CLASS_RANK == {"A": 0, "B": 1, "C": 2}
 
     def test_fields_contains_required_columns(self):
-        for col in ("github_repo", "git_url", "ecosystems", "packages",
+        for col in ("repo", "platform", "repo_id", "git_url", "valid",
+                    "ecosystems", "packages",
                     "top_eco", "top_eco_pkg", "top_eco_pct", "class"):
             assert col in FIELDS
         for eco in ECOSYSTEMS:
             assert f"class_{eco}" in FIELDS
+        # the old bare-slug column is gone — identity is now (repo, platform, repo_id)
+        assert "github_repo" not in FIELDS
+        assert "gh_repo_id" not in FIELDS
         # is_eol is intentionally NOT in FIELDS — owned by eligibility-data.csv
         assert "is_eol" not in FIELDS
 
     def test_ecosystems_tuple_canonical(self):
         assert ECOSYSTEMS == ("npm", "pypi", "crates", "cpp")
 
-    def test_gh_repo_id_follows_github_repo(self):
-        # gh_repo_id is written directly after github_repo so the repo's
-        # name and its stable numeric id sit together in value-data.csv.
-        i = FIELDS.index("github_repo")
-        assert FIELDS[i + 1] == "gh_repo_id"
+    def test_identity_columns_lead_fields(self):
+        # The repo-identity triple leads value.csv in a fixed order:
+        # repo, platform, repo_id — the slug, its host class, and the stable
+        # numeric id sit together at the front of the row.
+        assert FIELDS.index("repo") == 0
+        assert FIELDS.index("platform") == 1
+        assert FIELDS.index("repo_id") == 2
+        assert FIELDS[3] == "git_url"
 
     def test_valid_column_present_and_legacy_columns_dropped(self):
         # The unified `valid` column replaces the old gh_valid/git_valid pair;

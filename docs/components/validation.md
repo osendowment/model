@@ -24,8 +24,8 @@ source caches this step reads.
 Steps:
 
 1. **Collect targets** from `data/value/value.csv`. For each value row,
-   `_row_target` picks a single target: the row's `github_repo` (type
-   `github_repo`) if it holds an `owner/repo` slug, else its non-GitHub
+   `_row_target` picks a single target: the row's `repo` slug (type
+   `github_repo`) when its `platform == github`, else its non-GitHub
    `git_url` (type `git_url`). The GitHub branch wins, so a GitHub row's derived
    `git_url` is never double-counted. A row with neither is an **orphan** and
    contributes no target. Each target accumulates the `sources` — the ecosystems
@@ -37,7 +37,7 @@ Steps:
    - `data/sources/git/urls.csv` — `valid` + `checked_at`, keyed by `url`.
 3. **Apply override pins** from `data/value/overrides.csv`. A row there may pin a
    target's validity via its `valid` column (`True`/`False`); the pin resolves
-   to the override's `github_repo` target, else its `git_url` target, and
+   to the override's `repo` target, else its `git_url` target, and
    **overrides whatever the cache said** (its `checked_at` is recorded as the
    literal string `override`). A pin with no resolvable target is skipped with a
    warning.
@@ -64,7 +64,7 @@ row's target verdict:
 |---------|---------|-------------|
 | `True`  | The repo's URL is real/reachable. | The row's target resolved to a `True` verdict (AND across targets — currently one target per row, but the logic generalises to a future row carrying both a GitHub repo and a distinct non-GitHub URL). |
 | `False` | The repo's URL is invalid / unreachable. | The row's target resolved to a non-`True` verdict (cache `valid=False`, or a `False` override pin). |
-| *(empty)* | Orphan row — there is nothing to validate. | `_row_target` returned `None`: the row has neither a `github_repo` slug nor a `git_url`. |
+| *(empty)* | Orphan row — there is nothing to validate. | `_row_target` returned `None`: the row is neither a github `repo` nor has a `git_url`. |
 
 So `validation.csv` is the per-target ledger and `value.csv`'s `valid` is its
 per-row projection. Every non-orphan `value.csv` row's `valid` traces directly

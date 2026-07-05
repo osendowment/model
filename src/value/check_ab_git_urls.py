@@ -6,13 +6,13 @@ a **reachable** source — a live GitHub repo or a cloneable git URL. This check
 lists every A/B (risk-scope) project whose `valid` column is not `True`, i.e.
 either:
 
-  - **no target** — neither `github_repo` nor `git_url` resolved (the project
+  - **no target** — neither `repo` nor `git_url` resolved (the project
     lives on a non-git forge we never mapped: Mercurial/SVN/bzr, etc.), or
-  - **dead target** — a `github_repo`/`git_url` that failed validation (404 /
+  - **dead target** — a `repo`/`git_url` that failed validation (404 /
     `git ls-remote` failed).
 
 These are the projects that **require a manual override** in
-`data/value/overrides.csv` (a corrected `github_repo`, a canonical `git_url`,
+`data/value/overrides.csv` (a corrected `repo`, a canonical `git_url`,
 or a `valid` pin). The check exits non-zero when any are found, so it can gate
 CI / a pipeline run.
 
@@ -47,7 +47,7 @@ def find_invalid_ab(value_file: Path = VALUE_FILE) -> list[dict]:
                 continue
             if (row.get("valid") or "").strip() == "True":
                 continue
-            gh = (row.get("github_repo") or "").strip()
+            gh = (row.get("repo") or "").strip()
             gu = (row.get("git_url") or "").strip()
             if not gh and not gu:
                 reason = "no repo/url resolved"
@@ -74,10 +74,10 @@ def main() -> int:
     table.add_column("package")
     table.add_column("eco")
     table.add_column("valid")
-    table.add_column("target (github_repo / git_url)")
+    table.add_column("target (repo / git_url)")
     table.add_column("reason")
     for r in sorted(rows, key=lambda r: ((r.get("top_eco") or ""), (r.get("top_eco_pkg") or ""))):
-        target = (r.get("github_repo") or "").strip() or (r.get("git_url") or "").strip() or "—"
+        target = (r.get("repo") or "").strip() or (r.get("git_url") or "").strip() or "—"
         table.add_row(
             (r.get("top_eco_pkg") or "").strip() or "?",
             (r.get("top_eco") or "").strip(),
@@ -87,7 +87,7 @@ def main() -> int:
         )
     console.print(table)
     console.print(
-        f"\n[yellow]Add a corrected github_repo / canonical git_url (or a valid "
+        f"\n[yellow]Add a corrected repo / canonical git_url (or a valid "
         f"pin) for each in data/value/overrides.csv, then re-run "
         f"unify → verify_git_urls → build_validation.[/yellow]"
     )

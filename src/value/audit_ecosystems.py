@@ -143,12 +143,12 @@ def _load_results() -> dict[tuple[str, str], dict]:
 
 
 def _load_value_repos() -> set[str]:
-    """Lowercased github_repo set from value.csv (membership check)."""
+    """Lowercased `repo` set from value.csv (membership check)."""
     if not VALUE_CSV.exists():
         return set()
-    return {(r.get("github_repo") or "").strip().lower()
+    return {(r.get("repo") or "").strip().lower()
             for r in csv.DictReader(open(VALUE_CSV, encoding="utf-8"))
-            if (r.get("github_repo") or "").strip()}
+            if (r.get("repo") or "").strip()}
 
 
 # ── audit ──────────────────────────────────────────────────────────────────────

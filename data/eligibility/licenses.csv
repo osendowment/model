@@ -6,7 +6,7 @@ adobe/react-spectrum,208362715,apache-2.0,registry,True
 agronholm/anyio,145337588,mit,registry,True
 agronholm/exceptiongroup,447694800,mit,registry,True
 ai/nanoid,99401299,mit,registry,True
-aio-libs-abandoned/async-timeout,67703198,noassertion,github,
+aio-libs-abandoned/async-timeout,67703198,apache-2.0,registry,True
 aio-libs/aiobotocore,36618494,apache-2.0,registry,True
 aio-libs/aiohttp,13258039,noassertion,github,
 aio-libs/aiosignal,205007356,apache-2.0,registry,True
@@ -50,7 +50,6 @@ azure/msrest-for-python,71186468,mit,registry,True
 azuread/microsoft-authentication-library-for-python,67243113,mit,registry,True
 babel/babel,24560307,mit,registry,True
 babel/babel-polyfills,190579283,mit,registry,True
-babel/minify,55723051,mit,registry,True
 bdwgc/bdwgc,2109456,noassertion,github,
 beatgammit/base64-js,2853282,mit,registry,True
 benjaminp/six,77868600,mit,registry,True
@@ -113,11 +112,11 @@ colorjs/color-name,27038309,mit,registry,True
 comex/rust-shlex,37886228,mit or apache-2.0,registry,True
 component/escape-html,5444800,mit,registry,True
 component/toidentifier,114743189,mit,registry,True
-composefs/tar-rs,21946092,apache-2.0,github,True
+composefs/tar-rs,21946092,mit or apache-2.0,registry,True
 conventional-changelog/commitlint,51575745,mit,registry,True
 conventional-changelog/conventional-changelog,15639771,mit,registry,True
 cosmiconfig/cosmiconfig,45750507,mit,registry,True
-coveragepy/coveragepy,138421996,apache-2.0,github,True
+coveragepy/coveragepy,138421996,apache-2.0,registry,True
 cpburnz/python-pathspec,14648551,mpl-2.0,registry,True
 crate-py/rpds,608018848,mit,registry,True
 criterion-rs/criterion.rs,1081104682,apache-2.0 or mit,registry,True
@@ -169,6 +168,7 @@ eemeli/yaml,119439276,isc,registry,True
 ehmicky/human-signals,214467546,apache-2.0,registry,True
 eliben/pycparser,10589864,bsd-3-clause,registry,True
 emotion-js/emotion,92570536,mit,registry,True
+enarx/ciborium,313759241,apache-2.0,registry,True
 encode/httpcore,237210639,bsd-3-clause,registry,True
 encode/httpx,179492861,bsd-3-clause,registry,True
 epoberezkin/fast-deep-equal,94483360,mit,registry,True
@@ -529,6 +529,7 @@ mozilla/source-map,2014930,bsd-3-clause,registry,True
 mrabarnett/mrab-regex,309446978,apache-2.0 and cnri-python,registry,True
 mrmlnc/fast-glob,77467076,mit,registry,True
 msgpack/msgpack-python,2242705,apache-2.0,registry,True
+mui/material-ui,23083156,mit,registry,True
 myrne/performance-now,10219264,mit,registry,True
 mysticatea/abort-controller,105228556,mit,registry,True
 mysticatea/event-target-shim,31137469,mit,registry,True
@@ -602,7 +603,7 @@ prettier/prettier,75104123,mit,registry,True
 primus/eventemitter3,13100677,mit,registry,True
 proptest-rs/proptest,94702898,mit or apache-2.0,registry,True
 protobufjs/protobuf.js,8507859,bsd-3-clause,registry,True
-protocolbuffers/protobuf,23357588,noassertion,github,
+protocolbuffers/protobuf,23357588,bsd-3-clause,registry,True
 psf/requests,1362490,apache-2.0,registry,True
 psycopg/psycopg2,7730829,lgpl-2.1,registry,True
 pvorb/clone,2317381,mit,registry,True
@@ -655,9 +656,9 @@ raynos/function-bind,10727014,mit,registry,True
 raynos/xtend,4419184,mit,registry,True
 rayon-rs/either,42479602,mit or apache-2.0,registry,True
 rayon-rs/rayon,24725038,mit or apache-2.0,registry,True
-react/create-react-app,63537249,mit,github,True
+react/create-react-app,63537249,mit,registry,True
 react/metro,76504246,mit,registry,True
-react/react,10270250,mit,github,True
+react/react,10270250,mit,registry,True
 reactivex/rxjs,32247847,apache-2.0,registry,True
 realpython/pytest-mypy,69576530,mit,registry,True
 remix-run/react-router,19872456,mit,registry,True
@@ -719,6 +720,7 @@ selinuxproject/selinux,20648799,noassertion,github,
 serde-rs/bytes,87358441,mit or apache-2.0,registry,True
 serde-rs/json,35894511,mit or apache-2.0,registry,True
 serde-rs/serde,14367737,mit or apache-2.0,registry,True
+servo/core-foundation-rs,5621513,mit or apache-2.0,registry,True
 servo/rust-fnv,33499190,apache-2.0 / mit,registry,True
 servo/rust-smallvec,33456236,mit or apache-2.0,registry,True
 servo/rust-url,14934771,mit or apache-2.0,registry,True
@@ -860,7 +862,7 @@ tootallnate/util-deprecate,19321056,mit,registry,True
 torvalds/linux,2325298,noassertion,github,
 tower-rs/tower,98244646,mit,registry,True
 tox-dev/filelock,17098256,mit,registry,True
-tox-dev/platformdirs,367032142,mit,github,True
+tox-dev/platformdirs,367032142,mit,registry,True
 tqdm/tqdm,36804486,noassertion,github,
 tritondatacenter/node-assert-plus,4767976,mit,registry,True
 tritondatacenter/node-extsprintf,4058064,mit,registry,True

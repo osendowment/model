@@ -27,12 +27,13 @@ def _write(path, header, rows):
 class TestCollectTargets:
     def test_splits_github_vs_git_and_keeps_sources(self):
         rows = [
-            {"github_repo": "Owner/Repo",
+            {"repo": "Owner/Repo", "platform": "github",
              "git_url": "https://github.com/owner/repo.git",
              "ecosystems": "npm,pypi"},
-            {"github_repo": "", "git_url": "https://example.com/x.git",
+            {"repo": "", "platform": "",
+             "git_url": "https://example.com/x.git",
              "ecosystems": "crates"},
-            {"github_repo": "", "git_url": "", "ecosystems": "npm"},  # orphan
+            {"repo": "", "platform": "", "git_url": "", "ecosystems": "npm"},  # orphan
         ]
         t = bv.collect_targets(rows)
         # github row keyed by lowercased slug; its derived github git_url ignored
@@ -43,8 +44,8 @@ class TestCollectTargets:
 
     def test_unions_sources_across_rows_for_same_target(self):
         rows = [
-            {"github_repo": "a/b", "git_url": "", "ecosystems": "npm"},
-            {"github_repo": "A/B", "git_url": "", "ecosystems": "crates"},
+            {"repo": "a/b", "platform": "github", "git_url": "", "ecosystems": "npm"},
+            {"repo": "A/B", "platform": "github", "git_url": "", "ecosystems": "crates"},
         ]
         t = bv.collect_targets(rows)
         assert t[("a/b", "github_repo")] == {"npm", "crates"}
@@ -79,7 +80,7 @@ class TestApplyOverrides:
     def test_valid_pin_overrides_cache_verdict(self):
         verdicts = {("a/b", "github_repo"): {"valid": False, "checked_at": "t"}}
         overrides = {("pkg", "npm"):
-                     {"github_repo": "a/b", "git_url": "", "valid": "True"}}
+                     {"repo": "a/b", "git_url": "", "valid": "True"}}
         bv.apply_overrides(verdicts, overrides)
         assert verdicts[("a/b", "github_repo")]["valid"] is True
         assert verdicts[("a/b", "github_repo")]["checked_at"] == "override"
@@ -87,14 +88,14 @@ class TestApplyOverrides:
     def test_pin_without_target_is_skipped(self):
         verdicts = {}
         overrides = {("pkg", "npm"):
-                     {"github_repo": "", "git_url": "", "valid": "True"}}
+                     {"repo": "", "git_url": "", "valid": "True"}}
         bv.apply_overrides(verdicts, overrides)
         assert verdicts == {}
 
     def test_override_without_pin_does_not_touch_verdicts(self):
         verdicts = {("a/b", "github_repo"): {"valid": False, "checked_at": "t"}}
         overrides = {("pkg", "npm"):
-                     {"github_repo": "a/b", "git_url": "", "valid": ""}}
+                     {"repo": "a/b", "git_url": "", "valid": ""}}
         bv.apply_overrides(verdicts, overrides)
         assert verdicts[("a/b", "github_repo")]["valid"] is False
 
@@ -136,10 +137,12 @@ class TestJoinValid:
             ("u", "git_url"): True,   # reachable non-github url, but no github
         }
         rows = [
-            {"github_repo": "a/b", "git_url": "https://github.com/a/b.git"},  # valid github
-            {"github_repo": "c/d", "git_url": "https://github.com/c/d.git"},  # github 404
-            {"github_repo": "", "git_url": "u"},   # non-github, reachable, no github
-            {"github_repo": "", "git_url": ""},    # orphan
+            {"repo": "a/b", "platform": "github",
+             "git_url": "https://github.com/a/b.git"},  # valid github
+            {"repo": "c/d", "platform": "github",
+             "git_url": "https://github.com/c/d.git"},  # github 404
+            {"repo": "", "platform": "", "git_url": "u"},   # non-github, reachable, no github
+            {"repo": "", "platform": "", "git_url": ""},    # orphan
         ]
         out = bv.join_valid(rows, target_valid)
         assert [r["valid"] for r in out] == ["True", "False", "False", "False"]
