@@ -34,6 +34,7 @@ import csv
 from rich.console import Console
 from rich.table import Table
 
+from src.common.repos import to_repo_id
 from src.value.build_git_urls import platform_and_slug
 from src.value.git_urls import (
     _canonicalize_git_url,
@@ -166,7 +167,7 @@ def verify_urls_in_aggregates(aggs: list[dict],
         # platform. Only a repo that resolved (HTTP 200) carries one; sparse
         # 404 rows and every non-github repo have none.
         rid = (meta.get("repo_id") or "").strip() if is_valid else ""
-        a["repo_id"] = f"gh/{rid}" if rid else ""
+        a["repo_id"] = to_repo_id(rid)  # idempotent: bare id -> gh/<id>, empty -> ""
 
         # mirror_url: the upstream a GitHub *mirror* repo syncs from (GitHub's
         # own `mirror_url`), e.g. gcc-mirror/gcc → git://gcc.gnu.org/git/gcc.git.

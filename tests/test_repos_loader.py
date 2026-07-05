@@ -29,7 +29,7 @@ def test_load_top_repos_filters_classes_and_enriches(tmp_path, monkeypatch):
     out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
     # owner/b archived, owner/c out of classes, "" orphan.
     assert {e.repo for e in out} == {"owner/a"}
-    assert out[0].repo_id == "11"
+    assert out[0].repo_id == "gh/11"  # loader namespaces bare GitHub ids
     assert out[0].value_class == "A"
 
 
@@ -128,7 +128,7 @@ def test_load_top_repos_canonicalises_renamed_repo(tmp_path, monkeypatch):
     monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
     out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
     assert [e.repo for e in out] == ["browserify/events"]
-    assert out[0].repo_id == "1649251"
+    assert out[0].repo_id == "gh/1649251"
 
 
 def test_load_repo_ids(tmp_path):
@@ -139,11 +139,37 @@ def test_load_repo_ids(tmp_path):
         {"repo": "owner/noid", "valid": "True", "repo_id": "", "full_name": "owner/noid"},
     ])
     ids = repos.load_repo_ids(repos_file=str(gh))
-    assert ids["owner/name"] == "99"
+    assert ids["owner/name"] == "gh/99"
     # both the stale and the canonical slug resolve to the same id
-    assert ids["stale/slug"] == "77"
-    assert ids["fresh/slug"] == "77"
+    assert ids["stale/slug"] == "gh/77"
+    assert ids["fresh/slug"] == "gh/77"
     assert "owner/noid" not in ids
+
+
+def test_to_repo_id_namespaces_and_is_idempotent():
+    """Bare GitHub ids are promoted to gh/<id>; already-namespaced ids and
+    empties pass through unchanged (so re-running the loader never double-
+    prefixes)."""
+    assert repos.to_repo_id(119609) == "gh/119609"
+    assert repos.to_repo_id("119609") == "gh/119609"
+    assert repos.to_repo_id("  42 ") == "gh/42"
+    # idempotent — already-namespaced host ids are left alone
+    assert repos.to_repo_id("gh/119609") == "gh/119609"
+    assert repos.to_repo_id("gl/gitlab.com/456") == "gl/gitlab.com/456"
+    # empty / missing -> empty (never "gh/")
+    assert repos.to_repo_id("") == ""
+    assert repos.to_repo_id(None) == ""
+
+
+def test_read_github_repos_idempotent_on_prefixed_id(tmp_path):
+    """A repos.csv already carrying gh/-prefixed ids is not double-prefixed."""
+    gh = tmp_path / "repos.csv"
+    _write(gh, ["repo", "valid", "repo_id", "full_name"], [
+        {"repo": "owner/a", "valid": "True", "repo_id": "gh/11", "full_name": "owner/a"},
+    ])
+    _, meta = repos._read_github_repos(str(gh))
+    assert meta["owner/a"].repo_id == "gh/11"
+    assert repos.load_repo_ids(repos_file=str(gh))["owner/a"] == "gh/11"
 
 
 def test_load_default_branches(tmp_path):

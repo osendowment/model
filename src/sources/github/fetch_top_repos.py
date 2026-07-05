@@ -33,6 +33,7 @@ from src.sources.github.display import (
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
+from src.common.repos import to_repo_id
 from src.sources.github.github_client import get_revolver
 
 API_URL = "https://api.github.com/search/repositories"
@@ -366,7 +367,7 @@ def _parse_item(item: dict, fetched_at: str) -> tuple[str, dict]:
     topics = item.get("topics") or []
     return slug, {
         "repo": slug,
-        "repo_id": item["id"],
+        "repo_id": to_repo_id(item["id"]),
         "repo_node_id": item.get("node_id", ""),
         "user_name": (owner_data.get("login") or "").lower(),
         "user_id": owner_data.get("id", 0),
