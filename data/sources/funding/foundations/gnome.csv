@@ -1,0 +1,323 @@
+name,project_slug,domain,website,github_repo,ecosystem,package,description,fetched_at
+accerciser,accerciser,gnome.org,https://gitlab.gnome.org/GNOME/accerciser,GNOME/accerciser,,,,2026-07-05T17:43:25+00:00
+Adwaita Fonts,adwaita-fonts,gnome.org,https://gitlab.gnome.org/GNOME/adwaita-fonts,GNOME/adwaita-fonts,,,The typefaces for GNOME,2026-07-05T17:43:25+00:00
+adwaita-icon-theme,adwaita-icon-theme,gnome.org,https://gitlab.gnome.org/GNOME/adwaita-icon-theme,GNOME/adwaita-icon-theme,,,Private UI icon set for GNOME core apps.,2026-07-05T17:43:25+00:00
+Adwaita Legacy,adwaita-icon-theme-legacy,gnome.org,https://gitlab.gnome.org/GNOME/adwaita-icon-theme-legacy,GNOME/adwaita-icon-theme-legacy,,,,2026-07-05T17:43:25+00:00
+aisleriot,aisleriot,gnome.org,https://gitlab.gnome.org/GNOME/aisleriot,GNOME/aisleriot,,,Aisleriot Solitaire,2026-07-05T17:43:25+00:00
+alacarte,alacarte,gnome.org,https://gitlab.gnome.org/GNOME/alacarte,GNOME/alacarte,,,,2026-07-05T17:43:25+00:00
+Almanah,almanah,gnome.org,https://gitlab.gnome.org/GNOME/almanah,GNOME/almanah,,,Almanah is a small GTK+ application to allow you to keep a diary of your life.,2026-07-05T17:43:25+00:00
+at-spi2-core,at-spi2-core,gnome.org,https://gitlab.gnome.org/GNOME/at-spi2-core,GNOME/at-spi2-core,,,"Base DBus XML interfaces for accessibility, the accessibility registry daemon, and atspi library.",2026-07-05T17:43:25+00:00
+atkmm,atkmm,gnome.org,https://gitlab.gnome.org/GNOME/atkmm,GNOME/atkmm,,,,2026-07-05T17:43:25+00:00
+atomix,atomix,gnome.org,https://gitlab.gnome.org/GNOME/atomix,GNOME/atomix,,,Mind game - build molecules out of single atoms,2026-07-05T17:43:25+00:00
+babl,babl,gnome.org,https://gitlab.gnome.org/GNOME/babl,GNOME/babl,,,"Pixel encoding and color space conversion engine, with format introspection, cached runtime self-benchmarking alternate and cpu specific code paths.",2026-07-05T17:43:25+00:00
+balsa,balsa,gnome.org,https://gitlab.gnome.org/GNOME/balsa,GNOME/balsa,,,,2026-07-05T17:43:25+00:00
+baobab,baobab,gnome.org,https://gitlab.gnome.org/GNOME/baobab,GNOME/baobab,,,,2026-07-05T17:43:25+00:00
+bijiben,bijiben,gnome.org,https://gitlab.gnome.org/GNOME/bijiben,GNOME/bijiben,,,,2026-07-05T17:43:25+00:00
+Blueprint,blueprint-compiler,gnome.org,https://gitlab.gnome.org/GNOME/blueprint-compiler,GNOME/blueprint-compiler,,,A markup language for GTK user interfaces. Docs: https://gnome.pages.gitlab.gnome.org/blueprint-compiler/,2026-07-05T17:43:25+00:00
+brasero,brasero,gnome.org,https://gitlab.gnome.org/GNOME/brasero,GNOME/brasero,,,,2026-07-05T17:43:25+00:00
+Calls,calls,gnome.org,https://gitlab.gnome.org/GNOME/calls,GNOME/calls,,,A phone and VoIP (SIP) call handler,2026-07-05T17:43:25+00:00
+cantarell-fonts,cantarell-fonts,gnome.org,https://gitlab.gnome.org/GNOME/cantarell-fonts,GNOME/cantarell-fonts,,,"The Cantarell typeface family is a contemporary Humanist sans serif, and was used by the GNOME project for its user interface.",2026-07-05T17:43:25+00:00
+chronojump,chronojump,gnome.org,https://gitlab.gnome.org/GNOME/chronojump,GNOME/chronojump,,,,2026-07-05T17:43:25+00:00
+chronojump-docs,chronojump-docs,gnome.org,https://gitlab.gnome.org/GNOME/chronojump-docs,GNOME/chronojump-docs,,,,2026-07-05T17:43:25+00:00
+CITemplates,citemplates,gnome.org,https://gitlab.gnome.org/GNOME/citemplates,GNOME/citemplates,,,,2026-07-05T17:43:25+00:00
+Console,console,gnome.org,https://gitlab.gnome.org/GNOME/console,GNOME/console,,,A simple user-friendly terminal emulator for the GNOME desktop.,2026-07-05T17:43:25+00:00
+d-spy,d-spy,gnome.org,https://gitlab.gnome.org/GNOME/d-spy,GNOME/d-spy,,,Inspect peers on a D-Bus connection,2026-07-05T17:43:25+00:00
+dasher,dasher,gnome.org,https://gitlab.gnome.org/GNOME/dasher,GNOME/dasher,,,,2026-07-05T17:43:25+00:00
+dconf,dconf,gnome.org,https://gitlab.gnome.org/GNOME/dconf,GNOME/dconf,,,dconf is a simple key/value storage system that is heavily optimised for reading. This makes it an ideal system for storing user preferences (which are often read but rarely changed). It was created w,2026-07-05T17:43:25+00:00
+dconf-editor,dconf-editor,gnome.org,https://gitlab.gnome.org/GNOME/dconf-editor,GNOME/dconf-editor,,,,2026-07-05T17:43:25+00:00
+Decibels,decibels,gnome.org,https://gitlab.gnome.org/GNOME/decibels,GNOME/decibels,,,Play audio files,2026-07-05T17:43:25+00:00
+devdocsgjs,devdocsgjs,gnome.org,https://gitlab.gnome.org/GNOME/devdocsgjs,GNOME/devdocsgjs,,,,2026-07-05T17:43:25+00:00
+Dia,dia,gnome.org,https://gitlab.gnome.org/GNOME/dia,GNOME/dia,,,Diagram Editor,2026-07-05T17:43:25+00:00
+easytag,easytag,gnome.org,https://gitlab.gnome.org/GNOME/easytag,GNOME/easytag,,,,2026-07-05T17:43:25+00:00
+Eye of GNOME,eog,gnome.org,https://gitlab.gnome.org/GNOME/eog,GNOME/eog,,,,2026-07-05T17:43:25+00:00
+eog-plugins,eog-plugins,gnome.org,https://gitlab.gnome.org/GNOME/eog-plugins,GNOME/eog-plugins,,,,2026-07-05T17:43:25+00:00
+Epiphany,epiphany,gnome.org,https://gitlab.gnome.org/GNOME/epiphany,GNOME/epiphany,,,"A simple, clean, beautiful view of the Web",2026-07-05T17:43:25+00:00
+evince,evince,gnome.org,https://gitlab.gnome.org/GNOME/evince,GNOME/evince,,,Evince is a document viewer for multiple document formats. The goal of evince is to replace the multiple document viewers that exist on the GNOME Desktop with a single simple application.,2026-07-05T17:43:25+00:00
+evolution,evolution,gnome.org,https://gitlab.gnome.org/GNOME/evolution,GNOME/evolution,,,,2026-07-05T17:43:25+00:00
+evolution-activesync,evolution-activesync,gnome.org,https://gitlab.gnome.org/GNOME/evolution-activesync,GNOME/evolution-activesync,,,,2026-07-05T17:43:25+00:00
+evolution-data-server,evolution-data-server,gnome.org,https://gitlab.gnome.org/GNOME/evolution-data-server,GNOME/evolution-data-server,,,,2026-07-05T17:43:25+00:00
+evolution-etesync,evolution-etesync,gnome.org,https://gitlab.gnome.org/GNOME/evolution-etesync,GNOME/evolution-etesync,,,End-to-end encrypted private information sync for Evolution using the EteSync open-source protocol.,2026-07-05T17:43:25+00:00
+evolution-ews,evolution-ews,gnome.org,https://gitlab.gnome.org/GNOME/evolution-ews,GNOME/evolution-ews,,,,2026-07-05T17:43:25+00:00
+File Roller,file-roller,gnome.org,https://gitlab.gnome.org/GNOME/file-roller,GNOME/file-roller,,,,2026-07-05T17:43:25+00:00
+five-or-more,five-or-more,gnome.org,https://gitlab.gnome.org/GNOME/five-or-more,GNOME/five-or-more,,,Remove colored balls from the board by forming lines,2026-07-05T17:43:25+00:00
+folks,folks,gnome.org,https://gitlab.gnome.org/GNOME/folks,GNOME/folks,,,"Folks is a contact aggregation library. It retrieves contacts from various sources (including Telepathy IM accounts, and local contact stores) and compiles them into fully-fledged people objects.",2026-07-05T17:43:25+00:00
+foundry,foundry,gnome.org,https://gitlab.gnome.org/GNOME/foundry,GNOME/foundry,,,Foundry provides a platform for developer tools in GNOME,2026-07-05T17:43:25+00:00
+four-in-a-row,four-in-a-row,gnome.org,https://gitlab.gnome.org/GNOME/four-in-a-row,GNOME/four-in-a-row,,,,2026-07-05T17:43:25+00:00
+frogr,frogr,gnome.org,https://gitlab.gnome.org/GNOME/frogr,GNOME/frogr,,,,2026-07-05T17:43:25+00:00
+gcab,gcab,gnome.org,https://gitlab.gnome.org/GNOME/gcab,GNOME/gcab,,,,2026-07-05T17:43:25+00:00
+gcr,gcr,gnome.org,https://gitlab.gnome.org/GNOME/gcr,GNOME/gcr,,,,2026-07-05T17:43:25+00:00
+gdk-pixbuf,gdk-pixbuf,gnome.org,https://gitlab.gnome.org/GNOME/gdk-pixbuf,GNOME/gdk-pixbuf,,,,2026-07-05T17:43:25+00:00
+gdm,gdm,gnome.org,https://gitlab.gnome.org/GNOME/gdm,GNOME/gdm,,,,2026-07-05T17:43:25+00:00
+Geary,geary,gnome.org,https://gitlab.gnome.org/GNOME/geary,GNOME/geary,,,"Geary is an email application built around conversations, for the GNOME desktop.",2026-07-05T17:43:25+00:00
+gedit-latex,gedit-latex,gnome.org,https://gitlab.gnome.org/GNOME/gedit-latex,GNOME/gedit-latex,,,,2026-07-05T17:43:25+00:00
+gegl,gegl,gnome.org,https://gitlab.gnome.org/GNOME/gegl,GNOME/gegl,,,,2026-07-05T17:43:25+00:00
+genius,genius,gnome.org,https://gitlab.gnome.org/GNOME/genius,GNOME/genius,,,,2026-07-05T17:43:25+00:00
+geocode-glib,geocode-glib,gnome.org,https://gitlab.gnome.org/GNOME/geocode-glib,GNOME/geocode-glib,,,,2026-07-05T17:43:25+00:00
+gexiv2,gexiv2,gnome.org,https://gitlab.gnome.org/GNOME/gexiv2,GNOME/gexiv2,,,"gexiv2 is a GObject wrapper around the Exiv2 photo metadata library. It allows for GNOME applications to easily inspect and update EXIF, IPTC, and XMP metadata in photo and video files of various form",2026-07-05T17:43:25+00:00
+GHex,ghex,gnome.org,https://gitlab.gnome.org/GNOME/ghex,GNOME/ghex,,,Simple hex editor for the GNOME desktop,2026-07-05T17:43:25+00:00
+gi-docgen,gi-docgen,gnome.org,https://gitlab.gnome.org/GNOME/gi-docgen,GNOME/gi-docgen,,,A documentation generator for GObject-based libraries,2026-07-05T17:43:25+00:00
+GIMP,gimp,gnome.org,https://gitlab.gnome.org/GNOME/gimp,GNOME/gimp,,,The GNU Image Manipulation Program,2026-07-05T17:43:25+00:00
+gimp-book-painting,gimp-book-painting,gnome.org,https://gitlab.gnome.org/GNOME/gimp-book-painting,GNOME/gimp-book-painting,,,,2026-07-05T17:43:25+00:00
+gimp-data,gimp-data,gnome.org,https://gitlab.gnome.org/GNOME/gimp-data,GNOME/gimp-data,,,,2026-07-05T17:43:25+00:00
+gimp-data-extras,gimp-data-extras,gnome.org,https://gitlab.gnome.org/GNOME/gimp-data-extras,GNOME/gimp-data-extras,,,,2026-07-05T17:43:25+00:00
+gimp-help,gimp-help,gnome.org,https://gitlab.gnome.org/GNOME/gimp-help,GNOME/gimp-help,,,,2026-07-05T17:43:25+00:00
+gimp-perl,gimp-perl,gnome.org,https://gitlab.gnome.org/GNOME/gimp-perl,GNOME/gimp-perl,,,,2026-07-05T17:43:25+00:00
+gitg,gitg,gnome.org,https://gitlab.gnome.org/GNOME/gitg,GNOME/gitg,,,gitg is a GUI client to view git repositories https://wiki.gnome.org/Apps/Gitg/,2026-07-05T17:43:25+00:00
+gjs,gjs,gnome.org,https://gitlab.gnome.org/GNOME/gjs,GNOME/gjs,,,GNOME Javascript bindings,2026-07-05T17:43:25+00:00
+GLib,glib,gnome.org,https://gitlab.gnome.org/GNOME/glib,GNOME/glib,,,Low-level core library that forms the basis for projects such as GTK and GNOME.,2026-07-05T17:43:25+00:00
+glib-networking,glib-networking,gnome.org,https://gitlab.gnome.org/GNOME/glib-networking,GNOME/glib-networking,,,Network extensions for GLib,2026-07-05T17:43:25+00:00
+glibmm,glibmm,gnome.org,https://gitlab.gnome.org/GNOME/glibmm,GNOME/glibmm,,,,2026-07-05T17:43:25+00:00
+glycin,glycin,gnome.org,https://gitlab.gnome.org/GNOME/glycin,GNOME/glycin,,,Sandboxed and extendable image loading,2026-07-05T17:43:25+00:00
+2048,gnome-2048,gnome.org,https://gitlab.gnome.org/GNOME/gnome-2048,GNOME/gnome-2048,,,,2026-07-05T17:43:25+00:00
+gnome-app-list,gnome-app-list,gnome.org,https://gitlab.gnome.org/GNOME/gnome-app-list,GNOME/gnome-app-list,,,,2026-07-05T17:43:25+00:00
+gnome-applets,gnome-applets,gnome.org,https://gitlab.gnome.org/GNOME/gnome-applets,GNOME/gnome-applets,,,,2026-07-05T17:43:25+00:00
+gnome-autoar,gnome-autoar,gnome.org,https://gitlab.gnome.org/GNOME/gnome-autoar,GNOME/gnome-autoar,,,,2026-07-05T17:43:25+00:00
+gnome-backgrounds,gnome-backgrounds,gnome.org,https://gitlab.gnome.org/GNOME/gnome-backgrounds,GNOME/gnome-backgrounds,,,Default wallpaper set for GNOME. Please read the guidelines before suggesting additions.,2026-07-05T17:43:25+00:00
+gnome-battery-bench,gnome-battery-bench,gnome.org,https://gitlab.gnome.org/GNOME/gnome-battery-bench,GNOME/gnome-battery-bench,,,,2026-07-05T17:43:25+00:00
+gnome-bluetooth,gnome-bluetooth,gnome.org,https://gitlab.gnome.org/GNOME/gnome-bluetooth,GNOME/gnome-bluetooth,,,,2026-07-05T17:43:25+00:00
+GNOME Boxes,gnome-boxes,gnome.org,https://gitlab.gnome.org/GNOME/gnome-boxes,GNOME/gnome-boxes,,,Virtualization made simple. https://gnomeboxes.org This project is in low-maintenance mode. This repo is no longer receiving active feature updates. Active development has moved to a new code base at ,2026-07-05T17:43:25+00:00
+gnome-boxes-logos,gnome-boxes-logos,gnome.org,https://gitlab.gnome.org/GNOME/gnome-boxes-logos,GNOME/gnome-boxes-logos,,,The Libosinfo database of logos used by GNOME Boxes,2026-07-05T17:43:25+00:00
+Break Timer,gnome-break-timer,gnome.org,https://gitlab.gnome.org/GNOME/gnome-break-timer,GNOME/gnome-break-timer,,,,2026-07-05T17:43:25+00:00
+gnome-browser-connector,gnome-browser-connector,gnome.org,https://gitlab.gnome.org/GNOME/gnome-browser-connector,GNOME/gnome-browser-connector,,,,2026-07-05T17:43:25+00:00
+gnome-browser-extension,gnome-browser-extension,gnome.org,https://gitlab.gnome.org/GNOME/gnome-browser-extension,GNOME/gnome-browser-extension,,,GNOME Shell browser extension,2026-07-05T17:43:25+00:00
+gnome-browser-integration,gnome-browser-integration,gnome.org,https://gitlab.gnome.org/GNOME/gnome-browser-integration,GNOME/gnome-browser-integration,,,GNOME browser integration website,2026-07-05T17:43:25+00:00
+gnome-build-meta,gnome-build-meta,gnome.org,https://gitlab.gnome.org/GNOME/gnome-build-meta,GNOME/gnome-build-meta,,,The GNOME Build Metadata repository is where the GNOME release team manages build metadata for building the GNOME software stack.,2026-07-05T17:43:25+00:00
+gnome-builder,gnome-builder,gnome.org,https://gitlab.gnome.org/GNOME/gnome-builder,GNOME/gnome-builder,,,An IDE for writing GNOME-based software.,2026-07-05T17:43:25+00:00
+gnome-calculator,gnome-calculator,gnome.org,https://gitlab.gnome.org/GNOME/gnome-calculator,GNOME/gnome-calculator,,,Calculator for solving mathematical equations,2026-07-05T17:43:25+00:00
+gnome-calendar,gnome-calendar,gnome.org,https://gitlab.gnome.org/GNOME/gnome-calendar,GNOME/gnome-calendar,,,Calendar application for GNOME,2026-07-05T17:43:25+00:00
+Characters,gnome-characters,gnome.org,https://gitlab.gnome.org/GNOME/gnome-characters,GNOME/gnome-characters,,,Character map application,2026-07-05T17:43:25+00:00
+Chess,gnome-chess,gnome.org,https://gitlab.gnome.org/GNOME/gnome-chess,GNOME/gnome-chess,,,,2026-07-05T17:43:25+00:00
+Clocks,gnome-clocks,gnome.org,https://gitlab.gnome.org/GNOME/gnome-clocks,GNOME/gnome-clocks,,,Time for Clocks,2026-07-05T17:43:25+00:00
+gnome-color-manager,gnome-color-manager,gnome.org,https://gitlab.gnome.org/GNOME/gnome-color-manager,GNOME/gnome-color-manager,,,,2026-07-05T17:43:25+00:00
+gnome-commander,gnome-commander,gnome.org,https://gitlab.gnome.org/GNOME/gnome-commander,GNOME/gnome-commander,,,,2026-07-05T17:43:25+00:00
+Connections,gnome-connections,gnome.org,https://gitlab.gnome.org/GNOME/gnome-connections,GNOME/gnome-connections,,,A remote desktop client for the GNOME desktop environment,2026-07-05T17:43:25+00:00
+GNOME Contacts,gnome-contacts,gnome.org,https://gitlab.gnome.org/GNOME/gnome-contacts,GNOME/gnome-contacts,,,Manage your contacts in GNOME,2026-07-05T17:43:25+00:00
+Settings,gnome-control-center,gnome.org,https://gitlab.gnome.org/GNOME/gnome-control-center,GNOME/gnome-control-center,,,GNOME's main interface to configure various aspects of the desktop. Developer Documentation https://gitlab.gnome.org/GNOME/gnome-control-center/-/blob/main/docs/index.md,2026-07-05T17:43:25+00:00
+GNOME Utility Library,gnome-desktop,gnome.org,https://gitlab.gnome.org/GNOME/gnome-desktop,GNOME/gnome-desktop,,,libgnome-desktop is an unstable backend library for sharing code between GNOME desktop components.,2026-07-05T17:43:25+00:00
+gnome-desktop-testing,gnome-desktop-testing,gnome.org,https://gitlab.gnome.org/GNOME/gnome-desktop-testing,GNOME/gnome-desktop-testing,,,,2026-07-05T17:43:25+00:00
+gnome-directory-thumbnailer,gnome-directory-thumbnailer,gnome.org,https://gitlab.gnome.org/GNOME/gnome-directory-thumbnailer,GNOME/gnome-directory-thumbnailer,,,,2026-07-05T17:43:25+00:00
+gnome-disk-utility,gnome-disk-utility,gnome.org,https://gitlab.gnome.org/GNOME/gnome-disk-utility,GNOME/gnome-disk-utility,,,"GNOME Disks, gnome-disk-image-mounter and gsd-disk-utility-notify are libraries and applications for dealing with storage devices.",2026-07-05T17:43:25+00:00
+gnome-epub-thumbnailer,gnome-epub-thumbnailer,gnome.org,https://gitlab.gnome.org/GNOME/gnome-epub-thumbnailer,GNOME/gnome-epub-thumbnailer,,,,2026-07-05T17:43:25+00:00
+gnome-extensions-app,gnome-extensions-app,gnome.org,https://gitlab.gnome.org/GNOME/gnome-extensions-app,GNOME/gnome-extensions-app,,,,2026-07-05T17:43:25+00:00
+gnome-flashback,gnome-flashback,gnome.org,https://gitlab.gnome.org/GNOME/gnome-flashback,GNOME/gnome-flashback,,,,2026-07-05T17:43:25+00:00
+Fonts,gnome-font-viewer,gnome.org,https://gitlab.gnome.org/GNOME/gnome-font-viewer,GNOME/gnome-font-viewer,,,View fonts on your system,2026-07-05T17:43:25+00:00
+gnome-i18n,gnome-i18n,gnome.org,https://gitlab.gnome.org/GNOME/gnome-i18n,GNOME/gnome-i18n,,,,2026-07-05T17:43:25+00:00
+gnome-initial-setup,gnome-initial-setup,gnome.org,https://gitlab.gnome.org/GNOME/gnome-initial-setup,GNOME/gnome-initial-setup,,,,2026-07-05T17:43:25+00:00
+gnome-keyring,gnome-keyring,gnome.org,https://gitlab.gnome.org/GNOME/gnome-keyring,GNOME/gnome-keyring,,,,2026-07-05T17:43:25+00:00
+gnome-keysign,gnome-keysign,gnome.org,https://gitlab.gnome.org/GNOME/gnome-keysign,GNOME/gnome-keysign,,,"An easier way to sign OpenPGP keys over the local network. A GTK/GNOME application to use GnuPG for signing other peoples' keys. Quickly, easily, and securely.",2026-07-05T17:43:25+00:00
+GNOME Kiosk,gnome-kiosk,gnome.org,https://gitlab.gnome.org/GNOME/gnome-kiosk,GNOME/gnome-kiosk,,,"mutter based compositor for kiosks Kiosk provides a desktop enviroment suitable for fixed purpose, or single application deployments like wall displays and point-of-sale systems.",2026-07-05T17:43:25+00:00
+Klotski,gnome-klotski,gnome.org,https://gitlab.gnome.org/GNOME/gnome-klotski,GNOME/gnome-klotski,,,,2026-07-05T17:43:25+00:00
+gnome-kra-ora-thumbnailer,gnome-kra-ora-thumbnailer,gnome.org,https://gitlab.gnome.org/GNOME/gnome-kra-ora-thumbnailer,GNOME/gnome-kra-ora-thumbnailer,,,,2026-07-05T17:43:25+00:00
+gnome-logs,gnome-logs,gnome.org,https://gitlab.gnome.org/GNOME/gnome-logs,GNOME/gnome-logs,,,,2026-07-05T17:43:25+00:00
+Mahjongg,gnome-mahjongg,gnome.org,https://gitlab.gnome.org/GNOME/gnome-mahjongg,GNOME/gnome-mahjongg,,,Match tiles and clear the board,2026-07-05T17:43:25+00:00
+gnome-maps,gnome-maps,gnome.org,https://gitlab.gnome.org/GNOME/gnome-maps,GNOME/gnome-maps,,,,2026-07-05T17:43:25+00:00
+gnome-menus,gnome-menus,gnome.org,https://gitlab.gnome.org/GNOME/gnome-menus,GNOME/gnome-menus,,,GNOME Menu support,2026-07-05T17:43:25+00:00
+gnome-mines,gnome-mines,gnome.org,https://gitlab.gnome.org/GNOME/gnome-mines,GNOME/gnome-mines,,,Clear hidden mines from a minefield,2026-07-05T17:43:25+00:00
+gnome-multi-writer,gnome-multi-writer,gnome.org,https://gitlab.gnome.org/GNOME/gnome-multi-writer,GNOME/gnome-multi-writer,,,GNOME MultiWriter can be used to write an ISO file to multiple USB devices at once.,2026-07-05T17:43:25+00:00
+gnome-music,gnome-music,gnome.org,https://gitlab.gnome.org/GNOME/gnome-music,GNOME/gnome-music,,,,2026-07-05T17:43:25+00:00
+gnome-network-displays,gnome-network-displays,gnome.org,https://gitlab.gnome.org/GNOME/gnome-network-displays,GNOME/gnome-network-displays,,,Screencasting for GNOME. Supports the Miracast and Chromecast protocols.,2026-07-05T17:43:25+00:00
+Nibbles,gnome-nibbles,gnome.org,https://gitlab.gnome.org/GNOME/gnome-nibbles,GNOME/gnome-nibbles,,,,2026-07-05T17:43:25+00:00
+gnome-online-accounts,gnome-online-accounts,gnome.org,https://gitlab.gnome.org/GNOME/gnome-online-accounts,GNOME/gnome-online-accounts,,,Single sign-on framework for core GNOME components,2026-07-05T17:43:25+00:00
+gnome-packagekit,gnome-packagekit,gnome.org,https://gitlab.gnome.org/GNOME/gnome-packagekit,GNOME/gnome-packagekit,,,,2026-07-05T17:43:25+00:00
+gnome-panel,gnome-panel,gnome.org,https://gitlab.gnome.org/GNOME/gnome-panel,GNOME/gnome-panel,,,,2026-07-05T17:43:25+00:00
+gnome-power-manager,gnome-power-manager,gnome.org,https://gitlab.gnome.org/GNOME/gnome-power-manager,GNOME/gnome-power-manager,,,,2026-07-05T17:43:25+00:00
+gnome-remote-desktop,gnome-remote-desktop,gnome.org,https://gitlab.gnome.org/GNOME/gnome-remote-desktop,GNOME/gnome-remote-desktop,,,Remote desktop server which allows you to connect to your machine remotely,2026-07-05T17:43:25+00:00
+gnome-robots,gnome-robots,gnome.org,https://gitlab.gnome.org/GNOME/gnome-robots,GNOME/gnome-robots,,,,2026-07-05T17:43:25+00:00
+gnome-runtime-images,gnome-runtime-images,gnome.org,https://gitlab.gnome.org/GNOME/gnome-runtime-images,GNOME/gnome-runtime-images,,,,2026-07-05T17:43:25+00:00
+gnome-session,gnome-session,gnome.org,https://gitlab.gnome.org/GNOME/gnome-session,GNOME/gnome-session,,,,2026-07-05T17:43:25+00:00
+gnome-settings-daemon,gnome-settings-daemon,gnome.org,https://gitlab.gnome.org/GNOME/gnome-settings-daemon,GNOME/gnome-settings-daemon,,,,2026-07-05T17:43:25+00:00
+gnome-shell,gnome-shell,gnome.org,https://gitlab.gnome.org/GNOME/gnome-shell,GNOME/gnome-shell,,,,2026-07-05T17:43:25+00:00
+gnome-shell-extensions,gnome-shell-extensions,gnome.org,https://gitlab.gnome.org/GNOME/gnome-shell-extensions,GNOME/gnome-shell-extensions,,,GNOME Shell Extensions is a collection of extensions providing additional and optional functionality to GNOME Shell.,2026-07-05T17:43:25+00:00
+gnome-software,gnome-software,gnome.org,https://gitlab.gnome.org/GNOME/gnome-software,GNOME/gnome-software,,,,2026-07-05T17:43:25+00:00
+gnome-subtitles,gnome-subtitles,gnome.org,https://gitlab.gnome.org/GNOME/gnome-subtitles,GNOME/gnome-subtitles,,,"Gnome Subtitles is a subtitle editor for the GNOME desktop. It supports the most common text-based subtitle formats and allows for subtitle editing, translation and synchronization.",2026-07-05T17:43:25+00:00
+Sudoku,gnome-sudoku,gnome.org,https://gitlab.gnome.org/GNOME/gnome-sudoku,GNOME/gnome-sudoku,,,,2026-07-05T17:43:25+00:00
+gnome-system-monitor,gnome-system-monitor,gnome.org,https://gitlab.gnome.org/GNOME/gnome-system-monitor,GNOME/gnome-system-monitor,,,View current processes and monitor system state,2026-07-05T17:43:25+00:00
+Taquin,gnome-taquin,gnome.org,https://gitlab.gnome.org/GNOME/gnome-taquin,GNOME/gnome-taquin,,,,2026-07-05T17:43:25+00:00
+gnome-terminal,gnome-terminal,gnome.org,https://gitlab.gnome.org/GNOME/gnome-terminal,GNOME/gnome-terminal,,,GNOME Terminal # **You must read the [FAQ](https://gitlab.gnome.org/GNOME/gnome-terminal/-/wikis/FAQ) and the [bug reporting guidelines](https://gitlab.gnome.org/GNOME/gnome-terminal/-/wikis/BugReport,2026-07-05T17:43:25+00:00
+Tetravex,gnome-tetravex,gnome.org,https://gitlab.gnome.org/GNOME/gnome-tetravex,GNOME/gnome-tetravex,,,Reorder tiles to fit a square,2026-07-05T17:43:25+00:00
+gnome-text-editor,gnome-text-editor,gnome.org,https://gitlab.gnome.org/GNOME/gnome-text-editor,GNOME/gnome-text-editor,,,A simple text editor,2026-07-05T17:43:25+00:00
+GNOME Tour,gnome-tour,gnome.org,https://gitlab.gnome.org/GNOME/gnome-tour,GNOME/gnome-tour,,,GNOME Tour & Greeter.,2026-07-05T17:43:25+00:00
+GNOME Tweaks,gnome-tweaks,gnome.org,https://gitlab.gnome.org/GNOME/gnome-tweaks,GNOME/gnome-tweaks,,,,2026-07-05T17:43:25+00:00
+Usage,gnome-usage,gnome.org,https://gitlab.gnome.org/GNOME/gnome-usage,GNOME/gnome-usage,,,Analyse your system,2026-07-05T17:43:25+00:00
+gnome-user-docs,gnome-user-docs,gnome.org,https://gitlab.gnome.org/GNOME/gnome-user-docs,GNOME/gnome-user-docs,,,GNOME User Documentation,2026-07-05T17:43:25+00:00
+gnome-user-share,gnome-user-share,gnome.org,https://gitlab.gnome.org/GNOME/gnome-user-share,GNOME/gnome-user-share,,,,2026-07-05T17:43:25+00:00
+Weather,gnome-weather,gnome.org,https://gitlab.gnome.org/GNOME/gnome-weather,GNOME/gnome-weather,,,"A small application that allows you to monitor the current weather conditions for your city, or anywhere in the world.",2026-07-05T17:43:25+00:00
+gnomemm-website,gnomemm-website,gnome.org,https://gitlab.gnome.org/GNOME/gnomemm-website,GNOME/gnomemm-website,,,,2026-07-05T17:43:25+00:00
+gnote,gnote,gnome.org,https://gitlab.gnome.org/GNOME/gnote,GNOME/gnote,,,,2026-07-05T17:43:25+00:00
+gnumeric,gnumeric,gnome.org,https://gitlab.gnome.org/GNOME/gnumeric,GNOME/gnumeric,,,,2026-07-05T17:43:25+00:00
+gnumeric-web,gnumeric-web,gnome.org,https://gitlab.gnome.org/GNOME/gnumeric-web,GNOME/gnumeric-web,,,,2026-07-05T17:43:25+00:00
+gobject-introspection,gobject-introspection,gnome.org,https://gitlab.gnome.org/GNOME/gobject-introspection,GNOME/gobject-introspection,,,📘 https://gi.readthedocs.io 📗 [libgirepository API docs](https://gnome.pages.gitlab.gnome.org/gobject-introspection/girepository),2026-07-05T17:43:25+00:00
+gobject-introspection-tests,gobject-introspection-tests,gnome.org,https://gitlab.gnome.org/GNOME/gobject-introspection-tests,GNOME/gobject-introspection-tests,,,,2026-07-05T17:43:25+00:00
+goffice,goffice,gnome.org,https://gitlab.gnome.org/GNOME/goffice,GNOME/goffice,,,,2026-07-05T17:43:25+00:00
+gom,gom,gnome.org,https://gitlab.gnome.org/GNOME/gom,GNOME/gom,,,,2026-07-05T17:43:25+00:00
+gparted,gparted,gnome.org,https://gitlab.gnome.org/GNOME/gparted,GNOME/gparted,,,,2026-07-05T17:43:25+00:00
+grilo,grilo,gnome.org,https://gitlab.gnome.org/GNOME/grilo,GNOME/grilo,,,,2026-07-05T17:43:25+00:00
+grilo-plugins,grilo-plugins,gnome.org,https://gitlab.gnome.org/GNOME/grilo-plugins,GNOME/grilo-plugins,,,,2026-07-05T17:43:25+00:00
+gsettings-desktop-schemas,gsettings-desktop-schemas,gnome.org,https://gitlab.gnome.org/GNOME/gsettings-desktop-schemas,GNOME/gsettings-desktop-schemas,,,,2026-07-05T17:43:25+00:00
+gsound,gsound,gnome.org,https://gitlab.gnome.org/GNOME/gsound,GNOME/gsound,,,,2026-07-05T17:43:25+00:00
+gspell,gspell,gnome.org,https://gitlab.gnome.org/GNOME/gspell,GNOME/gspell,,,,2026-07-05T17:43:25+00:00
+gssdp,gssdp,gnome.org,https://gitlab.gnome.org/GNOME/gssdp,GNOME/gssdp,,,A GObject-based API for handling resource discovery and announcement over SSDP.,2026-07-05T17:43:25+00:00
+gst-thumbnailers,gst-thumbnailers,gnome.org,https://gitlab.gnome.org/GNOME/gst-thumbnailers,GNOME/gst-thumbnailers,,,,2026-07-05T17:43:25+00:00
+gstreamermm,gstreamermm,gnome.org,https://gitlab.gnome.org/GNOME/gstreamermm,GNOME/gstreamermm,,,,2026-07-05T17:43:25+00:00
+gThumb,gthumb,gnome.org,https://gitlab.gnome.org/GNOME/gthumb,GNOME/gthumb,,,Image viewer and browser,2026-07-05T17:43:25+00:00
+gtk,gtk,gnome.org,https://gitlab.gnome.org/GNOME/gtk,GNOME/gtk,,,GTK is a multi-platform toolkit for creating graphical user interfaces.,2026-07-05T17:43:25+00:00
+gtk-doc,gtk-doc,gnome.org,https://gitlab.gnome.org/GNOME/gtk-doc,GNOME/gtk-doc,,,,2026-07-05T17:43:25+00:00
+gtk-frdp,gtk-frdp,gnome.org,https://gitlab.gnome.org/GNOME/gtk-frdp,GNOME/gtk-frdp,,,A RDP viewer widget for Gtk.,2026-07-05T17:43:25+00:00
+gtk-mac-bundler,gtk-mac-bundler,gnome.org,https://gitlab.gnome.org/GNOME/gtk-mac-bundler,GNOME/gtk-mac-bundler,,,,2026-07-05T17:43:25+00:00
+gtk-mac-integration,gtk-mac-integration,gnome.org,https://gitlab.gnome.org/GNOME/gtk-mac-integration,GNOME/gtk-mac-integration,,,,2026-07-05T17:43:25+00:00
+gtk-osx,gtk-osx,gnome.org,https://gitlab.gnome.org/GNOME/gtk-osx,GNOME/gtk-osx,,,,2026-07-05T17:43:25+00:00
+gtk-vnc,gtk-vnc,gnome.org,https://gitlab.gnome.org/GNOME/gtk-vnc,GNOME/gtk-vnc,,,A VNC client viewer widget for GTK,2026-07-05T17:43:25+00:00
+gtkmm,gtkmm,gnome.org,https://gitlab.gnome.org/GNOME/gtkmm,GNOME/gtkmm,,,,2026-07-05T17:43:25+00:00
+gtkmm-documentation,gtkmm-documentation,gnome.org,https://gitlab.gnome.org/GNOME/gtkmm-documentation,GNOME/gtkmm-documentation,,,,2026-07-05T17:43:25+00:00
+gtksourceview,gtksourceview,gnome.org,https://gitlab.gnome.org/GNOME/gtksourceview,GNOME/gtksourceview,,,A text editor widget for code editing,2026-07-05T17:43:25+00:00
+gtksourceviewmm,gtksourceviewmm,gnome.org,https://gitlab.gnome.org/GNOME/gtksourceviewmm,GNOME/gtksourceviewmm,,,,2026-07-05T17:43:25+00:00
+gtranslator,gtranslator,gnome.org,https://gitlab.gnome.org/GNOME/gtranslator,GNOME/gtranslator,,,GNOME Translation Editor,2026-07-05T17:43:25+00:00
+gucharmap,gucharmap,gnome.org,https://gitlab.gnome.org/GNOME/gucharmap,GNOME/gucharmap,,,GNOME Character Map — Please note that this application is in deep-maintenance mode. It will be updated for new unicode versions as soon as these are released; but otherwise no features will be added ,2026-07-05T17:43:25+00:00
+gupnp,gupnp,gnome.org,https://gitlab.gnome.org/GNOME/gupnp,GNOME/gupnp,,,"GUPnP is an object-oriented open source framework for creating UPnP devices and control points, written in C using GObject and libsoup. The GUPnP API is intended to be easy to use, efficient and flexi",2026-07-05T17:43:25+00:00
+gupnp-av,gupnp-av,gnome.org,https://gitlab.gnome.org/GNOME/gupnp-av,GNOME/gupnp-av,,,GUPnP A/V is a small utility library that aims to ease the handling and implementation of UPnP A/V profiles.,2026-07-05T17:43:25+00:00
+gupnp-dlna,gupnp-dlna,gnome.org,https://gitlab.gnome.org/GNOME/gupnp-dlna,GNOME/gupnp-dlna,,,"GUPnP DLNA is a small utility library that aims to ease the DLNA-related tasks such as media profile guessing, transcoding to a given profile, etc.",2026-07-05T17:43:25+00:00
+gupnp-dlna-media,gupnp-dlna-media,gnome.org,https://gitlab.gnome.org/GNOME/gupnp-dlna-media,GNOME/gupnp-dlna-media,,,A set of media files for the detection test suite in gupnp-dlna,2026-07-05T17:43:25+00:00
+gupnp-igd,gupnp-igd,gnome.org,https://gitlab.gnome.org/GNOME/gupnp-igd,GNOME/gupnp-igd,,,,2026-07-05T17:43:25+00:00
+gupnp-tools,gupnp-tools,gnome.org,https://gitlab.gnome.org/GNOME/gupnp-tools,GNOME/gupnp-tools,,,GUPnP Tools are free replacements of Intel UPnP tools that use GUPnP. They provides the following client and server side tools which enable one to easily test and debug one's UPnP devices and control ,2026-07-05T17:43:25+00:00
+GVDB,gvdb,gnome.org,https://gitlab.gnome.org/GNOME/gvdb,GNOME/gvdb,,,A simple database file format that stores a mapping from strings to GVariant values in a way that is extremely efficient for lookups.,2026-07-05T17:43:25+00:00
+gvfs,gvfs,gnome.org,https://gitlab.gnome.org/GNOME/gvfs,GNOME/gvfs,,,Virtual filesystem implementation for GIO,2026-07-05T17:43:25+00:00
+gweather-locations,gweather-locations,gnome.org,https://gitlab.gnome.org/GNOME/gweather-locations,GNOME/gweather-locations,,,,2026-07-05T17:43:25+00:00
+gxml,gxml,gnome.org,https://gitlab.gnome.org/GNOME/gxml,GNOME/gxml,,,,2026-07-05T17:43:25+00:00
+Hitori,hitori,gnome.org,https://gitlab.gnome.org/GNOME/hitori,GNOME/hitori,,,"Hitori is a GTK+ application to generate and let you play games of Hitori, a logic game similar to Sudoku created by Nikoli.",2026-07-05T17:43:25+00:00
+Reversi,iagno,gnome.org,https://gitlab.gnome.org/GNOME/iagno,GNOME/iagno,,,,2026-07-05T17:43:25+00:00
+Resources,resources,gnome.org,https://gitlab.gnome.org/GNOME/Incubator/resources,GNOME/Incubator/resources,,,Keep an eye on system resources,2026-07-05T17:43:25+00:00
+Submission,Submission,gnome.org,https://gitlab.gnome.org/GNOME/Incubator/Submission,GNOME/Incubator/Submission,,,Submit apps for Incubation,2026-07-05T17:43:25+00:00
+Initiatives,Initiatives,gnome.org,https://gitlab.gnome.org/GNOME/Initiatives,GNOME/Initiatives,,,GNOME goals and initiatives across projects,2026-07-05T17:43:25+00:00
+java-atk-wrapper,java-atk-wrapper,gnome.org,https://gitlab.gnome.org/GNOME/java-atk-wrapper,GNOME/java-atk-wrapper,,,,2026-07-05T17:43:25+00:00
+jhbuild,jhbuild,gnome.org,https://gitlab.gnome.org/GNOME/jhbuild,GNOME/jhbuild,,,🧰 https://gnome.pages.gitlab.gnome.org/jhbuild,2026-07-05T17:43:25+00:00
+json-glib,json-glib,gnome.org,https://gitlab.gnome.org/GNOME/json-glib,GNOME/json-glib,,,"JSON-GLib implements a full JSON parser and generator using GLib and GObject, and integrates JSON with GLib data types.",2026-07-05T17:43:25+00:00
+jsonrpc-glib,jsonrpc-glib,gnome.org,https://gitlab.gnome.org/GNOME/jsonrpc-glib,GNOME/jsonrpc-glib,,,jsonrpc-glib is a library to communicate using the JSON-RPC 2.0 specification.,2026-07-05T17:43:25+00:00
+krb5-auth-dialog,krb5-auth-dialog,gnome.org,https://gitlab.gnome.org/GNOME/krb5-auth-dialog,GNOME/krb5-auth-dialog,,,An application to acquire and list Kerberos tickets.,2026-07-05T17:43:25+00:00
+libadwaita,libadwaita,gnome.org,https://gitlab.gnome.org/GNOME/libadwaita,GNOME/libadwaita,,,Building blocks for modern GNOME applications,2026-07-05T17:43:25+00:00
+libchamplain,libchamplain,gnome.org,https://gitlab.gnome.org/GNOME/libchamplain,GNOME/libchamplain,,,"libchamplain is a Gtk widget displaying zoomable and pannable maps that can be loaded from various network sources. It supports overlay layers, markers, and custom elements displayed on top of the map",2026-07-05T17:43:25+00:00
+libcloudproviders,libcloudproviders,gnome.org,https://gitlab.gnome.org/GNOME/libcloudproviders,GNOME/libcloudproviders,,,,2026-07-05T17:43:25+00:00
+libdex,libdex,gnome.org,https://gitlab.gnome.org/GNOME/libdex,GNOME/libdex,,,,2026-07-05T17:43:25+00:00
+libdmapsharing,libdmapsharing,gnome.org,https://gitlab.gnome.org/GNOME/libdmapsharing,GNOME/libdmapsharing,,,,2026-07-05T17:43:25+00:00
+libgd,libgd,gnome.org,https://gitlab.gnome.org/GNOME/libgd,GNOME/libgd,,,,2026-07-05T17:43:25+00:00
+libgda,libgda,gnome.org,https://gitlab.gnome.org/GNOME/libgda,GNOME/libgda,,,,2026-07-05T17:43:25+00:00
+libgee,libgee,gnome.org,https://gitlab.gnome.org/GNOME/libgee,GNOME/libgee,,,,2026-07-05T17:43:25+00:00
+libgepub,libgepub,gnome.org,https://gitlab.gnome.org/GNOME/libgepub,GNOME/libgepub,,,,2026-07-05T17:43:25+00:00
+libgit2-glib,libgit2-glib,gnome.org,https://gitlab.gnome.org/GNOME/libgit2-glib,GNOME/libgit2-glib,,,,2026-07-05T17:43:25+00:00
+libglnx,libglnx,gnome.org,https://gitlab.gnome.org/GNOME/libglnx,GNOME/libglnx,,,,2026-07-05T17:43:25+00:00
+libgnome-games-support,libgnome-games-support,gnome.org,https://gitlab.gnome.org/GNOME/libgnome-games-support,GNOME/libgnome-games-support,,,,2026-07-05T17:43:25+00:00
+libgnome-volume-control,libgnome-volume-control,gnome.org,https://gitlab.gnome.org/GNOME/libgnome-volume-control,GNOME/libgnome-volume-control,,,,2026-07-05T17:43:25+00:00
+libgovirt,libgovirt,gnome.org,https://gitlab.gnome.org/GNOME/libgovirt,GNOME/libgovirt,,,,2026-07-05T17:43:25+00:00
+libgsf,libgsf,gnome.org,https://gitlab.gnome.org/GNOME/libgsf,GNOME/libgsf,,,,2026-07-05T17:43:25+00:00
+libgtop,libgtop,gnome.org,https://gitlab.gnome.org/GNOME/libgtop,GNOME/libgtop,,,A library for collecting system monitoring data,2026-07-05T17:43:25+00:00
+libgudev,libgudev,gnome.org,https://gitlab.gnome.org/GNOME/libgudev,GNOME/libgudev,,,,2026-07-05T17:43:25+00:00
+libgweather,libgweather,gnome.org,https://gitlab.gnome.org/GNOME/libgweather,GNOME/libgweather,,,"Location and time zone database, and weather-lookup library",2026-07-05T17:43:25+00:00
+libgxdp,libgxdp,gnome.org,https://gitlab.gnome.org/GNOME/libgxdp,GNOME/libgxdp,,,,2026-07-05T17:43:25+00:00
+libgxps,libgxps,gnome.org,https://gitlab.gnome.org/GNOME/libgxps,GNOME/libgxps,,,,2026-07-05T17:43:25+00:00
+libhandy,libhandy,gnome.org,https://gitlab.gnome.org/GNOME/libhandy,GNOME/libhandy,,,Building blocks for modern adaptive GNOME apps,2026-07-05T17:43:25+00:00
+libhttpseverywhere,libhttpseverywhere,gnome.org,https://gitlab.gnome.org/GNOME/libhttpseverywhere,GNOME/libhttpseverywhere,,,,2026-07-05T17:43:25+00:00
+libmanette,libmanette,gnome.org,https://gitlab.gnome.org/GNOME/libmanette,GNOME/libmanette,,,The simple GObject game controller library.,2026-07-05T17:43:25+00:00
+libmediaart,libmediaart,gnome.org,https://gitlab.gnome.org/GNOME/libmediaart,GNOME/libmediaart,,,,2026-07-05T17:43:25+00:00
+libmks,libmks,gnome.org,https://gitlab.gnome.org/GNOME/libmks,GNOME/libmks,,,,2026-07-05T17:43:25+00:00
+libnma,libnma,gnome.org,https://gitlab.gnome.org/GNOME/libnma,GNOME/libnma,,,,2026-07-05T17:43:25+00:00
+libnotify,libnotify,gnome.org,https://gitlab.gnome.org/GNOME/libnotify,GNOME/libnotify,,,,2026-07-05T17:43:25+00:00
+libpanel,libpanel,gnome.org,https://gitlab.gnome.org/GNOME/libpanel,GNOME/libpanel,,,A dock/panel library for GTK 4,2026-07-05T17:43:25+00:00
+libpeas,libpeas,gnome.org,https://gitlab.gnome.org/GNOME/libpeas,GNOME/libpeas,,,,2026-07-05T17:43:25+00:00
+librest,librest,gnome.org,https://gitlab.gnome.org/GNOME/librest,GNOME/librest,,,,2026-07-05T17:43:25+00:00
+librsvg,librsvg,gnome.org,https://gitlab.gnome.org/GNOME/librsvg,GNOME/librsvg,,,"A library to render SVG images to Cairo surfaces. GNOME uses this to render SVG icons. Outside of GNOME, other desktop environments use it for similar purposes. Wikimedia uses it for Wikipedia's SVG d",2026-07-05T17:43:25+00:00
+libsecret,libsecret,gnome.org,https://gitlab.gnome.org/GNOME/libsecret,GNOME/libsecret,,,,2026-07-05T17:43:25+00:00
+libshew,libshew,gnome.org,https://gitlab.gnome.org/GNOME/libshew,GNOME/libshew,,,,2026-07-05T17:43:25+00:00
+libshumate,libshumate,gnome.org,https://gitlab.gnome.org/GNOME/libshumate,GNOME/libshumate,,,Shumate is a GTK toolkit providing widgets for embedded maps.,2026-07-05T17:43:25+00:00
+libsoup,libsoup,gnome.org,https://gitlab.gnome.org/GNOME/libsoup,GNOME/libsoup,,,HTTP Library for GLib - https://libsoup.gnome.org/,2026-07-05T17:43:25+00:00
+libspelling,libspelling,gnome.org,https://gitlab.gnome.org/GNOME/libspelling,GNOME/libspelling,,,,2026-07-05T17:43:25+00:00
+libwnck,libwnck,gnome.org,https://gitlab.gnome.org/GNOME/libwnck,GNOME/libwnck,,,,2026-07-05T17:43:25+00:00
+libxml2,libxml2,gnome.org,https://gitlab.gnome.org/GNOME/libxml2,GNOME/libxml2,,,XML parser and toolkit,2026-07-05T17:43:25+00:00
+libxslt,libxslt,gnome.org,https://gitlab.gnome.org/GNOME/libxslt,GNOME/libxslt,,,XSLT processor,2026-07-05T17:43:25+00:00
+lightsoff,lightsoff,gnome.org,https://gitlab.gnome.org/GNOME/lightsoff,GNOME/lightsoff,,,Turn off all the lights,2026-07-05T17:43:25+00:00
+LocalSearch,localsearch,gnome.org,https://gitlab.gnome.org/GNOME/localsearch,GNOME/localsearch,,,,2026-07-05T17:43:25+00:00
+Image Viewer,loupe,gnome.org,https://gitlab.gnome.org/GNOME/loupe,GNOME/loupe,,,View and edit images,2026-07-05T17:43:25+00:00
+m4-common,m4-common,gnome.org,https://gitlab.gnome.org/GNOME/m4-common,GNOME/m4-common,,,,2026-07-05T17:43:25+00:00
+manuals,manuals,gnome.org,https://gitlab.gnome.org/GNOME/manuals,GNOME/manuals,,,,2026-07-05T17:43:25+00:00
+meld,meld,gnome.org,https://gitlab.gnome.org/GNOME/meld,GNOME/meld,,,Meld is a visual diff and merge tool targeted at developers.,2026-07-05T17:43:25+00:00
+metacity,metacity,gnome.org,https://gitlab.gnome.org/GNOME/metacity,GNOME/metacity,,,,2026-07-05T17:43:25+00:00
+mm-common,mm-common,gnome.org,https://gitlab.gnome.org/GNOME/mm-common,GNOME/mm-common,,,,2026-07-05T17:43:25+00:00
+mobile-broadband-provider-info,mobile-broadband-provider-info,gnome.org,https://gitlab.gnome.org/GNOME/mobile-broadband-provider-info,GNOME/mobile-broadband-provider-info,,,,2026-07-05T17:43:25+00:00
+moserial,moserial,gnome.org,https://gitlab.gnome.org/GNOME/moserial,GNOME/moserial,,,,2026-07-05T17:43:25+00:00
+msgraph,msgraph,gnome.org,https://gitlab.gnome.org/GNOME/msgraph,GNOME/msgraph,,,Library to access MS Graph API for Office 365.,2026-07-05T17:43:25+00:00
+msitools,msitools,gnome.org,https://gitlab.gnome.org/GNOME/msitools,GNOME/msitools,,,,2026-07-05T17:43:25+00:00
+mutter,mutter,gnome.org,https://gitlab.gnome.org/GNOME/mutter,GNOME/mutter,,,A Wayland display server library.,2026-07-05T17:43:25+00:00
+Files,nautilus,gnome.org,https://gitlab.gnome.org/GNOME/nautilus,GNOME/nautilus,,,A file browser for GNOME [**Report a Bug**](https://gitlab.gnome.org/GNOME/nautilus/-/issues/new?issuable_template=Bug) | [**Questions & Suggestions**](https://discourse.gnome.org/tag/nautilus) | [**C,2026-07-05T17:43:25+00:00
+nautilus-python,nautilus-python,gnome.org,https://gitlab.gnome.org/GNOME/nautilus-python,GNOME/nautilus-python,,,,2026-07-05T17:43:25+00:00
+network-manager-applet,network-manager-applet,gnome.org,https://gitlab.gnome.org/GNOME/network-manager-applet,GNOME/network-manager-applet,,,Tray applet and an advanced network connection editor,2026-07-05T17:43:25+00:00
+network-manager-iodine,network-manager-iodine,gnome.org,https://gitlab.gnome.org/GNOME/network-manager-iodine,GNOME/network-manager-iodine,,,,2026-07-05T17:43:25+00:00
+network-manager-sstp,network-manager-sstp,gnome.org,https://gitlab.gnome.org/GNOME/network-manager-sstp,GNOME/network-manager-sstp,,,Secure Socket Tunneling Protocol Extention for Network Manager,2026-07-05T17:43:25+00:00
+NetworkManager-fortisslvpn,NetworkManager-fortisslvpn,gnome.org,https://gitlab.gnome.org/GNOME/NetworkManager-fortisslvpn,GNOME/NetworkManager-fortisslvpn,,,Fortinet compatible SSLVPN support for NetworkManager,2026-07-05T17:43:25+00:00
+NetworkManager-libreswan,NetworkManager-libreswan,gnome.org,https://gitlab.gnome.org/GNOME/NetworkManager-libreswan,GNOME/NetworkManager-libreswan,,,Provides easy connections to IPsec VPNs using NetworkManager and Libreswan.,2026-07-05T17:43:25+00:00
+NetworkManager-openconnect,NetworkManager-openconnect,gnome.org,https://gitlab.gnome.org/GNOME/NetworkManager-openconnect,GNOME/NetworkManager-openconnect,,,Openconnect support for NetworkManager,2026-07-05T17:43:25+00:00
+NetworkManager-openvpn,NetworkManager-openvpn,gnome.org,https://gitlab.gnome.org/GNOME/NetworkManager-openvpn,GNOME/NetworkManager-openvpn,,,OpenVPN support for NetworkManager,2026-07-05T17:43:25+00:00
+NetworkManager-pptp,NetworkManager-pptp,gnome.org,https://gitlab.gnome.org/GNOME/NetworkManager-pptp,GNOME/NetworkManager-pptp,,,PPTP support for NetworkManager,2026-07-05T17:43:25+00:00
+NetworkManager-vpnc,NetworkManager-vpnc,gnome.org,https://gitlab.gnome.org/GNOME/NetworkManager-vpnc,GNOME/NetworkManager-vpnc,,,VPNC support for NetworkManager,2026-07-05T17:43:25+00:00
+niepce,niepce,gnome.org,https://gitlab.gnome.org/GNOME/niepce,GNOME/niepce,,,,2026-07-05T17:43:25+00:00
+ocrfeeder,ocrfeeder,gnome.org,https://gitlab.gnome.org/GNOME/ocrfeeder,GNOME/ocrfeeder,,,,2026-07-05T17:43:25+00:00
+office-runner,office-runner,gnome.org,https://gitlab.gnome.org/GNOME/office-runner,GNOME/office-runner,,,,2026-07-05T17:43:25+00:00
+OpenQA Needles,openqa-needles,gnome.org,https://gitlab.gnome.org/GNOME/openqa-needles,GNOME/openqa-needles,,,,2026-07-05T17:43:25+00:00
+openQA Tests,openqa-tests,gnome.org,https://gitlab.gnome.org/GNOME/openqa-tests,GNOME/openqa-tests,,,"This repo has been merged into https://gitlab.gnome.org/GNOME/gnome-build-meta/-/tree/master/tests/openqa It is going to be archived, but we haven't finished moving the issues and merge-requests yet! ",2026-07-05T17:43:25+00:00
+openqa-utils,openqa-utils,gnome.org,https://gitlab.gnome.org/GNOME/openqa-utils,GNOME/openqa-utils,,,,2026-07-05T17:43:25+00:00
+orca,orca,gnome.org,https://gitlab.gnome.org/GNOME/orca,GNOME/orca,,,"Screen reader for graphical applications that use the atspi protocol, via speech or Braille.",2026-07-05T17:43:25+00:00
+pan,pan,gnome.org,https://gitlab.gnome.org/GNOME/pan,GNOME/pan,,,Pan Newsreader,2026-07-05T17:43:25+00:00
+pango,pango,gnome.org,https://gitlab.gnome.org/GNOME/pango,GNOME/pango,,,"Pango is a library for layout and rendering of text, with an emphasis on internationalization.",2026-07-05T17:43:25+00:00
+pangomm,pangomm,gnome.org,https://gitlab.gnome.org/GNOME/pangomm,GNOME/pangomm,,,,2026-07-05T17:43:25+00:00
+Papers,papers,gnome.org,https://gitlab.gnome.org/GNOME/papers,GNOME/papers,,,Papers is a document viewer for PDF and other document formats aimed at the GNOME desktop,2026-07-05T17:43:25+00:00
+perl-Cairo,perl-cairo,gnome.org,https://gitlab.gnome.org/GNOME/perl-cairo,GNOME/perl-cairo,,,,2026-07-05T17:43:25+00:00
+perl-Cairo-GObject,perl-cairo-gobject,gnome.org,https://gitlab.gnome.org/GNOME/perl-cairo-gobject,GNOME/perl-cairo-gobject,,,,2026-07-05T17:43:25+00:00
+perl-ExtUtils-Depends,perl-extutils-depends,gnome.org,https://gitlab.gnome.org/GNOME/perl-extutils-depends,GNOME/perl-extutils-depends,,,,2026-07-05T17:43:25+00:00
+perl-ExtUtils-PkgConfig,perl-extutils-pkgconfig,gnome.org,https://gitlab.gnome.org/GNOME/perl-extutils-pkgconfig,GNOME/perl-extutils-pkgconfig,,,,2026-07-05T17:43:25+00:00
+perl-Glib,perl-glib,gnome.org,https://gitlab.gnome.org/GNOME/perl-glib,GNOME/perl-glib,,,,2026-07-05T17:43:25+00:00
+perl-Glib-IO,perl-glib-io,gnome.org,https://gitlab.gnome.org/GNOME/perl-glib-io,GNOME/perl-glib-io,,,,2026-07-05T17:43:25+00:00
+perl-Glib-Object-Introspection,perl-glib-object-introspection,gnome.org,https://gitlab.gnome.org/GNOME/perl-glib-object-introspection,GNOME/perl-glib-object-introspection,,,,2026-07-05T17:43:25+00:00
+perl-Gtk3,perl-gtk3,gnome.org,https://gitlab.gnome.org/GNOME/perl-gtk3,GNOME/perl-gtk3,,,,2026-07-05T17:43:25+00:00
+perl-Pango,perl-pango,gnome.org,https://gitlab.gnome.org/GNOME/perl-pango,GNOME/perl-pango,,,,2026-07-05T17:43:25+00:00
+phodav,phodav,gnome.org,https://gitlab.gnome.org/GNOME/phodav,GNOME/phodav,,,,2026-07-05T17:43:25+00:00
+pipewire-media-stream,pipewire-media-stream,gnome.org,https://gitlab.gnome.org/GNOME/pipewire-media-stream,GNOME/pipewire-media-stream,,,PipeWire implementation of GtkMediaStream for GTK4,2026-07-05T17:43:25+00:00
+pitivi,pitivi,gnome.org,https://gitlab.gnome.org/GNOME/pitivi,GNOME/pitivi,,,Beautiful and powerful video editor based on GStreamer Editing Services.,2026-07-05T17:43:25+00:00
+polari,polari,gnome.org,https://gitlab.gnome.org/GNOME/polari,GNOME/polari,,,Polari is a simple IRC Client that is designed to integrate seamlessly with GNOME 3,2026-07-05T17:43:25+00:00
+Postr,postr,gnome.org,https://gitlab.gnome.org/GNOME/postr,GNOME/postr,,,A simple tool to upload pictures to Flickr,2026-07-05T17:43:25+00:00
+presentation-templates,presentation-templates,gnome.org,https://gitlab.gnome.org/GNOME/presentation-templates,GNOME/presentation-templates,,,,2026-07-05T17:43:25+00:00
+pyatspi2,pyatspi2,gnome.org,https://gitlab.gnome.org/GNOME/pyatspi2,GNOME/pyatspi2,,,,2026-07-05T17:43:25+00:00
+pygobject,pygobject,gnome.org,https://gitlab.gnome.org/GNOME/pygobject,GNOME/pygobject,,,🐍 https://pygobject.gnome.org/,2026-07-05T17:43:25+00:00
+pygobject-docs,pygobject-docs,gnome.org,https://gitlab.gnome.org/GNOME/pygobject-docs,GNOME/pygobject-docs,,,Python API documentation for the GNOME platform https://api.pygobject.gnome.org,2026-07-05T17:43:25+00:00
+quadrapassel,quadrapassel,gnome.org,https://gitlab.gnome.org/GNOME/quadrapassel,GNOME/quadrapassel,,,Fit falling blocks together,2026-07-05T17:43:25+00:00
+recipes,recipes,gnome.org,https://gitlab.gnome.org/GNOME/recipes,GNOME/recipes,,,GNOME likes to cook,2026-07-05T17:43:25+00:00
+releng,releng,gnome.org,https://gitlab.gnome.org/GNOME/releng,GNOME/releng,,,,2026-07-05T17:43:25+00:00
+rhythmbox,rhythmbox,gnome.org,https://gitlab.gnome.org/GNOME/rhythmbox,GNOME/rhythmbox,,,,2026-07-05T17:43:25+00:00
+rygel,rygel,gnome.org,https://gitlab.gnome.org/GNOME/rygel,GNOME/rygel,,,"Rygel is a home media solution (UPnP AV MediaServer) that allows you to easily share audio, video and pictures to other devices. Additionally, media player software may use Rygel to become a MediaRend",2026-07-05T17:43:25+00:00
+Passwords and Secrets,seahorse,gnome.org,https://gitlab.gnome.org/GNOME/seahorse,GNOME/seahorse,,,A password and encryption key manager for GNOME.,2026-07-05T17:43:25+00:00
+shotwell,shotwell,gnome.org,https://gitlab.gnome.org/GNOME/shotwell,GNOME/shotwell,,,Shotwell is a photo manager with simple image enhancement features,2026-07-05T17:43:25+00:00
+Video Player,showtime,gnome.org,https://gitlab.gnome.org/GNOME/showtime,GNOME/showtime,,,Watch without distraction,2026-07-05T17:43:25+00:00
+Document Scanner,simple-scan,gnome.org,https://gitlab.gnome.org/GNOME/simple-scan,GNOME/simple-scan,,,,2026-07-05T17:43:25+00:00
+Snapshot,snapshot,gnome.org,https://gitlab.gnome.org/GNOME/snapshot,GNOME/snapshot,,,Take pictures and videos,2026-07-05T17:43:25+00:00
+sound-juicer,sound-juicer,gnome.org,https://gitlab.gnome.org/GNOME/sound-juicer,GNOME/sound-juicer,,,,2026-07-05T17:43:25+00:00
+sushi,sushi,gnome.org,https://gitlab.gnome.org/GNOME/sushi,GNOME/sushi,,,A file previewer for the GNOME desktop environment.,2026-07-05T17:43:25+00:00
+swell-foop,swell-foop,gnome.org,https://gitlab.gnome.org/GNOME/swell-foop,GNOME/swell-foop,,,Clear the screen by removing groups of colored and shaped tiles,2026-07-05T17:43:25+00:00
+sysprof,sysprof,gnome.org,https://gitlab.gnome.org/GNOME/sysprof,GNOME/sysprof,,,,2026-07-05T17:43:25+00:00
+tali,tali,gnome.org,https://gitlab.gnome.org/GNOME/tali,GNOME/tali,,,,2026-07-05T17:43:25+00:00
+tecla,tecla,gnome.org,https://gitlab.gnome.org/GNOME/tecla,GNOME/tecla,,,,2026-07-05T17:43:25+00:00
+telegnome,telegnome,gnome.org,https://gitlab.gnome.org/GNOME/telegnome,GNOME/telegnome,,,,2026-07-05T17:43:25+00:00
+template-glib,template-glib,gnome.org,https://gitlab.gnome.org/GNOME/template-glib,GNOME/template-glib,,,template-glib is a library for template expansion which supports calling into GObject Introspection from templates.,2026-07-05T17:43:25+00:00
+TinySPARQL,tinysparql,gnome.org,https://gitlab.gnome.org/GNOME/tinysparql,GNOME/tinysparql,,,Low-footprint RDF triple store library with SPARQL 1.1 interface,2026-07-05T17:43:25+00:00
+totem,totem,gnome.org,https://gitlab.gnome.org/GNOME/totem,GNOME/totem,,,,2026-07-05T17:43:25+00:00
+totem-pl-parser,totem-pl-parser,gnome.org,https://gitlab.gnome.org/GNOME/totem-pl-parser,GNOME/totem-pl-parser,,,,2026-07-05T17:43:25+00:00
+totem-video-thumbnailer,totem-video-thumbnailer,gnome.org,https://gitlab.gnome.org/GNOME/totem-video-thumbnailer,GNOME/totem-video-thumbnailer,,,Video thumbnailer for embedded uses,2026-07-05T17:43:25+00:00
+tracker-miner-media,tracker-miner-media,gnome.org,https://gitlab.gnome.org/GNOME/tracker-miner-media,GNOME/tracker-miner-media,,,,2026-07-05T17:43:25+00:00
+twenty-years,twenty-years,gnome.org,https://gitlab.gnome.org/GNOME/twenty-years,GNOME/twenty-years,,,,2026-07-05T17:43:25+00:00
+vala,vala,gnome.org,https://gitlab.gnome.org/GNOME/vala,GNOME/vala,,,📘 [Manual](https://gnome.pages.gitlab.gnome.org/vala/manual/index.html) | 📗 [libvala API docs](https://gnome.pages.gitlab.gnome.org/vala/docs/vala/index.htm),2026-07-05T17:43:25+00:00
+vala-extra-vapis,vala-extra-vapis,gnome.org,https://gitlab.gnome.org/GNOME/vala-extra-vapis,GNOME/vala-extra-vapis,,,,2026-07-05T17:43:25+00:00
+vte,vte,gnome.org,https://gitlab.gnome.org/GNOME/vte,GNOME/vte,,,Virtual Terminal library # **You must read the [bug reporting guidelines](https://gitlab.gnome.org/GNOME/gnome-terminal/-/wikis/BugReportHowto) before filing an issue!**,2026-07-05T17:43:25+00:00
+wing,wing,gnome.org,https://gitlab.gnome.org/GNOME/wing,GNOME/wing,,,,2026-07-05T17:43:25+00:00
+xdg-desktop-portal-gnome,xdg-desktop-portal-gnome,gnome.org,https://gitlab.gnome.org/GNOME/xdg-desktop-portal-gnome,GNOME/xdg-desktop-portal-gnome,,,A backend implementation for xdg-desktop-portal for the GNOME desktop environment,2026-07-05T17:43:25+00:00
+xdg-user-dirs-gtk,xdg-user-dirs-gtk,gnome.org,https://gitlab.gnome.org/GNOME/xdg-user-dirs-gtk,GNOME/xdg-user-dirs-gtk,,,,2026-07-05T17:43:25+00:00
+yelp,yelp,gnome.org,https://gitlab.gnome.org/GNOME/yelp,GNOME/yelp,,,,2026-07-05T17:43:25+00:00
+yelp-tools,yelp-tools,gnome.org,https://gitlab.gnome.org/GNOME/yelp-tools,GNOME/yelp-tools,,,,2026-07-05T17:43:25+00:00
+yelp-xsl,yelp-xsl,gnome.org,https://gitlab.gnome.org/GNOME/yelp-xsl,GNOME/yelp-xsl,,,,2026-07-05T17:43:25+00:00
+zenity,zenity,gnome.org,https://gitlab.gnome.org/GNOME/zenity,GNOME/zenity,,,,2026-07-05T17:43:25+00:00
+Infrastructure,Infrastructure,gnome.org,https://gitlab.gnome.org/Infrastructure/Infrastructure,Infrastructure/Infrastructure,,,All your Infrastructure related support requests belong to us!,2026-07-05T17:43:25+00:00
+rust-supply-chain,rust-supply-chain,gnome.org,https://gitlab.gnome.org/Teams/Releng/rust-supply-chain,Teams/Releng/rust-supply-chain,,,,2026-07-05T17:43:25+00:00

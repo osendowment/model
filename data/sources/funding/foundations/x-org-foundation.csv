@@ -1,0 +1,263 @@
+name,project_slug,domain,website,github_repo,ecosystem,package,description,fetched_at
+adobe-100dpi,adobe-100dpi,x.org,https://gitlab.freedesktop.org/xorg/font/adobe-100dpi,gitlab-freedesktop-mirrors/adobe-100dpi,,,,2026-07-05T17:43:27+00:00
+adobe-75dpi,adobe-75dpi,x.org,https://gitlab.freedesktop.org/xorg/font/adobe-75dpi,gitlab-freedesktop-mirrors/adobe-75dpi,,,,2026-07-05T17:43:27+00:00
+adobe-utopia-100dpi,adobe-utopia-100dpi,x.org,https://gitlab.freedesktop.org/xorg/font/adobe-utopia-100dpi,gitlab-freedesktop-mirrors/adobe-utopia-100dpi,,,,2026-07-05T17:43:27+00:00
+adobe-utopia-75dpi,adobe-utopia-75dpi,x.org,https://gitlab.freedesktop.org/xorg/font/adobe-utopia-75dpi,gitlab-freedesktop-mirrors/adobe-utopia-75dpi,,,,2026-07-05T17:43:27+00:00
+adobe-utopia-type1,adobe-utopia-type1,x.org,https://gitlab.freedesktop.org/xorg/font/adobe-utopia-type1,gitlab-freedesktop-mirrors/adobe-utopia-type1,,,,2026-07-05T17:43:27+00:00
+alias,alias,x.org,https://gitlab.freedesktop.org/xorg/font/alias,gitlab-freedesktop-mirrors/alias,,,,2026-07-05T17:43:27+00:00
+appres,appres,x.org,https://gitlab.freedesktop.org/xorg/app/appres,gitlab-freedesktop-mirrors/appres,,,Utility to list X application resource database,2026-07-05T17:43:27+00:00
+arabic-misc,arabic-misc,x.org,https://gitlab.freedesktop.org/xorg/font/arabic-misc,gitlab-freedesktop-mirrors/arabic-misc,,,,2026-07-05T17:43:27+00:00
+bdftopcf,bdftopcf,x.org,https://gitlab.freedesktop.org/xorg/util/bdftopcf,gitlab-freedesktop-mirrors/bdftopcf,,,convert X font from Bitmap Distribution Format to Portable Compiled Format,2026-07-05T17:43:27+00:00
+beforelight,beforelight,x.org,https://gitlab.freedesktop.org/xorg/app/beforelight,gitlab-freedesktop-mirrors/beforelight,,,Sample implementation of a screen saver for X servers supporting the MIT-SCREEN-SAVER extension,2026-07-05T17:43:27+00:00
+bh-100dpi,bh-100dpi,x.org,https://gitlab.freedesktop.org/xorg/font/bh-100dpi,gitlab-freedesktop-mirrors/bh-100dpi,,,,2026-07-05T17:43:27+00:00
+bh-75dpi,bh-75dpi,x.org,https://gitlab.freedesktop.org/xorg/font/bh-75dpi,gitlab-freedesktop-mirrors/bh-75dpi,,,,2026-07-05T17:43:27+00:00
+bh-lucidatypewriter-100dpi,bh-lucidatypewriter-100dpi,x.org,https://gitlab.freedesktop.org/xorg/font/bh-lucidatypewriter-100dpi,gitlab-freedesktop-mirrors/bh-lucidatypewriter-100dpi,,,,2026-07-05T17:43:27+00:00
+bh-lucidatypewriter-75dpi,bh-lucidatypewriter-75dpi,x.org,https://gitlab.freedesktop.org/xorg/font/bh-lucidatypewriter-75dpi,gitlab-freedesktop-mirrors/bh-lucidatypewriter-75dpi,,,,2026-07-05T17:43:27+00:00
+bh-ttf,bh-ttf,x.org,https://gitlab.freedesktop.org/xorg/font/bh-ttf,gitlab-freedesktop-mirrors/bh-ttf,,,,2026-07-05T17:43:27+00:00
+bh-type1,bh-type1,x.org,https://gitlab.freedesktop.org/xorg/font/bh-type1,gitlab-freedesktop-mirrors/bh-type1,,,,2026-07-05T17:43:27+00:00
+bitmap,bitmap,x.org,https://gitlab.freedesktop.org/xorg/app/bitmap,gitlab-freedesktop-mirrors/bitmap,,,"bitmap, bmtoa, atobm - X bitmap (XBM) editor and converter utilities",2026-07-05T17:43:27+00:00
+bitmaps,bitmaps,x.org,https://gitlab.freedesktop.org/xorg/data/bitmaps,gitlab-freedesktop-mirrors/bitmaps,,,X BitMap (XBM) format bitmaps commonly used in X.Org applications,2026-07-05T17:43:27+00:00
+bitstream-100dpi,bitstream-100dpi,x.org,https://gitlab.freedesktop.org/xorg/font/bitstream-100dpi,gitlab-freedesktop-mirrors/bitstream-100dpi,,,,2026-07-05T17:43:27+00:00
+bitstream-75dpi,bitstream-75dpi,x.org,https://gitlab.freedesktop.org/xorg/font/bitstream-75dpi,gitlab-freedesktop-mirrors/bitstream-75dpi,,,,2026-07-05T17:43:27+00:00
+bitstream-type1,bitstream-type1,x.org,https://gitlab.freedesktop.org/xorg/font/bitstream-type1,gitlab-freedesktop-mirrors/bitstream-type1,,,,2026-07-05T17:43:27+00:00
+cf,cf,x.org,https://gitlab.freedesktop.org/xorg/util/cf,gitlab-freedesktop-mirrors/cf,,,Imake configuration files & templates,2026-07-05T17:43:27+00:00
+constype,constype,x.org,https://gitlab.freedesktop.org/xorg/app/constype,gitlab-freedesktop-mirrors/constype,,,Utility to print type of Sun console,2026-07-05T17:43:27+00:00
+cronyx-cyrillic,cronyx-cyrillic,x.org,https://gitlab.freedesktop.org/xorg/font/cronyx-cyrillic,gitlab-freedesktop-mirrors/cronyx-cyrillic,,,,2026-07-05T17:43:27+00:00
+cursor-misc,cursor-misc,x.org,https://gitlab.freedesktop.org/xorg/font/cursor-misc,gitlab-freedesktop-mirrors/cursor-misc,,,,2026-07-05T17:43:27+00:00
+cursors,cursors,x.org,https://gitlab.freedesktop.org/xorg/data/cursors,gitlab-freedesktop-mirrors/cursors,,,Default set of cursor themes for use with libXcursor.,2026-07-05T17:43:27+00:00
+daewoo-misc,daewoo-misc,x.org,https://gitlab.freedesktop.org/xorg/font/daewoo-misc,gitlab-freedesktop-mirrors/daewoo-misc,,,,2026-07-05T17:43:27+00:00
+dec-misc,dec-misc,x.org,https://gitlab.freedesktop.org/xorg/font/dec-misc,gitlab-freedesktop-mirrors/dec-misc,,,,2026-07-05T17:43:27+00:00
+editres,editres,x.org,https://gitlab.freedesktop.org/xorg/app/editres,gitlab-freedesktop-mirrors/editres,,,Dynamic resource editor for X Toolkit applications,2026-07-05T17:43:27+00:00
+encodings,encodings,x.org,https://gitlab.freedesktop.org/xorg/font/encodings,gitlab-freedesktop-mirrors/encodings,,,Font encoding tables for libfontenc,2026-07-05T17:43:27+00:00
+fonttosfnt,fonttosfnt,x.org,https://gitlab.freedesktop.org/xorg/app/fonttosfnt,gitlab-freedesktop-mirrors/fonttosfnt,,,fonttosfnt wraps a set of bdf or pcf bitmap fonts in a sfnt (TrueType or OpenType) wrapper.,2026-07-05T17:43:27+00:00
+fslsfonts,fslsfonts,x.org,https://gitlab.freedesktop.org/xorg/app/fslsfonts,gitlab-freedesktop-mirrors/fslsfonts,,,fslsfonts prints a list of fonts served by an X font server.,2026-07-05T17:43:27+00:00
+fstobdf,fstobdf,x.org,https://gitlab.freedesktop.org/xorg/app/fstobdf,gitlab-freedesktop-mirrors/fstobdf,,,generate BDF font from X font server,2026-07-05T17:43:27+00:00
+gccmakedep,gccmakedep,x.org,https://gitlab.freedesktop.org/xorg/util/gccmakedep,gitlab-freedesktop-mirrors/gccmakedep,,,script to create dependencies in makefiles using 'gcc -M',2026-07-05T17:43:27+00:00
+ibm-type1,ibm-type1,x.org,https://gitlab.freedesktop.org/xorg/font/ibm-type1,gitlab-freedesktop-mirrors/ibm-type1,,,,2026-07-05T17:43:27+00:00
+iceauth,iceauth,x.org,https://gitlab.freedesktop.org/xorg/app/iceauth,gitlab-freedesktop-mirrors/iceauth,,,libICE authority file utility,2026-07-05T17:43:27+00:00
+ico,ico,x.org,https://gitlab.freedesktop.org/xorg/app/ico,gitlab-freedesktop-mirrors/ico,,,A simple animation program that may be used for testing various X11 operations and extensions.,2026-07-05T17:43:27+00:00
+imake,imake,x.org,https://gitlab.freedesktop.org/xorg/util/imake,gitlab-freedesktop-mirrors/imake,,,Obsolete C preprocessor interface to the make utility,2026-07-05T17:43:27+00:00
+isas-misc,isas-misc,x.org,https://gitlab.freedesktop.org/xorg/font/isas-misc,gitlab-freedesktop-mirrors/isas-misc,,,,2026-07-05T17:43:27+00:00
+jis-misc,jis-misc,x.org,https://gitlab.freedesktop.org/xorg/font/jis-misc,gitlab-freedesktop-mirrors/jis-misc,,,,2026-07-05T17:43:27+00:00
+libAppleWM,libapplewm,x.org,https://gitlab.freedesktop.org/xorg/lib/libapplewm,gitlab-freedesktop-mirrors/libapplewm,,,Xlib-based library for the Apple-WM extension,2026-07-05T17:43:27+00:00
+libdmx,libdmx,x.org,https://gitlab.freedesktop.org/xorg/lib/libdmx,gitlab-freedesktop-mirrors/libdmx,,,Xlib-based library for the DMX (Distributed Multihead X) extension,2026-07-05T17:43:27+00:00
+libfontenc,libfontenc,x.org,https://gitlab.freedesktop.org/xorg/lib/libfontenc,gitlab-freedesktop-mirrors/libfontenc,,,X font encoding library,2026-07-05T17:43:27+00:00
+libFS,libfs,x.org,https://gitlab.freedesktop.org/xorg/lib/libfs,gitlab-freedesktop-mirrors/libfs,,,X Font Service client library,2026-07-05T17:43:27+00:00
+libICE,libice,x.org,https://gitlab.freedesktop.org/xorg/lib/libice,gitlab-freedesktop-mirrors/libice,,,Inter-Client Exchange Library,2026-07-05T17:43:27+00:00
+libpciaccess,libpciaccess,x.org,https://gitlab.freedesktop.org/xorg/lib/libpciaccess,gitlab-freedesktop-mirrors/libpciaccess,,,Generic PCI access library,2026-07-05T17:43:27+00:00
+libSM,libsm,x.org,https://gitlab.freedesktop.org/xorg/lib/libsm,gitlab-freedesktop-mirrors/libsm,,,X Session Management Library,2026-07-05T17:43:27+00:00
+libX11,libx11,x.org,https://gitlab.freedesktop.org/xorg/lib/libx11,gitlab-freedesktop-mirrors/libx11,,,"Core X11 protocol client library (aka ""Xlib"")",2026-07-05T17:43:27+00:00
+libXau,libxau,x.org,https://gitlab.freedesktop.org/xorg/lib/libxau,gitlab-freedesktop-mirrors/libxau,,,Functions for handling Xauthority files and entries.,2026-07-05T17:43:27+00:00
+libXaw,libxaw,x.org,https://gitlab.freedesktop.org/xorg/lib/libxaw,gitlab-freedesktop-mirrors/libxaw,,,"X Athena Widget Set, based on the X Toolkit Intrinsics (Xt) Library",2026-07-05T17:43:27+00:00
+libXaw3d,libxaw3d,x.org,https://gitlab.freedesktop.org/xorg/lib/libxaw3d,gitlab-freedesktop-mirrors/libxaw3d,,,"3D appearance variant of the X Athena Widget Set, based on the X Toolkit Intrinsics (Xt) Library",2026-07-05T17:43:27+00:00
+libxcb,libxcb,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcb,gitlab-freedesktop-mirrors/libxcb,,,"C interface to the X Window System protocol, which replaces the traditional Xlib interface.",2026-07-05T17:43:27+00:00
+libxcb-cursor,libxcb-cursor,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcb-cursor,gitlab-freedesktop-mirrors/libxcb-cursor,,,XCB port of libXcursor,2026-07-05T17:43:27+00:00
+libxcb-errors,libxcb-errors,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcb-errors,gitlab-freedesktop-mirrors/libxcb-errors,,,"XCB utility library that gives human readable names to error, event, & request codes.",2026-07-05T17:43:27+00:00
+libxcb-image,libxcb-image,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcb-image,gitlab-freedesktop-mirrors/libxcb-image,,,XCB port of Xlib's XImage and XShmImage functions.,2026-07-05T17:43:27+00:00
+libxcb-keysyms,libxcb-keysyms,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcb-keysyms,gitlab-freedesktop-mirrors/libxcb-keysyms,,,Standard X key constants and conversion to/from keycodes,2026-07-05T17:43:27+00:00
+libxcb-render-util,libxcb-render-util,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcb-render-util,gitlab-freedesktop-mirrors/libxcb-render-util,,,XCB convenience functions for the Render extension.,2026-07-05T17:43:27+00:00
+libxcb-util,libxcb-util,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcb-util,gitlab-freedesktop-mirrors/libxcb-util,,,XCB utility libraries,2026-07-05T17:43:27+00:00
+libxcb-wm,libxcb-wm,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcb-wm,gitlab-freedesktop-mirrors/libxcb-wm,,,XCB client and window-manager helpers for ICCCM & EWMH.,2026-07-05T17:43:27+00:00
+libXcomposite,libxcomposite,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcomposite,gitlab-freedesktop-mirrors/libxcomposite,,,Xlib-based client library for the Composite extension to the X11 protocol,2026-07-05T17:43:27+00:00
+libXcursor,libxcursor,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcursor,gitlab-freedesktop-mirrors/libxcursor,,,Xlib-based Cursor management library,2026-07-05T17:43:27+00:00
+libxcvt,libxcvt,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcvt,gitlab-freedesktop-mirrors/libxcvt,,,VESA CVT standard timing modeline generation library & utility.,2026-07-05T17:43:27+00:00
+libxcwm,libxcwm,x.org,https://gitlab.freedesktop.org/xorg/lib/libxcwm,gitlab-freedesktop-mirrors/libxcwm,,,Rootless Compositing Window Manager library,2026-07-05T17:43:27+00:00
+libXdamage,libxdamage,x.org,https://gitlab.freedesktop.org/xorg/lib/libxdamage,gitlab-freedesktop-mirrors/libxdamage,,,X Damage Extension library,2026-07-05T17:43:27+00:00
+libXdmcp,libxdmcp,x.org,https://gitlab.freedesktop.org/xorg/lib/libxdmcp,gitlab-freedesktop-mirrors/libxdmcp,,,X Display Manager Control Protocol library,2026-07-05T17:43:27+00:00
+libXext,libxext,x.org,https://gitlab.freedesktop.org/xorg/lib/libxext,gitlab-freedesktop-mirrors/libxext,,,Xlib-based library for common extensions to the X11 protocol,2026-07-05T17:43:27+00:00
+libXfixes,libxfixes,x.org,https://gitlab.freedesktop.org/xorg/lib/libxfixes,gitlab-freedesktop-mirrors/libxfixes,,,Xlib-based library for the XFIXES Extension,2026-07-05T17:43:27+00:00
+libXfont,libxfont,x.org,https://gitlab.freedesktop.org/xorg/lib/libxfont,gitlab-freedesktop-mirrors/libxfont,,,X font handling library for server & utilities,2026-07-05T17:43:27+00:00
+libXft,libxft,x.org,https://gitlab.freedesktop.org/xorg/lib/libxft,gitlab-freedesktop-mirrors/libxft,,,X FreeType library,2026-07-05T17:43:27+00:00
+libXi,libxi,x.org,https://gitlab.freedesktop.org/xorg/lib/libxi,gitlab-freedesktop-mirrors/libxi,,,Xlib library for the X Input Extension,2026-07-05T17:43:27+00:00
+libXinerama,libxinerama,x.org,https://gitlab.freedesktop.org/xorg/lib/libxinerama,gitlab-freedesktop-mirrors/libxinerama,,,Xlib API for Xinerama extension to X11 Protocol,2026-07-05T17:43:27+00:00
+libxkbfile,libxkbfile,x.org,https://gitlab.freedesktop.org/xorg/lib/libxkbfile,gitlab-freedesktop-mirrors/libxkbfile,,,XKB file handling routines,2026-07-05T17:43:27+00:00
+libXmu,libxmu,x.org,https://gitlab.freedesktop.org/xorg/lib/libxmu,gitlab-freedesktop-mirrors/libxmu,,,X miscellaneous utility routines library,2026-07-05T17:43:27+00:00
+libXp,libxp,x.org,https://gitlab.freedesktop.org/xorg/lib/libxp,gitlab-freedesktop-mirrors/libxp,,,X Print Client Library,2026-07-05T17:43:27+00:00
+libXpm,libxpm,x.org,https://gitlab.freedesktop.org/xorg/lib/libxpm,gitlab-freedesktop-mirrors/libxpm,,,X Pixmap (XPM) image file format library,2026-07-05T17:43:27+00:00
+libXpresent,libxpresent,x.org,https://gitlab.freedesktop.org/xorg/lib/libxpresent,gitlab-freedesktop-mirrors/libxpresent,,,Xlib-based library for the X Present Extension,2026-07-05T17:43:27+00:00
+libXrandr,libxrandr,x.org,https://gitlab.freedesktop.org/xorg/lib/libxrandr,gitlab-freedesktop-mirrors/libxrandr,,,"Xlib Resize, Rotate and Reflection (RandR) extension library",2026-07-05T17:43:27+00:00
+libXrender,libxrender,x.org,https://gitlab.freedesktop.org/xorg/lib/libxrender,gitlab-freedesktop-mirrors/libxrender,,,Xlib library for the Render Extension to the X11 protocol,2026-07-05T17:43:27+00:00
+libXRes,libxres,x.org,https://gitlab.freedesktop.org/xorg/lib/libxres,gitlab-freedesktop-mirrors/libxres,,,Xlib-based X-Resource extension client library,2026-07-05T17:43:27+00:00
+libXScrnSaver,libxscrnsaver,x.org,https://gitlab.freedesktop.org/xorg/lib/libxscrnsaver,gitlab-freedesktop-mirrors/libxscrnsaver,,,Xlib-based X11 Screen Saver extension client library,2026-07-05T17:43:27+00:00
+libxshmfence,libxshmfence,x.org,https://gitlab.freedesktop.org/xorg/lib/libxshmfence,gitlab-freedesktop-mirrors/libxshmfence,,,Shared memory 'SyncFence' synchronization primitive,2026-07-05T17:43:27+00:00
+libXt,libxt,x.org,https://gitlab.freedesktop.org/xorg/lib/libxt,gitlab-freedesktop-mirrors/libxt,,,X Toolkit Intrinsics library,2026-07-05T17:43:27+00:00
+libxtrans,libxtrans,x.org,https://gitlab.freedesktop.org/xorg/lib/libxtrans,gitlab-freedesktop-mirrors/libxtrans,,,X Window System Protocols Transport layer shared code,2026-07-05T17:43:27+00:00
+libXtst,libxtst,x.org,https://gitlab.freedesktop.org/xorg/lib/libxtst,gitlab-freedesktop-mirrors/libxtst,,,Xlib-based library for XTEST & RECORD extensions,2026-07-05T17:43:27+00:00
+libXv,libxv,x.org,https://gitlab.freedesktop.org/xorg/lib/libxv,gitlab-freedesktop-mirrors/libxv,,,Xlib-based library for the X Video (Xv) extension to the X Window System,2026-07-05T17:43:27+00:00
+libXvMC,libxvmc,x.org,https://gitlab.freedesktop.org/xorg/lib/libxvmc,gitlab-freedesktop-mirrors/libxvmc,,,Xlib-based X-Video Motion Compensation API,2026-07-05T17:43:27+00:00
+libXxf86dga,libxxf86dga,x.org,https://gitlab.freedesktop.org/xorg/lib/libxxf86dga,gitlab-freedesktop-mirrors/libxxf86dga,,,Xlib-based library for the XFree86-DGA extension,2026-07-05T17:43:27+00:00
+libXxf86vm,libxxf86vm,x.org,https://gitlab.freedesktop.org/xorg/lib/libxxf86vm,gitlab-freedesktop-mirrors/libxxf86vm,,,Xlib-based library for the XFree86-VidMode X extension,2026-07-05T17:43:27+00:00
+listres,listres,x.org,https://gitlab.freedesktop.org/xorg/app/listres,gitlab-freedesktop-mirrors/listres,,,Utility to list X resources for a widget in an X client written using a toolkit based on libXt.,2026-07-05T17:43:27+00:00
+lndir,lndir,x.org,https://gitlab.freedesktop.org/xorg/util/lndir,gitlab-freedesktop-mirrors/lndir,,,Utility to create a shadow directory of symbolic links to another directory tree,2026-07-05T17:43:27+00:00
+macros,macros,x.org,https://gitlab.freedesktop.org/xorg/util/macros,gitlab-freedesktop-mirrors/macros,,,GNU autoconf macros shared across X.Org projects,2026-07-05T17:43:27+00:00
+makedepend,makedepend,x.org,https://gitlab.freedesktop.org/xorg/util/makedepend,gitlab-freedesktop-mirrors/makedepend,,,Utility to parse C source files to make dependency lists for Makefiles,2026-07-05T17:43:27+00:00
+meta,meta,x.org,https://gitlab.freedesktop.org/xorg/meta,gitlab-freedesktop-mirrors/meta,,,"Metaproject for Xorg-related issues (gitlab group membership, bz migration, etc.)",2026-07-05T17:43:27+00:00
+micro-misc,micro-misc,x.org,https://gitlab.freedesktop.org/xorg/font/micro-misc,gitlab-freedesktop-mirrors/micro-misc,,,,2026-07-05T17:43:27+00:00
+misc-cyrillic,misc-cyrillic,x.org,https://gitlab.freedesktop.org/xorg/font/misc-cyrillic,gitlab-freedesktop-mirrors/misc-cyrillic,,,,2026-07-05T17:43:27+00:00
+misc-ethiopic,misc-ethiopic,x.org,https://gitlab.freedesktop.org/xorg/font/misc-ethiopic,gitlab-freedesktop-mirrors/misc-ethiopic,,,,2026-07-05T17:43:27+00:00
+misc-meltho,misc-meltho,x.org,https://gitlab.freedesktop.org/xorg/font/misc-meltho,gitlab-freedesktop-mirrors/misc-meltho,,,,2026-07-05T17:43:27+00:00
+misc-misc,misc-misc,x.org,https://gitlab.freedesktop.org/xorg/font/misc-misc,gitlab-freedesktop-mirrors/misc-misc,,,,2026-07-05T17:43:27+00:00
+mkcomposecache,mkcomposecache,x.org,https://gitlab.freedesktop.org/xorg/app/mkcomposecache,gitlab-freedesktop-mirrors/mkcomposecache,,,libX11 Compose file cache creator,2026-07-05T17:43:27+00:00
+mkfontscale,mkfontscale,x.org,https://gitlab.freedesktop.org/xorg/app/mkfontscale,gitlab-freedesktop-mirrors/mkfontscale,,,Utilities to create the fonts.scale and fonts.dir index files used by the legacy X11 font system.,2026-07-05T17:43:27+00:00
+modular,modular,x.org,https://gitlab.freedesktop.org/xorg/util/modular,gitlab-freedesktop-mirrors/modular,,,Project build & release scripts for the X.Org modular build system,2026-07-05T17:43:27+00:00
+mutt-misc,mutt-misc,x.org,https://gitlab.freedesktop.org/xorg/font/mutt-misc,gitlab-freedesktop-mirrors/mutt-misc,,,,2026-07-05T17:43:27+00:00
+oclock,oclock,x.org,https://gitlab.freedesktop.org/xorg/app/oclock,gitlab-freedesktop-mirrors/oclock,,,round X clock,2026-07-05T17:43:27+00:00
+pthread-stubs,pthread-stubs,x.org,https://gitlab.freedesktop.org/xorg/lib/pthread-stubs,gitlab-freedesktop-mirrors/pthread-stubs,,,Stub replacements for POSIX Threads functions,2026-07-05T17:43:27+00:00
+quartz-wm,quartz-wm,x.org,https://gitlab.freedesktop.org/xorg/app/quartz-wm,gitlab-freedesktop-mirrors/quartz-wm,,,XQuartz window manager,2026-07-05T17:43:27+00:00
+rendercheck,rendercheck,x.org,https://gitlab.freedesktop.org/xorg/test/rendercheck,gitlab-freedesktop-mirrors/rendercheck,,,program to test a Render extension implementation for expected output,2026-07-05T17:43:27+00:00
+rgb,rgb,x.org,https://gitlab.freedesktop.org/xorg/app/rgb,gitlab-freedesktop-mirrors/rgb,,,X color name database & tools,2026-07-05T17:43:27+00:00
+rstart,rstart,x.org,https://gitlab.freedesktop.org/xorg/app/rstart,gitlab-freedesktop-mirrors/rstart,,,A Flexible Remote Execution Protocol Based on rsh [DEPRECATED],2026-07-05T17:43:27+00:00
+schumacher-misc,schumacher-misc,x.org,https://gitlab.freedesktop.org/xorg/font/schumacher-misc,gitlab-freedesktop-mirrors/schumacher-misc,,,,2026-07-05T17:43:27+00:00
+screen-cyrillic,screen-cyrillic,x.org,https://gitlab.freedesktop.org/xorg/font/screen-cyrillic,gitlab-freedesktop-mirrors/screen-cyrillic,,,,2026-07-05T17:43:27+00:00
+scripts,scripts,x.org,https://gitlab.freedesktop.org/xorg/app/scripts,gitlab-freedesktop-mirrors/scripts,,,,2026-07-05T17:43:27+00:00
+sessreg,sessreg,x.org,https://gitlab.freedesktop.org/xorg/app/sessreg,gitlab-freedesktop-mirrors/sessreg,,,Utility to manage utmp & wtmp entries for X sessions.,2026-07-05T17:43:27+00:00
+setxkbmap,setxkbmap,x.org,https://gitlab.freedesktop.org/xorg/app/setxkbmap,gitlab-freedesktop-mirrors/setxkbmap,,,"Set keymaps, layouts, and options via the X Keyboard Extension (XKB)",2026-07-05T17:43:27+00:00
+showfont,showfont,x.org,https://gitlab.freedesktop.org/xorg/app/showfont,gitlab-freedesktop-mirrors/showfont,,,Utility to display data about a font from an X font server.,2026-07-05T17:43:27+00:00
+smproxy,smproxy,x.org,https://gitlab.freedesktop.org/xorg/app/smproxy,gitlab-freedesktop-mirrors/smproxy,,,Session Manager Proxy,2026-07-05T17:43:27+00:00
+sony-misc,sony-misc,x.org,https://gitlab.freedesktop.org/xorg/font/sony-misc,gitlab-freedesktop-mirrors/sony-misc,,,,2026-07-05T17:43:27+00:00
+sun-misc,sun-misc,x.org,https://gitlab.freedesktop.org/xorg/font/sun-misc,gitlab-freedesktop-mirrors/sun-misc,,,,2026-07-05T17:43:27+00:00
+transset,transset,x.org,https://gitlab.freedesktop.org/xorg/app/transset,gitlab-freedesktop-mirrors/transset,,,Utility for setting opacity/transparency property on a window.,2026-07-05T17:43:27+00:00
+twm,twm,x.org,https://gitlab.freedesktop.org/xorg/app/twm,gitlab-freedesktop-mirrors/twm,,,Tab Window Manager for the X Window System,2026-07-05T17:43:27+00:00
+util,util,x.org,https://gitlab.freedesktop.org/xorg/font/util,gitlab-freedesktop-mirrors/util,,,X.Org font package creation/installation utilities,2026-07-05T17:43:27+00:00
+viewres,viewres,x.org,https://gitlab.freedesktop.org/xorg/app/viewres,gitlab-freedesktop-mirrors/viewres,,,Graphical class browser for the Athena Widget Set (libXaw).,2026-07-05T17:43:27+00:00
+wiki,wiki,x.org,https://gitlab.freedesktop.org/xorg/wiki,gitlab-freedesktop-mirrors/wiki,,,This is the source code of https://x.org,2026-07-05T17:43:27+00:00
+winitzki-cyrillic,winitzki-cyrillic,x.org,https://gitlab.freedesktop.org/xorg/font/winitzki-cyrillic,gitlab-freedesktop-mirrors/winitzki-cyrillic,,,,2026-07-05T17:43:27+00:00
+x11perf,x11perf,x.org,https://gitlab.freedesktop.org/xorg/test/x11perf,gitlab-freedesktop-mirrors/x11perf,,,X11 server performance test program,2026-07-05T17:43:27+00:00
+xauth,xauth,x.org,https://gitlab.freedesktop.org/xorg/app/xauth,gitlab-freedesktop-mirrors/xauth,,,X authority file utility,2026-07-05T17:43:27+00:00
+xbacklight,xbacklight,x.org,https://gitlab.freedesktop.org/xorg/app/xbacklight,gitlab-freedesktop-mirrors/xbacklight,,,Utility to adjust backlight brightness using RandR extension,2026-07-05T17:43:27+00:00
+xbiff,xbiff,x.org,https://gitlab.freedesktop.org/xorg/app/xbiff,gitlab-freedesktop-mirrors/xbiff,,,xbiff provides graphical notification of new e-mail.,2026-07-05T17:43:27+00:00
+xcalc,xcalc,x.org,https://gitlab.freedesktop.org/xorg/app/xcalc,gitlab-freedesktop-mirrors/xcalc,,,Scientific calculator X11 client that can emulate a TI-30 or an HP-10C,2026-07-05T17:43:27+00:00
+xcb-demo,xcb-demo,x.org,https://gitlab.freedesktop.org/xorg/app/xcb-demo,gitlab-freedesktop-mirrors/xcb-demo,,,A collection of demo programs that use the XCB library.,2026-07-05T17:43:27+00:00
+xcb-util-m4,xcb-util-m4,x.org,https://gitlab.freedesktop.org/xorg/util/xcb-util-m4,gitlab-freedesktop-mirrors/xcb-util-m4,,,GNU autoconf macros shared across XCB projects,2026-07-05T17:43:27+00:00
+xcbproto,xcbproto,x.org,https://gitlab.freedesktop.org/xorg/proto/xcbproto,gitlab-freedesktop-mirrors/xcbproto,,,XML-XCB protocol descriptions used by libxcb for the X11 protocol & extensions,2026-07-05T17:43:27+00:00
+xclipboard,xclipboard,x.org,https://gitlab.freedesktop.org/xorg/app/xclipboard,gitlab-freedesktop-mirrors/xclipboard,,,X clipboard management clients,2026-07-05T17:43:27+00:00
+xclock,xclock,x.org,https://gitlab.freedesktop.org/xorg/app/xclock,gitlab-freedesktop-mirrors/xclock,,,analog / digital clock for X,2026-07-05T17:43:27+00:00
+xcmsdb,xcmsdb,x.org,https://gitlab.freedesktop.org/xorg/app/xcmsdb,gitlab-freedesktop-mirrors/xcmsdb,,,Device Color Characterization utility for X Color Management System,2026-07-05T17:43:27+00:00
+xcompmgr,xcompmgr,x.org,https://gitlab.freedesktop.org/xorg/app/xcompmgr,gitlab-freedesktop-mirrors/xcompmgr,,,sample X compositing manager,2026-07-05T17:43:27+00:00
+xconsole,xconsole,x.org,https://gitlab.freedesktop.org/xorg/app/xconsole,gitlab-freedesktop-mirrors/xconsole,,,displays /dev/console messages in an X window,2026-07-05T17:43:27+00:00
+xcursorgen,xcursorgen,x.org,https://gitlab.freedesktop.org/xorg/app/xcursorgen,gitlab-freedesktop-mirrors/xcursorgen,,,prepares X11 cursor sets for use with libXcursor,2026-07-05T17:43:27+00:00
+xditview,xditview,x.org,https://gitlab.freedesktop.org/xorg/app/xditview,gitlab-freedesktop-mirrors/xditview,,,display ditroff output in an X window,2026-07-05T17:43:27+00:00
+xdm,xdm,x.org,https://gitlab.freedesktop.org/xorg/app/xdm,gitlab-freedesktop-mirrors/xdm,,,"X Display Manager with support for XDMCP, host chooser",2026-07-05T17:43:27+00:00
+xdpyinfo,xdpyinfo,x.org,https://gitlab.freedesktop.org/xorg/app/xdpyinfo,gitlab-freedesktop-mirrors/xdpyinfo,,,display information utility for X,2026-07-05T17:43:27+00:00
+xdriinfo,xdriinfo,x.org,https://gitlab.freedesktop.org/xorg/app/xdriinfo,gitlab-freedesktop-mirrors/xdriinfo,,,Utility to query configuration information of X11 DRI drivers,2026-07-05T17:43:27+00:00
+xedit,xedit,x.org,https://gitlab.freedesktop.org/xorg/app/xedit,gitlab-freedesktop-mirrors/xedit,,,Simple graphical text editor using Athena Widgets (Xaw),2026-07-05T17:43:27+00:00
+xev,xev,x.org,https://gitlab.freedesktop.org/xorg/app/xev,gitlab-freedesktop-mirrors/xev,,,X event monitor,2026-07-05T17:43:27+00:00
+xeyes,xeyes,x.org,https://gitlab.freedesktop.org/xorg/app/xeyes,gitlab-freedesktop-mirrors/xeyes,,,"A ""follow the mouse"" X demo, using the X SHAPE extension",2026-07-05T17:43:27+00:00
+xf86-input-elographics,xf86-input-elographics,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-input-elographics,gitlab-freedesktop-mirrors/xf86-input-elographics,,,Xorg input driver for Elographics touchscreen devices,2026-07-05T17:43:27+00:00
+xf86-input-evdev,xf86-input-evdev,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-input-evdev,gitlab-freedesktop-mirrors/xf86-input-evdev,,,Generic Linux input driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-input-joystick,xf86-input-joystick,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-input-joystick,gitlab-freedesktop-mirrors/xf86-input-joystick,,,Joystick input driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-input-keyboard,xf86-input-keyboard,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-input-keyboard,gitlab-freedesktop-mirrors/xf86-input-keyboard,,,Keyboard input driver for non-Linux platforms for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-input-libinput,xf86-input-libinput,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-input-libinput,gitlab-freedesktop-mirrors/xf86-input-libinput,,,A libinput-based input driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-input-mouse,xf86-input-mouse,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-input-mouse,gitlab-freedesktop-mirrors/xf86-input-mouse,,,Mouse input driver for non-Linux platforms for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-input-synaptics,xf86-input-synaptics,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-input-synaptics,gitlab-freedesktop-mirrors/xf86-input-synaptics,,,Synaptics touchpad driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-input-vmmouse,xf86-input-vmmouse,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-input-vmmouse,gitlab-freedesktop-mirrors/xf86-input-vmmouse,,,VMware guest mouse driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-input-void,xf86-input-void,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-input-void,gitlab-freedesktop-mirrors/xf86-input-void,,,Null input driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-amdgpu,xf86-video-amdgpu,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-amdgpu,gitlab-freedesktop-mirrors/xf86-video-amdgpu,,,Xorg driver for AMD Radeon GPUs using the amdgpu kernel driver,2026-07-05T17:43:27+00:00
+xf86-video-apm,xf86-video-apm,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-apm,gitlab-freedesktop-mirrors/xf86-video-apm,,,Alliance Promotion video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-ark,xf86-video-ark,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-ark,gitlab-freedesktop-mirrors/xf86-video-ark,,,Ark Logic video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-armsoc,xf86-video-armsoc,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-armsoc,gitlab-freedesktop-mirrors/xf86-video-armsoc,,,Open-source X.org graphics driver for ARM graphics,2026-07-05T17:43:27+00:00
+xf86-video-ast,xf86-video-ast,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-ast,gitlab-freedesktop-mirrors/xf86-video-ast,,,ASpeed Technologies graphics driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-ati,xf86-video-ati,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-ati,gitlab-freedesktop-mirrors/xf86-video-ati,,,ATI/AMD Radeon video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-chips,xf86-video-chips,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-chips,gitlab-freedesktop-mirrors/xf86-video-chips,,,Chips & Technologies video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-cirrus,xf86-video-cirrus,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-cirrus,gitlab-freedesktop-mirrors/xf86-video-cirrus,,,Cirrus Logic video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-dummy,xf86-video-dummy,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-dummy,gitlab-freedesktop-mirrors/xf86-video-dummy,,,Virtual/offscreen frame buffer driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-fbdev,xf86-video-fbdev,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-fbdev,gitlab-freedesktop-mirrors/xf86-video-fbdev,,,framebuffer device video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-freedreno,xf86-video-freedreno,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-freedreno,gitlab-freedesktop-mirrors/xf86-video-freedreno,,,Adreno mobile GPU video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-geode,xf86-video-geode,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-geode,gitlab-freedesktop-mirrors/xf86-video-geode,,,Geode GX and LX graphics driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-glint,xf86-video-glint,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-glint,gitlab-freedesktop-mirrors/xf86-video-glint,,,GLINT/Permedia video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-i128,xf86-video-i128,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-i128,gitlab-freedesktop-mirrors/xf86-video-i128,,,Number Nine I128 video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-i740,xf86-video-i740,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-i740,gitlab-freedesktop-mirrors/xf86-video-i740,,,Intel i740 video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-impact,xf86-video-impact,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-impact,gitlab-freedesktop-mirrors/xf86-video-impact,,,SGI Impact video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-intel,xf86-video-intel,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-intel,gitlab-freedesktop-mirrors/xf86-video-intel,,,Open-source Xorg graphics driver for Intel graphics,2026-07-05T17:43:27+00:00
+xf86-video-mach64,xf86-video-mach64,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-mach64,gitlab-freedesktop-mirrors/xf86-video-mach64,,,ATI Mach64 video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-mga,xf86-video-mga,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-mga,gitlab-freedesktop-mirrors/xf86-video-mga,,,Matrox video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-neomagic,xf86-video-neomagic,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-neomagic,gitlab-freedesktop-mirrors/xf86-video-neomagic,,,NeoMagic video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-nested,xf86-video-nested,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-nested,gitlab-freedesktop-mirrors/xf86-video-nested,,,Video driver to run Xorg on top of another X server,2026-07-05T17:43:27+00:00
+xf86-video-newport,xf86-video-newport,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-newport,gitlab-freedesktop-mirrors/xf86-video-newport,,,SGI newport card video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-nouveau,xf86-video-nouveau,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-nouveau,gitlab-freedesktop-mirrors/xf86-video-nouveau,,,,2026-07-05T17:43:27+00:00
+xf86-video-nv,xf86-video-nv,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-nv,gitlab-freedesktop-mirrors/xf86-video-nv,,,Minimal NVIDIA video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-omap,xf86-video-omap,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-omap,gitlab-freedesktop-mirrors/xf86-video-omap,,,Open-source X.org graphics driver for TI OMAP graphics,2026-07-05T17:43:27+00:00
+xf86-video-opentegra,xf86-video-opentegra,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-opentegra,gitlab-freedesktop-mirrors/xf86-video-opentegra,,,Open-source Xorg graphics driver for NVIDIA Tegra,2026-07-05T17:43:27+00:00
+xf86-video-qxl,xf86-video-qxl,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-qxl,gitlab-freedesktop-mirrors/xf86-video-qxl,,,Xorg video driver for the QXL virtual GPU,2026-07-05T17:43:27+00:00
+xf86-video-r128,xf86-video-r128,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-r128,gitlab-freedesktop-mirrors/xf86-video-r128,,,ATI Rage 128 video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-rendition,xf86-video-rendition,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-rendition,gitlab-freedesktop-mirrors/xf86-video-rendition,,,Rendition (Micron) Verite video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-s3,xf86-video-s3,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-s3,gitlab-freedesktop-mirrors/xf86-video-s3,,,Xorg video driver for S3 chipsets other than ViRGE or Savage,2026-07-05T17:43:27+00:00
+xf86-video-s3virge,xf86-video-s3virge,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-s3virge,gitlab-freedesktop-mirrors/xf86-video-s3virge,,,S3 ViRGE video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-savage,xf86-video-savage,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-savage,gitlab-freedesktop-mirrors/xf86-video-savage,,,S3 Savage video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-siliconmotion,xf86-video-siliconmotion,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-siliconmotion,gitlab-freedesktop-mirrors/xf86-video-siliconmotion,,,Silicon Motion video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-sis,xf86-video-sis,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-sis,gitlab-freedesktop-mirrors/xf86-video-sis,,,SiS and XGI video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-sisusb,xf86-video-sisusb,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-sisusb,gitlab-freedesktop-mirrors/xf86-video-sisusb,,,SiS Net2280-based USB video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-suncg14,xf86-video-suncg14,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg14,gitlab-freedesktop-mirrors/xf86-video-suncg14,,,Sun CG14 video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-suncg3,xf86-video-suncg3,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg3,gitlab-freedesktop-mirrors/xf86-video-suncg3,,,Sun CG3 video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-suncg6,xf86-video-suncg6,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg6,gitlab-freedesktop-mirrors/xf86-video-suncg6,,,Sun GX/Turbo GX video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-sunffb,xf86-video-sunffb,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-sunffb,gitlab-freedesktop-mirrors/xf86-video-sunffb,,,Sun FFB video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-sunleo,xf86-video-sunleo,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-sunleo,gitlab-freedesktop-mirrors/xf86-video-sunleo,,,Sun Leo video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-suntcx,xf86-video-suntcx,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-suntcx,gitlab-freedesktop-mirrors/xf86-video-suntcx,,,Sun TCX video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-tdfx,xf86-video-tdfx,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-tdfx,gitlab-freedesktop-mirrors/xf86-video-tdfx,,,3Dfx video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-tga,xf86-video-tga,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-tga,gitlab-freedesktop-mirrors/xf86-video-tga,,,DEC 21030 (aka TGA) video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-trident,xf86-video-trident,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-trident,gitlab-freedesktop-mirrors/xf86-video-trident,,,Trident video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-tseng,xf86-video-tseng,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-tseng,gitlab-freedesktop-mirrors/xf86-video-tseng,,,Tseng Labs video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-v4l,xf86-video-v4l,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-v4l,gitlab-freedesktop-mirrors/xf86-video-v4l,,,Video 4 Linux adaptor driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-vbox,xf86-video-vbox,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-vbox,gitlab-freedesktop-mirrors/xf86-video-vbox,,,VirtualBox guest video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-vesa,xf86-video-vesa,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-vesa,gitlab-freedesktop-mirrors/xf86-video-vesa,,,Generic VESA video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-vmware,xf86-video-vmware,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-vmware,gitlab-freedesktop-mirrors/xf86-video-vmware,,,VMware guest video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-voodoo,xf86-video-voodoo,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-voodoo,gitlab-freedesktop-mirrors/xf86-video-voodoo,,,Voodoo video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-wsfb,xf86-video-wsfb,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-wsfb,gitlab-freedesktop-mirrors/xf86-video-wsfb,,,BSD wsdisplay framebuffer device video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-xgi,xf86-video-xgi,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-xgi,gitlab-freedesktop-mirrors/xf86-video-xgi,,,XGI video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86-video-xgixp,xf86-video-xgixp,x.org,https://gitlab.freedesktop.org/xorg/driver/xf86-video-xgixp,gitlab-freedesktop-mirrors/xf86-video-xgixp,,,XGI Volari 8300 video driver for the Xorg X server,2026-07-05T17:43:27+00:00
+xf86dga,xf86dga,x.org,https://gitlab.freedesktop.org/xorg/app/xf86dga,gitlab-freedesktop-mirrors/xf86dga,,,Simple test client for the XFree86-DGA extension,2026-07-05T17:43:27+00:00
+xfd,xfd,x.org,https://gitlab.freedesktop.org/xorg/app/xfd,gitlab-freedesktop-mirrors/xfd,,,"X font display utility, using either the X11 core protocol or libXft2.",2026-07-05T17:43:27+00:00
+xfindproxy,xfindproxy,x.org,https://gitlab.freedesktop.org/xorg/app/xfindproxy,gitlab-freedesktop-mirrors/xfindproxy,,,"Utility to locate available X11 proxy services, using the Proxy Management Protocol.",2026-07-05T17:43:27+00:00
+xfontsel,xfontsel,x.org,https://gitlab.freedesktop.org/xorg/app/xfontsel,gitlab-freedesktop-mirrors/xfontsel,,,X font selection client,2026-07-05T17:43:27+00:00
+xfree86-type1,xfree86-type1,x.org,https://gitlab.freedesktop.org/xorg/font/xfree86-type1,gitlab-freedesktop-mirrors/xfree86-type1,,,,2026-07-05T17:43:27+00:00
+xfs,xfs,x.org,https://gitlab.freedesktop.org/xorg/app/xfs,gitlab-freedesktop-mirrors/xfs,,,"X Font Server, for X11 core protocol fonts",2026-07-05T17:43:27+00:00
+xfsinfo,xfsinfo,x.org,https://gitlab.freedesktop.org/xorg/app/xfsinfo,gitlab-freedesktop-mirrors/xfsinfo,,,X font server information utility,2026-07-05T17:43:27+00:00
+xfwp,xfwp,x.org,https://gitlab.freedesktop.org/xorg/app/xfwp,gitlab-freedesktop-mirrors/xfwp,,,X Firewall Proxy,2026-07-05T17:43:27+00:00
+xgamma,xgamma,x.org,https://gitlab.freedesktop.org/xorg/app/xgamma,gitlab-freedesktop-mirrors/xgamma,,,Utility to query and alter the gamma correction of a monitor via XFree86-VidModeExtension.,2026-07-05T17:43:27+00:00
+xgc,xgc,x.org,https://gitlab.freedesktop.org/xorg/app/xgc,gitlab-freedesktop-mirrors/xgc,,,Demo to show various features of the X11 core protocol graphics primitives.,2026-07-05T17:43:27+00:00
+xhiv,xhiv,x.org,https://gitlab.freedesktop.org/xorg/test/xhiv,gitlab-freedesktop-mirrors/xhiv,,,testing of Handling Invalid Values in X libraries,2026-07-05T17:43:27+00:00
+xhost,xhost,x.org,https://gitlab.freedesktop.org/xorg/app/xhost,gitlab-freedesktop-mirrors/xhost,,,X server access control program,2026-07-05T17:43:27+00:00
+xinit,xinit,x.org,https://gitlab.freedesktop.org/xorg/app/xinit,gitlab-freedesktop-mirrors/xinit,,,X server & client startup utilities (includes startx),2026-07-05T17:43:27+00:00
+xinput,xinput,x.org,https://gitlab.freedesktop.org/xorg/app/xinput,gitlab-freedesktop-mirrors/xinput,,,Utility to configure and test XInput devices,2026-07-05T17:43:27+00:00
+xinput-calibrator,xinput-calibrator,x.org,https://gitlab.freedesktop.org/xorg/app/xinput-calibrator,gitlab-freedesktop-mirrors/xinput-calibrator,,,A generic touchscreen calibration program for X.Org,2026-07-05T17:43:27+00:00
+xisxwayland,xisxwayland,x.org,https://gitlab.freedesktop.org/xorg/app/xisxwayland,gitlab-freedesktop-mirrors/xisxwayland,,,tool to be used within shell scripts to determine whether the X server in use is Xwayland,2026-07-05T17:43:27+00:00
+xkbcomp,xkbcomp,x.org,https://gitlab.freedesktop.org/xorg/app/xkbcomp,gitlab-freedesktop-mirrors/xkbcomp,,,XKB keyboard description compiler,2026-07-05T17:43:27+00:00
+xkbevd,xkbevd,x.org,https://gitlab.freedesktop.org/xorg/app/xkbevd,gitlab-freedesktop-mirrors/xkbevd,,,XKB event daemon,2026-07-05T17:43:27+00:00
+xkbprint,xkbprint,x.org,https://gitlab.freedesktop.org/xorg/app/xkbprint,gitlab-freedesktop-mirrors/xkbprint,,,Generates a PostScript image of an XKB keyboard description.,2026-07-05T17:43:27+00:00
+xkbutils,xkbutils,x.org,https://gitlab.freedesktop.org/xorg/app/xkbutils,gitlab-freedesktop-mirrors/xkbutils,,,Collection of small XKB utilities,2026-07-05T17:43:27+00:00
+xkill,xkill,x.org,https://gitlab.freedesktop.org/xorg/app/xkill,gitlab-freedesktop-mirrors/xkill,,,Utility to forcibly terminate X11 clients.,2026-07-05T17:43:27+00:00
+xload,xload,x.org,https://gitlab.freedesktop.org/xorg/app/xload,gitlab-freedesktop-mirrors/xload,,,system load average display for X,2026-07-05T17:43:27+00:00
+xlogo,xlogo,x.org,https://gitlab.freedesktop.org/xorg/app/xlogo,gitlab-freedesktop-mirrors/xlogo,,,X Window System logo display demo,2026-07-05T17:43:27+00:00
+xlsatoms,xlsatoms,x.org,https://gitlab.freedesktop.org/xorg/app/xlsatoms,gitlab-freedesktop-mirrors/xlsatoms,,,Utility to list interned atoms defined on X server,2026-07-05T17:43:27+00:00
+xlsclients,xlsclients,x.org,https://gitlab.freedesktop.org/xorg/app/xlsclients,gitlab-freedesktop-mirrors/xlsclients,,,Utility to list client applications running on a display,2026-07-05T17:43:27+00:00
+xlsfonts,xlsfonts,x.org,https://gitlab.freedesktop.org/xorg/app/xlsfonts,gitlab-freedesktop-mirrors/xlsfonts,,,Utility to list core protocol fonts on an X server,2026-07-05T17:43:27+00:00
+xmag,xmag,x.org,https://gitlab.freedesktop.org/xorg/app/xmag,gitlab-freedesktop-mirrors/xmag,,,Utility to display a magnified snapshot of a portion of an X11 screen.,2026-07-05T17:43:27+00:00
+xman,xman,x.org,https://gitlab.freedesktop.org/xorg/app/xman,gitlab-freedesktop-mirrors/xman,,,Graphical manual page browser using the Athena Widgets (Xaw) toolkit.,2026-07-05T17:43:27+00:00
+xmessage,xmessage,x.org,https://gitlab.freedesktop.org/xorg/app/xmessage,gitlab-freedesktop-mirrors/xmessage,,,Display a message or query in a window,2026-07-05T17:43:27+00:00
+xmh,xmh,x.org,https://gitlab.freedesktop.org/xorg/app/xmh,gitlab-freedesktop-mirrors/xmh,,,Graphical user interface to the MH Message Handling System,2026-07-05T17:43:27+00:00
+xmodmap,xmodmap,x.org,https://gitlab.freedesktop.org/xorg/app/xmodmap,gitlab-freedesktop-mirrors/xmodmap,,,Utility for modifying keymaps and pointer button mappings in X,2026-07-05T17:43:27+00:00
+xmore,xmore,x.org,https://gitlab.freedesktop.org/xorg/app/xmore,gitlab-freedesktop-mirrors/xmore,,,Plain text display program for the X Window System,2026-07-05T17:43:27+00:00
+xorg-docs,xorg-docs,x.org,https://gitlab.freedesktop.org/xorg/doc/xorg-docs,gitlab-freedesktop-mirrors/xorg-docs,,,Documentation for the X Window System that doesn't better fit into other packages,2026-07-05T17:43:27+00:00
+xorg-gtest,xorg-gtest,x.org,https://gitlab.freedesktop.org/xorg/test/xorg-gtest,gitlab-freedesktop-mirrors/xorg-gtest,,,X.Org GTest testing environment for Google Test,2026-07-05T17:43:27+00:00
+xorg-integration-tests,xorg-integration-tests,x.org,https://gitlab.freedesktop.org/xorg/test/xorg-integration-tests,gitlab-freedesktop-mirrors/xorg-integration-tests,,,a test suite for X.Org tests,2026-07-05T17:43:27+00:00
+xorg-sgml-doctools,xorg-sgml-doctools,x.org,https://gitlab.freedesktop.org/xorg/doc/xorg-sgml-doctools,gitlab-freedesktop-mirrors/xorg-sgml-doctools,,,SGML entities and XML/CSS stylesheets used in X.Org docs,2026-07-05T17:43:27+00:00
+xorgproto,xorgproto,x.org,https://gitlab.freedesktop.org/xorg/proto/xorgproto,gitlab-freedesktop-mirrors/xorgproto,,,X Window System unified protocol definitions,2026-07-05T17:43:27+00:00
+xpr,xpr,x.org,https://gitlab.freedesktop.org/xorg/app/xpr,gitlab-freedesktop-mirrors/xpr,,,Utility to print an X window dump from xwd,2026-07-05T17:43:27+00:00
+xprop,xprop,x.org,https://gitlab.freedesktop.org/xorg/app/xprop,gitlab-freedesktop-mirrors/xprop,,,Command line tool to display and/or set window and font properties of an X server,2026-07-05T17:43:27+00:00
+xrandr,xrandr,x.org,https://gitlab.freedesktop.org/xorg/app/xrandr,gitlab-freedesktop-mirrors/xrandr,,,"Command line interface to X11 Resize, Rotate, and Reflect (RandR) extension",2026-07-05T17:43:27+00:00
+xrdb,xrdb,x.org,https://gitlab.freedesktop.org/xorg/app/xrdb,gitlab-freedesktop-mirrors/xrdb,,,X resource database utility,2026-07-05T17:43:27+00:00
+xrefresh,xrefresh,x.org,https://gitlab.freedesktop.org/xorg/app/xrefresh,gitlab-freedesktop-mirrors/xrefresh,,,Utility to refresh all or part of an X screen,2026-07-05T17:43:27+00:00
+xrestop,xrestop,x.org,https://gitlab.freedesktop.org/xorg/app/xrestop,gitlab-freedesktop-mirrors/xrestop,,,A 'top' like tool for monitoring X Client server resource usage.,2026-07-05T17:43:27+00:00
+xscope,xscope,x.org,https://gitlab.freedesktop.org/xorg/app/xscope,gitlab-freedesktop-mirrors/xscope,,,Program to monitor X11 Server/Client conversations,2026-07-05T17:43:27+00:00
+xserver,xserver,x.org,https://gitlab.freedesktop.org/xorg/xserver,gitlab-freedesktop-mirrors/xserver,,,X server,2026-07-05T17:43:27+00:00
+xset,xset,x.org,https://gitlab.freedesktop.org/xorg/app/xset,gitlab-freedesktop-mirrors/xset,,,User preference utility for X servers,2026-07-05T17:43:27+00:00
+xsetroot,xsetroot,x.org,https://gitlab.freedesktop.org/xorg/app/xsetroot,gitlab-freedesktop-mirrors/xsetroot,,,Root window parameter setting utility for X,2026-07-05T17:43:27+00:00
+xsm,xsm,x.org,https://gitlab.freedesktop.org/xorg/app/xsm,gitlab-freedesktop-mirrors/xsm,,,X Session Manager,2026-07-05T17:43:27+00:00
+xstdcmap,xstdcmap,x.org,https://gitlab.freedesktop.org/xorg/app/xstdcmap,gitlab-freedesktop-mirrors/xstdcmap,,,X standard colormap utility,2026-07-05T17:43:27+00:00
+xts,xts,x.org,https://gitlab.freedesktop.org/xorg/test/xts,gitlab-freedesktop-mirrors/xts,,,XTS - The X Test Suite,2026-07-05T17:43:27+00:00
+xtsttopng,xtsttopng,x.org,https://gitlab.freedesktop.org/xorg/test/xtsttopng,gitlab-freedesktop-mirrors/xtsttopng,,,utility to convert X Test Suite images to PNG format,2026-07-05T17:43:27+00:00
+xvidtune,xvidtune,x.org,https://gitlab.freedesktop.org/xorg/app/xvidtune,gitlab-freedesktop-mirrors/xvidtune,,,Video mode tuner client for XFree86-VidModeExtension,2026-07-05T17:43:27+00:00
+xvinfo,xvinfo,x.org,https://gitlab.freedesktop.org/xorg/app/xvinfo,gitlab-freedesktop-mirrors/xvinfo,,,Utility to print out X-Video extension adaptor information,2026-07-05T17:43:27+00:00
+xwd,xwd,x.org,https://gitlab.freedesktop.org/xorg/app/xwd,gitlab-freedesktop-mirrors/xwd,,,Utility to dump an image of an X window in XWD format.,2026-07-05T17:43:27+00:00
+xwininfo,xwininfo,x.org,https://gitlab.freedesktop.org/xorg/app/xwininfo,gitlab-freedesktop-mirrors/xwininfo,,,Utility to print information about windows on an X server.,2026-07-05T17:43:27+00:00
+xwud,xwud,x.org,https://gitlab.freedesktop.org/xorg/app/xwud,gitlab-freedesktop-mirrors/xwud,,,Utility to display an image in XWD (X Window Dump) format,2026-07-05T17:43:27+00:00
