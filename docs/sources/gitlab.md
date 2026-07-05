@@ -9,11 +9,13 @@ same identity, owner, and SHA-anchor signals a GitHub repo does. The GitLab API 
 identical across instances (`/api/v4`), so multi-instance support is a per-host base URL +
 per-host token.
 
-> **Status:** collection layer only. These outputs are produced but **not yet consumed** by
-> the Value or Risk stages — wiring GitLab repos into `value.csv` / `risk.csv` (validation,
-> `load_top_repos`, clone host-parametrization, Scorecard GitLab mode) is a follow-on plan.
-> Coverage/funnel counts therefore live in `docs/stats.md` only once that wiring lands — this
-> page describes **how** the data is fetched, not **how many**.
+> **Status:** collection layer (project/namespace/SHA-anchor) **plus** Scorecard GitLab mode
+> (`src/sources/openssf/scorecard.py --gitlab`, see below). These outputs are produced but
+> **not yet consumed** by the Value or Risk stages — wiring GitLab repos into `value.csv` /
+> `risk.csv` (validation, `load_top_repos`, clone host-parametrization) is a follow-on plan, so
+> the collected security scores don't yet aggregate into `risk.csv`. Coverage/funnel counts
+> therefore live in `docs/stats.md` only once that wiring lands — this page describes **how**
+> the data is fetched, not **how many**.
 
 ## Data Sources
 
@@ -41,7 +43,12 @@ host-parametrized — a follow-on plan, not part of this layer.
 **Authentication**: per-host tokens via the `PRIVATE-TOKEN` header. Resolution precedence per
 host: `GITLAB_TOKENS` (JSON `{host: token}`) → `GITLAB_TOKEN_<HOST_SLUG>` (dots→underscores,
 upper) → `GITLAB_TOKEN` (default applied to known hosts). Missing → anonymous for that host
-(public read works at a lower rate limit). Tokens are **per-instance** — a gitlab.com token does
+(public read works at a lower rate limit). Note: the bare `GITLAB_TOKEN` / per-host
+`GITLAB_TOKEN_<SLUG>` fallbacks only cover the curated `KNOWN_GITLAB_HOSTS`
+(gitlab.com, salsa.debian.org, invent.kde.org, gitlab.gnome.org, gitlab.freedesktop.org);
+a valid but non-curated host (e.g. `gitlab.cern.ch`) is only tokenised via an explicit
+`GITLAB_TOKENS` JSON entry — otherwise Scorecard's GitLab mode silently skips it (its
+checks 401 anonymously). Tokens are **per-instance** — a gitlab.com token does
 not authenticate against salsa.debian.org. Rate limiting honours each host's
 `RateLimit-Remaining` / `RateLimit-Reset` headers, with a minimum backoff floor and per-host
 isolation (an exhausted host never blocks requests to another host).
@@ -90,6 +97,12 @@ A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honour th
 - `src/sources/gitlab/commits_years.py` — per-year SHA anchor → `commits-years.csv`.
   CLI: `--limit`, `--force`. Selection is per-`(repo_id, year)`, so a newly-added year is picked
   up for already-anchored projects.
+- `src/sources/openssf/scorecard.py --gitlab [--host {host} …]` — OpenSSF Scorecard security
+  scores for the valid GitLab projects in `projects.csv`, per-host `GITLAB_AUTH_TOKEN`. Uses a
+  GitLab-applicable check subset (`GITLAB_SCORECARD_CHECKS`) and tolerates the CLI's non-zero
+  exit when a single check errors (recovers the still-valid aggregate JSON). Output shares the
+  GitHub scorecard's files: raw JSON in `data/sources/openssf/data.json`, long-format rows in
+  `data/sources/git/openssf.csv` keyed on the `gl/{host}/{id}` repo_id.
 
 ## Related
 
