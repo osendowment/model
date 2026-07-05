@@ -90,7 +90,8 @@ def load_sha_data(filepath: str) -> dict[tuple[str, str], dict[str, str]]:
 @lru_cache(maxsize=1)
 def _load_github_repo_ids() -> tuple[tuple[str, str], ...]:
     """repo slug -> numeric GitHub id (from github/repos.csv), as a hashable
-    tuple so lru_cache can hold it. Best-effort: empty on any load failure."""
+    tuple so each caller builds a fresh dict and cannot mutate the cached singleton.
+    Best-effort: empty on any load failure."""
     try:
         from src.common.repos import load_repo_ids
         return tuple(load_repo_ids().items())

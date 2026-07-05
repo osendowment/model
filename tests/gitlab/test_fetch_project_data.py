@@ -5,9 +5,19 @@ fetch_repo_owner_data test), so no network is touched.
 """
 from __future__ import annotations
 
+import datetime as dt
 from pathlib import Path
 
-from src.sources.gitlab.fetch_project_data import _fetch_project, _flat_project, load_gitlab_rows
+from src.sources.gitlab.fetch_project_data import (
+    PROJECT_FIELDS,
+    _fetch_namespace,
+    _fetch_project,
+    _filter_stale,
+    _flat_namespace,
+    _flat_project,
+    load_gitlab_rows,
+    upsert,
+)
 
 
 class FakeResponse:
@@ -133,7 +143,6 @@ def _ns_body(nid, full_path, kind="group"):
 
 class TestNamespace:
     def test_flat_namespace(self):
-        from src.sources.gitlab.fetch_project_data import _flat_namespace
         row = _flat_namespace(_ns_body(5, "debian"), "salsa.debian.org",
                               "salsa.debian.org/debian")
         assert row["namespace"] == "salsa.debian.org/debian"
@@ -142,7 +151,6 @@ class TestNamespace:
         assert row["host"] == "salsa.debian.org"
 
     async def test_fetch_namespace_200(self):
-        from src.sources.gitlab.fetch_project_data import _fetch_namespace
         item = {"host": "salsa.debian.org", "full_path": "debian",
                 "namespace": "salsa.debian.org/debian"}
         lim = FakeLimiter([FakeResponse(200, json_body=_ns_body(5, "debian"))])
@@ -151,19 +159,12 @@ class TestNamespace:
         assert row["namespace_id"] == 5
 
     async def test_fetch_namespace_404(self):
-        from src.sources.gitlab.fetch_project_data import _fetch_namespace
         item = {"host": "gitlab.com", "full_path": "gone",
                 "namespace": "gitlab.com/gone"}
         lim = FakeLimiter([FakeResponse(404)])
         key, row, status = await _fetch_namespace(lim, None, item)
         assert status == "404"
         assert row is None
-
-
-import datetime as dt
-
-from src.sources.gitlab.fetch_project_data import (PROJECT_FIELDS, _filter_stale,
-                                                   upsert)
 
 
 def _iso_days_ago(n):

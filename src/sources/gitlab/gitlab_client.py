@@ -111,10 +111,6 @@ def load_token_map() -> dict[str, str]:
     return out
 
 
-class _Deferred(Exception):
-    """Raised on a transient network/timeout error — caller may retry later."""
-
-
 class GitLabLimiter:
     """Bounded-concurrency async GETs with per-host rate-limit backoff.
 
