@@ -25,6 +25,11 @@ KNOWN_GITLAB_HOSTS: set[str] = {
     "gitlab.com", "salsa.debian.org", "invent.kde.org", "code.videolan.org",
 }
 
+# Floor for per-host backoff. A host can report `RateLimit-Remaining: 0` with
+# no `RateLimit-Reset` header — without a floor, `wait` would compute to 0 and
+# we'd hammer an exhausted host with no backoff at all.
+MIN_BACKOFF_S = 1.0
+
 
 def is_gitlab_host(host: str) -> bool:
     """True if `host` is a GitLab instance (curated seed OR a gitlab.* host)."""
@@ -115,12 +120,19 @@ class GitLabLimiter:
 
     GitLab returns `RateLimit-Remaining` / `RateLimit-Reset` (epoch seconds)
     headers per instance. Budgets are per-host, so state is tracked per host.
-    A single global semaphore bounds total in-flight requests across all hosts.
+    A single global semaphore bounds total in-flight HTTP requests across all
+    hosts — but critically, the semaphore only wraps the actual `session.get`
+    call. The per-host backoff sleep runs *outside* the lock and the
+    semaphore: an exhausted host must never occupy one of the shared
+    concurrency slots while it sleeps, or unrelated, non-limited hosts get
+    throttled behind it (head-of-line blocking). Only token/state reads and
+    writes are guarded, and only briefly, by `self._lock`.
     """
 
     def __init__(self, token_map: dict[str, str] | None = None,
                  max_concurrent: int = 10) -> None:
         self._sem = asyncio.Semaphore(max_concurrent)
+        self._lock = asyncio.Lock()
         self._tokens = token_map if token_map is not None else load_token_map()
         self._state: dict[str, tuple[int, float]] = {}   # host -> (remaining, reset_at)
         self._n = 0
@@ -130,24 +142,36 @@ class GitLabLimiter:
 
     async def get(self, session: aiohttp.ClientSession, host: str,
                   url: str) -> aiohttp.ClientResponse:
-        async with self._sem:
+        # 1. Brief lock: read this host's backoff state.
+        async with self._lock:
             remaining, reset_at = self._state.get(host, (1, 0.0))
+            wait = 0.0
             if remaining <= 0:
-                wait = max(reset_at - time.time() + 0.5, 0)
-                if wait > 0:
-                    log.info("%s rate-limited, sleeping %.1fs", host, wait)
-                    await asyncio.sleep(wait)
-            headers = {"Accept": "application/json"}
-            token = self.token_for(host)
-            if token:
-                headers["PRIVATE-TOKEN"] = token
+                wait = max(reset_at - time.time() + 0.5, MIN_BACKOFF_S)
+
+        # 2. Sleep OUTSIDE the lock and the semaphore — an exhausted host
+        #    must not hold a concurrency slot while it waits out its backoff.
+        if wait > 0:
+            log.info("%s rate-limited, sleeping %.1fs", host, wait)
+            await asyncio.sleep(wait)
+
+        headers = {"Accept": "application/json"}
+        token = self.token_for(host)
+        if token:
+            headers["PRIVATE-TOKEN"] = token
+
+        # 3. Only the actual HTTP call is bounded by the concurrency semaphore.
+        async with self._sem:
             resp = await session.get(url, headers=headers, timeout=30)
-            rem = resp.headers.get("RateLimit-Remaining")
-            rst = resp.headers.get("RateLimit-Reset")
+
+        # 4. Brief lock: update this host's state from the response headers.
+        rem = resp.headers.get("RateLimit-Remaining")
+        rst = resp.headers.get("RateLimit-Reset")
+        async with self._lock:
             if rem is not None:
                 self._state[host] = (int(rem), float(rst) if rst else 0.0)
             self._n += 1
-            return resp
+        return resp
 
     @property
     def n(self) -> int:
