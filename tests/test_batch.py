@@ -12,7 +12,9 @@ from src.sources.github.batch_runner import (
 
 class TestContribFields:
     def test_contrib_fields(self):
-        assert GH_CONTRIB_FIELDS == ["repo", "login", "contributions", "account_type"]
+        assert GH_CONTRIB_FIELDS == [
+            "repo", "repo_id", "login", "contributions", "account_type"
+        ]
 
     def test_status_fields(self):
         assert GH_CONTRIB_STATUS_FIELDS == [

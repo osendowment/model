@@ -62,7 +62,7 @@ from rich.table import Table
 from src.sources.git.clone import SOURCE_EXTS
 from src.sources.git.disk import check_disk_or_exit, make_clone_tmpdir, print_disk_banner, sweep_stale_clone_dirs
 from src.sources.github.display import _ETAColumn
-from src.common.repos import load_top_repos
+from src.common.repos import load_repo_ids, load_top_repos
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -83,7 +83,7 @@ SOURCE_SUFFIXES: tuple[str, ...] = tuple(
 )
 
 OUTPUT_FIELDS = [
-    "repo", "analyzed_through_year", "commits_5y_examined",
+    "repo", "repo_id", "analyzed_through_year", "commits_5y_examined",
     "churn_5y_added", "churn_5y_deleted", "churn_5y_total",
     "churn_files_count",
     "top_file_path", "top_file_churn",
@@ -317,20 +317,29 @@ def _filter_by_ttl(
 
 def _write_csv(
     path: str, results: list[ChurnResult], existing: dict[str, dict[str, str]],
+    repo_ids: dict[str, str] | None = None,
 ) -> None:
     """Merge new results into existing rows and rewrite the CSV.
 
     Errored results are skipped (existing rows for those repos are preserved
     so we don't lose previously-good data on a transient failure).
+
+    `repo_ids` (slug -> stable GitHub id) stamps new rows and backfills any
+    existing row missing its `repo_id` — downstream builders join churn by
+    repo_id, so a blank id makes the row invisible to them. The writer is
+    schema-tolerant on extra columns (extrasaction="ignore") so a file whose
+    header gained a column can never crash a rewrite mid-file again.
     """
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    ids = repo_ids or {}
 
     for r in results:
         if r.error:
             continue
         existing[r.repo] = {
             "repo": r.repo,
+            "repo_id": ids.get(r.repo, ""),
             "analyzed_through_year": str(ANALYZED_THROUGH_YEAR),
             "commits_5y_examined": str(r.commits),
             "churn_5y_added": str(r.added),
@@ -343,14 +352,20 @@ def _write_csv(
             "fetched_at": now,
         }
 
+    for slug, row in existing.items():
+        if not (row.get("repo_id") or "").strip():
+            row["repo_id"] = ids.get(slug, "")
+
     rows = sorted(
         existing.values(),
         key=lambda r: -int(r.get("churn_5y_total", 0) or 0),
     )
-    with open(path, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=OUTPUT_FIELDS)
+    tmp = path + ".tmp"
+    with open(tmp, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=OUTPUT_FIELDS, extrasaction="ignore")
         w.writeheader()
         w.writerows(rows)
+    os.replace(tmp, path)
 
 
 # --- Display ---------------------------------------------------------------
@@ -576,13 +591,16 @@ def main() -> None:
     print_disk_banner(console=console)
     console.print()
 
-    # Load risk-scope set
+    # Load risk-scope set. repo_ids stamps every written row — downstream
+    # builders join churn by the stable repo_id, not the renameable slug.
+    repo_ids = load_repo_ids()
     if args.repos:
         repos = [r.strip().lower() for r in args.repos]
         total_eligible = len(repos)
     else:
         risk_repos = load_top_repos()
         repos = [e.repo for e in risk_repos]
+        repo_ids.update({e.repo: str(e.repo_id) for e in risk_repos if e.repo_id})
         total_eligible = len(repos)
 
     existing = _load_existing(args.output)
@@ -621,7 +639,7 @@ def main() -> None:
             return
         pending_flush.append(r)
         if len(pending_flush) >= 10:
-            _write_csv(args.output, pending_flush, existing)
+            _write_csv(args.output, pending_flush, existing, repo_ids)
             pending_flush.clear()
 
     try:
@@ -638,7 +656,7 @@ def main() -> None:
 
     # Final write — covers anything still pending from the incremental flush.
     if ok:
-        _write_csv(args.output, ok, existing)
+        _write_csv(args.output, ok, existing, repo_ids)
 
     _print_results_table(ok)
     _print_perf_summary(

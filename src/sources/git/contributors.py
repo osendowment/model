@@ -93,7 +93,9 @@ _BOT_EMAILS = {
 }
 
 # Long raw output: one row per (repo, author_name, author_email, year).
-LONG_FIELDS = ["repo", "author_name", "author_email", "year", "commits"]
+# repo_id is load-bearing: build_concentration joins this file by the stable
+# id, so a rewrite that drops the column blanks the whole dimension.
+LONG_FIELDS = ["repo", "repo_id", "author_name", "author_email", "year", "commits"]
 
 # Per-repo status sidecar.
 STATUS_FIELDS = [
@@ -401,6 +403,7 @@ def process_repo(repo: str, repo_id: str, base_dir: str,
         for (name, email, year), count in bucket.items():
             long_rows.append({
                 "repo": repo,
+                "repo_id": repo_id,
                 "author_name": name,
                 "author_email": email,
                 "year": year,
@@ -462,8 +465,15 @@ def _load_long(path: Path) -> dict[str, list[dict]]:
     return out
 
 
-def _write_long(path: Path, long_by_repo: dict[str, list[dict]]) -> None:
-    """Write all long rows sorted by repo (atomic)."""
+def _write_long(path: Path, long_by_repo: dict[str, list[dict]],
+                repo_ids: dict[str, str] | None = None) -> None:
+    """Write all long rows sorted by repo (atomic).
+
+    Rows missing `repo_id` (legacy rows from before the column existed) are
+    healed from `repo_ids` when provided — never dropped, never left to
+    silently vanish from the id-keyed builder joins.
+    """
+    ids = repo_ids or {}
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:
@@ -471,6 +481,8 @@ def _write_long(path: Path, long_by_repo: dict[str, list[dict]]) -> None:
         w.writeheader()
         for repo in sorted(long_by_repo):
             for row in long_by_repo[repo]:
+                if not (row.get("repo_id") or "").strip():
+                    row = {**row, "repo_id": ids.get(repo, "")}
                 w.writerow(row)
     os.replace(tmp, path)
 
@@ -523,6 +535,7 @@ async def run_batch(
         return long_by_repo, status_by_repo
 
     FLUSH_EVERY = 25
+    id_map = {repo: rid for repo, rid in targets if rid}
     base_dir = make_clone_tmpdir("contributors")
     sem = asyncio.Semaphore(concurrency)
     loop = asyncio.get_running_loop()
@@ -545,7 +558,7 @@ async def run_batch(
             status_by_repo[repo] = status_row
             completed += 1
             if completed % FLUSH_EVERY == 0:
-                _write_long(output_path, long_by_repo)
+                _write_long(output_path, long_by_repo, id_map)
                 _write_status(status_path, status_by_repo)
             if completed % 25 == 0 or completed == len(to_fetch):
                 rate = completed / max(time.monotonic() - t_start, 1e-9)
@@ -562,7 +575,7 @@ async def run_batch(
         if aborted:
             for t in tasks:
                 t.cancel()
-        _write_long(output_path, long_by_repo)
+        _write_long(output_path, long_by_repo, id_map)
         _write_status(status_path, status_by_repo)
         shutil.rmtree(base_dir, ignore_errors=True)
 
