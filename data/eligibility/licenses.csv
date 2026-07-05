@@ -50,6 +50,7 @@ azure/msrest-for-python,71186468,mit,registry,True
 azuread/microsoft-authentication-library-for-python,67243113,mit,registry,True
 babel/babel,24560307,mit,registry,True
 babel/babel-polyfills,190579283,mit,registry,True
+babel/minify,55723051,mit,registry,True
 bdwgc/bdwgc,2109456,noassertion,github,
 beatgammit/base64-js,2853282,mit,registry,True
 benjaminp/six,77868600,mit,registry,True
@@ -168,7 +169,6 @@ eemeli/yaml,119439276,isc,registry,True
 ehmicky/human-signals,214467546,apache-2.0,registry,True
 eliben/pycparser,10589864,bsd-3-clause,registry,True
 emotion-js/emotion,92570536,mit,registry,True
-enarx/ciborium,313759241,apache-2.0,registry,True
 encode/httpcore,237210639,bsd-3-clause,registry,True
 encode/httpx,179492861,bsd-3-clause,registry,True
 epoberezkin/fast-deep-equal,94483360,mit,registry,True
@@ -529,7 +529,6 @@ mozilla/source-map,2014930,bsd-3-clause,registry,True
 mrabarnett/mrab-regex,309446978,apache-2.0 and cnri-python,registry,True
 mrmlnc/fast-glob,77467076,mit,registry,True
 msgpack/msgpack-python,2242705,apache-2.0,registry,True
-mui/material-ui,23083156,mit,registry,True
 myrne/performance-now,10219264,mit,registry,True
 mysticatea/abort-controller,105228556,mit,registry,True
 mysticatea/event-target-shim,31137469,mit,registry,True
@@ -720,7 +719,6 @@ selinuxproject/selinux,20648799,noassertion,github,
 serde-rs/bytes,87358441,mit or apache-2.0,registry,True
 serde-rs/json,35894511,mit or apache-2.0,registry,True
 serde-rs/serde,14367737,mit or apache-2.0,registry,True
-servo/core-foundation-rs,5621513,mit or apache-2.0,registry,True
 servo/rust-fnv,33499190,apache-2.0 / mit,registry,True
 servo/rust-smallvec,33456236,mit or apache-2.0,registry,True
 servo/rust-url,14934771,mit or apache-2.0,registry,True
