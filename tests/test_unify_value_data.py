@@ -874,7 +874,7 @@ class TestInvariants:
         assert CLASS_RANK == {"A": 0, "B": 1, "C": 2}
 
     def test_fields_contains_required_columns(self):
-        for col in ("repo", "platform", "repo_id", "git_url", "valid",
+        for col in ("repo", "platform", "repo_id", "git_url", "git_valid",
                     "ecosystems", "packages",
                     "top_eco", "top_eco_pkg", "top_eco_pct", "class"):
             assert col in FIELDS
@@ -898,21 +898,23 @@ class TestInvariants:
         assert FIELDS.index("repo_id") == 2
         assert FIELDS[3] == "git_url"
 
-    def test_valid_column_present_and_legacy_columns_dropped(self):
-        # The unified `valid` column replaces the old gh_valid/git_valid pair;
-        # llm_guess is removed entirely. Verdicts now live in validation.csv.
-        # Column order: git_url → mirror_url → valid.
-        assert "valid" in FIELDS
+    def test_git_valid_column_present_and_legacy_columns_dropped(self):
+        # The per-repo validity column is `git_valid`; the old bare `valid`
+        # and the previous gh_valid pair are gone. llm_guess removed entirely.
+        # Verdicts now live in validation.csv.
+        # Column order: git_url → mirror_url → git_valid.
+        assert "git_valid" in FIELDS
+        assert "valid" not in FIELDS
         assert FIELDS[FIELDS.index("git_url") + 1] == "mirror_url"
-        assert FIELDS[FIELDS.index("mirror_url") + 1] == "valid"
-        for dropped in ("gh_valid", "git_valid", "llm_guess"):
+        assert FIELDS[FIELDS.index("mirror_url") + 1] == "git_valid"
+        for dropped in ("gh_valid", "llm_guess"):
             assert dropped not in FIELDS
 
-    def test_aggregate_emits_empty_valid_placeholder(self):
-        # unify leaves `valid` empty on every aggregate; build_validation fills it.
+    def test_aggregate_emits_empty_git_valid_placeholder(self):
+        # unify leaves `git_valid` empty on every aggregate; build_validation fills it.
         rows = [_pkg_row("a", "npm", github_repo="x/y", pagerank="1.0")]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
-        assert aggs[0]["valid"] == ""
+        assert aggs[0]["git_valid"] == ""
 
 
 if __name__ == "__main__":  # pragma: no cover

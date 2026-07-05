@@ -111,4 +111,4 @@ class TestLicenseOverrides:
         if not bl.OVERRIDES_FILE.exists():
             pytest.skip("overrides.csv not present")
         out = bl.load_license_overrides()
-        assert out.get("27193779") == "mit"          # nodejs/node
+        assert out.get("gh/27193779") == "mit"       # nodejs/node (namespaced repo_id)

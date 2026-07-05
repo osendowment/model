@@ -2,8 +2,8 @@
 
 Source of truth: `data/value/value.csv` — `load_top_repos` returns repos
 whose `class` is one of `settings.json risk_input.value_classes`
-(default {A}) and whose `valid` column is `True`; this is the set the risk
-pipeline runs on. Repo metadata (`repo_id`, `archived`, `size`, `stars`)
+(default {A}) and whose `git_valid` column is `True`; this is the set the
+risk pipeline runs on. Repo metadata (`repo_id`, `archived`, `size`, `stars`)
 is enriched from `data/sources/github/repos.csv`, the authoritative GitHub-API
 record populated by `src.sources.github.fetch_repo_owner_data`.
 
@@ -38,6 +38,23 @@ OVERRIDES_FILE = "data/value/overrides.csv"
 
 # Class precedence — highest class wins if a repo has multiple rows.
 _RANK = {"A": 3, "B": 2, "C": 1}
+
+
+def to_repo_id(raw: object) -> str:
+    """Normalise a raw GitHub repo id to the canonical `gh/<id>` form.
+
+    The pipeline's join key is namespaced by host: GitHub repos are keyed by
+    GitHub's stable numeric Repos-API id as `gh/<id>`; GitLab repos use
+    `gl/<host>/<id>` (produced by the value stage). This is idempotent:
+    already-namespaced ids (`gh/…`, `gl/…`) and empties pass through
+    unchanged; a bare legacy numeric id (`119609`) is promoted to
+    `gh/119609`. Both `load_repo_ids` and `RepoEntry.repo_id` return this
+    form, so every stage writer downstream of the loader emits it.
+    """
+    s = ("" if raw is None else str(raw)).strip()
+    if not s or "/" in s:
+        return s
+    return f"gh/{s}"
 
 
 @dataclass
@@ -83,7 +100,7 @@ def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]
             canon[full] = full
             meta[full] = RepoEntry(
                 repo=full,
-                repo_id=(row.get("repo_id") or "").strip(),
+                repo_id=to_repo_id(row.get("repo_id")),
                 size_kb=int(row.get("size") or 0),
                 stars=int(row.get("stars") or 0),
                 archived=(row.get("archived") or "").strip().lower() in ("true", "1"),
@@ -136,8 +153,8 @@ def load_top_repos(
     `valid` column is `True`.
 
     - Keeps rows whose `platform` is `github`, `class` in RISK_INPUT_CLASSES,
-      a non-empty `repo`, and `valid == "True"`. The `valid` gate is on by
-      default (drops failed/404/invalid targets); pass `skip_invalid=False`
+      a non-empty `repo`, and `git_valid == "True"`. The `git_valid` gate is
+      on by default (drops failed/404/invalid targets); pass `skip_invalid=False`
       to include rows regardless of validity. The eligibility stage shares
       this exact scope (valid class-A repos).
     - Slugs are canonicalised against `github/repos.csv` `full_name`, so a
@@ -173,7 +190,9 @@ def load_top_repos(
             raw = (row.get("repo") or "").strip().lower()
             if not raw:
                 continue
-            if skip_invalid and (row.get("valid") or "").strip() != "True":
+            # git_valid is the renamed column (was `valid`); fall back for pre-rename CSVs.
+            git_valid_val = (row.get("git_valid") or "").strip()
+            if skip_invalid and git_valid_val != "True":
                 continue
             slug = canon.get(raw, raw)  # resolve renamed repos to current name
             if slug not in chosen or _RANK.get(cls, 0) > _RANK.get(chosen[slug], 0):
@@ -234,6 +253,29 @@ def canonical_repo_map(repos_file: str = REPOS_FILE) -> dict[str, str]:
     return _read_github_repos(repos_file)[0]
 
 
+def load_value_repo_ids(value_file: str = VALUE_FILE) -> dict[str, str]:
+    """Map canonical repo slug -> bare GitHub id from value.csv (`gh/<id>`).
+
+    Fallback/overlay for `load_repo_ids` (github/repos.csv): a freshly
+    renamed repo reaches value.csv under its new canonical slug before
+    github/repos.csv catches up, so a repos.csv-only map leaves the new
+    slug unresolvable and fetched rows land with a blank repo_id — which
+    the id-keyed builder joins then silently drop.
+    """
+    out: dict[str, str] = {}
+    if not os.path.exists(value_file):
+        return out
+    with open(value_file, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            if (row.get("platform") or "").strip().lower() != "github":
+                continue
+            slug = (row.get("repo") or "").strip().lower()
+            rid = (row.get("repo_id") or "").strip().removeprefix("gh/")
+            if slug and rid:
+                out.setdefault(slug, rid)
+    return out
+
+
 def load_repo_ids(repos_file: str = REPOS_FILE) -> dict[str, str]:
     """Map repo slug -> repo_id from data/sources/github/repos.csv.
 
@@ -248,7 +290,7 @@ def load_repo_ids(repos_file: str = REPOS_FILE) -> dict[str, str]:
         return out
     with open(repos_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            rid = (row.get("repo_id") or "").strip()
+            rid = to_repo_id(row.get("repo_id"))
             if not rid:
                 continue
             slug = (row.get("repo") or "").strip().lower()

@@ -1,28 +1,32 @@
 #!/usr/bin/env python3
 """Value pipeline step — aggregate git/GitHub validation into one audit table.
 
-Runs after `verify_git_urls` (which refreshes the two source caches). This
-step is a pure rollup — it does NO network IO:
+Refreshes the non-GitHub `git ls-remote` reachability cache, then rolls up
+all validation signals:
 
-  1. Collect every distinct validation *target* from `data/value/value.csv`:
+  1. Refresh non-GitHub URL reachability via `_verify_non_github` (writes
+     `data/sources/git/urls.csv`, TTL 365 days). Pass `--offline` to skip the
+     refresh and use only the existing cache; `--refresh` to force re-check
+     regardless of age.
+  2. Collect every distinct validation *target* from `data/value/value.csv`:
      a github row's `repo` slug (type `github_repo`) or, for non-GitHub repos,
      its `git_url` (type `git_url`). Each target accumulates the `sources` —
      the ecosystems whose packages resolve to it.
-  2. Load verdicts from the two caches:
+  3. Load verdicts from the two caches:
      - `data/sources/github/repos.csv`  (`valid` + `fetched_at`), keyed by both
        the queried `repo` slug and the rename-resolved `full_name`.
      - `data/sources/git/urls.csv`      (`valid` + `checked_at`).
-  3. Apply manual `valid` pins from `data/value/overrides.csv` (override wins).
-  4. **Hard gate:** every target must have a verdict. A target with none is a
-     pipeline error (run `verify_git_urls` first) — never silently invalid.
-  5. Write `data/value/validation.csv` (target, type, sources, checked_at,
-     valid) and join the per-repo `valid` verdict back into `value.csv`:
+  4. Apply manual `valid` pins from `data/value/overrides.csv` (override wins).
+  5. **Hard gate:** every target must have a verdict. A target with none is a
+     pipeline error (run the resolve step first) — never silently invalid.
+  6. Write `data/value/validation.csv` (target, type, sources, checked_at,
+     valid) and join the per-repo `git_valid` verdict back into `value.csv`:
      `True` iff the repo has a validated github `repo` (mirror); `False`
      otherwise — no GitHub repo at all (orphan or non-GitHub-only upstream),
      or a github `repo` that 404s.
 
 Usage:
-    uv run python -m src.value.build_validation
+    uv run python -m src.value.build_validation [--offline] [--refresh]
 """
 
 from __future__ import annotations
@@ -35,6 +39,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.value.git_urls import _canonicalize_git_url, _verify_non_github
 from src.value.unify_value_data import (
     OUTPUT_FILE as VALUE_FILE,
     load_repo_overrides,
@@ -59,13 +64,17 @@ def _row_target(row: dict) -> tuple[str, str] | None:
     non-GitHub `git_url` is validated via `git ls-remote` (type `git_url`). A
     row with neither is an orphan. The github branch wins, so a github row's
     derived github `git_url` is never double-counted as a separate target.
+
+    Non-GitHub git URLs are canonicalized (https→git://, path cleanup) before
+    being used as keys so they match the ls-remote cache entries.
     """
     repo = (row.get("repo") or "").strip().lower()
     gu = (row.get("git_url") or "").strip()
     if (row.get("platform") or "").strip().lower() == "github" and "/" in repo:
         return (repo, "github_repo")
     if gu:
-        return (gu, "git_url")
+        canonical = _canonicalize_git_url(gu)
+        return (canonical or gu, "git_url")
     return None
 
 
@@ -164,7 +173,7 @@ def build(
         raise SystemExit(
             f"build_validation: {len(missing)} target(s) have no validation "
             f"verdict:\n{listing}\n"
-            "Run `uv run python -m src.value.verify_git_urls` first."
+            "Run `uv run python -m src.value.run_value_pipeline --rollup` first."
         )
 
     validation_rows: list[dict] = []
@@ -187,21 +196,21 @@ def join_valid(
     value_rows: list[dict],
     target_valid: dict[tuple[str, str], bool],
 ) -> list[dict]:
-    """Set each row's `valid`: True iff the repo has a validated GitHub repo.
+    """Set each row's `git_valid`: True iff the repo has a validated GitHub repo.
 
     A repo is fundable only if it has a GitHub repo (or mirror) that resolves
     (HTTP 200). Everything else is `False`:
     - orphans (no upstream repo at all),
     - non-GitHub-only upstreams (sourceware / savannah / gitlab / …) — a
-      non-GitHub `git_url` does not make a repo valid on its own; add a GitHub
-      mirror to `overrides.csv` to bring one into scope,
+      non-GitHub `git_url` does not make a repo git_valid on its own; add a
+      GitHub mirror to `overrides.csv` to bring one into scope,
     - a github `repo` that 404s.
     """
     for row in value_rows:
         repo = (row.get("repo") or "").strip().lower()
         is_github = (row.get("platform") or "").strip().lower() == "github"
         valid = is_github and bool(repo) and target_valid.get((repo, "github_repo")) is True
-        row["valid"] = "True" if valid else "False"
+        row["git_valid"] = "True" if valid else "False"
     return value_rows
 
 
@@ -217,10 +226,10 @@ def _write_validation(rows: list[dict], path: Path = VALIDATION_FILE) -> None:
 
 def _print_summary(value_rows: list[dict], validation_rows: list[dict]) -> None:  # pragma: no cover
     from collections import Counter
-    vc = Counter(r["valid"] for r in value_rows)
-    table = Table(title="[bold]Value validity[/bold]",
+    vc = Counter(r["git_valid"] for r in value_rows)
+    table = Table(title="[bold]Value git_valid[/bold]",
                   header_style="bold dim", padding=(0, 1))
-    table.add_column("valid"); table.add_column("rows", justify="right")
+    table.add_column("git_valid"); table.add_column("rows", justify="right")
     table.add_row("[green]True[/green]", f"{vc.get('True', 0):,}")
     table.add_row("[red]False[/red]", f"{vc.get('False', 0):,}")
     table.add_row("[dim]empty (orphan)[/dim]", f"{vc.get('', 0):,}")
@@ -236,9 +245,33 @@ def _print_summary(value_rows: list[dict], validation_rows: list[dict]) -> None:
 
 
 def main() -> None:  # pragma: no cover
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Build data/value/validation.csv and update value.csv git_valid column."
+    )
+    parser.add_argument(
+        "--offline", action="store_true",
+        help="Skip the non-GitHub ls-remote refresh; use only the existing cache.",
+    )
+    parser.add_argument(
+        "--refresh", action="store_true",
+        help="Force re-check all non-GitHub URLs regardless of cache age.",
+    )
+    args = parser.parse_args()
+
     console.print("[bold]Building validation.csv...[/bold]\n")
     with open(VALUE_FILE, encoding="utf-8") as f:
         value_rows = list(csv.DictReader(f))
+
+    # Refresh the non-GitHub ls-remote reachability cache before rolling up.
+    # Gate behind --offline (skip) and --refresh (force=True).
+    nongithub_urls = sorted({
+        (r.get("git_url") or "").strip()
+        for r in value_rows
+        if (r.get("platform") or "") != "github" and (r.get("git_url") or "").strip()
+    })
+    if not args.offline:
+        _verify_non_github(nongithub_urls, force=args.refresh)
 
     targets = collect_targets(value_rows)
     verdicts = apply_overrides(load_verdicts(), load_repo_overrides())

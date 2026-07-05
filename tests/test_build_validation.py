@@ -2,7 +2,7 @@
 
 Covers target extraction from value rows, per-target source aggregation,
 the cache→verdict load (with rename double-keying), override `valid` pins,
-the hard coverage gate, and the AND-of-targets join into the `valid` column.
+the hard coverage gate, and the AND-of-targets join into the `git_valid` column.
 Synthetic in-memory rows / tmp_path CSVs only — no real `data/` reads.
 """
 
@@ -38,7 +38,8 @@ class TestCollectTargets:
         t = bv.collect_targets(rows)
         # github row keyed by lowercased slug; its derived github git_url ignored
         assert t[("owner/repo", "github_repo")] == {"npm", "pypi"}
-        assert t[("https://example.com/x.git", "git_url")] == {"crates"}
+        # non-github git URLs are canonicalized (https→git://) before keying
+        assert t[("git://example.com/x.git", "git_url")] == {"crates"}
         # orphan contributes no target
         assert len(t) == 2
 
@@ -145,4 +146,133 @@ class TestJoinValid:
             {"repo": "", "platform": "", "git_url": ""},    # orphan
         ]
         out = bv.join_valid(rows, target_valid)
-        assert [r["valid"] for r in out] == ["True", "False", "False", "False"]
+        assert [r["git_valid"] for r in out] == ["True", "False", "False", "False"]
+
+
+# ── _verify_non_github integration (Part A) ──────────────────────────────────
+
+class TestVerifyNonGithubIntegration:
+    """main() must call _verify_non_github with non-github URLs before rollup,
+    and must skip it when --offline is set."""
+
+    def _make_value_csv(self, tmp_path):
+        """Write a minimal value.csv with one github and one non-github row."""
+        p = tmp_path / "value.csv"
+        _write(p,
+               ["repo", "platform", "git_url", "git_valid", "ecosystems",
+                "packages", "top_eco", "top_eco_pkg", "top_eco_pct", "class",
+                "repo_id", "mirror_url",
+                "class_npm", "class_pypi", "class_crates", "class_cpp"],
+               [
+                   {"repo": "a/b", "platform": "github",
+                    "git_url": "https://github.com/a/b.git",
+                    "git_valid": "", "ecosystems": "npm", "packages": "1",
+                    "top_eco": "npm", "top_eco_pkg": "pkg", "top_eco_pct": "99",
+                    "class": "A", "repo_id": "", "mirror_url": "",
+                    "class_npm": "A", "class_pypi": "", "class_crates": "", "class_cpp": ""},
+                   {"repo": "", "platform": "gitlab",
+                    "git_url": "https://gitlab.com/x/y.git",
+                    "git_valid": "", "ecosystems": "npm", "packages": "1",
+                    "top_eco": "npm", "top_eco_pkg": "pkg2", "top_eco_pct": "50",
+                    "class": "B", "repo_id": "", "mirror_url": "",
+                    "class_npm": "B", "class_pypi": "", "class_crates": "", "class_cpp": ""},
+               ])
+        return p
+
+    def _make_caches(self, tmp_path):
+        """Write stub github/repos.csv and git/urls.csv so hard gate passes."""
+        gh = tmp_path / "repos.csv"
+        _write(gh, ["repo", "valid", "full_name", "fetched_at"],
+               [{"repo": "a/b", "valid": "True",
+                 "full_name": "a/b", "fetched_at": "2026-01-01T00:00:00Z"}])
+        git = tmp_path / "urls.csv"
+        _write(git, ["url", "valid", "method", "checked_at"],
+               [{"url": "https://gitlab.com/x/y.git", "valid": "True",
+                 "method": "ls-remote", "checked_at": "2026-01-01T00:00:00Z"}])
+        return gh, git
+
+    def _make_stub_verdicts(self):
+        """Verdicts covering the rows in _make_value_csv (passes the hard gate)."""
+        return {
+            ("a/b", "github_repo"): {"valid": True, "checked_at": "2026-01-01T00:00:00Z"},
+            ("https://gitlab.com/x/y.git", "git_url"): {"valid": True, "checked_at": "2026-01-01T00:00:00Z"},
+        }
+
+    def test_main_calls_verify_non_github_with_nongithub_urls(
+            self, tmp_path, monkeypatch):
+        """main() collects non-github git_urls and passes them to
+        _verify_non_github before the rollup (not --offline)."""
+        import sys
+        value_csv = self._make_value_csv(tmp_path)
+        captured: list = []
+
+        def fake_verify(urls, force=False):
+            captured.append({"urls": list(urls), "force": force})
+            return {}
+
+        monkeypatch.setattr(bv, "_verify_non_github", fake_verify)
+        monkeypatch.setattr(bv, "VALUE_FILE", value_csv)
+        monkeypatch.setattr(bv, "VALIDATION_FILE", tmp_path / "validation.csv")
+        monkeypatch.setattr(sys, "argv", ["build_validation"])
+
+        stub_verdicts = self._make_stub_verdicts()
+        monkeypatch.setattr(bv, "load_verdicts", lambda: stub_verdicts)
+        monkeypatch.setattr(bv, "load_repo_overrides", lambda: {})
+        monkeypatch.setattr(bv, "write_value_data", lambda rows: None)
+
+        bv.main()
+
+        assert len(captured) == 1
+        assert "https://gitlab.com/x/y.git" in captured[0]["urls"]
+        # github URL is excluded
+        assert "https://github.com/a/b.git" not in captured[0]["urls"]
+        assert captured[0]["force"] is False
+
+    def test_main_skips_verify_non_github_when_offline(
+            self, tmp_path, monkeypatch):
+        """--offline suppresses the _verify_non_github call entirely."""
+        import sys
+        value_csv = self._make_value_csv(tmp_path)
+        called: list = []
+
+        def fake_verify(urls, force=False):
+            called.append(True)
+            return {}
+
+        monkeypatch.setattr(bv, "_verify_non_github", fake_verify)
+        monkeypatch.setattr(bv, "VALUE_FILE", value_csv)
+        monkeypatch.setattr(bv, "VALIDATION_FILE", tmp_path / "validation.csv")
+        monkeypatch.setattr(sys, "argv", ["build_validation", "--offline"])
+
+        stub_verdicts = self._make_stub_verdicts()
+        monkeypatch.setattr(bv, "load_verdicts", lambda: stub_verdicts)
+        monkeypatch.setattr(bv, "load_repo_overrides", lambda: {})
+        monkeypatch.setattr(bv, "write_value_data", lambda rows: None)
+
+        bv.main()
+
+        assert called == [], "--offline must skip _verify_non_github"
+
+    def test_main_passes_force_true_when_refresh(self, tmp_path, monkeypatch):
+        """--refresh passes force=True to _verify_non_github."""
+        import sys
+        value_csv = self._make_value_csv(tmp_path)
+        captured: list = []
+
+        def fake_verify(urls, force=False):
+            captured.append(force)
+            return {}
+
+        monkeypatch.setattr(bv, "_verify_non_github", fake_verify)
+        monkeypatch.setattr(bv, "VALUE_FILE", value_csv)
+        monkeypatch.setattr(bv, "VALIDATION_FILE", tmp_path / "validation.csv")
+        monkeypatch.setattr(sys, "argv", ["build_validation", "--refresh"])
+
+        stub_verdicts = self._make_stub_verdicts()
+        monkeypatch.setattr(bv, "load_verdicts", lambda: stub_verdicts)
+        monkeypatch.setattr(bv, "load_repo_overrides", lambda: {})
+        monkeypatch.setattr(bv, "write_value_data", lambda rows: None)
+
+        bv.main()
+
+        assert captured == [True]

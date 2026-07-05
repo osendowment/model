@@ -42,8 +42,8 @@ class TestPlatformAndSlug:
 
 class TestIdentity:
     def test_github_slug_wins_regardless_of_url(self):
-        # A member-derived github slug takes the github identity; verify_git_urls
-        # later reconciles git_url to https://github.com/<slug>.git.
+        # A member-derived github slug takes the github identity; the resolve
+        # step later reconciles git_url to https://github.com/<slug>.git.
         assert _identity("facebook/react", "https://gitlab.com/x/y.git") == ("github", "facebook/react")
 
     def test_non_github_url_is_classified_when_no_github_slug(self):
