@@ -3,10 +3,11 @@
 [ecosyste.ms](https://ecosyste.ms) is a cross-registry index of open-source packages and
 repositories. The model uses two connectors against it, both under `src/sources/ecosystems/`.
 
-> **Status:** collection layer. Both outputs are produced but **not yet consumed** by the Value
-> or Risk stages — wiring the criticality factor into a stage is a follow-on. Coverage/funnel
-> counts therefore live in `docs/stats.md` only once that wiring lands; this page describes
-> **how** the data is fetched, not **how many**.
+> **Status:** the criticality connector's `critical` flag now feeds the **Value** stage as
+> `value.csv`'s `eco_crit` column — the 0.2-weight component of `score`, and the only importance
+> signal GitLab class-A repos carry (see [value.md](../value.md), applied by
+> `src.value.apply_criticality`). Coverage counts live in [stats.md](../stats.md#value); this page
+> describes **how** the data is fetched, not **how many**.
 
 ## Packages connector (URL backfill)
 
@@ -44,8 +45,9 @@ fallback for packages the ranked registries don't carry.
 
 ### Columns (`criticality.csv`)
 
-`repo_id` (`gh/{id}` / `gl/{host}/{id}`, best-effort), `repository_url` (the row key), `class`,
-`valid` (value.csv's validity, carried so the scope stays filterable), `ecosystem` (`top_eco`),
+`repo_id` (`gh/{id}` / `gl/{host}-{id}` / `gl/{id}`, read straight from value.csv's unified id),
+`repository_url` (the row key), `class`,
+`valid` (value.csv's `git_valid`, carried so the scope stays filterable), `ecosystem` (`top_eco`),
 `package` (`top_eco_pkg`), `registry_hit` (which registry served it), `ok` (success flag), `error`
 (reason when `ok=False`), `critical` (`True`/`False`/blank when the registry omits it),
 `rank_average` (percentile; **lower = more important**, e.g. express ≈ 0.08),
@@ -60,7 +62,7 @@ next run). A network blip is therefore never silently recorded as a genuine miss
 ### Scope
 
 Scoped on **value class alone** (default A), *not* via `src.common.repos.load_top_repos`: that
-loader's `valid` gate requires a `github_repo`, which would exclude every GitLab-hosted repo — but
+loader's gate requires a GitHub `platform`, which would exclude every GitLab-hosted repo — but
 GitLab repos are exactly what this signal is meant to cover. Criticality is a package-importance
 factor, not a risk-completeness gate, so a not-yet-`valid` or archived class-A repo still has a
 meaningful criticality. Each row carries `valid` so a consumer can re-apply the gate.

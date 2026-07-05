@@ -55,6 +55,19 @@ risk/eligibility scope is still GitHub-gated (`settings.json top_repos.platforms
 | GitHub unique repos | 916 | 2,721 | 6,803 | 10,440 | deduped; + 1,577 orphans = 12,017 repos |
 | **Valid repos** | **949** | **2,947** | **7,347** | **11,243** | upstream resolves — github/gitlab API or non-github ls-remote; incl. archived mirrors |
 
+### Value score coverage
+
+`openssf_crit` / `eco_crit` / `score`, stamped onto `value.csv` by
+`src.value.apply_criticality` (methodology in [value.md](value.md)).
+
+| Signal | Filled | Comment |
+|---|--:|---|
+| `openssf_crit` | 919 | GitHub-only; valid class-A GitHub gate **916 / 916** (enforced by `pipeline_health.py`) |
+| `eco_crit` | 949 | resolved class-A packages — 789 critical (`1`) / 160 not (`0`); covers GitHub **and** GitLab |
+| `score` | 952 | ≥ 2 components present; **all 26 GitLab class-A repos scored** (from `eco_crit` + `top_eco_pct`) |
+
+`score` range 0–100: **min 12.6 / mean 51.4 / max 81.4**.
+
 ### Repo class distribution
 
 Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
