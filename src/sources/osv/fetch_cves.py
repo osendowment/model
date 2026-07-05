@@ -104,7 +104,7 @@ ECOSYSTEM_FILES: list[tuple[Path, str]] = [
 ]
 
 OSV_QUERY_URL = "https://api.osv.dev/v1/query"
-TTL_DAYS_DEFAULT = 7
+TTL_DAYS_DEFAULT = 365
 YEAR_MIN = 2021
 YEAR_MAX = 2025
 

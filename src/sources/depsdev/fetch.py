@@ -110,7 +110,7 @@ ECO_TO_DEPSDEV_SYSTEM: dict[str, str] = {
     # "Debian" intentionally omitted — deps.dev returns "package not found"
 }
 
-TTL_DAYS_DEFAULT = 30
+TTL_DAYS_DEFAULT = 365
 REQUEST_TIMEOUT_S = 30
 MAX_RETRIES = 4
 WORKER_MIN_INTERVAL_S = 0.05  # ~20 req/sec per worker (deps.dev tolerates this)

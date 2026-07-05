@@ -73,7 +73,7 @@ PERIOD_START = "2021-01-01"
 PERIOD_END_EXCLUSIVE = "2026-01-01"  # git log --until is exclusive at midnight UTC
 ANALYZED_THROUGH_YEAR = 2025
 
-DEFAULT_TTL_DAYS = 30
+DEFAULT_TTL_DAYS = 365
 DEFAULT_CONCURRENCY = int(os.environ.get("CHURN_WORKERS") or 4)
 PER_REPO_TIMEOUT = 300  # 5 minutes hard cap per repo
 
