@@ -5,7 +5,9 @@ fetch_repo_owner_data test), so no network is touched.
 """
 from __future__ import annotations
 
-from src.sources.gitlab.fetch_project_data import _fetch_project, _flat_project
+from pathlib import Path
+
+from src.sources.gitlab.fetch_project_data import _fetch_project, _flat_project, load_gitlab_rows
 
 
 class FakeResponse:
@@ -102,3 +104,22 @@ class TestFetchProject:
         assert key == "gitlab.com/old/x"          # key stays what we asked
         assert row["repo_id"] == "gl/gitlab.com/9"
         assert len(lim.calls) == 2
+
+
+class TestLoadGitlabRows:
+    def test_selects_only_gitlab_hosts_and_dedups(self, tmp_path: Path):
+        csv_text = (
+            "github_repo,gh_repo_id,git_url,valid,class\n"
+            "npm/cli,1,https://github.com/npm/cli.git,True,A\n"
+            ",,https://salsa.debian.org/debian/foo.git,False,B\n"
+            ",,https://salsa.debian.org/debian/foo.git,False,C\n"   # dup
+            ",,https://gitlab.com/group/sub/proj,False,C\n"
+            ",,https://bitbucket.org/team/repo,False,C\n"           # not gitlab
+        )
+        vf = tmp_path / "value.csv"
+        vf.write_text(csv_text, encoding="utf-8")
+        rows = load_gitlab_rows(vf)
+        keys = sorted(r["project"] for r in rows)
+        assert keys == ["gitlab.com/group/sub/proj", "salsa.debian.org/debian/foo"]
+        foo = next(r for r in rows if r["host"] == "salsa.debian.org")
+        assert foo["path"] == "debian/foo"

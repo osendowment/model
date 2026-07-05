@@ -67,6 +67,27 @@ def _now_iso() -> str:
     return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def load_gitlab_rows(value_file: Path | None = None) -> list[dict]:
+    """Unique GitLab targets from value.csv.
+
+    Returns [{host, path, project}] where `project` = "{host}/{path}".lower()
+    is the dedup + upsert key. Rows whose `git_url` is not a GitLab instance
+    are skipped.
+    """
+    vf = value_file or VALUE_FILE
+    seen: dict[str, dict] = {}
+    with open(vf, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            parsed = parse_git_url((r.get("git_url") or "").strip())
+            if not parsed:
+                continue
+            host, path = parsed
+            key = f"{host}/{path}".lower()
+            if key not in seen:
+                seen[key] = {"host": host, "path": path, "project": key}
+    return sorted(seen.values(), key=lambda x: x["project"])
+
+
 def _flat_project(d: dict, host: str, project_key: str) -> dict:
     ns = d.get("namespace") or {}
     kind = ns.get("kind", "")
