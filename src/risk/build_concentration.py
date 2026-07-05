@@ -8,11 +8,15 @@ computes bus factor / HHI / contributor counts from both:
 Reads:
     data/value/value.csv                          — A/B value-class set (load_top_repos)
     data/sources/git/contributor-commits.csv             — git-clone method, long raw:
-                                                   repo, author_name, author_email, year, commits
+                                                   repo, repo_id, author_name, author_email, year, commits
     data/sources/git/contributor-commits.status.csv      — per-repo git fetch status / fetched_at
     data/sources/github/contributor-commits.csv          — GitHub /contributors method, long raw:
-                                                   repo, login, contributions, account_type
+                                                   repo, repo_id, login, contributions, account_type
     data/sources/github/contributor-commits.status.csv   — per-repo GitHub fetch status / fetched_at
+
+Every join onto a repo's GitHub identity is keyed by the stable `repo_id`, not
+the repo name, so a renamed/moved repo (facebook/react → react/react) keeps the
+contributor data collected under its old name.
 
 The git method walks `git log` on a local clone — it sees every contributor
 and carries author dates, so it yields both a lifetime figure and a windowed
@@ -72,7 +76,7 @@ from src.common.params import (
 )
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_top_repos
-from src.common.tables import load_rows_by_repo
+from src.common.tables import load_rows_by_id
 from src.sources.git.contributors import _is_bot_identity, merge_identity_groups
 from src.sources.github.fetch_contributors_metrics import _compute_bus_factor
 from src.sources.github.models import Contributor, is_bot
@@ -110,15 +114,21 @@ FIELDS = [
 
 
 def _load_long_grouped(path: Path) -> dict[str, list[dict]]:
-    """Read a long CSV → ``{repo_lowercased: [row, ...]}`` (missing file → {})."""
+    """Read a long CSV → ``{repo_id: [row, ...]}`` (missing file → {}).
+
+    Grouped by the stable GitHub `repo_id` (backfilled onto the long files), not
+    the repo name, so a renamed/moved repo (facebook/react → react/react) still
+    matches the contributor rows collected under its old name. Rows with a blank
+    `repo_id` are skipped.
+    """
     out: dict[str, list[dict]] = {}
     if not path.exists():
         return out
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if slug:
-                out.setdefault(slug, []).append(row)
+            rid = (row.get("repo_id") or "").strip()
+            if rid:
+                out.setdefault(rid, []).append(row)
     return out
 
 
@@ -227,7 +237,7 @@ def git_metrics(rows: list[dict]) -> dict:
     # years is a maximal single-point-of-failure, so it still scores rather than
     # dropping out. `comment` records WHICH flavour of "no human in the window"
     # triggered the imputation (auditability). This runs only for SUCCESSFULLY
-    # FETCHED repos (git_metrics is called only when `repo in git_long`); a
+    # FETCHED repos (git_metrics is called only when `rid in git_long`); a
     # clone/log failure writes no rows, never reaches here, and is annotated in
     # build() instead — so a fetch failure is the only thing that stays blank.
     comment = ""
@@ -258,31 +268,32 @@ def build() -> list[dict]:
     eligible = load_top_repos()
     git_long = _load_long_grouped(GIT_LONG_FILE)
     gh_long = _load_long_grouped(GH_LONG_FILE)
-    git_status = load_rows_by_repo(GIT_STATUS_FILE)
-    gh_status = load_rows_by_repo(GH_STATUS_FILE)
+    git_status = load_rows_by_id(GIT_STATUS_FILE)
+    gh_status = load_rows_by_id(GH_STATUS_FILE)
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
+        rid = str(entry.repo_id)   # stable GitHub id — the rename-proof join key
         row = {f: "" for f in FIELDS}
         row["repo"] = repo
         row["repo_id"] = entry.repo_id
 
-        if repo in gh_long:
-            row.update(github_metrics(gh_long[repo]))
+        if rid in gh_long:
+            row.update(github_metrics(gh_long[rid]))
         row["github_fetched_at"] = (
-            gh_status.get(repo, {}).get("fetched_at") or ""
+            gh_status.get(rid, {}).get("fetched_at") or ""
         ).strip()
 
-        if repo in git_long:
-            row.update(git_metrics(git_long[repo]))
+        if rid in git_long:
+            row.update(git_metrics(git_long[rid]))
         else:
             # No git long rows = the clone/log never produced data. Record why,
             # so a blank _5y axis is auditable rather than silently empty.
-            st = (git_status.get(repo, {}).get("status") or "").strip()
+            st = (git_status.get(rid, {}).get("status") or "").strip()
             row["comment"] = f"git fetch {st}" if st else "no git data"
         row["git_fetched_at"] = (
-            git_status.get(repo, {}).get("fetched_at") or ""
+            git_status.get(rid, {}).get("fetched_at") or ""
         ).strip()
 
         rows.append(row)

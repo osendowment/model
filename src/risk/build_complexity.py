@@ -76,7 +76,7 @@ from rich.table import Table
 from src.common.params import YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_top_repos
-from src.common.tables import load_rows_by_repo
+from src.common.tables import load_rows_by_id
 from src.sources.git.long_format import read as read_long
 
 console = Console()
@@ -121,7 +121,11 @@ FIELDS = [
 ]
 
 def _per_year_shas(commits_years_file: Path) -> dict[str, dict[int, str]]:
-    """Return {repo: {year_int: last_sha}} for usable (sha, year) pairs.
+    """Return {repo_id: {year_int: last_sha}} for usable (sha, year) pairs.
+
+    Keyed on GitHub's stable numeric `repo_id`, not the repo name, so a
+    renamed/moved repo (`facebook/react` → `react/react`) still matches the
+    snapshot SHAs collected under its old name.
 
     A pair is "usable" when ``last_sha`` is non-empty AND ``commits > 0``.
     EVERY real year is kept — not just the settings window — so a dormant
@@ -130,13 +134,13 @@ def _per_year_shas(commits_years_file: Path) -> dict[str, dict[int, str]]:
     pseudo-row is bucketed as year 0 (ultimate fallback). Repos with no usable
     year get no key.
     """
-    by_repo: dict[str, dict[int, str]] = {}
+    by_id: dict[str, dict[int, str]] = {}
     if not commits_years_file.exists():
         return {}
     with open(commits_years_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if not slug:
+            rid = (row.get("repo_id") or "").strip()
+            if not rid:
                 continue
             last_sha = (row.get("last_sha") or "").strip()
             if not last_sha:
@@ -146,7 +150,7 @@ def _per_year_shas(commits_years_file: Path) -> dict[str, dict[int, str]]:
                 # Dormant repo (no commits in the window). resolve_head writes
                 # this pseudo-row. Bucket as year=0 so the walk-down loop
                 # in build() can pick it up as a last-resort fallback.
-                by_repo.setdefault(slug, {})[0] = last_sha
+                by_id.setdefault(rid, {})[0] = last_sha
                 continue
             try:
                 year = int(yr_raw)
@@ -158,8 +162,8 @@ def _per_year_shas(commits_years_file: Path) -> dict[str, dict[int, str]]:
             # Keep any real year (no window clamp): resolve_head records a
             # dormant repo's snapshot under its real commit year as a dated
             # fallback, which the walk in build() reaches after the window.
-            by_repo.setdefault(slug, {})[year] = last_sha
-    return by_repo
+            by_id.setdefault(rid, {})[year] = last_sha
+    return by_id
 
 
 def _is_nonzero(val: str) -> bool:
@@ -212,7 +216,9 @@ def build() -> list[dict]:
     # 1. Build per-repo year→sha lookup from commits-years.csv.
     per_year = _per_year_shas(COMMITS_YEARS_FILE)
 
-    # 2. Index long-format rows as (repo, sha) → {metric: value}.
+    # 2. Index long-format rows as (repo_id, sha) → {metric: value}.
+    #    Keying on the stable `repo_id` (not the name) means a renamed repo
+    #    still matches the snapshots collected under its old name.
     #    We can't use project_to_wide here because we may need to walk back
     #    through multiple shas per repo: scc occasionally records loc=0 from
     #    a shallow/failed checkout, which we treat as "not measured" and skip
@@ -220,25 +226,26 @@ def build() -> list[dict]:
     scc_rows = read_long(SCC_FILE)
     lizard_rows = read_long(LIZARD_FILE)
 
-    # (repo, sha) → {metric: value}
+    # (repo_id, sha) → {metric: value}
     scc_idx: dict[tuple[str, str], dict[str, str]] = {}
-    for (r, s, m), row in scc_rows.items():
+    for (_r, s, m), row in scc_rows.items():
         if m in SCC_METRICS:
-            scc_idx.setdefault((r, s), {})[m] = row["value"]
+            scc_idx.setdefault((row["repo_id"], s), {})[m] = row["value"]
 
     lizard_idx: dict[tuple[str, str], dict[str, str]] = {}
-    for (r, s, m), row in lizard_rows.items():
+    for (_r, s, m), row in lizard_rows.items():
         if m in LIZARD_METRICS:
-            lizard_idx.setdefault((r, s), {})[m] = row["value"]
+            lizard_idx.setdefault((row["repo_id"], s), {})[m] = row["value"]
 
-    # 3. Load 5y churn (hotspot input).
-    churn_by_repo = load_rows_by_repo(CHURN_FILE)
+    # 3. Load 5y churn (hotspot input), keyed by stable repo_id.
+    churn_by_id = load_rows_by_id(CHURN_FILE)
 
     rows: list[dict] = []
 
     for entry in eligible:
         repo = entry.repo
-        year_to_sha = per_year.get(repo, {})
+        rid = str(entry.repo_id)
+        year_to_sha = per_year.get(rid, {})
 
         # Walk newest→oldest over EVERY available snapshot year, picking the
         # most-recent whose sha has scc loc>0. Real years (incl. pre-window
@@ -252,10 +259,10 @@ def build() -> list[dict]:
             sha = year_to_sha.get(y)
             if not sha:
                 continue
-            candidate = scc_idx.get((repo, sha), {})
+            candidate = scc_idx.get((rid, sha), {})
             if _is_nonzero(candidate.get("loc", "")):
                 scc_vals = candidate
-                lz_vals = lizard_idx.get((repo, sha), {})
+                lz_vals = lizard_idx.get((rid, sha), {})
                 year_label = "HEAD" if y == 0 else str(y)
                 break
 
@@ -266,7 +273,7 @@ def build() -> list[dict]:
             lz_vals = {}
 
         # Hotspot: combine churn × scc_complexity_eoy.
-        churn_row = churn_by_repo.get(repo, {})
+        churn_row = churn_by_id.get(rid, {})
         churn_total = _to_int(churn_row.get("churn_5y_total"))
         cx_value = _to_int(scc_vals.get("complexity"))
         churn_known = bool(churn_row)

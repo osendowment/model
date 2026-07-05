@@ -13,13 +13,14 @@ from src.risk.aggregate_risk import (
 def test_funding_flags_read(tmp_path):
     """intent/nonprofit are read per repo from funding.csv; missing → safe defaults."""
     f = tmp_path / "funding.csv"
-    f.write_text("repo,intent,nonprofit\n"
-                 "a/co,True,False\n"
-                 "c/found,True,True\n"
-                 "d/none,False,True\n")
+    # Flags join on the stable repo_id, not the (renameable) name.
+    f.write_text("repo,repo_id,intent,nonprofit\n"
+                 "a/co,1,True,False\n"
+                 "c/found,2,True,True\n"
+                 "d/none,3,False,True\n")
     flags = _funding_flags(f)
-    assert flags["a/co"] == {"intent": "True", "nonprofit": "False"}
-    assert flags["d/none"] == {"intent": "False", "nonprofit": "True"}
+    assert flags["1"] == {"intent": "True", "nonprofit": "False"}
+    assert flags["3"] == {"intent": "False", "nonprofit": "True"}
 
 
 def test_risk_csv_is_narrow():

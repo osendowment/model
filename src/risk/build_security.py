@@ -83,7 +83,7 @@ from src.common.params import YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import canonical_repo_map, load_top_repos
 from src.common.stats import floor_anchored_risk
-from src.common.tables import load_column_by_repo
+from src.common.tables import load_column_by_id
 from src.sources.git.long_format import read as read_long
 
 console = Console()
@@ -118,18 +118,20 @@ FIELDS = [
 
 
 def _per_year_shas(commits_years_file: Path) -> dict[str, list[str]]:
-    """Return {repo: [sha, …]} newest-first across the settings `years` window.
+    """Return {repo_id: [sha, …]} newest-first across the settings `years` window.
 
-    Only includes years with non-empty `last_sha` AND `commits > 0`.
-    Repos with no usable year get no key.
+    Keyed by GitHub's stable numeric `repo_id`, not the repo name, so a
+    renamed/moved repo still matches the sha priority collected under its old
+    name. Only includes years with non-empty `last_sha` AND `commits > 0`.
+    Repos with no usable year (or no repo_id) get no key.
     """
     by_repo: dict[str, dict[int, str]] = {}
     if not commits_years_file.exists():
         return {}
     with open(commits_years_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if not slug:
+            rid = (row.get("repo_id") or "").strip()
+            if not rid:
                 continue
             last_sha = (row.get("last_sha") or "").strip()
             if not last_sha:
@@ -142,7 +144,7 @@ def _per_year_shas(commits_years_file: Path) -> dict[str, list[str]]:
             if commits <= 0:
                 continue
             if min(YEARS) <= year <= max(YEARS):
-                by_repo.setdefault(slug, {})[year] = last_sha
+                by_repo.setdefault(rid, {})[year] = last_sha
 
     out: dict[str, list[str]] = {}
     for repo, year_map in by_repo.items():
@@ -164,40 +166,49 @@ def _index_long_by_repo_sha(
     metrics: set[str] | None = None,
     metric_prefix: str | None = None,
 ) -> dict[tuple[str, str], dict[str, dict[str, str]]]:
-    """Index {(repo, sha): {metric: row}} from long-format rows.
+    """Index {(repo_id, sha): {metric: row}} from long-format rows.
 
+    Keyed by the stable `repo_id` each long row carries — not the repo name —
+    so metrics collected under a repo's old name still join to its current
+    entry after a rename/move. Rows with a blank `repo_id` are skipped.
     `metrics` and `metric_prefix` are optional filters (either or both).
     Stores the full row (so callers can read `value` and `checked_at`).
     """
     out: dict[tuple[str, str], dict[str, dict[str, str]]] = {}
-    for (repo, sha, metric), row in rows.items():
+    for (_repo, sha, metric), row in rows.items():
         if metrics is not None and metric not in metrics:
             continue
         if metric_prefix is not None and not metric.startswith(metric_prefix):
             continue
-        out.setdefault((repo, sha), {})[metric] = row
+        rid = (row.get("repo_id") or "").strip()
+        if not rid:
+            continue
+        out.setdefault((rid, sha), {})[metric] = row
     return out
 
 
 def _pick_latest(
-    repo: str,
+    repo_id: str,
     sha_priority: list[str],
     sha_index: dict[tuple[str, str], dict[str, dict[str, str]]],
     fallback_shas_per_repo: dict[str, list[str]],
 ) -> tuple[str, dict[str, dict[str, str]]] | None:
-    """Pick (sha, metric_rows) for `repo` using year priority then fallback.
+    """Pick (sha, metric_rows) for `repo_id` using year priority then fallback.
+
+    `sha_index` and `fallback_shas_per_repo` are both keyed by the stable
+    `repo_id`, so the lookup survives a repo rename.
 
     1. Try each sha in `sha_priority` (newest year first); first hit wins.
-    2. If none match, fall back to any sha present for the repo in the
+    2. If none match, fall back to any sha present for the repo_id in the
        index (lexicographically smallest — deterministic).
     Returns None if nothing matches.
     """
     for sha in sha_priority:
-        rows = sha_index.get((repo, sha))
+        rows = sha_index.get((repo_id, sha))
         if rows:
             return sha, rows
-    for sha in fallback_shas_per_repo.get(repo, []):
-        rows = sha_index.get((repo, sha))
+    for sha in fallback_shas_per_repo.get(repo_id, []):
+        rows = sha_index.get((repo_id, sha))
         if rows:
             return sha, rows
     return None
@@ -206,12 +217,12 @@ def _pick_latest(
 def _shas_per_repo(
     sha_index: dict[tuple[str, str], dict[str, dict[str, str]]],
 ) -> dict[str, list[str]]:
-    """Group shas present in the index by repo, sorted lex (deterministic)."""
+    """Group shas present in the index by repo_id, sorted lex (deterministic)."""
     by_repo: dict[str, list[str]] = {}
-    for (repo, sha) in sha_index.keys():
-        by_repo.setdefault(repo, []).append(sha)
-    for repo in by_repo:
-        by_repo[repo].sort()
+    for (repo_id, sha) in sha_index.keys():
+        by_repo.setdefault(repo_id, []).append(sha)
+    for repo_id in by_repo:
+        by_repo[repo_id].sort()
     return by_repo
 
 
@@ -230,10 +241,11 @@ def _load_ossfuzz() -> set[str]:
 
 
 def _load_cve_counts_5y() -> dict[str, int]:
-    """Count distinct CVE ids per repo within the settings `years` window.
+    """Count distinct CVE ids per repo_id within the settings `years` window.
 
+    Keyed by GitHub's stable `repo_id` so a renamed repo's CVEs still join.
     Each row in osv/cves.csv is one (repo, cve, package-source) tuple.
-    Multiple package mappings can produce duplicate (repo, cve) pairs —
+    Multiple package mappings can produce duplicate (repo_id, cve) pairs —
     we dedupe on the CVE id within a repo. Date filter uses the `date`
     column's first 4 chars (YYYY).
     """
@@ -242,25 +254,25 @@ def _load_cve_counts_5y() -> dict[str, int]:
         return {}
     with open(OSV_FILE, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
+            rid = (row.get("repo_id") or "").strip()
             cve = (row.get("cve") or "").strip()
             date = (row.get("date") or "").strip()
-            if not slug or not cve or len(date) < 4:
+            if not rid or not cve or len(date) < 4:
                 continue
             year = date[:4]
             if year < str(min(YEARS)) or year > str(max(YEARS)):
                 continue
-            counts.setdefault(slug, set()).add(cve)
-    return {slug: len(cves) for slug, cves in counts.items()}
+            counts.setdefault(rid, set()).add(cve)
+    return {rid: len(cves) for rid, cves in counts.items()}
 
 
 def _load_osv_queried() -> set[str]:
-    """Repos we attempted to query OSV for (sidecar to cves.csv).
+    """repo_ids we attempted to query OSV for (sidecar to cves.csv).
 
+    Keyed by the stable `repo_id` (rename-proof), matching cve counts.
     Used to distinguish "0 CVEs because we asked and got none" from
-    "missing because we never queried". For now we just count rows in
-    cves.csv directly — a repo absent from cves.csv but present in
-    queried.csv is a confirmed zero.
+    "missing because we never queried": a repo absent from cves.csv but
+    present in queried.csv is a confirmed zero.
     """
     out: set[str] = set()
     queried_file = DATA_DIR / "sources" / "osv" / "queried.csv"
@@ -268,9 +280,9 @@ def _load_osv_queried() -> set[str]:
         return out
     with open(queried_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
-            if slug:
-                out.add(slug)
+            rid = (row.get("repo_id") or "").strip()
+            if rid:
+                out.add(rid)
     return out
 
 
@@ -279,7 +291,7 @@ def build() -> list[dict]:
 
     per_year = _per_year_shas(COMMITS_YEARS_FILE)
 
-    # Index each long file by (repo, sha) → {metric: row}.
+    # Index each long file by (repo_id, sha) → {metric: row}.
     openssf_idx = _index_long_by_repo_sha(read_long(OPENSSF_FILE))
     depsdev_idx = _index_long_by_repo_sha(read_long(DEPSDEV_LONG_FILE))
     semgrep_idx = _index_long_by_repo_sha(
@@ -293,18 +305,22 @@ def build() -> list[dict]:
     fuzz = _load_ossfuzz()
     cve_counts = _load_cve_counts_5y()
     queried = _load_osv_queried()
-    badges = load_column_by_repo(DEPSDEV_REPOS_FILE, "bestpractices_badge_id")
+    badges = load_column_by_id(DEPSDEV_REPOS_FILE, "bestpractices_badge_id")
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
-        priority = per_year.get(repo, [])
+        # Every GitHub-identity join keys on the stable repo_id (rename-proof);
+        # only the OSS-Fuzz enrollment match below stays slug-based (its source
+        # list carries no repo_id — see _load_ossfuzz).
+        rid = str(entry.repo_id)
+        priority = per_year.get(rid, [])
 
         # OpenSSF Scorecard: local (openssf.csv) → deps.dev mirror fallback.
         ossf_score = ""
         ossf_source = ""
         ossf_checked_at = ""
-        local = _pick_latest(repo, priority, openssf_idx, openssf_shas)
+        local = _pick_latest(rid, priority, openssf_idx, openssf_shas)
         if local is not None:
             _sha, metrics = local
             score_row = metrics.get("score")
@@ -313,7 +329,7 @@ def build() -> list[dict]:
                 ossf_source = "openssf_local"
                 ossf_checked_at = (score_row.get("checked_at") or "").strip()
         if not ossf_score:
-            mirror = _pick_latest(repo, priority, depsdev_idx, depsdev_shas)
+            mirror = _pick_latest(rid, priority, depsdev_idx, depsdev_shas)
             if mirror is not None:
                 _sha, metrics = mirror
                 score_row = metrics.get("score")
@@ -326,7 +342,7 @@ def build() -> list[dict]:
 
         # Semgrep p/default findings.
         sast_total = sast_error = sast_security = ""
-        sg = _pick_latest(repo, priority, semgrep_idx, semgrep_shas)
+        sg = _pick_latest(rid, priority, semgrep_idx, semgrep_shas)
         if sg is not None:
             _sha, metrics = sg
             t = metrics.get(SEMGREP_PREFIX + "findings_total")
@@ -339,11 +355,11 @@ def build() -> list[dict]:
             if s and s.get("value", "").strip():
                 sast_security = s["value"].strip()
 
-        # CVE count: count from cves.csv if present; else 0 if we queried;
-        # else "" (unknown — never queried).
-        if repo in cve_counts:
-            cve_5y = str(cve_counts[repo])
-        elif repo in queried:
+        # CVE count (by repo_id): count from cves.csv if present; else 0 if we
+        # queried; else "" (unknown — never queried).
+        if rid in cve_counts:
+            cve_5y = str(cve_counts[rid])
+        elif rid in queried:
             cve_5y = "0"
         else:
             cve_5y = ""
@@ -354,11 +370,13 @@ def build() -> list[dict]:
             "openssf_score": ossf_score,
             "openssf_score_source": ossf_source,
             "cve_count_5y": cve_5y,
+            # OSS-Fuzz enrollment matches the external project list by slug (no
+            # repo_id in that source); `repo` is already canonical.
             "ossfuzz_enrolled": "True" if repo in fuzz else "False",
             "sast_findings_total": sast_total,
             "sast_findings_error": sast_error,
             "sast_findings_security": sast_security,
-            "bestpractices_badge_id": badges.get(repo, ""),
+            "bestpractices_badge_id": badges.get(rid, ""),
             "fetched_at": ossf_checked_at,
         })
 

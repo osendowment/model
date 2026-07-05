@@ -27,19 +27,19 @@ def test_workload_blanks_issues_when_repo_not_fetched(monkeypatch):
     import types
     from src.risk import build_workload as bw
 
-    repos = [types.SimpleNamespace(repo="o/present", repo_id="1"),
-             types.SimpleNamespace(repo="o/absent", repo_id="2")]
+    repos = [types.SimpleNamespace(repo="o/present", repo_id="o/present"),
+             types.SimpleNamespace(repo="o/absent", repo_id="o/absent")]
     issues = {
         "opened_issues": {"o/present": {y: 0 for y in bw.YEARS}},
         "closed_issues": {"o/present": {y: 0 for y in bw.YEARS}},
     }
     monkeypatch.setattr(bw, "load_top_repos", lambda: repos)
-    monkeypatch.setattr(bw, "load_rows_by_repo", lambda *a, **k: {})
+    monkeypatch.setattr(bw, "load_rows_by_id", lambda *a, **k: {})
     monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
     monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
     monkeypatch.setattr(bw, "_load_issues_long", lambda path: issues)
     # AC, loc, cve present for both so the per-AC guard stays open.
-    monkeypatch.setattr(bw, "load_column_by_repo",
+    monkeypatch.setattr(bw, "load_column_by_id",
                         lambda path, col: {"o/present": "5", "o/absent": "5"})
 
     rows = {r["repo"]: r for r in bw.build()}
@@ -70,7 +70,7 @@ def test_issue_sums_windowed_to_years(monkeypatch):
     import types
     from src.risk import build_workload as bw
 
-    repos = [types.SimpleNamespace(repo="o/r", repo_id="1")]
+    repos = [types.SimpleNamespace(repo="o/r", repo_id="o/r")]
     in_open = {y: i + 1 for i, y in enumerate(bw.YEARS)}   # 1..5 -> sum 15
     in_close = {y: 1 for y in bw.YEARS}                    # sum 5
     # Inject out-of-window years that must NOT be counted.
@@ -79,11 +79,11 @@ def test_issue_sums_windowed_to_years(monkeypatch):
         "closed_issues": {"o/r": {bw.YEARS[-1] + 1: 500, **in_close}},
     }
     monkeypatch.setattr(bw, "load_top_repos", lambda: repos)
-    monkeypatch.setattr(bw, "load_rows_by_repo", lambda *a, **k: {})
+    monkeypatch.setattr(bw, "load_rows_by_id", lambda *a, **k: {})
     monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
     monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
     monkeypatch.setattr(bw, "_load_issues_long", lambda path: issues)
-    monkeypatch.setattr(bw, "load_column_by_repo", lambda path, col: {"o/r": "5"})
+    monkeypatch.setattr(bw, "load_column_by_id", lambda path, col: {"o/r": "5"})
 
     row = {r["repo"]: r for r in bw.build()}["o/r"]
     assert row["issues_opened_5y"] == 15   # not 1015
@@ -102,7 +102,7 @@ def test_empty_nni_neutral_filled_only_when_loc_and_cve_present(monkeypatch):
     import types
     from src.risk import build_workload as bw
 
-    repos = [types.SimpleNamespace(repo=f"o/r{i}", repo_id=str(i)) for i in range(5)]
+    repos = [types.SimpleNamespace(repo=f"o/r{i}", repo_id=f"o/r{i}") for i in range(5)]
     cols = {
         "loc_eoy": {f"o/r{i}": str(100 * (i + 1)) for i in range(5)},       # all
         "cve_count_5y": {f"o/r{i}": str(i + 1) for i in range(4)},          # r0..r3
@@ -113,11 +113,11 @@ def test_empty_nni_neutral_filled_only_when_loc_and_cve_present(monkeypatch):
         "closed_issues": {f"o/r{i}": {y: 0 for y in bw.YEARS} for i in range(3)},
     }
     monkeypatch.setattr(bw, "load_top_repos", lambda: repos)
-    monkeypatch.setattr(bw, "load_rows_by_repo", lambda *a, **k: {})
+    monkeypatch.setattr(bw, "load_rows_by_id", lambda *a, **k: {})
     monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
     monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
     monkeypatch.setattr(bw, "_load_issues_long", lambda path: issues)
-    monkeypatch.setattr(bw, "load_column_by_repo", lambda path, col: cols[col])
+    monkeypatch.setattr(bw, "load_column_by_id", lambda path, col: cols[col])
 
     rows = {r["repo"]: r for r in bw.build()}
 
@@ -143,20 +143,20 @@ def test_dormant_repo_scored_with_ac_one(monkeypatch):
     import types
     from src.risk import build_workload as bw
 
-    repos = [types.SimpleNamespace(repo="o/dormant", repo_id="1"),
-             types.SimpleNamespace(repo="o/live", repo_id="2")]
+    repos = [types.SimpleNamespace(repo="o/dormant", repo_id="o/dormant"),
+             types.SimpleNamespace(repo="o/live", repo_id="o/live")]
     cols = {
         "loc_eoy": {"o/dormant": "1000", "o/live": "1000"},
         "cve_count_5y": {"o/dormant": "4", "o/live": "4"},
         "active_contributors_git_5y": {"o/dormant": "0", "o/live": "2"},
     }
     monkeypatch.setattr(bw, "load_top_repos", lambda: repos)
-    monkeypatch.setattr(bw, "load_rows_by_repo", lambda *a, **k: {})
+    monkeypatch.setattr(bw, "load_rows_by_id", lambda *a, **k: {})
     monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
     monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
     monkeypatch.setattr(bw, "_load_issues_long",
                         lambda path: {"opened_issues": {}, "closed_issues": {}})
-    monkeypatch.setattr(bw, "load_column_by_repo", lambda path, col: cols[col])
+    monkeypatch.setattr(bw, "load_column_by_id", lambda path, col: cols[col])
 
     rows = {r["repo"]: r for r in bw.build()}
 

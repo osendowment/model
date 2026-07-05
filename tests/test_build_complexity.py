@@ -18,7 +18,8 @@ def test_scoreercentile_columns():
 
 def test_per_year_shas_keeps_prewindow_dated_fallback(tmp_path):
     """A dormant repo's pre-window dated snapshot (e.g. 2020) survives — it is
-    NOT clamped to the settings window — and HEAD is bucketed as year 0.
+    NOT clamped to the settings window — and HEAD is bucketed as year 0. The
+    index is keyed on the stable `repo_id`, not the (rename-prone) repo name.
 
     Regression for the dated-fallback rule: resolve_head records a dormant
     repo's snapshot under its real commit year so the complexity walk has an
@@ -31,15 +32,15 @@ def test_per_year_shas_keeps_prewindow_dated_fallback(tmp_path):
     p = Path(tmp_path) / "commits-years.csv"
     with open(p, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=[
-            "repo", "year", "first_sha", "last_sha", "commits", "fetched_at"])
+            "repo", "repo_id", "year", "first_sha", "last_sha", "commits", "fetched_at"])
         w.writeheader()
-        w.writerow({"repo": "dorm/repo", "year": "2020", "last_sha": "deadbeef", "commits": "1"})
-        w.writerow({"repo": "dorm/repo", "year": "HEAD", "last_sha": "deadbeef", "commits": "1"})
-        w.writerow({"repo": "act/repo", "year": "2025", "last_sha": "cafe", "commits": "40"})
+        w.writerow({"repo": "dorm/repo", "repo_id": "111", "year": "2020", "last_sha": "deadbeef", "commits": "1"})
+        w.writerow({"repo": "dorm/repo", "repo_id": "111", "year": "HEAD", "last_sha": "deadbeef", "commits": "1"})
+        w.writerow({"repo": "act/repo", "repo_id": "222", "year": "2025", "last_sha": "cafe", "commits": "40"})
 
     out = _per_year_shas(p)
-    assert out["dorm/repo"][2020] == "deadbeef"   # pre-window year kept
-    assert out["dorm/repo"][0] == "deadbeef"      # HEAD bucketed as year 0
+    assert out["111"][2020] == "deadbeef"   # pre-window year kept (keyed by repo_id)
+    assert out["111"][0] == "deadbeef"      # HEAD bucketed as year 0
     # walk order: real year sorts ahead of the HEAD pseudo-row (0)
-    assert sorted(out["dorm/repo"], reverse=True)[0] == 2020
-    assert out["act/repo"][2025] == "cafe"
+    assert sorted(out["111"], reverse=True)[0] == 2020
+    assert out["222"][2025] == "cafe"

@@ -73,7 +73,7 @@ from rich.table import Table
 from src.common.params import LAST_COMPLETE_YEAR, YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_top_repos
-from src.common.tables import load_column_by_repo, load_rows_by_repo
+from src.common.tables import load_column_by_id, load_rows_by_id
 
 console = Console()
 
@@ -116,7 +116,7 @@ def _load_commits_years() -> dict[str, dict[int, int]]:
         return out
     with open(COMMITS_YEARS_FILE, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
+            slug = (row.get("repo_id") or "").strip()   # join on stable id, not name
             if not slug:
                 continue
             try:
@@ -134,7 +134,7 @@ def _load_openssf_maintained() -> dict[str, str]:
         return out
     with open(OPENSSF_CHECKS_FILE, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
+            slug = (row.get("repo_id") or "").strip()   # join on stable id, not name
             if not slug:
                 continue
             v = (row.get("Maintained") or "").strip()
@@ -157,7 +157,7 @@ def _load_issues_long(path: Path) -> dict[str, dict[str, dict[int, int]]]:
         return out
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            slug = (row.get("repo") or "").strip().lower()
+            slug = (row.get("repo_id") or "").strip()   # join on stable id, not name
             metric = (row.get("metric") or "").strip()
             year_s = (row.get("year") or "").strip()
             value = (row.get("value") or "").strip()
@@ -223,7 +223,8 @@ def _repo_age_years(created_at_iso: str) -> str:
 def build() -> list[dict]:
     eligible = load_top_repos()
 
-    repos = load_rows_by_repo(REPOS_FILE)
+    # All these join on the stable repo_id (below), so a rename never drops data.
+    repos = load_rows_by_id(REPOS_FILE)
     commits_years = _load_commits_years()
     maintained = _load_openssf_maintained()
     issues = _load_issues_long(ISSUES_FILE)
@@ -231,14 +232,15 @@ def build() -> list[dict]:
     closed = issues["closed_issues"]
 
     # Cross-dimension inputs for the workload class.
-    loc_by_repo = load_column_by_repo(COMPLEXITY_FILE, "loc_eoy")
-    cve_by_repo = load_column_by_repo(SECURITY_FILE, "cve_count_5y")
-    ac_by_repo = load_column_by_repo(CONCENTRATION_FILE, "active_contributors_git_5y")
+    loc_by_repo = load_column_by_id(COMPLEXITY_FILE, "loc_eoy")
+    cve_by_repo = load_column_by_id(SECURITY_FILE, "cve_count_5y")
+    ac_by_repo = load_column_by_id(CONCENTRATION_FILE, "active_contributors_git_5y")
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
-        meta = repos.get(repo, {})
+        rid = str(entry.repo_id)
+        meta = repos.get(rid, {})
 
         # Age
         created_at = (meta.get("created_at") or "").strip()
@@ -249,20 +251,20 @@ def build() -> list[dict]:
         has_issues = hi_raw if hi_raw else ""
 
         # Push cadence: years with ≥1 commit in 2021-2025
-        cy = commits_years.get(repo, {})
+        cy = commits_years.get(rid, {})
         cadence = sum(1 for y in YEARS if cy.get(y, 0) > 0) if cy else ""
         cadence_val = str(cadence) if cadence != "" else ""
 
         # OpenSSF maintained
-        openssf_maintained = maintained.get(repo, "")
+        openssf_maintained = maintained.get(rid, "")
 
         # Issues. A repo present in issues.csv (even with all-zero counts) was
         # genuinely fetched — a real 0. A repo absent from issues.csv was never
         # fetched: every issue figure must stay blank, never 0, so a fetch gap
         # can't masquerade as "zero issues" and skew the per-AC percentiles.
-        op = opened.get(repo, {})
-        cl = closed.get(repo, {})
-        issues_fetched = (repo in opened) or (repo in closed)
+        op = opened.get(rid, {})
+        cl = closed.get(rid, {})
+        issues_fetched = (rid in opened) or (rid in closed)
         if issues_fetched:
             # Window every issue figure to YEARS. _load_issues_long can carry
             # year keys outside the settings window (e.g. a wider `--years`
@@ -287,10 +289,10 @@ def build() -> list[dict]:
             op_5y = cl_5y = net_new_issues = ""
             ratio = trend_score = slope_opened_out = slope_closed_out = ""
 
-        ac_raw = ac_by_repo.get(repo, "")
+        ac_raw = ac_by_repo.get(rid, "")
         ac_f = _num(ac_raw)
-        loc_f = _num(loc_by_repo.get(repo, ""))
-        cve_f = _num(cve_by_repo.get(repo, ""))
+        loc_f = _num(loc_by_repo.get(rid, ""))
+        cve_f = _num(cve_by_repo.get(rid, ""))
         # A repo with zero active contributors in the window (dormant / bot-only)
         # has no real maintainer to divide the burden across; rather than leave
         # it unscored, attribute the whole burden to a single notional maintainer

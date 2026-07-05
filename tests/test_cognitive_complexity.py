@@ -273,8 +273,8 @@ def test_build_complexity_reads_cognitive_from_lizard(tmp_path, monkeypatch):
 
     sha = "a" * 40
     (tmp_path / "commits-years.csv").write_text(
-        "repo,year,commits,last_sha\n"
-        f"foo/bar,2025,120,{sha}\n"
+        "repo,repo_id,year,commits,last_sha\n"
+        f"foo/bar,1,2025,120,{sha}\n"
     )
     (tmp_path / "scc.csv").write_text(
         "repo,repo_id,commit_sha,metric,value,checked_at\n"

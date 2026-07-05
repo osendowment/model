@@ -1,4 +1,55 @@
-"""Tests for src/risk/build_security.py — security percentile logic."""
+"""Tests for src/risk/build_security.py — security percentile logic + joins."""
+
+from dataclasses import dataclass
+
+
+@dataclass
+class E:
+    """Minimal RepoEntry stand-in. Defaults repo_id to the slug so id-keyed
+    source mocks (keyed by name) match when a test doesn't care about renames."""
+    repo: str
+    repo_id: str = ""
+    value_class: str = "A"
+
+    def __post_init__(self):
+        if not self.repo_id:
+            self.repo_id = self.repo
+
+
+def test_build_recovers_renamed_repo_by_repo_id(monkeypatch):
+    """A repo renamed since collection (facebook/react → react/react) still joins
+    its security data: every GitHub-identity join keys on the stable repo_id, not
+    the (now-stale) name under which the data was fetched. Under the old
+    name-keyed joins this row would come back blank."""
+    from src.risk import build_security as bs
+
+    sha = "deadbeef"
+    # Long rows were fetched under the OLD name but carry the stable repo_id.
+    openssf_rows = {
+        ("facebook/react", sha, "score"): {
+            "repo": "facebook/react", "repo_id": "10270250",
+            "commit_sha": sha, "metric": "score", "value": "7",
+            "checked_at": "2026-05-03T20:00:58+01:00",
+        },
+    }
+
+    def fake_read_long(path, *a, **k):
+        return openssf_rows if "openssf" in str(path) else {}
+
+    monkeypatch.setattr(bs, "load_top_repos",
+                        lambda: [E("react/react", "10270250")])
+    monkeypatch.setattr(bs, "_per_year_shas", lambda f: {})   # force sha fallback
+    monkeypatch.setattr(bs, "read_long", fake_read_long)
+    monkeypatch.setattr(bs, "_load_ossfuzz", lambda: set())
+    monkeypatch.setattr(bs, "_load_cve_counts_5y", lambda: {"10270250": 3})
+    monkeypatch.setattr(bs, "_load_osv_queried", lambda: {"10270250"})
+    monkeypatch.setattr(bs, "load_column_by_id", lambda p, c: {"10270250": "gold"})
+
+    row = {r["repo"]: r for r in bs.build()}["react/react"]
+    assert row["openssf_score"] == "7"              # scorecard recovered by repo_id
+    assert row["openssf_score_source"] == "openssf_local"
+    assert row["cve_count_5y"] == "3"               # CVE join by repo_id
+    assert row["bestpractices_badge_id"] == "gold"  # badge join by repo_id
 
 
 def test_security_score_uses_neutral_cve_anchor():

@@ -61,11 +61,11 @@ def _scores_by_repo(path: Path) -> dict[str, int]:
         return out
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            repo = (row.get("repo") or "").strip().lower()
+            rid = (row.get("repo_id") or "").strip()  # join on stable id, not name
             s = (row.get("score") or "").strip()
-            if repo and s:
+            if rid and s:
                 try:
-                    out[repo] = int(float(s))
+                    out[rid] = int(float(s))
                 except ValueError:
                     continue
     return out
@@ -79,9 +79,9 @@ def _funding_flags(funding_csv: Path) -> dict[str, dict[str, str]]:
         return out
     with open(funding_csv, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            repo = (row.get("repo") or "").strip().lower()
-            if repo:
-                out[repo] = {
+            rid = (row.get("repo_id") or "").strip()  # join on stable id, not name
+            if rid:
+                out[rid] = {
                     "intent": (row.get("intent") or "").strip() or "False",
                     "nonprofit": (row.get("nonprofit") or "").strip() or "True",
                 }
@@ -105,11 +105,12 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
         repo = entry.repo
         if sample is not None and repo not in sample:
             continue
+        rid = str(entry.repo_id)
         row = {"repo": repo, "repo_id": entry.repo_id}
         present: list[int] = []
         complete = True
         for name, scores in by_component.items():
-            s = scores.get(repo)
+            s = scores.get(rid)
             row[name] = "" if s is None else s
             if s is None:
                 complete = False
@@ -117,7 +118,7 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
                 present.append(s)
         # Completeness rule: only score a repo whose every dimension is present.
         row["score"] = overall_score(present) if complete else ""
-        f = flags.get(repo.lower(), {})
+        f = flags.get(rid, {})
         row["intent"] = f.get("intent", "False")
         row["nonprofit"] = f.get("nonprofit", "True")
         rows.append(row)
