@@ -282,9 +282,9 @@ def check_long_format_keys() -> list[Result]:
 
 
 def check_value_criticality() -> list[Result]:
-    """Every valid class-A GitHub row in value.csv carries a criticality score.
+    """Every valid class-A GitHub row in value.csv carries an openssf_crit score.
 
-    The `criticality` column is filled by `src.value.apply_criticality` from
+    The `openssf_crit` column is filled by `src.value.apply_criticality` from
     the OpenSSF criticality fetch, whose scope is exactly this set (archived
     included) — so a blank is a missing/failed fetch or a skipped apply step,
     never "not applicable".
@@ -295,12 +295,12 @@ def check_value_criticality() -> list[Result]:
             if (r.get("platform") or "").lower() == "github"
             and (r.get("git_valid") or "") == "True"
             and (r.get("class") or "") == "A"]
-    blank = [r["repo"] for r in gate if not (r.get("criticality") or "").strip()]
+    blank = [r["repo"] for r in gate if not (r.get("openssf_crit") or "").strip()]
     if blank:
         sample = ", ".join(blank[:3]) + ("…" if len(blank) > 3 else "")
-        return [("value.csv:criticality", False,
+        return [("value.csv:openssf_crit", False,
                  f"{len(gate) - len(blank)}/{len(gate)} — {len(blank)} blank: {sample}")]
-    return [("value.csv:criticality", True,
+    return [("value.csv:openssf_crit", True,
              f"{len(gate)}/{len(gate)} valid class-A github rows scored")]
 
 

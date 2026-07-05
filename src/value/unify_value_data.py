@@ -13,7 +13,8 @@ key for orphans), and writes `data/value/value.csv` with **one row per repo**:
 
     repo, platform, repo_id, git_url, mirror_url, git_valid,
     ecosystems, packages, top_eco, top_eco_pkg,
-    top_eco_pct, class, class_npm, class_pypi, class_crates, class_cpp
+    top_eco_pct, class, class_npm, class_pypi, class_crates, class_cpp,
+    openssf_crit, score
 
 Repo identity is a `(platform, repo, repo_id)` triple, all derived from the
 canonical `git_url`:
@@ -100,11 +101,12 @@ FIELDS = (
      "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
-    # `criticality` (OpenSSF criticality score, 0-1) is not computed here —
-    # `src.value.apply_criticality` fills it as a later pipeline step, and the
-    # rewriters in between (verify_git_urls, build_validation) round-trip it.
-    # It is in FIELDS so write_value_data never drops it.
-    + ["criticality"]
+    # `openssf_crit` (OpenSSF criticality score, 0-1) and `score` (the 0-100
+    # value blend, 0.8*openssf_crit*100 + 0.2*top_eco_pct) are not computed
+    # here — `src.value.apply_criticality` fills both as a later pipeline step,
+    # and the rewriters in between (verify_git_urls, build_validation) round-trip
+    # them. They are in FIELDS so write_value_data never drops them.
+    + ["openssf_crit", "score"]
 )
 
 # Internal scratch keys carried on each aggregate dict during computation.
