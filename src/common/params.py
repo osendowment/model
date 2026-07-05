@@ -66,6 +66,10 @@ CONCENTRATION_WINDOW_YEARS: int = _P["concentration"]["window_years"]
 # factor (fewest contributors whose combined commits reach this fraction).
 BUS_FACTOR_THRESHOLD: float = _P["concentration"]["bus_factor_threshold"]
 
+# Key-contributor threshold for data/preview/people.csv — independently
+# tunable from BUS_FACTOR_THRESHOLD (used by risk/eligibility scoring).
+KEY_CONTRIBUTORS_CUM_SHARE: float = _P["key_contributors"]["cum_share"]
+
 
 _STATS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "value", "stats.csv")
 
