@@ -57,7 +57,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.common.repos import load_repo_ids, load_top_slugs
+from src.common.repos import VALUE_FILE, load_repo_ids, load_top_slugs
 from src.sources.openssf.scorecard import _github_tokens
 
 log = logging.getLogger(__name__)
@@ -167,6 +167,78 @@ def load_existing(path: Path) -> dict[str, dict]:
             if repo:
                 out[repo] = row
     return out
+
+
+def _value_repo_ids(value_file: str = VALUE_FILE) -> dict[str, str]:
+    """{repo slug -> bare GitHub id} from value.csv (`gh/<id>` stripped).
+
+    Fallback for `load_repo_ids` (github/repos.csv): a freshly renamed repo
+    (facebook/react -> react/react) reaches value.csv under its new canonical
+    slug before github/repos.csv catches up, so repos.csv alone leaves the
+    new slug unresolvable and the fetched row lands with an empty repo_id.
+    """
+    out: dict[str, str] = {}
+    if not os.path.exists(value_file):
+        return out
+    with open(value_file, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            if (row.get("platform") or "").strip().lower() != "github":
+                continue
+            slug = (row.get("repo") or "").strip().lower()
+            rid = (row.get("repo_id") or "").strip().removeprefix("gh/")
+            if slug and rid:
+                out.setdefault(slug, rid)
+    return out
+
+
+def _repo_id_map() -> dict[str, str]:
+    """Slug -> bare GitHub id: github/repos.csv first, value.csv as fallback."""
+    ids = load_repo_ids()
+    for slug, rid in _value_repo_ids().items():
+        ids.setdefault(slug, rid)
+    return ids
+
+
+def _heal_rows(rows: dict[str, dict], repo_ids: dict[str, str],
+               scope: set[str]) -> int:
+    """Idempotent repair of previously-written rows; runs on every invocation.
+
+    1. Backfill an empty `repo_id` where the slug has become resolvable.
+    2. Drop rows superseded by a same-repo_id row under another slug — a
+       rename leaves the old-slug row behind (facebook/react error next to
+       react/react ok). Keeper preference: slug in the current scope, then
+       status=ok, then newest checked_at.
+
+    Returns the number of rows changed or dropped (0 = nothing to heal).
+    """
+    healed = 0
+    for slug, row in rows.items():
+        if not (row.get("repo_id") or "").strip():
+            rid = repo_ids.get(slug, "")
+            if rid:
+                row["repo_id"] = rid
+                healed += 1
+
+    by_id: dict[str, list[str]] = {}
+    for slug, row in rows.items():
+        rid = (row.get("repo_id") or "").strip()
+        if rid:
+            by_id.setdefault(rid, []).append(slug)
+    for rid, slugs in by_id.items():
+        if len(slugs) < 2:
+            continue
+        keeper = max(slugs, key=lambda s: (
+            s in scope,
+            (rows[s].get("status") or "") == "ok",
+            rows[s].get("checked_at") or "",
+        ))
+        for s in slugs:
+            if s != keeper:
+                log.info("dropping stale duplicate %s (repo_id %s kept as %s)",
+                         s, rid, keeper)
+                del rows[s]
+                healed += 1
+    return healed
 
 
 def _classify_failure(stderr: str, timed_out: bool) -> tuple[str, bool]:
@@ -386,6 +458,13 @@ def main() -> None:
         raise SystemExit("No repos — pass slugs or populate data/value/value.csv")
 
     existing = load_existing(OUTPUT_FILE)
+    repo_ids = _repo_id_map()
+    healed = _heal_rows(existing, repo_ids, set(scope))
+    if healed:
+        write_csv(OUTPUT_FILE, existing)
+        console.print(f"[yellow]Healed {healed} stale row(s) "
+                      f"(repo_id backfill / rename dedupe) → rewrote file[/yellow]")
+
     if args.force:
         todo = list(scope)
     else:
@@ -403,7 +482,6 @@ def main() -> None:
         return
 
     token_str = ",".join(_github_tokens())
-    repo_ids = load_repo_ids()
     rows = dict(existing)
 
     done = 0
