@@ -33,7 +33,8 @@ Install the binary once:
     go install github.com/ossf/criticality_score/v2/cmd/criticality_score@latest
 
 Usage:
-    # All top repos (valid class-A from data/value/value.csv); TTL-skips fresh rows
+    # All top repos (valid class-A from data/value/value.csv, archived
+    # included); TTL-skips fresh rows
     uv run python -m src.sources.openssf.criticality
 
     # Specific repos
@@ -452,7 +453,11 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     args = build_parser().parse_args()
 
-    scope = [r.lower() for r in (args.repos or load_top_slugs())]
+    # Archived repos are IN scope (skip_archived=False): value.csv's
+    # `criticality` column must be non-empty for every valid class-A GitHub
+    # repo, archived included — the tool scores archived repos fine.
+    scope = [r.lower()
+             for r in (args.repos or load_top_slugs(skip_archived=False))]
     scope = list(dict.fromkeys(scope))  # dedupe, preserve order
     if not scope:
         raise SystemExit("No repos — pass slugs or populate data/value/value.csv")

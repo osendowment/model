@@ -27,6 +27,7 @@ STEPS = [
     Step("unify",      "src.value.unify_value_data"),
     Step("verify",     "src.value.verify_git_urls"),
     Step("validation", "src.value.build_validation"),
+    Step("criticality", "src.value.apply_criticality"),
     Step("eco-audit",  "src.value.audit_ecosystems"),
 ]
 
@@ -41,7 +42,8 @@ STEPS = [
 #   eco-resolve — rewrite results.csv git/github_repo: override > eco > prior
 #   eco-audit   — read-only diff of the result against value.csv
 # All three need only results.csv / packages.csv / overrides.csv — no native raw.
-ROLLUP_LABELS = ("eco-fetch", "eco-resolve", "unify", "verify", "validation", "eco-audit")
+ROLLUP_LABELS = ("eco-fetch", "eco-resolve", "unify", "verify", "validation",
+                 "criticality", "eco-audit")
 
 
 def main() -> int:

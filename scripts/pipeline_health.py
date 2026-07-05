@@ -281,8 +281,32 @@ def check_long_format_keys() -> list[Result]:
     return out
 
 
+def check_value_criticality() -> list[Result]:
+    """Every valid class-A GitHub row in value.csv carries a criticality score.
+
+    The `criticality` column is filled by `src.value.apply_criticality` from
+    the OpenSSF criticality fetch, whose scope is exactly this set (archived
+    included) — so a blank is a missing/failed fetch or a skipped apply step,
+    never "not applicable".
+    """
+    disk = list(csv.DictReader(open(ROOT / "data" / "value" / "value.csv",
+                                    encoding="utf-8")))
+    gate = [r for r in disk
+            if (r.get("platform") or "").lower() == "github"
+            and (r.get("valid") or "") == "True"
+            and (r.get("class") or "") == "A"]
+    blank = [r["repo"] for r in gate if not (r.get("criticality") or "").strip()]
+    if blank:
+        sample = ", ".join(blank[:3]) + ("…" if len(blank) > 3 else "")
+        return [("value.csv:criticality", False,
+                 f"{len(gate) - len(blank)}/{len(gate)} — {len(blank)} blank: {sample}")]
+    return [("value.csv:criticality", True,
+             f"{len(gate)}/{len(gate)} valid class-A github rows scored")]
+
+
 CHECKS = [check_dimension_csvs, check_risk_data, check_eligibility_data,
-          check_value_data, check_score_component_coverage,
+          check_value_data, check_value_criticality,
+          check_score_component_coverage,
           check_score_input_completeness, check_long_format_keys]
 
 
