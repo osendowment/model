@@ -158,3 +158,41 @@ async def _fetch_project(limiter, session, item: dict) -> tuple[str, dict | None
                 return key, None, f"http_{resp.status}"
         await asyncio.sleep(2 ** attempt)
     return key, None, "error"
+
+
+def _flat_namespace(d: dict, host: str, ns_key: str) -> dict:
+    """Flatten a namespace object to a row."""
+    return {
+        "namespace": ns_key,
+        "namespace_id": d.get("id", ""),
+        "host": host,
+        "kind": d.get("kind", ""),
+        "name": d.get("name", ""),
+        "path": d.get("path", ""),
+        "full_path": d.get("full_path", ""),
+        "web_url": d.get("web_url", ""),
+        "description": (d.get("description") or "")[:500],
+        "fetched_at": _now_iso(),
+    }
+
+
+async def _fetch_namespace(limiter, session, item: dict) -> tuple[str, dict | None, str]:
+    """Return (namespace_key, row|None, status). 200→ok; 404→None; other/transient handled."""
+    host, full_path, key = item["host"], item["full_path"], item["namespace"]
+    url = f"{api_base(host)}/namespaces/{encode_project_path(full_path)}"
+    for attempt in range(4):
+        try:
+            resp = await limiter.get(session, host, url)
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            await asyncio.sleep(2 ** attempt)
+            continue
+        async with resp:
+            if resp.status == 200:
+                return key, _flat_namespace(await resp.json(), host, key), "ok"
+            if resp.status == 404:
+                return key, None, "404"
+            if resp.status == 429:
+                await asyncio.sleep(2)
+                continue
+            return key, None, f"http_{resp.status}"
+    return key, None, "error"

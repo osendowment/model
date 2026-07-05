@@ -123,3 +123,38 @@ class TestLoadGitlabRows:
         assert keys == ["gitlab.com/group/sub/proj", "salsa.debian.org/debian/foo"]
         foo = next(r for r in rows if r["host"] == "salsa.debian.org")
         assert foo["path"] == "debian/foo"
+
+
+def _ns_body(nid, full_path, kind="group"):
+    return {"id": nid, "name": full_path.split("/")[-1], "path": full_path.split("/")[-1],
+            "full_path": full_path, "kind": kind,
+            "web_url": f"https://gitlab.com/{full_path}", "description": "d"}
+
+
+class TestNamespace:
+    def test_flat_namespace(self):
+        from src.sources.gitlab.fetch_project_data import _flat_namespace
+        row = _flat_namespace(_ns_body(5, "debian"), "salsa.debian.org",
+                              "salsa.debian.org/debian")
+        assert row["namespace"] == "salsa.debian.org/debian"
+        assert row["namespace_id"] == 5
+        assert row["kind"] == "group"
+        assert row["host"] == "salsa.debian.org"
+
+    async def test_fetch_namespace_200(self):
+        from src.sources.gitlab.fetch_project_data import _fetch_namespace
+        item = {"host": "salsa.debian.org", "full_path": "debian",
+                "namespace": "salsa.debian.org/debian"}
+        lim = FakeLimiter([FakeResponse(200, json_body=_ns_body(5, "debian"))])
+        key, row, status = await _fetch_namespace(lim, None, item)
+        assert status == "ok"
+        assert row["namespace_id"] == 5
+
+    async def test_fetch_namespace_404(self):
+        from src.sources.gitlab.fetch_project_data import _fetch_namespace
+        item = {"host": "gitlab.com", "full_path": "gone",
+                "namespace": "gitlab.com/gone"}
+        lim = FakeLimiter([FakeResponse(404)])
+        key, row, status = await _fetch_namespace(lim, None, item)
+        assert status == "404"
+        assert row is None
