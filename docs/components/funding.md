@@ -49,7 +49,8 @@ Funding  → data/risk/funding.csv  (one row per class-A risk repo)
 │   ├── owner, owner_type     ← owning-entity domain (e.g. meta.com), from overrides.csv               [most recent]
 │   └── host_score           ← derived: combined backing, most-funded of host/owner (0 · 0.5 · 1)     [most recent]
 │
-├── channels_count           ← derived (funding-link platforms ∪ funding.json channels ∪ org channels, deduped)  [most recent]
+├── paypal                    ← curated PayPal.me URL from overrides.csv (declared channel: feeds intent + channels_count, caps score)  [curated]
+├── channels_count           ← derived (funding-link platforms ∪ funding.json channels ∪ org channels ∪ paypal, deduped)  [most recent]
 ├── gh_stars, gh_forks        ← GitHub /repos (informational, not scored)                             [most recent]
 │
 ├── score  (funding-risk score)  ← derived (geom-mean of gh_sponsorships_p, oc_avg_funding_p, host_score×100; int 1–100)  [most recent]
@@ -98,7 +99,7 @@ Five sources feed the build. Each fetcher records a `*_status` and/or
 | `floss-fund/funding-json.csv` | `src/sources/floss_fund/funding_json.py` | FLOSS Fund manifest directory | `id` |
 | `opencollective/budgets.csv` | `src/sources/opencollective/fetch_budgets.py` | OC gross annual budgets | `slug` |
 | `funding/host-by-repo.csv` | foundations scrapers (`src/sources/funding/`) | scraped FOSS-foundation host | `repo` |
-| `funding/overrides.csv` | curated | per-repo `host`/`owner` **domains** + types (company/nonprofit); schema `repo,host,host_type,gh_user,owner,owner_type` | `repo` |
+| `funding/overrides.csv` | curated | per-repo `host`/`owner` **domains** + types (company/nonprofit), a curated `oc_slug`, and a curated `paypal` PayPal.me URL; schema `repo,host,host_type,gh_user,owner,owner_type,oc_slug,paypal` | `repo` |
 
 `gh_stars` / `gh_forks` are read from `data/sources/github/repos.csv` (GitHub
 `/repos`) and carried as informational columns — they are **not** scored.
@@ -248,7 +249,8 @@ in each source file.
 | `funding_link_platforms` | declared platform keys (comma-sep) |
 | `has_funding_json` | repo registered in the FLOSS Fund directory (incl. redirect-resolved URL) |
 | `org_fundable` | repo's **owner** has an org-level FLOSS manifest — counts as a funding channel (caps `score` at 79) |
-| `channels_count` | distinct funding platforms (links ∪ funding.json ∪ org-level) |
+| `paypal` | curated PayPal.me URL from `overrides.csv` — a declared channel (feeds `intent` + `channels_count`, caps `score` at 79); empty when none |
+| `channels_count` | distinct funding platforms (links ∪ funding.json ∪ org-level ∪ paypal) |
 | `oc_avg_funding` | mean OC gross annual budget (`0` if none) |
 | `oc_avg_funding_p` | risk percentile of `oc_avg_funding` |
 | `host` | legally-connected steward **domain** (e.g. `apache`, `react.foundation`) or empty |
@@ -277,8 +279,9 @@ signals and joins them into `risk.csv`:
 **`intent`** (`bool`, default `false`) — `true` when the repo shows at least
 one funding signal: GitHub Sponsors (inbound or outbound), a `.github/FUNDING.yml`,
 a `funding.json` (FLOSS Fund), an npm `funding` field, a PyPI project-URLs
-funding entry, an Open Collective slug, or an institutional host or owner.
-"Intent" means the project is actively seeking or accepting support.
+funding entry, an Open Collective slug, a curated `paypal` PayPal.me handle, or
+an institutional host or owner. "Intent" means the project is actively seeking
+or accepting support.
 
 **`nonprofit`** (`bool`, default `true`) — `false` only when a corporate entity
 (Meta, Google, Microsoft, AWS, …) is the project's host or owner, as determined by
