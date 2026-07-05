@@ -34,6 +34,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.sources.github.key_contributors import load_key_contributors
 from src.sources.github.models import is_bot
 
 log = logging.getLogger(__name__)
@@ -171,3 +172,101 @@ def _finalize_row(person: dict) -> dict[str, str]:
     row["repo_count"] = str(len(role_repo_ids))
     row["has_sponsors_listing"] = person["has_sponsors_listing"]
     return row
+
+
+def _target_repo_ids(results_rows: list[dict]) -> set[str]:
+    return {(r.get("repo_id") or "").strip() for r in results_rows
+            if (r.get("repo_id") or "").strip()}
+
+
+def _users_by_login(users_rows: list[dict]) -> dict[str, dict]:
+    return {(r.get("login") or "").strip().lower(): r for r in users_rows
+            if (r.get("login") or "").strip()}
+
+
+def _org_logins(repos_rows: list[dict]) -> set[str]:
+    """Every login known to be a GitHub Organization (any repo in repos.csv,
+    not just the target scope — an org doesn't stop being an org outside it)."""
+    return {(r.get("owner_login") or "").strip().lower() for r in repos_rows
+            if (r.get("owner_type") or "").strip() == "Organization"
+            and (r.get("owner_login") or "").strip()}
+
+
+def _owner_pairs(repos_rows: list[dict], target_repo_ids: set[str]) -> list[tuple[str, str]]:
+    """[(owner_login, repo_id), ...] for User-type owners of target repos.
+    Organization-owned repos are skipped entirely — not a person."""
+    out = []
+    for row in repos_rows:
+        repo_id = (row.get("repo_id") or "").strip()
+        if repo_id not in target_repo_ids:
+            continue
+        if (row.get("owner_type") or "").strip() != "User":
+            continue
+        login = (row.get("owner_login") or "").strip()
+        if login:
+            out.append((login, repo_id))
+    return out
+
+
+def _key_contributor_pairs(
+    target_repo_ids: set[str], cum_share: float,
+) -> list[tuple[str, str]]:
+    """[(login, repo_id), ...] from the key-contributor lookup (Task 1),
+    using an independently configurable cum_share."""
+    by_repo = load_key_contributors(cum_share)
+    return [(login, repo_id) for repo_id, logins in by_repo.items()
+            if repo_id in target_repo_ids for login in logins]
+
+
+def _funding_yml_pairs(
+    funding_yml_rows: list[dict], target_repo_ids: set[str], org_logins: set[str],
+) -> list[tuple[str, str]]:
+    """[(login, repo_id), ...] from FUNDING.yml's `github` column, dropping
+    any name that resolves to a known Organization (FUNDING.yml sometimes
+    names an org, and this role is for people)."""
+    out = []
+    for row in funding_yml_rows:
+        repo_id = (row.get("repo_id") or "").strip()
+        if repo_id not in target_repo_ids:
+            continue
+        names = [n.strip() for n in (row.get("github") or "").split(",") if n.strip()]
+        for login in names:
+            if login.lower() in org_logins:
+                continue
+            out.append((login, repo_id))
+    return out
+
+
+def _ecosystem_maintainer_rows(
+    maintainer_rows: list[dict], target_repo_ids: set[str],
+) -> list[dict]:
+    return [r for r in maintainer_rows
+            if (r.get("repo_id") or "").strip() in target_repo_ids]
+
+
+def _apply_curated_overrides(people: dict[str, dict], overrides_rows: list[dict]) -> None:
+    """Tag an existing GitHub-platform row with its curated reason.
+
+    Not repo-scoped (maintainer-overrides.csv has no repo_id), so this only
+    annotates a person who already surfaced via another role — it never
+    creates a new row.
+    """
+    reasons_by_login = {(r.get("login") or "").strip().lower(): (r.get("reason") or "").strip()
+                        for r in overrides_rows if (r.get("login") or "").strip()}
+    for person in people.values():
+        if person["platform"] != "github":
+            continue
+        reason = reasons_by_login.get(person["login"].lower())
+        if reason:
+            person["curated_override_reason"] = reason
+
+
+def _sponsors_by_login(maintainer_sponsors_rows: list[dict]) -> dict[str, str]:
+    return {(r.get("login") or "").strip().lower():
+            (r.get("has_sponsors_listing") or "").strip()
+            for r in maintainer_sponsors_rows if (r.get("login") or "").strip()}
+
+
+def _owner_sponsors_by_repo(sponsors_rows: list[dict]) -> dict[str, str]:
+    return {(r.get("repo_id") or "").strip(): (r.get("gh_sponsors_enabled") or "").strip()
+            for r in sponsors_rows if (r.get("repo_id") or "").strip()}

@@ -64,3 +64,57 @@ def test_finalize_row_unions_role_columns_into_repo_ids():
     assert row["key_contributor_repo_ids"] == "gh/2"
     assert row["emails"] == "a@example.com"
     assert list(row.keys()) == bp.FIELDS
+
+
+def test_target_repo_ids_reads_repo_id_column():
+    rows = [{"repo_id": "gh/1", "repo": "a/a"}, {"repo_id": "gh/2", "repo": "b/b"}]
+    assert bp._target_repo_ids(rows) == {"gh/1", "gh/2"}
+
+
+def test_owner_pairs_filters_scope_and_org_owners():
+    repos_rows = [
+        {"repo_id": "gh/1", "owner_type": "User", "owner_login": "alice"},
+        {"repo_id": "gh/2", "owner_type": "Organization", "owner_login": "acme"},
+        {"repo_id": "gh/3", "owner_type": "User", "owner_login": "bob"},  # out of scope
+    ]
+    pairs = bp._owner_pairs(repos_rows, {"gh/1", "gh/2"})
+    assert pairs == [("alice", "gh/1")]  # org owner and out-of-scope repo excluded
+
+
+def test_org_logins_collects_every_organization_owner():
+    repos_rows = [
+        {"owner_type": "Organization", "owner_login": "Acme"},
+        {"owner_type": "User", "owner_login": "alice"},
+    ]
+    assert bp._org_logins(repos_rows) == {"acme"}
+
+
+def test_funding_yml_pairs_splits_and_drops_org_logins():
+    rows = [{"repo_id": "gh/1", "github": "alice, acme, bob"}]
+    pairs = bp._funding_yml_pairs(rows, {"gh/1"}, org_logins={"acme"})
+    assert pairs == [("alice", "gh/1"), ("bob", "gh/1")]
+
+
+def test_ecosystem_maintainer_rows_filters_to_target_scope():
+    rows = [{"repo_id": "gh/1", "login": "a"}, {"repo_id": "gh/9", "login": "b"}]
+    assert bp._ecosystem_maintainer_rows(rows, {"gh/1"}) == [{"repo_id": "gh/1", "login": "a"}]
+
+
+def test_apply_curated_overrides_tags_existing_github_row_only():
+    people = {"github/1": bp._new_person("github/1", "github", "hartwork", "1"),
+              "npm/x": bp._new_person("npm/x", "npm", "hartwork", "x")}
+    bp._apply_curated_overrides(people, [{"login": "hartwork", "reason": "FSFE profile"}])
+    assert people["github/1"]["curated_override_reason"] == "FSFE profile"
+    assert people["npm/x"]["curated_override_reason"] == ""  # non-github platform untouched
+
+
+def test_sponsors_by_login_and_owner_sponsors_by_repo():
+    ms_rows = [{"login": "Alice", "has_sponsors_listing": "True"}]
+    assert bp._sponsors_by_login(ms_rows) == {"alice": "True"}
+    s_rows = [{"repo_id": "gh/1", "gh_sponsors_enabled": "False"}]
+    assert bp._owner_sponsors_by_repo(s_rows) == {"gh/1": "False"}
+
+
+def test_users_by_login_keys_lowercased():
+    rows = [{"login": "Alice", "name": "Alice A"}]
+    assert bp._users_by_login(rows) == {"alice": {"login": "Alice", "name": "Alice A"}}
