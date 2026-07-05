@@ -16,6 +16,16 @@ def test_fetchers_cover_complexity_score_inputs():
     assert "src.sources.github.fetch_cognitive" in modules             # cognitive audit cols
 
 
+def test_fetchers_cover_concentration_and_workload_score_inputs():
+    """The git-clone contributor log is the sole source of the concentration
+    score (bf/hhi _5y) AND workload's active_contributors divisor — it must
+    be a pipeline step, not a fetcher you have to know to run by hand."""
+    from src.risk.run_risk_pipeline import FETCHERS
+    modules = {s.module for s in FETCHERS}
+    assert "src.sources.git.contributors" in modules
+    assert "src.sources.github.fetch_issue_metrics" in modules          # nni_per_ac
+
+
 def test_lizard_fetchers_default_to_full_scope_incremental():
     """Both lizard fetchers run as pipeline steps: no random sampling, and a
     TTL long enough that sha-pinned rows aren't pointlessly re-analyzed."""

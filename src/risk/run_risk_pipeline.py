@@ -19,6 +19,12 @@ from src.common.pipeline_runner import Step, build_parser, run_pipeline
 FETCHERS = [
     Step("commits-years", "src.sources.git.commits_years",                fetch=True),
     Step("resolve-head",  "src.sources.git.resolve_head",                 fetch=True),
+    # The git-clone contributor log is the ONLY source of the concentration
+    # score (bf/hhi _5y) and of workload's per-contributor divisor. It was
+    # runnable solely by hand before — a new repo entering scope got blank
+    # concentration + workload from a full pipeline run. Incremental: skips
+    # repos whose status row is already ok.
+    Step("git-contributors", "src.sources.git.contributors",              fetch=True),
     Step("contributors",  "src.sources.github.fetch_contributors_metrics", fetch=True),
     Step("issues",        "src.sources.github.fetch_issue_metrics",       fetch=True),
     Step("scc",           "src.sources.git.fetch_scc",                    fetch=True),
