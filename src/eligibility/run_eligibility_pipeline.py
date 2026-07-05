@@ -39,6 +39,9 @@ FETCHERS = [
     Step("npm-funding",   "src.sources.npm.fetch_funding",                fetch=True),
     Step("pypi-funding",  "src.sources.pypi.fetch_funding",               fetch=True),
     Step("sponsors",      "src.sources.github.fetch_sponsors",            fetch=True),
+    # personal Sponsors of each repo's bus-factor maintainers (needs the risk
+    # pipeline's github/contributor-commits.csv; no-ops if that is absent)
+    Step("maintainer-sponsors", "src.sources.github.fetch_maintainer_sponsors", fetch=True),
     Step("floss-fund",    "src.sources.floss_fund.funding_json",          fetch=True),
     Step("oc-collectives", "src.sources.opencollective.fetch_collectives", fetch=True),
     Step("opencollective", "src.sources.opencollective.fetch_budgets",    fetch=True),
