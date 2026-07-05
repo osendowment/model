@@ -41,8 +41,8 @@ from rich.table import Table
 
 from src.common.repos import (
     VALUE_FILE,
+    load_github_top_slugs,
     load_repo_ids,
-    load_top_slugs,
     load_value_repo_ids,
 )
 from src.sources.github.display import _ETAColumn, console
@@ -502,7 +502,10 @@ def main() -> None:
     year_start, year_end = args.years
     years_int = list(range(year_start, year_end + 1))
 
-    all_repos = load_top_slugs(value_file=args.input)
+    # GitHub Search API only — a GitLab target would resolve to an unrelated
+    # GitHub mirror, so non-GitHub repos are excluded (their issue columns stay
+    # blank; build_workload neutral-fills the missing issue axis).
+    all_repos = load_github_top_slugs(value_file=args.input)
 
     # Writer id map, most-authoritative last: ids already on disk (so a
     # rewrite can never wipe one we knew), then repos.csv, then value.csv

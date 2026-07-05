@@ -720,9 +720,19 @@ def main() -> int:
     if args.repos:
         ids = load_repo_ids()
         gitmap = load_git_urls()
-        targets = [(s, ids.get(s, ""))
-                   for s in (r.strip().lower() for r in args.repos)]
-        git_urls = {s: git_url_for(rid, s, gitmap) for s, rid in targets}
+        # Resolve id + clone URL from the risk-scope entries first: load_repo_ids
+        # (github/repos.csv) has no GitLab rows, so a bare gl/ slug would get a
+        # blank repo_id and clone the wrong (github.com) host. load_top_repos
+        # carries the gl/ id and the real value.csv git_url for both hosts;
+        # github slugs resolve to the same id/URL as before.
+        by_slug = {e.repo: e for e in load_top_repos()}
+        targets = []
+        git_urls = {}
+        for s in (r.strip().lower() for r in args.repos):
+            e = by_slug.get(s)
+            rid = str(e.repo_id) if e and e.repo_id else ids.get(s, "")
+            targets.append((s, rid))
+            git_urls[s] = e.git_url if e and e.git_url else git_url_for(rid, s, gitmap)
     else:
         entries = load_top_repos()
         targets = [(e.repo, e.repo_id) for e in entries]

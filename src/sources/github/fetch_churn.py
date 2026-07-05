@@ -600,7 +600,12 @@ def main() -> None:
         repos = [r.strip().lower() for r in args.repos]
         total_eligible = len(repos)
     else:
-        risk_repos = load_top_repos()
+        # GitHub-only: `_bare_clone` hardcodes the github.com URL, so a GitLab
+        # slug would clone the wrong host's mirror. Non-GitHub repos are skipped
+        # (their churn stays blank; build_complexity's hotspot input is optional
+        # and does not feed the complexity score).
+        risk_repos = [e for e in load_top_repos()
+                      if not str(e.repo_id).startswith("gl/")]
         repos = [e.repo for e in risk_repos]
         repo_ids.update({e.repo: str(e.repo_id) for e in risk_repos if e.repo_id})
         total_eligible = len(repos)

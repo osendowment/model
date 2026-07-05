@@ -138,6 +138,15 @@ def load_repo_package_mapping() -> dict[str, list[tuple[str, str]]]:
     # Resolve renamed repos to their canonical name so the mapping keys
     # match the canonical slugs load_top_repos iterates over.
     canon = canonical_repo_map()
+    # GitLab packages sit in the ecosystem CSVs with an EMPTY github_repo but a
+    # stable gl/ repo_id (the value stage resolved them to a GitLab host, not a
+    # GitHub slug). Map those rows to the GitLab repo's canonical slug via the
+    # repo_id so OSV is genuinely host-agnostic. Restricted to gl/ ids so no
+    # GitHub row's package set can change.
+    gl_slug_by_id = {
+        str(e.repo_id): e.repo
+        for e in load_top_repos() if str(e.repo_id).startswith("gl/")
+    }
     for path, eco in ECOSYSTEM_FILES:
         if not path.exists():
             log.warning("missing ecosystem file: %s — skipping", path)
@@ -146,6 +155,10 @@ def load_repo_package_mapping() -> dict[str, list[tuple[str, str]]]:
             for row in csv.DictReader(f):
                 raw = (row.get("github_repo") or "").strip().lower()
                 ghr = canon.get(raw, raw)
+                if not ghr:
+                    # No GitHub slug — recover a GitLab target from the gl/ id.
+                    rid = (row.get("repo_id") or "").strip()
+                    ghr = gl_slug_by_id.get(rid, "")
                 pkg = (row.get("package") or "").strip()
                 if not ghr or not pkg:
                     continue

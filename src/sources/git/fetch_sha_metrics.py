@@ -44,6 +44,7 @@ from __future__ import annotations
 import argparse
 import ast
 import asyncio
+import csv
 import datetime
 import functools
 import json
@@ -393,6 +394,42 @@ def analyze_directory(root: str) -> dict:
     }
 
 
+def _gitlab_targets_by_id(
+    sha_file: str, repo_to_id: dict[str, str], years: list[int],
+) -> dict[str, tuple[str, int]]:
+    """Resolve target (sha, year) for non-GitHub repos by **repo_id**, not slug.
+
+    `load_sha_data` keys commits-years on (repo, year), which is ambiguous for a
+    GitLab repo whose slug also has a stale GitHub-mirror row in the same file
+    (e.g. gnome/glib). Non-GitHub repos are therefore resolved here by their
+    stable `gl/…` id: read commits-years, keep the newest year in `years` with a
+    populated last_sha and commits > 0. Returns {slug: (sha, year)}.
+    """
+    by_id: dict[str, dict[int, str]] = {}
+    if os.path.exists(sha_file):
+        with open(sha_file, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                rid = (row.get("repo_id") or "").strip()
+                last = (row.get("last_sha") or "").strip()
+                if not rid or not last:
+                    continue
+                try:
+                    y = int((row.get("year") or "").strip())
+                    c = int((row.get("commits") or "0").strip())
+                except ValueError:
+                    continue
+                if c > 0:
+                    by_id.setdefault(rid, {})[y] = last
+    out: dict[str, tuple[str, int]] = {}
+    for repo, rid in repo_to_id.items():
+        year_map = by_id.get(rid, {})
+        for y in sorted(years, reverse=True):
+            if year_map.get(y):
+                out[repo] = (year_map[y], y)
+                break
+    return out
+
+
 def _analysis_timeout(size_kb: int) -> int:
     """Per-repo lizard timeout, scaled by repo size (+base per ~1 GB).
 
@@ -593,9 +630,14 @@ async def _process_one(
         t0 = time.monotonic()
         try:
             # Correct an off-mainline pinned SHA to the real mainline commit.
-            # Records still key on the original `sha`.
+            # Records still key on the original `sha`. This correction is a
+            # GitHub-only concern (GitHub's Commits API + fork-network object
+            # sharing can pin an off-mainline template commit); it is skipped for
+            # non-GitHub repos, which sparse-clone straight at the pinned
+            # commits-years SHA via their own host's `repo_url`.
+            is_github = (not repo_url) or ("github.com" in repo_url.lower())
             clone_sha = sha
-            if sha and branch:
+            if sha and branch and is_github:
                 clone_sha = await loop.run_in_executor(
                     None,
                     functools.partial(
@@ -867,8 +909,17 @@ def main() -> None:
         )
         return
 
-    # Target SHA (+ its year) per repo — the existing scc cascade logic, reused.
-    raw_targets = _target_sha_per_repo(sha_data, repos, args.years)  # {repo:(sha,year)}
+    # Target SHA (+ its year) per repo. GitHub repos use the slug-keyed scc
+    # cascade (unchanged — byte-identical). Non-GitHub repos (gl/…) resolve by
+    # repo_id instead, so a stale GitHub-mirror row that shares a GitLab repo's
+    # slug can't hand it the wrong SHA (see `_gitlab_targets_by_id`).
+    rid_by_repo = {e.repo: str(e.repo_id) for e in entries}
+    gl_repos = [r for r in repos if str(rid_by_repo.get(r, "")).startswith("gl/")]
+    gh_repos = [r for r in repos if r not in set(gl_repos)]
+    raw_targets = _target_sha_per_repo(sha_data, gh_repos, args.years)  # {repo:(sha,year)}
+    raw_targets.update(
+        _gitlab_targets_by_id(args.sha_file, {r: rid_by_repo[r] for r in gl_repos}, args.years)
+    )
     targets = {r: (sha, str(y)) for r, (sha, y) in raw_targets.items()}
     cutoffs = {r: f"{y + 1}-01-01T00:00:00" for r, (_sha, y) in raw_targets.items()}
     missing = [r for r in repos if r not in targets]
@@ -904,6 +955,12 @@ def main() -> None:
         return
 
     repo_ids = _load_repo_id_map()
+    # github/repos.csv (the id map's source) has no GitLab rows, so a gl/ repo
+    # would land in scc.csv / lizard.csv with a blank repo_id — invisible to the
+    # id-keyed builder joins. Stamp the gl/ ids from the risk-scope entries.
+    for e in entries:
+        if str(e.repo_id).startswith("gl/"):
+            repo_ids[e.repo] = str(e.repo_id)
     default_branches = load_default_branches()
 
     t0 = time.monotonic()

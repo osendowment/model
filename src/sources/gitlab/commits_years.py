@@ -1,9 +1,19 @@
 """Per-year commit SHA anchor for GitLab repos (mirrors git/commits_years.py).
 
-For each valid GitLab project in data/sources/gitlab/projects.csv, resolve the
-last commit SHA of each calendar year on the default branch — the year→SHA map
-the risk builders use to pin complexity/workload metrics. Writes a standalone
-data/sources/gitlab/commits-years.csv keyed on the unified repo_id.
+For each risk-scope GitLab project, resolve the last commit SHA of each calendar
+year on the default branch — the year→SHA map the risk builders use to pin
+complexity/workload metrics. Rows land in the **shared**
+``data/sources/git/commits-years.csv`` beside the GitHub rows (same unified
+schema: repo, repo_id, git_url, year, first_sha, last_sha, commits, fetched_at)
+so the sha-pinned code-metrics fetcher (`fetch_sha_metrics`) reads one file for
+both hosts. Scope is the GitLab members of `load_top_repos()` (risk scope), not
+every valid project, and each row's `repo` is that entry's canonical slug so it
+joins downstream exactly like the value.csv / builder key.
+
+Rows are upserted by (repo, repo_id, year): every existing GitHub row is
+preserved verbatim (a GitHub mirror that shares a slug with a GitLab repo keeps
+its own gh/… row — the two are distinct by repo_id), and re-running only
+rewrites the GitLab (repo_id, year) cells it fetched.
 
 Usage:
     uv run python -m src.sources.gitlab.commits_years --limit 3
@@ -30,12 +40,15 @@ console = Console()
 
 REPO = Path(__file__).resolve().parents[3]
 PROJECTS_IN = REPO / "data" / "sources" / "gitlab" / "projects.csv"
-COMMITS_OUT = REPO / "data" / "sources" / "gitlab" / "commits-years.csv"
+# Shared with GitHub — the single file fetch_sha_metrics / build_complexity read.
+COMMITS_OUT = REPO / "data" / "sources" / "git" / "commits-years.csv"
 
 YEARS = list(range(2021, dt.datetime.now(dt.UTC).year + 1))
 MAX_CONCURRENT = 8
 
-COMMITS_FIELDS = ["repo_id", "git_url", "project", "year", "first_sha",
+# Unified schema, byte-compatible with src/sources/git/commits_years.py's
+# SHA_FIELDS so GitHub and GitLab rows coexist in one file.
+COMMITS_FIELDS = ["repo", "repo_id", "git_url", "year", "first_sha",
                   "last_sha", "commits", "fetched_at"]
 
 
@@ -73,19 +86,45 @@ async def _fetch_year(limiter, session, host: str, path: str, branch: str,
         return last_sha, commits
 
 
+def _load_scope() -> dict[str, dict]:
+    """{gl/ repo_id: {"repo": canonical slug, "git_url": clone URL}} for the
+    GitLab members of the risk scope (`load_top_repos`).
+
+    Keying on `load_top_repos` (not every valid project) means we only anchor
+    the ~26 GitLab repos the risk pipeline actually scores, and the `repo` we
+    write is the exact slug the builders / sha-metrics join on.
+    """
+    from src.common.repos import load_top_repos
+    out: dict[str, dict] = {}
+    for e in load_top_repos():
+        rid = str(e.repo_id)
+        if rid.startswith("gl/"):
+            out[rid] = {"repo": e.repo, "git_url": e.git_url}
+    return out
+
+
 def _load_valid_projects() -> list[dict]:
+    """Risk-scope GitLab projects joined to their projects.csv host/path/branch.
+
+    Only projects whose gl/ repo_id is in the risk scope are returned; each row
+    carries the canonical `repo` slug + `git_url` from value.csv (via the scope
+    map) plus the `host`/`path`/`branch` needed to hit the per-instance API.
+    """
     if not PROJECTS_IN.exists():
         return []
+    scope = _load_scope()
     out = []
     with open(PROJECTS_IN, encoding="utf-8") as f:
         for r in csv.DictReader(f):
-            if (r.get("valid") or "").lower() == "true" and r.get("repo_id"):
-                host = r["host"]
-                path = r["path_with_namespace"] or r["project"].split("/", 1)[1]
-                out.append({"repo_id": r["repo_id"], "project": r["project"],
-                            "git_url": clone_url(host, path),
-                            "host": host, "path": path,
-                            "branch": r.get("default_branch") or "HEAD"})
+            rid = (r.get("repo_id") or "").strip()
+            if rid not in scope:
+                continue
+            host = r["host"]
+            path = r["path_with_namespace"] or r["project"].split("/", 1)[1]
+            out.append({"repo_id": rid, "repo": scope[rid]["repo"],
+                        "git_url": scope[rid]["git_url"] or clone_url(host, path),
+                        "host": host, "path": path,
+                        "branch": r.get("default_branch") or "HEAD"})
     return out
 
 
@@ -135,8 +174,8 @@ async def _fetch_all(pairs: list[tuple[dict, int]]) -> list[dict]:
             async with sem:
                 sha, commits = await _fetch_year(
                     limiter, session, proj["host"], proj["path"], proj["branch"], year)
-                rows.append({"repo_id": proj["repo_id"], "git_url": proj["git_url"],
-                             "project": proj["project"], "year": year,
+                rows.append({"repo": proj["repo"], "repo_id": proj["repo_id"],
+                             "git_url": proj["git_url"], "year": year,
                              "first_sha": "", "last_sha": sha,
                              "commits": commits, "fetched_at": _now_iso()})
         await asyncio.gather(*[_one(p, y) for p, y in pairs])
@@ -156,15 +195,29 @@ def fetch_and_persist(limit: int | None = None, force: bool = False,
                       f"pairs to fetch: [bold]{len(pairs)}[/bold]")
     t0 = time.monotonic()
     new_rows = asyncio.run(_fetch_all(pairs)) if pairs else []
-    # Merge with existing (keep prior repo_ids), keyed on (repo_id, year).
-    merged: dict[tuple[str, str], dict] = {}
-    if COMMITS_OUT.exists() and not force:
+    # Merge into the shared file keyed on (repo, repo_id, year). We ALWAYS read
+    # existing rows (even with --force) so every GitHub row — and any GitLab row
+    # we didn't refetch — is preserved verbatim; --force only re-fetches GitLab
+    # (repo_id, year) cells. The three-part key keeps a GitHub mirror and a
+    # GitLab repo that happen to share a slug (e.g. gnome/glib) as distinct rows.
+    merged: dict[tuple[str, str, str], dict] = {}
+    if COMMITS_OUT.exists():
         with open(COMMITS_OUT, encoding="utf-8") as f:
             for r in csv.DictReader(f):
-                merged[(r["repo_id"], r["year"])] = r
+                key = (r.get("repo", ""), r.get("repo_id", ""), r.get("year", ""))
+                merged[key] = {k: r.get(k, "") for k in COMMITS_FIELDS}
     for r in new_rows:
-        merged[(r["repo_id"], str(r["year"]))] = r
-    ordered = sorted(merged.values(), key=lambda r: (r["repo_id"], int(r["year"])))
+        merged[(r["repo"], r["repo_id"], str(r["year"]))] = r
+
+    def _year_key(v: str) -> int:
+        # `year` can be the "HEAD" pseudo-row that resolve_head writes; sort it
+        # last within a repo rather than crash int("HEAD").
+        s = str(v)
+        return int(s) if s.lstrip("-").isdigit() else 10**9
+    ordered = sorted(
+        merged.values(),
+        key=lambda r: (r.get("repo", ""), _year_key(r.get("year", "")), r.get("repo_id", "")),
+    )
     _atomic_write(COMMITS_OUT, ordered)
     elapsed = time.monotonic() - t0
     if not quiet:

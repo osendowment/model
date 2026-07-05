@@ -85,13 +85,13 @@ class TestLoadExistingPairs:
         with open(out, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=mod.COMMITS_FIELDS)
             w.writeheader()
-            w.writerow({"repo_id": "gl:1", "git_url": "u", "project": "g/p",
+            w.writerow({"repo": "g/p", "repo_id": "gl:1", "git_url": "u",
                         "year": "2021", "first_sha": "", "last_sha": "abc",
                         "commits": "5", "fetched_at": "2026-01-01T00:00:00Z"})
-            w.writerow({"repo_id": "gl:1", "git_url": "u", "project": "g/p",
+            w.writerow({"repo": "g/p", "repo_id": "gl:1", "git_url": "u",
                         "year": "2022", "first_sha": "", "last_sha": "def",
                         "commits": "3", "fetched_at": "2026-01-01T00:00:00Z"})
-            w.writerow({"repo_id": "gl:2", "git_url": "u2", "project": "g/q",
+            w.writerow({"repo": "g/q", "repo_id": "gl:2", "git_url": "u2",
                         "year": "2021", "first_sha": "", "last_sha": "xyz",
                         "commits": "1", "fetched_at": "2026-01-01T00:00:00Z"})
         monkeypatch.setattr(mod, "COMMITS_OUT", out)

@@ -21,7 +21,7 @@ from src.sources.github.models import (
     Contributor, PerfStats, RunResult,
     THRESHOLD, is_bot,
 )
-from src.common.repos import VALUE_FILE, load_top_slugs
+from src.common.repos import VALUE_FILE, load_github_top_slugs
 
 
 def parse_repo(url_or_slug: str) -> str:
@@ -155,8 +155,12 @@ def main() -> None:
         ))
         return
 
-    # Batch mode: every A/B-class repo from value-data.csv.
-    repos = load_top_slugs(value_file=args.input)
+    # Batch mode: every risk-scope GitHub repo. The GitHub /contributors API
+    # can't service a GitLab target (a gl/ slug would resolve to an unrelated
+    # GitHub mirror), so non-GitHub repos are excluded here — the concentration
+    # builder's GitHub columns simply stay blank for them (the git-clone method
+    # supplies their score).
+    repos = load_github_top_slugs(value_file=args.input)
     asyncio.run(batch_update(
         repos, threshold=args.threshold,
         include_bots=args.include_bots, limit=args.limit, force=args.force,
