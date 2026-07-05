@@ -193,12 +193,12 @@ extras. Unknown (no license signal) is tracked separately from known non-OSS.
 |---|---:|---:|
 | input top repos (incl. archived) | 916 | 100% |
 | license resolved | 916 | 100% |
-| · from override | 14 | 1.5% |
+| · from override | 16 | 1.7% |
 | · from registry | 893 | 97.5% |
-| · from GitHub | 9 | 1.0% |
-| **oss=True (OSI-approved)** | **910** | **99.3%** |
+| · from GitHub | 7 | 0.8% |
+| **oss=True (OSI-approved)** | **912** | **99.6%** |
 | oss=False (known non-OSS) | 4 | 0.4% |
-| oss unknown (no signal) | 2 | 0.2% |
+| oss unknown (no signal) | 0 | 0.0% |
 
 The 4 known non-OSS are content-licensed data repos (CC0/CC-BY — free for
 documents, not software OSS by this model's strict policy).
@@ -244,8 +244,8 @@ unlock. Missing intent is by far the binding constraint.
 
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
-| oss | 910 | 99.3% | 1 |
-| intent | 718 | 78.4% | 182 |
-| nonprofit | 856 | 93.4% | 59 |
+| oss | 912 | 99.6% | 1 |
+| intent | 718 | 78.4% | 183 |
+| nonprofit | 856 | 93.4% | 60 |
 | active | 894 | 97.6% | 10 |
 | **eligible** | **647** | **70.6%** | |

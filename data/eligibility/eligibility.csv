@@ -51,7 +51,7 @@ azuread/microsoft-authentication-library-for-python,gh/67243113,True,True,False,
 babel/babel,gh/24560307,True,True,True,True,True
 babel/babel-polyfills,gh/190579283,True,True,True,True,True
 babel/minify,gh/55723051,True,True,True,True,True
-bdwgc/bdwgc,gh/2109456,False,False,True,True,False
+bdwgc/bdwgc,gh/2109456,True,False,True,True,False
 beatgammit/base64-js,gh/2853282,True,True,True,True,True
 benjaminp/six,gh/77868600,True,False,True,True,False
 besser82/libxcrypt,gh/35503965,True,False,True,True,False
@@ -532,7 +532,7 @@ msgpack/msgpack-python,gh/2242705,True,True,True,True,True
 myrne/performance-now,gh/10219264,True,False,True,True,False
 mysticatea/abort-controller,gh/105228556,True,True,True,True,True
 mysticatea/event-target-shim,gh/31137469,True,True,True,True,True
-netflix/vmaf,gh/51317975,False,True,False,True,False
+netflix/vmaf,gh/51317975,True,True,False,True,False
 nghttp2/nghttp2,gh/11452676,True,True,True,True,True
 nicolo-ribaudo/babel-preset-current-node-syntax,gh/253327079,True,True,True,True,True
 nlnetlabs/unbound,gh/94195301,True,True,True,True,True

@@ -51,7 +51,7 @@ azuread/microsoft-authentication-library-for-python,gh/67243113,mit,registry,Tru
 babel/babel,gh/24560307,mit,registry,True
 babel/babel-polyfills,gh/190579283,mit,registry,True
 babel/minify,gh/55723051,mit,registry,True
-bdwgc/bdwgc,gh/2109456,noassertion,github,
+bdwgc/bdwgc,gh/2109456,mit,override,True
 beatgammit/base64-js,gh/2853282,mit,registry,True
 benjaminp/six,gh/77868600,mit,registry,True
 besser82/libxcrypt,gh/35503965,lgpl-2.1-or-later,registry,True
@@ -532,7 +532,7 @@ msgpack/msgpack-python,gh/2242705,apache-2.0,registry,True
 myrne/performance-now,gh/10219264,mit,registry,True
 mysticatea/abort-controller,gh/105228556,mit,registry,True
 mysticatea/event-target-shim,gh/31137469,mit,registry,True
-netflix/vmaf,gh/51317975,noassertion,github,
+netflix/vmaf,gh/51317975,bsd-2-clause-patent,override,True
 nghttp2/nghttp2,gh/11452676,mit,registry,True
 nicolo-ribaudo/babel-preset-current-node-syntax,gh/253327079,mit,registry,True
 nlnetlabs/unbound,gh/94195301,bsd-3-clause,registry,True

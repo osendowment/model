@@ -33,7 +33,7 @@ vercel/ai,gh/644461337,,,vercel,vercel.com,company,,,,
 vercel/ms,gh/3655872,,,vercel,vercel.com,company,,,,
 remix-run/react-router,gh/19872456,,,remix-run,shopify.com,company,,,,
 getsentry/sentry-javascript,gh/3328572,,,getsentry,sentry.io,company,,,,
-netflix/vmaf,gh/51317975,,,netflix,netflix.com,company,,,,
+netflix/vmaf,gh/51317975,,,netflix,netflix.com,company,,bsd-2-clause-patent,,Licensee noassertion; LICENSE states SPDX BSD-2-Clause-Patent (BSD+Patent, OSI). Stays ineligible: company-backed (netflix)
 huggingface/huggingface_hub,gh/323591830,,,huggingface,huggingface.co,company,,,,
 cloudflare/cloudflare-python,gh/753271547,,,cloudflare,cloudflare.com,company,,,,
 pydantic/pydantic,gh/90194616,,,pydantic,pydantic.dev,company,,,,
@@ -75,3 +75,4 @@ python/mypy_extensions,gh/165752308,,,,,,,mit,,Licensee noassertion; MIT declare
 linux-pam/linux-pam,gh/76264690,,,,,,,bsd-3-clause,,Licensee noassertion; Linux-PAM BSD-3-Clause (OSI)
 thkukuk/rpcsvc-proto,gh/55140533,,,,,,,bsd-3-clause,,Licensee noassertion; Sun RPC 3-clause BSD (Oracle America) in COPYING (OSI)
 selinuxproject/selinux,gh/20648799,,,,,,,gpl-2.0-only,,Licensee noassertion on multi-license meta-repo; GPL-2.0-only covers userspace tools (OSI)
+bdwgc/bdwgc,gh/2109456,,,,,,,mit,,Licensee noassertion on upstream MIT-style permissive license (use/copy/modify with notice retention); MIT per upstream self-title and distro convention (OSI). Stays ineligible: no funding intent
