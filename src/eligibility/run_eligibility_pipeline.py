@@ -58,6 +58,8 @@ BUILDERS = [
     Step("active",        "src.eligibility.build_active"),
     Step("funding-build", "src.eligibility.build_funding"),
     Step("aggregate",     "src.eligibility.build_eligibility"),
+    # Terminal cross-stage rollup: eligible repos + value_score + risk_score.
+    Step("results",       "src.build_results"),
 ]
 
 
