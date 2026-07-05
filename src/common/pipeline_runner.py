@@ -26,12 +26,17 @@ class Step:
 
 
 def select_steps(steps: list[Step], from_step: str | None,
-                 only: str | None) -> list[Step]:
+                 only: str | None, offline: bool = False) -> list[Step]:
     """Resolve --from / --only into the list of steps to run.
 
-    All steps always run (TTL makes cached data zero-network; use --offline
-    to hard-forbid network or --refresh to force refetch). Raises KeyError
-    if `from_step` / `only` names an unknown step.
+    All steps run by default (TTL makes cached data zero-network). Use
+    --refresh to force refetch. `offline` (from --offline) hard-forbids
+    network: `net=True` steps are kept and receive --offline so they use only
+    their caches, but legacy fetch-only steps (`fetch=True and not net=True` —
+    they do network yet can't honour --offline) are DROPPED, so a shared
+    consumer like the risk/eligibility pipeline can still run builders-only
+    offline (the role the old --skip-fetch served). Raises KeyError if
+    `from_step` / `only` names an unknown step.
     """
     labels = [s.label for s in steps]
     if only is not None:
@@ -44,6 +49,8 @@ def select_steps(steps: list[Step], from_step: str | None,
         chosen = steps[labels.index(from_step):]
     else:
         chosen = list(steps)
+    if offline:
+        chosen = [s for s in chosen if not (s.fetch and not s.net)]
     return chosen
 
 
@@ -70,7 +77,8 @@ def run_pipeline(steps: list[Step], args: argparse.Namespace) -> int:
             print(f"  {s.label:24s} {s.module}  {tags}".rstrip())
         return 0
     try:
-        selected = select_steps(steps, args.from_step, args.only)
+        selected = select_steps(steps, args.from_step, args.only,
+                                offline=getattr(args, "offline", False))
     except KeyError as e:
         print(f"unknown step: {e.args[0]}", file=sys.stderr)
         return 2

@@ -147,3 +147,20 @@ def test_run_pipeline_returns_nonzero_on_failure():
     with patch("src.common.pipeline_runner.subprocess.run", side_effect=fake_run):
         rc = run_pipeline(steps, args)
     assert rc == 1
+
+
+def test_offline_drops_fetch_only_steps_keeps_net():
+    """--offline (offline=True) drops fetch-only steps (fetch=True, not net=True)
+    so a shared consumer runs builders-only offline, but keeps net steps (which
+    receive --offline) and plain builder steps."""
+    from src.common.pipeline_runner import Step, select_steps
+    steps = [
+        Step("fetcher", "m.fetch", fetch=True),          # network, not offline-aware -> DROP
+        Step("netstep", "m.net", net=True),              # offline-aware -> KEEP
+        Step("ecopipe", "m.eco", fetch=True, pipeline=True),  # fetch-only orchestrator -> DROP
+        Step("builder", "m.build"),                      # pure builder -> KEEP
+    ]
+    online = [s.label for s in select_steps(steps, None, None, offline=False)]
+    offline = [s.label for s in select_steps(steps, None, None, offline=True)]
+    assert online == ["fetcher", "netstep", "ecopipe", "builder"]  # all run online
+    assert offline == ["netstep", "builder"]                        # fetch-only dropped
