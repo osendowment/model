@@ -40,6 +40,14 @@ LAST_COMPLETE_YEAR: int = max(YEARS)
 # Risk-pipeline input scope — which value classes feed the risk pipeline.
 RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]
 
+# Value score — value.csv `score`, a 0–100 blend of OpenSSF criticality
+# (popularity/activity) and ecosystem centrality (top_eco_pct, PageRank
+# percentile). score = CRIT_WEIGHT*(openssf_crit*100) + CENTRALITY_WEIGHT*top_eco_pct.
+# Criticality-dominant (0.8/0.2) so foundational-but-quiet micro-deps don't
+# outrank genuinely critical projects; see docs/value.md.
+VALUE_SCORE_CRIT_WEIGHT:       float = _P["value_score"]["criticality_weight"]
+VALUE_SCORE_CENTRALITY_WEIGHT: float = _P["value_score"]["centrality_weight"]
+
 # Concentration window length (complete years). The bus-factor/HHI '_5y'
 # columns cover the last CONCENTRATION_WINDOW_YEARS complete years, anchored
 # to LAST_COMPLETE_YEAR; '_full' caps at LAST_COMPLETE_YEAR.
