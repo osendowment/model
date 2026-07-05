@@ -25,7 +25,7 @@ def test_load_top_repos_filters_classes_and_enriches(tmp_path, monkeypatch):
         {"repo": "owner/a", "valid": "True", "repo_id": "11", "archived": "False", "size": "5", "stars": "9"},
         {"repo": "owner/b", "valid": "True", "repo_id": "22", "archived": "True", "size": "1", "stars": "1"},
     ])
-    monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
+    monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
     out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
     # owner/b archived, owner/c out of classes, "" orphan.
     assert {e.repo for e in out} == {"owner/a"}
@@ -43,7 +43,7 @@ def test_load_top_repos_filters_valid_by_default(tmp_path, monkeypatch):
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [])
-    monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
+    monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
     out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
     assert {e.repo for e in out} == {"owner/live"}
     # opting out includes invalid/blank rows again
@@ -60,7 +60,7 @@ def test_load_top_repos_keeps_archived_when_flag_off(tmp_path, monkeypatch):
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
         {"repo": "owner/b", "valid": "True", "repo_id": "22", "archived": "True", "size": "1", "stars": "1"},
     ])
-    monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
+    monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
     out = repos.load_top_repos(value_file=str(value), repos_file=str(gh), skip_archived=False)
     assert {e.repo for e in out} == {"owner/b"}
 
@@ -90,7 +90,7 @@ def test_load_top_repos_keeps_archived_live_upstream_mirror(tmp_path, monkeypatc
         {"package": "x", "ecosystem": "cpp", "repo": "owner/plainarchived",
          "git_url": "https://github.com/owner/plainarchived.git", "valid": "", "reason": "x"},
     ])
-    monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
+    monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
     out = repos.load_top_repos(
         value_file=str(value), repos_file=str(gh), overrides_file=str(overrides)
     )
@@ -108,7 +108,7 @@ def test_load_top_repos_dedup_highest_class_wins(tmp_path, monkeypatch):
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
         {"repo": "owner/dup", "valid": "True", "repo_id": "7", "archived": "False", "size": "0", "stars": "0"},
     ])
-    monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
+    monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
     out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
     assert len(out) == 1
     assert out[0].value_class == "A"
@@ -125,7 +125,7 @@ def test_load_top_repos_canonicalises_renamed_repo(tmp_path, monkeypatch):
         {"repo": "gozala/events", "valid": "True", "repo_id": "1649251",
          "full_name": "browserify/events", "archived": "False", "size": "9", "stars": "3"},
     ])
-    monkeypatch.setattr(repos, "RISK_INPUT_CLASSES", ["A", "B"])
+    monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
     out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
     assert [e.repo for e in out] == ["browserify/events"]
     assert out[0].repo_id == "gh/1649251"
@@ -155,7 +155,8 @@ def test_to_repo_id_namespaces_and_is_idempotent():
     assert repos.to_repo_id("  42 ") == "gh/42"
     # idempotent — already-namespaced host ids are left alone
     assert repos.to_repo_id("gh/119609") == "gh/119609"
-    assert repos.to_repo_id("gl/gitlab.com/456") == "gl/gitlab.com/456"
+    assert repos.to_repo_id("gl/456") == "gl/456"                       # gitlab.com bare id
+    assert repos.to_repo_id("gl/salsa.debian.org-678") == "gl/salsa.debian.org-678"
     # empty / missing -> empty (never "gh/")
     assert repos.to_repo_id("") == ""
     assert repos.to_repo_id(None) == ""

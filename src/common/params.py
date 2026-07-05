@@ -40,6 +40,15 @@ LAST_COMPLETE_YEAR: int = max(YEARS)
 # Risk-pipeline input scope — which value classes feed the risk pipeline.
 RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]
 
+# load_top_repos scope — the platforms and value classes that define the "top
+# repos" set shared by the risk and eligibility stages. A value.csv row is a top
+# repo iff its `platform` is in TOP_REPO_PLATFORMS, its `class` is in
+# TOP_REPO_CLASSES, and it is git_valid. GitHub-only today; the gate is
+# host-agnostic so adding "gitlab" here (once gl/ enrichment lands) pulls in
+# valid GitLab repos without further code changes.
+TOP_REPO_PLATFORMS: set[str] = set(_P["top_repos"]["platforms"])
+TOP_REPO_CLASSES: set[str] = set(_P["top_repos"]["classes"])
+
 # Value score — value.csv `score`, a 0–100 blend of OpenSSF criticality
 # (popularity/activity) and ecosystem centrality (top_eco_pct, PageRank
 # percentile). score = CRIT_WEIGHT*(openssf_crit*100) + CENTRALITY_WEIGHT*top_eco_pct.

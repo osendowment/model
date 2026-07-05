@@ -28,7 +28,7 @@ import logging
 import os
 from dataclasses import dataclass
 
-from src.common.params import RISK_INPUT_CLASSES
+from src.common.params import TOP_REPO_CLASSES, TOP_REPO_PLATFORMS
 
 log = logging.getLogger(__name__)
 
@@ -45,11 +45,11 @@ def to_repo_id(raw: object) -> str:
 
     The pipeline's join key is namespaced by host: GitHub repos are keyed by
     GitHub's stable numeric Repos-API id as `gh/<id>`; GitLab repos use
-    `gl/<host>/<id>` (produced by the value stage). This is idempotent:
-    already-namespaced ids (`gh/…`, `gl/…`) and empties pass through
-    unchanged; a bare legacy numeric id (`119609`) is promoted to
-    `gh/119609`. Both `load_repo_ids` and `RepoEntry.repo_id` return this
-    form, so every stage writer downstream of the loader emits it.
+    `gl/<host>-<id>` (or a bare `gl/<id>` for gitlab.com), produced by the value
+    stage. This is idempotent: already-namespaced ids (`gh/…`, `gl/…`) and
+    empties pass through unchanged; a bare legacy numeric id (`119609`) is
+    promoted to `gh/119609`. Both `load_repo_ids` and `RepoEntry.repo_id` return
+    this form, so every stage writer downstream of the loader emits it.
     """
     s = ("" if raw is None else str(raw)).strip()
     if not s or "/" in s:
@@ -149,12 +149,15 @@ def load_top_repos(
     Scope = valid class-A AND not-archived, EXCEPT live-upstream GitHub
     mirrors (kept despite an archived mirror flag). The risk pipeline runs
     on this set: repos whose `class` in `value.csv` is one of
-    `settings.json risk_input.value_classes` (default {A}) AND whose unified
-    `valid` column is `True`.
+    `settings.json top_repos.classes` (default {A}) AND whose `platform` is one
+    of `top_repos.platforms` (default {github}) AND whose unified `git_valid`
+    column is `True`.
 
-    - Keeps rows whose `platform` is `github`, `class` in RISK_INPUT_CLASSES,
-      a non-empty `repo`, and `git_valid == "True"`. The `git_valid` gate is
-      on by default (drops failed/404/invalid targets); pass `skip_invalid=False`
+    - Keeps rows whose `platform` ∈ `TOP_REPO_PLATFORMS`, `class` ∈
+      `TOP_REPO_CLASSES`, a non-empty `repo`, and `git_valid == "True"`. Both the
+      platform and class sets come from `settings.json top_repos`; the
+      `git_valid` gate applies to every configured platform (host-agnostic) and
+      is on by default (drops failed/404/invalid targets); pass `skip_invalid=False`
       to include rows regardless of validity. The eligibility stage shares
       this exact scope (valid class-A repos).
     - Slugs are canonicalised against `github/repos.csv` `full_name`, so a
@@ -180,17 +183,20 @@ def load_top_repos(
     with open(value_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             cls = (row.get("class") or "").strip()
-            if cls not in RISK_INPUT_CLASSES:
+            if cls not in TOP_REPO_CLASSES:
                 continue
-            # Risk scope is GitHub-only — the pipeline enriches every repo via
-            # the GitHub API, so non-github platforms (gitlab/codeberg/custom)
-            # are excluded here rather than 404-ing downstream.
-            if (row.get("platform") or "").strip().lower() != "github":
+            # Scope platforms are configured in settings.json (top_repos.platforms).
+            # GitHub-only today — the pipeline enriches every repo via the GitHub
+            # API, so other platforms (gitlab/codeberg/custom) are excluded here
+            # rather than 404-ing downstream — but the gate is host-agnostic, so
+            # adding "gitlab" to settings pulls in valid GitLab repos.
+            if (row.get("platform") or "").strip().lower() not in TOP_REPO_PLATFORMS:
                 continue
             raw = (row.get("repo") or "").strip().lower()
             if not raw:
                 continue
             # git_valid is the renamed column (was `valid`); fall back for pre-rename CSVs.
+            # The valid gate applies to every configured platform, not just github.
             git_valid_val = (row.get("git_valid") or "").strip()
             if skip_invalid and git_valid_val != "True":
                 continue
