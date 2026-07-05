@@ -67,3 +67,10 @@ python/cpython,81598961,,,python,,,,python-2.0,,Licensee noassertion on stacked 
 unicode-org/icu,49244766,,,unicode-org,,,,unicode-3.0,,Licensee noassertion on bundled LICENSE; real license Unicode-3.0 (OSI-approved 2023-11)
 libjpeg-turbo/libjpeg-turbo,39760454,,,libjpeg-turbo,,,,bsd-3-clause,,Licensee noassertion on multi-license LICENSE.md; TurboJPEG API BSD-3-Clause (OSI)
 tjguk/wmi,23124645,,,tjguk,,,,mit,,No standard LICENSE file; MIT declared in PyPI metadata (OSI). Stays ineligible: no funding intent
+aio-libs/aiohttp,13258039,,,,,,,apache-2.0,,Licensee noassertion + empty PyPI license metadata; real license Apache-2.0 (OSI)
+aio-libs/multidict,51206425,,,,,,,apache-2.0,,Licensee noassertion + empty PyPI license metadata; real license Apache-2.0 (OSI)
+tqdm/tqdm,36804486,,,,,,,mpl-2.0 and mit,,Licensee noassertion; real license MPL-2.0 AND MIT (both OSI)
+python/mypy_extensions,165752308,,,,,,,mit,,Licensee noassertion; MIT declared upstream (OSI)
+linux-pam/linux-pam,76264690,,,,,,,bsd-3-clause,,Licensee noassertion; Linux-PAM BSD-3-Clause (OSI)
+thkukuk/rpcsvc-proto,55140533,,,,,,,bsd-3-clause,,Licensee noassertion; Sun RPC 3-clause BSD (Oracle America) in COPYING (OSI)
+selinuxproject/selinux,20648799,,,,,,,gpl-2.0-only,,Licensee noassertion on multi-license meta-repo; GPL-2.0-only covers userspace tools (OSI)
