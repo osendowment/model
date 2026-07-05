@@ -151,6 +151,40 @@ def merge_urls(urls: list[str]) -> dict[str, str]:
     return out
 
 
+def platform_and_slug(url: str) -> tuple[str, str]:
+    """Return `(platform, repo_slug)` for a git URL, or `("", "")` if unrecognised.
+
+    The single source of truth for the `platform` / `repo` columns in
+    `data/value/value.csv`. `platform` is the host class from `classify`
+    (github, gitlab, bitbucket, sourcehut, codeberg, custom); `repo` is the
+    project path on that host:
+
+      - github / bitbucket / codeberg → `owner/repo` (first two path segments)
+      - gitlab                        → the full nested path (`xorg/lib/libx11`);
+                                        GitLab allows arbitrarily deep groups
+      - sourcehut                     → `~user/repo`
+      - custom                        → best-effort full path (`gettext`,
+                                        `binutils-gdb`); may be empty for
+                                        query-string gitweb URLs that carry no
+                                        clean path.
+
+    The slug is derived from `classify`'s already-canonicalised, lowercased
+    URL, so it is stable regardless of the input scheme (git://, ssh, https).
+    """
+    plat, canon = classify(url)
+    if not plat:
+        return ("", "")
+    path = urlparse(canon).path.strip("/")
+    if path.endswith(".git"):
+        path = path[:-4]
+    parts = [p for p in path.split("/") if p]
+    if plat in ("github", "bitbucket", "codeberg"):
+        slug = "/".join(parts[:2]) if len(parts) >= 2 else path
+    else:  # gitlab (nested), sourcehut (~user/repo), custom (full path)
+        slug = "/".join(parts)
+    return (plat, slug.lower())
+
+
 # ── Validity-aware merge ───────────────────────────────────────────────────────
 #
 # Source-priority for picking each platform slot is native > eco. But if
