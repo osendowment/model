@@ -27,9 +27,10 @@ def test_filters_eligible_and_joins(tmp_path, monkeypatch):
            [["a/keep", "1", "True", "True", "True", "True", "True"],
             ["b/drop", "2", "True", "False", "True", "True", "False"]])
     # value.csv keys on the `repo` slug (its repo_id is the gh/<n> platform form).
-    _write(val, ["repo", "platform", "repo_id", "top_eco", "top_eco_pct"],
-           [["a/keep", "github", "gh/1", "npm", "55.5"],
-            ["b/drop", "github", "gh/2", "pypi", "10.0"]])
+    # value_score is the blended crit/eco/central score (not top_eco_pct).
+    _write(val, ["repo", "platform", "repo_id", "top_eco", "top_eco_pct", "value_score"],
+           [["a/keep", "github", "gh/1", "npm", "55.5", "72.3"],
+            ["b/drop", "github", "gh/2", "pypi", "10.0", "8.1"]])
     _write(risk, ["repo", "repo_id", "risk_score"], [["a/keep", "1", "80"], ["b/drop", "2", "20"]])
     _patch(monkeypatch, elig, val, risk)
 
@@ -38,7 +39,7 @@ def test_filters_eligible_and_joins(tmp_path, monkeypatch):
     r = rows[0]
     assert r["repo_id"] == "1"
     assert r["ecosystem"] == "npm"
-    assert r["value_score"] == "55.5"
+    assert r["value_score"] == "72.3"
     assert r["risk_score"] == "80"
     assert list(r.keys()) == br.FIELDS
 
@@ -49,8 +50,8 @@ def test_sorted_by_risk_then_value_desc(tmp_path, monkeypatch):
     risk = tmp_path / "risk.csv"
     _write(elig, ["repo", "repo_id", "eligible"],
            [["a/lo", "1", "True"], ["b/hi", "2", "True"], ["c/mid", "3", "True"]])
-    _write(val, ["repo", "top_eco", "top_eco_pct"],
-           [["a/lo", "npm", "1"], ["b/hi", "npm", "2"], ["c/mid", "npm", "9"]])
+    _write(val, ["repo", "top_eco", "top_eco_pct", "value_score"],
+           [["a/lo", "npm", "1", "1"], ["b/hi", "npm", "2", "2"], ["c/mid", "npm", "9", "9"]])
     _write(risk, ["repo", "repo_id", "risk_score"],
            [["a/lo", "1", "30"], ["b/hi", "2", "90"], ["c/mid", "3", "90"]])
     _patch(monkeypatch, elig, val, risk)
@@ -67,11 +68,11 @@ def test_missing_risk_score_left_blank(tmp_path, monkeypatch):
     val = tmp_path / "value.csv"
     risk = tmp_path / "risk.csv"
     _write(elig, ["repo", "repo_id", "eligible"], [["x/norisk", "9", "True"]])
-    _write(val, ["repo", "top_eco", "top_eco_pct"], [["x/norisk", "crates", "42"]])
+    _write(val, ["repo", "top_eco", "top_eco_pct", "value_score"], [["x/norisk", "crates", "42", "63.7"]])
     _write(risk, ["repo", "repo_id", "risk_score"], [])
     _patch(monkeypatch, elig, val, risk)
 
     rows = br.build()
     assert len(rows) == 1
     assert rows[0]["risk_score"] == ""
-    assert rows[0]["value_score"] == "42"
+    assert rows[0]["value_score"] == "63.7"

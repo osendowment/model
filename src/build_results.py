@@ -11,7 +11,7 @@ Columns:
     repo_id      GitHub numeric id (stable across renames)
     repo         canonical owner/name slug
     ecosystem    the repo's top ecosystem            (value.csv `top_eco`)
-    value_score  top-ecosystem download share, %     (value.csv `top_eco_pct`)
+    value_score  0-100 value blend (crit/eco/central)  (value.csv `value_score`)
     risk_score   overall risk score, 0-100           (risk.csv `risk_score`)
 
 Joins: eligibility.csv → risk.csv on the stable `repo_id`; eligibility.csv →
@@ -99,7 +99,7 @@ def build() -> list[dict]:
                 "repo_id": rid,
                 "repo": repo,
                 "ecosystem": (v.get("top_eco") or "").strip(),
-                "value_score": (v.get("top_eco_pct") or "").strip(),
+                "value_score": (v.get("value_score") or "").strip(),
                 "risk_score": risk.get(rid, ""),
             })
     rows.sort(key=lambda r: (_num(r["risk_score"]), _num(r["value_score"])), reverse=True)
