@@ -1,69 +1,69 @@
 repo,repo_id,host,host_type,gh_user,owner,owner_type,oc_slug,license,eol,reason
-facebook/react,10270250,react.foundation,nonprofit,facebook,,,,,,React Foundation (Linux Foundation) 501c3 steward since 2026-02; Meta no longer sole owner — blanked company owner so host nonprofit wins
-rust-lang/rust,724712,rustfoundation.org,nonprofit,rust-lang,,,,,,
-langchain-ai/langchain,552661142,,,langchain-ai,langchain.com,company,,,,
-mui/material-ui,23083156,,,mui,mui.com,company,mui-org,,,
-protocolbuffers/protobuf,23357588,,,protocolbuffers,google.com,company,,,,
-angular/angular-cli,36891867,,,angular,google.com,company,,,,
-facebook/zstd,29759715,,,facebook,meta.com,company,,,,
-radix-ui/primitives,273499522,,,radix-ui,workos.com,company,,,,
-adobe/react-spectrum,208362715,,,adobe,adobe.com,company,,,,
-torvalds/linux,2325298,linuxfoundation.org,nonprofit,torvalds,,,,gpl-2.0-only,,Licensee noassertion on LICENSES/ dir + per-file SPDX tags; real license GPL-2.0-only (OSI)
-git/git,36502,sfconservancy.org,nonprofit,git,,,,,,
-certbot/certbot,26516210,eff.org,nonprofit,certbot,,,,,,
-libuv/libuv,14812739,openjsf.org,nonprofit,libuv,,,,,,
-sqlite/sqlite,176278485,sqlite.org,,sqlite,hwaci.com,company,,,,
-socketio/socket.io,557980,,,socketio,,,socketio,,,
-facebook/create-react-app,63537249,,,facebook,meta.com,company,create-react-app,,,
-facebook/watchman,6930489,,,facebook,meta.com,company,,,,
-facebook/metro,76504246,,,facebook,meta.com,company,,,,
-microsoft/typescript,20929025,,,microsoft,microsoft.com,company,,,,
-microsoft/windows-rs,208102250,,,microsoft,microsoft.com,company,,,,
-microsoft/tslib,34414315,,,microsoft,microsoft.com,company,,,,
-azure/azure-sdk-for-python,4127088,,,azure,microsoft.com,company,,,,
-azure/azure-sdk-for-js,108311273,,,azure,microsoft.com,company,,,,
-google/brotli,24993138,,,google,google.com,company,,,,
-google/zerocopy,534354967,,,google,google.com,company,,,,
-googlechrome/workbox,55424670,,,googlechrome,google.com,company,,,,
-googleapis/google-cloud-python,16316451,,,googleapis,google.com,company,,,,
-aws/aws-cli,6780767,,,aws,amazon.com,company,,,,
-aws/aws-sdk-js-v3,87228090,,,aws,amazon.com,company,,,,
-aws/aws-sdk-js-crypto-helpers,149673986,,,aws,amazon.com,company,,,,
-vercel/ai,644461337,,,vercel,vercel.com,company,,,,
-vercel/ms,3655872,,,vercel,vercel.com,company,,,,
-remix-run/react-router,19872456,,,remix-run,shopify.com,company,,,,
-getsentry/sentry-javascript,3328572,,,getsentry,sentry.io,company,,,,
-netflix/vmaf,51317975,,,netflix,netflix.com,company,,,,
-huggingface/huggingface_hub,323591830,,,huggingface,huggingface.co,company,,,,
-cloudflare/cloudflare-python,753271547,,,cloudflare,cloudflare.com,company,,,,
-pydantic/pydantic,90194616,,,pydantic,pydantic.dev,company,,,,
-astral-sh/ruff,523043277,,,astral-sh,astral.sh,company,astral-sh,,,"direct maker Astral (astral.sh), for-profit; OpenAI acquired Astral 2026-03-19 — still company"
-storybookjs/storybook,54173593,,,storybookjs,chromatic.com,company,storybook,,,
+facebook/react,gh/10270250,react.foundation,nonprofit,facebook,,,,,,React Foundation (Linux Foundation) 501c3 steward since 2026-02; Meta no longer sole owner — blanked company owner so host nonprofit wins
+rust-lang/rust,gh/724712,rustfoundation.org,nonprofit,rust-lang,,,,,,
+langchain-ai/langchain,gh/552661142,,,langchain-ai,langchain.com,company,,,,
+mui/material-ui,gh/23083156,,,mui,mui.com,company,mui-org,,,
+protocolbuffers/protobuf,gh/23357588,,,protocolbuffers,google.com,company,,,,
+angular/angular-cli,gh/36891867,,,angular,google.com,company,,,,
+facebook/zstd,gh/29759715,,,facebook,meta.com,company,,,,
+radix-ui/primitives,gh/273499522,,,radix-ui,workos.com,company,,,,
+adobe/react-spectrum,gh/208362715,,,adobe,adobe.com,company,,,,
+torvalds/linux,gh/2325298,linuxfoundation.org,nonprofit,torvalds,,,,gpl-2.0-only,,Licensee noassertion on LICENSES/ dir + per-file SPDX tags; real license GPL-2.0-only (OSI)
+git/git,gh/36502,sfconservancy.org,nonprofit,git,,,,,,
+certbot/certbot,gh/26516210,eff.org,nonprofit,certbot,,,,,,
+libuv/libuv,gh/14812739,openjsf.org,nonprofit,libuv,,,,,,
+sqlite/sqlite,gh/176278485,sqlite.org,,sqlite,hwaci.com,company,,,,
+socketio/socket.io,gh/557980,,,socketio,,,socketio,,,
+facebook/create-react-app,gh/63537249,,,facebook,meta.com,company,create-react-app,,,
+facebook/watchman,gh/6930489,,,facebook,meta.com,company,,,,
+facebook/metro,gh/76504246,,,facebook,meta.com,company,,,,
+microsoft/typescript,gh/20929025,,,microsoft,microsoft.com,company,,,,
+microsoft/windows-rs,gh/208102250,,,microsoft,microsoft.com,company,,,,
+microsoft/tslib,gh/34414315,,,microsoft,microsoft.com,company,,,,
+azure/azure-sdk-for-python,gh/4127088,,,azure,microsoft.com,company,,,,
+azure/azure-sdk-for-js,gh/108311273,,,azure,microsoft.com,company,,,,
+google/brotli,gh/24993138,,,google,google.com,company,,,,
+google/zerocopy,gh/534354967,,,google,google.com,company,,,,
+googlechrome/workbox,gh/55424670,,,googlechrome,google.com,company,,,,
+googleapis/google-cloud-python,gh/16316451,,,googleapis,google.com,company,,,,
+aws/aws-cli,gh/6780767,,,aws,amazon.com,company,,,,
+aws/aws-sdk-js-v3,gh/87228090,,,aws,amazon.com,company,,,,
+aws/aws-sdk-js-crypto-helpers,gh/149673986,,,aws,amazon.com,company,,,,
+vercel/ai,gh/644461337,,,vercel,vercel.com,company,,,,
+vercel/ms,gh/3655872,,,vercel,vercel.com,company,,,,
+remix-run/react-router,gh/19872456,,,remix-run,shopify.com,company,,,,
+getsentry/sentry-javascript,gh/3328572,,,getsentry,sentry.io,company,,,,
+netflix/vmaf,gh/51317975,,,netflix,netflix.com,company,,,,
+huggingface/huggingface_hub,gh/323591830,,,huggingface,huggingface.co,company,,,,
+cloudflare/cloudflare-python,gh/753271547,,,cloudflare,cloudflare.com,company,,,,
+pydantic/pydantic,gh/90194616,,,pydantic,pydantic.dev,company,,,,
+astral-sh/ruff,gh/523043277,,,astral-sh,astral.sh,company,astral-sh,,,"direct maker Astral (astral.sh), for-profit; OpenAI acquired Astral 2026-03-19 — still company"
+storybookjs/storybook,gh/54173593,,,storybookjs,chromatic.com,company,storybook,,,
 boto/*,,,,boto,amazon.com,company,,,,
 smithy-lang/*,,,,smithy-lang,amazon.com,company,,,,
 firebase/*,,,,firebase,google.com,company,,,,
-libjxl/libjxl,340219494,,,libjxl,google.com,company,,,,
+libjxl/libjxl,gh/340219494,,,libjxl,google.com,company,,,,
 npm/*,,,,npm,github.com,company,,,,
 octokit/*,,,,octokit,github.com,company,,,,
-definitelytyped/definitelytyped,6093316,,,definitelytyped,microsoft.com,company,,,,
+definitelytyped/definitelytyped,gh/6093316,,,definitelytyped,microsoft.com,company,,,,
 yahoo/*,,,,yahoo,yahooinc.com,company,,,,
 auth0/*,,,,auth0,auth0.com,company,,,,
 salesforce/*,,,,salesforce,salesforce.com,company,,,,
 rust-lang/*,,rustfoundation.org,nonprofit,rust-lang,,,,,,
-gcc-mirror/gcc,22711503,fsf.org,nonprofit,gcc-mirror,,,,,,
-bminor/glibc,13868694,fsf.org,nonprofit,bminor,,,,,,
+gcc-mirror/gcc,gh/22711503,fsf.org,nonprofit,gcc-mirror,,,,,,
+bminor/glibc,gh/13868694,fsf.org,nonprofit,bminor,,,,,,
 bytecodealliance/*,,bytecodealliance.org,nonprofit,bytecodealliance,,,,,,
 azuread/*,,,,azuread,microsoft.com,company,,,,
-webmproject/libwebp,23368445,,,webmproject,google.com,company,,,,
+webmproject/libwebp,gh/23368445,,,webmproject,google.com,company,,,,
 mozilla/*,,mozilla.org,nonprofit,mozilla,,,,,,
-tower-rs/tower,98244646,,,tower-rs,,,tokio,,,
-gmp-mirror/gmp,681340775,fsf.org,nonprofit,gmp-mirror,,,,,,GNU MP is an official GNU package; copyright assigned to FSF (501c3)
-libpixman/pixman,81675971,x.org,nonprofit,libpixman,,,,,,X.Org Foundation 501c3 steward; fiscally hosted by Software Freedom Conservancy
-chaijs/type-detect,12107007,,,chaijs,,,chaijs,,,"chaijs Open Collective (active, Open Source Collective fiscal host)"
-mirror/ncurses,22324756,gnu.org,nonprofit,mirror,,,,,,Official GNU package under FSF/GNU (501c3) stewardship; oss via X11 SPDX added to OSI extras
-freedesktop-unofficial-mirror/cairo,34372735,freedesktop.org,nonprofit,freedesktop-unofficial-mirror,,,,lgpl-2.1-only or mpl-1.1,,"X.Org Foundation / SFC 501c3 steward; Licensee noassertion on dual-license COPYING (LGPL-2.1 OR MPL-1.1, OSI)"
-nodejs/node,27193779,,,nodejs,,,,mit,,Licensee noassertion on LICENSE bundling third-party deps; real license MIT (OSI)
-python/cpython,81598961,,,python,,,,python-2.0,,Licensee noassertion on stacked PSF/BeOpen/CNRI/CWI text; real license Python-2.0 (OSI)
-unicode-org/icu,49244766,,,unicode-org,,,,unicode-3.0,,Licensee noassertion on bundled LICENSE; real license Unicode-3.0 (OSI-approved 2023-11)
-libjpeg-turbo/libjpeg-turbo,39760454,,,libjpeg-turbo,,,,bsd-3-clause,,Licensee noassertion on multi-license LICENSE.md; TurboJPEG API BSD-3-Clause (OSI)
-tjguk/wmi,23124645,,,tjguk,,,,mit,,No standard LICENSE file; MIT declared in PyPI metadata (OSI). Stays ineligible: no funding intent
+tower-rs/tower,gh/98244646,,,tower-rs,,,tokio,,,
+gmp-mirror/gmp,gh/681340775,fsf.org,nonprofit,gmp-mirror,,,,,,GNU MP is an official GNU package; copyright assigned to FSF (501c3)
+libpixman/pixman,gh/81675971,x.org,nonprofit,libpixman,,,,,,X.Org Foundation 501c3 steward; fiscally hosted by Software Freedom Conservancy
+chaijs/type-detect,gh/12107007,,,chaijs,,,chaijs,,,"chaijs Open Collective (active, Open Source Collective fiscal host)"
+mirror/ncurses,gh/22324756,gnu.org,nonprofit,mirror,,,,,,Official GNU package under FSF/GNU (501c3) stewardship; oss via X11 SPDX added to OSI extras
+freedesktop-unofficial-mirror/cairo,gh/34372735,freedesktop.org,nonprofit,freedesktop-unofficial-mirror,,,,lgpl-2.1-only or mpl-1.1,,"X.Org Foundation / SFC 501c3 steward; Licensee noassertion on dual-license COPYING (LGPL-2.1 OR MPL-1.1, OSI)"
+nodejs/node,gh/27193779,,,nodejs,,,,mit,,Licensee noassertion on LICENSE bundling third-party deps; real license MIT (OSI)
+python/cpython,gh/81598961,,,python,,,,python-2.0,,Licensee noassertion on stacked PSF/BeOpen/CNRI/CWI text; real license Python-2.0 (OSI)
+unicode-org/icu,gh/49244766,,,unicode-org,,,,unicode-3.0,,Licensee noassertion on bundled LICENSE; real license Unicode-3.0 (OSI-approved 2023-11)
+libjpeg-turbo/libjpeg-turbo,gh/39760454,,,libjpeg-turbo,,,,bsd-3-clause,,Licensee noassertion on multi-license LICENSE.md; TurboJPEG API BSD-3-Clause (OSI)
+tjguk/wmi,gh/23124645,,,tjguk,,,,mit,,No standard LICENSE file; MIT declared in PyPI metadata (OSI). Stays ineligible: no funding intent
