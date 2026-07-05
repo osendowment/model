@@ -104,7 +104,7 @@ def _base_mocks(monkeypatch, repos):
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -139,7 +139,7 @@ def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -253,7 +253,7 @@ def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
@@ -282,7 +282,7 @@ def test_build_funding_real_zero_oc_counts_as_intent(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
@@ -309,7 +309,7 @@ def test_build_funding_override_oc_slug_authoritative(monkeypatch):
     monkeypatch.setattr(bf, "load_top_repos", lambda **kw: repos)
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
@@ -347,7 +347,7 @@ def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: {})
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -357,6 +357,48 @@ def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
     assert rows["link/lp"]["score"] == bf.DECLARED_FUNDING_CAP  # liberapay → capped 79
     assert rows["gh/only"]["score"] == 100   # github-only is measured → no cap, 0 sponsors
     assert rows["plain/p"]["score"] == 100   # no channel at all
+
+
+def test_export_by_repo_splits_id_and_canonical_slug(tmp_path, monkeypatch):
+    """funding-json.csv rows with a repo_id are keyed by id; blank-id rows fall
+    back to the slug map, canonicalized (an old pre-rename slug resolves to the
+    canonical name `load_top_repos` uses)."""
+    p = tmp_path / "funding-json.csv"
+    p.write_text(
+        "id,project_repository,project_repository_resolved,channel_platforms,repo_id\n"
+        "1,https://github.com/old-org/lib,,liberapay,424242\n"
+        "2,https://github.com/gozala/events,,ko_fi,\n",
+        encoding="utf-8")
+    # the blank-id row's slug predates a rename → canonical map resolves it
+    monkeypatch.setattr(bf, "canonical_repo_map",
+                        lambda: {"gozala/events": "browserify/events"})
+    by_id, by_slug = bf._export_by_repo(p)
+    assert by_id["424242"]["channel_platforms"] == "liberapay"
+    assert "old-org/lib" not in by_slug            # id-carrying row is id-keyed only
+    assert by_slug["browserify/events"]["channel_platforms"] == "ko_fi"
+    assert "gozala/events" not in by_slug          # keyed canonical, not raw
+
+
+def test_build_funding_floss_manifest_by_repo_id_survives_rename(monkeypatch):
+    """A manifest recorded under a repo's OLD slug still reaches the renamed
+    entry: the row carries the stable repo_id and build() joins by id first.
+    A blank-id manifest row still matches by canonical slug (fallback)."""
+    _base_mocks(monkeypatch, [E("new-org/lib", "424242"), E("slugonly/tool", "9"),
+                              E("plain/p"), E("rich/r")])
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: (
+        # id-keyed: manifest URL still names the pre-rename slug old-org/lib,
+        # but the fetcher stamped the stable id 424242 (= new-org/lib's id).
+        {"424242": {"channel_platforms": "liberapay"}},
+        # blank-id row: only reachable via the canonical slug fallback.
+        {"slugonly/tool": {"channel_platforms": "ko_fi"}}))
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["new-org/lib"]["has_funding_json"] == "True"    # found by repo_id
+    assert rows["new-org/lib"]["channels_count"] == "1"
+    assert rows["new-org/lib"]["score"] == bf.DECLARED_FUNDING_CAP
+    assert rows["slugonly/tool"]["has_funding_json"] == "True"  # found by slug
+    assert rows["slugonly/tool"]["channels_count"] == "1"
+    assert rows["plain/p"]["has_funding_json"] == "False"       # neither map → no signal
 
 
 def test_build_funding_org_manifest_caps_score_and_counts_channel(monkeypatch):

@@ -262,24 +262,33 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
     return row
 
 
-def _export_by_repo(path: Path) -> dict[str, dict]:
-    """{owner/repo: manifest row} for repo-level FLOSS manifests (resolved-or-raw).
+def _export_by_repo(path: Path) -> tuple[dict[str, dict], dict[str, dict]]:
+    """``(by_id, by_slug)`` maps for repo-level FLOSS manifests.
 
-    The slug comes from the manifest's own URL, which can predate a GitHub
-    rename (funding-json.csv carries no repo_id), so it is resolved through
-    `canonical_repo_map` — the lookup key must be the same canonical slug
-    `load_top_repos` hands the builder.
+    `by_id` keys manifest rows by their stable GitHub `repo_id` (stamped by the
+    fetcher) — the rename-proof join build() tries first. Rows with a blank
+    repo_id (fetched before the id was resolvable, or outside the model's repo
+    maps) land in `by_slug` instead, keyed by the manifest URL's slug
+    (resolved-or-raw). That slug can predate a GitHub rename, so it is passed
+    through `canonical_repo_map` — the fallback key must be the same canonical
+    slug `load_top_repos` hands the builder.
     """
-    out: dict[str, dict] = {}
+    by_id: dict[str, dict] = {}
+    by_slug: dict[str, dict] = {}
     if not path.exists():
-        return out
+        return by_id, by_slug
     canon = canonical_repo_map()
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             repo = export_repo_slug(row)
-            if repo:
-                out[canon.get(repo, repo)] = row
-    return out
+            if not repo:
+                continue
+            rid = (row.get("repo_id") or "").strip()
+            if rid:
+                by_id[rid] = row
+            else:
+                by_slug[canon.get(repo, repo)] = row
+    return by_id, by_slug
 
 
 def _fundable_orgs(path: Path) -> dict[str, dict]:
@@ -389,15 +398,17 @@ def build() -> list[dict]:
     # archived repos must appear in the stage output so build_eligibility can
     # mark them active=False instead of silently dropping them.
     eligible = load_top_repos(skip_archived=False)
-    # GitHub-repo signals join on the stable repo_id (rename-proof); the external
-    # matches below (outbound sponsoring by login, OC by slug, FLOSS by URL) keep
-    # their own key, where repo_id is irrelevant.
+    # GitHub-repo signals join on the stable repo_id (rename-proof) — including
+    # repo-level FLOSS manifests, whose rows carry a fetcher-stamped repo_id
+    # (canonical-slug fallback for blank-id rows). The other external matches
+    # (outbound sponsoring by login, OC by slug, FLOSS org manifests by owner)
+    # keep their own key, where repo_id is irrelevant.
     sponsors = load_rows_by_id(SPONSORS_FILE)
     yml = load_rows_by_id(FUNDING_YML_FILE)
     repos_meta = load_rows_by_id(REPOS_FILE)
     foundations = load_column_by_id(FOUNDATIONS_FILE, "host")
     overrides_by_id, org_overrides = _load_funding_overrides(OVERRIDES_FILE)
-    export = _export_by_repo(FLOSS_FUND_FILE)
+    export_by_id, export_by_slug = _export_by_repo(FLOSS_FUND_FILE)
     fundable_orgs = _fundable_orgs(FLOSS_FUND_FILE)
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
     sponsoring = _load_sponsoring(SPONSORSHIPS_FILE)
@@ -471,7 +482,9 @@ def build() -> list[dict]:
         rows.append(assemble_row(
             repo=repo, repo_id=entry.repo_id,
             sponsors=sponsors.get(rid, {}), yml=yml.get(rid, {}),
-            export=export.get(repo.lower(), {}),   # FLOSS: matched by URL/slug
+            # FLOSS manifest: stable repo_id first (rename-proof), canonical
+            # slug fallback for rows the fetcher could not id.
+            export=export_by_id.get(rid) or export_by_slug.get(repo.lower(), {}),
             host=host, host_type=host_type,
             owner=ov.get("owner", ""), owner_type=ov.get("owner_type", ""),
             repo_meta=repos_meta.get(rid, {}),

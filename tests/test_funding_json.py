@@ -1,9 +1,10 @@
-"""Tests for src/sources/floss_fund/funding_json.py channel→platform parsing
-and redirect resolution of non-GitHub repo URLs."""
+"""Tests for src/sources/floss_fund/funding_json.py channel→platform parsing,
+redirect resolution of non-GitHub repo URLs, and repo_id stamping."""
 
 from src.sources.floss_fund.funding_json import (
     _redirect_candidate_urls,
     parse_channels,
+    resolve_repo_ids,
     resolve_repo_redirects,
 )
 
@@ -90,3 +91,29 @@ def test_resolve_repo_redirects_fresh_resolve_overrides_last_good():
                                last_good=last_good)
     assert n == 1
     assert rows[0]["project_repository_resolved"] == "https://github.com/tukaani-project/xz"
+
+
+# ── repo_id stamping ─────────────────────────────────────────────────────────
+
+def test_resolve_repo_ids_canonicalizes_and_never_invents():
+    """repo_id is looked up via the canonical slug (a manifest URL may predate a
+    rename); org-level / non-GitHub / out-of-scope rows stay blank — no id is
+    ever invented."""
+    rows = [
+        {"project_repository": "https://github.com/gozala/events"},    # pre-rename slug
+        {"project_repository": "https://tukaani.org/xz/redir",
+         "project_repository_resolved": "https://github.com/tukaani-project/xz"},
+        {"project_repository": "https://github.com/unknown/repo"},     # not in the maps
+        {"project_repository": "https://github.com/someorg"},          # org page → no slug
+        {"project_repository": "https://codeberg.org/a/b"},            # non-GitHub
+    ]
+    n = resolve_repo_ids(
+        rows,
+        ids={"browserify/events": "665422", "tukaani-project/xz": "394784806"},
+        canon={"gozala/events": "browserify/events"})
+    assert n == 2
+    assert rows[0]["repo_id"] == "665422"      # old slug → canonical → id
+    assert rows[1]["repo_id"] == "394784806"   # resolved redirect URL wins
+    assert rows[2]["repo_id"] == ""            # unresolvable → blank, never invented
+    assert rows[3]["repo_id"] == ""
+    assert rows[4]["repo_id"] == ""

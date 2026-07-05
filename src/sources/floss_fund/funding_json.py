@@ -31,7 +31,8 @@ from src.common.funding_platforms import (
     FUNDING_PLATFORMS,
     platform_handle_from_url,
 )
-from src.sources.floss_fund.directory import normalize_github_repo
+from src.common.repos import canonical_repo_map, load_repo_ids, load_value_repo_ids
+from src.sources.floss_fund.directory import export_repo_slug, normalize_github_repo
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -49,6 +50,12 @@ OUTPUT_FIELDS = [
     "funding_channels", "channel_platforms", "funding_plans_count",
 ] + FUNDING_PLATFORMS + [
     "created_at", "updated_at",
+    # repo_id: stable GitHub numeric id for the manifest's repo (rename-proof
+    # join key); blank when the manifest is org-level / non-GitHub / unknown to
+    # the model's repo maps. fetched_at: UTC ISO-8601 stamp of the run that
+    # fetched/refreshed the row (created_at/updated_at above are manifest
+    # metadata from the directory, not our fetch date).
+    "repo_id", "fetched_at",
 ]
 
 
@@ -174,6 +181,32 @@ def resolve_repo_redirects(rows: list[dict], resolver=_resolve_url,
     return len(mapping)
 
 
+def resolve_repo_ids(rows: list[dict], ids: dict[str, str] | None = None,
+                     canon: dict[str, str] | None = None) -> int:
+    """Populate `repo_id` on every row; return the count resolved.
+
+    The manifest's repo slug (`export_repo_slug`: resolved-redirect-or-raw URL,
+    lowercased) is passed through `canonical_repo_map` (a manifest URL can
+    predate a GitHub rename) and looked up in the model's slug → id maps:
+    `load_repo_ids` (github/repos.csv) overlaid with `load_value_repo_ids`
+    (value.csv wins — repos.csv lags renames). Org-level manifests, non-GitHub
+    hosts, and slugs outside the model's scope get an empty repo_id — the id is
+    never invented.
+    """
+    if ids is None:
+        ids = {**load_repo_ids(), **load_value_repo_ids()}
+    if canon is None:
+        canon = canonical_repo_map()
+    resolved = 0
+    for r in rows:
+        slug = export_repo_slug(r)
+        rid = ids.get(canon.get(slug, slug), "") if slug else ""
+        r["repo_id"] = rid
+        if rid:
+            resolved += 1
+    return resolved
+
+
 def _download_and_extract(url: str) -> str:
     """Download tar.gz and return the CSV content as string."""
     log.debug("Downloading %s", url)
@@ -289,6 +322,12 @@ def main() -> None:
         console.print("[dim]Resolving non-GitHub repo URLs via redirect…[/dim]")
         last_good = _load_last_good_resolved(args.output)
         resolve_repo_redirects(rows, last_good=last_good)
+        # Every row in this branch was genuinely (re-)fetched from the tarball
+        # just now — the file is rewritten whole, so one stamp covers the run.
+        resolve_repo_ids(rows)
+        fetched_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+        for r in rows:
+            r["fetched_at"] = fetched_at
         _write_csv(args.output, rows)
         elapsed = time.monotonic() - t_start
 
@@ -296,6 +335,7 @@ def main() -> None:
     projects = len(rows)
     with_repo = sum(1 for r in rows if r["project_repository"])
     resolved = sum(1 for r in rows if (r.get(RESOLVED_FIELD) or "").strip())
+    with_repo_id = sum(1 for r in rows if (r.get("repo_id") or "").strip())
     active = sum(1 for r in rows if r["status"] == "active")
 
     # Entity type breakdown
@@ -355,6 +395,7 @@ def main() -> None:
     summary.add_row("Projects", f"[bold]{projects:,}[/bold]")
     summary.add_row("With repo URL", f"{with_repo:,}")
     summary.add_row("Repo URL resolved (redirect→GitHub)", f"{resolved:,}")
+    summary.add_row("GitHub repo_id resolved", f"{with_repo_id:,}")
     summary.add_row("Active", f"{active:,}")
     type_str = "  ".join(f"{t}: {c}" for t, c in type_counts.most_common())
     summary.add_row("Types", f"[dim]{type_str}[/dim]")
