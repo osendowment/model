@@ -76,4 +76,4 @@ thkukuk/rpcsvc-proto,gh/55140533,,,,,,,bsd-3-clause,,,Licensee noassertion; Sun 
 selinuxproject/selinux,gh/20648799,,,,,,,gpl-2.0-only,,,Licensee noassertion on multi-license meta-repo; GPL-2.0-only covers userspace tools (OSI)
 bdwgc/bdwgc,gh/2109456,,,,,,,mit,,,Licensee noassertion on upstream MIT-style permissive license (use/copy/modify with notice retention); MIT per upstream self-title and distro convention (OSI). Stays ineligible: no funding intent
 xiph/*,,xiph.org,nonprofit,xiph,,,,,,,Xiph.Org Foundation 501c3 since 2003 (donate page xiph.org/donate); legal steward of Ogg/Vorbis/FLAC/Opus/Speex/Theora
-ronaldoussoren/pyobjc,gh/243933900,,,ronaldoussoren,,,,,https://www.paypal.com/paypalme/RonaldOussoren,,PayPal.me is the only declared funding channel (README); curated PayPal channel
+ronaldoussoren/pyobjc,gh/243933900,,,ronaldoussoren,,,,,https://www.paypal.com/paypalme/RonaldOussoren,,PayPal.me declared on maintainer's blog support page (blog.ronaldoussoren.net/support — 'One-time donations through Paypal' for pyobjc/py2app); curated PayPal channel
