@@ -38,13 +38,18 @@ from src.sources.funding._common import DATA_DIR, out_path
 
 console = Console()
 
-REPOS_FILE = Path(__file__).resolve().parents[3] / "data" / "sources" / "github" / "search" / "top-repos.csv"
+# Classify the full set of fetched repos (github/repos.csv) — a superset of the
+# risk/eligibility scope. The narrower search/top-repos.csv omits repos that
+# entered via value-stage git-URL resolution (e.g. autotools-mirror/*), so it
+# would leave those foundation-hosted repos unclassified.
+REPOS_FILE = Path(__file__).resolve().parents[3] / "data" / "sources" / "github" / "repos.csv"
 OUT_FILE = DATA_DIR / "host-by-repo.csv"
 
 # Priority order — first match wins. More specific foundations come before
 # parent / umbrella ones (CNCF and OpenJS both live under the Linux
 # Foundation, so they win over `lf` on overlap).
-SLUGS = ["apache", "cncf", "eclipse", "openjs", "psf", "numfocus", "sfc", "lf"]
+SLUGS = ["apache", "cncf", "eclipse", "openjs", "psf", "numfocus", "gnu", "fsf",
+         "gnome", "xorg", "sfc", "lf"]
 
 # Parent foundation hierarchy. When a host has a parent (e.g. CNCF and OpenJS
 # both live under the Linux Foundation), the emitted host string is
@@ -52,6 +57,9 @@ SLUGS = ["apache", "cncf", "eclipse", "openjs", "psf", "numfocus", "sfc", "lf"]
 PARENT_FOUNDATION: dict[str, str] = {
     "cncf":   "lf",
     "openjs": "lf",
+    # GNU is the Free Software Foundation's project — FSF holds the copyright
+    # assignments and accepts donations earmarked for GNU — so emit `fsf/gnu`.
+    "gnu":    "fsf",
     # NumFOCUS, SFC, Apache, Eclipse, PSF are independent legal entities
     # — no parent. PyPA → PSF would qualify but we already collapse PyPA
     # repos to host=psf via the org-prefix rule, not a separate slug.
@@ -93,6 +101,15 @@ ORG_HOST: dict[str, str] = {
     # eslint, webpack, expressjs, …) which the project_list match catches.
     "openjsf": "openjs",
     "openjs-foundation": "openjs",
+    # GNU mirror orgs whose repos are ALL genuine GNU packages. Conservative:
+    # `mirror/*` and `bminor/*` are NOT here — `mirror/` hosts non-GNU projects
+    # (ncurses) and `bminor/` only mirrors glibc — those match by exact slug
+    # from the roster instead.
+    "autotools-mirror": "gnu",
+    "coreutils": "gnu",
+    "gcc-mirror": "gnu",
+    # GNOME mirrors every gitlab.gnome.org project to github.com/GNOME/*.
+    "gnome": "gnome",
 }
 
 # Domain suffixes whose subdomains all belong to a single foundation.
@@ -105,6 +122,16 @@ DOMAIN_SUFFIX_HOST: list[tuple[str, str]] = [
     ("numfocus.org", "numfocus"),
     ("sfconservancy.org", "sfc"),
     ("linuxfoundation.org", "lf"),
+    # GNU: any *.gnu.org (www/ftp/git.savannah/gcc.gnu.org/…) is a GNU package.
+    ("gnu.org", "gnu"),
+    # FSF's own sites (email self-defense, the directory software, RYF). The
+    # substantive FSF-stewarded software is GNU (tracked separately above).
+    ("fsf.org", "fsf"),
+    # GNOME Foundation (gnome.org, gitlab.gnome.org, *.gnome.org).
+    ("gnome.org", "gnome"),
+    # X.Org Foundation. Only x.org — NOT freedesktop.org, which is a broader
+    # umbrella (wayland/dbus/pipewire/… are not X.Org) and would over-attribute.
+    ("x.org", "xorg"),
     # PSF / PyPA
     ("python.org", "psf"),
     ("pypa.io", "psf"),
@@ -184,10 +211,21 @@ def _apex(url: str) -> str:
         return ""
 
 
+# Reference / docs subdomains of a foundation site that are NOT a project home:
+# a repo whose homepage is a PEP (peps.python.org) or docs page merely *links*
+# to the foundation — it is not thereby hosted or funded by it. Block these from
+# the suffix match so they don't spuriously attribute a host (e.g.
+# rogdham/backports.zstd → peps.python.org/pep-0784 must NOT become host=psf).
+NON_HOME_SUBDOMAINS: set[str] = {
+    "peps.python.org", "docs.python.org", "discuss.python.org",
+    "bugs.python.org", "mail.python.org", "wiki.python.org",
+}
+
+
 def _host_from_domain(host_url: str, domain_idx: dict[str, str]) -> str:
     """Match by exact apex domain, then by trailing suffix (e.g. `*.apache.org`)."""
     apex = _apex(host_url)
-    if not apex:
+    if not apex or apex in NON_HOME_SUBDOMAINS:
         return ""
     if apex in domain_idx:
         return domain_idx[apex]
@@ -203,6 +241,7 @@ def classify(slug_idx: dict[str, str], org_idx: dict[str, str],
     with open(REPOS_FILE, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             repo = r["repo"].strip()
+            repo_id = (r.get("repo_id") or "").strip()
             key = repo.lower()
             org = key.split("/", 1)[0] if "/" in key else ""
             homepage = (r.get("homepage") or "").strip()
@@ -224,7 +263,8 @@ def classify(slug_idx: dict[str, str], org_idx: dict[str, str],
             # byte-identical host-by-repo.csv. Emit qualified `parent/child` for
             # the `host` column.
             host_checked = fetched_at_by_host.get(host, "") if host else ""
-            rows.append({"repo": repo, "host": _qualified(host) if host else "",
+            rows.append({"repo": repo, "repo_id": repo_id,
+                         "host": _qualified(host) if host else "",
                          "host_source": source, "host_checked": host_checked})
     return rows
 
@@ -244,7 +284,7 @@ def main() -> None:
     tmp = OUT_FILE.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f,
-                           fieldnames=["repo", "host", "host_source", "host_checked"])
+                           fieldnames=["repo", "repo_id", "host", "host_source", "host_checked"])
         w.writeheader()
         w.writerows(rows)
     tmp.replace(OUT_FILE)

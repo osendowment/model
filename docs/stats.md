@@ -68,9 +68,9 @@ Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 
 ## Risk
 
-**Risk dimensions cover the 896 top repos** — the valid class-A set
+**Risk dimensions cover the 895 top repos** — the valid class-A set
 (`risk_input.value_classes = ["A"]`), non-archived; each funnel below starts
-from those 896. `risk.csv` ranks all 896 on the four scored dimensions; the
+from those 895. `risk.csv` ranks all 895 on the four scored dimensions; the
 funding signals and the intent/nonprofit flags moved to the
 [Eligibility](#eligibility) stage. Methodology: [risk.md](risk.md) + component docs.
 
@@ -174,8 +174,8 @@ net-new issues per active contributor, plus issue-debt and trend.
 
 ## Eligibility
 
-**Eligibility covers the 918 top repos** — the valid class-A set INCLUDING
-archived repos (896 risk scope + 22 archived, which surface below as
+**Eligibility covers the 916 top repos** — the valid class-A set INCLUDING
+archived repos (895 risk scope + 21 archived, which surface below as
 `active=False` instead of being dropped). Four checks per repo, rolled into
 `data/eligibility/eligibility.csv`: `eligible = oss AND intent AND nonprofit
 AND active`. Methodology: [eligibility.md](eligibility.md) +
@@ -183,8 +183,9 @@ AND active`. Methodology: [eligibility.md](eligibility.md) +
 
 ### Licenses (scope 916)
 
-Per-repo license resolution ([eligibility.md](eligibility.md)) — registry
-license first (per-eco results.csv), GitHub Licensee fallback; `oss` = the
+Per-repo license resolution ([eligibility.md](eligibility.md)) — manual
+`license` assertion in `overrides.csv` first (detection-failure fix), then
+registry license (per-eco results.csv), GitHub Licensee fallback; `oss` = the
 SPDX id (or any component of an SPDX expression) is OSI-approved ∪ curated
 extras. Unknown (no license signal) is tracked separately from known non-OSS.
 
@@ -192,14 +193,14 @@ extras. Unknown (no license signal) is tracked separately from known non-OSS.
 |---|---:|---:|
 | input top repos (incl. archived) | 916 | 100% |
 | license resolved | 916 | 100% |
-| · from override | 7 | 0.8% |
+| · from override | 14 | 1.5% |
 | · from registry | 893 | 97.5% |
-| · from GitHub | 16 | 1.7% |
-| **oss=True (OSI-approved)** | **903** | **98.6%** |
+| · from GitHub | 9 | 1.0% |
+| **oss=True (OSI-approved)** | **910** | **99.3%** |
 | oss=False (known non-OSS) | 4 | 0.4% |
-| oss unknown (no signal) | 9 | 1.0% |
+| oss unknown (no signal) | 2 | 0.2% |
 
-The 5 known non-OSS are content-licensed data repos (CC0/CC-BY — free for
+The 4 known non-OSS are content-licensed data repos (CC0/CC-BY — free for
 documents, not software OSS by this model's strict policy).
 
 ### Activity
@@ -225,14 +226,14 @@ Microsoft, …). See [funding.md](components/funding.md).
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 665 | 72.6% |
-| intent — no funding signal | 251 | 27.4% |
+| intent — any funding signal | 672 | 73.4% |
+| intent — no funding signal | 244 | 26.6% |
 | nonprofit — community / independent | 856 | 93.4% |
 | nonprofit — company-backed | 60 | 6.6% |
 
-The 33 company-backed repos are **kept in `eligibility.csv`** and flagged
+The 61 company-backed repos are **kept in `eligibility.csv`** and flagged
 `nonprofit=False` (they are already resourced; the flag makes them ineligible
-without hiding them). The 286 repos with `intent=False` are not actively
+without hiding them). The 246 repos with `intent=False` are not actively
 soliciting support — a higher-priority target for outreach.
 
 ### Eligibility rollup
@@ -242,8 +243,8 @@ unlock. Missing intent is by far the binding constraint.
 
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
-| oss | 903 | 98.6% | 5 |
-| intent | 665 | 72.6% | 228 |
+| oss | 910 | 99.3% | 1 |
+| intent | 672 | 73.4% | 224 |
 | nonprofit | 856 | 93.4% | 59 |
 | active | 894 | 97.6% | 6 |
-| **eligible** | **594** | **64.8%** | |
+| **eligible** | **605** | **66.0%** | |

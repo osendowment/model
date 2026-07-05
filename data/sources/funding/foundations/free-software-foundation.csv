@@ -1,0 +1,5 @@
+name,project_slug,domain,website,github_repo,ecosystem,package,description,fetched_at
+Email Self-Defense (Edward),email-self-defense,emailselfdefense.fsf.org,https://emailselfdefense.fsf.org/,,,,"FSF-run GnuPG email-encryption guide and Edward reply bot (AGPL, hosted on vcs.fsf.org).",2026-07-05T16:53:17+00:00
+Free Software Directory,free-software-directory,directory.fsf.org,https://directory.fsf.org/,,,,FSF-operated catalog of free software (the platform is FSF's; the catalog entries are not FSF projects).,2026-07-05T16:53:17+00:00
+Free Software Foundation,fsf,fsf.org,https://www.fsf.org/,,,,501(c)(3) that sponsors the GNU Project and funds free software; holds GNU copyright assignments.,2026-07-05T16:53:17+00:00
+Respects Your Freedom,respects-your-freedom,ryf.fsf.org,https://ryf.fsf.org/,,,,FSF hardware-certification program for devices that respect users' freedom.,2026-07-05T16:53:17+00:00

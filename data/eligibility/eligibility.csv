@@ -8,10 +8,10 @@ agronholm/exceptiongroup,gh/447694800,True,True,True,True,True
 ai/nanoid,gh/99401299,True,True,True,True,True
 aio-libs-abandoned/async-timeout,gh/67703198,True,True,True,False,False
 aio-libs/aiobotocore,gh/36618494,True,True,True,True,True
-aio-libs/aiohttp,gh/13258039,False,True,True,True,False
+aio-libs/aiohttp,gh/13258039,True,True,True,True,True
 aio-libs/aiosignal,gh/205007356,True,True,True,True,True
 aio-libs/frozenlist,gh/204197530,True,True,True,True,True
-aio-libs/multidict,gh/51206425,False,True,True,True,False
+aio-libs/multidict,gh/51206425,True,True,True,True,True
 aio-libs/propcache,gh/866565706,True,True,True,True,True
 aio-libs/yarl,gh/64756820,True,True,True,True,True
 ajv-validator/ajv,gh/35914020,True,True,True,True,True
@@ -37,9 +37,9 @@ assert-rs/snapbox,gh/424722460,True,False,True,True,False
 astanin/python-tabulate,gh/205875548,True,False,True,True,False
 astral-sh/ruff,gh/523043277,True,True,False,True,False
 auth0/node-jwa,gh/8116861,True,True,False,True,False
-autotools-mirror/autoconf,gh/47662429,True,False,True,True,False
-autotools-mirror/libtool,gh/47662711,True,False,True,True,False
-autotools-mirror/m4,gh/66880383,True,False,True,True,False
+autotools-mirror/autoconf,gh/47662429,True,True,True,True,True
+autotools-mirror/libtool,gh/47662711,True,True,True,True,True
+autotools-mirror/m4,gh/66880383,True,True,True,True,True
 aws/aws-cli,gh/6780767,True,True,False,True,False
 aws/aws-sdk-js-crypto-helpers,gh/149673986,True,True,False,True,False
 aws/aws-sdk-js-v3,gh/87228090,True,True,False,True,False
@@ -246,7 +246,7 @@ gcc-mirror/gcc,gh/22711503,True,True,True,True,True
 getsentry/sentry-javascript,gh/3328572,True,True,False,True,False
 giampaolo/psutil,gh/20101515,True,True,True,True,True
 git/git,gh/36502,True,True,True,True,True
-gitlab-freedesktop-mirrors/libxcb,gh/444023705,True,False,True,True,False
+gitlab-freedesktop-mirrors/libxcb,gh/444023705,True,True,True,True,True
 gitoxidelabs/gitoxide,gh/136510559,True,True,True,True,True
 gitpython-developers/gitdb,gh/1126093,True,False,True,True,False
 gitpython-developers/smmap,gh/1865144,True,False,True,True,False
@@ -255,7 +255,7 @@ gkz/optionator,gh/13435927,True,False,True,True,False
 gkz/prelude-ls,gh/4457759,True,False,True,True,False
 gkz/type-check,gh/13182168,True,False,True,True,False
 gmp-mirror/gmp,gh/681340775,True,True,True,True,True
-gnome/pango,gh/4537144,True,False,True,True,False
+gnome/pango,gh/4537144,True,True,True,True,True
 google/brotli,gh/24993138,True,True,False,True,False
 google/zerocopy,gh/534354967,True,True,False,True,False
 googleapis/google-cloud-python,gh/16316451,True,True,False,True,False
@@ -438,14 +438,14 @@ laurent-laporte-pro/deprecated,gh/111412148,True,False,True,True,False
 lddubeau/xmlchars,gh/139881982,True,False,True,False,False
 legrandin/pycryptodome,gh/19378935,True,False,True,True,False
 libexpat/libexpat,gh/80314213,True,False,True,True,False
-libffi/libffi,gh/321154,True,False,True,True,False
+libffi/libffi,gh/321154,True,True,True,True,True
 libjpeg-turbo/libjpeg-turbo,gh/39760454,True,True,True,True,True
 libjxl/libjxl,gh/340219494,True,True,False,True,False
 libpixman/pixman,gh/81675971,True,True,True,True,True
 libuv/libuv,gh/14812739,True,True,True,True,True
 linusu/buffer-from,gh/66025821,True,True,True,True,True
 linux-audit/audit-userspace,gh/52464964,True,False,True,True,False
-linux-pam/linux-pam,gh/76264690,False,False,True,True,False
+linux-pam/linux-pam,gh/76264690,True,False,True,True,False
 litejs/natural-compare-lite,gh/9146732,True,True,True,True,True
 ljharb/call-bind,gh/308533760,True,True,True,True,True
 ljharb/call-bind-apply-helpers,gh/898190951,True,True,True,True,True
@@ -567,7 +567,7 @@ octokit/openapi-types.ts,gh/304109193,True,True,False,True,False
 octokit/types.ts,gh/216109757,True,True,False,True,False
 oozcitak/xmlbuilder-js,gh/1042809,True,True,True,True,True
 open-telemetry/opentelemetry-js,gh/185901023,True,True,True,True,True
-open-telemetry/opentelemetry-js-contrib,gh/255986659,True,False,True,True,False
+open-telemetry/opentelemetry-js-contrib,gh/255986659,True,True,True,True,True
 open-telemetry/opentelemetry-python,gh/185478926,True,True,True,True,True
 open-telemetry/opentelemetry-python-contrib,gh/220524743,True,True,True,True,True
 openssl/openssl,gh/7634677,True,True,True,True,True
@@ -641,7 +641,7 @@ python/cpython,gh/81598961,True,True,True,True,True
 python/importlib_metadata,gh/306448340,True,True,True,True,True
 python/importlib_resources,gh/306147182,True,True,True,True,True
 python/mypy,gh/7053637,True,True,True,True,True
-python/mypy_extensions,gh/165752308,False,True,True,True,False
+python/mypy_extensions,gh/165752308,True,True,True,True,True
 python/typing,gh/24604008,True,True,True,True,True
 python/typing_extensions,gh/494077289,True,True,True,True,True
 python/tzdata,gh/242158882,True,True,True,True,True
@@ -715,7 +715,7 @@ scikit-learn/scikit-learn,gh/843222,True,True,True,True,True
 scipy/scipy,gh/1460385,True,True,True,True,True
 seanmonstar/reqwest,gh/62350380,True,True,True,True,True
 sec-ant/readable-stream,gh/569980966,True,False,True,True,False
-selinuxproject/selinux,gh/20648799,False,False,True,True,False
+selinuxproject/selinux,gh/20648799,True,False,True,True,False
 serde-rs/bytes,gh/87358441,True,False,True,True,False
 serde-rs/json,gh/35894511,True,False,True,True,False
 serde-rs/serde,gh/14367737,True,True,True,True,True
@@ -839,7 +839,7 @@ terkelg/sisteransi,gh/122441239,True,True,True,True,True
 terser/terser,gh/29097127,True,True,True,True,True
 textualize/rich,gh/220809393,True,True,True,True,True
 theskumar/python-dotenv,gh/23727790,True,False,True,True,False
-thkukuk/rpcsvc-proto,gh/55140533,False,False,True,True,False
+thkukuk/rpcsvc-proto,gh/55140533,True,False,True,True,False
 thlorenz/convert-source-map,gh/8751561,True,True,True,True,True
 thlorenz/deep-is,gh/9345558,True,True,True,True,True
 tim-kos/node-retry,gh/1738798,True,False,True,True,False
@@ -861,7 +861,7 @@ torvalds/linux,gh/2325298,True,True,True,True,True
 tower-rs/tower,gh/98244646,True,True,True,True,True
 tox-dev/filelock,gh/17098256,True,True,True,True,True
 tox-dev/platformdirs,gh/367032142,True,True,True,True,True
-tqdm/tqdm,gh/36804486,False,True,True,True,False
+tqdm/tqdm,gh/36804486,True,True,True,True,True
 tritondatacenter/node-assert-plus,gh/4767976,True,False,True,True,False
 tritondatacenter/node-extsprintf,gh/4058064,True,False,True,True,False
 troygoode/node-require-directory,gh/3053807,True,False,True,True,False

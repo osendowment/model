@@ -24,6 +24,8 @@ gh/2317381,pvorb/clone,npm,26.8528,73
 gh/55723051,babel/minify,npm,25.3705,73
 gh/63155638,stub42/pytz,pypi,46.1926,72
 gh/12107007,chaijs/type-detect,npm,43.9085,72
+gh/444023705,gitlab-freedesktop-mirrors/libxcb,cpp,33.4978,72
+gh/4537144,gnome/pango,cpp,28.7772,72
 gh/17144859,grantjenks/python-sortedcontainers,pypi,25.2982,72
 gh/95052330,nodejs/string_decoder,npm,56.2724,71
 gh/190579283,babel/babel-polyfills,npm,53.6186,71
@@ -38,10 +40,12 @@ gh/67305738,dtolnay/syn,crates,71.2836,70
 gh/157420458,micromark/micromark,npm,63.2813,70
 gh/681340775,gmp-mirror/gmp,cpp,51.3627,70
 gh/26459635,time-rs/time,crates,34.9651,70
+gh/36804486,tqdm/tqdm,pypi,33.327,70
 gh/11031844,uqfoundation/dill,pypi,27.3906,70
 gh/27113310,jonschlinkert/fill-range,npm,57.4323,69
 gh/12001360,mathiasbynens/cssesc,npm,49.0173,69
 gh/19117456,formatjs/formatjs,npm,36.6146,69
+gh/66880383,autotools-mirror/m4,cpp,34.8576,69
 gh/20101515,giampaolo/psutil,pypi,32.9504,69
 gh/930576948,pydantic/typing-inspection,pypi,30.1344,69
 gh/65987276,bluss/bencher,crates,27.5727,69
@@ -50,6 +54,7 @@ gh/11481338,zloirock/core-js,npm,54.1728,68
 gh/22266795,ljharb/qs,npm,47.8517,68
 gh/105228556,mysticatea/abort-controller,npm,38.0047,68
 gh/508894,isaacs/sax-js,npm,35.7197,68
+gh/321154,libffi/libffi,cpp,26.8534,68
 gh/759017108,burntsushi/jiff,crates,25.3307,68
 gh/14367737,serde-rs/serde,crates,88.7911,67
 gh/91262163,pyparsing/pyparsing,pypi,45.52,67
@@ -170,6 +175,7 @@ gh/800543709,isaacs/package-json-from-dist,npm,39.012,56
 gh/6627949,fb55/domutils,npm,35.8376,56
 gh/119439276,eemeli/yaml,npm,32.3986,56
 gh/209673558,lokathor/bytemuck,crates,31.3858,56
+gh/47662711,autotools-mirror/libtool,cpp,27.3041,56
 gh/183990447,dtolnay/rustversion,crates,69.2396,55
 gh/2743221,pillarjs/iconv-lite,npm,53.8943,55
 gh/10498729,mathiasbynens/jsesc,npm,48.7981,55
@@ -203,6 +209,7 @@ gh/209510094,rust-random/rngs,crates,35.9926,53
 gh/901188921,ljharb/side-channel-weakmap,npm,31.6022,53
 gh/1945034,pallets/itsdangerous,pypi,29.8543,53
 gh/16523712,sinonjs/fake-timers,npm,29.1823,53
+gh/47662429,autotools-mirror/autoconf,cpp,28.2684,53
 gh/122441239,terkelg/sisteransi,npm,26.495,53
 gh/33943153,cssnano/cssnano,npm,75.6917,52
 gh/2755924,mathiasbynens/punycode.js,npm,64.2439,52
@@ -295,6 +302,7 @@ gh/22022707,sindresorhus/resolve-from,npm,52.9439,47
 gh/41585934,sindresorhus/pify,npm,47.0416,47
 gh/34739117,pytest-dev/pluggy,pypi,45.8542,47
 gh/71475907,watson/ci-info,npm,45.1036,47
+gh/51206425,aio-libs/multidict,pypi,44.5271,47
 gh/2811323,oauthlib/oauthlib,pypi,42.0383,47
 gh/4475810,jshttp/cookie,npm,41.0266,47
 gh/22020904,sindresorhus/import-fresh,npm,38.5355,47
@@ -412,6 +420,7 @@ gh/10270250,react/react,npm,70.3049,40
 gh/175398594,sindresorhus/type-fest,npm,67.1929,40
 gh/773229339,es-shims/es-object-atoms,npm,60.1802,40
 gh/71381729,sindresorhus/mimic-function,npm,55.1793,40
+gh/13258039,aio-libs/aiohttp,pypi,48.7359,40
 gh/481834578,inspect-js/has-property-descriptors,npm,48.2658,40
 gh/23241722,rust-lang/glob,crates,40.472,40
 gh/204197530,aio-libs/frozenlist,pypi,39.9507,40
@@ -490,6 +499,7 @@ gh/99401299,ai/nanoid,npm,40.0699,36
 gh/43528820,inspect-js/is-typed-array,npm,38.6031,36
 gh/27193779,nodejs/node,cpp,33.2484,36
 gh/23512396,sindresorhus/cli-cursor,npm,32.9278,36
+gh/165752308,python/mypy_extensions,pypi,31.1939,36
 gh/25997846,feross/is-buffer,npm,30.386,36
 gh/358917250,apache/arrow-rs,crates,25.7955,36
 gh/1580001,isaacs/inherits,npm,63.5141,35
@@ -545,6 +555,7 @@ gh/21304485,sindresorhus/detect-newline,npm,32.1147,31
 gh/31656998,sindresorhus/to-fast-properties,npm,28.432,31
 gh/367032142,tox-dev/platformdirs,pypi,45.1877,30
 gh/17690272,jshttp/statuses,npm,41.8805,30
+gh/255986659,open-telemetry/opentelemetry-js-contrib,npm,33.1252,30
 gh/649850465,inspect-js/typed-array-buffer,npm,25.9742,30
 gh/8274071,jshttp/methods,npm,25.8042,30
 gh/752160492,ljharb/es-errors,npm,81.9143,29

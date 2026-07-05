@@ -206,7 +206,18 @@ association); `owner` is the owning entity (a domain). Each is classified
 of the two** (`min`), so a single value ∈ {0, 0.5, 1}:
 
 - A scraped FOSS-foundation host (`funding/host-by-repo.csv`) defaults to
-  nonprofit, so Apache/LF/CNCF/NumFOCUS/PSF repos drop from 100 → 50 as before.
+  nonprofit, so Apache/CNCF/Eclipse/OpenJS/PSF/NumFOCUS/LF, the **GNU project**
+  (host `fsf/gnu` — every GNU package is FSF-stewarded), the **FSF** itself,
+  **Software Freedom Conservancy** members (incl. Sourceware-hosted libs like
+  `libffi`), the **GNOME Foundation** (`gnome/*`, gnome.org), and the **X.Org
+  Foundation** (its gitlab.freedesktop.org/xorg projects, e.g. `libxcb`) repos
+  drop from 100 → 50. `match_repos` joins each roster to a repo by exact
+  `owner/name` slug, a curated foundation org-prefix (`autotools-mirror/*`,
+  `gcc-mirror/*`, `coreutils/*` → GNU; `GNOME/*` → GNOME), or apex/suffix domain
+  (`*.gnu.org` → GNU, `sfconservancy.org` → SFC, `gnome.org` → GNOME, `x.org` →
+  X.Org — but NOT `freedesktop.org`, a broader umbrella that would
+  over-attribute). Reference-only subdomains (`peps.python.org`, docs pages) are
+  excluded so a repo that merely links to a foundation is not miscredited.
 - A curated `data/eligibility/overrides.csv` row sets either side by domain.
   `facebook/react` (host `react.foundation` nonprofit, owner `meta.com` company)
   → host_score `min(0.5, 0)` = 0 → ∛(100·100·0) = **1**; `rust-lang/rust` (host
