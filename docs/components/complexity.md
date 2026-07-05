@@ -23,13 +23,13 @@ per-source under `data/sources/`; derived columns are computed by
 ```
 Complexity  → data/risk/complexity.csv  (one row per class-A risk repo)
 │
-├── scc  (sparse checkout, sha-pinned)
+├── scc  (one sparse checkout, sha-pinned)
 │   ├── loc_eoy                 ← scc.loc                 (total lines)            [EOY]
 │   ├── sloc_eoy                ← scc.sloc                (source lines)           [EOY]
 │   ├── scc_complexity_eoy      ← scc.complexity          (cyclomatic total)       [EOY]
 │   └── scc_density_eoy         ← scc.complexity_density  (complexity per line)    [EOY]
 │
-├── lizard  (sparse checkout, sha-pinned, mainline-corrected)
+├── lizard  (same checkout, sha-pinned, mainline-corrected)
 │   ├── cyclomatic_total/avg/max ← lizard cyclomatic (per-function McCabe)         [EOY]
 │   └── cognitive_total/avg/max  ← lizard cognitive complexity                     [EOY]
 │
@@ -50,10 +50,11 @@ Complexity  → data/risk/complexity.csv  (one row per class-A risk repo)
 
 ## How It Works
 
-1. **Collect** — three Git-analysis fetchers pull raw signals into
-   `data/sources/`: scc (loc + complexity), lizard (cyclomatic + cognitive), and
-   churn. Each is keyed on a sha taken from `commits-years.csv` (per-year
-   `last_sha`).
+1. **Collect** — one unified fetcher (`fetch_sha_metrics.py`) resolves the
+   end-of-year sha, sparse-clones **once**, and runs scc + both lizard passes on
+   that single checkout, writing scc (loc + complexity) and lizard (cyclomatic +
+   cognitive); a separate churn fetcher adds 5-year churn. Each is keyed on a sha
+   taken from `commits-years.csv` (per-year `last_sha`).
 2. **Pick the snapshot sha** — for each repo `build_complexity.py` walks **every
    available snapshot year newest→oldest** and picks the most-recent whose
    `last_sha` has scc `loc > 0`. This spans the settings window (2025→2021) and,
@@ -73,25 +74,24 @@ Complexity  → data/risk/complexity.csv  (one row per class-A risk repo)
 
 GitHub's fork-network leak means a repo's pinned sha can occasionally point at an
 **off-mainline** commit (a CI/template commit from another fork in the network),
-whose tree is a tiny template — not the real codebase. The fetchers correct this:
-scc's `resolve_mainline_sha` walks the branch's first-parent history to the real
-last mainline commit before the year cutoff, and the lizard fetchers
-(`fetch_advanced_complexity.py`, `fetch_cognitive.py`) now apply the same
-`corrected_clone_sha` before checkout. Without this, complexity would be measured
-on a template tree.
+whose tree is a tiny template — not the real codebase. The unified fetcher corrects
+this: scc's `resolve_mainline_sha` walks the branch's first-parent history to the
+real last mainline commit before the year cutoff, and `fetch_sha_metrics.py` applies
+the same `corrected_clone_sha` once before its single checkout. Without this,
+complexity would be measured on a template tree.
 
 ## Collection
 
-Three Git-analysis fetchers (plus `commits-years.csv` for the sha) feed the
-build. Every fetcher records the analysed sha + a `fetched_at`, so a `0`/empty
-value is distinguishable from a failed fetch.
+A unified SHA-metrics fetcher (scc + lizard) and a churn fetcher (plus
+`commits-years.csv` for the sha) feed the build. Every fetcher records the
+analysed sha + a `fetched_at`, so a `0`/empty value is distinguishable from a
+failed fetch.
 
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
 |---|---|---|---|
 | `git/commits-years.csv` | `src/sources/git/commits_years.py` | per-(repo, year) `last_sha` + `commits` | `repo`, `year` |
-| `git/scc.csv` | `src/sources/git/fetch_scc.py` | scc loc, sloc, complexity, complexity_density | `repo`, `sha` |
-| `git/lizard.csv` (cyclomatic) | `src/sources/github/fetch_advanced_complexity.py` | lizard cyclomatic_{total,avg,max} | `repo`, `sha` |
-| `git/lizard.csv` (cognitive) | `src/sources/github/fetch_cognitive.py` | lizard cognitive_{total,avg,max} | `repo`, `sha` |
+| `git/scc.csv` | `src/sources/git/fetch_sha_metrics.py` (scc via `fetch_scc.py` helpers) | scc loc, sloc, complexity, complexity_density | `repo`, `sha` |
+| `git/lizard.csv` | `src/sources/git/fetch_sha_metrics.py` | lizard cyclomatic_{total,avg,max} + cognitive_{total,avg,max} | `repo`, `sha` |
 | `git/churn.csv` | git churn (bare clone) | 5-year added+deleted lines | `repo` |
 
 scc and lizard are stored long-format (one row per `(repo, sha, metric)`) and
@@ -102,9 +102,10 @@ skipped to the next-oldest year).
 
 ### Off-mainline sha correction + the false-zero guard
 
-scc applies the first-parent **mainline-sha correction** (`resolve_mainline_sha`
-/ `corrected_clone_sha`) described above; the lizard fetchers now apply the same
-correction, but historically did not. To defend against any residual mismatch,
+The unified fetcher applies the first-parent **mainline-sha correction**
+(`resolve_mainline_sha` / `corrected_clone_sha`) described above once, before its
+single checkout, so scc and lizard analyse the same corrected tree (historically
+the separate lizard fetchers did not). To defend against any residual mismatch,
 `build_complexity._is_lizard_false_zero` guards the join: when scc found real
 branching (`scc_complexity_eoy ≥ LIZARD_FALSE_ZERO_MIN_SCC_CX`, currently **5**)
 but lizard reports `cyclomatic_total == 0`, lizard analysed the wrong (off-mainline,
@@ -217,8 +218,8 @@ repo (GitHub `size = 0`, scc `loc = 0`), not a fetch gap (e.g.
 
 Some repos have scc but no lizard cognitive (e.g. `nodejs/node`,
 `gcc-mirror/gcc`, `scipy/scipy`): they are either dropped by the false-zero
-guard or not yet covered by the cognitive fetcher, so `cognitive_max` is missing
-while `cyclomatic_max` (and thus `score`) is still present.
+guard or in a language Lizard's cognitive parser doesn't cover, so `cognitive_max`
+is missing while `cyclomatic_max` (and thus `score`) is still present.
 
 ## Limitations
 

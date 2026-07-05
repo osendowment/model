@@ -147,13 +147,12 @@ clone) is the heaviest fetch and times out on the largest mirrors (gcc, ffmpeg).
 ### Security
 
 Security posture ([security.md](components/security.md)). OpenSSF Scorecard +
-OSV CVE counts + semgrep SAST.
+OSV CVE counts.
 
 | Step | Repos | % |
 |---|---:|---:|
 | input top repos | 894 | 100% |
 | OpenSSF score present | 894 | 100% |
-| semgrep SAST present | 873 | 97.7% |
 | CVE count 5y > 0 | 195 | 21.8% |
 | OSS-Fuzz enrolled | 131 | 14.7% |
 | CII Best Practices badge | 30 | 3.4% |

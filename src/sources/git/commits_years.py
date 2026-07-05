@@ -5,7 +5,7 @@ Output: ``data/sources/git/commits-years.csv`` with columns
     repo, repo_id, git_url, year, first_sha, last_sha, commits, fetched_at
 
 This file is foundational for all SHA-pinned analyses (scc, lizard,
-semgrep, churn). Each downstream tool reads it to find a year-end
+churn). Each downstream tool reads it to find a year-end
 snapshot SHA per repo and pins its analysis to that commit.
 
 Per (repo, year) we issue **two** GitHub API calls:

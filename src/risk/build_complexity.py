@@ -102,8 +102,8 @@ LIZARD_METRICS = [
 # reports zero functions, lizard analysed the wrong tree; we treat its metrics
 # as MISSING rather than let a false cyclomatic_max=0 deflate the score. A
 # genuinely function-free repo (data/config module) has near-zero scc
-# complexity too, so the threshold spares it. See fetch_advanced_complexity /
-# fetch_cognitive `corrected_clone_sha` for the upstream fix.
+# complexity too, so the threshold spares it. See fetch_sha_metrics'
+# `corrected_clone_sha` for the upstream fix.
 LIZARD_FALSE_ZERO_MIN_SCC_CX = 5
 
 FIELDS = [

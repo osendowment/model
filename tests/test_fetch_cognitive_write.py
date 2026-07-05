@@ -1,22 +1,24 @@
-"""Regression tests for fetch_cognitive._write_results — no fake zeros."""
+"""Regression tests for fetch_sha_metrics._write_results — no fake zeros (the
+cognitive view). The former fetch_cognitive writer merged into fetch_sha_metrics.
+"""
 
 from src.sources.git.long_format import read as read_long
-from src.sources.github.fetch_cognitive import RepoCognitive, _write_results
+from src.sources.git.fetch_sha_metrics import RepoResult, _write_results
 
 
 class TestWriteResults:
     def test_zero_files_result_not_persisted(self, tmp_path):
         """A `files == 0` result (empty/partial checkout, crashed worker)
-        must NOT be written — RepoCognitive's zero defaults would land in
+        must NOT be written — RepoResult's zero defaults would land in
         lizard.csv as a real cognitive_total=0.
         """
         path = str(tmp_path / "lizard.csv")
         results = [
-            RepoCognitive(repo="big/repo", repo_id="1", analyzed_sha="a" * 40,
-                          files=0),  # crashed / empty — must be skipped
-            RepoCognitive(repo="good/repo", repo_id="2", analyzed_sha="b" * 40,
-                          files=12, cognitive_total=340,
-                          cognitive_avg=4.5, cognitive_max=29),
+            RepoResult(repo="big/repo", repo_id="1", analyzed_sha="a" * 40,
+                       files=0),  # crashed / empty — must be skipped
+            RepoResult(repo="good/repo", repo_id="2", analyzed_sha="b" * 40,
+                       files=12, cognitive_total=340,
+                       cognitive_avg=4.5, cognitive_max=29),
         ]
         _write_results(path, results)
 
@@ -29,10 +31,10 @@ class TestWriteResults:
     def test_error_and_missing_sha_still_skipped(self, tmp_path):
         path = str(tmp_path / "lizard.csv")
         results = [
-            RepoCognitive(repo="err/repo", repo_id="1", analyzed_sha="c" * 40,
-                          files=5, error="timeout"),
-            RepoCognitive(repo="nosha/repo", repo_id="2", analyzed_sha="",
-                          files=5, cognitive_total=10),
+            RepoResult(repo="err/repo", repo_id="1", analyzed_sha="c" * 40,
+                       files=5, error="timeout"),
+            RepoResult(repo="nosha/repo", repo_id="2", analyzed_sha="",
+                       files=5, cognitive_total=10),
         ]
         _write_results(path, results)
         assert read_long(path) == {}
@@ -43,10 +45,10 @@ class TestWriteResults:
         """
         path = str(tmp_path / "lizard.csv")
         results = [
-            RepoCognitive(repo="trivial/repo", repo_id="1",
-                          analyzed_sha="d" * 40, files=3,
-                          cognitive_total=0, cognitive_avg=0.0,
-                          cognitive_max=0),
+            RepoResult(repo="trivial/repo", repo_id="1",
+                       analyzed_sha="d" * 40, files=3,
+                       cognitive_total=0, cognitive_avg=0.0,
+                       cognitive_max=0),
         ]
         _write_results(path, results)
         rows = read_long(path)

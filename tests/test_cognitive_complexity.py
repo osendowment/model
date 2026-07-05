@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from src.sources.github.fetch_cognitive import (
+from src.sources.git.fetch_sha_metrics import (
     SonarCognitiveExt,
     _python_cognitive,
     _run_lizard_cognitive,

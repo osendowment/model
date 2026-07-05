@@ -36,7 +36,7 @@ commit count (`X-Total` header). This is the SHA anchor sha-pinned analyses (scc
 key off. (GitLab omits `X-Total` for result sets > 10,000, so `commits` may under-report in
 that rare case; `last_sha` — the anchor — is unaffected.)
 
-**Git metrics** (future): the clone-based fetchers (scc/lizard/contributors/churn/semgrep) are
+**Git metrics** (future): the clone-based fetchers (sha-metrics=scc+lizard/contributors/churn) are
 host-agnostic and will run on GitLab clone URLs once `src/sources/git/clone.py` is
 host-parametrized — a follow-on plan, not part of this layer.
 

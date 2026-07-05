@@ -35,8 +35,7 @@ from, so a fetcher clones the real host rather than assuming `github.com/{repo}`
 - `churn.csv` -- 5y added/deleted lines per repo (range-based)
 - long-format sha-pinned (schema: `repo, repo_id, git_url, commit_sha, metric, value, checked_at`):
   - `scc.csv` -- scc metrics: `loc`, `sloc`, `files`, `uloc`, `complexity`, `complexity_density`
-  - `lizard.csv` -- lizard cognitive + cyclomatic + halstead + maintainability_index
-  - `semgrep.csv` -- semgrep findings (rulepack-prefixed metrics, e.g. `p_default.total`)
+  - `lizard.csv` -- lizard cyclomatic + cognitive + files
   - `openssf.csv` -- OpenSSF Scorecard `score` + 18 per-check scores
   - `depsdev.csv` -- deps.dev-mirrored Scorecard score + checks (fall-back when local row missing)
 
@@ -49,10 +48,8 @@ from, so a fetcher clones the real host rather than assuming `github.com/{repo}`
 | `src/sources/github/bf_contributors.py` | Bus-factor contributor membership (which logins make up `bf_commits_gh_alltime`) |
 | `src/sources/github/fetch_maintainer_sponsors.py` | Personal GitHub Sponsors listing per bus-factor maintainer (→ funding-intent `bf_maintainer_fundable`) |
 | `src/sources/git/commits_years.py` | Resolve per (repo, year) `last_sha` + `commits` |
-| `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (writes long format) |
-| `src/sources/github/fetch_advanced_complexity.py` | Lizard cyclomatic + multimetric Halstead + MI |
-| `src/sources/github/fetch_cognitive.py` | Sonar cognitive complexity (Lizard + AST) |
-| `src/sources/github/fetch_semgrep.py` | Semgrep findings (security/correctness rulepacks) |
+| `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (writes long format; helpers reused by the unified SHA-metrics fetcher) |
+| `src/sources/git/fetch_sha_metrics.py` | Unified SHA-pinned metrics: one sparse checkout → scc + both lizard passes (cyclomatic McCabe + Sonar cognitive) → `scc.csv` + `lizard.csv` |
 | `src/sources/github/github_client.py` | API client with token rotation + rate limiting |
 | `src/sources/github/batch_runner.py` | Async batch processing + CSV I/O |
 | `src/sources/github/models.py` | Data types (Contributor, RunResult, bot detection) |

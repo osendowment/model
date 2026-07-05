@@ -37,7 +37,6 @@ SOURCES = [
     ("data/sources/git/lizard.csv", "repo", ["cognitive_total"], []),
     ("data/sources/git/openssf.csv", "repo", ["openssf_score"], ["data/sources/git/depsdev.csv"]),
     ("data/sources/git/depsdev.csv", "repo", ["bestpractices_badge_id"], []),
-    ("data/sources/git/semgrep.csv", "repo", ["sast_findings_total"], []),
     ("data/sources/osv/cves.csv", "repo", ["cve_count_5y"], []),
     ("data/sources/github/issues.csv", "repo", ["issues_opened_5y", "issues_closed_5y"], []),
     ("data/sources/git/churn.csv", "repo", ["churn_5y_total"], []),

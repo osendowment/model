@@ -8,7 +8,6 @@ are no gaps.
 
 Usage:
     uv run python scripts/fill_gaps.py
-    uv run python scripts/fill_gaps.py --skip-semgrep   # skip the slow one
     uv run python scripts/fill_gaps.py --build-only     # just rebuild CSVs
     uv run python scripts/fill_gaps.py --dry-run        # show plan, no changes
 
@@ -60,7 +59,6 @@ def _covered(path: Path, repo_col: str = "repo") -> set[str]:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--skip-semgrep", action="store_true")
     parser.add_argument("--build-only", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
@@ -90,15 +88,12 @@ def main():
         if dormant:
             plan.append(("resolve-head", ["uv", "run", "python", "-m", "src.sources.git.resolve_head", "--concurrency", "8"], len(dormant)))
 
-        # 3. Sha-pinned fetchers
+        # 3. Sha-pinned code metrics — ONE clone per repo yields scc.csv +
+        # lizard.csv (scc loc/complexity + lizard cyclomatic + cognitive).
         scc_missing = eligible - _covered(ROOT / "data/sources/git/scc.csv")
-        if scc_missing:
-            plan.append(("scc", ["uv", "run", "python", "-m", "src.sources.git.fetch_scc", "--concurrency", "4"], len(scc_missing)))
-
         lizard_missing = eligible - _covered(ROOT / "data/sources/git/lizard.csv")
-        if lizard_missing:
-            plan.append(("cognitive", ["uv", "run", "python", "-m", "src.sources.github.fetch_cognitive", "--concurrency", "3"], len(lizard_missing)))
-            plan.append(("cyclo-halstead", ["uv", "run", "python", "-m", "src.sources.github.fetch_advanced_complexity", "--limit", "0", "--concurrency", "3"], len(lizard_missing)))
+        if scc_missing or lizard_missing:
+            plan.append(("sha-metrics", ["uv", "run", "python", "-m", "src.sources.git.fetch_sha_metrics", "--concurrency", "4"], len(scc_missing | lizard_missing)))
 
         openssf_missing = sorted(eligible - _covered(ROOT / "data/sources/git/openssf.csv"))
         if openssf_missing:
@@ -117,11 +112,6 @@ def main():
         issues_missing = eligible - _covered(ROOT / "data/sources/github/issues.csv")
         if issues_missing:
             plan.append(("issues", ["uv", "run", "python", "-m", "src.sources.github.fetch_issue_metrics"], len(issues_missing)))
-
-        if not args.skip_semgrep:
-            semgrep_missing = eligible - _covered(ROOT / "data/sources/git/semgrep.csv")
-            if semgrep_missing:
-                plan.append(("semgrep", ["uv", "run", "python", "-m", "src.sources.github.fetch_semgrep", "--limit", "0", "--rulepack", "p/default", "--concurrency", "4"], len(semgrep_missing)))
 
         # 4. Regenerate openssf/checks.csv from data.json (free, fast)
         plan.append(("openssf-checks", ["uv", "run", "python", "-m", "src.sources.openssf.extract_checks"], 0))

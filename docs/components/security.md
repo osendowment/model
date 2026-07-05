@@ -5,7 +5,7 @@ independent signals — the project's **OpenSSF Scorecard** (lower score → mor
 risk) and its **count of distinct CVEs over 2021–2025** (more CVEs → more risk)
 — and distils them into one **security-risk score (`score`, 0–100)** that feeds
 `data/risk/risk.csv` as the column `security`. It also carries informational
-signals (semgrep SAST findings, OSS-Fuzz enrollment, OpenSSF Best Practices
+signals (OSS-Fuzz enrollment, OpenSSF Best Practices
 badge) that do **not** enter the score.
 
 Scope: the top repos in the risk pipeline (see
@@ -31,11 +31,6 @@ Security  → data/risk/security.csv  (class-A risk repos)  →  risk.csv col `s
 │   ├── cve_count_5y           ← distinct CVE ids mapped to the repo in 2021–2025          [2021–2025]
 │   └── cve_score             ← derived (0 CVEs → 50 neutral; ≥1 ranked into (50,100])     [2021–2025]
 │
-├── SAST  (semgrep p/default — INFORMATIONAL, not scored)
-│   ├── sast_findings_total / _p    ← semgrep p/default findings_total + pctl              [2025 EOY]
-│   ├── sast_findings_error / _p    ← high-severity (ERROR) findings + pctl                [2025 EOY]
-│   └── sast_findings_security / _p ← security-category findings + pctl                    [2025 EOY]
-│
 ├── ossfuzz_enrolled          ← OSS-Fuzz projects index ("True"/"False")                   [most recent]
 ├── bestpractices_badge_id    ← deps.dev (OpenSSF Best Practices badge tier)               [most recent]
 ├── fetched_at                ← checked_at of the OpenSSF score row used                   [2025 EOY]
@@ -48,18 +43,18 @@ Security  → data/risk/security.csv  (class-A risk repos)  →  risk.csv col `s
 
 1. **Collect** — fetchers pull raw signals into `data/sources/`: OpenSSF
    Scorecard (`git/openssf.csv`), its deps.dev mirror (`git/depsdev.csv`),
-   semgrep findings (`git/semgrep.csv`), OSV CVEs (`osv/cves.csv`), OSS-Fuzz
+   OSV CVEs (`osv/cves.csv`), OSS-Fuzz
    enrollment (`ossfuzz/projects.csv`), and the Best Practices badge
    (`depsdev/repos.csv`). Each is TTL/sha-gated so re-runs only fetch what's
    missing or stale.
-2. **Snapshot-join** — the three sha-pinned long files (openssf, depsdev,
-   semgrep) are keyed by `(repo, sha)`. For each repo, `build_security.py` walks
+2. **Snapshot-join** — the two sha-pinned long files (openssf, depsdev)
+   are keyed by `(repo, sha)`. For each repo, `build_security.py` walks
    the per-year `last_sha` priority from `commits-years.csv` (2025→2024→…→2021)
    and picks the first sha that has rows in that file. If no year matches, it
    falls back to any sha present for the repo (deterministic lexicographic
    pick). This is the same snapshot convention `build_complexity` uses.
 3. **Derive** — read `openssf_score` (with the local→deps.dev fallback below),
-   count distinct CVEs, read semgrep findings, set `ossfuzz_enrolled` and
+   count distinct CVEs, set `ossfuzz_enrolled` and
    `bestpractices_badge_id`.
 4. **Score** — `add_percentiles(...)` ranks the population, then `score` =
    max ("worst-of") of `openssf_score_p` and `cve_score`.
@@ -81,14 +76,14 @@ re-run only fills gaps); pass `--skip-fetch` to rebuild from existing data witho
 fetching:
 
 ```
-commits-years → … → semgrep → … → cves → scorecard → depsdev → … → security-build → aggregate
+commits-years → … → cves → scorecard → depsdev → … → security-build → aggregate
 ```
 
 ## Collection
 
-Eight source files feed the build. The three Git-snapshot long files
-(`git/openssf.csv`, `git/depsdev.csv`, `git/semgrep.csv`) carry
-`repo, repo_id, commit_sha, metric, value, checked_at` — one row per check/finding
+Seven source files feed the build. The two Git-snapshot long files
+(`git/openssf.csv`, `git/depsdev.csv`) carry
+`repo, repo_id, commit_sha, metric, value, checked_at` — one row per check
 metric per sha — and are joined on the snapshot sha. The rest join on `repo`.
 
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
@@ -97,7 +92,6 @@ metric per sha — and are joined on the snapshot sha. The rest join on `repo`.
 | `git/commits-years.csv` | `src.sources.git.commits_years` | per-(repo, year) `last_sha` — the snapshot pin | `repo`, `year` |
 | `git/openssf.csv` | `src/sources/openssf/scorecard.py` | OpenSSF Scorecard `score` + 18 checks per `(repo, sha)` — see [openssf.md](../sources/openssf.md) | `repo`, `sha` |
 | `git/depsdev.csv` | `src/sources/depsdev/fetch.py` | deps.dev-mirrored Scorecard `score` + checks (**fallback** when local row missing) | `repo`, `sha` |
-| `git/semgrep.csv` | `src/sources/github/fetch_semgrep.py` | semgrep findings per `(repo, sha, rulepack-prefixed metric)`; locked to `p_default` | `repo`, `sha` |
 | `osv/cves.csv` | `src/sources/osv/fetch_cves.py` | per-CVE rows `(repo, date, cve, package-source)` | `repo` |
 | `osv/queried.csv` | `src/sources/osv/fetch_cves.py` | sidecar — repos OSV was queried for (confirms true zeros) | `repo` |
 | `ossfuzz/projects.csv` | `src/sources/ossfuzz/fetch_ossfuzz_data.py` | OSS-Fuzz enrollment — see [ossfuzz.md](../sources/ossfuzz.md) | `github_repo` |
@@ -115,14 +109,6 @@ appears in `cves.csv`; `0` if it's absent but present in `queried.csv` (a
 confirmed zero); `""` if it was never queried (unknown — keeps a failed/skipped
 fetch from masquerading as zero).
 
-### Semgrep findings (locked to `p_default`, info-only)
-
-The build reads only the `p_default.` rulepack prefix from `semgrep.csv`,
-surfacing three counts at the snapshot sha — `findings_total` (all),
-`findings_error` (high-severity ERROR only), `findings_security`
-(security-category only) — each with an `_p` percentile. **These `sast_*_p`
-percentiles are informational and are NOT inputs to `score`.**
-
 ### The percentiles (`_p`)
 
 `add_percentiles(...)` computes direction-aware population percentiles
@@ -132,9 +118,6 @@ percentiles are informational and are NOT inputs to `score`.**
 |---|---|---|
 | `openssf_score_p` | `openssf_score` | `False` — **lower** Scorecard score → **higher** risk pctl |
 | `cve_score` | `cve_count_5y` | neutral-anchored — **0 CVEs → 50** neutral; **≥1** ranked into **(50,100]**, worst → 100 (not a plain `asc` percentile) |
-| `sast_findings_total_p` | `sast_findings_total` | `True` — info only |
-| `sast_findings_error_p` | `sast_findings_error` | `True` — info only |
-| `sast_findings_security_p` | `sast_findings_security` | `True` — info only |
 
 ### How `score` composes
 
@@ -157,7 +140,7 @@ for the minority whose `cve_score` exceeds their openssf axis.
 
 ### `data/risk/security.csv` (per-dimension build)
 
-17 columns, one row per risk repo. Per-signal timestamps stay in each source
+11 columns, one row per risk repo. Per-signal timestamps stay in each source
 file; `fetched_at` here is the `checked_at` of the OpenSSF score row that was used.
 
 | Column | Description |
@@ -167,9 +150,6 @@ file; `fetched_at` here is the `checked_at` of the OpenSSF score row that was us
 | `openssf_score_source` | `openssf_local` \| `depsdev` \| `""` |
 | `cve_count_5y` | distinct CVE ids 2021–2025 (`0` confirmed-zero; `""` unknown) |
 | `ossfuzz_enrolled` | `"True"`/`"False"` — enrolled in OSS-Fuzz |
-| `sast_findings_total` / `_p` | semgrep p/default total findings + pctl (info) |
-| `sast_findings_error` / `_p` | high-severity (ERROR) findings + pctl (info) |
-| `sast_findings_security` / `_p` | security-category findings + pctl (info) |
 | `bestpractices_badge_id` | `passing` \| `silver` \| `gold` \| `in_progress` \| `""` |
 | `openssf_score_p` | risk pctl of `openssf_score` (lower-is-worse) |
 | `cve_score` | neutral-anchored CVE risk score: 0 → 50, ≥1 ranked into (50,100] |
@@ -196,7 +176,7 @@ See [docs/stats.md → Risk → Security](../stats.md#security) for current per-
 ## Limitations
 
 - **Two-axis score.** Only `openssf_score_p` and `cve_score` enter `score`.
-  Semgrep SAST, OSS-Fuzz, and the Best Practices badge are collected and
+  OSS-Fuzz and the Best Practices badge are collected and
   surfaced but **not scored** — they are context, not inputs.
 - **CVE mapping is package-name-bound.** CVE counts depend on OSV mapping a CVE
   to the repo via its published package names. C/Debian-mapped repos with
@@ -205,7 +185,7 @@ See [docs/stats.md → Risk → Security](../stats.md#security) for current per-
 - **CVE axis is coarse for the majority.** Most repos have zero CVEs and
   share `cve_score = 50` (the neutral baseline), so for them `score` mostly
   tracks the OpenSSF axis; the CVE axis only re-ranks the minority that carry CVEs.
-- **Snapshot pinning, not live.** The Scorecard/semgrep signals are pinned to
+- **Snapshot pinning, not live.** The Scorecard signals are pinned to
   the repo's latest in-window commit (2025→2021), not re-run live, so they
   reflect the snapshot sha rather than `HEAD`.
 - **`score` is not a class.** It's a 0–100 risk percentile — the risk pipeline

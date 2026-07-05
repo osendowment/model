@@ -1,7 +1,7 @@
 """Disk-space safety helpers shared by every fetcher that clones repos.
 
-Every per-repo fetcher (`fetch_scc`, `fetch_advanced_complexity`,
-`fetch_cognitive`, `fetch_semgrep`, `fetch_churn`, `fetch_gitpandas`)
+Every per-repo fetcher (`fetch_scc`, `fetch_sha_metrics`,
+`fetch_churn`, `fetch_gitpandas`)
 writes hundreds of MB to /tmp at peak. The user runs on a small SSD,
 so we want two safety nets that are cheap to wire in:
 

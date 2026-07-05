@@ -2,14 +2,14 @@
 
 Some risk-scope repos are dormant — their last commit is older than the
 window covered by `commits-years.csv` (default 2021-2025). Without a
-sha they can't be analysed by sha-pinned fetchers (scc, lizard, semgrep).
+sha they can't be analysed by sha-pinned fetchers (scc, lizard).
 
 This module fills those gaps by fetching the repo's latest default-branch
 commit (sha + date) via the GitHub API and inserting it into
 `commits-years.csv` under its **real commit year** (e.g. 2020) — so the
 LOC/complexity snapshot is dated rather than an opaque "HEAD". A `year=HEAD`
-alias row (same sha) is also written: the sha-pinned tarball fetchers
-(lizard/cognitive/semgrep) special-case it, and `resolve_snapshot_sha` falls
+alias row (same sha) is also written: the sha-pinned fetchers special-case it,
+and `resolve_snapshot_sha` falls
 back to it for repos older than its 10-year walk-back. Active repos are
 untouched. There is always a snapshot sha when the repo has any commit.
 
@@ -156,8 +156,8 @@ async def main_async(args):
             row = {"first_sha": sha, "last_sha": sha, "commits": "1", "fetched_at": now}
             # Record the snapshot under its REAL commit year (e.g. 2020) so the
             # LOC/complexity walk reads a dated fallback instead of an opaque
-            # "HEAD". Keep the "HEAD" alias too: the sha-pinned tarball fetchers
-            # (lizard/cognitive/semgrep) special-case it as the dormant snapshot.
+            # "HEAD". Keep the "HEAD" alias too: the sha-pinned fetchers
+            # (scc, lizard) special-case it as the dormant snapshot.
             if year:
                 sha_data[(repo, str(year))] = dict(row)
             sha_data[(repo, HEAD_YEAR)] = dict(row)

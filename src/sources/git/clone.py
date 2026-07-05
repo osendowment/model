@@ -7,7 +7,7 @@ Three strategies, picked by what the downstream tool needs:
    Fastest for small repos; no ``.git`` directory, so history-walking
    tools (gitpandas, truckfactor, ``git log``) won't work. Returns
    ``(elapsed_s, downloaded_bytes)``. Use for source-only analyses
-   like scc, semgrep, lizard.
+   like scc and lizard.
 
 2. ``sparse_clone(repo, dest, size_kb=0, ref=None)``
    Sparse-checkout clone limited to source-file extensions
@@ -86,7 +86,7 @@ def _check(
     """Raise ``RuntimeError`` if a git step failed.
 
     A non-zero git exit must not be silently ignored: a failed sparse-clone
-    leaves an empty working tree that downstream tools (scc, semgrep) would
+    leaves an empty working tree that downstream tools (scc, lizard) would
     measure as a genuine empty repo — recording a fake 0-LOC snapshot.
     """
     if result.returncode != 0:

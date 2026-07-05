@@ -1,6 +1,10 @@
-"""Tests for src/sources/github/fetch_advanced_complexity.py."""
+"""Tests for the lizard analysis in src/sources/git/fetch_sha_metrics.py.
 
-from src.sources.github.fetch_advanced_complexity import (
+The former fetch_advanced_complexity + fetch_cognitive modules were merged into
+the unified sha-pinned fetcher; the lizard cyclomatic pass lives here now.
+"""
+
+from src.sources.git.fetch_sha_metrics import (
     LIZARD_SKIP_SUFFIXES,
     MAX_FILE_BYTES,
     _list_source_files,

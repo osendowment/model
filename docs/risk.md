@@ -54,7 +54,6 @@ Risk
 │   ├── openssf_score                 ← OpenSSF Scorecard (deps.dev fb)  [2025 EOY]
 │   ├── cve_count_5y                  ← OSV.dev /v1/query                [2021–2025]
 │   ├── ossfuzz_enrolled              ← OSS-Fuzz projects index          [most recent]
-│   ├── sast_findings_{total,error,security}  ← semgrep p/default        [2025 EOY]
 │   └── bestpractices_badge_id        ← deps.dev (OpenSSF Best Practices) [most recent]
 │
 └── Workload  →  data/risk/workload.csv
@@ -130,7 +129,7 @@ component doc; every `*_p` column and raw metric lives in the per-dimension
 
 1. **Concentration risk** -- how dependent is the project on a few contributors?
 2. **Complexity risk** -- how large and hard to audit is the codebase?
-3. **Security risk** -- how exposed is the project (OpenSSF Scorecard, CVEs, SAST)?
+3. **Security risk** -- how exposed is the project (OpenSSF Scorecard, CVEs)?
 4. **Workload risk** -- how much per-contributor burden (code, CVEs, issue backlog)?
 
 ### Concentration
@@ -205,7 +204,7 @@ percentiles, empty when an input is missing or AC = 0.
 
 ### Security
 
-Combines the OpenSSF-rooted signals and SAST findings. Direction-aware risk
+Combines the OpenSSF-rooted signals and CVE counts. Direction-aware risk
 percentiles (▴ higher = worse security):
 
 - `openssf_score_p` — percentile of the OpenSSF Scorecard `openssf_score`,
@@ -215,8 +214,6 @@ percentiles (▴ higher = worse security):
   of evidence, not proof of safety); a repo with **≥1 CVE** is ranked among the
   non-zero repos only (by worst-pinned CDF) and mapped into **(50, 100]**, so
   more CVEs → strictly higher risk and the single worst maps to 100.
-- `sast_findings_{total,error,security}_p` — percentiles of semgrep
-  `p/default` findings (informational).
 
 The dimension `score` is the **max ("worst-of")** of `openssf_score_p` and
 `cve_score` — either a bad Scorecard *or* real CVEs alone is enough to flag the
@@ -233,9 +230,8 @@ the OpenSSF Scorecard axis; the CVE axis takes over only for the minority whose
 | Source | Fields extracted for Risk |
 |---|---|
 | **GitHub Contributors stats API** (`api.github.com/repos/.../stats/contributors`) | per-contributor weekly commit history → bus factor, HHI |
-| **GitHub git tree** (sparse checkout + [scc](https://github.com/boyter/scc)) | lines of code, complexity per language → `data/sources/git/scc.csv` |
-| **Lizard + multimetric** (sparse checkout) | per-function McCabe + Halstead + Sonar cognitive + maintainability index → `data/sources/git/lizard.csv` |
-| **Semgrep** (sparse checkout, `p/default` rulepack) | SAST findings → `data/sources/git/semgrep.csv` |
+| **GitHub git tree** (one sparse checkout of the EOY-pinned sha, `fetch_sha_metrics.py`) → [scc](https://github.com/boyter/scc) | lines of code, complexity per language → `data/sources/git/scc.csv` |
+| **Lizard** (same single checkout) | per-function McCabe cyclomatic + Sonar cognitive → `data/sources/git/lizard.csv` |
 | **GitHub Issues Search API** (`api.github.com/search/issues`) | per-year issue open / close counts |
 | **OpenSSF Scorecard API** (`api.securityscorecards.dev`) | security score (0–10) per repo → `data/sources/git/openssf.csv` |
 | **deps.dev API** (`api.deps.dev`) | mirrored Scorecard `score` + checks (fallback) → `data/sources/git/depsdev.csv` |
@@ -255,8 +251,7 @@ Files:
 | File | Tool | Metrics |
 |------|------|---------|
 | `data/sources/git/scc.csv` | [scc](https://github.com/boyter/scc) | `loc`, `sloc`, `files`, `uloc`, `complexity`, `complexity_density` |
-| `data/sources/git/lizard.csv` | [lizard](https://github.com/terryyin/lizard) + [multimetric](https://github.com/priv-kweihmann/multimetric) | `cyclomatic_*`, `halstead_*`, `cognitive_*`, `maintainability_index`, `files` |
-| `data/sources/git/semgrep.csv` | [semgrep](https://semgrep.dev) | `<rulepack>.<metric>` (e.g. `p_default.total`, `p_default.error`) |
+| `data/sources/git/lizard.csv` | [lizard](https://github.com/terryyin/lizard) | `cyclomatic_*`, `cognitive_*`, `files` |
 | `data/sources/git/openssf.csv` | [scorecard CLI](https://github.com/ossf/scorecard) | `score` + 18 individual checks (`maintained`, `code_review`, …) |
 | `data/sources/git/depsdev.csv` | [deps.dev](https://api.deps.dev) | mirrored Scorecard `score` + checks |
 
@@ -271,7 +266,7 @@ Each repo has per-year `last_sha` resolved by `src/sources/git/commits_years.py`
 The pipeline stages project the long files into per-repo wide rows for downstream consumers:
 
 - `data/risk/complexity.csv` ← `src.risk.build_complexity` projects `data/sources/git/scc.csv` + `data/sources/git/lizard.csv` using `commits-years.last_sha` (2025 → 2021 walk; first sha with `loc > 0`). Also folds in the **hotspot** score (Tornhill `churn × complexity`): joins `data/sources/git/churn.csv` (`churn_5y_total`) with the EOY-2025 scc complexity snapshot to emit `churn_5y_total`, `hotspot_raw`, `hotspot_log`, `hotspot_percentile`.
-- `data/risk/security.csv` ← `src.risk.build_security` projects `data/sources/git/openssf.csv`, `data/sources/git/depsdev.csv`, `data/sources/git/semgrep.csv` using the same per-year sha priority.
+- `data/risk/security.csv` ← `src.risk.build_security` projects `data/sources/git/openssf.csv`, `data/sources/git/depsdev.csv` using the same per-year sha priority.
 - `data/risk/risk.csv` ← `src.risk.run_risk_pipeline` joins the four scored dimensions (concentration · complexity · security · workload) and computes the final risk score as their geometric mean.
 
 ## Scripts
@@ -279,7 +274,8 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 | Script | Purpose |
 |--------|---------|
 | `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
-| `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (the `scc` fetcher) |
+| `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (standalone `scc` fetcher; helpers reused by `fetch_sha_metrics.py`) |
+| `src/sources/git/fetch_sha_metrics.py` | Unified SHA-pinned metrics — one sparse checkout → scc + both lizard passes (cyclomatic + cognitive) → `scc.csv` + `lizard.csv` |
 | `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
 | `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall risk `score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload). **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)**. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. |
 

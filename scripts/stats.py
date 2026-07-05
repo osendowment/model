@@ -224,7 +224,6 @@ RISK_FUNNELS = {
                    ("churn 5y", "present", "churn_5y_total"),
                    ("Complexity score", "present", "score")],
     "security": [("OpenSSF score present", "present", "openssf_score"),
-                 ("semgrep SAST present", "present", "sast_findings_total"),
                  ("CVE count 5y > 0", "gt0", "cve_count_5y"),
                  ("OSS-Fuzz enrolled", "bool", "ossfuzz_enrolled"),
                  ("CII Best Practices badge", "present", "bestpractices_badge_id"),
