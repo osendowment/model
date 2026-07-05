@@ -9,7 +9,8 @@ Reads (all under data/sources/):
     floss-fund/funding-json.csv — FLOSS Fund directory export  (src.sources.floss_fund.funding_json)
     opencollective/budgets.csv — annual gross raised per OC slug (src.sources.opencollective.fetch_budgets)
     funding/host-by-repo.csv   — scraped FOSS-foundation host per repo
-    funding/overrides.csv      — curated host/owner institutional backing per repo
+    funding/overrides.csv      — curated host/owner institutional backing + a
+                                 curated PayPal.me handle (`paypal`) per repo
     npm/funding.csv            — npm package.json `funding` field (npm repos only,
                                  src.sources.npm.fetch_funding) — a declared channel
     pypi/funding.csv           — PyPI `project_urls` funding link (pypi repos only,
@@ -85,7 +86,7 @@ FIELDS = ["repo", "repo_id",
           "gh_stars", "gh_forks",
           "has_funding_link", "funding_link_platforms", "has_funding_json", "org_fundable",
           "has_npm_funding", "npm_funding_url",
-          "has_pypi_funding", "pypi_funding_platforms", "channels_count",
+          "has_pypi_funding", "pypi_funding_platforms", "paypal", "channels_count",
           "oc_slug", "oc_avg_funding", "oc_avg_funding_p",
           "host", "host_type", "owner", "owner_type", "host_score",
           "score", "intent", "nonprofit"]
@@ -120,7 +121,8 @@ def _nonprofit_flag(host_type: str, owner_type: str) -> bool:
 def _intent_flag(row: dict) -> bool:
     """Sustainability intent: True if the repo shows any funding signal — a live
     sponsorship, the owner's GitHub Sponsors listing, a declared channel
-    (FUNDING.yml / funding.json / npm / PyPI / OC), or an institutional host/owner."""
+    (FUNDING.yml / funding.json / npm / PyPI / OC / a curated PayPal.me handle),
+    or an institutional host/owner."""
     return (
         _to_int(row.get("gh_sponsors_in")) + _to_int(row.get("gh_sponsors_out")) > 0
         or (row.get("owner_has_sponsors_listing") or "").strip() == "True"
@@ -129,6 +131,7 @@ def _intent_flag(row: dict) -> bool:
         or (row.get("org_fundable") or "").strip() == "True"
         or (row.get("has_npm_funding") or "").strip() == "True"
         or (row.get("has_pypi_funding") or "").strip() == "True"
+        or bool((row.get("paypal") or "").strip())
         or bool((row.get("oc_slug") or "").strip())
         or bool((row.get("host") or "").strip())
         or bool((row.get("owner") or "").strip())
@@ -151,15 +154,17 @@ def _declares_unmeasured_channel(row: dict) -> bool:
     """True if the repo declares a funding channel whose $ we don't measure.
 
     A registry channel (npm `funding` / PyPI `project_urls`), a fundable
-    owner/org (`org_fundable`), or a funding **link** to any platform other than
-    GitHub Sponsors / Open Collective (those two are measured in dollars
-    elsewhere). Such a repo has set up *a way* to be funded → not maximally
-    unfunded, so its score is capped at DECLARED_FUNDING_CAP.
+    owner/org (`org_fundable`), a curated PayPal.me handle (`paypal`), or a
+    funding **link** to any platform other than GitHub Sponsors / Open Collective
+    (those two are measured in dollars elsewhere). Such a repo has set up *a way*
+    to be funded → not maximally unfunded, so its score is capped at
+    DECLARED_FUNDING_CAP.
     """
     return (
         row.get("has_npm_funding") == "True"
         or row.get("has_pypi_funding") == "True"
         or row.get("org_fundable") == "True"
+        or bool((row.get("paypal") or "").strip())
         or bool(_platform_set(row.get("funding_link_platforms")) - MEASURED_PLATFORMS)
     )
 
@@ -194,7 +199,8 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
                  oc_slug: str = "", oc_avg: str = "0",
                  npm_funding: dict | None = None,
                  pypi_funding: dict | None = None,
-                 org_export: dict | None = None) -> dict:
+                 org_export: dict | None = None,
+                 paypal: str = "") -> dict:
     """Join one repo's raw funding signals (percentiles filled later in build()).
 
     `oc_slug` / `oc_avg` are the Open Collective attribution resolved in build():
@@ -208,6 +214,7 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
     npm_funding = npm_funding or {}
     pypi_funding = pypi_funding or {}
     org_export = org_export or {}
+    paypal = (paypal or "").strip()
     has_npm = (npm_funding.get("has_npm_funding") or "").strip() == "True"
     has_pypi = (pypi_funding.get("has_pypi_funding") or "").strip() == "True"
     channels = (_platform_set(yml.get("funding_link_platforms"))
@@ -217,6 +224,8 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         channels = channels | {"npm"}
     if has_pypi:
         channels = channels | {"pypi"}
+    if paypal:
+        channels = channels | {"paypal"}
     gh_in = (sponsors.get("github_sponsors") or "").strip()
     gh_out = (sponsoring_count or "").strip()
     row = {
@@ -236,6 +245,7 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
         "npm_funding_url": (npm_funding.get("npm_funding_url") or "").strip(),
         "has_pypi_funding": "True" if has_pypi else "False",
         "pypi_funding_platforms": (pypi_funding.get("pypi_funding_platforms") or "").strip(),
+        "paypal": paypal,
         "channels_count": str(len(channels)),
         "oc_slug": oc_slug,
         "oc_avg_funding": oc_avg,
@@ -305,13 +315,16 @@ def _load_sponsoring(path: Path) -> dict[str, str]:
 
 
 def _load_funding_overrides(path: Path) -> dict[str, dict]:
-    """{repo_lower: {host, host_type, owner, owner_type}} from overrides.csv.
+    """{repo_lower: {host, host_type, owner, owner_type, oc_slug, paypal}} from
+    overrides.csv.
 
-    Schema: ``repo, host, host_type, gh_user, owner, owner_type, oc_slug``.
+    Schema: ``repo, host, host_type, gh_user, owner, owner_type, oc_slug, paypal``.
     `host` and `owner` are **domains** (the domain is the canonical name — no
     separate `*_domain` column); `gh_user` is the GitHub login (informational);
     `oc_slug` is a curated Open Collective slug for projects that fund via OC but
-    declare no FUNDING.yml (e.g. socketio).
+    declare no FUNDING.yml (e.g. socketio); `paypal` is a curated PayPal.me URL
+    for a maintainer who takes donations that way but declares no FUNDING.yml
+    (e.g. ronaldoussoren/pyobjc) — a declared, unmeasured funding channel.
 
     Curated per-repo institutional backing — the foundation/company that hosts a
     project and the entity that owns it. **Only a *legally connected* host
@@ -334,6 +347,7 @@ def _load_funding_overrides(path: Path) -> dict[str, dict]:
                 "owner": (row.get("owner") or "").strip(),
                 "owner_type": (row.get("owner_type") or "").strip(),
                 "oc_slug": (row.get("oc_slug") or "").strip(),
+                "paypal": (row.get("paypal") or "").strip(),
             }
     return out
 
@@ -424,7 +438,8 @@ def build() -> list[dict]:
             oc_slug=oc_slug, oc_avg=_fmt_money(oc_amt),
             npm_funding=npm_funding.get(repo, {}),
             pypi_funding=pypi_funding.get(repo, {}),
-            org_export=fundable_orgs.get(owner_login, {})))
+            org_export=fundable_orgs.get(owner_login, {}),
+            paypal=ov.get("paypal", "")))
 
     # Funding risk score: both axes are `lower_is_worse` (less funding → riskier).
     # add_percentiles writes the two risk percentiles; we then recompute `score`

@@ -31,6 +31,7 @@ def test_intent_each_single_signal_is_true():
     assert _intent_flag(_row(has_npm_funding="True")) is True
     assert _intent_flag(_row(has_pypi_funding="True")) is True
     assert _intent_flag(_row(oc_slug="babel")) is True
+    assert _intent_flag(_row(paypal="https://www.paypal.com/paypalme/X")) is True
     assert _intent_flag(_row(host="apache")) is True
     assert _intent_flag(_row(owner="meta.com")) is True
 
@@ -82,6 +83,23 @@ def test_assemble_row_stars_forks_sponsorships():
     assert row["oc_avg_funding"] == "0"        # no OC attributed → $0
     assert row["host_score"] == "1"            # no backing → ×1
     assert "score" not in row                  # filled by build()
+
+
+def test_assemble_row_paypal_is_intent_channel_not_corporate():
+    """A curated PayPal.me handle is a declared funding channel: it sets intent,
+    counts toward channels_count, and — being a personal donation link — leaves
+    the repo nonprofit (it is not corporate backing)."""
+    row = bf.assemble_row(
+        repo="ronaldoussoren/pyobjc", repo_id="1",
+        sponsors={}, yml={}, export={},
+        host="", host_type="", owner="", owner_type="",
+        repo_meta={},
+        paypal="https://www.paypal.com/paypalme/RonaldOussoren",
+    )
+    assert row["paypal"] == "https://www.paypal.com/paypalme/RonaldOussoren"
+    assert row["intent"] == "True"             # declared channel → intent
+    assert row["channels_count"] == "1"        # paypal counted as a channel
+    assert row["nonprofit"] == "True"          # personal donation link ≠ corporate
 
 
 def _base_mocks(monkeypatch, repos):
@@ -143,6 +161,26 @@ def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
     for d in ("npm/d", "pypi/d"):
         assert rows[d]["channels_count"] == "1"             # registry channel counted
         assert rows[d]["score"] == bf.DECLARED_FUNDING_CAP  # 100 → 79
+
+
+def test_build_funding_paypal_override_caps_score_and_sets_intent(monkeypatch):
+    """A curated PayPal.me override on an otherwise-unfunded repo flips intent to
+    True, counts a channel, caps the score at DECLARED_FUNDING_CAP, and leaves
+    the repo nonprofit. An identical repo with no override stays at 100/intent
+    False. (Mirrors the ronaldoussoren/pyobjc case.)"""
+    _base_mocks(monkeypatch, [E("plain/p"), E("pp/d"), E("rich/r")])
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: {
+        "pp/d": {"host": "", "host_type": "", "owner": "", "owner_type": "",
+                 "oc_slug": "", "paypal": "https://www.paypal.com/paypalme/X"}})
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["plain/p"]["score"] == 100                  # unfunded, no channel
+    assert rows["plain/p"]["intent"] == "False"
+    assert rows["pp/d"]["paypal"] == "https://www.paypal.com/paypalme/X"
+    assert rows["pp/d"]["channels_count"] == "1"            # paypal counted
+    assert rows["pp/d"]["score"] == bf.DECLARED_FUNDING_CAP  # 100 → 79
+    assert rows["pp/d"]["intent"] == "True"
+    assert rows["pp/d"]["nonprofit"] == "True"              # not corporate
 
 
 def test_build_funding_scraped_foundation_host_lowers_score(monkeypatch):
