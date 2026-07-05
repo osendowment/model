@@ -27,6 +27,7 @@ STEPS = [
     Step("resolve",    "src.value.apply_ecosystems_authority",   net=True),
     Step("unify",      "src.value.unify_value_data"),
     Step("validation", "src.value.build_validation",             net=True),
+    Step("criticality", "src.value.apply_criticality"),
     Step("eco-audit",  "src.value.audit_ecosystems"),
 ]
 
@@ -38,12 +39,14 @@ STEPS = [
 # Net steps use TTL caches — pass --offline to hard-forbid network (pure-cache
 # run) or --refresh to force refetch ignoring TTL.
 #
-#   eco-fetch  — pull ecosyste.ms repo identity for every top package (network)
-#   resolve    — rewrite results.csv git/github_repo: override > eco > prior
-#   unify      — merge per-eco results into value.csv
-#   validation — ls-remote non-GitHub URLs; stamp git_valid on value.csv
-#   eco-audit  — read-only diff of the result against value.csv
-ROLLUP_LABELS = ("eco-fetch", "resolve", "unify", "validation", "eco-audit")
+#   eco-fetch   — pull ecosyste.ms repo identity for every top package (network)
+#   resolve     — rewrite results.csv git/github_repo: override > eco > prior
+#   unify       — merge per-eco results into value.csv
+#   validation  — ls-remote non-GitHub URLs; stamp git_valid on value.csv
+#   criticality — stamp the OpenSSF criticality score onto value.csv
+#   eco-audit   — read-only diff of the result against value.csv
+ROLLUP_LABELS = ("eco-fetch", "resolve", "unify", "validation", "criticality",
+                 "eco-audit")
 
 
 def main() -> int:

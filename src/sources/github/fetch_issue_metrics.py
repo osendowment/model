@@ -38,7 +38,12 @@ import aiohttp
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
-from src.common.repos import VALUE_FILE, load_repo_ids, load_top_slugs
+from src.common.repos import (
+    VALUE_FILE,
+    load_repo_ids,
+    load_top_slugs,
+    load_value_repo_ids,
+)
 from src.sources.github.display import _ETAColumn, console
 from src.sources.github.github_client import GITHUB_API, get_revolver
 
@@ -104,6 +109,16 @@ def _write_long(
 ) -> int:
     """Write long-format issues.csv stable-sorted by (repo, year, metric).
 
+    Atomic (tmp + os.replace): this writer rewrites the WHOLE file and is
+    flushed after every repo — a mid-write kill on a plain truncate-write
+    would destroy all issue data (the fetch_churn failure mode).
+
+    Every row's repo_id is re-derived from `repo_ids` — the caller must
+    build that map so it covers every slug already on disk (disk ids ∪
+    repos.csv ∪ value.csv), otherwise a rewrite would wipe ids for repos
+    the map doesn't know (repos.csv lags renames), and the id-keyed
+    builder joins silently drop those rows.
+
     `extra_rows` is for any rows we read but couldn't classify (unknown
     metric) — they're round-tripped untouched. Returns rows written.
     """
@@ -126,11 +141,31 @@ def _write_long(
     if extra_rows:
         out_rows.extend(extra_rows)
     out_rows.sort(key=lambda r: (r["repo"], r["year"], r["metric"]))
-    with open(path, "w", newline="", encoding="utf-8") as f:
+    tmp = path + ".tmp"
+    with open(tmp, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=LONG_FIELDS, extrasaction="ignore")
         w.writeheader()
         w.writerows(out_rows)
+    os.replace(tmp, path)
     return len(out_rows)
+
+
+def _load_disk_repo_ids(path: str) -> dict[str, str]:
+    """{repo slug -> first non-blank repo_id} already recorded in issues.csv.
+
+    Preserved as the base layer of the writer's id map so a full rewrite
+    can never wipe an id we previously knew, even for slugs that have
+    since left repos.csv/value.csv (renamed-away duplicates)."""
+    out: dict[str, str] = {}
+    if not os.path.exists(path):
+        return out
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            slug = (row.get("repo") or "").strip()
+            rid = (row.get("repo_id") or "").strip()
+            if slug and rid:
+                out.setdefault(slug, rid)
+    return out
 
 
 def _load_extra_rows(path: str) -> list[dict[str, str]]:
@@ -449,7 +484,14 @@ def main() -> None:
 
     all_repos = load_top_slugs(value_file=args.input)
 
-    repo_ids = load_repo_ids(repos_file=args.repos_file)
+    # Writer id map, most-authoritative last: ids already on disk (so a
+    # rewrite can never wipe one we knew), then repos.csv, then value.csv
+    # (canonical slugs — repos.csv lags renames; see _write_long docstring).
+    repo_ids = {
+        **_load_disk_repo_ids(args.output),
+        **load_repo_ids(repos_file=args.repos_file),
+        **load_value_repo_ids(value_file=args.input),
+    }
     rows_by_state, _existing_years = _load_long(args.output)
     extra_rows = _load_extra_rows(args.output)
 

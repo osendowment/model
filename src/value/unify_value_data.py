@@ -100,6 +100,11 @@ FIELDS = (
      "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
+    # `criticality` (OpenSSF criticality score, 0-1) is not computed here —
+    # `src.value.apply_criticality` fills it as a later pipeline step, and the
+    # rewriters in between (verify_git_urls, build_validation) round-trip it.
+    # It is in FIELDS so write_value_data never drops it.
+    + ["criticality"]
 )
 
 # Internal scratch keys carried on each aggregate dict during computation.

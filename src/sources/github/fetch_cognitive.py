@@ -113,7 +113,12 @@ OUTPUT_FILE = LIZARD_LONG_FILE
 DEFAULT_LIMIT = 0
 DEFAULT_SEED = 42
 DEFAULT_CONCURRENCY = int(os.environ.get("COGNITIVE_WORKERS") or 4)
-DEFAULT_TTL_DAYS = 30
+# Rows are sha-pinned (same sha -> same complexity, forever) and a changed
+# sha always re-analyzes regardless of TTL — so the TTL only gates pointless
+# same-sha re-analysis. 30d made every monthly pipeline run re-grind the
+# whole scope's CPU-heavy lizard pass for identical results; 365 matches
+# the repo-wide freshness convention.
+DEFAULT_TTL_DAYS = 365
 
 # Metrics this fetcher emits per snapshot to data/sources/git/lizard.csv.
 COGNITIVE_METRICS: tuple[str, ...] = (

@@ -32,6 +32,7 @@ import argparse
 import asyncio
 import csv
 import datetime
+import functools
 import logging
 import os
 import random
@@ -56,7 +57,7 @@ DEFAULT_YEARS = [2021, 2022, 2023, 2024, 2025]
 DEFAULT_CONCURRENCY = 32
 FLUSH_EVERY = 500
 
-SHA_FIELDS = ["repo", "year", "first_sha", "last_sha", "commits", "fetched_at"]
+SHA_FIELDS = ["repo", "repo_id", "year", "first_sha", "last_sha", "commits", "fetched_at"]
 
 
 # ────────────────────────────── CSV I/O ────────────────────────────────
@@ -74,6 +75,7 @@ def load_sha_data(filepath: str) -> dict[tuple[str, str], dict[str, str]]:
         for row in csv.DictReader(f):
             key = (row["repo"], row["year"])
             data[key] = {
+                "repo_id":   row.get("repo_id", ""),
                 "first_sha": row.get("first_sha", ""),
                 "last_sha":  row.get("last_sha", ""),
                 "commits":   row.get("commits", ""),
@@ -82,18 +84,34 @@ def load_sha_data(filepath: str) -> dict[tuple[str, str], dict[str, str]]:
     return data
 
 
+@functools.lru_cache(maxsize=1)
+def _repo_id_map() -> dict[str, str]:
+    """Slug -> stable GitHub id, cached (write_sha_data flushes frequently)."""
+    from src.common.repos import load_repo_ids
+    return load_repo_ids()
+
+
 def write_sha_data(
     filepath: str,
     data: dict[tuple[str, str], dict[str, str]],
 ) -> None:
-    """Write commits-years.csv sorted by (repo, year)."""
+    """Write commits-years.csv sorted by (repo, year).
+
+    Every row is stamped with `repo_id` (kept from the loaded row, else
+    resolved from repos.csv). Downstream builders join this file by the
+    stable id — dropping the column silently blanks their entire output,
+    which is exactly what a schema-unaware rewrite did once.
+    """
+    ids = _repo_id_map()
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
     with open(filepath, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=SHA_FIELDS, extrasaction="ignore")
         writer.writeheader()
         for (repo, year), row in sorted(data.items()):
             writer.writerow({
-                "repo": repo, "year": year,
+                "repo": repo,
+                "repo_id": row.get("repo_id") or ids.get(repo.lower(), ""),
+                "year": year,
                 "first_sha": row.get("first_sha", ""),
                 "last_sha":  row.get("last_sha", ""),
                 "commits":   row.get("commits", ""),
