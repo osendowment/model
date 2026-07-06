@@ -44,8 +44,8 @@ from rich.console import Console
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
+from src.common.repos import load_github_top_slugs
 from src.common.repos import load_repo_ids as load_repo_id_map
-from src.common.repos import load_top_slugs
 from src.sources.git.long_format import _file_lock, upsert_snapshot
 from src.sources.git.long_format import read as read_long
 
@@ -625,7 +625,9 @@ async def main() -> None:
         repos.extend(load_repos_from_file(args.file))
 
     if not repos:
-        repos = load_top_slugs()
+        # GitHub-only list: the default (non---gitlab) mode scans github.com/<slug>,
+        # so a GitLab slug here would silently score an unrelated GitHub repo.
+        repos = load_github_top_slugs()
         if not repos:
             parser.error("No repos found — provide positional args, --file, or populate data/value/value.csv")
 
