@@ -303,9 +303,9 @@ of the two** (`min`), so a single value ∈ {0, 0.5, 1}:
   `facebook/watchman` (owner `meta.com` company) → host_score `min(1, 0)` = 0
   → ∛(100·100·0) = **1**; `rust-lang/rust` (host `rustfoundation.org`
   nonprofit, no owner) → host_score `min(0.5, 1)` = 0.5 → ∛(100·100·50) =
-  **79**. Overrides evolve with reality: `react/react` (ex `facebook/react`)
-  is now stewarded by the React Foundation (nonprofit, since 2026-02) with the
-  Meta company-owner blanked, so it sits at host_score 0.5 → **79** rather
+  **79**. Overrides evolve with reality: `react/react`
+  is stewarded by the React Foundation (nonprofit) with no company owner,
+  so it sits at host_score 0.5 → **79** rather
   than the company floor of 1.
 
 Non-backed unfunded repos stay at 100 — **unless they declare a funding channel

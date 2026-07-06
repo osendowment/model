@@ -90,8 +90,7 @@ In `data/sources/gitlab/`:
 - SHA anchors land in the **shared** `data/sources/git/commits-years.csv` beside the GitHub
   rows (same unified schema: `repo, repo_id, git_url, year, first_sha, last_sha, commits,
   fetched_at`), upserted by `(repo, repo_id, year)` so a GitHub mirror sharing a slug keeps
-  its own `gh/…` row. The old standalone `data/sources/gitlab/commits-years.csv` is a legacy
-  snapshot no longer written or read.
+  its own `gh/…` row.
 
 Each fetcher records `fetched_at` and a success flag (`valid`) or a status sidecar, so a
 genuinely-absent value is distinguishable from a failed fetch (auditability).

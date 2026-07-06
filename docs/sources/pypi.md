@@ -20,7 +20,7 @@ GROUP BY project ORDER BY avg_downloads DESC
 
 **Dependencies**: [PyPI JSON API](https://pypi.org/pypi/{package}/json) -- `info.requires_dist` returns PEP 508 dependency specifiers. Only runtime deps kept. Rate limit ~50 req/s.
 
-**Repo mappings**: two layers. `github-repos.csv` is built from a legacy one-shot BigQuery extract pre-filtered to `github.com` URLs (`raw/package-github-mapping.csv`, manual). Separately, `src/sources/pypi/fetch_pypi_urls.py` queries `pypi.org/pypi/{package}/json` for every results.csv package and writes the full URL set (`info.project_urls` + `info.home_page`) to `raw/package-urls.csv`, which the value-stage git-URL builder classifies by host (GitHub / GitLab / etc.).
+**Repo mappings**: two layers. `github-repos.csv` is built from a one-shot BigQuery extract pre-filtered to `github.com` URLs (`raw/package-github-mapping.csv`, manual). Separately, `src/sources/pypi/fetch_pypi_urls.py` queries `pypi.org/pypi/{package}/json` for every results.csv package and writes the full URL set (`info.project_urls` + `info.home_page`) to `raw/package-urls.csv`, which the value-stage git-URL builder classifies by host (GitHub / GitLab / etc.).
 
 No authentication required (except BigQuery for download data).
 
@@ -28,7 +28,7 @@ No authentication required (except BigQuery for download data).
 
 - `data/sources/pypi/bigquery/bq-package-downloads.csv` -- ~849K packages x 5 years (manual export)
 - `data/sources/pypi/raw/package-dependencies.csv` -- package, dependency, type, fetched_at
-- `data/sources/pypi/raw/package-github-mapping.csv` -- package-to-GitHub URL (manual, legacy)
+- `data/sources/pypi/raw/package-github-mapping.csv` -- package-to-GitHub URL (manual, static)
 - `data/sources/pypi/raw/package-urls.csv` -- package, url (all project URLs from the PyPI JSON API; per-package responses cached in `raw/api-cache/`)
 
 ## Scripts

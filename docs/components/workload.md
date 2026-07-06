@@ -67,8 +67,7 @@ Workload  → data/risk/workload.csv  (the top risk repos)
    into `risk.csv` as the `workload` column.
 
 Pipeline order (`src/risk/run_risk_pipeline.py`) — workload is the last
-dimension build because it consumes the three earlier builds (funding moved to
-the eligibility stage and is no longer a risk step):
+dimension build because it consumes the three earlier builds:
 
 ```
 concentration → complexity → security → workload → aggregate
@@ -155,7 +154,7 @@ An integer 0–100, **higher = more workload risk**, floored at 1. A repo with n
 fetched issues has a blank `nni_per_ac`; **when its LOC and CVE burdens are both
 present**, `nni_per_ac_p` is neutral-filled to 50 so the row still scores. The
 score is therefore blank only when LOC or CVE (or AC > 0) is missing —
-`nni_per_ac` no longer gates it, but it is never the *sole* present input (no
+`nni_per_ac` does not gate it, but it is never the *sole* present input (no
 lone 50 on an otherwise-blank row). `issue_close_ratio_p` and
 `issue_trend_score_p` are informational — they describe backlog dynamics but are
 **not** scoring inputs.

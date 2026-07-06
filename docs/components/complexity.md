@@ -126,8 +126,8 @@ The snapshot is the last commit on the default branch at the end of the chosen
 year. The walk picks the most-recent year with a usable sha (scc `loc > 0`)
 across the window **and any dated pre-window fallback**; `loc_year` records the
 real year (`"2025"`…`"2021"`, or an earlier year like `"2020"` for a dormant
-repo), or `""` only when no sha has analysable code. A legacy `"HEAD"`
-pseudo-bucket remains in the walk as an ultimate last resort (a repo with only
+repo), or `""` only when no sha has analysable code. A `"HEAD"`
+pseudo-bucket is the walk's ultimate last resort (a repo with only
 a HEAD pseudo-row and no dated year), but `resolve_head` records dated
 snapshots, so it does not occur in current data.
 

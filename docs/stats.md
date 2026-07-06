@@ -95,7 +95,7 @@ Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 GitLab), **archived included** (they enter risk scope like every other stage;
 archival surfaces in eligibility as `active=False`); each funnel below starts
 from those 940. `risk.csv` ranks all 940 on the four scored dimensions; the
-funding signals and the intent/nonprofit flags moved to the
+funding signals and the intent/nonprofit flags live in the
 [Eligibility](#eligibility) stage. Methodology: [risk.md](risk.md) + component
 docs.
 
@@ -210,8 +210,8 @@ net-new issues per active contributor, plus issue-debt and trend.
 
 **Eligibility covers the 940 top repos** — the valid class-A set INCLUDING
 archived repos, which surface here as `active=False` instead of being dropped.
-This is the same 940-repo scope the risk stage now runs on (both stages include
-archived and both platforms); the four checks per repo roll into
+Risk runs on the same 940-repo scope (both stages include archived repos and
+both platforms); the four checks per repo roll into
 `data/eligibility/eligibility.csv`: `eligible = oss AND intent AND nonprofit
 AND active`. Methodology: [eligibility.md](eligibility.md) +
 [funding.md](components/funding.md).

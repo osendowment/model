@@ -18,7 +18,7 @@ derives metrics, and produces the `score` it contributes to `risk.csv`:
 | Workload | [components/workload.md](components/workload.md) | geom-mean of LOC/CVE/net-issues-per-contributor percentiles |
 
 Funding is **not part of the risk stage** — the funding signals and the
-`intent` / `nonprofit` flags they feed moved to the Eligibility stage
+`intent` / `nonprofit` flags they feed belong to the Eligibility stage
 ([eligibility.md](eligibility.md)): the signals build
 `data/eligibility/funding.csv` and roll into
 `data/eligibility/eligibility.csv`. Methodology stays in
@@ -315,7 +315,7 @@ repo, not a data-collection bug:
 
 - **depsdev** — repos that publish only via Debian / Homebrew / vcpkg / source tarballs are absent from deps.dev's index. Not fillable.
 - **Scorecard files (~99%)** — a mix of brand-new risk-scope additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
-- **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos. The `/stats/contributors` per-year breakdown and `data/concentration-data.csv` are retired.
+- **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos.
 - **churn** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
 - **Structurally-sparse columns** — `bestpractices_badge_id` (only CII-enrolled repos), `cognitive_*` (only languages with a Lizard cognitive parser), and `issue_trend_score` (only repos with `mean_opened_per_year ≥ 1`) are sparse by definition. Their coverage is in [stats.md](stats.md#risk).
 
@@ -342,6 +342,5 @@ documented in the component docs linked at the top of this page.
 | `workload` | Per-contributor workload risk score (0–100) |
 | `risk_score` | Overall risk score (0–100) — geometric mean of the four dimensions; blank when any dimension score is missing |
 
-The `intent` and `nonprofit` flags that used to sit alongside the score are now
-part of the Eligibility stage — built into `data/eligibility/funding.csv` and
+The `intent` and `nonprofit` flags are part of the Eligibility stage — built into `data/eligibility/funding.csv` and
 rolled into `data/eligibility/eligibility.csv` (see [eligibility.md](eligibility.md)).

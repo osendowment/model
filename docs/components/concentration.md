@@ -120,9 +120,9 @@ Concentration  → data/risk/concentration.csv  (one row per risk-scope repo)
 4. **Score** — `score = max(1, round(√(hhi/bf)))` over the `_5y` bus factor and
    HHI — the geometric mean of the absolute scales `100/bf` and `hhi/100`, an
    integer 0–100 (higher = more concentrated = more risk). `add_percentiles`
-   still emits the six `*_p` percentile columns as audit references.
-5. **Aggregate** — `aggregate_risk.py` carries **only** `score` into `risk.csv`,
-   renamed to the column `concentration`.
+   emits the six `*_p` percentile columns as audit references.
+5. **Aggregate** — `aggregate_risk.py` carries **only** `score` into `risk.csv`
+   as the `concentration` column.
 
 Pipeline order. The git-clone contributor fetcher runs **inside** the risk
 pipeline (it is the only source of the score and of workload's per-contributor
@@ -250,9 +250,9 @@ timestamps live in `github_fetched_at` / `git_fetched_at`.
 
 ### `data/risk/risk.csv` (aggregate)
 
-`aggregate_risk.py` carries **only this component's `score`** into `risk.csv`,
-renamed to the column `concentration`. Every other column above stays in the
-per-dimension CSV. `risk.csv` today is just `repo, repo_id, concentration,
+`aggregate_risk.py` carries **only this component's `score`** into `risk.csv`
+as the `concentration` column. Every other column above stays in the
+per-dimension CSV. `risk.csv` is `repo, repo_id, concentration,
 complexity, security, workload, risk_score` — one score per component plus
 the overall geometric-mean `risk_score` (blank unless all four component
 scores are present).
