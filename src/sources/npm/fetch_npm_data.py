@@ -36,8 +36,9 @@ from tqdm import tqdm
 
 load_dotenv()
 
-RAW_DOWNLOADS = "data/sources/npm/raw/downloads.csv"
-RAW_DEPS      = "data/sources/npm/raw/dependencies.csv"
+RAW_DOWNLOADS    = "data/sources/npm/raw/downloads.csv"
+DOWNLOADS_STATUS = "data/sources/npm/raw/downloads.status.csv"
+RAW_DEPS         = "data/sources/npm/raw/dependencies.csv"
 NPM_DOWNLOADS = "https://api.npmjs.org/downloads/point"
 NPM_REGISTRY  = "https://registry.npmjs.org"
 YEARS         = [2021, 2022, 2023, 2024, 2025]
@@ -58,6 +59,7 @@ MAX_RETRIES   = 5
 RETRY_BACKOFF = [5, 15, 30, 60, 90]
 RATE_PER_SEC  = 1.0
 DEPS_TTL_DAYS = 365  # re-fetch a package's dep edges after this age — /latest deps drift with releases
+DOWNLOADS_STATUS_TTL_DAYS = 365  # sidecar verdicts (ok / not_found) older than this are re-checkable
 USER_AGENT    = "osendowment-model/1.0 (research; +https://endowment.dev)"
 NPM_TOKEN     = os.environ.get("NPM_TOKEN", "")
 
@@ -98,6 +100,47 @@ def write_raw_downloads(raw_dl: dict[tuple[str, int], dict]) -> None:
         w.writeheader()
         w.writerows(sorted(raw_dl.values(), key=lambda r: (r["package"], int(r["year"]))))
     os.replace(tmp, RAW_DOWNLOADS)
+
+
+def load_downloads_status() -> dict[str, dict]:
+    """Return {package: {"status": ok|not_found, "checked_at": iso}} from the sidecar.
+
+    downloads.csv rows are bare (package, year, downloads) — a 0 there cannot
+    distinguish "measured zero" from "package 404s on npm". The sidecar records
+    that per-package verdict + fetch date, so zero-audits can skip packages
+    already checked within DOWNLOADS_STATUS_TTL_DAYS instead of re-fetching
+    every all-zero package forever.
+    """
+    if not os.path.exists(DOWNLOADS_STATUS):
+        return {}
+    with open(DOWNLOADS_STATUS, newline="", encoding="utf-8") as f:
+        return {row["package"]: {"status": row["status"], "checked_at": row["checked_at"]}
+                for row in csv.DictReader(f) if row.get("package")}
+
+
+def write_downloads_status(status: dict[str, dict]) -> None:
+    tmp = DOWNLOADS_STATUS + ".tmp"
+    os.makedirs(os.path.dirname(DOWNLOADS_STATUS), exist_ok=True)
+    with open(tmp, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f, quoting=csv.QUOTE_ALL)
+        w.writerow(["package", "status", "checked_at"])
+        for pkg in sorted(status):
+            w.writerow([pkg, status[pkg]["status"], status[pkg]["checked_at"]])
+    os.replace(tmp, DOWNLOADS_STATUS)
+
+
+def status_fresh_packages(status: dict[str, dict],
+                          ttl_days: int = DOWNLOADS_STATUS_TTL_DAYS) -> set[str]:
+    """Packages whose sidecar verdict is within `ttl_days` — safe to skip in audits."""
+    cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=ttl_days)
+    fresh: set[str] = set()
+    for pkg, row in status.items():
+        try:
+            if datetime.fromisoformat(row["checked_at"]) >= cutoff:
+                fresh.add(pkg)
+        except (ValueError, KeyError):
+            continue
+    return fresh
 
 
 def load_fetched_dep_packages(ttl_days: int = DEPS_TTL_DAYS) -> set[str]:
@@ -350,6 +393,7 @@ async def fetch_package_downloads(
     raw_dl: dict,
     bar: tqdm | None = None,
     progress: FetchProgress | None = None,
+    status: dict[str, dict] | None = None,
 ) -> bool:
     """Fetch one scoped package's missing years sequentially, newest first.
 
@@ -375,17 +419,23 @@ async def fetch_package_downloads(
     async with sem:
         inner = asyncio.Semaphore(1)  # fetch_downloads_batch requires a sem; years here run sequentially anyway
         needed = [y for y in sorted(YEARS, reverse=True) if (pkg, y) not in raw_dl]
+        gone = False
         for i, year in enumerate(needed):
             _, res = await fetch_downloads_batch(session, inner, rl, year, [pkg], bar, progress)
             count = res[pkg]
             if count is FETCH_FAILED:
                 return False
             if count is None:
-                # didn't exist this year — this and all earlier missing years are 0
+                # didn't exist this year — this and all earlier missing years are 0.
+                # None at the NEWEST model year means the package 404s outright.
+                gone = year == max(YEARS)
                 for y2 in needed[i:]:
                     raw_dl[(pkg, y2)] = {"package": pkg, "year": y2, "downloads": 0}
                 break
             raw_dl[(pkg, year)] = {"package": pkg, "year": year, "downloads": count}
+        if status is not None:
+            status[pkg] = {"status": "not_found" if gone else "ok",
+                           "checked_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(sep=" ")}
         return True
 
 
@@ -404,8 +454,17 @@ async def _fetch_downloads_async(
     sem        = asyncio.Semaphore(concurrency)
     rl         = RateLimiter(RATE_PER_SEC)
     progress   = FetchProgress()
+    status     = load_downloads_status()
     n_done     = 0
     unresolved = 0
+
+    def _stamp(pkg: str, newest_none: bool) -> None:
+        status[pkg] = {"status": "not_found" if newest_none else "ok",
+                       "checked_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(sep=" ")}
+
+    def _flush() -> None:
+        write_raw_downloads(raw_dl)
+        write_downloads_status(status)
 
     # DummyCookieJar: do NOT persist Cloudflare's per-session _cfuvid cookie.
     # A long-running session that carries a rate-limit-flagged _cfuvid keeps
@@ -447,17 +506,18 @@ async def _fetch_downloads_async(
                             newly_complete.append(pkg)
                     for pkg in newly_complete:
                         _apply_short_circuit(pkg, pkg_yrs[pkg], raw_dl)
+                        _stamp(pkg, pkg_yrs[pkg].get(max(YEARS)) is None)
                         bar.update(1)
                         n_done += 1
                     if newly_complete and n_done % SAVE_INTERVAL < len(newly_complete):
-                        write_raw_downloads(raw_dl)
+                        _flush()
                 unresolved += sum(1 for p in unscoped if waiting[p] > 0)
 
             # ── scoped: one task per package, its years fetched sequentially ──
             if scoped:
                 futs = [
                     asyncio.ensure_future(
-                        fetch_package_downloads(session, sem, rl, p, raw_dl, bar, progress))
+                        fetch_package_downloads(session, sem, rl, p, raw_dl, bar, progress, status))
                     for p in scoped
                 ]
                 for fut in asyncio.as_completed(futs):
@@ -467,7 +527,7 @@ async def _fetch_downloads_async(
                     bar.update(1)
                     n_done += 1
                     if n_done % SAVE_INTERVAL == 0:
-                        write_raw_downloads(raw_dl)
+                        _flush()
         finally:
             status_task.cancel()
             try:
@@ -475,7 +535,7 @@ async def _fetch_downloads_async(
             except asyncio.CancelledError:
                 pass
 
-    write_raw_downloads(raw_dl)  # final flush
+    _flush()  # final flush
     return unresolved
 
 

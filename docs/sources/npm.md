@@ -18,7 +18,8 @@ No authentication required (an optional `NPM_TOKEN` in `.env` Bearer-auths regis
 
 In `data/sources/npm/raw/`:
 - `downloads.csv` -- package, year, downloads
-- `dependencies.csv` -- package, dep_name, dep_version, fetched_at
+- `downloads.status.csv` -- package, status (`ok` | `not_found`), checked_at. Per-package fetch-verdict sidecar: a `downloads=0` row alone cannot distinguish a measured zero from a package that 404s on npm, so audits consult this (365-day TTL) instead of re-fetching every all-zero package
+- `dependencies.csv` -- package, dep_name, dep_version, fetched_at (edges re-fetched after 365 days -- `/latest` deps drift with releases)
 - `npm-stats.csv` -- year, downloads (ecosystem-wide totals)
 
 In `data/sources/npm/nice-registry/`:
