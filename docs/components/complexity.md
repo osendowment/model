@@ -7,9 +7,9 @@ churn-weighted hotspots (Tornhill) — and distils them into one **complexity-ri
 score (`score`)** that feeds `data/risk/risk.csv`. Higher = larger / harder to
 maintain.
 
-Scope: the class-A value-class repos in the risk pipeline (counts in
-[stats.md → Risk](../stats.md#risk); see [value.md](../value.md)). Build step:
-`src/risk/build_complexity.py`.
+Scope: the valid class-A top repos in the risk pipeline — GitHub + GitLab,
+archived included (counts in [stats.md → Risk](../stats.md#risk); see
+[value.md](../value.md)). Build step: `src/risk/build_complexity.py`.
 
 ## Metrics Roadmap
 
@@ -21,7 +21,7 @@ per-source under `data/sources/`; derived columns are computed by
 `build_complexity.py`.
 
 ```
-Complexity  → data/risk/complexity.csv  (one row per class-A risk repo)
+Complexity  → data/risk/complexity.csv  (one row per risk-scope repo)
 │
 ├── scc  (one sparse checkout, sha-pinned)
 │   ├── loc_eoy                 ← scc.loc                 (total lines)            [EOY]
@@ -53,8 +53,9 @@ Complexity  → data/risk/complexity.csv  (one row per class-A risk repo)
 1. **Collect** — one unified fetcher (`fetch_sha_metrics.py`) resolves the
    end-of-year sha, sparse-clones **once**, and runs scc + both lizard passes on
    that single checkout, writing scc (loc + complexity) and lizard (cyclomatic +
-   cognitive); a separate churn fetcher adds 5-year churn. Each is keyed on a sha
-   taken from `commits-years.csv` (per-year `last_sha`).
+   cognitive); a separate churn fetcher (audit-only — run by hand, not by the
+   pipeline, since churn feeds no score) adds 5-year churn. Each is keyed on a
+   sha taken from `commits-years.csv` (per-year `last_sha`).
 2. **Pick the snapshot sha** — for each repo `build_complexity.py` walks **every
    available snapshot year newest→oldest** and picks the most-recent whose
    `last_sha` has scc `loc > 0`. This spans the settings window (2025→2021) and,
@@ -89,10 +90,10 @@ failed fetch.
 
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
 |---|---|---|---|
-| `git/commits-years.csv` | `src/sources/git/commits_years.py` | per-(repo, year) `last_sha` + `commits` | `repo`, `year` |
-| `git/scc.csv` | `src/sources/git/fetch_sha_metrics.py` (scc via `fetch_scc.py` helpers) | scc loc, sloc, complexity, complexity_density | `repo`, `sha` |
-| `git/lizard.csv` | `src/sources/git/fetch_sha_metrics.py` | lizard cyclomatic_{total,avg,max} + cognitive_{total,avg,max} | `repo`, `sha` |
-| `git/churn.csv` | git churn (bare clone) | 5-year added+deleted lines | `repo` |
+| `git/commits-years.csv` | `src/sources/git/commits_years.py` | per-(repo, year) `last_sha` + `commits` | `repo_id`, `year` |
+| `git/scc.csv` | `src/sources/git/fetch_sha_metrics.py` (scc via `fetch_scc.py` helpers) | scc loc, sloc, complexity, complexity_density | `repo_id`, `sha` |
+| `git/lizard.csv` | `src/sources/git/fetch_sha_metrics.py` | lizard cyclomatic_{total,avg,max} + cognitive_{total,avg,max} | `repo_id`, `sha` |
+| `git/churn.csv` | `src/sources/github/fetch_churn.py` (audit-only, run by hand) | 5-year added+deleted lines (git churn, bare clone) | `repo_id` |
 
 scc and lizard are stored long-format (one row per `(repo, sha, metric)`) and
 read via `src.sources.git.long_format.read`; the build indexes them by
@@ -111,7 +112,11 @@ branching (`scc_complexity_eoy ≥ LIZARD_FALSE_ZERO_MIN_SCC_CX`, currently **5*
 but lizard reports `cyclomatic_total == 0`, lizard analysed the wrong (off-mainline,
 function-free) tree, so its metrics are dropped to **MISSING** rather than a
 score-deflating real `0`. A genuinely function-free repo (a pure data/config
-module) has near-zero scc complexity too, so the threshold spares it.
+module) has near-zero scc complexity too, so the threshold spares it. The
+guard applies to **GitHub repos only**: the off-mainline artefact comes from
+`corrected_clone_sha`, which is GitHub-specific — non-GitHub (`gl/…`) repos
+sparse-clone the exact pinned SHA scc measured, so a lizard zero there is a
+genuine function-free repo and is kept.
 
 ## Processing & scoring
 
@@ -121,7 +126,10 @@ The snapshot is the last commit on the default branch at the end of the chosen
 year. The walk picks the most-recent year with a usable sha (scc `loc > 0`)
 across the window **and any dated pre-window fallback**; `loc_year` records the
 real year (`"2025"`…`"2021"`, or an earlier year like `"2020"` for a dormant
-repo — never an opaque `"HEAD"`), or `""` only when no sha has analysable code.
+repo), or `""` only when no sha has analysable code. A legacy `"HEAD"`
+pseudo-bucket remains in the walk as an ultimate last resort (a repo with only
+a HEAD pseudo-row and no dated year), but `resolve_head` records dated
+snapshots, so it does not occur in current data.
 
 ### scc vs lizard metric mapping
 
@@ -188,7 +196,7 @@ in the source files (`scc.csv`, `lizard.csv`).
 | `scc_density_eoy` | scc complexity per line |
 | `cognitive_total` / `cognitive_avg` / `cognitive_max` | lizard cognitive complexity |
 | `cyclomatic_total` / `cyclomatic_avg` / `cyclomatic_max` | lizard McCabe (per-function) |
-| `loc_year` | snapshot year used (`2025`…`2021`, `HEAD`, or `""`) |
+| `loc_year` | snapshot year used (a real year — `2025`…`2021`, or a pre-window fallback year for dormant repos; `""` when no sha has analysable code; a `HEAD` pseudo-bucket survives in the code as ultimate fallback but does not occur in current data) |
 | `churn_5y_total` | 5-year added+deleted lines |
 | `hotspot_raw` | `churn × complexity` (linear) |
 | `hotspot_log` | `log10(churn+1) × log10(complexity+1)` |
@@ -205,8 +213,9 @@ in the source files (`scc.csv`, `lizard.csv`).
 `aggregate_risk.py` carries **only** this component's `score`, writing it as the
 column **`complexity`** (alongside the other dimensions' scores). All other
 complexity columns stay in `complexity.csv`. The narrow `risk.csv` is just:
-`repo, repo_id, concentration, complexity, security, funding, workload, score`
-(the overall `score` is the geometric mean of the present component scores).
+`repo, repo_id, concentration, complexity, security, workload, risk_score`
+(the overall `risk_score` is the geometric mean of the four component scores,
+blank unless all four are present).
 
 ## Coverage
 

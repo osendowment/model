@@ -1,8 +1,11 @@
 # Risk Pipeline
 
-Measures sustainability risk for GitHub repos using four scored dimensions —
-contributor concentration, codebase complexity, security posture, and
-maintainer workload — over the last 5 years.
+Measures sustainability risk for the top repos — the valid class-A set across
+both platforms (GitHub + GitLab), **including archived repos** — using four
+scored dimensions: contributor concentration, codebase complexity, security
+posture, and maintainer workload, over the last 5 years. Archived repos are
+scored like any other (archival surfaces in eligibility as `active=False`,
+not by dropping the repo from risk).
 
 Each scored dimension has its own component doc — how it collects its sources,
 derives metrics, and produces the `score` it contributes to `risk.csv`:
@@ -11,7 +14,7 @@ derives metrics, and produces the `score` it contributes to `risk.csv`:
 |---|---|---|
 | Concentration | [components/concentration.md](components/concentration.md) | geom-mean of absolute 5y scales 100/bf + HHI/100 |
 | Complexity | [components/complexity.md](components/complexity.md) | geom-mean of LOC + cyclomatic-max percentiles |
-| Security | [components/security.md](components/security.md) | max (worst-of) OpenSSF-score + CVE-count percentiles |
+| Security | [components/security.md](components/security.md) | max (worst-of) OpenSSF-score percentile + neutral-anchored CVE score |
 | Workload | [components/workload.md](components/workload.md) | geom-mean of LOC/CVE/net-issues-per-contributor percentiles |
 
 Funding is **not part of the risk stage** — the funding signals and the
@@ -39,8 +42,8 @@ Risk
 │   ├── bf_commits           ← derived (bus factor)                      [lifetime · 2021–2025]
 │   └── hhi_commits          ← derived (HHI, 0–10000)                    [lifetime · 2021–2025]
 │       (every metric resolved by two methods — git-clone log and the
-│        GitHub /contributors API — kept as parallel *_git / *_github
-│        columns; the git method also carries a 2021–2025 window)
+│        GitHub /contributors API — kept as parallel *_git_full / *_git_5y /
+│        *_gh_alltime columns; only the git method carries a 2021–2025 window)
 │
 ├── Complexity  →  data/risk/complexity.csv
 │   ├── loc, sloc                     ← scc (sparse checkout)            [2025 EOY]
@@ -48,7 +51,7 @@ Risk
 │   ├── cyclomatic_{total,avg,max}    ← lizard (sparse checkout)         [2025 EOY]
 │   ├── cognitive_{total,avg,max}     ← lizard cognitive complexity      [2025 EOY]
 │   ├── churn_5y_total                ← git churn (bare clone)           [2021–2025]
-│   └── hotspot_{raw,log,percentile}  ← derived (churn × complexity)     [2025 EOY]
+│   └── hotspot_{raw,log,log_p}       ← derived (churn × complexity)     [2025 EOY]
 │
 ├── Security  →  data/risk/security.csv
 │   ├── openssf_score                 ← OpenSSF Scorecard (deps.dev fb)  [2025 EOY]
@@ -72,20 +75,21 @@ Risk
 Single source: **OSV.dev** (free, no auth, aggregates GHSA + NVD + ecosystem
 advisories).
 
-`POST https://api.osv.dev/v1/query` with one of:
+`POST https://api.osv.dev/v1/query` with
+`{"package": {"name": "<pkg>", "ecosystem": "npm|PyPI|crates.io|Debian"}}`,
+once per `(ecosystem, package)` tuple mapped to the repo across the
+per-ecosystem `results.csv` files (`src/sources/osv/fetch_cves.py`). OSV does
+**not** index `pkg:github/*` purls (they return zero results), so there is no
+repo-purl fallback; C/C++ packages are queried against OSV's `Debian`
+ecosystem (release-suffix-free, aggregating across all Debian releases).
 
-- `{"package": {"name": "<pkg>", "ecosystem": "npm|PyPI|crates.io|Go|…"}}` —
-  for ecosystem-published packages.
-- `{"package": {"purl": "pkg:github/<owner>/<name>"}}` — for repos without
-  a published package (uses the GitHub purl form).
-
-Filter the returned `vulns[]` by `published` year ∈ 2021–2025 and dedupe by
-the `aliases[]` set so a CVE listed under multiple GHSA/OSV IDs only counts
-once.
+Aggregate the vulns from every package mapped to the repo, filter by
+`published` year ∈ 2021–2025, and dedupe by the `{id} ∪ aliases[]` set so a
+CVE listed under multiple GHSA/OSV IDs only counts once.
 
 ```mermaid
 graph LR
-    github["GitHub"]
+    github["GitHub / GitLab"]
 
     subgraph Risk["Risk Pipeline"]
         concentration["Contributor Concentration"]
@@ -115,12 +119,18 @@ real CVE alone flags the repo without the axes diluting each other;
 concentration scores its two metrics on absolute scales
 (`100/bf`, `HHI/100`) because its percentile version collapsed into
 bus-factor-1 tie blocks. The four dimension scores are combined into the
-overall `risk.csv` `risk_score` via a geometric mean. Risk is expressed as
+overall `risk.csv` `risk_score` via a geometric mean; the overall score is
+blank unless **all four** dimension scores are present (a partial geometric
+mean is not comparable across repos). Risk is expressed as
 continuous scores end-to-end — there are **no discrete risk classes or
 tiers**.
 
-Percentiles use the Hazen position `100·(rank−0.5)/n`, ranked across the
-risk-scope set, strictly within 0–100. "Direction-aware" means each metric is
+Percentiles are worst-pinned CDF ranks (`risk_percentiles` in
+`src/common/stats.py`): for each present value, `100 · #{j : vⱼ ≤ vᵢ} / n`
+after orienting the metric, ranked across the risk-scope set. The single
+worst value maps to exactly 100 and the best to ≥ 100/n, so every percentile
+is in (0, 100] and a geometric mean over them can never collapse to 0.
+"Direction-aware" means each metric is
 oriented before ranking: a low bus factor, a high HHI, a low OpenSSF score all
 map to a *high* risk percentile. The exact percentile(s) that feed each
 dimension `score` are listed in the table at the top of this doc and in each
@@ -166,9 +176,8 @@ How large and hard to audit is the codebase? Percentile-ranked metrics
 Is the maintainer keeping up with reported issues over 5 years? (Folded into the
 **workload** dimension.) `issue_close_ratio` = `closed_5y / opened_5y` (rounded
 to 3 dp); a low close ratio means a growing backlog, and its risk percentile is
-`issue_close_ratio_p`. Repos with too few issues (`opened_5y` below the volume
-floor) get an empty signal rather than a misleading ratio off two dropped
-issues.
+`issue_close_ratio_p`. Repos with zero opened issues in the window get an
+empty signal rather than a division by zero.
 
 ### Issue Trend
 
@@ -183,8 +192,8 @@ trend_score  = (slope_closed - slope_opened) / mean(opened_per_year)
 
 Normalising by mean opened-volume makes the score comparable across project
 sizes. A positive `issue_trend_score` means the maintainer is closing the gap
-(`issue_trend_score_p` is its risk percentile); it is empty when `opened_5y` is
-too small or fewer than three years had any issues opened.
+(`issue_trend_score_p` is its risk percentile); it is empty when
+`mean(opened_per_year) < 1` (fewer than ~1 opened issue per window year).
 
 ### Workload
 
@@ -196,11 +205,16 @@ backlog. Three ratios (▴ higher = more workload), each percentile-ranked:
 - `nni_per_ac` — net new issues (opened − closed, 5y) per active contributor.
 
 `AC` = `active_contributors_git_5y`, the count of distinct non-bot
-contributors who authored a commit in 2021–2025 (git-clone method).
-Each ratio is percentile-ranked across the risk-scope set (Hazen position
-`100·(rank−0.5)/n`, strictly in 0–100) into `loc_per_ac_p` / `cve_per_ac_p` /
+contributors who authored a commit in 2021–2025 (git-clone method). A repo
+with AC = 0 (dormant / bot-only window) is scored with a notional AC = 1 and
+flagged `dormant = 1` rather than left blank.
+Each ratio is percentile-ranked across the risk-scope set (worst-pinned CDF,
+in (0, 100] — see above) into `loc_per_ac_p` / `cve_per_ac_p` /
 `nni_per_ac_p`; the dimension `score` is the geometric mean of the three
-percentiles, empty when an input is missing or AC = 0.
+percentiles. When a repo's issues were never fetched (e.g. GitLab repos, which
+have no GitHub-issue data), `nni_per_ac_p` is neutral-filled to **50** so LOC +
+CVE still produce a score; the score is empty only when the LOC or CVE input
+is also missing.
 
 ### Security
 
@@ -222,14 +236,17 @@ CVEs is never masked by an otherwise-good Scorecard). Most risk-scope repos have
 zero known CVEs and share the same `cve_score = 50` (the neutral baseline), so
 for those `score = openssf_score_p` (which clears 50 for most) and is driven by
 the OpenSSF Scorecard axis; the CVE axis takes over only for the minority whose
-`cve_score` exceeds their openssf axis. (CVE coverage is in
+`cve_score` exceeds their openssf axis. When one axis is missing entirely the
+other alone scores the repo (`max_composite_any`) — e.g. a GitLab repo with no
+Scorecard still gets a security score from the CVE axis. (CVE coverage is in
 [stats.md → Risk → Security](stats.md#security).)
 
 ## Data Sources
 
 | Source | Fields extracted for Risk |
 |---|---|
-| **GitHub Contributors stats API** (`api.github.com/repos/.../stats/contributors`) | per-contributor weekly commit history → bus factor, HHI |
+| **git-clone commit log** (`src/sources/git/contributors.py`, bare treeless clone, `git log --no-merges`) | per-contributor per-year commits → bus factor, HHI, active contributors (the concentration score source + workload divisor) |
+| **GitHub Contributors API** (`api.github.com/repos/.../contributors`) | lifetime per-account contributions → `_gh_alltime` bus factor / HHI (audit cross-check only) |
 | **GitHub git tree** (one sparse checkout of the EOY-pinned sha, `fetch_sha_metrics.py`) → [scc](https://github.com/boyter/scc) | lines of code, complexity per language → `data/sources/git/scc.csv` |
 | **Lizard** (same single checkout) | per-function McCabe cyclomatic + Sonar cognitive → `data/sources/git/lizard.csv` |
 | **GitHub Issues Search API** (`api.github.com/search/issues`) | per-year issue open / close counts |
@@ -241,8 +258,11 @@ the OpenSSF Scorecard axis; the CVE axis takes over only for the minority whose
 All sha-pinned raw metrics share one canonical schema:
 
 ```
-repo, repo_id, commit_sha, metric, value, checked_at
+repo, repo_id, git_url, commit_sha, metric, value, checked_at
 ```
+
+(`git_url` is the host-agnostic clone URL — how GitLab repos route to their
+real host.)
 
 Key = `(repo, commit_sha, metric)`. New runs upsert by key — historical snapshots for prior SHAs are preserved as a time-series. Empty `value` / empty `commit_sha` rows are dropped. Floats are written in shortest round-trip form (`42` not `42.0`, `8.5` not `8.500000000001`).
 
@@ -259,15 +279,15 @@ The canonical writer/reader is `src/sources/git/long_format.py` (`upsert_snapsho
 
 ### Sha-pinning convention
 
-Each repo has per-year `last_sha` resolved by `src/sources/git/commits_years.py` into `data/sources/git/commits-years.csv`. Fetchers walk per-repo years 2025 → 2024 → … → 2021 and pick the most-recent year with `commits > 0` and a non-empty `last_sha`. That sha is the `commit_sha` for every row the fetcher writes. No HEAD fallback persists — if no usable year exists for a repo, no row is written for it.
+Each repo has per-year `last_sha` resolved by `src/sources/git/commits_years.py` into `data/sources/git/commits-years.csv`. Fetchers walk per-repo years newest → oldest (2025 → 2024 → …, cascading up to 10 years back via `resolve_snapshot_sha`) and pick the most-recent year with a non-empty `last_sha`. For dormant repos with no populated year at all, the `year = "HEAD"` pseudo-row written by `src.sources.git.resolve_head` (itself a pinned, dated sha) is the last resort. That sha is the `commit_sha` for every row the fetcher writes — no live-HEAD clone ever persists, and if no usable sha exists anywhere, no row is written for that repo.
 
 ### High-level projection (long → wide)
 
 The pipeline stages project the long files into per-repo wide rows for downstream consumers:
 
-- `data/risk/complexity.csv` ← `src.risk.build_complexity` projects `data/sources/git/scc.csv` + `data/sources/git/lizard.csv` using `commits-years.last_sha` (2025 → 2021 walk; first sha with `loc > 0`). Also folds in the **hotspot** score (Tornhill `churn × complexity`): joins `data/sources/git/churn.csv` (`churn_5y_total`) with the EOY-2025 scc complexity snapshot to emit `churn_5y_total`, `hotspot_raw`, `hotspot_log`, `hotspot_percentile`.
+- `data/risk/complexity.csv` ← `src.risk.build_complexity` projects `data/sources/git/scc.csv` + `data/sources/git/lizard.csv` using `commits-years.last_sha` (2025 → 2021 walk; first sha with `loc > 0`). Also folds in the **hotspot** score (Tornhill `churn × complexity`): joins `data/sources/git/churn.csv` (`churn_5y_total`) with the EOY-2025 scc complexity snapshot to emit `churn_5y_total`, `hotspot_raw`, `hotspot_log`, `hotspot_log_p`.
 - `data/risk/security.csv` ← `src.risk.build_security` projects `data/sources/git/openssf.csv`, `data/sources/git/depsdev.csv` using the same per-year sha priority.
-- `data/risk/risk.csv` ← `src.risk.run_risk_pipeline` joins the four scored dimensions (concentration · complexity · security · workload) and computes the final risk score as their geometric mean.
+- `data/risk/risk.csv` ← `src.risk.aggregate_risk` (the pipeline's final step) joins the four scored dimensions (concentration · complexity · security · workload) and computes the final `risk_score` as their geometric mean — blank unless all four are present.
 
 ## Scripts
 
@@ -277,7 +297,7 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 | `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (standalone `scc` fetcher; helpers reused by `fetch_sha_metrics.py`) |
 | `src/sources/git/fetch_sha_metrics.py` | Unified SHA-pinned metrics — one sparse checkout → scc + both lizard passes (cyclomatic + cognitive) → `scc.csv` + `lizard.csv` |
 | `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall risk `score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload). **Input is `data/value/value.csv` — valid repos with `class ∈ settings.json risk_input.value_classes` (default `["A"]`)**. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. The pipeline runs **only the score-forming fetchers** (`FETCHERS`); the audit-only fetchers that populate purely informational columns — `fetch_churn` (hotspot), `fetch_semgrep` (SAST), `fetch_cognitive` (cognitive complexity), `fetch_contributors_metrics` (GitHub-method BF/HHI) — live in `AUDIT_FETCHERS` and are run by hand when those columns need refreshing. |
+| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall `risk_score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload; blank unless all four are present). **Input scope is `load_top_repos` over `data/value/value.csv` — valid repos with `class ∈ settings.json top_repos.classes` (`["A"]`) and `platform ∈ top_repos.platforms` (`["github", "gitlab"]`), archived included**. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. The pipeline runs **only the score-forming fetchers** (`FETCHERS`); the audit-only fetchers that populate purely informational columns — `fetch_churn` (hotspot) and `fetch_contributors_metrics` (GitHub-method BF/HHI) — live in `AUDIT_FETCHERS` and are run by hand when those columns need refreshing. (Semgrep SAST was removed from the model entirely, and cognitive complexity is now produced by the unified sha-metrics/lizard pass — neither has a standalone fetcher any more.) |
 
 ## Source-file coverage
 
@@ -304,9 +324,10 @@ repo, not a data-collection bug:
 ### risk.csv
 
 One row per risk-scope repo. The four scored-dimension columns are each a
-**0–100 risk score** (higher = riskier) — the geometric-mean rollup of that
-dimension's scored percentiles — and `score` is the geometric mean of those
-four scores. The detailed per-dimension metric
+**0–100 risk score** (higher = riskier) — the rollup of that
+dimension's scored metrics — and `risk_score` is the geometric mean of those
+four scores (blank unless all four are present). Rows are ranked by
+`risk_score` descending. The detailed per-dimension metric
 and `*_p` percentile columns live in the per-dimension files
 (`data/risk/{concentration,complexity,security,workload}.csv`) and are
 documented in the component docs linked at the top of this page.
@@ -319,8 +340,8 @@ documented in the component docs linked at the top of this page.
 | `complexity` | Codebase-complexity risk score (0–100) |
 | `security` | Security risk score (0–100) |
 | `workload` | Per-contributor workload risk score (0–100) |
-| `score` | Overall risk score (0–100) — geometric mean of the four dimensions |
+| `risk_score` | Overall risk score (0–100) — geometric mean of the four dimensions; blank when any dimension score is missing |
 
-The `intent` and `nonprofit` flags that used to sit alongside `score` are now
+The `intent` and `nonprofit` flags that used to sit alongside the score are now
 part of the Eligibility stage — built into `data/eligibility/funding.csv` and
 rolled into `data/eligibility/eligibility.csv` (see [eligibility.md](eligibility.md)).
