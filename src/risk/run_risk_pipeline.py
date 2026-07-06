@@ -2,7 +2,7 @@
 
 By default fetches any MISSING raw data first (incremental — each fetcher
 skips data already present in its output files, so only gaps are fetched),
-then runs the four dimension builders -> aggregate. Pass --skip-fetch to skip
+then runs the four dimension builders -> aggregate. Pass --offline to skip
 all fetchers and only re-run the builders/aggregate from existing data.
 
 Funding moved to the eligibility stage — its fetchers and builder now live in
@@ -17,7 +17,7 @@ keeps a full risk run lean: it fetches only what the scores need.
 
 Usage:
     uv run python -m src.risk.run_risk_pipeline                # fetch + build + aggregate
-    uv run python -m src.risk.run_risk_pipeline --skip-fetch   # build + aggregate only
+    uv run python -m src.risk.run_risk_pipeline --offline      # build + aggregate only
     uv run python -m src.risk.run_risk_pipeline --from aggregate
     uv run python -m src.risk.run_risk_pipeline --list
 """
