@@ -126,10 +126,9 @@ The snapshot is the last commit on the default branch at the end of the chosen
 year. The walk picks the most-recent year with a usable sha (scc `loc > 0`)
 across the window **and any dated pre-window fallback**; `loc_year` records the
 real year (`"2025"`…`"2021"`, or an earlier year like `"2020"` for a dormant
-repo), or `""` only when no sha has analysable code. A `"HEAD"`
-pseudo-bucket is the walk's ultimate last resort (a repo with only
-a HEAD pseudo-row and no dated year), but `resolve_head` records dated
-snapshots, so it does not occur in current data.
+repo), or `""` only when no sha has analysable code. Snapshots are always
+dated — `resolve_head` records a dated end-of-year sha for dormant
+repos, never an undated `HEAD`.
 
 ### scc vs lizard metric mapping
 
@@ -196,7 +195,7 @@ in the source files (`scc.csv`, `lizard.csv`).
 | `scc_density_eoy` | scc complexity per line |
 | `cognitive_total` / `cognitive_avg` / `cognitive_max` | lizard cognitive complexity |
 | `cyclomatic_total` / `cyclomatic_avg` / `cyclomatic_max` | lizard McCabe (per-function) |
-| `loc_year` | snapshot year used (a real year — `2025`…`2021`, or a pre-window fallback year for dormant repos; `""` when no sha has analysable code; a `HEAD` pseudo-bucket survives in the code as ultimate fallback but does not occur in current data) |
+| `loc_year` | snapshot year used (a real year — `2025`…`2021`, or a pre-window fallback year for dormant repos; `""` when no sha has analysable code) |
 | `churn_5y_total` | 5-year added+deleted lines |
 | `hotspot_raw` | `churn × complexity` (linear) |
 | `hotspot_log` | `log10(churn+1) × log10(complexity+1)` |

@@ -34,8 +34,8 @@ All sha-pinned analyses (scc, lizard) key off `commits-years.csv`:
 | Step | Module | Behaviour |
 |------|--------|-----------|
 | Per-year SHAs | `commits_years.py` | GitHub Commits API, per (repo, year): newest + oldest commit in the year on the default branch (2 calls: `per_page=1`, then `&page={count}` from the Link header) → `first_sha`, `last_sha`, `commits`. Inactive years stored with empty SHAs, `commits=0` |
-| Snapshot pick | `resolve_snapshot_sha` | target year's `last_sha`, cascading back through earlier years (cap 10), then the `year=HEAD` pseudo-row |
-| Dormant repos | `resolve_head.py` | latest default-branch commit capped at end of the last complete year, stored under its **real** year plus a `HEAD` alias row |
+| Snapshot pick | `resolve_snapshot_sha` | target year's `last_sha`, cascading back through earlier years (cap 10); no usable sha → no row |
+| Dormant repos | `resolve_head.py` | latest default-branch commit capped at end of the last complete year, stored under its **real** year |
 | Off-mainline correction | `resolve_mainline_sha` / `corrected_clone_sha` | the API can return a merged side-branch commit (e.g. a shared CI-template commit); fetchers verify the pinned SHA is on the default branch's first-parent line and, if not, *check out* the mainline commit at the year-end cutoff — while still **recording** metrics under the pinned SHA (the builders' join key) |
 
 ## The long format (`long_format.py`)
@@ -77,7 +77,7 @@ Coverage/funnel counts: [stats.md → Risk](../stats.md#risk).
 | Script | Purpose |
 |--------|---------|
 | `src/sources/git/commits_years.py` | Per (repo, year) first/last SHA + commit count (GitHub API) |
-| `src/sources/git/resolve_head.py` | Snapshot SHA for dormant repos (dated + `HEAD` alias rows) |
+| `src/sources/git/resolve_head.py` | Snapshot SHA for dormant repos (dated rows only) |
 | `src/sources/git/fetch_sha_metrics.py` | One sparse checkout → scc + both lizard passes → `scc.csv` + `lizard.csv` |
 | `src/sources/git/fetch_scc.py` | scc-only fetcher (helpers reused by `fetch_sha_metrics`) |
 | `src/sources/git/contributors.py` | Treeless clone + `git log` → contributor-commits long + status sidecar |

@@ -94,11 +94,13 @@ join is on the stable `repo_id` (rename-proof).
 ### Issues are long-format
 
 `issues.csv` is long (`repo, repo_id, year, metric, value`), one row per
-`(repo, year, metric)`. The build pivots it to `{metric: {repo: {year: count}}}`
-and backfills missing window years with `0`. A repo **present** in `issues.csv`
-(even all-zero) was genuinely fetched — a real 0; a repo **absent** was never
-fetched, so all its issue figures stay blank rather than 0, preventing a fetch
-gap from masquerading as "zero issues" and skewing the per-AC percentiles.
+`(repo, year, metric)`. The build pivots it to `{metric: {repo_id: {year: count}}}` with no
+zero-backfill: a year counts as fetched only if its row exists. Issue
+figures require **every** window year present for **both** metrics
+(the `issues_fetched` gate) — a repo missing even one year (fetch
+failure or never attempted) gets all issue-derived columns blank
+rather than 0, preventing a fetch gap from masquerading as "zero
+issues" and skewing the per-AC percentiles.
 
 ## Processing & scoring
 

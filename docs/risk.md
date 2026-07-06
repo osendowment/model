@@ -279,7 +279,7 @@ The canonical writer/reader is `src/sources/git/long_format.py` (`upsert_snapsho
 
 ### Sha-pinning convention
 
-Each repo has per-year `last_sha` resolved by `src/sources/git/commits_years.py` into `data/sources/git/commits-years.csv`. Fetchers walk per-repo years newest → oldest (2025 → 2024 → …, cascading up to 10 years back via `resolve_snapshot_sha`) and pick the most-recent year with a non-empty `last_sha`. For dormant repos with no populated year at all, the `year = "HEAD"` pseudo-row written by `src.sources.git.resolve_head` (itself a pinned, dated sha) is the last resort. That sha is the `commit_sha` for every row the fetcher writes — no live-HEAD clone ever persists, and if no usable sha exists anywhere, no row is written for that repo.
+Each repo has per-year `last_sha` resolved by `src/sources/git/commits_years.py` into `data/sources/git/commits-years.csv`. Fetchers walk per-repo years newest → oldest (2025 → 2024 → …, cascading up to 10 years back via `resolve_snapshot_sha`) and pick the most-recent year with a non-empty `last_sha`. For dormant repos with no populated year at all, `src.sources.git.resolve_head` records the latest default-branch commit under its real (dated) year. That sha is the `commit_sha` for every row the fetcher writes — no live-HEAD clone ever persists, and if no usable sha exists anywhere, no row is written for that repo.
 
 ### High-level projection (long → wide)
 

@@ -189,8 +189,11 @@ license and EOL fetchers, the funding-intent fetchers (FUNDING.yml,
 npm/PyPI funding, Sponsors, bus-factor maintainer Sponsors, FLOSS Fund,
 the Open Collective reverse-map + budgets) and the FOSS-foundation roster
 scrapers + host matcher. Builders: `licenses` → `active` → `funding-build`
-→ `aggregate` → `results` (the terminal cross-stage rollup,
-`src.build_results`).
+→ `aggregate`, then the terminal preview steps: `results`
+(`src.build_results` — the cross-stage rollup), `people`
+(`src.build_people` — owners/key contributors for outreach) and
+`preview-xlsx` (`src.build_preview_workbook` — both preview CSVs as
+one styled workbook).
 
 `scripts/pipeline_health.py` verifies every stage CSV matches its
 builder's current output; `scripts/stats.py` recomputes the
