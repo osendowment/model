@@ -26,7 +26,7 @@ import os
 import random
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import aiohttp
 from dotenv import load_dotenv
@@ -57,6 +57,7 @@ CONCURRENCY   = 3
 MAX_RETRIES   = 5
 RETRY_BACKOFF = [5, 15, 30, 60, 90]
 RATE_PER_SEC  = 1.0
+DEPS_TTL_DAYS = 365  # re-fetch a package's dep edges after this age — /latest deps drift with releases
 USER_AGENT    = "osendowment-model/1.0 (research; +https://endowment.dev)"
 NPM_TOKEN     = os.environ.get("NPM_TOKEN", "")
 
@@ -99,12 +100,37 @@ def write_raw_downloads(raw_dl: dict[tuple[str, int], dict]) -> None:
     os.replace(tmp, RAW_DOWNLOADS)
 
 
-def load_fetched_dep_packages() -> set[str]:
-    """Packages whose deps have already been fetched (appear as `package` in raw/deps)."""
+def load_fetched_dep_packages(ttl_days: int = DEPS_TTL_DAYS) -> set[str]:
+    """Packages whose deps were fetched within `ttl_days`.
+
+    Dep edges come from `/{package}/latest`, so they drift as packages
+    release new versions — an edge list older than the TTL no longer
+    reflects the package's current dependencies. Stale (or unstamped)
+    rows are treated as unfetched, so the next round re-fetches them and
+    the graph frontier tracks upstream reality. `ttl_days <= 0` disables
+    the TTL (every recorded package counts as fetched).
+    """
     if not os.path.exists(RAW_DEPS):
         return set()
+    cutoff = (datetime.now(timezone.utc).replace(tzinfo=None)
+              - timedelta(days=ttl_days)) if ttl_days > 0 else None
+    fresh: set[str] = set()
     with open(RAW_DEPS, newline="", encoding="utf-8") as f:
-        return {row["package"] for row in csv.DictReader(f) if row.get("package")}
+        for row in csv.DictReader(f):
+            pkg = row.get("package")
+            if not pkg or pkg in fresh:
+                continue
+            if cutoff is None:
+                fresh.add(pkg)
+                continue
+            try:
+                # stored as naive-UTC "%Y-%m-%d %H:%M:%S.%f"
+                fetched = datetime.fromisoformat(row.get("fetched_at", ""))
+            except ValueError:
+                continue  # unstamped/unparsable — treat as stale
+            if fetched >= cutoff:
+                fresh.add(pkg)
+    return fresh
 
 
 def load_all_dep_names() -> set[str]:
