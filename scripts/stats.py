@@ -350,6 +350,47 @@ def eligibility_stats() -> dict:
             "rollup": rollup, "sole": sole}
 
 
+# ── end-to-end funnel ────────────────────────────────────────────────────────
+
+def funnel_stats(v: dict, r: dict, e: dict) -> list[tuple[str, int, int, str, str]]:
+    """The whole pipeline as one funnel: package universe → priority-ranked
+    preview rows. Each row = (stage, count, denominator, denominator label,
+    comment); the pre-scope stages narrow against the previous stage, the
+    post-scope stages are parallel filters over the top-repo set (so each is
+    expressed against `top repos`, not the row above)."""
+    preview = _load("data/preview/repos.csv")
+    bc = v["by_class"]
+    pkgs = sum(v["pkg_class"][c] for c in "ABC")
+    valid = sum(bc[c]["valid"] for c in "ABC")
+    class_a = v["classes"]["A"]["strongest"]
+    top = e["scope"]
+    value_scored = sum(1 for p in preview if _present(p.get("value_score")))
+    scored = sum(1 for p in preview if _present(p.get("score")))
+    ranked = sum(1 for p in preview if _present(p.get("priority")))
+    return [
+        ("packages (after dep tree)", pkgs, 0, "",
+         "package universe across the four ecosystems"),
+        ("distinct repos", v["rows"], pkgs, "packages",
+         "package→repo union (any host), incl. url-less orphans"),
+        ("valid repos", valid, v["rows"], "repos",
+         "upstream resolves — GitHub/GitLab API or git ls-remote"),
+        ("class-A repos", class_a, valid, "valid",
+         "strongest class = A (≤75% cumulative PageRank share)"),
+        ("top repos", top, class_a, "class A",
+         "valid class-A on GitHub+GitLab, archived included — the risk/eligibility scope"),
+        ("value_score present", value_scored, top, "top repos",
+         "≥2 value components (openssf_crit / eco_crit / top_eco_pct)"),
+        ("risk_score present", r["overall_scored"], top, "top repos",
+         "all four risk dimensions scored"),
+        ("fully scored", scored, top, "top repos",
+         "value_score × risk_score → preview `score`"),
+        ("eligible", e["rollup"]["eligible"], top, "top repos",
+         "oss AND intent AND nonprofit AND active"),
+        ("priority-ranked", ranked, top, "top repos",
+         "eligible AND fully scored → preview `priority`"),
+    ]
+
+
 # ── rendering: rich dashboard ────────────────────────────────────────────────
 
 def _pct(n: int, d: int) -> str:
@@ -364,6 +405,17 @@ def dashboard(v: dict, r: dict, e: dict) -> None:
     console.rule("[bold]Pipeline statistics[/bold]")
     console.print(f"value.csv rows: [bold]{v['rows']:,}[/bold]   "
                   f"risk scope (top repos): [bold]{r['scope']:,}[/bold]\n")
+
+    t = Table(title="End-to-end funnel", header_style="bold dim")
+    t.add_column("Stage")
+    t.add_column("Count", justify="right")
+    t.add_column("%", justify="right")
+    t.add_column("of")
+    for stage, cnt, denom, denom_label, _comment in funnel_stats(v, r, e):
+        t.add_row(stage, f"{cnt:,}", _pct(cnt, denom) if denom else "—",
+                  denom_label or "—",
+                  style="bold" if stage in ("top repos", "eligible") else None)
+    console.print(t)
 
     t = Table(title="Value — identity coverage", header_style="bold dim")
     t.add_column("Step")
@@ -477,6 +529,18 @@ def dashboard(v: dict, r: dict, e: dict) -> None:
 def markdown(v: dict, r: dict, e: dict) -> str:
     out: list[str] = []
     a = out.append
+
+    a("### End-to-end funnel\n")
+    a("| Stage | Count | % | of | Comment |")
+    a("|---|--:|--:|---|---|")
+    for stage, cnt, denom, denom_label, comment in funnel_stats(v, r, e):
+        pct = _pct(cnt, denom) if denom else "—"
+        of = denom_label or "—"
+        mark = "**" if stage in ("top repos", "eligible") else ""
+        a(f"| {mark}{stage}{mark} | {mark}{cnt:,}{mark} | {mark}{pct}{mark} "
+          f"| {of} | {comment} |")
+    a("")
+
     a("### Repo identity coverage\n")
     a("| Step | A | B | C | Total | Comment |")
     a("|---|--:|--:|--:|--:|---|")
