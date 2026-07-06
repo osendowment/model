@@ -51,7 +51,7 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 OSI_FILE = DATA_DIR / "sources" / "osi" / "oss-licenses.csv"
 GH_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
-GL_PROJECTS_FILE = DATA_DIR / "sources" / "gitlab" / "projects.csv"
+GL_PROJECTS_FILE = DATA_DIR / "sources" / "gitlab" / "repos.csv"
 OVERRIDES_FILE = DATA_DIR / "eligibility" / "overrides.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility" / "licenses.csv"
 
@@ -195,7 +195,7 @@ def load_github_licenses() -> dict[str, str]:
 
 
 def load_gitlab_licenses() -> dict[str, str]:
-    """{gl/ repo_id: license} from gitlab/projects.csv (lowercased SPDX).
+    """{gl/ repo_id: license} from gitlab/repos.csv (lowercased SPDX).
 
     The GitLab project API returns a `license.key` (SPDX-ish) that the fetcher
     flattens into the `license` column — the GitLab analogue of the GitHub

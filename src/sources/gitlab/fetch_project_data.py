@@ -2,7 +2,7 @@
 
 Reads `data/value/value.csv`, selects every row whose `git_url` points at a
 GitLab instance, then hits `GET /projects/:url_encoded_path?license=true` on
-that instance and flattens the response to `data/sources/gitlab/projects.csv`
+that instance and flattens the response to `data/sources/gitlab/repos.csv`
 (plus a best-effort `GET /projects/:id/languages` for the primary `language`).
 Owner/group metadata goes to `data/sources/gitlab/namespaces.csv`.
 
@@ -39,7 +39,7 @@ console = Console()
 
 REPO = Path(__file__).resolve().parents[3]
 VALUE_FILE = REPO / "data" / "value" / "value.csv"
-PROJECTS_OUT = REPO / "data" / "sources" / "gitlab" / "projects.csv"
+REPOS_OUT = REPO / "data" / "sources" / "gitlab" / "repos.csv"
 NAMESPACES_OUT = REPO / "data" / "sources" / "gitlab" / "namespaces.csv"
 
 TTL_DAYS = 90
@@ -337,11 +337,11 @@ def upsert(out_path: Path, key: str, fields: list[str], new_rows: list[dict]) ->
 
 
 def _namespaces_from_projects() -> list[dict]:
-    """Derive namespace targets from projects.csv (after the project phase)."""
-    if not PROJECTS_OUT.exists():
+    """Derive namespace targets from repos.csv (after the project phase)."""
+    if not REPOS_OUT.exists():
         return []
     seen: dict[str, dict] = {}
-    with open(PROJECTS_OUT, encoding="utf-8") as f:
+    with open(REPOS_OUT, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             host = r.get("host") or ""
             full = r.get("namespace_path") or ""
@@ -374,7 +374,7 @@ def fetch_and_persist(target: str = "projects", force: bool = False,
 
     if target in ("projects", "both"):
         items = targets if targets is not None else load_gitlab_rows(classes=classes)
-        existing = _load_existing(PROJECTS_OUT, "project")
+        existing = _load_existing(REPOS_OUT, "project")
         to_fetch, fresh, missing = _filter_stale(items, existing, "project", force)
         if limit:
             to_fetch = to_fetch[:limit]
@@ -383,7 +383,7 @@ def fetch_and_persist(target: str = "projects", force: bool = False,
                           f"to_fetch={len(to_fetch):,}")
         new_rows, statuses = (asyncio.run(fetch_many(to_fetch, _fetch_project, "projects"))
                               if to_fetch else ([], {}))
-        total = upsert(PROJECTS_OUT, "project", PROJECT_FIELDS, new_rows)
+        total = upsert(REPOS_OUT, "project", PROJECT_FIELDS, new_rows)
         out["projects"] = {"fresh": fresh, "fetched": len(new_rows),
                            "statuses": statuses, "total": total}
 

@@ -39,7 +39,7 @@ log = logging.getLogger(__name__)
 console = Console()
 
 REPO = Path(__file__).resolve().parents[3]
-PROJECTS_IN = REPO / "data" / "sources" / "gitlab" / "projects.csv"
+PROJECTS_IN = REPO / "data" / "sources" / "gitlab" / "repos.csv"
 # Shared with GitHub — the single file fetch_sha_metrics / build_complexity read.
 COMMITS_OUT = REPO / "data" / "sources" / "git" / "commits-years.csv"
 
@@ -104,7 +104,7 @@ def _load_scope() -> dict[str, dict]:
 
 
 def _load_valid_projects() -> list[dict]:
-    """Risk-scope GitLab projects joined to their projects.csv host/path/branch.
+    """Risk-scope GitLab projects joined to their repos.csv host/path/branch.
 
     Only projects whose gl/ repo_id is in the risk scope are returned; each row
     carries the canonical `repo` slug + `git_url` from value.csv (via the scope

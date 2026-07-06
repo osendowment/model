@@ -43,7 +43,7 @@ from rich.table import Table
 
 from src.common.repos import _read_github_repos
 from src.sources.github.fetch_repo_owner_data import fetch_and_persist, owners_from_repos
-from src.sources.gitlab.fetch_project_data import PROJECTS_OUT as _GITLAB_PROJECTS_FILE
+from src.sources.gitlab.fetch_project_data import REPOS_OUT as _GITLAB_PROJECTS_FILE
 from src.sources.gitlab.fetch_project_data import fetch_and_persist as _gitlab_fetch_and_persist
 from src.sources.gitlab.gitlab_client import parse_git_url as _parse_gitlab_url
 from src.value.build_git_urls import (
@@ -233,7 +233,7 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None,
 
 
 def _load_gitlab_repo_ids(path=None) -> dict[str, str]:
-    """`{project_key: repo_id}` from gitlab/projects.csv, valid rows only.
+    """`{project_key: repo_id}` from gitlab/repos.csv, valid rows only.
 
     `project_key = "{host}/{path}".lower()` (the fetcher's upsert key); `repo_id`
     is the `gl/{host}-{id}` / `gl/{id}` form. Only rows that resolved to a real
@@ -259,7 +259,7 @@ def _resolve_gitlab(rows: list[dict], offline: bool = False, force: bool = False
     Runs AFTER `_resolve_github`, so **GitHub wins**: only a row with an empty
     `repo_id` (GitHub didn't claim it) and a GitLab clone URL is considered.
     Collects the distinct GitLab targets, TTL-fetches their project metadata into
-    `data/sources/gitlab/projects.csv` (skipped under --offline), then stamps
+    `data/sources/gitlab/repos.csv` (skipped under --offline), then stamps
     `repo_id = gl/{host}-{id}` (`gl/{id}` for gitlab.com) for every target that
     resolved to a valid project. A 404 / unreachable GitLab URL keeps an empty
     repo_id — it groups by `git_url` and gets `git_valid` from the ls-remote pass.

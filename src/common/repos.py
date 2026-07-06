@@ -34,7 +34,7 @@ log = logging.getLogger(__name__)
 
 VALUE_FILE = "data/value/value.csv"
 REPOS_FILE = "data/sources/github/repos.csv"
-GITLAB_PROJECTS_FILE = "data/sources/gitlab/projects.csv"
+GITLAB_PROJECTS_FILE = "data/sources/gitlab/repos.csv"
 OVERRIDES_FILE = "data/value/overrides.csv"
 
 # Class precedence — highest class wins if a repo has multiple rows.
@@ -115,7 +115,7 @@ def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]
 
 
 def _read_gitlab_projects(path: str = GITLAB_PROJECTS_FILE) -> dict[str, RepoEntry]:
-    """Read data/sources/gitlab/projects.csv → {gl/ repo_id: RepoEntry}.
+    """Read data/sources/gitlab/repos.csv → {gl/ repo_id: RepoEntry}.
 
     The GitLab analogue of `_read_github_repos`'s `meta`, keyed by the stable
     `gl/{host}-{id}` repo_id the value stage stamps onto value.csv — so a GitLab

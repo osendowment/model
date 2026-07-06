@@ -71,7 +71,7 @@ github.com is a single instance, so it needs no host qualifier.)
 
 In `data/sources/gitlab/`:
 
-- **`projects.csv`** — one row per GitLab project (mirrors `github/repos.csv`):
+- **`repos.csv`** — one row per GitLab project (mirrors `github/repos.csv`):
   `project` (= `host/namespace/path`, the key), `valid`, `project_id`, `repo_id`
   (= `gl/{host}/{project_id}`), `host`, `owner_type` (`Organization` if `namespace.kind==group`,
   else `User`), `namespace_kind` (raw `group`/`user`), `namespace_path`, `name`,
@@ -99,12 +99,12 @@ A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honour th
 - `src/sources/gitlab/gitlab_client.py` — multi-instance async client (host detection, per-host
   tokens, rate limiter).
 - `src/sources/gitlab/fetch_project_data.py` — projects + namespaces →
-  `projects.csv` / `namespaces.csv`. CLI: `--target {projects,namespaces,both}`, `--limit`, `--force`.
+  `repos.csv` / `namespaces.csv`. CLI: `--target {projects,namespaces,both}`, `--limit`, `--force`.
 - `src/sources/gitlab/commits_years.py` — per-year SHA anchor → `commits-years.csv`.
   CLI: `--limit`, `--force`. Selection is per-`(repo_id, year)`, so a newly-added year is picked
   up for already-anchored projects.
 - `src/sources/openssf/scorecard.py --gitlab [--host {host} …]` — OpenSSF Scorecard security
-  scores for the valid GitLab projects in `projects.csv`, per-host `GITLAB_AUTH_TOKEN`. Uses a
+  scores for the valid GitLab projects in `repos.csv`, per-host `GITLAB_AUTH_TOKEN`. Uses a
   GitLab-applicable check subset (`GITLAB_SCORECARD_CHECKS`) and tolerates the CLI's non-zero
   exit when a single check errors (recovers the still-valid aggregate JSON). Output shares the
   GitHub scorecard's files: raw JSON in `data/sources/openssf/data.json`, long-format rows in
