@@ -9,8 +9,9 @@ ineligible/incomplete repos stay in the table with their `eligible` flag
 visible — filter on it downstream if you want only fundable candidates.
 
 Columns:
-    repo_id           stable platform-qualified id (`gh/<n>` / `gl/<host>-<n>`)
-    repo              canonical slug
+    repo              canonical slug (first column — the row's identity for
+                      human readers; the preview workbook links it to the
+                      repo's home page)
     language          primary language, lowercased. GitHub repos from
                       `data/sources/github/repos.csv`; GitLab repos fall back
                       to `data/sources/gitlab/repos.csv` (GitLab Languages API).
@@ -24,12 +25,15 @@ Columns:
     risk_score        overall risk score, 0-100          (risk.csv `risk_score`)
     oss, intent, nonprofit, active                        (eligibility.csv components)
     eligible          oss AND intent AND nonprofit AND active
-    score             value_score * risk_score, scaled so the highest row = 100.
-                      Computed for every row with both value_score and
-                      risk_score present, regardless of eligibility.
     priority          dense rank (1, 2, 3, …) by score desc, among eligible
                       rows only — blank for ineligible rows and any row
                       missing a score.
+    score             value_score * risk_score, scaled so the highest row = 100.
+                      Computed for every row with both value_score and
+                      risk_score present, regardless of eligibility.
+    repo_id           stable platform-qualified id (`gh/<n>` / `gl/<host>-<n>`)
+                      — last column; every join key, kept out of the way of
+                      human readers.
 
 All score-like numeric columns (`openssf_crit`, `top_eco_pct`, `value_score`,
 the four risk components, `risk_score`) are rounded to 2 decimal places for
@@ -73,12 +77,12 @@ RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
 ELIGIBILITY_COMPONENTS = ["oss", "intent", "nonprofit", "active"]
 
 FIELDS = (
-    ["repo_id", "repo", "language", "ecosystem", "openssf_crit", "eco_crit",
+    ["repo", "language", "ecosystem", "openssf_crit", "eco_crit",
      "top_eco_pct", "value_score"]
     + RISK_COMPONENTS
     + ["risk_score"]
     + ELIGIBILITY_COMPONENTS
-    + ["eligible", "score", "priority"]
+    + ["eligible", "priority", "score", "repo_id"]
 )
 
 
@@ -125,7 +129,6 @@ def build() -> list[dict]:
             raw_by_id[rid] = vs_num * rs_num
 
         row = {
-            "repo_id": rid,
             "repo": repo,
             "language": language.lower(),
             "ecosystem": (v.get("top_eco") or "").strip(),
@@ -137,8 +140,9 @@ def build() -> list[dict]:
             "risk_score": _round2(risk_score),
             **{col: (e.get(col) or "").strip() for col in ELIGIBILITY_COMPONENTS},
             "eligible": (e.get("eligible") or "").strip(),
-            "score": "",
             "priority": "",
+            "score": "",
+            "repo_id": rid,
         }
         rows.append(row)
 

@@ -22,6 +22,11 @@ The CSV sheets get:
     - a frozen header row (`freeze_panes`), so the header (and its filter
       dropdowns) stays visible while scrolling a long sheet
 
+The repos sheet is additionally decorated: each `repo` cell hyperlinks to
+the repo's home page (host derived from `repo_id`), and the four decision
+columns (`value_score` / `risk_score` / `eligible` / `score`) carry light
+background fills (blue / orange / purple / green).
+
 Usage:
     uv run python -m src.build_preview_workbook
 """
@@ -48,6 +53,19 @@ SHEETS = [("repos", REPOS_CSV), ("people", PEOPLE_CSV)]
 HEADER_FILL = PatternFill(start_color="1F3864", end_color="1F3864", fill_type="solid")
 HEADER_FONT = Font(bold=True, color="FFFFFF")
 SECTION_FONT = Font(bold=True, size=13)
+
+# repos sheet: light column fills on the four decision columns so they pop
+# against the raw metrics. Consistent hues: value=blue, risk=orange,
+# eligible=purple, score=green.
+def _fill(rgb: str) -> PatternFill:
+    return PatternFill(start_color=rgb, end_color=rgb, fill_type="solid")
+
+REPOS_COLUMN_FILLS = {
+    "value_score": _fill("D9E1F2"),   # light blue
+    "risk_score": _fill("FCE4D6"),    # light orange
+    "eligible": _fill("E4DFEC"),      # light purple
+    "score": _fill("E2EFDA"),         # light green
+}
 
 
 def _cell_value(raw: str) -> int | float | str | None:
@@ -93,6 +111,37 @@ def _write_sheet(ws: Worksheet, csv_path: Path) -> int:
     ws.auto_filter.ref = ws.dimensions
     ws.freeze_panes = "A2"
     return len(data_rows)
+
+
+def _repo_url(repo: str, repo_id: str) -> str | None:
+    """The repo's home page, derived from its platform-qualified id:
+    `gh/<n>` → github.com, bare `gl/<n>` → gitlab.com, `gl/<host>-<n>` → that
+    self-hosted GitLab instance. Unknown/blank id → no link."""
+    if repo_id.startswith("gh/"):
+        return f"https://github.com/{repo}"
+    if repo_id.startswith("gl/"):
+        rest = repo_id[3:]
+        if rest.isdigit():
+            return f"https://gitlab.com/{repo}"
+        return f"https://{rest.rsplit('-', 1)[0]}/{repo}"
+    return None
+
+
+def _decorate_repos_sheet(ws: Worksheet) -> None:
+    """repos-only dressing: link each `repo` cell to the repo's home page
+    (host from `repo_id`) and fill the decision columns per REPOS_COLUMN_FILLS."""
+    headers = {c.value: c.column for c in ws[1]}  # name -> 1-based col index
+    repo_col, id_col = headers.get("repo"), headers.get("repo_id")
+    fill_cols = {headers[n]: f for n, f in REPOS_COLUMN_FILLS.items() if n in headers}
+    for row in ws.iter_rows(min_row=2):
+        if repo_col and id_col:
+            cell = row[repo_col - 1]
+            url = _repo_url(str(cell.value or ""), str(row[id_col - 1].value or ""))
+            if url:
+                cell.hyperlink = url
+                cell.style = "Hyperlink"
+        for col, fill in fill_cols.items():
+            row[col - 1].fill = fill
 
 
 def _md_cell(raw: str) -> int | float | str | None:
@@ -175,6 +224,8 @@ def build() -> None:
     for name, path in SHEETS:
         ws = wb.create_sheet(name)
         n = _write_sheet(ws, path)
+        if name == "repos" and n:
+            _decorate_repos_sheet(ws)
         console.print(f"  [cyan]{name}[/cyan]: {n:,} rows ← {path}")
 
     ws = wb.create_sheet("stats")
