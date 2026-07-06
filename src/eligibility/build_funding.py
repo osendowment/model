@@ -5,8 +5,17 @@ Reads (all under data/sources/ except the stage-level overrides):
     github/sponsors.csv        — gh_sponsorships_in (inbound), gh_sponsors_enabled (src.github.fetch_sponsors)
     github/sponsorships.csv    — sponsoring_count (outbound) (src.github.fetch_sponsorships)
     github/funding-yml.csv     — has_funding_links / platforms (src.github.fetch_funding_yml)
+    gitlab/funding-files.csv   — the GitLab twin of funding-yml.csv: in-repo
+                                 FUNDING.yml variants + funding.json probed per
+                                 GitLab top repo (src.sources.gitlab.fetch_funding_files)
     github/repos.csv           — stars, forks (info)          (src.github.fetch_repo_owner_data)
-    floss-fund/funding-json.csv — FLOSS Fund directory export  (src.sources.floss_fund.funding_json)
+    floss-fund/funding-json.csv — FLOSS Fund directory export  (src.sources.floss_fund.funding_json);
+                                 GitHub manifests join by repo_id/slug, non-GitHub
+                                 ones by normalized repository URL
+    data/eligibility/gitlab-hosts.csv — curated GitLab instance → institutional
+                                 host (salsa.debian.org → debian.org, …): hosting
+                                 on an institution's own GitLab is host backing,
+                                 exactly like a scraped foundation host
     opencollective/budgets.csv — annual gross raised per OC slug (src.sources.opencollective.fetch_budgets)
     funding/host-by-repo.csv   — scraped FOSS-foundation host per repo
     data/eligibility/overrides.csv — curated host/owner institutional backing +
@@ -60,7 +69,12 @@ from src.common.percentiles import add_percentiles
 from src.common.repos import canonical_repo_map, load_top_repos
 from src.common.stats import geometric_mean
 from src.common.tables import load_column_by_id, load_rows_by_id
-from src.sources.floss_fund.directory import export_repo_slug, github_org_page
+from src.sources.floss_fund.directory import (
+    export_repo_slug,
+    export_repo_url,
+    github_org_page,
+    normalize_repo_url,
+)
 from src.sources.github.bf_contributors import load_bf_contributors
 from src.sources.opencollective.fetch_collectives import load_index as _load_oc_index
 
@@ -70,6 +84,8 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 SPONSORS_FILE = DATA_DIR / "sources" / "github" / "sponsors.csv"
 SPONSORSHIPS_FILE = DATA_DIR / "sources" / "github" / "sponsorships.csv"
 FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
+GITLAB_FUNDING_FILE = DATA_DIR / "sources" / "gitlab" / "funding-files.csv"
+GITLAB_HOSTS_FILE = DATA_DIR / "eligibility" / "gitlab-hosts.csv"
 REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 FLOSS_FUND_FILE = DATA_DIR / "sources" / "floss-fund" / "funding-json.csv"
 OC_BUDGETS_FILE = DATA_DIR / "sources" / "opencollective" / "budgets.csv"
@@ -330,33 +346,70 @@ def assemble_row(repo: str, repo_id: str, sponsors: dict, yml: dict, export: dic
     return row
 
 
-def _export_by_repo(path: Path) -> tuple[dict[str, dict], dict[str, dict]]:
-    """``(by_id, by_slug)`` maps for repo-level FLOSS manifests.
+def _export_by_repo(path: Path) -> tuple[dict[str, dict], dict[str, dict], dict[str, dict]]:
+    """``(by_id, by_slug, by_url)`` maps for repo-level FLOSS manifests.
 
     `by_id` keys manifest rows by their stable GitHub `repo_id` (stamped by the
-    fetcher) — the rename-proof join build() tries first. Rows with a blank
-    repo_id (fetched before the id was resolvable, or outside the model's repo
-    maps) land in `by_slug` instead, keyed by the manifest URL's slug
+    fetcher) — the rename-proof join build() tries first. GitHub rows with a
+    blank repo_id (fetched before the id was resolvable, or outside the model's
+    repo maps) land in `by_slug` instead, keyed by the manifest URL's slug
     (resolved-or-raw). That slug can predate a GitHub rename, so it is passed
     through `canonical_repo_map` — the fallback key must be the same canonical
-    slug `load_top_repos` hands the builder.
+    slug `load_top_repos` hands the builder. Manifests whose repository lives
+    OUTSIDE GitHub (GitLab instances, custom hosts) land in `by_url`, keyed by
+    the normalized repository URL — the join key for GitLab top repos.
     """
     by_id: dict[str, dict] = {}
     by_slug: dict[str, dict] = {}
+    by_url: dict[str, dict] = {}
     if not path.exists():
-        return by_id, by_slug
+        return by_id, by_slug, by_url
     canon = canonical_repo_map()
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            repo = export_repo_slug(row)
-            if not repo:
-                continue
             rid = (row.get("repo_id") or "").strip()
-            if rid:
-                by_id[rid] = row
-            else:
-                by_slug[canon.get(repo, repo)] = row
-    return by_id, by_slug
+            repo = export_repo_slug(row)
+            if repo:
+                if rid:
+                    by_id[rid] = row
+                else:
+                    by_slug[canon.get(repo, repo)] = row
+                continue
+            url = export_repo_url(row)
+            if url:
+                by_url[url] = row
+    return by_id, by_slug, by_url
+
+
+def _load_gitlab_hosts(path: Path = GITLAB_HOSTS_FILE) -> dict[str, tuple[str, str]]:
+    """{gitlab_instance_host: (host, host_type)} from the curated mapping.
+
+    A project hosted on an institution's OWN GitLab instance (salsa.debian.org,
+    gitlab.gnome.org, …) is institutionally backed by that host — the instance
+    itself is the evidence, so the mapping applies automatically to every top
+    repo on it. gitlab.com is deliberately absent (commercial shared hosting,
+    anyone can sign up — hosting there backs nothing).
+    """
+    out: dict[str, tuple[str, str]] = {}
+    if not path.exists():
+        return out
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            gh = (row.get("gitlab_host") or "").strip().lower()
+            host = (row.get("host") or "").strip()
+            if gh and host:
+                out[gh] = (host, (row.get("host_type") or "").strip())
+    return out
+
+
+def _gitlab_instance(repo_id: str) -> str:
+    """The GitLab instance host from a `gl/` repo_id: `gl/{host}-{id}` → host,
+    bare `gl/{id}` → gitlab.com; "" for anything else."""
+    rid = (repo_id or "").strip()
+    if not rid.startswith("gl/"):
+        return ""
+    rest = rid[3:]
+    return "gitlab.com" if rest.isdigit() else rest.rsplit("-", 1)[0]
 
 
 def _fundable_orgs(path: Path) -> dict[str, dict]:
@@ -506,10 +559,15 @@ def build() -> list[dict]:
     # keep their own key, where repo_id is irrelevant.
     sponsors = load_rows_by_id(SPONSORS_FILE)
     yml = load_rows_by_id(FUNDING_YML_FILE)
+    # GitLab twin of funding-yml.csv — same has_funding_yml / has_funding_links /
+    # funding_link_platforms columns, probed from the repos' funding files.
+    gitlab_yml = (load_rows_by_id(GITLAB_FUNDING_FILE)
+                  if GITLAB_FUNDING_FILE.exists() else {})
+    gitlab_hosts = _load_gitlab_hosts()
     repos_meta = load_rows_by_id(REPOS_FILE)
     foundations = load_column_by_id(FOUNDATIONS_FILE, "host")
     overrides_by_id, org_overrides = _load_funding_overrides(OVERRIDES_FILE)
-    export_by_id, export_by_slug = _export_by_repo(FLOSS_FUND_FILE)
+    export_by_id, export_by_slug, export_by_url = _export_by_repo(FLOSS_FUND_FILE)
     fundable_orgs = _fundable_orgs(FLOSS_FUND_FILE)
     oc_budgets = _load_oc(OC_BUDGETS_FILE)
     sponsoring = _load_sponsoring(SPONSORSHIPS_FILE)
@@ -552,11 +610,22 @@ def build() -> list[dict]:
         # Per-repo override (matched by stable repo_id) wins; else an org-level
         # (owner/*) row keyed by owner name.
         ov = overrides_by_id.get(str(entry.repo_id)) or org_overrides.get(owner_login) or {}
-        # host: override wins; otherwise the scraped FOSS-foundation host, which
-        # is a nonprofit by definition. owner: from the override only.
+        # host: override wins; then the scraped FOSS-foundation host (a
+        # nonprofit by definition); then, for a repo on an institution's own
+        # GitLab instance, the curated instance→host mapping (salsa.debian.org
+        # → debian.org, …). owner: from the override only.
         scraped_host = foundations.get(str(entry.repo_id), "")
-        host = ov.get("host") or scraped_host
-        host_type = ov.get("host_type") or ("nonprofit" if scraped_host else "")
+        instance_host, instance_type = gitlab_hosts.get(
+            _gitlab_instance(str(entry.repo_id)), ("", ""))
+        host = ov.get("host") or scraped_host or instance_host
+        if ov.get("host_type"):
+            host_type = ov["host_type"]
+        elif scraped_host:
+            host_type = "nonprofit"
+        elif instance_host:
+            host_type = instance_type
+        else:
+            host_type = ""
 
         # OC budget. A curated override row is AUTHORITATIVE: its `oc_slug` wins
         # over the auto-map, including when EMPTY — an empty oc_slug on a curated
@@ -587,12 +656,27 @@ def build() -> list[dict]:
 
         rid = str(entry.repo_id)
         bf_fundable = any(l in fundable_maintainers for l in bf_by_repo.get(rid, []))
+        # Funding-file signals: GitHub repos from funding-yml.csv (GraphQL),
+        # GitLab repos from the probed gitlab/funding-files.csv twin — same
+        # columns, so assemble_row reads either transparently. An in-repo
+        # FLOSS manifest (funding.json / .well-known pointer) on a GitLab repo
+        # counts as the repo's own manifest even before it appears in the
+        # FLOSS Fund directory export.
+        yml_row = yml.get(rid) or gitlab_yml.get(rid, {})
+        inrepo_manifest = (
+            {"source": "in-repo funding.json"}
+            if (gitlab_yml.get(rid, {}).get("has_funding_json_file") or "") == "True"
+            else {})
         rows.append(assemble_row(
             repo=repo, repo_id=entry.repo_id,
-            sponsors=sponsors.get(rid, {}), yml=yml.get(rid, {}),
+            sponsors=sponsors.get(rid, {}), yml=yml_row,
             # FLOSS manifest: stable repo_id first (rename-proof), canonical
-            # slug fallback for rows the fetcher could not id.
-            export=export_by_id.get(rid) or export_by_slug.get(repo.lower(), {}),
+            # slug fallback for GitHub rows the fetcher could not id,
+            # normalized-URL fallback for non-GitHub repos, then the in-repo
+            # manifest file probed directly off a GitLab repo.
+            export=(export_by_id.get(rid) or export_by_slug.get(repo.lower())
+                    or export_by_url.get(normalize_repo_url(entry.git_url))
+                    or inrepo_manifest),
             host=host, host_type=host_type,
             owner=ov.get("owner", ""), owner_type=ov.get("owner_type", ""),
             repo_meta=repos_meta.get(rid, {}),

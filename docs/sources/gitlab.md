@@ -110,6 +110,16 @@ A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honour th
   `data/sources/git/commits-years.csv`. Scope: the GitLab members of `load_top_repos()`
   (risk scope). CLI: `--limit`, `--force`. Selection is per-`(repo_id, year)`, so a
   newly-added year is picked up for already-anchored projects.
+- `src/sources/gitlab/fetch_funding_files.py` — in-repo funding declarations →
+  `data/sources/gitlab/funding-files.csv`. Probes each GitLab top repo's default branch
+  (public raw endpoint, no token) for FUNDING.yml / `.github/FUNDING.yml` /
+  `.gitlab/FUNDING.yml` (parsed to platform keys), `funding.json`, and
+  `.well-known/funding-manifest-urls`. The GitLab twin of `github/funding-yml.csv`;
+  `build_funding` joins it by `repo_id`. Rows carry `status` + `fetched_at`
+  (empty results recheck on the short funding TTL). CLI: `--limit`, `--force`.
+  A separate curated mapping, `data/eligibility/gitlab-hosts.csv`, marks a repo hosted
+  on an institution's own GitLab instance (salsa.debian.org, gitlab.gnome.org, …) as
+  institutionally host-backed → `intent` (gitlab.com deliberately maps to nothing).
 - `src/sources/openssf/scorecard.py --gitlab [--host {host} …]` — OpenSSF Scorecard security
   scores for the valid GitLab projects in `repos.csv`, per-host `GITLAB_AUTH_TOKEN`. Uses a
   GitLab-applicable check subset (`GITLAB_SCORECARD_CHECKS`) and tolerates the CLI's non-zero

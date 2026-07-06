@@ -111,7 +111,7 @@ def test_build_funding_owner_intent_propagates_but_not_nonprofit(monkeypatch):
         E("corp/a"), E("corp/b"), E("lonely/x"), E("rich/r")])
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -165,6 +165,7 @@ class E:
     repo: str
     repo_id: str = ""
     value_class: str = "B"
+    git_url: str = ""
 
     def __post_init__(self):
         # default repo_id to the slug so id-keyed source mocks (keyed by name) match
@@ -229,7 +230,7 @@ def _base_mocks(monkeypatch, repos):
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -264,7 +265,7 @@ def test_build_funding_declared_registry_channel_caps_score(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -401,7 +402,7 @@ def test_build_funding_oc_repo_full_vs_org_split(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
@@ -430,7 +431,7 @@ def test_build_funding_real_zero_oc_counts_as_intent(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
@@ -457,7 +458,7 @@ def test_build_funding_override_oc_slug_authoritative(monkeypatch):
     monkeypatch.setattr(bf, "load_top_repos", lambda **kw: repos)
     monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {
@@ -495,7 +496,7 @@ def test_build_funding_unmeasured_funding_link_caps_score(monkeypatch):
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
     monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
     monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
-    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}))
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}, {}))
     monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
     monkeypatch.setattr(bf, "_load_oc", lambda p: {"rich": {"raised_2024": "10000", "oc_status": "ok"}})
     monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
@@ -520,7 +521,7 @@ def test_export_by_repo_splits_id_and_canonical_slug(tmp_path, monkeypatch):
     # the blank-id row's slug predates a rename → canonical map resolves it
     monkeypatch.setattr(bf, "canonical_repo_map",
                         lambda: {"gozala/events": "browserify/events"})
-    by_id, by_slug = bf._export_by_repo(p)
+    by_id, by_slug, _by_url = bf._export_by_repo(p)
     assert by_id["424242"]["channel_platforms"] == "liberapay"
     assert "old-org/lib" not in by_slug            # id-carrying row is id-keyed only
     assert by_slug["browserify/events"]["channel_platforms"] == "ko_fi"
@@ -538,7 +539,8 @@ def test_build_funding_floss_manifest_by_repo_id_survives_rename(monkeypatch):
         # but the fetcher stamped the stable id 424242 (= new-org/lib's id).
         {"424242": {"channel_platforms": "liberapay"}},
         # blank-id row: only reachable via the canonical slug fallback.
-        {"slugonly/tool": {"channel_platforms": "ko_fi"}}))
+        {"slugonly/tool": {"channel_platforms": "ko_fi"}},
+        {}))
 
     rows = {r["repo"]: r for r in bf.build()}
     assert rows["new-org/lib"]["has_funding_json"] == "True"    # found by repo_id
@@ -631,3 +633,100 @@ def test_overrides_use_canonical_host_codes():
     assert not offenders, (
         "overrides.csv uses raw foundation domains that collide with canonical "
         f"host codes (normalize to the host-by-repo.csv code): {offenders}")
+
+
+# ── GitLab funding checks ─────────────────────────────────────────────────────
+
+def test_gitlab_instance_parsing():
+    assert bf._gitlab_instance("gl/12345") == "gitlab.com"
+    assert bf._gitlab_instance("gl/salsa.debian.org-9696") == "salsa.debian.org"
+    assert bf._gitlab_instance("gl/gitlab.inria.fr-22470") == "gitlab.inria.fr"
+    assert bf._gitlab_instance("gh/123") == ""
+    assert bf._gitlab_instance("") == ""
+
+
+def test_load_gitlab_hosts(tmp_path):
+    p = tmp_path / "gitlab-hosts.csv"
+    p.write_text("gitlab_host,host,host_type,reason\n"
+                 "salsa.debian.org,debian.org,nonprofit,debian's gitlab\n"
+                 "gitlab.kitware.com,kitware.com,company,kitware's gitlab\n"
+                 ",skipped.org,nonprofit,no instance host\n", encoding="utf-8")
+    hosts = bf._load_gitlab_hosts(p)
+    assert hosts == {"salsa.debian.org": ("debian.org", "nonprofit"),
+                     "gitlab.kitware.com": ("kitware.com", "company")}
+    assert bf._load_gitlab_hosts(tmp_path / "missing.csv") == {}
+
+
+def test_build_gitlab_instance_host_gives_intent(monkeypatch):
+    """A repo on an institution's own GitLab instance gets that institution as
+    `host` → intent True (and the nonprofit host halves the backing score); a
+    gitlab.com repo gets nothing — commercial shared hosting backs nothing."""
+    _base_mocks(monkeypatch, [
+        E("debian/bzip2", repo_id="gl/salsa.debian.org-9696"),
+        E("takluyver/jeepney", repo_id="gl/2780772"),
+        E("rich/r"),
+    ])
+    monkeypatch.setattr(bf, "_load_gitlab_hosts",
+                        lambda *a, **k: {"salsa.debian.org": ("debian.org", "nonprofit")})
+    rows = {r["repo"]: r for r in bf.build()}
+    salsa = rows["debian/bzip2"]
+    assert (salsa["host"], salsa["host_type"]) == ("debian.org", "nonprofit")
+    assert salsa["intent"] == "True"
+    assert salsa["nonprofit"] == "True"
+    assert salsa["host_score"] == "0.5"
+    lab = rows["takluyver/jeepney"]
+    assert (lab["host"], lab["host_type"]) == ("", "")
+    assert lab["intent"] == "False"
+
+
+def test_build_gitlab_funding_files_feed_yml_and_manifest(monkeypatch, tmp_path):
+    """gitlab/funding-files.csv is the GitLab twin of funding-yml.csv: its
+    FUNDING.yml flags flow into the same columns (→ intent), and an in-repo
+    funding.json counts as the repo's own FLOSS manifest (→ has_funding_json,
+    → the unmeasured-channel score cap)."""
+    gl_file = tmp_path / "funding-files.csv"
+    gl_file.write_text("x\n", encoding="utf-8")  # existence gate only; rows mocked
+    def rows_by_repo(p):
+        if "sponsors.csv" in str(p):
+            return {"rich/r": {"gh_sponsorships_in": "100"}}
+        if "funding-files.csv" in str(p):
+            # keyed by the stable gl/ repo_id, like the real load_rows_by_id
+            return {"gl/gitlab.gnome.org-658": {"has_funding_yml": "True",
+                                                "has_funding_links": "True",
+                                                "funding_link_platforms": "custom",
+                                                "has_funding_json_file": "False"},
+                    "gl/gitlab.inria.fr-22470": {"has_funding_yml": "False",
+                                                 "has_funding_links": "False",
+                                                 "funding_link_platforms": "",
+                                                 "has_funding_json_file": "True"}}
+        return {}
+    _base_mocks(monkeypatch, [
+        E("gnome/glib", repo_id="gl/gitlab.gnome.org-658"),
+        E("mpc/mpc", repo_id="gl/gitlab.inria.fr-22470"),
+        E("rich/r"),
+    ])
+    monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)
+    monkeypatch.setattr(bf, "GITLAB_FUNDING_FILE", gl_file)
+    monkeypatch.setattr(bf, "_load_gitlab_hosts", lambda *a, **k: {})
+    rows = {r["repo"]: r for r in bf.build()}
+    glib = rows["gnome/glib"]
+    assert glib["has_funding_yml"] == "True"
+    assert glib["funding_link_platforms"] == "custom"
+    assert glib["intent"] == "True"
+    mpc = rows["mpc/mpc"]
+    assert mpc["has_funding_json"] == "True"     # in-repo manifest file
+    assert mpc["intent"] == "True"
+    assert int(float(mpc["score"])) <= bf.DECLARED_FUNDING_CAP
+
+
+def test_export_by_repo_maps_non_github_manifests_by_url(tmp_path):
+    p = tmp_path / "funding-json.csv"
+    p.write_text(
+        "repo_id,project_repository,project_repository_resolved,channel_platforms\n"
+        "gh/1,https://github.com/a/b,,github\n"
+        ",https://GitLab.com/libtiff/libtiff.git/,,custom\n",
+        encoding="utf-8")
+    by_id, by_slug, by_url = bf._export_by_repo(p)
+    assert "gh/1" in by_id
+    assert by_url["gitlab.com/libtiff/libtiff"]["channel_platforms"] == "custom"
+    assert not by_slug

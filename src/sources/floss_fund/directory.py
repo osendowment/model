@@ -67,6 +67,24 @@ def export_repo_slug(row: dict) -> str | None:
             or normalize_github_repo(row.get("project_repository")))
 
 
+def normalize_repo_url(url: str | None) -> str:
+    """Host-agnostic repo-URL normalizer: lowercased, scheme/`.git`/trailing
+    slash stripped — `https://GitLab.com/a/B.git/` → `gitlab.com/a/b`.
+    The join key for non-GitHub manifests (GitHub ones join by slug/repo_id)."""
+    u = (url or "").strip().lower().rstrip("/")
+    u = re.sub(r"^(https?://|git://)", "", u)
+    u = re.sub(r"\.git$", "", u)
+    return u
+
+
+def export_repo_url(row: dict) -> str:
+    """Normalized repository URL for a FLOSS export row (resolved wins), "" if
+    the row names no repository. Complements `export_repo_slug` for manifests
+    hosted outside GitHub (GitLab instances, custom hosts)."""
+    return (normalize_repo_url(row.get("project_repository_resolved"))
+            or normalize_repo_url(row.get("project_repository")))
+
+
 def load_directory_repos(path: Path | str) -> set[str]:
     """Set of normalized `owner/repo` slugs from the export (resolved-or-raw)."""
     out: set[str] = set()

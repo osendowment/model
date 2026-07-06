@@ -1,0 +1,11 @@
+gitlab_host,host,host_type,reason
+salsa.debian.org,debian.org,nonprofit,Debian's own GitLab; projects here are maintained by Debian teams (legal steward SPI 501c3)
+gitlab.gnome.org,gnome,nonprofit,GNOME Foundation's GitLab; hosted projects are GNOME-stewarded (501c3). `gnome` is the canonical roster code (DOMAIN_SUFFIX_HOST) — not the raw domain
+gitlab.freedesktop.org,freedesktop.org,nonprofit,freedesktop.org infrastructure (fiscally hosted by X.Org Foundation 501c3); hosted projects are fd.o-stewarded
+gitlab.inria.fr,inria.fr,nonprofit,INRIA's institutional GitLab; hosted projects are maintained by INRIA research teams (French public research institute)
+invent.kde.org,kde.org,nonprofit,KDE's own GitLab; hosted projects are KDE-stewarded (KDE e.V.)
+code.videolan.org,videolan.org,nonprofit,VideoLAN's own GitLab; hosted projects are VideoLAN-stewarded (French nonprofit association)
+gitlab.xiph.org,xiph.org,nonprofit,Xiph.Org Foundation's GitLab; hosted projects are Xiph-stewarded (501c3)
+gitlab.isc.org,isc.org,nonprofit,Internet Systems Consortium's GitLab; hosted projects are ISC-stewarded (501c3)
+gitlab.cern.ch,cern.ch,nonprofit,CERN's institutional GitLab; hosted projects are CERN-maintained (intergovernmental research organisation)
+gitlab.kitware.com,kitware.com,company,Kitware's own GitLab; hosted projects are Kitware-stewarded (for-profit company)

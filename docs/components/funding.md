@@ -41,16 +41,23 @@ Funding  → data/eligibility/funding.csv  (one row per top repo, archived inclu
 │   ├── gh_sponsorships       ← derived (in + out, total engagement)                                  [most recent]
 │   └── gh_sponsorships_p     ← derived (worst-pinned CDF risk percentile of gh_sponsorships)         [most recent]
 │
-├── Funding links  (GraphQL repository.fundingLinks — the "Sponsor" widget)
-│   ├── has_funding_links     ← GraphQL fundingLinks (resolves FUNDING.yml anywhere + org default)    [most recent]
+├── Funding links  (GitHub: GraphQL repository.fundingLinks — the "Sponsor" widget;
+│   │               GitLab: gitlab/funding-files.csv — FUNDING.yml variants probed
+│   │               on the default branch, same columns)
+│   ├── has_funding_links     ← GraphQL fundingLinks (resolves FUNDING.yml anywhere + org default);
+│   │                            GitLab: the probed FUNDING.yml parsed to ≥1 platform key             [most recent]
 │   ├── has_funding_yml       ← a FUNDING.yml FILE exists for the repo or its owner (even if it
-│   │                            resolves to no links — the file itself signals intent)               [most recent]
+│   │                            resolves to no links — the file itself signals intent); GitLab:
+│   │                            FUNDING.yml / .github/FUNDING.yml / .gitlab/FUNDING.yml in the repo  [most recent]
 │   └── funding_link_platforms ← declared platform keys (per-platform handles stay in the
 │                                source file, github/funding-yml.csv)                                 [most recent]
 │
 ├── FLOSS Fund  (funding.json)
 │   └── has_funding_json      ← dir.floss.fund export ∩ repo (id-first join, incl. redirect-resolved
-│                                URLs) OR an ORG-level manifest (github.com/<org>) covering the owner  [most recent]
+│                                URLs; non-GitHub manifests join by normalized repository URL) OR an
+│                                ORG-level manifest (github.com/<org>) covering the owner OR, for a
+│                                GitLab repo, an in-repo funding.json / .well-known manifest pointer
+│                                (gitlab/funding-files.csv)                                            [most recent]
 │
 ├── Registry funding fields
 │   ├── has_npm_funding, npm_funding_url        ← npm package.json `funding` field (npm repos)        [most recent]
@@ -65,8 +72,13 @@ Funding  → data/eligibility/funding.csv  (one row per top repo, archived inclu
 │   └── bf_maintainer_fundable ← any bus-factor maintainer (wrote ≥50% of the repo) has a personal
 │                                GitHub Sponsors listing (GraphQL hasSponsorsListing, keyed by user id)  [most recent]
 │
-├── Institutional backing  (funding/host-by-repo.csv ∪ data/eligibility/overrides.csv)
-│   ├── host, host_type      ← legally-connected steward domain (e.g. apache.org, react.foundation)  [most recent]
+├── Institutional backing  (funding/host-by-repo.csv ∪ data/eligibility/overrides.csv
+│   │                       ∪ data/eligibility/gitlab-hosts.csv)
+│   ├── host, host_type      ← legally-connected steward domain (e.g. apache.org, react.foundation).
+│   │                            Precedence: overrides.csv > scraped foundation roster > the curated
+│   │                            GitLab-instance mapping — a repo on an institution's OWN GitLab
+│   │                            (salsa.debian.org → debian.org, gitlab.gnome.org → gnome, …) is
+│   │                            host-backed by that institution; gitlab.com maps to nothing          [most recent]
 │   ├── owner, owner_type     ← owning-entity domain (e.g. meta.com), from overrides.csv               [most recent]
 │   └── host_score           ← derived: combined backing, most-funded of host/owner (0 · 0.5 · 1)     [most recent]
 │

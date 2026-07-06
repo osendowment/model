@@ -76,3 +76,21 @@ def test_load_directory_repos(tmp_path):
 
 def test_load_directory_repos_missing_file(tmp_path):
     assert load_directory_repos(tmp_path / "nope.csv") == set()
+
+
+def test_normalize_repo_url_host_agnostic():
+    from src.sources.floss_fund.directory import normalize_repo_url
+    assert normalize_repo_url("https://GitLab.com/a/B.git/") == "gitlab.com/a/b"
+    assert normalize_repo_url("git://git.gnupg.org/libgpg-error.git") == "git.gnupg.org/libgpg-error"
+    assert normalize_repo_url("") == ""
+    assert normalize_repo_url(None) == ""
+
+
+def test_export_repo_url_prefers_resolved():
+    from src.sources.floss_fund.directory import export_repo_url
+    row = {"project_repository": "https://example.org/redirect",
+           "project_repository_resolved": "https://gitlab.com/x/y.git"}
+    assert export_repo_url(row) == "gitlab.com/x/y"
+    assert export_repo_url({"project_repository": "https://salsa.debian.org/a/b"}) \
+        == "salsa.debian.org/a/b"
+    assert export_repo_url({}) == ""
