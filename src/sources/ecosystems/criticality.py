@@ -223,7 +223,15 @@ def _is_fresh(fetched_at: str, ttl_days: int) -> bool:
 
 
 def _cache_path(eco: str, pkg: str) -> Path:
-    """One cache file per (ecosystem, package)."""
+    """One cache file per (ecosystem, package).
+
+    Deliberately a SEPARATE cache from ``packages.py`` (which caches the same
+    endpoint under ``sources/{eco}/raw/ecosystems/``). They cannot be shared:
+    for cpp, packages.py queries debian first (widest URL coverage) while this
+    fetcher queries spack/conan first — debian reports ``rank_average=100`` for
+    every package, so reusing packages.py's cpp cache would silently zero out
+    the criticality ranking for ~all cpp repos (verified: 57 cpp rows regress).
+    """
     safe = pkg.replace("/", "__")
     return DATA_DIR / "sources" / "ecosystems" / "raw" / "criticality" / f"{eco}__{safe}.json"
 
