@@ -28,6 +28,14 @@ STEPS = [
     Step("unify",      "src.value.unify_value_data"),
     Step("validation", "src.value.build_validation",             net=True),
     Step("criticality", "src.value.apply_criticality"),
+]
+
+# Audit-only steps — read-only diffs whose output feeds NO value.csv column
+# and is read by nothing downstream, so the pipeline does not run them (same
+# discipline as the risk runner's AUDIT_FETCHERS). Still runnable by hand:
+#   uv run python -m src.value.audit_ecosystems   # diff packages.csv vs value.csv
+# (writes data/sources/ecosystems/audit.csv, consumed by no other script.)
+AUDIT_STEPS = [
     Step("eco-audit",  "src.value.audit_ecosystems"),
 ]
 
@@ -44,9 +52,7 @@ STEPS = [
 #   unify       — merge per-eco results into value.csv
 #   validation  — ls-remote non-GitHub URLs; stamp git_valid on value.csv
 #   criticality — stamp the OpenSSF criticality score onto value.csv
-#   eco-audit   — read-only diff of the result against value.csv
-ROLLUP_LABELS = ("eco-fetch", "resolve", "unify", "validation", "criticality",
-                 "eco-audit")
+ROLLUP_LABELS = ("eco-fetch", "resolve", "unify", "validation", "criticality")
 
 
 def main() -> int:
@@ -54,7 +60,7 @@ def main() -> int:
     parser.add_argument(
         "--rollup", action="store_true",
         help="Run only the cross-ecosystem rollup (eco-fetch → resolve → unify → "
-             "validation → eco-audit) that turns existing per-eco results.csv into "
+             "validation → criticality) that turns existing per-eco results.csv into "
              "value.csv. Skips the ecosystem sub-pipelines, stats, and URL "
              "re-derivation, so no raw ecosystem data is needed.",
     )
