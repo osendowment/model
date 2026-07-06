@@ -18,13 +18,13 @@ def test_risk_csv_is_narrow():
 
 
 def test_overall_score_geom_mean():
-    assert overall_score([50, 50, 50]) == "50"
+    assert overall_score([50, 50, 50]) == "50.00"
     # geom mean of 100 and 1 = 10 — one low component pulls the total down
-    assert overall_score([100, 1]) == str(round(math.sqrt(100 * 1)))
+    assert overall_score([100, 1]) == f"{math.sqrt(100 * 1):.2f}"
 
 
 def test_overall_score_floored_and_empty():
-    assert overall_score([1, 1]) == "1"
+    assert overall_score([1, 1]) == "1.00"
     assert overall_score([]) == ""        # no component scores → blank
 
 
@@ -51,6 +51,6 @@ def test_aggregate_requires_all_components(monkeypatch):
     monkeypatch.setattr(ar, "_scores_by_repo", lambda p: by_name[Path(p).stem])
 
     rows = {r["repo"]: r for r in ar.aggregate()}
-    assert rows["o/full"]["risk_score"] == "50"   # all present → scored
-    assert rows["o/partial"]["workload"] == ""    # the missing input
-    assert rows["o/partial"]["risk_score"] == ""  # …so no overall score
+    assert rows["o/full"]["risk_score"] == "50.00"  # all present → scored
+    assert rows["o/partial"]["workload"] == ""      # the missing input
+    assert rows["o/partial"]["risk_score"] == ""    # …so no overall score

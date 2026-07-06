@@ -13,7 +13,7 @@ def test_scoreercentile_columns():
                                 ("nni_per_ac", True)],
                     composite_cols=["loc_per_ac_p", "cve_per_ac_p", "nni_per_ac_p"],
                     dim_col="score")
-    assert rows[0]["score"] == 100.0   # worst on all three axes
+    assert rows[0]["score"] == "100.00"   # worst on all three axes
 
 
 def test_workload_blanks_issues_when_repo_not_fetched(monkeypatch):

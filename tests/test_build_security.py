@@ -114,13 +114,13 @@ def test_security_score_uses_neutral_cve_anchor():
     assert rows[2]["cve_score"] == 50.0
     assert rows[0]["cve_score"] == 100.0         # only non-zero → worst → 100
     assert rows[0]["openssf_score_p"] == 100.0   # lowest scorecard = worst
-    assert rows[0]["score"] == 100.0             # worst on both axes → 100
+    assert rows[0]["score"] == "100.00"          # worst on both axes → 100
 
     # Worst-of, not geom-mean: the great-scorecard/no-CVE repo scores on the
     # neutral CVE axis (50), NOT a geom mean that its low openssf_score_p would
     # drag under 50. Its openssf axis is the least risky of the three.
     assert rows[1]["openssf_score_p"] < 50.0
-    assert rows[1]["score"] == 50.0
+    assert rows[1]["score"] == "50.00"
 
 
 def test_cve_not_masked_by_good_hygiene():
@@ -148,4 +148,4 @@ def test_cve_not_masked_by_good_hygiene():
     # yet its real CVEs (cve_score=100) carry the score straight to 100.
     assert rows[0]["cve_score"] == 100.0
     assert rows[0]["openssf_score_p"] < 50.0
-    assert rows[0]["score"] == 100.0
+    assert rows[0]["score"] == "100.00"

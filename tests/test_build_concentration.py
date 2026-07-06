@@ -6,14 +6,14 @@ def test_concentration_score_absolute_scale():
     a repo's score doesn't depend on the rest of the population."""
     from src.risk.build_concentration import _concentration_score
     # Single author writing everything: the theoretical maximum.
-    assert _concentration_score(1, 10000) == 100
-    # bf=1 but with a contributor tail (HHI 9000): sqrt(9000) ≈ 94.9.
-    assert _concentration_score("1", "9000") == 95
+    assert _concentration_score(1, 10000) == "100.00"
+    # bf=1 but with a contributor tail (HHI 9000): sqrt(9000) ≈ 94.87.
+    assert _concentration_score("1", "9000") == "94.87"
     # Two-person / moderate HHI: sqrt(2744/2) ≈ 37.04.
-    assert _concentration_score(2, 2744) == 37
+    assert _concentration_score(2, 2744) == "37.04"
     # Broad, even contributor base scores low but never 0 (floor 1).
-    assert _concentration_score(50, 190) == 2
-    assert _concentration_score(100, 100) == 1
+    assert _concentration_score(50, 190) == "1.95"
+    assert _concentration_score(100, 100) == "1.00"
 
 
 def test_concentration_score_blank_on_missing_inputs():

@@ -33,22 +33,22 @@ def test_shipped_weights_and_pro_rata_blend():
     assert (VALUE_SCORE_CRIT_WEIGHT, VALUE_SCORE_ECO_CRIT_WEIGHT,
             VALUE_SCORE_CENTRALITY_WEIGHT) == (0.6, 0.2, 0.2)
     assert VALUE_SCORE_MIN_COMPONENTS == 2
-    # all three present: 0.6*50 + 0.2*100 + 0.2*40 = 58.0
-    assert compute_score(0.5, 1.0, 40.0) == 58.0
+    # all three present (openssf already on 0–100): 0.6*50 + 0.2*100 + 0.2*40 = 58.0
+    assert compute_score(50.0, 1.0, 40.0) == 58.0
     # eco_crit absent → openssf + centrality renormalize to 0.75/0.25 → 47.5
-    assert compute_score(0.5, None, 40.0) == 47.5
+    assert compute_score(50.0, None, 40.0) == 47.5
     # openssf absent (a GitLab repo) → eco_crit + centrality → 0.5/0.5 → 70.0
     assert compute_score(None, 1.0, 40.0) == 70.0
     # eco_crit=0 is a PRESENT component (contributes 0), not absent:
     # 0.6*50 + 0.2*0 + 0.2*40 = 38.0
-    assert compute_score(0.5, 0.0, 40.0) == 38.0
+    assert compute_score(50.0, 0.0, 40.0) == 38.0
 
 
 def test_compute_score_requires_min_components():
     """Fewer than VALUE_SCORE_MIN_COMPONENTS present → blank score (None)."""
     from src.value.apply_criticality import compute_score
     assert compute_score(None, None, 40.0) is None   # only centrality
-    assert compute_score(0.5, None, None) is None     # only openssf
+    assert compute_score(50.0, None, None) is None    # only openssf
     assert compute_score(None, None, None) is None     # nothing
 
 
@@ -78,12 +78,12 @@ def test_apply_joins_openssf_eco_crit_and_scores_gitlab(tmp_path):
 
     from src.value.apply_criticality import apply
     rows = {r["repo"]: r for r in apply(value, crit, eco)}
-    # a/a: 0.6*(0.5*100) + 0.2*(1*100) + 0.2*40 = 58.00
-    assert rows["a/a"]["openssf_crit"] == "0.5"
+    # a/a: source 0.5 stored ·100; 0.6*50 + 0.2*(1*100) + 0.2*40 = 58.00
+    assert rows["a/a"]["openssf_crit"] == "50.00"
     assert rows["a/a"]["eco_crit"] == "1"
     assert rows["a/a"]["value_score"] == "58.00"
     # b/b: openssf matched by slug, no eco row → 2 comps 0.75/0.25 → 47.50
-    assert rows["b/b"]["openssf_crit"] == "0.5"
+    assert rows["b/b"]["openssf_crit"] == "50.00"
     assert rows["b/b"]["eco_crit"] == ""
     assert rows["b/b"]["value_score"] == "47.50"
     # g/g: gitlab (no openssf), eco=1 + top 40 → 0.5/0.5 → 70.00 (newly scored)
@@ -187,12 +187,12 @@ def test_apply_is_idempotent_and_written_file_round_trips(tmp_path):
     from src.value.apply_criticality import apply
     apply(value, crit, eco)
     rows = apply(value, crit, eco)  # second run reads its own output
-    # 0.6*70 + 0.2*100 + 0.2*50 = 72.00
-    assert rows[0]["openssf_crit"] == "0.7"
+    # source 0.7 stored ·100; 0.6*70 + 0.2*100 + 0.2*50 = 72.00
+    assert rows[0]["openssf_crit"] == "70.00"
     assert rows[0]["eco_crit"] == "1"
     assert rows[0]["value_score"] == "72.00"
     on_disk = list(csv.DictReader(open(value, encoding="utf-8")))
-    assert on_disk[0]["openssf_crit"] == "0.7"
+    assert on_disk[0]["openssf_crit"] == "70.00"
     assert on_disk[0]["eco_crit"] == "1"
     assert on_disk[0]["value_score"] == "72.00"
 

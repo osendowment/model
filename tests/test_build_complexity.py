@@ -13,7 +13,7 @@ def test_scoreercentile_columns():
                     composite_cols=["loc_eoy_p", "cyclomatic_max_p"],
                     dim_col="score")
     assert rows[0]["loc_eoy_p"] == 100.0      # biggest codebase = worst
-    assert rows[0]["score"] == 100.0
+    assert rows[0]["score"] == "100.00"
 
 
 def test_per_year_shas_keeps_prewindow_dated_fallback(tmp_path):
