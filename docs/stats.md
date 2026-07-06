@@ -86,7 +86,7 @@ recorded, not pulled into scope.
 
 | Signal | Filled | Comment |
 |---|--:|---|
-| `pr_score` | 12,084 | every group with any PageRank signal (all 12,090 rows minus 6 rank-less orphans); computed by `unify_value_data`, not part of `value_score` |
+| `pr_score` | 12,076 | every group with any PageRank signal (all 12,082 rows minus 6 rank-less orphans); computed by `unify_value_data`, not part of `value_score` |
 | `openssf_crit` | 921 | GitHub-only; valid class-A GitHub gate **915 / 915** (enforced by `pipeline_health.py`) |
 | `eco_crit` | 794 | explicit flags only — 788 critical (`1`) / 6 not (`0`); a checked-but-blank flag (spack/debian cpp) is left empty, never 0 |
 | `value_score` | 923 | ≥ 2 components present; 2 GitLab class-A repos scored — only those with an explicit `eco_crit`; the rest have just `top_eco_pct` and stay blank |
