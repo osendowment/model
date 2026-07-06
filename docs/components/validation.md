@@ -3,7 +3,7 @@
 `data/value/validation.csv` is the **git/GitHub validation audit table** — a
 rollup of the two per-source validation caches that decides, per validation
 *target*, whether a repo's resolved URL is real and reachable. It is the audit
-trail behind the tri-state `valid` column in
+trail behind the `git_valid` column in
 [`data/value/value.csv`](../value.md): `validation.csv` records *why* each target
 was judged valid (which cache verdict, checked when, which ecosystems point at
 it), and `build_validation` joins that verdict back onto every value row.
@@ -16,17 +16,22 @@ ecosystems into the target's `sources` column.
 ## How it's built
 
 Built by [`src/value/build_validation.py`](../../src/value/build_validation.py),
-which runs as the `validation` step of the value pipeline runner (the last step,
-after `unify` and `verify`). It is a **pure rollup — it does no network I/O**;
-all verification happened earlier in `verify_git_urls`, which refreshes the two
-source caches this step reads.
+which runs as the `validation` step of the value pipeline runner (after
+`unify`, before the final `criticality` step). It does one piece of network
+I/O of its own: before rolling up, it refreshes the non-GitHub `git ls-remote`
+reachability cache (`data/sources/git/urls.csv`, TTL 365 days) — `--offline`
+skips the refresh (cache only), `--refresh` forces a re-check regardless of
+age. The GitHub cache (`data/sources/github/repos.csv`) is not touched here:
+it is the GitHub Repos API record maintained by
+`src.sources.github.fetch_repo_owner_data`, refreshed during the rollup's
+earlier `resolve` step.
 
 Steps:
 
 1. **Collect targets** from `data/value/value.csv`. For each value row,
    `_row_target` picks a single target: the row's `repo` slug (type
-   `github_repo`) when its `platform == github`, else its non-GitHub
-   `git_url` (type `git_url`). The GitHub branch wins, so a GitHub row's derived
+   `github_repo`) when its `platform == github`, else its canonicalised
+   non-GitHub `git_url` (type `git_url`). The GitHub branch wins, so a GitHub row's derived
    `git_url` is never double-counted. A row with neither is an **orphan** and
    contributes no target. Each target accumulates the `sources` — the ecosystems
    (from each row's `ecosystems` column) whose packages resolve to it.
@@ -46,29 +51,37 @@ Steps:
    write — a missing verdict is treated as a pipeline error, never silently
    invalid (see *Refreshing* below).
 5. **Write** `validation.csv` (sorted by `type`, then `target`) and **join** the
-   per-target verdict back into the `valid` column of `value.csv`.
+   per-target verdict back into the `git_valid` column of `value.csv`.
 
-## The `valid` column
+## The `valid` / `git_valid` columns
 
-`build_validation` produces two `valid` values from the same verdicts: a
-per-*target* `valid` in `validation.csv`, and a per-*row* (per-repo) `valid`
-joined into `value.csv`.
+`build_validation` produces two values from the same verdicts: a per-*target*
+`valid` in `validation.csv`, and a per-*row* (per-repo) `git_valid` joined
+into `value.csv`.
 
 In **`validation.csv`**, `valid` is a plain boolean (`True`/`False`) — the cache
 verdict (or override pin) for that one target.
 
-In **`value.csv`**, `valid` is **tri-state**, set by `join_valid` from each
-row's target verdict:
+In **`value.csv`**, `git_valid` is a boolean set by `join_valid` from each
+row's target verdict. It is **host-agnostic**: a reachable non-GitHub upstream
+(sourceware / savannah / a GitLab host / …) is valid on its own, not only a
+GitHub repo.
 
-| `valid` | Meaning | How derived |
+| `git_valid` | Meaning | How derived |
 |---------|---------|-------------|
-| `True`  | The repo's URL is real/reachable. | The row's target resolved to a `True` verdict (AND across targets — currently one target per row, but the logic generalises to a future row carrying both a GitHub repo and a distinct non-GitHub URL). |
-| `False` | The repo's URL is invalid / unreachable. | The row's target resolved to a non-`True` verdict (cache `valid=False`, or a `False` override pin). |
-| *(empty)* | Orphan row — there is nothing to validate. | `_row_target` returned `None`: the row is neither a github `repo` nor has a `git_url`. |
+| `True`  | The repo's upstream is real/reachable. | The row's target verdict is `True` (GitHub Repos API for `platform == github` rows, `git ls-remote` for non-GitHub `git_url` rows) — **or** the row carries a GitLab `gl/` `repo_id`, which is itself a validity proof: the resolver only assigns it after the GitLab project API confirmed the project exists, more authoritative than `git ls-remote` (which can fail on hosts like salsa.debian.org even for live projects). This keeps the `repo_id ⇒ git_valid` invariant. |
+| `False` | No reachable upstream. | Orphan rows (no target at all — nothing to validate), a target whose reachability check failed, or a github `repo` that 404s. |
 
-So `validation.csv` is the per-target ledger and `value.csv`'s `valid` is its
-per-row projection. Every non-orphan `value.csv` row's `valid` traces directly
-to exactly one `validation.csv` row (matched by the row's target + type).
+Marking a non-GitHub upstream valid does **not** pull it into the risk /
+eligibility scope — `load_top_repos` still filters to the platforms configured
+in `settings.json → top_repos`; `git_valid` only records that the URL
+resolves.
+
+So `validation.csv` is the per-target ledger and `value.csv`'s `git_valid` is
+its per-row projection. Every non-orphan `value.csv` row's `git_valid` traces
+to its one `validation.csv` row (matched by the row's target + type) — except
+`gl/`-id rows, which are `True` regardless of their `git_url` target's
+ls-remote verdict.
 
 ## Columns
 
@@ -82,26 +95,30 @@ to exactly one `validation.csv` row (matched by the row's target + type).
 
 ## Refreshing
 
-`build_validation` reads only existing caches, so refresh the verification first,
-then rebuild:
+`build_validation` refreshes the non-GitHub `git ls-remote` cache itself
+(TTL 365 days), then rolls up:
 
 ```bash
-# 1. Refresh the two validation caches (GitHub Repos API + git ls-remote).
-#    This is the only step that does network I/O.
-uv run python -m src.value.verify_git_urls
-
-# 2. Roll the caches up into validation.csv and join the valid column.
+# Rebuild validation.csv and re-join git_valid onto value.csv.
+# Refreshes stale ls-remote entries first (the step's only network I/O).
 uv run python -m src.value.build_validation
+
+# Variants:
+uv run python -m src.value.build_validation --offline   # cache only, no network
+uv run python -m src.value.build_validation --refresh   # force re-check all URLs
 ```
 
-Or run the whole value pipeline, which wires both steps in order
-(`verify` → `validation`):
+The GitHub cache (`data/sources/github/repos.csv`) is refreshed by the
+rollup's `resolve` step, so to refresh everything run the rollup (or the whole
+value pipeline), which wires the steps in order
+(`eco-fetch` → `resolve` → `unify` → `validation` → `criticality`):
 
 ```bash
-uv run python -m src.value.run_value_pipeline
+uv run python -m src.value.run_value_pipeline --rollup
 ```
 
 > **Prerequisite:** `build_validation` will not invent verdicts. If a target in
 > `value.csv` has no entry in either cache, the **hard gate** aborts the build
-> with the message *"Run `uv run python -m src.value.verify_git_urls` first."* —
-> run that step (or the full pipeline) to populate the caches, then rebuild.
+> with the message *"Run `uv run python -m src.value.run_value_pipeline
+> --rollup` first."* — run that (or the full pipeline) to populate the caches,
+> then rebuild.
