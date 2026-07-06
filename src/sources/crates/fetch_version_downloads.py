@@ -26,6 +26,8 @@ import httpx
 from rich.console import Console
 from rich.table import Table
 
+from src.common.params import YEARS as MODEL_YEARS
+
 ARCHIVE_INDEX = "https://static.crates.io/archive/version-downloads/index.json"
 ARCHIVE_BASE  = "https://static.crates.io/archive/version-downloads"
 OUT_DIR       = "data/sources/crates/version-downloads"
@@ -34,7 +36,8 @@ CONCURRENCY   = 64
 console = Console()
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--years",       type=int, nargs="+", required=True, metavar="YEAR")
+parser.add_argument("--years", type=int, nargs="+", default=MODEL_YEARS, metavar="YEAR",
+                     help=f"Years to fetch (default: the model's configured YEARS, {MODEL_YEARS})")
 parser.add_argument("--concurrency", type=int, default=CONCURRENCY)
 args = parser.parse_args()
 
