@@ -101,7 +101,7 @@ FIELDS = (
      "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
-    # `openssf_crit` (OpenSSF criticality score, 0-1), `eco_crit` (ecosyste.ms
+    # `openssf_crit` (OpenSSF criticality score ·100, 0-100), `eco_crit` (ecosyste.ms
     # critical flag: 1 critical / 0 explicitly-not / blank unknown), and
     # `value_score` (the 0-100 pro-rata value blend of the three) are not
     # computed here — `src.value.apply_criticality` fills all three as a later

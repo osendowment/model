@@ -3,7 +3,7 @@
 Two independent OpenSSF metrics, fetched by two independent tools:
 
 - **Scorecard** — *security posture*, 0–10 ([securityscorecards.dev](https://securityscorecards.dev/)). Feeds the risk stage's security dimension.
-- **Criticality Score** — *importance/criticality*, 0–1 ([ossf/criticality_score](https://github.com/ossf/criticality_score)). Joined onto `value.csv` as the `criticality` column ([value.md](../value.md#unified-value-table)).
+- **Criticality Score** — *importance/criticality*, 0–1 ([ossf/criticality_score](https://github.com/ossf/criticality_score)). Joined onto `value.csv` as the `openssf_crit` column, ·100 (0–100, two decimals) ([value.md](../value.md#unified-value-table)).
 
 Both are GitHub-only (each tool collects exclusively from the GitHub API) and require a GitHub token (`GITHUB_AUTH_TOKEN` / `GITHUB_TOKEN`, round-robin via `GITHUB_TOKENS`).
 

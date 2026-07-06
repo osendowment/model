@@ -5,10 +5,11 @@ Roll-up step, run after `unify_value_data` / `build_validation` (both rebuild
 value.csv without these columns' values). Joins two per-repo signals onto
 value.csv and blends them into a single 0–100 `score`:
 
-  - `openssf_crit` — the OpenSSF criticality score (0–1), fetched by
-    `src.sources.openssf.criticality`. GitHub-only (the tool doesn't support
-    other hosts). Joined by repo id (value.csv `gh/<id>` ↔ criticality.csv id)
-    with a canonical-slug fallback.
+  - `openssf_crit` — the OpenSSF criticality score, fetched 0–1 by
+    `src.sources.openssf.criticality` and stored ·100 (0–100, two decimals,
+    xx.xx). GitHub-only (the tool doesn't support other hosts). Joined by repo
+    id (value.csv `gh/<id>` ↔ criticality.csv id) with a canonical-slug
+    fallback.
   - `eco_crit` — the ecosyste.ms critical flag, fetched by
     `src.sources.ecosystems.criticality`: `1` = on the critical list, `0` =
     explicitly not on it (`critical=False`), blank = unknown — the fetch didn't
@@ -17,7 +18,7 @@ value.csv and blends them into a single 0–100 `score`:
     class-A repo with an explicit flag gets an importance signal even though it
     has no `openssf_crit`. Joined by repo id, then by normalized git URL.
   - `value_score` — a 0–100 pro-rata blend of whichever of the three components
-    (`openssf_crit·100`, `eco_crit·100`, `top_eco_pct`) are present, renormalized
+    (`openssf_crit`, `eco_crit·100`, `top_eco_pct`) are present, renormalized
     by their weight total (settings.json → value_score). A row needs at least
     `min_components` present or `value_score` stays blank. See docs/value.md.
 
@@ -138,7 +139,7 @@ def compute_score(openssf_crit: float | None, eco_crit: float | None,
 
     Each argument is the raw component value, or ``None`` when absent for this
     repo:
-      - ``openssf_crit`` — OpenSSF criticality, 0–1, scaled ·100 here.
+      - ``openssf_crit`` — OpenSSF criticality, already ·100 (0–100, as stored).
       - ``eco_crit``     — ecosyste.ms critical flag, 0/1, scaled ·100 here.
       - ``top_eco_pct``  — PageRank percentile in the top ecosystem, already 0–100.
 
@@ -150,7 +151,7 @@ def compute_score(openssf_crit: float | None, eco_crit: float | None,
     score."""
     parts: list[tuple[float, float]] = []  # (weight, value on 0–100)
     if openssf_crit is not None:
-        parts.append((VALUE_SCORE_CRIT_WEIGHT, openssf_crit * 100.0))
+        parts.append((VALUE_SCORE_CRIT_WEIGHT, openssf_crit))
     if eco_crit is not None:
         parts.append((VALUE_SCORE_ECO_CRIT_WEIGHT, eco_crit * 100.0))
     if top_eco_pct is not None:
@@ -193,14 +194,17 @@ def apply(value_file: Path = OUTPUT_FILE,
         url = _norm_url(row.get("git_url") or "")
 
         # openssf_crit — GitHub-only tool; join by id, fall back to slug.
+        # criticality.csv carries the raw 0–1 score; value.csv stores it ·100
+        # (0–100, two decimals) so the blend below reads exactly what's on disk.
         openssf: float | None = None
         if platform == "github":
             crit = by_id.get(rid) if rid else None
             if crit is None:
                 crit = by_slug.get(slug)
-            if crit is not None:
-                row["openssf_crit"] = crit
-                openssf = _as_float(crit)
+            raw = _as_float(crit)
+            if raw is not None:
+                openssf = round(raw * 100.0, 2)
+                row["openssf_crit"] = f"{openssf:.2f}"
 
         # eco_crit — GitHub + GitLab; join by id, fall back to URL. An ok=False
         # row matches as "" (unresolved) — kept distinct from None (no row at

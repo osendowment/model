@@ -50,7 +50,7 @@ TOP_REPO_PLATFORMS: set[str] = set(_P["top_repos"]["platforms"])
 TOP_REPO_CLASSES: set[str] = set(_P["top_repos"]["classes"])
 
 # Value score — value.csv `score`, a 0–100 pro-rata blend of up to three
-# components: OpenSSF criticality (openssf_crit, 0-1 → *100), the ecosyste.ms
+# components: OpenSSF criticality (openssf_crit, stored ·100 as 0-100), the ecosyste.ms
 # critical flag (eco_crit, 0/1 → *100), and ecosystem centrality (top_eco_pct,
 # a PageRank percentile already 0-100). Only present (non-blank) components are
 # weighted, then renormalized by their weight sum; a row needs at least

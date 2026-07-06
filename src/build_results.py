@@ -16,7 +16,7 @@ Columns:
                       to `data/sources/gitlab/repos.csv` (GitLab Languages API).
                       Blank for any repo not fetched on either host.
     ecosystem         top ecosystem                     (value.csv `top_eco`)
-    openssf_crit      OpenSSF criticality score, 0-1     (value.csv)
+    openssf_crit      OpenSSF criticality score, 0-100   (value.csv)
     eco_crit          ecosyste.ms critical flag, 0/1     (value.csv)
     top_eco_pct       PageRank percentile in top_eco     (value.csv)
     value_score       0-100 value blend                  (value.csv `value_score`)
