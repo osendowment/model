@@ -308,3 +308,35 @@ def test_build_complexity_includes_cognitive_columns():
     from src.risk.build_complexity import FIELDS
     for col in ("cognitive_total", "cognitive_avg", "cognitive_max"):
         assert col in FIELDS, f"{col} missing from build_complexity FIELDS"
+
+
+def test_cognitive_pass_skips_fortran(tmp_path, monkeypatch):
+    """The cognitive pass must apply LIZARD_SKIP_SUFFIXES like the cyclomatic
+    pass does — lizard's fixed-form Fortran reader OOM-kills on large sources
+    (scipy's d_odr.f took the whole analysis subprocess down with exit -9;
+    the filter originally existed only in _run_lizard)."""
+    from src.sources.git import fetch_sha_metrics as fsm
+
+    fortran = tmp_path / "d_odr.f"
+    fortran.write_text("      SUBROUTINE DODR\n      END\n")
+    c_file = tmp_path / "ok.c"
+    c_file.write_text("int f(int x) { if (x) { return 1; } return 0; }\n")
+
+    seen: list[list[str]] = []
+    real_analyze = __import__("lizard").analyze_files
+
+    def spy(files, exts=None):
+        seen.append(list(files))
+        return real_analyze(files, exts=exts)
+
+    monkeypatch.setattr("lizard.analyze_files", spy)
+    n, total, mx = fsm._run_lizard_cognitive([str(fortran), str(c_file)])
+    assert all(str(fortran) not in batch for batch in seen), \
+        "Fortran file reached lizard.analyze_files in the cognitive pass"
+    assert n >= 1  # the C file was still analyzed
+
+
+def test_cognitive_pass_all_fortran_returns_zero():
+    """An all-Fortran input must return zeros, not crash on an empty list."""
+    from src.sources.git import fetch_sha_metrics as fsm
+    assert fsm._run_lizard_cognitive(["only.f", "more.f90"]) == (0, 0, 0)

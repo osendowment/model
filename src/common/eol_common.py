@@ -19,7 +19,7 @@ Schema:
 from __future__ import annotations
 
 import csv
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from rich.console import Console
@@ -27,10 +27,39 @@ from rich.table import Table
 
 EOL_FIELDS = ["package", "is_eol", "eol_method", "eol_reason", "source", "eol_checked_at"]
 
+# Deprecation status changes slowly; the registry-hitting checkers (npm, pypi)
+# skip packages checked within this window instead of re-querying every one of
+# them on every pipeline run. `error` rows are never fresh (always retried).
+EOL_TTL_DAYS = 7
+
 
 def now_iso() -> str:
     """UTC ISO 8601 timestamp to second precision."""
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def load_fresh_eol(path: Path, ttl_days: int = EOL_TTL_DAYS) -> dict[str, dict]:
+    """{package: row} for rows checked within `ttl_days` with a definitive source.
+
+    A definitive source is anything except `error` — a network failure must
+    never be cached as an answer (auditability), so those rows always
+    re-fetch. `ttl_days <= 0` disables the skip (everything re-fetches).
+    """
+    if ttl_days <= 0 or not path.exists():
+        return {}
+    cutoff = datetime.now(timezone.utc) - timedelta(days=ttl_days)
+    fresh: dict[str, dict] = {}
+    with open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            if r.get("source") == "error":
+                continue
+            try:
+                checked = datetime.fromisoformat(r.get("eol_checked_at", ""))
+            except ValueError:
+                continue
+            if checked >= cutoff:
+                fresh[r["package"]] = r
+    return fresh
 
 
 def write_eol(path: Path, rows: list[dict]) -> None:

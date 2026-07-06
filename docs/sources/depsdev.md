@@ -10,8 +10,6 @@ One fetcher covers every valid class-A repo (archived included,
 | Service | Endpoint | Fields taken |
 |---------|----------|--------------|
 | deps.dev | `GET /v3/projects/github.com%2F{owner}%2F{repo}` | mirrored OpenSSF Scorecard (`overallScore`, `date`, scanned `commit` SHA, per-check scores), `license`, `openIssuesCount` |
-| deps.dev | `GET /v3alpha/systems/{sys}/packages/{pkg}` | registry-default version (anchor for dependents) |
-| deps.dev | `GET …/versions/{v}:dependents` | `dependentCount`, summed across the repo's mapped npm/pypi/cargo packages (per-ecosystem `results.csv`) |
 | bestpractices.dev | `GET /projects.json?url=https://github.com/{owner}/{repo}` | first match's `badge_level`, `tiered_percentage` |
 
 ## Raw Data
@@ -24,7 +22,6 @@ One fetcher covers every valid class-A repo (archived included,
 | `repo_id` | stable id from `value.csv` (never invented) | `gh/35914020` |
 | `depsdev_scorecard_overall` | mirrored Scorecard 0–10 (convenience copy; sha-pinned copy in the long file) | `5.3` |
 | `depsdev_scorecard_date` | mirror's scan date | `2026-04-20` |
-| `depsdev_dependent_count` | summed dependents across mapped packages | `181448` |
 | `depsdev_license` | SPDX-ish license from the project payload | `MIT` |
 | `depsdev_open_issues` | GitHub open-issue count as seen by deps.dev | `327` |
 | `bestpractices_badge_id` | `in_progress` / `passing` / `silver` / `gold` / `""` (not enrolled) | `in_progress` |
@@ -77,4 +74,3 @@ Coverage counts live in [stats.md](../stats.md).
 |--------|--------|
 | 404 vs transport failure | not distinguished — both leave fields blank; `fetched_at` proves the repo was processed, but "not indexed / not enrolled" and "failed after retries" look identical |
 | Wide scorecard columns | convenience copy only; the sha-pinned long file is the source of truth for the security build |
-| Debian not indexed | `depsdev_dependent_count` blank for Debian-only (cpp) repos and for packages with no published default version |

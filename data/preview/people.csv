@@ -112,7 +112,7 @@ crates/38859,crates,xhochy,38859,Uwe L. Korn,,https://crates.io/users/xhochy,,,,
 crates/9648,crates,zbraniecki,9648,Zibi Braniecki,,https://crates.io/users/zbraniecki,,,,,,gh/243395141,,gh/243395141,1,
 crates/21853,crates,zesterer,21853,Joshua Barretto,,https://crates.io/users/zesterer,,,,,,gh/21686666,,gh/21686666,1,
 github:0x676e67,github,0x676e67,,,,,,,,gh/62350380,,,,gh/62350380,1,False
-github:3v1n0,github,3v1n0,,,,,,,,gl/gnome-658,,,,gl/gnome-658,1,
+github:3v1n0,github,3v1n0,,,,,,,,gl/gnome-658,,,,gl/gnome-658,1,False
 github/5969049,github,7rulnik,5969049,Valentin Semirulnik,v7rulnik@gmail.com,https://github.com/7rulnik,@KosyanMedia,"JS engineer at aviasales.com
 
 https://t.me/valya_reads_issue",gh/330043541,,,,,gh/330043541,1,True
@@ -143,7 +143,7 @@ github/9440903,github,alexhuszagh,9440903,Alexander Huszagh,ahuszagh@gmail.com,h
 github/127063,github,alexindigo,127063,Alex Indigo,iam@alexindigo.com,https://github.com/alexindigo,,Interfaces + Automation,gh/59087459,gh/1755793|gh/59087459,,,,gh/1755793|gh/59087459,2,False
 github:alexlamsl,github,alexlamsl,,,,,,,,gh/29097127,,,,gh/29097127,1,False
 github:alexwaygood,github,alexwaygood,,,,,,,,gh/24604008|gh/494077289|gh/523043277,,,,gh/24604008|gh/494077289|gh/523043277,3,False
-github:allisonkarlitskaya,github,allisonkarlitskaya,,,,,,,,gl/gnome-658,,,,gl/gnome-658,1,
+github:allisonkarlitskaya,github,allisonkarlitskaya,,,,,,,,gl/gnome-658,,,,gl/gnome-658,1,False
 github/1392512,github,altsysrq,1392512,Jason Lingle,jason@lin.gl,https://github.com/AltSysrq,,,,gh/94702898,,,,gh/94702898,1,False
 github/278509,github,amanieu,278509,Amanieu d'Antras,amanieu@gmail.com,https://github.com/Amanieu,,,gh/58731560,gh/155119796|gh/58731560|gh/65153793,,,,gh/155119796|gh/58731560|gh/65153793,3,False
 github:amarzavery,github,amarzavery,,,,,,,,gh/108311273,,,,gh/108311273,1,False
@@ -317,7 +317,7 @@ github/199429,github,dvarrazzo,199429,Daniele Varrazzo,daniele.varrazzo@gmail.co
 github:dy,github,dy,,,,,,,,gh/27038309,,,,gh/27038309,1,True
 github:dyladan,github,dyladan,,,,,,,,gh/185901023|gh/255986659,,,,gh/185901023|gh/255986659,2,False
 github:dylan-dpc,github,dylan-dpc,,,,,,,,gh/724712,,,,gh/724712,1,False
-github/1665,github,ebassi,1665,Emmanuele Bassi,ebassi@gmail.com,https://github.com/ebassi,,"Geek, husband, lover, software developer, londoner. Not necessarily in that order.",,gl/gnome-1548|gl/gnome-658,,,,gl/gnome-1548|gl/gnome-658,2,
+github/1665,github,ebassi,1665,Emmanuele Bassi,ebassi@gmail.com,https://github.com/ebassi,,"Geek, husband, lover, software developer, londoner. Not necessarily in that order.",,gl/gnome-1548|gl/gnome-658,,,,gl/gnome-1548|gl/gnome-658,2,False
 github:ebblake,github,ebblake,,,,,,,,gh/66880383,,,,gh/66880383,1,False
 github:ebotcazou,github,ebotcazou,,,,,,,,gh/22711503,,,,gh/22711503,1,False
 github:edoerpani,github,edoerpani,,,,,,,,gh/80221890,,,,gh/80221890,1,False
@@ -353,7 +353,7 @@ github:exarkun,github,exarkun,,,,,,,,gh/15778059,,,,gh/15778059,1,False
 github:eyurtsev,github,eyurtsev,,,,,,,,gh/552661142,,,,gh/552661142,1,False
 github:fabiosantoscode,github,fabiosantoscode,,,,,,,,gh/29097127,,,,gh/29097127,1,True
 github/1055125,github,facelessuser,1055125,Isaac Muse,,https://github.com/facelessuser,,,gh/160789418,gh/160789418,gh/160789418,,,gh/160789418,1,True
-github:fanc999-1,github,fanc999-1,,,,,,,,gl/gnome-1548,,,,gl/gnome-1548,1,
+github:fanc999-1,github,fanc999-1,,,,,,,,gl/gnome-1548,,,,gl/gnome-1548,1,False
 github:fatso83,github,fatso83,,,,,,,,gh/16523712,,,,gh/16523712,1,False
 github/188768,github,fb55,188768,Felix Boehm,,https://github.com/fb55,,"Climbing student, rock programmer.",gh/16864585|gh/16864923|gh/2279062|gh/3172629|gh/3411063|gh/4460687|gh/5414232|gh/6627835|gh/6627949,gh/16864585|gh/16864923|gh/18991884|gh/2279062|gh/3172629|gh/3411063|gh/4460687|gh/5414232|gh/6627835|gh/6627949,gh/16864585|gh/16864923|gh/18991884|gh/2279062|gh/3172629|gh/3411063|gh/4460687|gh/5414232|gh/6627835|gh/6627949|gh/8862593,,,gh/16864585|gh/16864923|gh/18991884|gh/2279062|gh/3172629|gh/3411063|gh/4460687|gh/5414232|gh/6627835|gh/6627949|gh/8862593,11,True
 github:fdawgs,github,fdawgs,,,,,,,,gh/419317518,,,,gh/419317518,1,True
@@ -405,7 +405,7 @@ github:gvvaughan,github,gvvaughan,,,,,,,,gh/47662711,,,,gh/47662711,1,False
 github/138943,github,gweis,138943,,,https://github.com/gweis,,,gh/6449370,gh/6449370,,,,gh/6449370,1,False
 github/564903,github,gyscos,564903,Alexandre Bury,alexandre.bury@gmail.com,https://github.com/gyscos,@argoai,"""Such a wasted opportunity for overkill.""",gh/52115335,gh/52115335,,,,gh/52115335,1,False
 github:haberman,github,haberman,,,,,,,,gh/23357588,,,,gh/23357588,1,False
-github:hadess,github,hadess,,,,,,,,gl/gnome-1548,,,,gl/gnome-1548,1,
+github:hadess,github,hadess,,,,,,,,gl/gnome-1548,,,,gl/gnome-1548,1,False
 github:harshanalluru,github,harshanalluru,,,,,,,,gh/108311273,,,,gh/108311273,1,False
 github:hartwork,github,hartwork,,,,,,,,gh/80314213,,,"Sebastian Pipping — github.com/hartwork profile funding link solicits donations to FSFE (fsfe.org, Free Software Foundation Europe, nonprofit). An external profile funding link, not a GitHub Sponsors listing, so hasSponsorsListing reads False — curated as fundable.",gh/80314213,1,False
 github/2796466,github,hawkw,2796466,Eliza Weisman,eliza@elizas.website,https://github.com/hawkw,@oxidecomputer,systems witch,,gh/165289175|gh/98244646,,,,gh/165289175|gh/98244646,2,True
@@ -463,7 +463,7 @@ github/5018213,github,japaric,5018213,Jorge Aparicio,,https://github.com/japaric
 github/308610,github,jaraco,308610,Jason R. Coombs,jaraco@jaraco.com,https://github.com/jaraco,,,gh/157774633|gh/372026120|gh/48289082,gh/157774633|gh/306147182|gh/306448340|gh/372026120|gh/48289082|gh/54980593,,,,gh/157774633|gh/306147182|gh/306448340|gh/372026120|gh/48289082|gh/54980593,6,True
 github/10355,github,jaredhanson,10355,Jared Hanson,jaredhanson@gmail.com,https://github.com/jaredhanson,,I make things with computers.,gh/11349896,gh/11349896,,,,gh/11349896,1,True
 github/1205481,github,jaredwray,1205481,Jared Wray,me@jaredwray.com,https://github.com/jaredwray,,,gh/9267870|gh/96540810,gh/9267870|gh/96540810,,,,gh/9267870|gh/96540810,2,False
-github:jas4711,github,jas4711,,,,,,,,gl/2882658|gl/919981,,,,gl/2882658|gl/919981,2,
+github:jas4711,github,jas4711,,,,,,,,gl/2882658|gl/919981,,,,gl/2882658|gl/919981,2,False
 github:jasnell,github,jasnell,,,,,,,,gh/27193779,,,,gh/27193779,1,False
 github:jasonsaayman,github,jasonsaayman,,,,,,,,gh/23088740,,,,gh/23088740,1,False
 github/24221,github,jbgutierrez,24221,Javier Blanco Gutiérrez,contacto@jbgutierrez.info,https://github.com/jbgutierrez,Desarrollador Web Freelance,,gh/34113780,gh/34113780,,,,gh/34113780,1,False
@@ -691,7 +691,7 @@ github:nikomatsakis,github,nikomatsakis,,,,,,,,gh/24725038|gh/724712,,,,gh/24725
 github:nipunn1313,github,nipunn1313,,,,,,,,gh/33456236,,,,gh/33456236,1,False
 github:njsmith,github,njsmith,,,,,,,,gh/142657210|gh/57372073,,,,gh/142657210|gh/57372073,2,False
 github:nlf,github,nlf,,,,,,,,gh/5831189,,,,gh/5831189,1,False
-github:nmav,github,nmav,,,,,,,,gl/179611,,,,gl/179611,1,
+github:nmav,github,nmav,,,,,,,,gl/179611,,,,gl/179611,1,False
 github:nnethercote,github,nnethercote,,,,,,,,gh/724712,,,,gh/724712,1,False
 github:nobodyxu,github,nobodyxu,,,,,,,,gh/26039547,,,,gh/26039547,1,True
 github:nodejs-github-bot,github,nodejs-github-bot,,,,,,,,gh/27193779,,,,gh/27193779,1,False
@@ -699,7 +699,7 @@ github:not-an-aardvark,github,not-an-aardvark,,,,,,,,gh/11061773,,,,gh/11061773,
 github:numfocus,github,numfocus,,,,,,,,,gh/1385122|gh/1460385|gh/858127,,,gh/1385122|gh/1460385|gh/858127,3,
 github/55838,github,nv,55838,Nikita Vasilyev,,https://github.com/NV,,Developer Tools developer. I worked on WebKit Inspector at  for a decade.,gh/1025209,gh/1025209,,,,gh/1025209,1,False
 github/10367662,github,nvzqz,10367662,Nikolai Vazquez,github@nikolaivazquez.com,https://github.com/nvzqz,,"conducts curses, breaks things, and uses the oxford comma",gh/100129252,gh/100129252,gh/100129252,,,gh/100129252,1,True
-github:nwellnhof,github,nwellnhof,,,,,,,,gl/gnome-1665,,,,gl/gnome-1665,1,
+github:nwellnhof,github,nwellnhof,,,,,,,,gl/gnome-1665,,,,gl/gnome-1665,1,False
 github:nzakas,github,nzakas,,,,,,,,gh/11061773|gh/27620277|gh/791446923,,,,gh/11061773|gh/27620277|gh/791446923,3,True
 github:obecny,github,obecny,,,,,,,,gh/185901023|gh/255986659,,,,gh/185901023|gh/255986659,2,False
 github:ocelotl,github,ocelotl,,,,,,,,gh/185478926|gh/220524743,,,,gh/185478926|gh/220524743,2,False
@@ -718,7 +718,7 @@ Formerly Rhapsody, New Relic, npm, Crunchyroll.",,gh/24208073,,,,gh/24208073,1,F
 github:ousret,github,ousret,,,,,,,,gh/200259335,gh/200259335,,,gh/200259335,1,True
 github:owais,github,owais,,,,,,,,gh/185478926|gh/220524743,,,,gh/185478926|gh/220524743,2,False
 github:owlstronaut,github,owlstronaut,,,,,,,,gh/35246620,,,,gh/35246620,1,False
-github:owtaylor,github,owtaylor,,,,,,,,gl/gnome-1548,,,,gl/gnome-1548,1,
+github:owtaylor,github,owtaylor,,,,,,,,gl/gnome-1548,,,,gl/gnome-1548,1,False
 github/8319210,github,oyvindln,8319210,,,https://github.com/oyvindln,,,,gh/96124162,,,,gh/96124162,1,False
 github:paolobarbolini,github,paolobarbolini,,,,,,,,gh/62350380,,,,gh/62350380,1,False
 github:parthea,github,parthea,,,,,,,,gh/16316451,,,,gh/16316451,1,False
@@ -763,7 +763,7 @@ github/183534,github,pvorb,183534,Paul Vorbach,paul@vorba.ch,https://github.com/
 I write Software in Java and Kotlin.
 
 I also run npm-stat.com",gh/2317381,gh/2317381,,,,gh/2317381,1,True
-github:pwithnall,github,pwithnall,,,,,,,,gl/gnome-658,,,,gl/gnome-658,1,
+github:pwithnall,github,pwithnall,,,,,,,,gl/gnome-658,,,,gl/gnome-658,1,False
 github/885648,github,qix-,885648,Josh Junon,,https://github.com/Qix-,@oro-os,"Working on @oro-os. Moderator alumnus @bellingcat. Member of @chalk, @debug-js. Formerly @uber, @vercel. Thank you sponsors ❤",gh/1874305|gh/41376759|gh/41388258,gh/1874305|gh/41376759|gh/41388258,gh/11803168|gh/11855007|gh/11855195|gh/15014856|gh/20451415|gh/41053676|gh/43191689,,,gh/11803168|gh/11855007|gh/11855195|gh/15014856|gh/1874305|gh/20451415|gh/41053676|gh/41376759|gh/41388258|gh/43191689,10,True
 github:qulogic,github,qulogic,,,,,,,,gh/1385122,,,,gh/1385122,1,False
 github:quodlibetor,github,quodlibetor,,,,,,,,gh/18210201,,,,gh/18210201,1,False
@@ -885,7 +885,7 @@ github:sydney-runkle,github,sydney-runkle,,,,,,,,gh/90194616,,,,gh/90194616,1,Fa
 github:szabadka,github,szabadka,,,,,,,,gh/24993138|gh/340219494,,,,gh/24993138|gh/340219494,2,False
 github:t8m,github,t8m,,,,,,,,gh/76264690,,,,gh/76264690,1,False
 github:tacaswell,github,tacaswell,,,,,,,,gh/1385122,,,,gh/1385122,1,False
-github:tagoh,github,tagoh,,,,,,,,gl/freedesktop-890,,,,gl/freedesktop-890,1,
+github:tagoh,github,tagoh,,,,,,,,gl/freedesktop-890,,,,gl/freedesktop-890,1,False
 github/43724913,github,taiki-e,43724913,Taiki Endo,,https://github.com/taiki-e,,,gh/164668916|gh/216847853|gh/448365131,gh/161875917|gh/164668916|gh/216847853|gh/267368764|gh/35566048|gh/448365131|gh/55077261|gh/67836789,gh/164668916|gh/216847853|gh/448365131,,,gh/161875917|gh/164668916|gh/216847853|gh/267368764|gh/35566048|gh/448365131|gh/55077261|gh/67836789,8,True
 github/321799,github,tailhook,321799,Paul Colomiets,,https://github.com/tailhook,@edgedb,,,gh/59320323,,,,gh/59320323,1,False
 github/327925,github,takluyver,327925,Thomas Kluyver,,https://github.com/takluyver,European XFEL,,,gh/24727748,,,,gh/24727748,1,False

@@ -246,7 +246,13 @@ class TestNamespace:
         lim = FakeLimiter([FakeResponse(404)])
         key, row, status = await _fetch_namespace(lim, None, item)
         assert status == "404"
-        assert row is None
+        # Definitive failures persist a TOMBSTONE row (kind='', fetched_at
+        # stamped) so the TTL backoff skips the namespace instead of
+        # re-fetching it on every run (216 identical 401/404s observed).
+        assert row is not None
+        assert row["kind"] == "" and row["namespace_id"] == ""
+        assert row["fetched_at"]
+        assert "404" in row["description"]
 
 
 def _iso_days_ago(n):

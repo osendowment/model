@@ -37,7 +37,7 @@ def test_workload_blanks_issues_when_repo_not_fetched(monkeypatch):
     monkeypatch.setattr(bw, "load_rows_by_id", lambda *a, **k: {})
     monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
     monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
-    monkeypatch.setattr(bw, "_load_issues_long", lambda path: issues)
+    monkeypatch.setattr(bw, "_load_issues_long", lambda *paths: issues)
     # AC, loc, cve present for both so the per-AC guard stays open.
     monkeypatch.setattr(bw, "load_column_by_id",
                         lambda path, col: {"o/present": "5", "o/absent": "5"})
@@ -83,7 +83,7 @@ def test_workload_blanks_issues_on_partial_year_coverage(monkeypatch):
     monkeypatch.setattr(bw, "load_rows_by_id", lambda *a, **k: {})
     monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
     monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
-    monkeypatch.setattr(bw, "_load_issues_long", lambda path: issues)
+    monkeypatch.setattr(bw, "_load_issues_long", lambda *paths: issues)
     monkeypatch.setattr(bw, "load_column_by_id",
                         lambda path, col: {"o/partial": "5"})
 
@@ -138,7 +138,7 @@ def test_issue_sums_windowed_to_years(monkeypatch):
     monkeypatch.setattr(bw, "load_rows_by_id", lambda *a, **k: {})
     monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
     monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
-    monkeypatch.setattr(bw, "_load_issues_long", lambda path: issues)
+    monkeypatch.setattr(bw, "_load_issues_long", lambda *paths: issues)
     monkeypatch.setattr(bw, "load_column_by_id", lambda path, col: {"o/r": "5"})
 
     row = {r["repo"]: r for r in bw.build()}["o/r"]
@@ -172,7 +172,7 @@ def test_empty_nni_neutral_filled_only_when_loc_and_cve_present(monkeypatch):
     monkeypatch.setattr(bw, "load_rows_by_id", lambda *a, **k: {})
     monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
     monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
-    monkeypatch.setattr(bw, "_load_issues_long", lambda path: issues)
+    monkeypatch.setattr(bw, "_load_issues_long", lambda *paths: issues)
     monkeypatch.setattr(bw, "load_column_by_id", lambda path, col: cols[col])
 
     rows = {r["repo"]: r for r in bw.build()}
@@ -211,7 +211,7 @@ def test_dormant_repo_scored_with_ac_one(monkeypatch):
     monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
     monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
     monkeypatch.setattr(bw, "_load_issues_long",
-                        lambda path: {"opened_issues": {}, "closed_issues": {}})
+                        lambda *paths: {"opened_issues": {}, "closed_issues": {}})
     monkeypatch.setattr(bw, "load_column_by_id", lambda path, col: cols[col])
 
     rows = {r["repo"]: r for r in bw.build()}

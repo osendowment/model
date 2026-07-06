@@ -29,6 +29,8 @@ Usage:
 """
 
 import argparse
+import functools
+from datetime import datetime, timedelta, timezone
 import asyncio
 import csv
 import functools
@@ -300,7 +302,9 @@ async def fetch_all(
         async with semaphore:
             token = tokens[idx % len(tokens)]
             loop = asyncio.get_running_loop()
-            data = await loop.run_in_executor(None, run_scorecard, repo, token)
+            data = await loop.run_in_executor(
+                None,
+                functools.partial(run_scorecard, repo, token, tolerate_partial=True))
             results[repo] = data
             upsert_json(DEFAULT_DATA_OUTPUT, {repo: data})
             upsert_long(DEFAULT_LONG_OUTPUT, {repo: data}, repo_ids=repo_ids)
@@ -461,6 +465,19 @@ def upsert_long(
     repo_ids = repo_ids or {}
     for repo, data in new_results.items():
         if data.get("error"):
+            # Tombstone: one scan_error row (sha "unscanned") so the skip-scan
+            # backs off for SCAN_ERROR_RETRY_DAYS instead of re-running
+            # scorecard (up to SUBPROCESS_TIMEOUT_S) on a known-failing repo
+            # every single pipeline run. Auditability: the failure is explicit
+            # in the CSV, and it re-tries once the retry window passes.
+            upsert_snapshot(
+                long_path,
+                repo=repo,
+                repo_id=repo_ids.get(repo, ""),
+                commit_sha="unscanned",
+                metrics={"scan_error": str(data.get("message", ""))[:160]},
+                checked_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            )
             continue
         commit_sha = (data.get("repo") or {}).get("commit") or ""
         if not commit_sha:
@@ -514,14 +531,31 @@ def display_summary(results: dict[str, dict]) -> None:
 # ---------------------------------------------------------------------------
 
 
+SCAN_ERROR_RETRY_DAYS = 7  # back-off window before re-trying a failed scan
+
+
 def load_already_scored(long_path: Path) -> set[str]:
     """Return repos that already have a `score` row in the long-format CSV.
 
     A repo is considered "scored" if any (repo, sha, score) row exists —
-    we don't try to determine sha freshness here. Use --force to rescan.
+    we don't try to determine sha freshness here. A repo whose latest
+    attempt is a `scan_error` tombstone within SCAN_ERROR_RETRY_DAYS also
+    counts (back-off — without it a chronically failing repo re-runs
+    scorecard, up to SUBPROCESS_TIMEOUT_S, on every single pipeline run);
+    older tombstones fall out and the repo is retried. Use --force to rescan.
     """
     rows = read_long(long_path)
-    return {repo for (repo, _sha, metric) in rows.keys() if metric == "score"}
+    scored = {repo for (repo, _sha, metric) in rows.keys() if metric == "score"}
+    cutoff = datetime.now(timezone.utc) - timedelta(days=SCAN_ERROR_RETRY_DAYS)
+    for (repo, _sha, metric), row in rows.items():
+        if metric != "scan_error" or repo in scored:
+            continue
+        try:
+            if datetime.fromisoformat(row.get("checked_at", "")) >= cutoff:
+                scored.add(repo)
+        except ValueError:
+            continue
+    return scored
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -563,8 +597,15 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-async def _run_gitlab(args: argparse.Namespace) -> None:
-    """Score GitLab projects (per-host tokens) → same data.json + openssf.csv."""
+async def _run_gitlab(args: argparse.Namespace,
+                      only_repo_ids: set[str] | None = None) -> None:
+    """Score GitLab projects (per-host tokens) → same data.json + openssf.csv.
+
+    `only_repo_ids` restricts targets to those repo_ids — the pipeline passes
+    the top-scope gl/ ids so a bare run scores ONLY what risk.csv needs
+    (same lean-fetch discipline as the GitHub pass), never the whole
+    gitlab/repos.csv backlog. Explicit --gitlab runs stay unrestricted.
+    """
     from src.sources.gitlab.gitlab_client import load_token_map
 
     if args.repos or args.file:
@@ -574,6 +615,8 @@ async def _run_gitlab(args: argparse.Namespace) -> None:
     hosts = set(args.host) if args.host else None
     classes = set(args.classes) if args.classes else None
     targets = load_gitlab_targets(hosts, classes)
+    if only_repo_ids is not None:
+        targets = [t for t in targets if t["repo_id"] in only_repo_ids]
     token_map = load_token_map()
 
     # A token gets a host more checks + higher rate limits, but self-hosted
@@ -640,18 +683,29 @@ async def main() -> None:
         if skipped:
             console.print(f"[dim]Skipping {len(skipped)} already-scored repo(s). Use --force to rescan.[/dim]")
         if not repos:
-            console.print("[green]All repos already scored — nothing to do.[/green]")
-            return
+            console.print("[green]All GitHub repos already scored.[/green]")
 
-    repo_ids = load_repo_id_map()
+    if repos:
+        repo_ids = load_repo_id_map()
+        console.print(f"[bold]Fetching OpenSSF Scorecards for {len(repos)} risk repo(s)...[/bold]\n")
+        results = await fetch_all(repos, concurrency=args.concurrency, repo_ids=repo_ids)
+        display_summary(results)
+        console.print(f"\n[green]Raw JSON  → {DEFAULT_DATA_OUTPUT}[/green]")
+        console.print(f"[green]Long CSV  → {DEFAULT_LONG_OUTPUT}[/green]")
 
-    console.print(f"[bold]Fetching OpenSSF Scorecards for {len(repos)} risk repo(s)...[/bold]\n")
-
-    results = await fetch_all(repos, concurrency=args.concurrency, repo_ids=repo_ids)
-
-    display_summary(results)
-    console.print(f"\n[green]Raw JSON  → {DEFAULT_DATA_OUTPUT}[/green]")
-    console.print(f"[green]Long CSV  → {DEFAULT_LONG_OUTPUT}[/green]")
+    # The risk scope includes GitLab-hosted repos, and the pipeline invokes
+    # this module bare — without this, GitLab repos silently never get an
+    # openssf_score (16 blank salsa/inria/freedesktop rows observed). Scoped
+    # to the TOP repos' gl/ ids only (lean-fetch discipline: a bare run
+    # fetches exactly what risk.csv needs); its already-scored skip keeps
+    # repeat runs incremental. Full-backlog scoring stays manual: --gitlab.
+    if not args.repos and not args.file:
+        from src.common.repos import load_top_repos
+        top_gl_ids = {e.repo_id for e in load_top_repos(skip_archived=False)
+                      if e.repo_id.startswith("gl/")}
+        if top_gl_ids:
+            console.print("\n[bold]GitLab pass (top-scope only)[/bold]")
+            await _run_gitlab(args, only_repo_ids=top_gl_ids)
 
 
 if __name__ == "__main__":

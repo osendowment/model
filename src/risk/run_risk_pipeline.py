@@ -26,24 +26,25 @@ from src.common.pipeline_runner import Step, build_parser, run_pipeline
 # Score-forming fetchers — each produces an input to one of the four risk.csv
 # dimension scores. Comment marks which score each feeds.
 FETCHERS = [
-    Step("commits-years", "src.sources.git.commits_years",                fetch=True),  # per-year last_sha anchor (scc/lizard/openssf/workload key off it)
-    Step("resolve-head",  "src.sources.git.resolve_head",                 fetch=True),  # current-HEAD sha for the complexity / cyclomatic chain
+    Step("commits-years", "src.sources.git.commits_years",                fetch=True, pgroup="git-fetch"),  # per-year last_sha anchor (scc/lizard/openssf/workload key off it)
+    Step("resolve-head",  "src.sources.git.resolve_head",                 fetch=True, pgroup="git-fetch"),  # current-HEAD sha for the complexity / cyclomatic chain
     # The git-clone contributor log is the ONLY source of the concentration
     # score (bf/hhi _5y) and of workload's per-contributor divisor. It was
     # runnable solely by hand before — a new repo entering scope got blank
     # concentration + workload from a full pipeline run. Incremental: skips
     # repos whose status row is already ok.
-    Step("git-contributors", "src.sources.git.contributors",              fetch=True),  # concentration score + workload divisor
-    Step("issues",        "src.sources.github.fetch_issue_metrics",       fetch=True),  # workload score
+    Step("git-contributors", "src.sources.git.contributors",              fetch=True, pgroup="git-fetch"),  # concentration score + workload divisor
+    Step("issues",        "src.sources.github.fetch_issue_metrics",       fetch=True, pgroup="git-fetch"),  # workload score
+    Step("gitlab-issues",  "src.sources.gitlab.fetch_issue_metrics",       fetch=True, pgroup="git-fetch"),  # workload score for gl/ repos
     # One clone per repo yields BOTH scc (loc/complexity → scc.csv) and lizard
     # (cyclomatic + cognitive → lizard.csv). cyclomatic_max is half the
     # complexity score, so a newly-scoped repo cannot be scored without this
     # step. Replaces the former separate scc/cyclomatic steps that each
     # re-cloned the same end-of-year SHA.
-    Step("sha-metrics",   "src.sources.git.fetch_sha_metrics",            fetch=True),  # complexity score: loc_eoy + cyclomatic_max
-    Step("cves",          "src.sources.osv.fetch_cves",                   fetch=True),  # security score: cve_count_5y
-    Step("scorecard",     "src.sources.openssf.scorecard",                fetch=True),  # security score: openssf_score + workload checks
-    Step("depsdev",       "src.sources.depsdev.fetch",                    fetch=True),  # security score: openssf fallback (deps.dev-mirrored)
+    Step("sha-metrics",   "src.sources.git.fetch_sha_metrics",            fetch=True, pgroup="metrics"),  # complexity score: loc_eoy + cyclomatic_max
+    Step("cves",          "src.sources.osv.fetch_cves",                   fetch=True, pgroup="metrics"),  # security score: cve_count_5y
+    Step("scorecard",     "src.sources.openssf.scorecard",                fetch=True, pgroup="metrics"),  # security score: openssf_score + workload checks
+    Step("depsdev",       "src.sources.depsdev.fetch",                    fetch=True, pgroup="metrics"),  # security score: openssf fallback (deps.dev-mirrored)
 ]
 
 # Audit-only fetchers — their output populates informational columns in the

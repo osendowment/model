@@ -283,10 +283,20 @@ def _run_lizard_cognitive(files: list[str]) -> tuple[int, int, int]:
     if not files:
         return 0, 0, 0
     import lizard
+    # Same Fortran exclusion as the cyclomatic pass: lizard's fixed-form
+    # reader OOM-kills on large sources (scipy's d_odr.f took the whole
+    # analysis subprocess down with exit -9 — this filter existed only in
+    # _run_lizard, so the cognitive pass re-introduced the crash).
+    analyzable = [
+        f for f in files
+        if os.path.splitext(f)[1].lower() not in LIZARD_SKIP_SUFFIXES
+    ]
+    if not analyzable:
+        return 0, 0, 0
     ext = SonarCognitiveExt()
     exts = lizard.get_extensions([ext])
     total = mx = nfn = 0
-    for r in lizard.analyze_files(files, exts=exts):
+    for r in lizard.analyze_files(analyzable, exts=exts):
         for fn in r.function_list:
             cog = getattr(fn, 'cognitive_complexity', 0) or 0
             total += cog

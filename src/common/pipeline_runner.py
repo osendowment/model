@@ -23,6 +23,9 @@ class Step:
     fetch: bool = False     # legacy field — kept for backward compat; unused by select_steps
     pipeline: bool = False  # step is itself an orchestrator — receives --offline/--refresh
     net: bool = False       # step does network I/O — receives --offline/--refresh
+    pgroup: str | None = None  # consecutive steps sharing a pgroup run CONCURRENTLY
+    # (a pgroup boundary is a barrier: the next step/group starts only after
+    # every step in the group succeeded — use for independent fetchers only)
 
 
 def select_steps(steps: list[Step], from_step: str | None,
@@ -90,11 +93,24 @@ def run_pipeline(steps: list[Step], args: argparse.Namespace) -> int:
     if getattr(args, "refresh", False):
         net_flags.append("--refresh")
 
-    for s in selected:
+    i = 0
+    while i < len(selected):
+        s = selected[i]
+        # Collect a run of consecutive steps sharing the same pgroup.
+        batch = [s]
+        if s.pgroup:
+            while (i + len(batch) < len(selected)
+                   and selected[i + len(batch)].pgroup == s.pgroup):
+                batch.append(selected[i + len(batch)])
+        if len(batch) > 1:
+            rc = _run_parallel(batch, net_flags)
+            if rc != 0:
+                return rc
+            i += len(batch)
+            continue
+
         print(f"\n=== {s.label} ({s.module}) ===", flush=True)
-        cmd = [sys.executable, "-m", s.module]
-        if net_flags and (s.net or s.pipeline):
-            cmd.extend(net_flags)
+        cmd = _step_cmd(s, net_flags)
         t0 = time.monotonic()
         result = subprocess.run(cmd)
         dt = time.monotonic() - t0
@@ -103,4 +119,41 @@ def run_pipeline(steps: list[Step], args: argparse.Namespace) -> int:
                   file=sys.stderr)
             return result.returncode
         print(f"--- {s.label} done in {dt:.0f}s", flush=True)
+        i += 1
     return 0
+
+
+def _step_cmd(s: Step, net_flags: list[str]) -> list[str]:
+    cmd = [sys.executable, "-m", s.module]
+    if net_flags and (s.net or s.pipeline):
+        cmd.extend(net_flags)
+    return cmd
+
+
+def _run_parallel(batch: list[Step], net_flags: list[str]) -> int:
+    """Run a pgroup batch concurrently; print each step's captured output in
+    batch order as it completes. All steps run to completion even if a
+    sibling fails (no mid-flight kills — cleaner on-disk state); the first
+    non-zero exit code is returned after the whole batch finishes."""
+    labels = ", ".join(s.label for s in batch)
+    print(f"\n=== [parallel ×{len(batch)}] {labels} ===", flush=True)
+    t0 = time.monotonic()
+    procs = [subprocess.Popen(_step_cmd(s, net_flags),
+                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                              text=True)
+             for s in batch]
+    first_rc = 0
+    for s, p in zip(batch, procs):
+        out, _ = p.communicate()
+        dt = time.monotonic() - t0
+        print(f"\n--- [{s.label}] ({s.module})", flush=True)
+        if out and out.strip():
+            print(out.rstrip(), flush=True)
+        if p.returncode != 0:
+            print(f"FAILED: {s.label} (exit {p.returncode}, {dt:.0f}s)",
+                  file=sys.stderr)
+            if first_rc == 0:
+                first_rc = p.returncode
+        else:
+            print(f"--- {s.label} done in {dt:.0f}s (parallel)", flush=True)
+    return first_rc

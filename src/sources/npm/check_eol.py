@@ -34,7 +34,7 @@ import aiohttp
 from rich.console import Console
 from tqdm.asyncio import tqdm_asyncio
 
-from src.common.eol_common import display_summary, now_iso, write_eol
+from src.common.eol_common import EOL_TTL_DAYS, display_summary, load_fresh_eol, now_iso, write_eol
 
 logging.basicConfig(level="INFO")
 log = logging.getLogger(__name__)
@@ -110,6 +110,8 @@ async def run(packages: list[str], concurrency: int) -> list[dict]:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--limit", type=int, default=None)
+    p.add_argument("--refresh", action="store_true",
+                   help=f"Re-check every package, ignoring the {EOL_TTL_DAYS}-day TTL")
     p.add_argument("--concurrency", type=int, default=30)
     args = p.parse_args()
 
@@ -120,7 +122,15 @@ def main() -> None:
     pkgs = load_packages(args.limit)
     log.info("loaded %d packages from results.csv", len(pkgs))
 
-    rows = asyncio.run(run(pkgs, args.concurrency))
+    fresh = {} if args.refresh else load_fresh_eol(OUTPUT_FILE)
+    to_check = [p_ for p_ in pkgs if p_ not in fresh]
+    if fresh:
+        console.print(f"  [dim]{len(pkgs) - len(to_check):,} fresh (< {EOL_TTL_DAYS}d) — "
+                      f"checking {len(to_check):,}; --refresh to force[/dim]")
+
+    fetched = asyncio.run(run(to_check, args.concurrency)) if to_check else []
+    by_pkg = {r["package"]: r for r in fetched}
+    rows = [by_pkg.get(p_) or fresh[p_] for p_ in pkgs]
     write_eol(OUTPUT_FILE, rows)
 
     display_summary(console, "npm", rows)
