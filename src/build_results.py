@@ -31,6 +31,13 @@ Columns:
                       rows only — blank for ineligible rows and any row
                       missing a score.
 
+All score-like numeric columns (`openssf_crit`, `top_eco_pct`, `value_score`,
+the four risk components, `risk_score`) are rounded to 2 decimal places for
+this preview output — `eco_crit` is a 0/1 flag, not a score, and is left as
+its raw upstream value. `score` itself is always computed from the
+FULL-PRECISION upstream `value_score`/`risk_score`, before rounding, so
+rounding the displayed columns never shifts the ranking.
+
 Joins: every file keys on the stable `repo_id` — eligibility.csv's population
 (all top repos) drives the row set; value.csv / risk.csv / github/repos.csv /
 gitlab/repos.csv are joined onto it. A repo missing from a joined file (e.g. an
@@ -82,6 +89,12 @@ def _num(x: str) -> float | None:
         return None
 
 
+def _round2(x: str) -> str:
+    """Round a numeric string to 2 decimal places; blank/unparseable -> ""."""
+    n = _num(x)
+    return f"{n:.2f}" if n is not None else ""
+
+
 def build() -> list[dict]:
     value_by_id = load_rows_by_id(VALUE_FILE)
     risk_by_id = load_rows_by_id(RISK_FILE)
@@ -116,12 +129,12 @@ def build() -> list[dict]:
             "repo": repo,
             "language": language.lower(),
             "ecosystem": (v.get("top_eco") or "").strip(),
-            "openssf_crit": (v.get("openssf_crit") or "").strip(),
+            "openssf_crit": _round2(v.get("openssf_crit") or ""),
             "eco_crit": (v.get("eco_crit") or "").strip(),
-            "top_eco_pct": (v.get("top_eco_pct") or "").strip(),
-            "value_score": value_score,
-            **{col: (r.get(col) or "").strip() for col in RISK_COMPONENTS},
-            "risk_score": risk_score,
+            "top_eco_pct": _round2(v.get("top_eco_pct") or ""),
+            "value_score": _round2(value_score),
+            **{col: _round2(r.get(col) or "") for col in RISK_COMPONENTS},
+            "risk_score": _round2(risk_score),
             **{col: (e.get(col) or "").strip() for col in ELIGIBILITY_COMPONENTS},
             "eligible": (e.get("eligible") or "").strip(),
             "score": "",
