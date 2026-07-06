@@ -22,9 +22,9 @@ more prose
 
 ### Coverage
 
-| Signal | Filled |
-|---|--:|
-| `openssf_crit` | 921 |
+| Signal | Filled | Pct |
+|---|--:|--:|
+| `openssf_crit` | 921 | 97.8% |
 """
 
 
@@ -152,14 +152,24 @@ def test_stats_sheet_renders_markdown_tables(tmp_path, monkeypatch):
 
     ws = load_workbook(out)["stats"]
     got = [[c.value for c in row] for row in ws.iter_rows()]
+    # column A is an empty gutter — every block starts at column B
+    assert all(row[0] is None for row in got)
     # block 1: heading, header, two data rows (bold + thousands stripped)
-    assert got[0][0] == "Repo identity coverage"
-    assert ws.cell(row=1, column=1).font.bold is True
-    assert got[1][:4] == ["Step", "A", "Total", "Comment"]
-    assert ws.cell(row=2, column=1).fill.start_color.rgb == "001F3864"
-    assert got[2][:3] == ["Packages", 3425, 17647]
-    assert got[3][:3] == ["Valid repos", 947, 11378]      # **bold** stripped
+    assert got[0][1] == "Repo identity coverage"
+    assert ws.cell(row=1, column=2).font.bold is True
+    assert got[1][1:5] == ["Step", "A", "Total", "Comment"]
+    assert ws.cell(row=2, column=2).fill.start_color.rgb == "001F3864"
+    assert got[2][1:4] == ["Packages", 3425, 17647]
+    assert got[3][1:4] == ["Valid repos", 947, 11378]     # **bold** stripped
+    # numeric columns: real numbers with thousands format, header right-aligned
+    assert ws.cell(row=3, column=3).number_format == "#,##0"
+    assert ws.cell(row=2, column=3).alignment.horizontal == "right"   # "A"
+    assert ws.cell(row=2, column=2).alignment.horizontal != "right"   # "Step"
+    assert ws.cell(row=2, column=5).alignment.horizontal != "right"   # "Comment"
     # blank separator, then block 2 under its own heading (`code` stripped)
     assert got[4] == [None] * len(got[4])
-    assert got[5][0] == "Coverage"
-    assert got[7][:2] == ["openssf_crit", 921]
+    assert got[5][1] == "Coverage"
+    assert got[7][1:3] == ["openssf_crit", 921]
+    # percent cells become real fractions with a percent format
+    pct = ws.cell(row=8, column=4)
+    assert pct.value == 0.978 and pct.number_format == "0.0%"

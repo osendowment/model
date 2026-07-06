@@ -35,7 +35,7 @@ import csv
 from pathlib import Path
 
 from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill
+from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.worksheet.worksheet import Worksheet
 from rich.console import Console
 
@@ -148,25 +148,34 @@ def _decorate_repos_sheet(ws: Worksheet) -> None:
             row[col - 1].fill = fill
 
 
-def _md_cell(raw: str) -> int | float | str | None:
-    """One markdown table cell → an Excel value.
+def _md_cell(raw: str) -> tuple[int | float | str | None, str | None]:
+    """One markdown table cell → (Excel value, number format).
 
     Strips the markdown dressing (`**bold**`, `` `code` `` — including code
-    spans inside prose), then coerces thousands-separated counts to real
-    numbers. Percent strings ("97.8%") and prose stay text; a
+    spans inside prose), then coerces to REAL typed cells so Excel never
+    flags "number stored as text": thousands-separated counts become ints
+    (format `#,##0`), decimals become floats (`0.00`), and percent strings
+    ("97.8%") become fractions with a percent format (`0.0%`, or `0%` when
+    the source had no decimals). Prose stays text (no format); a
     blank/placeholder cell becomes an empty cell."""
     s = raw.strip().strip("*").replace("`", "").strip()
     if s in ("", "—", "·"):
-        return None
+        return None, None
+    if s.endswith("%"):
+        num = s[:-1].replace(",", "").strip()
+        try:
+            return float(num) / 100.0, ("0.0%" if "." in num else "0%")
+        except ValueError:
+            return s, None
     plain = s.replace(",", "")
     try:
-        return int(plain)
+        return int(plain), "#,##0"
     except ValueError:
         pass
     try:
-        return float(plain)
+        return float(plain), "0.00"
     except ValueError:
-        return s
+        return s, None
 
 
 def _is_md_separator(line: str) -> bool:
@@ -179,6 +188,11 @@ def _write_stats_sheet(ws: Worksheet, md_path: Path) -> int:
     """Render every markdown table in `md_path` as a stacked block: its nearest
     heading above as a bold section title, then the table with a styled header
     row. Prose between tables is skipped. Returns the number of tables written.
+
+    Layout: column A stays empty (a gutter, like a document margin) — every
+    block starts at column B. Numeric/percent cells are written as typed
+    values with number formats, and a column whose data is entirely
+    numeric/percent gets its header right-aligned to sit over the numbers.
     """
     lines = md_path.read_text(encoding="utf-8").splitlines()
     heading = ""
@@ -203,20 +217,35 @@ def _write_stats_sheet(ws: Worksheet, md_path: Path) -> int:
             continue
         if tables:
             ws.append([])  # blank separator between blocks
-        ws.append([heading])
-        ws.cell(row=ws.max_row, column=1).font = SECTION_FONT
+        ws.append([None, heading])
+        ws.cell(row=ws.max_row, column=2).font = SECTION_FONT
         header_row_idx = ws.max_row + 1
+        n_cols = max(len(cells) for cells in block)
+        numeric_col = [True] * n_cols  # column has ONLY numeric/percent data
+        has_data_col = [False] * n_cols
         for j, cells in enumerate(block):
-            ws.append([_md_cell(c) for c in cells])
-            if j == 0:
-                for col_idx in range(1, len(cells) + 1):
-                    cell = ws.cell(row=header_row_idx, column=col_idx)
+            parsed = [_md_cell(c) for c in cells]
+            ws.append([None] + [v for v, _ in parsed])
+            for k, (v, fmt) in enumerate(parsed):
+                cell = ws.cell(row=ws.max_row, column=k + 2)
+                if fmt:
+                    cell.number_format = fmt
+                if j == 0:
                     cell.font = HEADER_FONT
                     cell.fill = HEADER_FILL
+                elif v is not None:
+                    has_data_col[k] = True
+                    if not isinstance(v, (int, float)):
+                        numeric_col[k] = False
+        for k in range(n_cols):
+            if has_data_col[k] and numeric_col[k]:
+                ws.cell(row=header_row_idx, column=k + 2).alignment = \
+                    Alignment(horizontal="right")
         tables += 1
 
-    ws.column_dimensions["A"].width = 36
-    for col in "BCDEFG":
+    ws.column_dimensions["A"].width = 2
+    ws.column_dimensions["B"].width = 36
+    for col in "CDEFGH":
         ws.column_dimensions[col].width = 14
     return tables
 
