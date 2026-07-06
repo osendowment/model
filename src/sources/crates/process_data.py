@@ -42,7 +42,7 @@ from rich.table import Table
 from src.common.lfs import is_lfs_pointer
 from src.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
-DUMP_DIR    = "data/sources/crates/db-dump"
+DUMP_DIR    = "data/sources/crates/db-dump"  # slim pipeline extracts (gitignored, regenerable) — see fetch_db_dump
 MONTHLY_DIR = "data/sources/crates/version-downloads"
 DATA_DIR    = "data/sources/crates"
 

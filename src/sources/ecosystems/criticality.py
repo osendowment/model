@@ -165,7 +165,7 @@ def load_repos(classes: set[str] | None, value_file: Path | None = None) -> list
     ``valid``) so a downstream consumer can re-apply the gate and the scope stays
     auditable.
 
-    The unified ``repo_id`` (``gh/{id}`` / ``gl/{host}-{id}``) is read straight
+    The unified ``repo_id`` (``gh/{id}`` / ``gl/{nickname}-{id}``) is read straight
     from value.csv — the value stage already resolved it for GitHub and GitLab
     rows alike, so no host-specific derivation is needed here.
 
@@ -225,7 +225,7 @@ def _cache_path(eco: str, pkg: str) -> Path:
     """One cache file per (ecosystem, package).
 
     Deliberately a SEPARATE cache from ``packages.py`` (which caches the same
-    endpoint under ``sources/{eco}/raw/ecosystems/``). They cannot be shared:
+    endpoint under ``sources/ecosystems/{eco}/raw/``). They cannot be shared:
     for cpp, packages.py queries debian first (widest URL coverage) while this
     fetcher queries spack/conan first — debian reports ``rank_average=100`` for
     every package, so reusing packages.py's cpp cache would silently zero out

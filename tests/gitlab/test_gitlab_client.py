@@ -1,6 +1,8 @@
 """Tests for gitlab_client URL/host helpers — pure functions, no network."""
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from src.sources.gitlab import gitlab_client as gc
@@ -55,12 +57,27 @@ class TestUrlBuilders:
         assert gc.clone_url("gitlab.com", "group/proj") == "https://gitlab.com/group/proj.git"
 
     def test_make_repo_id(self):
-        # self-hosted instances are host-namespaced with a hyphen (no path sep)
-        assert gc.make_repo_id("salsa.debian.org", 678) == "gl/salsa.debian.org-678"
-        assert gc.make_repo_id("Gitlab.Gnome.org", 90) == "gl/gitlab.gnome.org-90"  # lowercased
+        # self-hosted instances are namespaced by their HOST_NICKNAMES entry
+        assert gc.make_repo_id("salsa.debian.org", 678) == "gl/debian-678"
+        assert gc.make_repo_id("Gitlab.Gnome.org", 90) == "gl/gnome-90"  # lowercased
+        assert gc.make_repo_id("invent.kde.org", 12) == "gl/kde-12"
         # gitlab.com is the canonical instance → bare gl/{id}
         assert gc.make_repo_id("gitlab.com", "278964") == "gl/278964"
         assert gc.make_repo_id("www.gitlab.com", 5) == "gl/5"
+
+    def test_make_repo_id_unmapped_host_raises(self):
+        # an id must never be invented for a host outside HOST_NICKNAMES —
+        # it would change once the nickname is registered
+        with pytest.raises(ValueError, match="HOST_NICKNAMES"):
+            gc.make_repo_id("gitlab.example.org", 1)
+
+    def test_host_nicknames_well_formed(self):
+        # nicknames are unique, lowercase alphanumeric, non-numeric (a numeric
+        # nickname would collide with bare gitlab.com ids)
+        nicks = [n for n in gc.HOST_NICKNAMES.values() if n]
+        assert len(nicks) == len(set(nicks))
+        assert all(re.fullmatch(r"[a-z][a-z0-9]*", n) for n in nicks)
+        assert gc.HOST_NICKNAMES["gitlab.com"] == ""
 
 
 class FakeResp:

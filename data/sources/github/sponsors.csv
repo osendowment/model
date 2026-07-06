@@ -511,6 +511,7 @@ ljharb/side-channel-weakmap,gh/901188921,67,True,ok,2026-06-30T10:25:32+00:00
 lodash/lodash,gh/3955647,0,False,ok,2026-06-30T10:25:32+00:00
 loganfsmyth/gensync,gh/132383032,0,False,ok,2026-06-30T10:25:32+00:00
 lokathor/bytemuck,gh/209673558,10,True,ok,2026-06-30T10:25:32+00:00
+lovell/detect-libc,gh/96149091,0,False,ok,2026-07-06T15:53:42+00:00
 lukeed/dequal,gh/174421655,8,True,ok,2026-06-30T10:25:33+00:00
 lukeed/escalade,gh/273568715,8,True,ok,2026-06-30T10:25:33+00:00
 lukeed/kleur,gh/140393403,8,True,ok,2026-06-30T10:25:33+00:00
@@ -569,6 +570,7 @@ mpfr/mpfr,,0,False,ok,2026-07-06T11:10:40+00:00
 mrabarnett/mrab-regex,gh/309446978,0,False,ok,2026-06-30T10:25:17+00:00
 mrmlnc/fast-glob,gh/77467076,0,False,ok,2026-06-30T10:25:17+00:00
 msgpack/msgpack-python,gh/2242705,0,False,ok,2026-06-30T10:25:17+00:00
+mui/material-ui,gh/23083156,0,False,ok,2026-07-06T15:53:42+00:00
 multimedia-team/aom,,0,False,ok,2026-07-06T11:10:41+00:00
 myrne/performance-now,gh/10219264,0,False,ok,2026-06-30T10:25:17+00:00
 mysticatea/abort-controller,gh/105228556,6,True,ok,2026-06-30T10:25:17+00:00

@@ -63,7 +63,7 @@ appearance-level (a repo counts once per ecosystem); the distinct-repo rows
 follow. **GitHub unique** counts only GitHub-hosted repos — the other 1,561
 (gitlab / other-host / url-less) are the "orphans". **Valid** is host-agnostic:
 a GitHub repo that resolves (API 200), a GitLab project that resolves (GitLab
-API — these also get a `gl/{host}-{id}` / `gl/{id}` repo_id), *or* any other
+API — these also get a `gl/{nickname}-{id}` / `gl/{id}` repo_id), *or* any other
 upstream that resolves (`git ls-remote`). It is therefore measured over all
 12,116 repos and can exceed the GitHub-unique count — only 738 (url-less orphans
 + dead URLs) are invalid. Archived GitHub mirrors of a live upstream stay *valid*

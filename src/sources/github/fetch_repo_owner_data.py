@@ -210,7 +210,9 @@ def _flat_repo(d: dict, full_name: str) -> dict:
         # API's full_name will differ — capture the new name in `full_name`.
         "repo": full_name.lower(),
         "valid": True,
-        "repo_id": d.get("id", ""),
+        # Canonical unified id form — never the bare numeric (downstream
+        # shape check rejects unprefixed ids).
+        "repo_id": f"gh/{d['id']}" if d.get("id") else "",
         "node_id": d.get("node_id", ""),
         "owner_login": owner.get("login", ""),
         "owner_id": owner.get("id", ""),

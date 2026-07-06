@@ -68,10 +68,13 @@ isolation (an exhausted host never blocks requests to another host).
 Unified `repo_id`, built by `gitlab_client.make_repo_id`: gitlab.com is the canonical instance
 and gets a **bare `gl/{project_id}`** — e.g. `gl/278964` — parallel to GitHub's `gh/{id}` (both
 default instances need no host qualifier). Every self-hosted instance is namespaced by its
-**lowercased host**, joined with a hyphen so the id carries no path separator:
-`gl/{host}-{project_id}` — e.g. `gl/salsa.debian.org-678`. Self-hosted needs the host because
+**host nickname** — the short alias from `HOST_NICKNAMES` in
+`src/sources/gitlab/gitlab_client.py` (e.g. `salsa.debian.org` → `debian`,
+`invent.kde.org` → `kde`) — joined with a hyphen so the id carries no path separator:
+`gl/{nickname}-{project_id}` — e.g. `gl/debian-678`. Self-hosted needs the qualifier because
 each instance has an independent project-id space, so a bare `gl/{id}` would collide across
-instances. The numeric `project_id` comes from that instance's Projects API.
+instances. A host without a nickname never gets an id — `make_repo_id` raises until the host
+is added to `HOST_NICKNAMES`. The numeric `project_id` comes from that instance's Projects API.
 
 ## Raw Data
 
@@ -79,7 +82,7 @@ In `data/sources/gitlab/`:
 
 - **`repos.csv`** — one row per GitLab project (mirrors `github/repos.csv`):
   `project` (= `host/namespace/path`, the key), `valid`, `project_id`, `repo_id`
-  (= `gl/{host}-{project_id}`, bare `gl/{project_id}` for gitlab.com), `host`, `owner_type` (`Organization` if `namespace.kind==group`,
+  (= `gl/{nickname}-{project_id}`, bare `gl/{project_id}` for gitlab.com), `host`, `owner_type` (`Organization` if `namespace.kind==group`,
   else `User`), `namespace_kind` (raw `group`/`user`), `namespace_path`, `name`,
   `path_with_namespace`, `description`, `homepage` (`web_url`), `default_branch`, `license`
   (SPDX-ish key), `language` (primary, from the Languages API), `topics`, `stars`, `forks`,
@@ -125,7 +128,7 @@ A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honour th
   GitLab-applicable check subset (`GITLAB_SCORECARD_CHECKS`) and tolerates the CLI's non-zero
   exit when a single check errors (recovers the still-valid aggregate JSON). Output shares the
   GitHub scorecard's files: raw JSON in `data/sources/openssf/data.json`, long-format rows in
-  `data/sources/git/openssf.csv` keyed on the `gl/{host}-{id}` repo_id.
+  `data/sources/git/openssf.csv` keyed on the `gl/{nickname}-{id}` repo_id.
 
 ## Related
 

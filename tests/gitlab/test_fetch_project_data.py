@@ -74,7 +74,7 @@ class TestFlatProject:
     def test_maps_fields_and_repo_id(self):
         row = _flat_project(_project_body(678, "debian/foo"), "salsa.debian.org",
                             "salsa.debian.org/debian/foo")
-        assert row["repo_id"] == "gl/salsa.debian.org-678"
+        assert row["repo_id"] == "gl/debian-678"
         assert row["project_id"] == 678
         assert row["valid"] is True
         assert row["owner_type"] == "Organization"   # kind=group → Organization
@@ -108,7 +108,7 @@ class TestFetchProject:
         key, row, status = await _fetch_project(lim, None, item)
         assert status == "ok"
         assert key == "salsa.debian.org/debian/foo"
-        assert row["repo_id"] == "gl/salsa.debian.org-678"
+        assert row["repo_id"] == "gl/debian-678"
         assert row["language"] == "C"                # top-share language wired in
         assert len(lim.calls) == 2                   # project + languages
 
@@ -287,10 +287,10 @@ class TestDedupeByRepoId:
         # row (with a language) must win over the stale blank one.
         rows = [
             {"project": "invent.kde.org/frameworks/plasma-framework",
-             "repo_id": "gl/invent.kde.org-2485", "valid": "True",
+             "repo_id": "gl/kde-2485", "valid": "True",
              "language": "C++", "fetched_at": _iso_days_ago(0)},
             {"project": "invent.kde.org/plasma/libplasma",
-             "repo_id": "gl/invent.kde.org-2485", "valid": "True",
+             "repo_id": "gl/kde-2485", "valid": "True",
              "language": "", "fetched_at": _iso_days_ago(1)},
         ]
         out = _dedupe_by_id(rows, "repo_id")

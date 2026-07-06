@@ -50,7 +50,7 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 RESULTS_FILE = DATA_DIR / "sources" / "crates" / "results.csv"
-DUMP_DIR = DATA_DIR / "sources" / "crates" / "db-dump"
+DUMP_DIR = DATA_DIR / "sources" / "crates" / "db-dump"  # slim extracts (gitignored, regenerable), see fetch_db_dump
 OUTPUT_FILE = DATA_DIR / "sources" / "crates" / "eol.csv"
 
 EOL_METHOD = "crates_yanked"

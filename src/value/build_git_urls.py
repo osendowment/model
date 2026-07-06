@@ -319,9 +319,9 @@ def crates_urls() -> dict[str, list[str]]:
         return out
     if is_lfs_pointer(path):
         raise SystemExit(
-            f"{path} is a Git LFS pointer — the crates db-dump isn't materialised. "
-            "Run `uv run python -m src.sources.crates.fetch_db_dump` (or `git lfs pull`) "
-            "first, or use `--rollup` to rebuild value.csv from existing results.csv."
+            f"{path} is a Git LFS pointer — stray from when the dump lived in git. "
+            "Delete it and run `uv run python -m src.sources.crates.fetch_db_dump`, "
+            "or use `--rollup` to rebuild value.csv from existing results.csv."
         )
     df = pl.read_csv(path, columns=["name", "homepage", "repository"],
                      schema_overrides={"homepage": pl.Utf8, "repository": pl.Utf8})
@@ -487,12 +487,12 @@ def _pick_git(merged: dict[str, str]) -> str:
 
 
 def _load_ecosystems_urls(ecosystem: str) -> dict[str, list[str]]:
-    """Load ecosyste.ms-derived URLs from data/sources/{eco}/raw/ecosystems.csv.
+    """Load ecosyste.ms-derived URLs from data/sources/ecosystems/{eco}/packages.csv.
 
     Returns {package: [repository_url, homepage]} skipping empty values.
     `merge_urls()` will classify each URL into the right platform slot.
     """
-    path = DATA_DIR / "sources" / ecosystem / "raw" / "ecosystems.csv"
+    path = DATA_DIR / "sources" / "ecosystems" / ecosystem / "packages.csv"
     if not path.exists():
         return {}
     out: dict[str, list[str]] = {}

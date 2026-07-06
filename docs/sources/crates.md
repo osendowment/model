@@ -10,11 +10,13 @@ Package downloads, dependencies, and repository mappings for the Rust ecosystem.
 
 ## Raw Data
 
+In `data/sources/crates/db-dump/` -- slim extracts holding only the columns the pipeline reads (~560 MB, gitignored + regenerable: the raw 3.9 GB dump is downloaded and slimmed inside the gitignored `tmp/`, never committed):
+- `crates.csv` -- id, name, repository, homepage
+- `versions.csv` -- id, crate_id, license, yanked
+- `default_versions.csv` -- current (non-yanked) version per crate
+- `dependencies.csv` -- version_id, crate_id, kind
+
 In `data/sources/crates/`:
-- `db-dump/crates.csv` -- crate ID, name, repository URL
-- `db-dump/versions.csv` -- version ID, crate ID
-- `db-dump/default_versions.csv` -- current (non-yanked) version per crate
-- `db-dump/dependencies.csv` -- version-level dependency edges
 - `version-downloads/YYYY-MM.csv` -- monthly per-version download totals
 
 ## Scripts

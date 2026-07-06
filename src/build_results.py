@@ -31,7 +31,7 @@ Columns:
     score             value_score * risk_score, scaled so the highest row = 100.
                       Computed for every row with both value_score and
                       risk_score present, regardless of eligibility.
-    repo_id           stable platform-qualified id (`gh/<n>` / `gl/<host>-<n>`)
+    repo_id           stable platform-qualified id (`gh/<n>` / `gl/<nickname>-<n>`)
                       — last column; every join key, kept out of the way of
                       human readers.
 

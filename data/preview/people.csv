@@ -30,7 +30,7 @@ crates/3283,crates,andygrove,3283,Andy Grove,,https://crates.io/users/andygrove,
 crates/2495,crates,aturon,2495,Aaron Turon,,https://crates.io/users/aturon,,,,,,gh/35566048,,gh/35566048,1,
 crates/160111,crates,aws-sdk-rust-ci,160111,AWS SDK Rust Bot,,https://crates.io/users/aws-sdk-rust-ci,,,,,,gh/308027791,,gh/308027791,1,
 crates/356,crates,bluss,356,bluss,,https://crates.io/users/bluss,,,,,,gh/22360263|gh/42479602|gh/65987276|gh/68294628,,gh/22360263|gh/42479602|gh/65987276|gh/68294628,4,
-crates/10,crates,carllerche,10,Carl Lerche,,https://crates.io/users/carllerche,,,,,,gh/161875917|gh/165289175|gh/183281612|gh/30062547|gh/37093133|gh/55077261|gh/67836789|gh/84983058|gh/98244646,,gh/161875917|gh/165289175|gh/183281612|gh/30062547|gh/37093133|gh/55077261|gh/67836789|gh/84983058|gh/98244646,9,
+crates/10,crates,carllerche,10,Carl Lerche,,https://crates.io/users/carllerche,,,,,,gh/161875917|gh/165289175|gh/183281612|gh/30062547|gh/55077261|gh/67836789|gh/84983058|gh/98244646,,gh/161875917|gh/165289175|gh/183281612|gh/30062547|gh/55077261|gh/67836789|gh/84983058|gh/98244646,8,
 crates/972,crates,comex,972,,,https://crates.io/users/comex,,,,,,gh/37886228,,gh/37886228,1,
 crates/5149,crates,cramertj,5149,Taylor Cramer,,https://crates.io/users/cramertj,,,,,,gh/55077261,,gh/55077261,1,
 crates/539,crates,cuviper,539,Josh Stone,,https://crates.io/users/cuviper,,,,,,gh/114705611|gh/135481335|gh/24725038|gh/42479602|gh/68294628,,gh/114705611|gh/135481335|gh/24725038|gh/42479602|gh/68294628,5,
@@ -70,6 +70,7 @@ crates/336166,crates,knurling-infra,336166,,,https://crates.io/users/knurling-in
 crates/32477,crates,kou,32477,Sutou Kouhei,,https://crates.io/users/kou,,,,,,gh/358917250,,gh/358917250,1,
 crates/38242,crates,kszucs,38242,Krisztián Szűcs,,https://crates.io/users/kszucs,,,,,,gh/358917250,,gh/358917250,1,
 crates/1458,crates,kwantam,1458,Riad S. Wahby,,https://crates.io/users/kwantam,,,,,,gh/34637906,,gh/34637906,1,
+crates/30606,crates,la10736,30606,Michele d'Amico,,https://crates.io/users/la10736,,,,,,gh/124802455,,gh/124802455,1,
 crates/23,crates,lifthrasiir,23,Kang Seonghoon,,https://crates.io/users/lifthrasiir,,,,,,gh/18210201,,gh/18210201,1,
 crates/5563,crates,marshallpierce,5563,Marshall Pierce,,https://crates.io/users/marshallpierce,,,,,,gh/47371310,,gh/47371310,1,
 crates/2699,crates,matklad,2699,Alex Kladov,,https://crates.io/users/matklad,,,,,,gh/135481335|gh/143220272,,gh/135481335|gh/143220272,2,
@@ -81,6 +82,7 @@ crates/726,crates,nagisa,726,Simonas Kazlauskas,,https://crates.io/users/nagisa,
 crates/30398,crates,nevi-me,30398,Wakahisa,,https://crates.io/users/nevi-me,,,,,,gh/358917250,,gh/358917250,1,
 crates/5059,crates,newpavlov,5059,Artyom Pavlov,,https://crates.io/users/newpavlov,,,,,,gh/406051759|gh/74106774|gh/77307442|gh/83051505|gh/85605821,,gh/406051759|gh/74106774|gh/77307442|gh/83051505|gh/85605821,5,
 crates/1386,crates,nikomatsakis,1386,Niko Matsakis,,https://crates.io/users/nikomatsakis,,,,,,gh/24725038,,gh/24725038,1,
+crates/29227,crates,npmccallum,29227,Nathaniel McCallum,,https://crates.io/users/npmccallum,,,,,,gh/313759241,,gh/313759241,1,
 crates/3832,crates,nvzqz,3832,Nikolai Vazquez,,https://crates.io/users/nvzqz,,,,,,gh/100129252,,gh/100129252,1,
 crates/7434,crates,ordian,7434,,,https://crates.io/users/ordian,,,,,,gh/95902102,,gh/95902102,1,
 crates/4968,crates,oyvindln,4968,,,https://crates.io/users/oyvindln,,,,,,gh/96124162,,gh/96124162,1,
@@ -110,6 +112,7 @@ crates/38859,crates,xhochy,38859,Uwe L. Korn,,https://crates.io/users/xhochy,,,,
 crates/9648,crates,zbraniecki,9648,Zibi Braniecki,,https://crates.io/users/zbraniecki,,,,,,gh/243395141,,gh/243395141,1,
 crates/21853,crates,zesterer,21853,Joshua Barretto,,https://crates.io/users/zesterer,,,,,,gh/21686666,,gh/21686666,1,
 github:0x676e67,github,0x676e67,,,,,,,,gh/62350380,,,,gh/62350380,1,False
+github:3v1n0,github,3v1n0,,,,,,,,gl/gnome-658,,,,gl/gnome-658,1,
 github/5969049,github,7rulnik,5969049,Valentin Semirulnik,v7rulnik@gmail.com,https://github.com/7rulnik,@KosyanMedia,"JS engineer at aviasales.com
 
 https://t.me/valya_reads_issue",gh/330043541,,,,,gh/330043541,1,True
@@ -121,13 +124,13 @@ github:acdlite,github,acdlite,,,,,,,,gh/10270250,,,,gh/10270250,1,False
 github:actions-user,github,actions-user,,,,,,,,gh/73765596,,,,gh/73765596,1,False
 github:addaleax,github,addaleax,,,,,,,,gh/27193779,,,,gh/27193779,1,False
 github:adriangb,github,adriangb,,,,,,,,gh/487934134,,,,gh/487934134,1,True
-github:aduh95,github,aduh95,,,,,,,,gh/27193779,,,,gh/27193779,1,True
+github/14309773,github,aduh95,14309773,Antoine du Hamel,,https://github.com/aduh95,,Node.js collaborator,,gh/27193779,,,,gh/27193779,1,True
 github:aearly,github,aearly,,,,,,,,gh/698041,,,,gh/698041,1,False
 github:agramfort,github,agramfort,,,,,,,,gh/843222,,,,gh/843222,1,False
-github:agronholm,github,agronholm,,,,,,,gh/145337588|gh/447694800,gh/142657210|gh/145337588|gh/447694800|gh/98346885,,,,gh/142657210|gh/145337588|gh/447694800|gh/98346885,4,False
+github/130003,github,agronholm,130003,Alex Grönholm,alex.gronholm@nextday.fi,https://github.com/agronholm,NextDay Solutions Oy,,gh/145337588|gh/447694800,gh/142657210|gh/145337588|gh/447694800|gh/98346885,,,,gh/142657210|gh/145337588|gh/447694800|gh/98346885,4,False
 github:ahejlsberg,github,ahejlsberg,,,,,,,,gh/20929025,,,,gh/20929025,1,False
 github/19343,github,ai,19343,Andrey Sitnik,andrey@sitnik.es,https://github.com/ai,@evilmartians,"The creator of Autoprefixer, @postcss, @browserslist, and Nano ID",gh/99401299,gh/13078968|gh/27971466|gh/505548145|gh/80221890|gh/99401299,gh/13078968|gh/27971466|gh/505548145|gh/80221890|gh/99401299,,,gh/13078968|gh/27971466|gh/505548145|gh/80221890|gh/99401299,5,True
-github:ajaeger,github,ajaeger,,,,,,,,gh/13868694,,,,gh/13868694,1,
+github:ajaeger,github,ajaeger,,,,,,,,gh/13868694,,,,gh/13868694,1,False
 github:akimd,github,akimd,,,,,,,,gh/47662429,,,,gh/47662429,1,False
 github:alamb,github,alamb,,,,,,,,gh/358917250,,,,gh/358917250,1,False
 github:alenkaf,github,alenkaf,,,,,,,,gh/51905353,,,,gh/51905353,1,False
@@ -140,15 +143,16 @@ github/9440903,github,alexhuszagh,9440903,Alexander Huszagh,ahuszagh@gmail.com,h
 github/127063,github,alexindigo,127063,Alex Indigo,iam@alexindigo.com,https://github.com/alexindigo,,Interfaces + Automation,gh/59087459,gh/1755793|gh/59087459,,,,gh/1755793|gh/59087459,2,False
 github:alexlamsl,github,alexlamsl,,,,,,,,gh/29097127,,,,gh/29097127,1,False
 github:alexwaygood,github,alexwaygood,,,,,,,,gh/24604008|gh/494077289|gh/523043277,,,,gh/24604008|gh/494077289|gh/523043277,3,False
-github:altsysrq,github,altsysrq,,,,,,,,gh/94702898,,,,gh/94702898,1,False
+github:allisonkarlitskaya,github,allisonkarlitskaya,,,,,,,,gl/gnome-658,,,,gl/gnome-658,1,
+github/1392512,github,altsysrq,1392512,Jason Lingle,jason@lin.gl,https://github.com/AltSysrq,,,,gh/94702898,,,,gh/94702898,1,False
 github/278509,github,amanieu,278509,Amanieu d'Antras,amanieu@gmail.com,https://github.com/Amanieu,,,gh/58731560,gh/155119796|gh/58731560|gh/65153793,,,,gh/155119796|gh/58731560|gh/65153793,3,False
 github:amarzavery,github,amarzavery,,,,,,,,gh/108311273,,,,gh/108311273,1,False
 github:amoghrajesh,github,amoghrajesh,,,,,,,,gh/33884891,,,,gh/33884891,1,False
 github:amueller,github,amueller,,,,,,,,gh/843222,,,,gh/843222,1,False
-github:andarist,github,andarist,,,,,,,,gh/92570536,,,,gh/92570536,1,True
+github/9800850,github,andarist,9800850,Mateusz Burzyński,mateuszburzynski@gmail.com,https://github.com/Andarist,@replayio,,,gh/92570536,,,,gh/92570536,1,True
 github/25632,github,andialbrecht,25632,Andi Albrecht,albrecht.andi@gmail.com,https://github.com/andialbrecht,,,gh/4067434,gh/4067434,,,,gh/4067434,1,False
 github:andr83,github,andr83,,,,,,,,gh/16231859,,,,gh/16231859,1,False
-github:andreas-schwab,github,andreas-schwab,,,,,,,,gh/13868694,,,,gh/13868694,1,
+github:andreas-schwab,github,andreas-schwab,,,,,,,,gh/13868694,,,,gh/13868694,1,False
 github:andrewbranch,github,andrewbranch,,,,,,,,gh/34414315,,,,gh/34414315,1,False
 github:andrewgodwin,github,andrewgodwin,,,,,,,,gh/48501860,,,,gh/48501860,1,True
 github/106511,github,andrewrk,106511,Andrew Kelley,andrew@ziglang.org,https://github.com/andrewrk,@ziglang,Lead developer & president of Zig Software Foundation,gh/11836813,gh/11836813,,,,gh/11836813,1,True
@@ -176,7 +180,6 @@ github:aws-sdk-rust-ci,github,aws-sdk-rust-ci,,,,,,,,gh/308027791,,,,gh/30802779
 github:aws-smithy-automation,github,aws-smithy-automation,,,,,,,,gh/208319207,,,,gh/208319207,1,False
 github:azure-sdk,github,azure-sdk,,,,,,,,gh/108311273|gh/4127088,,,,gh/108311273|gh/4127088,2,False
 github:bagder,github,bagder,,,,,,,,gh/569041,,,,gh/569041,1,True
-github:bartdag,github,bartdag,,,,,,,,gh/1045976,,,,gh/1045976,1,False
 github:basarat,github,basarat,,,,,,,,gh/6093316,,,,gh/6093316,1,True
 github:baskaryan,github,baskaryan,,,,,,,,gh/552661142,,,,gh/552661142,1,False
 github:bbayles,github,bbayles,,,,,,,,gh/4144530,,,,gh/4144530,1,False
@@ -187,16 +190,16 @@ github:bdraco,github,bdraco,,,,,,,,gh/13258039|gh/866565706,,,,gh/13258039|gh/86
 github/427337,github,beatgammit,427337,Jameson Little,jameson.little@pm.me,https://github.com/beatgammit,,"Rust and Go all the things!!
 
 Oh, and unicycles.",gh/2853282,,,,,gh/2853282,1,False
-github:behdad,github,behdad,,,,,,,,gh/4537144|gh/5050525,,,,gh/4537144|gh/5050525,2,False
+github:behdad,github,behdad,,,,,,,,gh/4537144|gh/5050525|gl/freedesktop-890,,,,gh/4537144|gh/5050525|gl/freedesktop-890,3,False
 github:ben-eb,github,ben-eb,,,,,,,,gh/33943153|gh/36500102,,,,gh/33943153|gh/36500102,2,False
 github:bendingbender,github,bendingbender,,,,,,,,gh/6093316,,,,gh/6093316,1,False
 github/219470,github,benjaminp,219470,Benjamin Peterson,,https://github.com/benjaminp,,,gh/77868600,gh/77868600,,,,gh/77868600,1,False
-github:benjamn,github,benjamn,,,,,,,,gh/13346571,,,,gh/13346571,1,
-github:benlesh,github,benlesh,,,,,,,,gh/32247847,,,,gh/32247847,1,False
+github/5750,github,benjamn,5750,Ben Newman,ben@eloper.dev,https://github.com/benjamn,"Apollo Graph, Inc (formerly: Meteor, Facebook/Instagram, Quora, Mozilla)",,,gh/13346571,,,,gh/13346571,1,False
+github/1540597,github,benlesh,1540597,Ben Lesh,,https://github.com/benlesh,,,,gh/32247847,,,,gh/32247847,1,False
 github:benmosher,github,benmosher,,,,,,,,gh/32238354,,,,gh/32238354,1,False
 github:benoitgrelard,github,benoitgrelard,,,,,,,,gh/273499522,,,,gh/273499522,1,False
 github/1271348,github,besser82,1271348,Björn Esser,,https://github.com/besser82,,,gh/35503965,gh/35503965,,,,gh/35503965,1,False
-github:bheisler,github,bheisler,,,,,,,,gh/1081104682,,,,gh/1081104682,1,False
+github/1616938,github,bheisler,1616938,Brook Heisler,,https://github.com/bheisler,,,,gh/1081104682,,,,gh/1081104682,1,False
 github:birkenfeld,github,birkenfeld,,,,,,,,gh/205564111,,,,gh/205564111,1,False
 github:bitinn,github,bitinn,,,,,,,,gh/29849956,,,,gh/29849956,1,False
 github:bitprophet,github,bitprophet,,,,,,,,gh/119609,,,,gh/119609,1,True
@@ -208,7 +211,7 @@ github/3209739,github,bluss,3209739,bluss,,https://github.com/bluss,,,gh/6598727
 github:bmw,github,bmw,,,,,,,,gh/26516210,,,,gh/26516210,1,False
 github:bnoordhuis,github,bnoordhuis,,,,,,,,gh/14812739|gh/27193779,,,,gh/14812739|gh/27193779,2,False
 github:bobozaur,github,bobozaur,,,,,,,,gh/80964373,,,,gh/80964373,1,False
-github:borewit,github,borewit,,,,,,,,gh/19105307,gh/19105307,,,gh/19105307,1,True
+github/23255260,github,borewit,23255260,,,https://github.com/Borewit,,"Passionate open-source builder of libraries for digital media, file-type detection, and safe SVG sanitization.",,gh/19105307,gh/19105307,,,gh/19105307,1,True
 github:borisyankov,github,borisyankov,,,,,,,,gh/6093316,,,,gh/6093316,1,False
 github:bors,github,bors,,,,,,,,gh/155119796|gh/29197565|gh/724712,,,,gh/155119796|gh/29197565|gh/724712,3,False
 github:bors-servo,github,bors-servo,,,,,,,,gh/33456236,,,,gh/33456236,1,False
@@ -217,8 +220,8 @@ github:bradh352,github,bradh352,,,,,,,,gh/571708,,,,gh/571708,1,False
 github:bradzacher,github,bradzacher,,,,,,,,gh/165536154,,,,gh/165536154,1,True
 github:brettcannon,github,brettcannon,,,,,,,,gh/19837758,,,,gh/19837758,1,True
 github/50081,github,brianc,50081,Brian C,brian.m.carlson@gmail.com,https://github.com/brianc,,,gh/991475,gh/991475,gh/991475,,,gh/991475,1,True
-github:brianloveswords,github,brianloveswords,,,,,,,,gh/8116861,,,,gh/8116861,1,False
-github:bridgear,github,bridgear,,,,,,,,gh/27193779,,,,gh/27193779,1,False
+github/166258,github,brianloveswords,166258,Brian J Brennan,brianloveswords@gmail.com,https://github.com/brianloveswords,,professional computers user,,gh/8116861,,,,gh/8116861,1,False
+github/8822573,github,bridgear,8822573,Ruben Bridgewater,ruben@bridgewater.de,https://github.com/BridgeAR,"Datadog, Inc.",@tc39 Invited Expert. @nodejs Technical Steering Committee member. Staff Engineer @Datadog. Conference Speaker. Open Source enthusiast.,,gh/27193779,,,,gh/27193779,1,False
 github/164050,github,broofa,164050,Robert Kieffer,,https://github.com/broofa,,,gh/1208666|gh/534940,gh/1203139|gh/1208666|gh/534940,gh/1203139|gh/534940,,,gh/1203139|gh/1208666|gh/534940,3,True
 github:brophdawg11,github,brophdawg11,,,,,,,,gh/19872456,,,,gh/19872456,1,False
 github:brson,github,brson,,,,,,,,gh/724712,,,,gh/724712,1,False
@@ -228,7 +231,7 @@ github:byron,github,byron,,,,,,,,gh/1126093|gh/136510559|gh/1865144|gh/21954009|
 github:c24t,github,c24t,,,,,,,,gh/185478926,,,,gh/185478926,1,False
 github/1128607,github,calvinmetcalf,1128607,Calvin Metcalf,,https://github.com/calvinmetcalf,@AppGeo,"I live with several cats, plus a dog, and my wife.",gh/29144257|gh/36039131,gh/29144257|gh/29300004|gh/36039131|gh/7580644,,,,gh/29144257|gh/29300004|gh/36039131|gh/7580644,4,False
 github/5274,github,caolan,5274,Caolan McMahon,caolan@caolan.uk,https://github.com/caolan,,"I write JavaScript, Scheme, Python, and Rust. I enjoy good offline experiences, safely synchronising data, and implementing real-time collaboration.",gh/698041,,,,,gh/698041,1,False
-github:carllerche,github,carllerche,,,,,,,,gh/161875917|gh/30062547|gh/37093133|gh/67836789|gh/84983058|gh/98244646,,,,gh/161875917|gh/30062547|gh/37093133|gh/67836789|gh/84983058|gh/98244646,6,False
+github:carllerche,github,carllerche,,,,,,,,gh/161875917|gh/30062547|gh/67836789|gh/84983058|gh/98244646,,,,gh/161875917|gh/30062547|gh/67836789|gh/84983058|gh/98244646,5,False
 github:carreau,github,carreau,,,,,,,,gh/14993021,,,,gh/14993021,1,True
 github:casperdcl,github,casperdcl,,,,,,,,gh/36804486,gh/36804486,,,gh/36804486,1,True
 github:caspermeijn,github,caspermeijn,,,,,,,,gh/94262864,,,,gh/94262864,1,False
@@ -258,7 +261,7 @@ github:cournape,github,cournape,,,,,,,,gh/1460385|gh/908607,,,,gh/1460385|gh/908
 github/2126043,github,cpburnz,2126043,Caleb P. Burns,,https://github.com/cpburnz,,,gh/14648551,gh/14648551,,,,gh/14648551,1,False
 github:cpojer,github,cpojer,,,,,,,,gh/15062869|gh/76504246,,,,gh/15062869|gh/76504246,2,True
 github:cramertj,github,cramertj,,,,,,,,gh/55077261,,,,gh/55077261,1,False
-github:crwilcox,github,crwilcox,,,,,,,,gh/159736041,,,,gh/159736041,1,
+github:crwilcox,github,crwilcox,,,,,,,,gh/159736041,,,,gh/159736041,1,False
 github:ctavan,github,ctavan,,,,,,,,gh/1203139,gh/1203139,,,gh/1203139,1,True
 github:ctiller,github,ctiller,,,,,,,,gh/27729880,,,,gh/27729880,1,False
 github:ctruta,github,ctruta,,,,,,,,gh/3768025,,,,gh/3768025,1,False
@@ -268,9 +271,9 @@ github/750081,github,cyan4973,750081,Yann Collet,,https://github.com/Cyan4973,@f
 github:d-fischer,github,d-fischer,,,,,,,,gh/45750507,gh/45750507,,,gh/45750507,1,True
 github/593,github,daaku,593,Naitik Shah,,https://github.com/daaku,,,gh/2097803|gh/2171213,gh/2097803|gh/2171213,,,,gh/2097803|gh/2171213,2,False
 github:dan-blanchard,github,dan-blanchard,,,,,,,,gh/5196969,,,,gh/5196969,1,False
-github:danburkert,github,danburkert,,,,,,,,gh/94262864,,,,gh/94262864,1,False
+github/160242,github,danburkert,160242,Dan Burkert,dan@danburkert.com,https://github.com/danburkert,,,,gh/94262864,,,,gh/94262864,1,False
 github:danielrosenwasser,github,danielrosenwasser,,,,,,,,gh/20929025|gh/34414315|gh/6093316,,,,gh/20929025|gh/34414315|gh/6093316,3,False
-github:darksonn,github,darksonn,,,,,,,,gh/30062547|gh/37093133|gh/67836789,,,,gh/30062547|gh/37093133|gh/67836789,3,False
+github:darksonn,github,darksonn,,,,,,,,gh/30062547|gh/67836789,,,,gh/30062547|gh/67836789,2,False
 github:davelosert,github,davelosert,,,,,,,,gh/12107007,,,,gh/12107007,1,False
 github:david-luna,github,david-luna,,,,,,,,gh/255986659,,,,gh/255986659,1,False
 github:davidaurelio,github,davidaurelio,,,,,,,,gh/76504246,,,,gh/76504246,1,False
@@ -280,12 +283,11 @@ github:davidmalcolm,github,davidmalcolm,,,,,,,,gh/22711503,,,,gh/22711503,1,Fals
 github:davidpdrsn,github,davidpdrsn,,,,,,,,gh/98244646,,,,gh/98244646,1,False
 github:davidtheclark,github,davidtheclark,,,,,,,,gh/45750507,,,,gh/45750507,1,False
 github/22822319,github,davisjam,22822319,James C. (Jamie) Davis,,https://github.com/davisjam,Purdue University,"Assistant Professor, ECE@Purdue. PhD, CS@VT.",gh/90781457,gh/90781457,,,,gh/90781457,1,False
-github:daxpedda,github,daxpedda,,,,,,,,gh/114685405,gh/114685405,,,gh/114685405,1,True
+github/1645124,github,daxpedda,1645124,,daxpedda@gmail.com,https://github.com/daxpedda,,,,gh/114685405,gh/114685405,,,gh/114685405,1,True
 github/52677,github,dchest,52677,Dmitry Chestnykh,dmitry@codingrobots.com,https://github.com/dchest,Coding Robots,"Founder of @coding-robots. Invented ""I Write Like"". Previously created BlogJet (acquired) and StableLib. Interested in cryptography and perfect code.",gh/15649752,gh/15649752,,,,gh/15649752,1,False
 github/1136893,github,dcodeio,1136893,,,https://github.com/dcodeIO,,,gh/8678904,gh/8507859|gh/8678904,gh/8507859|gh/8678904,,,gh/8507859|gh/8678904,2,True
 github:dcommander,github,dcommander,,,,,,,,gh/39760454,,,,gh/39760454,1,False
 github/84792,github,defunctzombie,84792,Roman Shtylman,,https://github.com/defunctzombie,,,gh/7580644,gh/1649251|gh/7580644,,,,gh/1649251|gh/7580644,2,False
-github:devongovett,github,devongovett,,,,,,,,gh/208362715,,,,gh/208362715,1,True
 github:deyaaeldeen,github,deyaaeldeen,,,,,,,,gh/108311273,,,,gh/108311273,1,False
 github:dhardy,github,dhardy,,,,,,,,gh/1086593277|gh/209510094|gh/30227790,gh/1086593277|gh/209510094|gh/30227790,,,gh/1086593277|gh/209510094|gh/30227790,3,True
 github:dhermes,github,dhermes,,,,,,,,gh/159736041|gh/16316451|gh/226992462,,,,gh/159736041|gh/16316451|gh/226992462,3,False
@@ -299,8 +301,8 @@ github/158471,github,djc,158471,Dirkjan Ochtman,,https://github.com/djc,,Open so
 github/244010,github,dmitrysoshnikov,244010,Dmitry Soshnikov,dmitry.soshnikov@gmail.com,https://github.com/DmitrySoshnikov,,,gh/85459304,gh/85459304,,,,gh/85459304,1,False
 github:dmontagu,github,dmontagu,,,,,,,,gh/90194616,,,,gh/90194616,1,False
 github:dmtucker,github,dmtucker,,,,,,,,gh/69576530,,,,gh/69576530,1,False
-github:domenic,github,domenic,,,,,,,,gh/1981208|gh/23000311|gh/28553202|gh/34761352|gh/36964214|gh/71014420,,,,gh/1981208|gh/23000311|gh/28553202|gh/34761352|gh/36964214|gh/71014420,6,False
-github/259374,github,dominictarr,259374,Dominic Tarr,,https://github.com/dominictarr,,antipodean wandering albatross,gh/4885140,gh/4885140,,,,gh/4885140,1,
+github/617481,github,domenic,617481,Domenic Denicola,d@domenic.me,https://github.com/domenic,,,,gh/1981208|gh/23000311|gh/28553202|gh/34761352|gh/36964214|gh/71014420,,,,gh/1981208|gh/23000311|gh/28553202|gh/34761352|gh/36964214|gh/71014420,6,False
+github/259374,github,dominictarr,259374,Dominic Tarr,,https://github.com/dominictarr,,antipodean wandering albatross,gh/4885140,gh/4885140,,,,gh/4885140,1,False
 github/995160,github,doowb,995160,Brian Woodward,brian.woodward@gmail.com,https://github.com/doowb,@brandscale,"Node.js, javascript, and distributed applications developer.
 Building with @jonschlinkert: @assemble @enquirer @generate @update @verbose",gh/47135420,,gh/11458302|gh/156211895|gh/25475303|gh/27359938|gh/28179425|gh/40355891|gh/47135420,,,gh/11458302|gh/156211895|gh/25475303|gh/27359938|gh/28179425|gh/40355891|gh/47135420,7,True
 github/35274124,github,douglasdwyer,35274124,Douglas Dwyer,dwyer.d@northeastern.edu,https://github.com/DouglasDwyer,,,gh/668034655,gh/668034655,,,,gh/668034655,1,False
@@ -310,11 +312,12 @@ github:dreamsorcerer,github,dreamsorcerer,,,,,,,,,gh/13258039|gh/204197530|gh/20
 github:dscho,github,dscho,,,,,,,,gh/36502,,,,gh/36502,1,False
 github:dstandish,github,dstandish,,,,,,,,gh/33884891,,,,gh/33884891,1,False
 github:dstufft,github,dstufft,,,,,,,,gh/1446467|gh/19837758|gh/8350032,,,,gh/1446467|gh/19837758|gh/8350032,3,False
-github/1940490,github,dtolnay,1940490,David Tolnay,dtolnay@gmail.com,https://github.com/dtolnay,0xF9BA143B95FF6D82,,gh/106295902|gh/142720484|gh/143469762|gh/155652490|gh/173074854|gh/183990447|gh/184941159|gh/212936374|gh/213836768|gh/22432442|gh/229514821|gh/492639579|gh/54252316|gh/61962375|gh/67273122|gh/67305738|gh/734167706|gh/91860126,gh/106295902|gh/142720484|gh/143469762|gh/14367737|gh/155652490|gh/173074854|gh/183990447|gh/184941159|gh/212936374|gh/213836768|gh/22432442|gh/229514821|gh/35894511|gh/492639579|gh/54252316|gh/61962375|gh/67273122|gh/67305738|gh/734167706|gh/87358441|gh/91860126,gh/106295902|gh/142720484|gh/143469762|gh/14367737|gh/173074854|gh/183990447|gh/184941159|gh/212936374|gh/213836768|gh/22432442|gh/229514821|gh/492639579|gh/54252316|gh/61962375|gh/67273122|gh/67305738|gh/734167706|gh/91860126,,,gh/106295902|gh/142720484|gh/143469762|gh/14367737|gh/155652490|gh/173074854|gh/183990447|gh/184941159|gh/212936374|gh/213836768|gh/22432442|gh/229514821|gh/35894511|gh/492639579|gh/54252316|gh/61962375|gh/67273122|gh/67305738|gh/734167706|gh/87358441|gh/91860126,21,True
-github:dvarrazzo,github,dvarrazzo,,,,,,,,gh/7730829,gh/7730829,,,gh/7730829,1,True
+github/1940490,github,dtolnay,1940490,David Tolnay,dtolnay@gmail.com,https://github.com/dtolnay,0xF9BA143B95FF6D82,,gh/106295902|gh/142720484|gh/143469762|gh/155652490|gh/173074854|gh/183990447|gh/184941159|gh/212936374|gh/213836768|gh/22432442|gh/229514821|gh/492639579|gh/54252316|gh/61962375|gh/67273122|gh/67305738|gh/734167706|gh/91860126,gh/106295902|gh/142720484|gh/143469762|gh/14367737|gh/155652490|gh/173074854|gh/183990447|gh/184941159|gh/212936374|gh/213836768|gh/22432442|gh/229514821|gh/35894511|gh/492639579|gh/54252316|gh/61962375|gh/67273122|gh/67305738|gh/734167706|gh/87358441|gh/91860126,gh/106295902|gh/142720484|gh/143469762|gh/14367737|gh/155652490|gh/173074854|gh/183990447|gh/184941159|gh/212936374|gh/213836768|gh/22432442|gh/229514821|gh/492639579|gh/54252316|gh/61962375|gh/67273122|gh/67305738|gh/734167706|gh/91860126,,,gh/106295902|gh/142720484|gh/143469762|gh/14367737|gh/155652490|gh/173074854|gh/183990447|gh/184941159|gh/212936374|gh/213836768|gh/22432442|gh/229514821|gh/35894511|gh/492639579|gh/54252316|gh/61962375|gh/67273122|gh/67305738|gh/734167706|gh/87358441|gh/91860126,21,True
+github/199429,github,dvarrazzo,199429,Daniele Varrazzo,daniele.varrazzo@gmail.com,https://github.com/dvarrazzo,@codicelieve,"Free software hacker, hacking on PostgreSQL and Python, maintainer of psycopg and other projects.",,gh/7730829,gh/7730829,,,gh/7730829,1,True
 github:dy,github,dy,,,,,,,,gh/27038309,,,,gh/27038309,1,True
 github:dyladan,github,dyladan,,,,,,,,gh/185901023|gh/255986659,,,,gh/185901023|gh/255986659,2,False
 github:dylan-dpc,github,dylan-dpc,,,,,,,,gh/724712,,,,gh/724712,1,False
+github/1665,github,ebassi,1665,Emmanuele Bassi,ebassi@gmail.com,https://github.com/ebassi,,"Geek, husband, lover, software developer, londoner. Not necessarily in that order.",,gl/gnome-1548|gl/gnome-658,,,,gl/gnome-1548|gl/gnome-658,2,
 github:ebblake,github,ebblake,,,,,,,,gh/66880383,,,,gh/66880383,1,False
 github:ebotcazou,github,ebotcazou,,,,,,,,gh/22711503,,,,gh/22711503,1,False
 github:edoerpani,github,edoerpani,,,,,,,,gh/80221890,,,,gh/80221890,1,False
@@ -334,7 +337,7 @@ github:engn33r,github,engn33r,,,,,,,,gh/1202362,,,,gh/1202362,1,False
 github:epage,github,epage,,,,,,,,gh/31315121|gh/424722460|gh/493821282|gh/95902102|gh/96382888,gh/493821282|gh/95902102|gh/96382888,,,gh/31315121|gh/424722460|gh/493821282|gh/95902102|gh/96382888,5,True
 github:ephraimbuddy,github,ephraimbuddy,,,,,,,,gh/33884891,,,,gh/33884891,1,False
 github/2769109,github,epoberezkin,2769109,Evgeny,,https://github.com/epoberezkin,@simplex-chat,Founder @ simplex.chat,gh/108103016|gh/93333933|gh/94483360,gh/108103016|gh/281084700|gh/35914020|gh/60477053|gh/93333933|gh/94483360,gh/108103016|gh/281084700|gh/35914020|gh/60477053|gh/93333933|gh/94483360,,,gh/108103016|gh/281084700|gh/35914020|gh/60477053|gh/93333933|gh/94483360,6,True
-github:eps1lon,github,eps1lon,,,,,,,,gh/6093316,,,,gh/6093316,1,True
+github/12292047,github,eps1lon,12292047,"Sebastian ""Sebbie"" Silbermann",silbermann.sebastian@gmail.com,https://github.com/eps1lon,,I maintain stuff.,,gh/6093316,,,,gh/6093316,1,True
 github:eric-wieser,github,eric-wieser,,,,,,,,gh/908607,,,,gh/908607,1,False
 github:ericf,github,ericf,,,,,,,,gh/24106944,,,,gh/24106944,1,False
 github:erictraut,github,erictraut,,,,,,,,gh/24604008,,,,gh/24604008,1,True
@@ -350,6 +353,7 @@ github:exarkun,github,exarkun,,,,,,,,gh/15778059,,,,gh/15778059,1,False
 github:eyurtsev,github,eyurtsev,,,,,,,,gh/552661142,,,,gh/552661142,1,False
 github:fabiosantoscode,github,fabiosantoscode,,,,,,,,gh/29097127,,,,gh/29097127,1,True
 github/1055125,github,facelessuser,1055125,Isaac Muse,,https://github.com/facelessuser,,,gh/160789418,gh/160789418,gh/160789418,,,gh/160789418,1,True
+github:fanc999-1,github,fanc999-1,,,,,,,,gl/gnome-1548,,,,gl/gnome-1548,1,
 github:fatso83,github,fatso83,,,,,,,,gh/16523712,,,,gh/16523712,1,False
 github/188768,github,fb55,188768,Felix Boehm,,https://github.com/fb55,,"Climbing student, rock programmer.",gh/16864585|gh/16864923|gh/2279062|gh/3172629|gh/3411063|gh/4460687|gh/5414232|gh/6627835|gh/6627949,gh/16864585|gh/16864923|gh/18991884|gh/2279062|gh/3172629|gh/3411063|gh/4460687|gh/5414232|gh/6627835|gh/6627949,gh/16864585|gh/16864923|gh/18991884|gh/2279062|gh/3172629|gh/3411063|gh/4460687|gh/5414232|gh/6627835|gh/6627949|gh/8862593,,,gh/16864585|gh/16864923|gh/18991884|gh/2279062|gh/3172629|gh/3411063|gh/4460687|gh/5414232|gh/6627835|gh/6627949|gh/8862593,11,True
 github:fdawgs,github,fdawgs,,,,,,,,gh/419317518,,,,gh/419317518,1,True
@@ -364,12 +368,12 @@ github:fezvrasta,github,fezvrasta,,,,,,,,,gh/54994103,,,gh/54994103,1,
 github:fishilico,github,fishilico,,,,,,,,gh/20648799,,,,gh/20648799,1,False
 github:fisker,github,fisker,,,,,,,,gh/15186239|gh/75104123,,,,gh/15186239|gh/75104123,2,True
 github/74571,github,fitzgen,74571,Nick Fitzgerald,,https://github.com/fitzgen,,,gh/11461122,gh/11461122|gh/114685405|gh/2014930|gh/330043541|gh/90591032,,,,gh/11461122|gh/114685405|gh/2014930|gh/330043541|gh/90591032,5,False
-github/365089,github,floatdrop,365089,Vsevolod Strukchinsky,vsevolod@strukchinsky.ru,https://github.com/floatdrop,Yandex,Machine told me so.,gh/39301848,gh/39301848,,,,gh/39301848,1,
+github/365089,github,floatdrop,365089,Vsevolod Strukchinsky,vsevolod@strukchinsky.ru,https://github.com/floatdrop,Yandex,Machine told me so.,gh/39301848,gh/39301848,,,,gh/39301848,1,False
 github/237182,github,frenic,237182,Fredrik Nicol,fredrik.nicol@gmail.com,https://github.com/frenic,Strategic9,,gh/104001328,gh/104001328,,,,gh/104001328,1,False
 github:frewsxcv,github,frewsxcv,,,,,,,,gh/33499190,,,,gh/33499190,1,False
 github/7431116,github,frommi,7431116,,,https://github.com/Frommi,,,gh/96124162,gh/96124162,,,,gh/96124162,1,False
-github:frostming,github,frostming,,,,,,,,gh/140365570,,,,gh/140365570,1,True
-github:fweimer-rh,github,fweimer-rh,,,,,,,,gh/13868694,,,,gh/13868694,1,
+github/16336606,github,frostming,16336606,Frost Ming,me@frostming.com,https://github.com/frostming,,"Love 🐍 Python, 📷 Photography and beautiful things",,gh/140365570,,,,gh/140365570,1,True
+github:fweimer-rh,github,fweimer-rh,,,,,,,,gh/13868694,,,,gh/13868694,1,False
 github:gaborbernat,github,gaborbernat,,,,,,,,gh/1446474|gh/17098256|gh/367032142,,,,gh/1446474|gh/17098256|gh/367032142,3,True
 github:gaearon,github,gaearon,,,,,,,,gh/10270250|gh/63537249|gh/87597642,,,,gh/10270250|gh/63537249|gh/87597642,3,False
 github:gaelvaroquaux,github,gaelvaroquaux,,,,,,,,gh/654608,,,,gh/654608,1,False
@@ -384,10 +388,10 @@ github:google-oss-bot,github,google-oss-bot,,,,,,,,gh/89290483,,,,gh/89290483,1,
 github:google-pr-creation-bot,github,google-pr-creation-bot,,,,,,,,gh/534354967,,,,gh/534354967,1,False
 github:goto-bus-stop,github,goto-bus-stop,,,,,,,,gh/14568009|gh/1649251,,,,gh/14568009|gh/1649251,2,False
 github:gotwarlost,github,gotwarlost,,,,,,,,gh/81482340,,,,gh/81482340,1,False
-github:gr2m,github,gr2m,,,,,,,,gh/216109757|gh/644461337,,,,gh/216109757|gh/644461337,2,True
+github/39992,github,gr2m,39992,Gregor Martynus,,https://github.com/gr2m,@vercel @octokit @octoherd @probot @nock @semantic-release @AllContributors @hearts,AI SDK tech lead,,gh/216109757|gh/644461337,,,,gh/216109757|gh/644461337,2,True
 github/507637,github,grahamdumpleton,507637,Graham Dumpleton,,https://github.com/GrahamDumpleton,,,gh/10357291,gh/10357291,gh/10357291,,,gh/10357291,1,True
-github:graingert,github,graingert,,,,,,,,gh/142657210,,,,gh/142657210,1,True
-github:grantjenks,github,grantjenks,,,,,,,gh/17144859,,,,,gh/17144859,1,False
+github/413772,github,graingert,413772,Thomas Grainger,https//@graingert.co.uk,https://github.com/graingert,,,,gh/142657210,,,,gh/142657210,1,True
+github/118304,github,grantjenks,118304,Grant Jenks,contact@grantjenks.com,https://github.com/grantjenks,,listen | learn | think | solve,gh/17144859,,,,,gh/17144859,1,False
 github/14097,github,graydon,14097,Graydon Hoare,,https://github.com/graydon,,,gh/432630522,gh/432630522,,,,gh/432630522,1,False
 github:greenkeeperio-bot,github,greenkeeperio-bot,,,,,,,,gh/14210523|gh/34287546|gh/39720886|gh/50258379|gh/634056857,,,,gh/14210523|gh/34287546|gh/39720886|gh/50258379|gh/634056857,5,False
 github/266302,github,gregberge,266302,Greg Bergé,greg@smooth-code.com,https://github.com/gregberge,Argos,"❤️ React & JavaScript — Teacher, speaker.
@@ -395,15 +399,16 @@ My open source projects are trusted by thousand developers around the world.",gh
 github:greghudson,github,greghudson,,,,,,,,gh/4307702,,,,gh/4307702,1,False
 github:grhoten,github,grhoten,,,,,,,,gh/49244766,,,,gh/49244766,1,False
 github/82634,github,grncdr,82634,Stephen Sugden,,https://github.com/grncdr,,,gh/10579821,gh/10579821,,,,gh/10579821,1,False
-github:gsnedders,github,gsnedders,,,,,,,gh/7043404,,,,,gh/7043404,1,False
+github/176218,github,gsnedders,176218,Sam Sneddon,me@gsnedders.com,https://github.com/gsnedders,Apple Inc.,,gh/7043404,,,,,gh/7043404,1,False
 github/3050060,github,guillaumegomez,3050060,Guillaume Gomez,,https://github.com/GuillaumeGomez,@huawei,"Opensource lover. member of a few Rust project teams, GNOME foundation member.",gh/127254922,gh/127254922|gh/724712,gh/127254922,,,gh/127254922|gh/724712,2,True
 github:gvvaughan,github,gvvaughan,,,,,,,,gh/47662711,,,,gh/47662711,1,False
 github/138943,github,gweis,138943,,,https://github.com/gweis,,,gh/6449370,gh/6449370,,,,gh/6449370,1,False
 github/564903,github,gyscos,564903,Alexandre Bury,alexandre.bury@gmail.com,https://github.com/gyscos,@argoai,"""Such a wasted opportunity for overkill.""",gh/52115335,gh/52115335,,,,gh/52115335,1,False
 github:haberman,github,haberman,,,,,,,,gh/23357588,,,,gh/23357588,1,False
+github:hadess,github,hadess,,,,,,,,gl/gnome-1548,,,,gl/gnome-1548,1,
 github:harshanalluru,github,harshanalluru,,,,,,,,gh/108311273,,,,gh/108311273,1,False
 github:hartwork,github,hartwork,,,,,,,,gh/80314213,,,"Sebastian Pipping — github.com/hartwork profile funding link solicits donations to FSFE (fsfe.org, Free Software Foundation Europe, nonprofit). An external profile funding link, not a GitHub Sponsors listing, so hasSponsorsListing reads False — curated as fundable.",gh/80314213,1,False
-github:hawkw,github,hawkw,,,,,,,,gh/165289175|gh/98244646,,,,gh/165289175|gh/98244646,2,True
+github/2796466,github,hawkw,2796466,Eliza Weisman,eliza@elizas.website,https://github.com/hawkw,@oxidecomputer,systems witch,,gh/165289175|gh/98244646,,,,gh/165289175|gh/98244646,2,True
 github:hazat,github,hazat,,,,,,,,gh/3328572,,,,gh/3328572,1,True
 github:helfer,github,helfer,,,,,,,,gh/54432168,,,,gh/54432168,1,False
 github:henryiii,github,henryiii,,,,,,,,gh/19837758,,,,gh/19837758,1,False
@@ -419,7 +424,7 @@ github:hueniverse,github,hueniverse,,,,,,,,gh/5831189,,,,gh/5831189,1,True
 github:hugovk,github,hugovk,,,,,,,,gh/5171600|gh/6449370,,,,gh/5171600|gh/6449370,2,True
 github/3275109,github,hukkin,3275109,Taneli Hukkinen,,https://github.com/hukkin,,,gh/370616797,gh/370616797|gh/387293763,,,,gh/370616797|gh/387293763,2,False
 github:hwchase17,github,hwchase17,,,,,,,,gh/552661142,,,,gh/552661142,1,False
-github:hynek,github,hynek,,,,,,,,gh/15778059|gh/29918975,gh/29918975,,,gh/15778059|gh/29918975,2,True
+github/41240,github,hynek,41240,Hynek Schlawack,hs@ox.cx,https://github.com/hynek,Variomedia AG,,,gh/15778059|gh/29918975,gh/29918975,,,gh/15778059|gh/29918975,2,True
 github:hzoo,github,hzoo,,,,,,,,gh/24560307,,,,gh/24560307,1,True
 github:ianschmitz,github,ianschmitz,,,,,,,,gh/63537249,,,,gh/63537249,1,False
 github:iansu,github,iansu,,,,,,,,gh/63537249,,,,gh/63537249,1,True
@@ -427,7 +432,7 @@ github/983798,github,iarna,983798,Rebecca Turner,rebecca@iarna.org,https://githu
 github:ib-lundgren,github,ib-lundgren,,,,,,,,gh/2811323|gh/6825724,,,,gh/2811323|gh/6825724,2,False
 github:ichernev,github,ichernev,,,,,,,,gh/1424470,,,,gh/1424470,1,False
 github:ickle,github,ickle,,,,,,,,gh/34372735,,,,gh/34372735,1,False
-github:ilevkivskyi,github,ilevkivskyi,,,,,,,,gh/24604008|gh/7053637,,,,gh/24604008|gh/7053637,2,False
+github/12005495,github,ilevkivskyi,12005495,Ivan Levkivskyi,,https://github.com/ilevkivskyi,,,,gh/24604008|gh/7053637,,,,gh/24604008|gh/7053637,2,False
 github:ilyavolodin,github,ilyavolodin,,,,,,,,gh/11061773,,,,gh/11061773,1,False
 github/238531,github,indutny,238531,Fedor Indutny,,https://github.com/indutny,@signalapp,"While being kept on ice in a Cryostasis Chamber, Fedor Indutny was held in the HYDRA Siberian Facility alongside other Winter Soldiers...",gh/19176350,gh/19176350|gh/27193779,,,,gh/19176350|gh/27193779,2,True
 github/342993,github,indygreg,342993,Gregory Szorc,gregory.szorc@gmail.com,https://github.com/indygreg,,,gh/67307930,gh/67307930,gh/67307930,,,gh/67307930,1,True
@@ -435,7 +440,7 @@ github/453071,github,inikulin,453071,Ivan Nikulin,ivan@nikulin.engineering,https
 github:ipetkov,github,ipetkov,,,,,,,,gh/67836789,,,,gh/67836789,1,False
 github/9287,github,isaacs,9287,isaacs,i@izs.me,https://github.com/isaacs,,"npm inventor, founder npm, Inc.
 Former Node BDFL.
-All opinions are my own. Literally all of them. I own them all.",gh/102982143|gh/12391440|gh/1341324|gh/1534331|gh/1580001|gh/19442260|gh/2056549|gh/2077020|gh/24208073|gh/2718248|gh/357681|gh/3858354|gh/48222381|gh/49804297|gh/508894|gh/5409660|gh/591569499|gh/61231712|gh/634056857|gh/679662|gh/800543709|gh/84886212|gh/86429676,gh/102982143|gh/12391440|gh/1341324|gh/1357199|gh/1534331|gh/1544436|gh/1580001|gh/19442260|gh/2056549|gh/2077020|gh/211384370|gh/2167680|gh/2169708|gh/23896209|gh/24208073|gh/2718248|gh/27193779|gh/35711072|gh/357681|gh/3858354|gh/48222381|gh/48974178|gh/49804297|gh/508894|gh/5159166|gh/5187096|gh/5409660|gh/554893|gh/591569499|gh/61231712|gh/679662|gh/800543709|gh/84886212|gh/86429676|gh/9301720,gh/102982143|gh/12391440|gh/1341324|gh/1534331|gh/1580001|gh/2056549|gh/2077020|gh/24208073|gh/2718248|gh/35711072|gh/357681|gh/3858354|gh/48222381|gh/48974178|gh/49804297|gh/508894|gh/5409660|gh/591569499|gh/61231712|gh/634056857|gh/679662|gh/800543709|gh/84886212|gh/86429676,,,gh/102982143|gh/12391440|gh/1341324|gh/1357199|gh/1534331|gh/1544436|gh/1580001|gh/19442260|gh/2056549|gh/2077020|gh/211384370|gh/2167680|gh/2169708|gh/23896209|gh/24208073|gh/2718248|gh/27193779|gh/35711072|gh/357681|gh/3858354|gh/48222381|gh/48974178|gh/49804297|gh/508894|gh/5159166|gh/5187096|gh/5409660|gh/554893|gh/591569499|gh/61231712|gh/634056857|gh/679662|gh/800543709|gh/84886212|gh/86429676|gh/9301720,36,True
+All opinions are my own. Literally all of them. I own them all.",gh/102982143|gh/12391440|gh/1341324|gh/1534331|gh/1580001|gh/19442260|gh/2056549|gh/2077020|gh/24208073|gh/2718248|gh/357681|gh/3858354|gh/48222381|gh/49804297|gh/508894|gh/5409660|gh/591569499|gh/61231712|gh/634056857|gh/679662|gh/800543709|gh/84886212|gh/86429676,gh/102982143|gh/12391440|gh/1341324|gh/1357199|gh/1534331|gh/1544436|gh/1580001|gh/19442260|gh/2056549|gh/2077020|gh/211384370|gh/2167680|gh/2169708|gh/23896209|gh/24208073|gh/2718248|gh/27193779|gh/35711072|gh/357681|gh/3858354|gh/48222381|gh/48974178|gh/49804297|gh/508894|gh/5159166|gh/5187096|gh/5409660|gh/554893|gh/591569499|gh/61231712|gh/679662|gh/800543709|gh/84886212|gh/86429676|gh/9301720,gh/102982143|gh/12391440|gh/1341324|gh/1534331|gh/1580001|gh/19442260|gh/2056549|gh/2077020|gh/24208073|gh/2718248|gh/35711072|gh/357681|gh/3858354|gh/48222381|gh/48974178|gh/49804297|gh/508894|gh/5409660|gh/591569499|gh/61231712|gh/634056857|gh/679662|gh/800543709|gh/84886212|gh/86429676,,,gh/102982143|gh/12391440|gh/1341324|gh/1357199|gh/1534331|gh/1544436|gh/1580001|gh/19442260|gh/2056549|gh/2077020|gh/211384370|gh/2167680|gh/2169708|gh/23896209|gh/24208073|gh/2718248|gh/27193779|gh/35711072|gh/357681|gh/3858354|gh/48222381|gh/48974178|gh/49804297|gh/508894|gh/5159166|gh/5187096|gh/5409660|gh/554893|gh/591569499|gh/61231712|gh/634056857|gh/679662|gh/800543709|gh/84886212|gh/86429676|gh/9301720,36,True
 github:iscai-msft,github,iscai-msft,,,,,,,,gh/4127088,,,,gh/4127088,1,False
 github:isidentical,github,isidentical,,,,,,,,gh/130727736|gh/53987953,,,,gh/130727736|gh/53987953,2,True
 github:iurisilvio,github,iurisilvio,,,,,,,,gh/599731435,,,,gh/599731435,1,False
@@ -451,13 +456,14 @@ github:jamesls,github,jamesls,,,,,,,,gh/6780767|gh/8300763,,,,gh/6780767|gh/8300
 github/2097964,github,jamesmunns,2097964,James Munns,james@onevariable.com,https://github.com/jamesmunns,@oxidecomputer,"Bringing Rust to new places, big and small.
 
 Resources Team @ Rust Embedded Working Group",gh/179385478,gh/179385478,,,,gh/179385478,1,False
-github:jamestalmage,github,jamestalmage,,,,,,,,gh/48783244|gh/48974178,,,,gh/48783244|gh/48974178,2,True
+github/4082216,github,jamestalmage,4082216,James Talmage,james@talmage.io,https://github.com/jamestalmage,,,,gh/48783244|gh/48974178,,,,gh/48783244|gh/48974178,2,True
 github:jameysharp,github,jameysharp,,,,,,,,gh/444023705,,,,gh/444023705,1,False
 github:jamrial,github,jamrial,,,,,,,,gh/1614410,,,,gh/1614410,1,False
-github:japaric,github,japaric,,,,,,,,gh/282262730,,,,gh/282262730,1,False
+github/5018213,github,japaric,5018213,Jorge Aparicio,,https://github.com/japaric,@ferrous-systems,"""Everything else is a distraction"". @ferrous-systems engineer.",,gh/282262730,,,,gh/282262730,1,False
 github/308610,github,jaraco,308610,Jason R. Coombs,jaraco@jaraco.com,https://github.com/jaraco,,,gh/157774633|gh/372026120|gh/48289082,gh/157774633|gh/306147182|gh/306448340|gh/372026120|gh/48289082|gh/54980593,,,,gh/157774633|gh/306147182|gh/306448340|gh/372026120|gh/48289082|gh/54980593,6,True
 github/10355,github,jaredhanson,10355,Jared Hanson,jaredhanson@gmail.com,https://github.com/jaredhanson,,I make things with computers.,gh/11349896,gh/11349896,,,,gh/11349896,1,True
 github/1205481,github,jaredwray,1205481,Jared Wray,me@jaredwray.com,https://github.com/jaredwray,,,gh/9267870|gh/96540810,gh/9267870|gh/96540810,,,,gh/9267870|gh/96540810,2,False
+github:jas4711,github,jas4711,,,,,,,,gl/2882658|gl/919981,,,,gl/2882658|gl/919981,2,
 github:jasnell,github,jasnell,,,,,,,,gh/27193779,,,,gh/27193779,1,False
 github:jasonsaayman,github,jasonsaayman,,,,,,,,gh/23088740,,,,gh/23088740,1,False
 github/24221,github,jbgutierrez,24221,Javier Blanco Gutiérrez,contacto@jbgutierrez.info,https://github.com/jbgutierrez,Desarrollador Web Freelance,,gh/34113780,gh/34113780,,,,gh/34113780,1,False
@@ -471,13 +477,13 @@ github:jdalton,github,jdalton,,,,,,,,gh/3955647,,,,gh/3955647,1,False
 github:jdisanti,github,jdisanti,,,,,,,,gh/308027791,,,,gh/308027791,1,False
 github:jedcunningham,github,jedcunningham,,,,,,,,gh/33884891,,,,gh/33884891,1,False
 github:jeffposnick,github,jeffposnick,,,,,,,,gh/55424670,,,,gh/55424670,1,False
-github:jellezijlstra,github,jellezijlstra,,,,,,,,gh/24604008|gh/494077289,,,,gh/24604008|gh/494077289,2,True
+github/906600,github,jellezijlstra,906600,Jelle Zijlstra,jelle.zijlstra@gmail.com,https://github.com/JelleZijlstra,@openai,"Core developer for CPython, typing-extensions, typeshed, mypy, Black. Member of the Python Typing Council. Software engineer at OpenAI.",,gh/24604008|gh/494077289,,,,gh/24604008|gh/494077289,2,True
 github/2153532,github,jensyt,2153532,Jens Taylor,,https://github.com/jensyt,,,gh/11802843,gh/11802843,,,,gh/11802843,1,False
 github:jeremymeng,github,jeremymeng,,,,,,,,gh/108311273,,,,gh/108311273,1,False
-github:jhnns,github,jhnns,,,,,,,,gh/6503675,,,,gh/6503675,1,
-github:jhpratt,github,jhpratt,,,,,,,,gh/26459635,gh/26459635,,,gh/26459635,1,True
+github:jhnns,github,jhnns,,,,,,,,gh/6503675,,,,gh/6503675,1,False
+github/3161395,github,jhpratt,3161395,Jacob Pratt,jacob@jhpratt.dev,https://github.com/jhpratt,,Contributor to Rust's compiler and standard library. Maintainer of Rust crates with over 3.4 billion downloads. Third degree black belt 🥋,,gh/26459635,gh/26459635,,,gh/26459635,1,True
 github:jicama,github,jicama,,,,,,,,gh/22711503,,,,gh/22711503,1,False
-github/1148376,github,jimmywarting,1148376,Jimmy Wärting,jimmy@warting.se,https://github.com/jimmywarting,,Do most NodeJS developing nowdays,gh/371470141,gh/186960326|gh/29849956|gh/371470141,,,,gh/186960326|gh/29849956|gh/371470141,3,True
+github/1148376,github,jimmywarting,1148376,Jimmy Wärting,jimmy@warting.se,https://github.com/jimmywarting,,Do most NodeJS developing nowdays,gh/371470141,gh/186960326|gh/29849956|gh/371470141,gh/371470141,,,gh/186960326|gh/29849956|gh/371470141,3,True
 github:jlhwung,github,jlhwung,,,,,,,,gh/14087781,,,,gh/14087781,1,True
 github:jly36963,github,jly36963,,,,,,,,gh/14210523,,,,gh/14210523,1,False
 github:jnothman,github,jnothman,,,,,,,,gh/843222,,,,gh/843222,1,False
@@ -539,7 +545,7 @@ github/522231,github,kevinbeaty,522231,Kevin Beaty,kevin@simplectic.com,https://
 github/709159,github,kevva,709159,Kevin Mårtensson,kevinmartensson@gmail.com,https://github.com/kevva,,,gh/47402913|gh/49264969,gh/47402913|gh/49264969,,,,gh/47402913|gh/49264969,2,False
 github:khafradev,github,khafradev,,,,,,,,gh/133092972,,,,gh/133092972,1,False
 github/41970,github,kilian,41970,Kilian Valkhof,kilian@kilianvalkhof.com,https://github.com/Kilian,Polypane,,gh/78972540,gh/78972540,gh/78972540,,,gh/78972540,1,True
-github:kimundi,github,kimundi,,,,,,,,gh/21157492|gh/41272773,,,,gh/21157492|gh/41272773,2,False
+github/2903206,github,kimundi,2903206,Marvin Löbel,loebel.marvin@gmail.com,https://github.com/Kimundi,,,,gh/21157492|gh/41272773,,,,gh/21157492|gh/41272773,2,False
 github:kirkwaiblinger,github,kirkwaiblinger,,,,,,,,gh/165536154,,,,gh/165536154,1,False
 github/34589,github,kjd,34589,Kim Davies,,https://github.com/kjd,@icann @iana-org,,gh/10323585,gh/10323585,,,,gh/10323585,1,False
 github:kodraus,github,kodraus,,,,,,,,gh/157205610|gh/21157492|gh/23241722|gh/27974762|gh/29287955,,,,gh/157205610|gh/21157492|gh/23241722|gh/27974762|gh/29287955,5,False
@@ -554,24 +560,23 @@ github:kuba,github,kuba,,,,,,,,gh/26516210,,,,gh/26516210,1,False
 github:kuhe,github,kuhe,,,,,,,,gh/208319207|gh/87228090,,,,gh/208319207|gh/87228090,2,False
 github:kwonoj,github,kwonoj,,,,,,,,gh/32247847,,,,gh/32247847,1,False
 github:kyleknap,github,kyleknap,,,,,,,,gh/49535299,,,,gh/49535299,1,False
+github/3902961,github,la10736,3902961,Michele d'Amico,michele.damico@gmail.com,https://github.com/la10736,,,gh/124802455,,,,,gh/124802455,1,False
 github:lahmatiy,github,lahmatiy,,,,,,,,gh/67236461|gh/70901646,,,,gh/67236461|gh/70901646,2,False
 github:laiapat,github,laiapat,,,,,,,,gh/4127088,,,,gh/4127088,1,False
 github:larhzu,github,larhzu,,,,,,,,gh/553665726,,,,gh/553665726,1,False
 github:larsmans,github,larsmans,,,,,,,,gh/843222,,,,gh/843222,1,False
 github/43534797,github,laurent-laporte-pro,43534797,Laurent LAPORTE,,https://github.com/laurent-laporte-pro,,Senior developer and Python trainer,gh/111412148,,,,,gh/111412148,1,False
 github:lauriro,github,lauriro,,,,,,,,gh/9146732,gh/9146732,,,gh/9146732,1,True
-github/1963493,github,lddubeau,1963493,Louis-Dominique Dubeau,,https://github.com/lddubeau,,,gh/139881982,gh/139881982,,,,gh/139881982,1,
+github/1963493,github,lddubeau,1963493,Louis-Dominique Dubeau,,https://github.com/lddubeau,,,gh/139881982,gh/139881982,,,,gh/139881982,1,False
 github:ldv-alt,github,ldv-alt,,,,,,,,gh/76264690,,,,gh/76264690,1,False
 github:legendecas,github,legendecas,,,,,,,,gh/185901023,,,,gh/185901023,1,True
 github/554612,github,legrandin,554612,Helder Eijs,,https://github.com/Legrandin,,,gh/19378935,gh/19378935,,,,gh/19378935,1,False
 github:lemzwerg,github,lemzwerg,,,,,,,,gh/187000659,,,,gh/187000659,1,False
 github:leo,github,leo,,,,,,,,gh/3655872,,,,gh/3655872,1,False
 github:levitte,github,levitte,,,,,,,,gh/7634677,,,,gh/7634677,1,False
-github:lfdanlu,github,lfdanlu,,,,,,,,gh/208362715,,,,gh/208362715,1,False
 github:lgrammel,github,lgrammel,,,,,,,,gh/644461337,,,,gh/644461337,1,False
-github:li-zhi,github,li-zhi,,,,,,,,gh/51317975,,,,gh/51317975,1,False
 github:lidavidm,github,lidavidm,,,,,,,,gh/51905353,,,,gh/51905353,1,False
-github:lifthrasiir,github,lifthrasiir,,,,,,,,gh/18210201,,,,gh/18210201,1,False
+github/323836,github,lifthrasiir,323836,Kang Seonghoon,,https://github.com/lifthrasiir,,Yet another procrastinating programmer,,gh/18210201,,,,gh/18210201,1,False
 github/189580,github,linusu,189580,Linus Unnebäck,linus@folkdatorn.se,https://github.com/LinusU,@locoapp @ctrl-alt-deseat,,gh/66025821,gh/66025821|gh/7682781,,,,gh/66025821|gh/7682781,2,True
 github:liris,github,liris,,,,,,,,gh/1202362,,,,gh/1202362,1,False
 github/45469,github,ljharb,45469,Jordan Harband,,https://github.com/ljharb,@socketdev @tc39,"software engineer/nerd/teacher/will try anything once; surgeon with git rebase. @TC39 ex @Coinbase @Airbnb @Twitter @MobBase. Fav punctuation ⸮, scent petrichor",gh/17755831|gh/216159146|gh/22266795|gh/225239081|gh/28768789|gh/28995155|gh/308516559|gh/308533760|gh/32377814|gh/480458584|gh/540138887|gh/548993448|gh/560708130|gh/689109338|gh/704249795|gh/752160492|gh/756570458|gh/760136716|gh/898125972|gh/898190951|gh/901188921|gh/901191461|gh/901451610|gh/9103992|gh/911035271,gh/10727014|gh/114682105|gh/114682758|gh/11683441|gh/149682261|gh/15725461|gh/15930063|gh/17755831|gh/1915099|gh/198357138|gh/201685155|gh/201714166|gh/216159146|gh/22266795|gh/225239081|gh/235965505|gh/24578130|gh/26932422|gh/28753032|gh/28768789|gh/28995155|gh/29791606|gh/29991041|gh/29991666|gh/30010185|gh/30012910|gh/308516559|gh/308533760|gh/32238354|gh/32377814|gh/34700259|gh/392913710|gh/3967764|gh/41658845|gh/41658954|gh/41659073|gh/41723335|gh/43528820|gh/43708371|gh/443970899|gh/45977026|gh/480458584|gh/481834578|gh/540138887|gh/548993448|gh/549230701|gh/560708130|gh/577580747|gh/580683868|gh/6006855|gh/607836784|gh/649850465|gh/68573418|gh/689109338|gh/703350811|gh/704249795|gh/751048078|gh/752160492|gh/756570458|gh/760136716|gh/773229339|gh/87597642|gh/898125972|gh/898190951|gh/898274312|gh/901188921|gh/901191461|gh/901451610|gh/902014040|gh/9103992|gh/911035271,gh/10727014|gh/114682105|gh/114682758|gh/11683441|gh/149682261|gh/15725461|gh/15930063|gh/17755831|gh/1915099|gh/198357138|gh/201685155|gh/201714166|gh/216159146|gh/22266795|gh/225239081|gh/235965505|gh/24578130|gh/26932422|gh/28753032|gh/28768789|gh/28995155|gh/29791606|gh/29991041|gh/29991666|gh/30010185|gh/30012910|gh/308516559|gh/308533760|gh/32238354|gh/32377814|gh/34700259|gh/392913710|gh/41658845|gh/41658954|gh/41659073|gh/41723335|gh/43528820|gh/43708371|gh/443970899|gh/45977026|gh/480458584|gh/481834578|gh/540138887|gh/548993448|gh/549230701|gh/560708130|gh/577580747|gh/580683868|gh/6006855|gh/607836784|gh/649850465|gh/68573418|gh/689109338|gh/703350811|gh/704249795|gh/751048078|gh/752160492|gh/756570458|gh/760136716|gh/773229339|gh/898125972|gh/898190951|gh/898274312|gh/901188921|gh/901191461|gh/901451610|gh/902014040|gh/9103992|gh/911035271,,,gh/10727014|gh/114682105|gh/114682758|gh/11683441|gh/149682261|gh/15725461|gh/15930063|gh/17755831|gh/1915099|gh/198357138|gh/201685155|gh/201714166|gh/216159146|gh/22266795|gh/225239081|gh/235965505|gh/24578130|gh/26932422|gh/28753032|gh/28768789|gh/28995155|gh/29791606|gh/29991041|gh/29991666|gh/30010185|gh/30012910|gh/308516559|gh/308533760|gh/32238354|gh/32377814|gh/34700259|gh/392913710|gh/3967764|gh/41658845|gh/41658954|gh/41659073|gh/41723335|gh/43528820|gh/43708371|gh/443970899|gh/45977026|gh/480458584|gh/481834578|gh/540138887|gh/548993448|gh/549230701|gh/560708130|gh/577580747|gh/580683868|gh/6006855|gh/607836784|gh/649850465|gh/68573418|gh/689109338|gh/703350811|gh/704249795|gh/751048078|gh/752160492|gh/756570458|gh/760136716|gh/773229339|gh/87597642|gh/898125972|gh/898190951|gh/898274312|gh/901188921|gh/901191461|gh/901451610|gh/902014040|gh/9103992|gh/911035271,71,True
@@ -581,6 +586,7 @@ github/132260,github,loganfsmyth,132260,Logan Smyth,loganfsmyth@gmail.com,https:
 github/5456384,github,lokathor,5456384,Lokathor,,https://github.com/Lokathor,"@rust-console, @rust-tutorials","You should use the amazing new trio-license:
 Zlib OR Apache-2.0 OR MIT",gh/209673558,gh/209673558,gh/209673558,,,gh/209673558,1,True
 github:longlho,github,longlho,,,,,,,,gh/19117456,,,,gh/19117456,1,False
+github/210965,github,lovell,210965,Lovell Fuller,,https://github.com/lovell,,,gh/96149091,,,,,gh/96149091,1,False
 github:lovelydinosaur,github,lovelydinosaur,,,,,,,,gh/179492861|gh/237210639,,,,gh/179492861|gh/237210639,2,False
 github:lpinca,github,lpinca,,,,,,,,gh/13100677|gh/26316179|gh/2744972,gh/2744972,,,gh/13100677|gh/26316179|gh/2744972,3,True
 github:luciofranco,github,luciofranco,,,,,,,,gh/98244646,,,,gh/98244646,1,False
@@ -592,11 +598,11 @@ github:lukekarrys,github,lukekarrys,,,,,,,,gh/1544436|gh/211384370|gh/2167680|gh
 github:lumirlumir,github,lumirlumir,,,,,,,,gh/791446923,,,,gh/791446923,1,True
 github/2142817,github,lydell,2142817,Simon Lydell,simon.lydell@gmail.com,https://github.com/lydell,SAVR,Magic Coding Creature,gh/17552490,gh/17552490,,,,gh/17552490,1,False
 github:lzchen,github,lzchen,,,,,,,,gh/185478926|gh/220524743,,,,gh/185478926|gh/220524743,2,False
-github:madler,github,madler,,,,,,,gh/2359378,gh/2359378,,,,gh/2359378,1,False
+github/240717,github,madler,240717,Mark Adler,madler@alumni.caltech.edu,https://github.com/madler,,Mostly harmless.,gh/2359378,gh/2359378,,,,gh/2359378,1,False
 github/376661,github,mafintosh,376661,Mathias Buus,mathiasbuus@gmail.com,https://github.com/mafintosh,@holepunchto,Rød grød med fløde,gh/12118126|gh/14732255|gh/15340089,gh/12118126|gh/14732255|gh/15340089,gh/12118126|gh/14732255|gh/15340089,,,gh/12118126|gh/14732255|gh/15340089,3,True
-github:manishearth,github,manishearth,,,,,,,,gh/33499190|gh/34637906|gh/724712|gh/90591032,,,,gh/33499190|gh/34637906|gh/724712|gh/90591032,4,True
+github/1617736,github,manishearth,1617736,Manish Goregaokar,manishsmail@gmail.com,https://github.com/Manishearth,@google,"@rust-lang devtools, ex-core, internationalization @google",,gh/33499190|gh/34637906|gh/724712|gh/90591032,,,,gh/33499190|gh/34637906|gh/724712|gh/90591032,4,True
 github:marcondiro,github,marcondiro,,,,,,,,gh/34637906,,,,gh/34637906,1,False
-github:marijnh,github,marijnh,,,,,,,,gh/22187098|gh/5932749,,,,gh/22187098|gh/5932749,2,True
+github/144427,github,marijnh,144427,Marijn Haverbeke,marijn@haverbeke.berlin,https://github.com/marijnh,not interested in recruiter mail,Independent open-source programmer person,,gh/22187098|gh/5932749,,,,gh/22187098|gh/5932749,2,True
 github:marionebl,github,marionebl,,,,,,,,gh/51575745,,,,gh/51575745,1,False
 github:mariusvniekerk,github,mariusvniekerk,,,,,,,,gh/53987953,,,,gh/53987953,1,False
 github:mark-adams,github,mark-adams,,,,,,,,gh/1408162,,,,gh/1408162,1,False
@@ -608,7 +614,7 @@ github:marxin,github,marxin,,,,,,,,gh/22711503,,,,gh/22711503,1,False
 github/81942,github,mathiasbynens,81942,Mathias Bynens,,https://github.com/mathiasbynens,@Google,"Web standards fanatic. JavaScript, HTML, CSS, HTTP, performance, security, Bash, Unicode, macOS.",gh/10182772|gh/10498729|gh/12001360|gh/24557614|gh/2755924|gh/49437324|gh/88333533|gh/88346537,gh/10182772|gh/10498729|gh/12001360|gh/24557614|gh/2755924|gh/49437324|gh/88333533|gh/88346537,,,,gh/10182772|gh/10498729|gh/12001360|gh/24557614|gh/2755924|gh/49437324|gh/88333533|gh/88346537,8,True
 github/1711539,github,matklad,1711539,Alex Kladov,aleksey.kladov@gmail.com,https://github.com/matklad,@tigerbeetle,"Computers, democracy, and nervous disorder.",gh/143220272,gh/143220272|gh/724712,,,,gh/143220272|gh/724712,2,False
 github:mattcaswell,github,mattcaswell,,,,,,,,gh/7634677,,,,gh/7634677,1,False
-github:matthiasclasen,github,matthiasclasen,,,,,,,,gh/4537144,,,,gh/4537144,1,False
+github:matthiasclasen,github,matthiasclasen,,,,,,,,gh/4537144|gl/gnome-1548|gl/gnome-658,,,,gh/4537144|gl/gnome-1548|gl/gnome-658,3,False
 github:matthiaskrgr,github,matthiaskrgr,,,,,,,,gh/724712,,,,gh/724712,1,False
 github:mattip,github,mattip,,,,,,,,gh/908607,,,,gh/908607,1,True
 github:mattrobenolt,github,mattrobenolt,,,,,,,,gh/3328572,,,,gh/3328572,1,False
@@ -617,7 +623,7 @@ github:maxrimue,github,maxrimue,,,,,,,,gh/14210523|gh/39720886|gh/50258379,,,,gh
 github:mayeut,github,mayeut,,,,,,,,gh/75102202,,,,gh/75102202,1,False
 github:mayurkale22,github,mayurkale22,,,,,,,,gh/185901023|gh/255986659,,,,gh/185901023|gh/255986659,2,False
 github:mblondel,github,mblondel,,,,,,,,gh/843222,,,,gh/843222,1,False
-github:mbrubeck,github,mbrubeck,,,,,,,,gh/33456236,,,,gh/33456236,1,False
+github/5920,github,mbrubeck,5920,Matt Brubeck,mbrubeck@limpet.net,https://github.com/mbrubeck,FullStory,,,gh/33456236,,,,gh/33456236,1,False
 github:mcavage,github,mcavage,,,,,,,,gh/4767976,,,,gh/4767976,1,False
 github/52195,github,mcollina,52195,Matteo Collina,matteo.collina@gmail.com,https://github.com/mcollina,@platformatic,"@platformatic Co-Founder & CTO, TSC member @nodejs, Lead Maintainer @fastify, Conference Speaker, Ph.D.",gh/37368217|gh/42106515,gh/10706095|gh/37368217|gh/42106515|gh/5187096|gh/95052330,gh/37368217|gh/42106515,,,gh/10706095|gh/37368217|gh/42106515|gh/5187096|gh/95052330,5,True
 github:mdboom,github,mdboom,,,,,,,,gh/1385122,,,,gh/1385122,1,False
@@ -628,7 +634,7 @@ github/122434,github,medikoo,122434,Mariusz Nowak,medikoo+github.com@medikoo.com
 
 JavaScript/Node.js/HTML/Serverless",gh/10817569|gh/14423385|gh/177198492|gh/1792941,gh/10817569|gh/14423385|gh/177198492|gh/1792941,gh/10817569|gh/14423385|gh/177198492|gh/1792941,,,gh/10817569|gh/14423385|gh/177198492|gh/1792941,4,True
 github:megawac,github,megawac,,,,,,,,gh/698041,,,,gh/698041,1,False
-github:meinersbur,github,meinersbur,,,,,,,gh/37677854,,,,,gh/37677854,1,False
+github/2278807,github,meinersbur,2278807,Michael Kruse,,https://github.com/Meinersbur,Advanced Micro Devices,Optimizing compiler engineer with an focus on loops.,gh/37677854,,,,,gh/37677854,1,False
 github:methane,github,methane,,,,,,,,gh/2242705,,,,gh/2242705,1,True
 github/83924,github,mhammond,83924,Mark Hammond,,https://github.com/mhammond,,,gh/108187130,gh/108187130,,,,gh/108187130,1,False
 github:mhegazy,github,mhegazy,,,,,,,,gh/20929025,,,,gh/20929025,1,False
@@ -636,18 +642,18 @@ github:michaeldeboey,github,michaeldeboey,,,,,,,,gh/568240379,,,,gh/568240379,1,
 github:michaelficarra,github,michaelficarra,,,,,,,,gh/11412938,,,,gh/11412938,1,False
 github:michaelni,github,michaelni,,,,,,,,gh/1614410,,,,gh/1614410,1,False
 github:michareiser,github,michareiser,,,,,,,,gh/523043277,,,,gh/523043277,1,False
-github:micheles,github,micheles,,,,,,,gh/14656555,gh/14656555,,,,gh/14656555,1,False
+github/2463856,github,micheles,2463856,Michele Simionato,michele.simionato@gmail.com,https://github.com/micheles,GEM,,gh/14656555,gh/14656555,,,,gh/14656555,1,False
 github:mik-laj,github,mik-laj,,,,,,,,gh/33884891,,,,gh/33884891,1,False
 github:minestarks,github,minestarks,,,,,,,,gh/6093316,,,,gh/6093316,1,False
 github:minrk,github,minrk,,,,,,,,gh/14993021,,,,gh/14993021,1,False
 github:mistercrunch,github,mistercrunch,,,,,,,,gh/33884891,,,,gh/33884891,1,False
 github/7396,github,mitsuhiko,7396,Armin Ronacher,armin.ronacher@active-4.com,https://github.com/mitsuhiko,Earendil,Software developer and Open Source nut. Creator of the Flask framework. Founder of @earendil-works. Other things of interest: @pallets and @getsentry,gh/165561258,gh/165561258|gh/19103692|gh/596892|gh/994551|gh/997338,gh/165561258,,,gh/165561258|gh/19103692|gh/596892|gh/994551|gh/997338,5,True
-github:mjackson,github,mjackson,,,,,,,,gh/19872456,,,,gh/19872456,1,True
+github/92839,github,mjackson,92839,Michael Jackson,michael@jackson.us,https://github.com/mjackson,@Shopify,"Founder @remix-run, creator @unpkg. Thriller.",,gh/19872456,,,,gh/19872456,1,True
 github:mjpieters,github,mjpieters,,,,,,,,gh/204197530|gh/205007356,,,,gh/204197530|gh/205007356,2,False
 github:mkruskal-google,github,mkruskal-google,,,,,,,,gh/23357588,,,,gh/23357588,1,False
 github:mkver,github,mkver,,,,,,,,gh/1614410,,,,gh/1614410,1,False
 github:mleguen,github,mleguen,,,,,,,,gh/14210523,,,,gh/14210523,1,False
-github:mm2,github,mm2,,,,,,,gh/507969,gh/507969,,,,gh/507969,1,False
+github/199618,github,mm2,199618,Marti Maria,marti.maria@littlecms.com,https://github.com/mm2,Little CMS,,gh/507969,gh/507969,,,,gh/507969,1,False
 github:mmckerns,github,mmckerns,,,,,,,,gh/11031844,,,,gh/11031844,1,False
 github:mo271,github,mo271,,,,,,,,gh/340219494,,,,gh/340219494,1,False
 github/3848,github,motdotla,3848,Mot,mot@mot.la,https://github.com/motdotla,dotenvx.com,Creator of `dotenv` and `dotenvx`.,gh/11205780,gh/11205780,gh/11205780,,,gh/11205780,1,True
@@ -664,7 +670,7 @@ github:msyyc,github,msyyc,,,,,,,,gh/4127088,,,,gh/4127088,1,False
 github:murgatroid99,github,murgatroid99,,,,,,,,gh/27729880,,,,gh/27729880,1,False
 github:mvdnes,github,mvdnes,,,,,,,,gh/21686666,,,,gh/21686666,1,False
 github:mydea,github,mydea,,,,,,,,gh/3328572,,,,gh/3328572,1,False
-github:myrne,github,myrne,,,,,,,gh/10219264,gh/9301720,,,,gh/10219264|gh/9301720,2,False
+github/56914,github,myrne,56914,Myrne Stol,,https://github.com/myrne,,,gh/10219264,gh/9301720,,,,gh/10219264|gh/9301720,2,False
 github/1937871,github,mysticatea,1937871,Toru Nagashima,,https://github.com/mysticatea,,A software developer.,gh/105228556|gh/31137469,gh/105228556|gh/31137469|gh/568240379,gh/105228556|gh/31137469,,,gh/105228556|gh/31137469|gh/568240379,3,True
 github:mzabriskie,github,mzabriskie,,,,,,,,gh/23088740,,,,gh/23088740,1,False
 github:nateprewitt,github,nateprewitt,,,,,,,,gh/49535299,,,,gh/49535299,1,False
@@ -674,7 +680,7 @@ github:ndelangen,github,ndelangen,,,,,,,,gh/54173593,,,,gh/54173593,1,False
 github:nealrichardson,github,nealrichardson,,,,,,,,gh/358917250|gh/51905353,,,,gh/358917250|gh/51905353,2,False
 github:nedbat,github,nedbat,,,,,,,,gh/138421996,gh/138421996,,,gh/138421996,1,True
 github:newpavlov,github,newpavlov,,,,,,,,gh/166545969|gh/74106774,,,,gh/166545969|gh/74106774,2,False
-github:nexdrew,github,nexdrew,,,,,,,,gh/14210523,,,,gh/14210523,1,True
+github/1929625,github,nexdrew,1929625,Andrew Goode,,https://github.com/nexdrew,,,,gh/14210523,,,,gh/14210523,1,True
 github:nickelc,github,nickelc,,,,,,,,gh/62350380,,,,gh/62350380,1,False
 github:nickuraltsev,github,nickuraltsev,,,,,,,,gh/23088740,,,,gh/23088740,1,False
 github:nicoalbanese,github,nicoalbanese,,,,,,,,gh/644461337,,,,gh/644461337,1,False
@@ -685,6 +691,7 @@ github:nikomatsakis,github,nikomatsakis,,,,,,,,gh/24725038|gh/724712,,,,gh/24725
 github:nipunn1313,github,nipunn1313,,,,,,,,gh/33456236,,,,gh/33456236,1,False
 github:njsmith,github,njsmith,,,,,,,,gh/142657210|gh/57372073,,,,gh/142657210|gh/57372073,2,False
 github:nlf,github,nlf,,,,,,,,gh/5831189,,,,gh/5831189,1,False
+github:nmav,github,nmav,,,,,,,,gl/179611,,,,gl/179611,1,
 github:nnethercote,github,nnethercote,,,,,,,,gh/724712,,,,gh/724712,1,False
 github:nobodyxu,github,nobodyxu,,,,,,,,gh/26039547,,,,gh/26039547,1,True
 github:nodejs-github-bot,github,nodejs-github-bot,,,,,,,,gh/27193779,,,,gh/27193779,1,False
@@ -692,22 +699,27 @@ github:not-an-aardvark,github,not-an-aardvark,,,,,,,,gh/11061773,,,,gh/11061773,
 github:numfocus,github,numfocus,,,,,,,,,gh/1385122|gh/1460385|gh/858127,,,gh/1385122|gh/1460385|gh/858127,3,
 github/55838,github,nv,55838,Nikita Vasilyev,,https://github.com/NV,,Developer Tools developer. I worked on WebKit Inspector at  for a decade.,gh/1025209,gh/1025209,,,,gh/1025209,1,False
 github/10367662,github,nvzqz,10367662,Nikolai Vazquez,github@nikolaivazquez.com,https://github.com/nvzqz,,"conducts curses, breaks things, and uses the oxford comma",gh/100129252,gh/100129252,gh/100129252,,,gh/100129252,1,True
+github:nwellnhof,github,nwellnhof,,,,,,,,gl/gnome-1665,,,,gl/gnome-1665,1,
 github:nzakas,github,nzakas,,,,,,,,gh/11061773|gh/27620277|gh/791446923,,,,gh/11061773|gh/27620277|gh/791446923,3,True
 github:obecny,github,obecny,,,,,,,,gh/185901023|gh/255986659,,,,gh/185901023|gh/255986659,2,False
 github:ocelotl,github,ocelotl,,,,,,,,gh/185478926|gh/220524743,,,,gh/185478926|gh/220524743,2,False
 github:octokitbot,github,octokitbot,,,,,,,,gh/216109757|gh/304109193,,,,gh/216109757|gh/304109193,2,False
-github:ofek,github,ofek,,,,,,,,gh/220524743,,,,gh/220524743,1,True
+github/9677399,github,ofek,9677399,Ofek Lev,oss@ofek.dev,https://github.com/ofek,@datadog,I like developing beautiful APIs.,,gh/220524743,,,,gh/220524743,1,True
 github:ogrisel,github,ogrisel,,,,,,,,gh/654608|gh/843222,,,,gh/654608|gh/843222,2,False
 github:okuryu,github,okuryu,,,,,,,,gh/24106944,,,,gh/24106944,1,True
-github:oli-obk,github,oli-obk,,,,,,,,gh/724712,,,,gh/724712,1,False
+github/332036,github,oli-obk,332036,Oli Scherer,,https://github.com/oli-obk,RustNL,,,gh/724712,,,,gh/724712,1,False
 github:omsmith,github,omsmith,,,,,,,,gh/8116861,,,,gh/8116861,1,False
 github/188041,github,oozcitak,188041,Ozgur Ozcitak,,https://github.com/oozcitak,,,gh/1042809,gh/1042809,gh/1042809,,,gh/1042809,1,True
 github:orta,github,orta,,,,,,,,gh/263697285,,,,gh/263697285,1,True
-github:othiym23,github,othiym23,,,,,,,,gh/24208073,,,,gh/24208073,1,False
+github/418097,github,othiym23,418097,零Rei,othiym23@gmail.com,https://github.com/othiym23,Arcjet Labs,"FKA Forrest Norvell.
+
+Currently working as @arcjet-rei for Arcjet Labs.
+Formerly Rhapsody, New Relic, npm, Crunchyroll.",,gh/24208073,,,,gh/24208073,1,False
 github:ousret,github,ousret,,,,,,,,gh/200259335,gh/200259335,,,gh/200259335,1,True
 github:owais,github,owais,,,,,,,,gh/185478926|gh/220524743,,,,gh/185478926|gh/220524743,2,False
 github:owlstronaut,github,owlstronaut,,,,,,,,gh/35246620,,,,gh/35246620,1,False
-github:oyvindln,github,oyvindln,,,,,,,,gh/96124162,,,,gh/96124162,1,False
+github:owtaylor,github,owtaylor,,,,,,,,gl/gnome-1548,,,,gl/gnome-1548,1,
+github/8319210,github,oyvindln,8319210,,,https://github.com/oyvindln,,,,gh/96124162,,,,gh/96124162,1,False
 github:paolobarbolini,github,paolobarbolini,,,,,,,,gh/62350380,,,,gh/62350380,1,False
 github:parthea,github,parthea,,,,,,,,gh/16316451,,,,gh/16316451,1,False
 github:paulidale,github,paulidale,,,,,,,,gh/7634677,,,,gh/7634677,1,False
@@ -721,8 +733,8 @@ github:peterblazejewicz,github,peterblazejewicz,,,,,,,,gh/6093316,,,,gh/6093316,
 github/7546183,github,peternator7,7546183,Peter Glotfelty,,https://github.com/Peternator7,@Microsoft,Developer @ Microsoft,gh/80964373,gh/80964373,,,,gh/80964373,1,False
 github/829734,github,petkaantonov,829734,Petka Antonov,petka@softanov.fi,https://github.com/petkaantonov,Softanov,,gh/12670444,gh/12670444,,,,gh/12670444,1,False
 github:pfmooney,github,pfmooney,,,,,,,,gh/4767976,,,,gh/4767976,1,False
-github:pfmoore,github,pfmoore,,,,,,,,gh/1446467,,,,gh/1446467,1,False
-github:pganssle,github,pganssle,,,,,,,,gh/242158882|gh/26876372,,,,gh/242158882|gh/26876372,2,False
+github/1110419,github,pfmoore,1110419,Paul Moore,,https://github.com/pfmoore,,,,gh/1446467,,,,gh/1446467,1,False
+github/1377457,github,pganssle,1377457,Paul Ganssle,,https://github.com/pganssle,@Google,Opinions expressed do not necessarily reflect those of my employer.,,gh/242158882|gh/26876372,,,,gh/242158882|gh/26876372,2,False
 github:phated,github,phated,,,,,,,,gh/29154915,gh/29154915,,,gh/29154915,1,True
 github:philiphazel,github,philiphazel,,,,,,,,gh/398251321,,,,gh/398251321,1,False
 github:philippe-cholet,github,philippe-cholet,,,,,,,,gh/22360263,,,,gh/22360263,1,False
@@ -751,6 +763,7 @@ github/183534,github,pvorb,183534,Paul Vorbach,paul@vorba.ch,https://github.com/
 I write Software in Java and Kotlin.
 
 I also run npm-stat.com",gh/2317381,gh/2317381,,,,gh/2317381,1,True
+github:pwithnall,github,pwithnall,,,,,,,,gl/gnome-658,,,,gl/gnome-658,1,
 github/885648,github,qix-,885648,Josh Junon,,https://github.com/Qix-,@oro-os,"Working on @oro-os. Moderator alumnus @bellingcat. Member of @chalk, @debug-js. Formerly @uber, @vercel. Thank you sponsors ❤",gh/1874305|gh/41376759|gh/41388258,gh/1874305|gh/41376759|gh/41388258,gh/11803168|gh/11855007|gh/11855195|gh/15014856|gh/20451415|gh/41053676|gh/43191689,,,gh/11803168|gh/11855007|gh/11855195|gh/15014856|gh/1874305|gh/20451415|gh/41053676|gh/41376759|gh/41388258|gh/43191689,10,True
 github:qulogic,github,qulogic,,,,,,,,gh/1385122,,,,gh/1385122,1,False
 github:quodlibetor,github,quodlibetor,,,,,,,,gh/18210201,,,,gh/18210201,1,False
@@ -772,19 +785,17 @@ github/1299873,github,remusao,1299873,Rémi,,https://github.com/remusao,,,gh/976
 github/666308,github,retep998,666308,Peter Atashian,,https://github.com/retep998,,Writes software in Rust and C++. Is fluffy.,gh/23853482,gh/23853482,,,,gh/23853482,1,False
 github:rgommers,github,rgommers,,,,,,,,gh/1460385|gh/908607,,,,gh/1460385|gh/908607,2,False
 github:rguenth,github,rguenth,,,,,,,,gh/22711503,,,,gh/22711503,1,False
-github:rh-steve-grubb,github,rh-steve-grubb,,,,,,,,gh/52464964,,,,gh/52464964,1,False
 github/1162160,github,rich-harris,1162160,Rich Harris,,https://github.com/Rich-Harris,,,gh/26143240|gh/33668779,gh/26143240|gh/33668779,,,,gh/26143240|gh/33668779,2,False
 github:richardpl,github,richardpl,,,,,,,,gh/1614410,,,,gh/1614410,1,False
 github:ricmoo,github,ricmoo,,,,,,,,gh/63465664,,,,gh/63465664,1,False
-github:rillian,github,rillian,,,,,,,,gh/33956205,,,,gh/33956205,1,False
 github:rlidwka,github,rlidwka,,,,,,,,gh/16231859,,,,gh/16231859,1,False
 github/1365071,github,rob--w,1365071,Rob Wu,rob@robwu.nl,https://github.com/Rob--W,,,gh/52038793,gh/52038793,,,,gh/52038793,1,False
 github:robertbastian,github,robertbastian,,,,,,,,gh/243395141,,,,gh/243395141,1,False
 github:robhogan,github,robhogan,,,,,,,,gh/76504246,,,,gh/76504246,1,False
-github:rogdham,github,rogdham,,,,,,,gh/977687927,gh/977687927,,,,gh/977687927,1,False
+github/3994389,github,rogdham,3994389,,,https://github.com/Rogdham,,,gh/977687927,gh/977687927,,,,gh/977687927,1,False
 github:romainmenke,github,romainmenke,,,,,,,,gh/219192307,,,,gh/219192307,1,True
 github:ronag,github,ronag,,,,,,,,gh/133092972,,,,gh/133092972,1,True
-github:ronaldoussoren,github,ronaldoussoren,,,,,,,gh/243933900,gh/243933900,,,,gh/243933900,1,False
+github/713966,github,ronaldoussoren,713966,Ronald Oussoren,ronaldoussoren@mac.com,https://github.com/ronaldoussoren,,,gh/243933900,gh/243933900,,,,gh/243933900,1,False
 github:ronnypfannschmidt,github,ronnypfannschmidt,,,,,,,,gh/34739117|gh/66012563,,,,gh/34739117|gh/66012563,2,False
 github:rreverser,github,rreverser,,,,,,,,gh/22187098,,,,gh/22187098,1,True
 github:rsandifo-arm,github,rsandifo-arm,,,,,,,,gh/22711503,,,,gh/22711503,1,False
@@ -797,10 +808,10 @@ github:ryancavanaugh,github,ryancavanaugh,,,,,,,,gh/6093316,,,,gh/6093316,1,Fals
 github:ryanflorence,github,ryanflorence,,,,,,,,gh/19872456,,,,gh/19872456,1,False
 github/17342435,github,ryanzim,17342435,Ryan Zimmerman,,https://github.com/RyanZim,,Node.js/Electron developer. Maintainer of fs-extra and postcss-cli.,gh/87651180,gh/87651180,,,,gh/87651180,1,False
 github:sadasant,github,sadasant,,,,,,,,gh/108311273,,,,gh/108311273,1,False
-github:saghul,github,saghul,,,,,,,,gh/14812739,,,,gh/14812739,1,False
+github/317464,github,saghul,317464,Saúl Ibarra Corretgé,s@saghul.net,https://github.com/saghul,@jitsi / @8x8,Fellow Jitster,,gh/14812739,,,,gh/14812739,1,False
 github:samchou19815,github,samchou19815,,,,,,,,gh/76504246,,,,gh/76504246,1,False
 github/174850,github,samn,174850,Sam Neubardt,samneubardt@gmail.com,https://github.com/samn,@Upstream-Tech,Professional Bad Boy,gh/76598131,gh/76598131,,,,gh/76598131,1,False
-github:samuelcolvin,github,samuelcolvin,,,,,,,,gh/487934134|gh/90194616,gh/90194616,,,gh/487934134|gh/90194616,2,True
+github/4039449,github,samuelcolvin,4039449,Samuel Colvin,samuel@pydantic.dev,https://github.com/samuelcolvin,@pydantic,"The Pydantic Stack: Pydantic Validation, Pydantic AI and Pydantic Logfire",,gh/487934134|gh/90194616,gh/90194616,,,gh/487934134|gh/90194616,2,True
 github/1913805,github,samverschueren,1913805,Sam Verschueren,,https://github.com/SamVerschueren,@stackblitz,,gh/91837954,gh/91837954,,,,gh/91837954,1,False
 github:sandersn,github,sandersn,,,,,,,,gh/20929025|gh/6093316,,,,gh/20929025|gh/6093316,2,False
 github:satazor,github,satazor,,,,,,,,gh/21335844,,,,gh/21335844,1,False
@@ -809,7 +820,7 @@ github/923865,github,sboudrias,923865,Simon Boudrias,admin@simonboudrias.com,htt
 github:scbedd,github,scbedd,,,,,,,,gh/4127088,,,,gh/4127088,1,False
 github:schmidt-sebastian,github,schmidt-sebastian,,,,,,,,gh/89290483,,,,gh/89290483,1,False
 github:scoder,github,scoder,,,,,,,,gh/1353927,gh/1353927,,,gh/1353927,1,True
-github:sdispater,github,sdispater,,,,,,,,gh/140365570,gh/140365570,,,gh/140365570,1,True
+github/555648,github,sdispater,555648,Sébastien Eustace,sebastien@eustace.io,https://github.com/sdispater,,"Software engineer, proud pythonista, open source lover. Creator of the Poetry package manager and the datetime library Pendulum.",,gh/140365570,gh/140365570,,,gh/140365570,1,True
 github:sdroege,github,sdroege,,,,,,,,gh/26042035,,,,gh/26042035,1,False
 github/51479,github,seanmonstar,51479,Sean McArthur,sean@seanmonstar.com,https://github.com/seanmonstar,,"Independent maintainer of @hyperium, @tower-rs, and other 🦀 Rust networking libraries.",gh/62350380,gh/183281612|gh/30062547|gh/62350380|gh/84983058,gh/183281612|gh/62350380|gh/84983058,,,gh/183281612|gh/30062547|gh/62350380|gh/84983058,4,True
 github:seberg,github,seberg,,,,,,,,gh/908607,,,,gh/908607,1,False
@@ -820,22 +831,24 @@ github/10386119,github,sec-ant,10386119,Ze-Zheng Wu,zezhengwu@proton.me,https://
 It's the lively source that makes it flow.",gh/569980966,gh/569980966,,,,gh/569980966,1,False
 github:seebees,github,seebees,,,,,,,,gh/149673986,,,,gh/149673986,1,False
 github:sethmlarson,github,sethmlarson,,,,,,,,gh/2410676,,,,gh/2410676,1,True
-github:sfackler,github,sfackler,,,,,,,,gh/15992970|gh/27974762,,,,gh/15992970|gh/27974762,2,True
+github/1455697,github,sfackler,1455697,Steven Fackler,,https://github.com/sfackler,@palantir,,,gh/15992970|gh/27974762,,,,gh/15992970|gh/27974762,2,True
 github:sfc-gh-mkeller,github,sfc-gh-mkeller,,,,,,,,gh/62262074,,,,gh/62262074,1,False
 github:sfc-gh-stakeda,github,sfc-gh-stakeda,,,,,,,,gh/62262074,,,,gh/62262074,1,False
 github:sffc,github,sffc,,,,,,,,gh/243395141,,,,gh/243395141,1,False
 github:shadowspawn,github,shadowspawn,,,,,,,,gh/2206953,gh/2206953|gh/549230701,,,gh/2206953|gh/549230701,2,True
 github:shazow,github,shazow,,,,,,,,gh/2410676,,,,gh/2410676,1,True
 github:sheetalkamat,github,sheetalkamat,,,,,,,,gh/20929025,,,,gh/20929025,1,False
-github:shellscape,github,shellscape,,,,,,,,gh/203607977,,,,gh/203607977,1,True
+github/76371,github,shellscape,76371,Andrew Powell,,https://github.com/shellscape,,"▸ @rollup core team and plugins lead　　▸ software engineer and architect　　　
+▸ technical leader and mentor　　　　　
+▸ got that 🔥 for all things node",,gh/203607977,,,,gh/203607977,1,True
 github:sheremet-va,github,sheremet-va,,,,,,,,gh/434708679,,,,gh/434708679,1,False
 github:shilman,github,shilman,,,,,,,,gh/54173593,,,,gh/54173593,1,False
-github:shinnn,github,shinnn,,,,,,,,gh/10579821|gh/26001547,,,,gh/10579821|gh/26001547,2,False
+github/1131567,github,shinnn,1131567,shinnn,,https://github.com/shinnn,,JavaScript programmer,,gh/10579821|gh/26001547,,,,gh/10579821|gh/26001547,2,False
 github:shkuropat,github,shkuropat,,,,,,,,gh/4325614,,,,gh/4325614,1,False
 github:sibiraj-s,github,sibiraj-s,,,,,,,,gh/71475907,gh/71475907,,,gh/71475907,1,True
 github:sigmavirus24,github,sigmavirus24,,,,,,,,gh/1362490|gh/15515181,,,,gh/1362490|gh/15515181,2,False
-github:simenb,github,simenb,,,,,,,,gh/15062869,,,,gh/15062869,1,False
-github:simonsapin,github,simonsapin,,,,,,,,gh/14934771|gh/33456236|gh/33499190|gh/7043404,,,,gh/14934771|gh/33456236|gh/33499190|gh/7043404,4,False
+github/1404810,github,simenb,1404810,Simen Bekkhus,sbekkhus91@gmail.com,https://github.com/SimenB,@cvpartner,,,gh/15062869,,,,gh/15062869,1,False
+github/291359,github,simonsapin,291359,Simon Sapin,,https://github.com/SimonSapin,,,,gh/14934771|gh/33456236|gh/33499190|gh/7043404,,,,gh/14934771|gh/33456236|gh/33499190|gh/7043404,4,False
 github/3048342,github,sinclairzx81,3048342,,,https://github.com/sinclairzx81,Acid Interactive,,gh/87454905,gh/87454905,,,,gh/87454905,1,False
 github/170270,github,sindresorhus,170270,Sindre Sorhus,sindresorhus@gmail.com,https://github.com/sindresorhus,,"Full-Time Open-Sourcerer. Focused on Swift & JavaScript. Makes macOS apps, CLI tools, npm packages.",gh/11516031|gh/14468669|gh/14847357|gh/15186239|gh/16457190|gh/175398594|gh/18242629|gh/18444852|gh/18469325|gh/18938743|gh/19105307|gh/20576837|gh/21005682|gh/21054113|gh/21069494|gh/21169121|gh/21304485|gh/21672939|gh/21673868|gh/22020904|gh/22022707|gh/22794601|gh/23512229|gh/23512396|gh/25116836|gh/25121561|gh/29094022|gh/29436825|gh/29769737|gh/29771015|gh/29771247|gh/29773710|gh/30900285|gh/30903733|gh/315531538|gh/31656998|gh/33590534|gh/348660847|gh/34965664|gh/38718671|gh/38923193|gh/39222301|gh/39222730|gh/40721875|gh/41367145|gh/41585934|gh/41723004|gh/41724281|gh/41790094|gh/41842429|gh/41905436|gh/44264225|gh/47453723|gh/47475908|gh/47504070|gh/48706449|gh/48707028|gh/48783244|gh/50187748|gh/601943060|gh/62838930|gh/711160838|gh/71381729|gh/714044439|gh/71526722|gh/71534796|gh/71542716|gh/716660564|gh/73665728|gh/74265632|gh/74266248|gh/793180075|gh/795552264|gh/7985040|gh/86679721|gh/88415331|gh/90292430|gh/90776169|gh/93189529,gh/11516031|gh/11803168|gh/11855007|gh/11855195|gh/14468669|gh/14847357|gh/15014856|gh/15186239|gh/16457190|gh/175398594|gh/18242629|gh/18444852|gh/18469325|gh/18938743|gh/19105307|gh/20451415|gh/20576837|gh/21005682|gh/21054113|gh/21069494|gh/21169121|gh/21304485|gh/21672939|gh/21673868|gh/22020904|gh/22022707|gh/22794601|gh/23512229|gh/23512396|gh/25116836|gh/25121561|gh/29094022|gh/29436825|gh/29769737|gh/29771015|gh/29771247|gh/29773710|gh/30900285|gh/30903733|gh/315531538|gh/31656998|gh/33590534|gh/348660847|gh/34965664|gh/38718671|gh/38923193|gh/39222301|gh/39222730|gh/40721875|gh/41053676|gh/41367145|gh/41585934|gh/41723004|gh/41724281|gh/41790094|gh/41842429|gh/41905436|gh/43191689|gh/47453723|gh/47504070|gh/48706449|gh/48707028|gh/48783244|gh/50187748|gh/601943060|gh/62838930|gh/711160838|gh/71381729|gh/714044439|gh/71526722|gh/71534796|gh/71542716|gh/716660564|gh/73665728|gh/74265632|gh/74266248|gh/793180075|gh/795552264|gh/7985040|gh/86679721|gh/88415331|gh/90292430|gh/90776169|gh/93189529,gh/11516031|gh/11803168|gh/11855007|gh/11855195|gh/14468669|gh/14847357|gh/15014856|gh/15186239|gh/16457190|gh/175398594|gh/18242629|gh/18444852|gh/18469325|gh/18938743|gh/19105307|gh/20451415|gh/20576837|gh/21005682|gh/21054113|gh/21069494|gh/21169121|gh/21304485|gh/21672939|gh/21673868|gh/22020904|gh/22022707|gh/22794601|gh/23512229|gh/23512396|gh/25116836|gh/25121561|gh/29094022|gh/29436825|gh/29769737|gh/29771015|gh/29771247|gh/29773710|gh/30903733|gh/315531538|gh/31656998|gh/33590534|gh/348660847|gh/34965664|gh/38718671|gh/38923193|gh/39222301|gh/39222730|gh/40721875|gh/41053676|gh/41367145|gh/41585934|gh/41723004|gh/41724281|gh/41790094|gh/41842429|gh/41905436|gh/43191689|gh/44264225|gh/47453723|gh/47475908|gh/47504070|gh/48706449|gh/48707028|gh/48783244|gh/50187748|gh/601943060|gh/62838930|gh/711160838|gh/71381729|gh/714044439|gh/71526722|gh/71534796|gh/71542716|gh/716660564|gh/73665728|gh/74265632|gh/74266248|gh/793180075|gh/795552264|gh/7985040|gh/86679721|gh/88415331|gh/90292430|gh/90776169|gh/93189529,,,gh/11516031|gh/11803168|gh/11855007|gh/11855195|gh/14468669|gh/14847357|gh/15014856|gh/15186239|gh/16457190|gh/175398594|gh/18242629|gh/18444852|gh/18469325|gh/18938743|gh/19105307|gh/20451415|gh/20576837|gh/21005682|gh/21054113|gh/21069494|gh/21169121|gh/21304485|gh/21672939|gh/21673868|gh/22020904|gh/22022707|gh/22794601|gh/23512229|gh/23512396|gh/25116836|gh/25121561|gh/29094022|gh/29436825|gh/29769737|gh/29771015|gh/29771247|gh/29773710|gh/30900285|gh/30903733|gh/315531538|gh/31656998|gh/33590534|gh/348660847|gh/34965664|gh/38718671|gh/38923193|gh/39222301|gh/39222730|gh/40721875|gh/41053676|gh/41367145|gh/41585934|gh/41723004|gh/41724281|gh/41790094|gh/41842429|gh/41905436|gh/43191689|gh/44264225|gh/47453723|gh/47475908|gh/47504070|gh/48706449|gh/48707028|gh/48783244|gh/50187748|gh/601943060|gh/62838930|gh/711160838|gh/71381729|gh/714044439|gh/71526722|gh/71534796|gh/71542716|gh/716660564|gh/73665728|gh/74265632|gh/74266248|gh/793180075|gh/795552264|gh/7985040|gh/86679721|gh/88415331|gh/90292430|gh/90776169|gh/93189529,86,True
 github:skal65535,github,skal65535,,,,,,,,gh/23368445,,,,gh/23368445,1,False
@@ -843,13 +856,12 @@ github:skyclouds2001,github,skyclouds2001,,,,,,,,gh/70901646,,,,gh/70901646,1,Fa
 github:smtakeda,github,smtakeda,,,,,,,,gh/62262074,,,,gh/62262074,1,False
 github:snhenson,github,snhenson,,,,,,,,gh/7634677,,,,gh/7634677,1,False
 github:snitin315,github,snitin315,,,,,,,,gh/80306715,,,,gh/80306715,1,True
-github:snowystinger,github,snowystinger,,,,,,,,gh/208362715,,,,gh/208362715,1,False
 github:sokra,github,sokra,,,,,,,,gh/24119524|gh/48954523|gh/5400204|gh/6503675|gh/7730086,,,,gh/24119524|gh/48954523|gh/5400204|gh/6503675|gh/7730086,5,True
 github:som-sm,github,som-sm,,,,,,,,gh/175398594,gh/175398594,,,gh/175398594,1,True
 github:sophiebits,github,sophiebits,,,,,,,,gh/10270250,,,,gh/10270250,1,False
-github:sorensp,github,sorensp,,,,,,,,gh/81675971,,,,gh/81675971,1,
+github:sorensp,github,sorensp,,,,,,,,gh/81675971,,,,gh/81675971,1,False
 github:sosukesuzuki,github,sosukesuzuki,,,,,,,,gh/75104123,,,,gh/75104123,1,False
-github:sqlite,github,sqlite,,,,,,,gh/176278485,,,,,gh/176278485,1,False
+github/48680494,github,sqlite,48680494,The SQLite Development Team,,https://github.com/sqlite,,,gh/176278485,,,,,gh/176278485,1,False
 github/2677165,github,srijs,2677165,Sam Rijs,,https://github.com/srijs,,,gh/157348282,gh/157348282,,,,gh/157348282,1,False
 github:srikanthccv,github,srikanthccv,,,,,,,,gh/185478926|gh/220524743,,,,gh/185478926|gh/220524743,2,False
 github:srittau,github,srittau,,,,,,,,gh/24604008,,,,gh/24604008,1,False
@@ -860,22 +872,23 @@ github/310393,github,stebalien,310393,Steven Allen,steven@stebalien.com,https://
 github/1377,github,stefanpenner,1377,Stefan Penner,stef@iamstef.net,https://github.com/stefanpenner,@LinkedIn,,gh/48818175,gh/48818175,,,,gh/48818175,1,False
 github:stefwalter,github,stefwalter,,,,,,,,gh/12060420,,,,gh/12060420,1,False
 github:stephensmalley,github,stephensmalley,,,,,,,,gh/20648799,,,,gh/20648799,1,False
-github:steveklabnik,github,steveklabnik,,,,,,,,gh/22432442,,,,gh/22432442,1,False
-github:stevemao,github,stevemao,,,,,,,,gh/15639771,,,,gh/15639771,1,False
+github/27786,github,steveklabnik,27786,Steve Klabnik,steve@steveklabnik.com,https://github.com/steveklabnik,East River Source Control,"Rust, jj, other things",,gh/22432442,,,,gh/22432442,1,False
+github/6316590,github,stevemao,6316590,Steve Mao,,https://github.com/stevemao,,"Maker, builder, technologist",,gh/15639771,,,,gh/15639771,1,False
 github/9773803,github,streamich,9773803,Va Da,streamich@gmail.com,https://github.com/streamich,,,gh/37490572,gh/37490572,gh/37490572,,,gh/37490572,1,True
-github:stub42,github,stub42,,,,,,,gh/63155638,gh/63155638,,,,gh/63155638,1,False
-github:stygianentity,github,stygianentity,,,,,,,,gh/24130045,,,,gh/24130045,1,
+github/2928805,github,stub42,2928805,Stub,,https://github.com/stub42,,,gh/63155638,gh/63155638,,,,gh/63155638,1,False
+github:stygianentity,github,stygianentity,,,,,,,,gh/24130045,,,,gh/24130045,1,False
 github/8013633,github,suguru03,8013633,Suguru Motegi,suguru.motegi@gmail.com,https://github.com/suguru03,,,gh/27030361,gh/27030361,,,,gh/27030361,1,False
-github:sunfishcode,github,sunfishcode,,,,,,,,gh/196445196|gh/295544240,,,,gh/196445196|gh/295544240,2,False
+github/4503403,github,sunfishcode,4503403,Dan Gohman,,https://github.com/sunfishcode,,"I'm working on Wasmtime, WASI, and lots of things related to WebAssembly.",,gh/196445196|gh/295544240,,,,gh/196445196|gh/295544240,2,False
 github:swc-bot,github,swc-bot,,,,,,,,gh/115110181,,,,gh/115110181,1,False
-github/1092128,github,sybrenstuvel,1092128,Sybren A. Stüvel,sybren@stuvel.eu,https://github.com/sybrenstuvel,Blender Institute,,gh/50107469,gh/50107469,,,,gh/50107469,1,
+github/1092128,github,sybrenstuvel,1092128,Sybren A. Stüvel,sybren@stuvel.eu,https://github.com/sybrenstuvel,Blender Institute,,gh/50107469,gh/50107469,,,,gh/50107469,1,False
 github:sydney-runkle,github,sydney-runkle,,,,,,,,gh/90194616,,,,gh/90194616,1,False
 github:szabadka,github,szabadka,,,,,,,,gh/24993138|gh/340219494,,,,gh/24993138|gh/340219494,2,False
 github:t8m,github,t8m,,,,,,,,gh/76264690,,,,gh/76264690,1,False
 github:tacaswell,github,tacaswell,,,,,,,,gh/1385122,,,,gh/1385122,1,False
-github/43724913,github,taiki-e,43724913,Taiki Endo,,https://github.com/taiki-e,,,gh/164668916|gh/216847853|gh/448365131,gh/161875917|gh/164668916|gh/216847853|gh/267368764|gh/35566048|gh/37093133|gh/448365131|gh/55077261|gh/67836789,gh/164668916|gh/216847853|gh/448365131,,,gh/161875917|gh/164668916|gh/216847853|gh/267368764|gh/35566048|gh/37093133|gh/448365131|gh/55077261|gh/67836789,9,True
-github:tailhook,github,tailhook,,,,,,,,gh/59320323,,,,gh/59320323,1,False
-github:takluyver,github,takluyver,,,,,,,,gh/24727748,,,,gh/24727748,1,False
+github:tagoh,github,tagoh,,,,,,,,gl/freedesktop-890,,,,gl/freedesktop-890,1,
+github/43724913,github,taiki-e,43724913,Taiki Endo,,https://github.com/taiki-e,,,gh/164668916|gh/216847853|gh/448365131,gh/161875917|gh/164668916|gh/216847853|gh/267368764|gh/35566048|gh/448365131|gh/55077261|gh/67836789,gh/164668916|gh/216847853|gh/448365131,,,gh/161875917|gh/164668916|gh/216847853|gh/267368764|gh/35566048|gh/448365131|gh/55077261|gh/67836789,8,True
+github/321799,github,tailhook,321799,Paul Colomiets,,https://github.com/tailhook,@edgedb,,,gh/59320323,,,,gh/59320323,1,False
+github/327925,github,takluyver,327925,Thomas Kluyver,,https://github.com/takluyver,European XFEL,,,gh/24727748,,,,gh/24727748,1,False
 github:tantale,github,tantale,,,,,,,,gh/111412148,,,,gh/111412148,1,False
 github:tarcieri,github,tarcieri,,,,,,,,gh/406051759|gh/74106774|gh/77307442|gh/83051505|gh/85605821,,,,gh/406051759|gh/74106774|gh/77307442|gh/83051505|gh/85605821,5,True
 github:targos,github,targos,,,,,,,,gh/27193779,,,,gh/27193779,1,True
@@ -897,18 +910,18 @@ github:thomasjpfan,github,thomasjpfan,,,,,,,,gh/843222,,,,gh/843222,1,True
 github/15005,github,tim-kos,15005,Tim Koschuetzki,,https://github.com/tim-kos,"Transloadit, Ltd.","JavaScript • PHP • Go • Unix • Open Source • Started @transloadit, tus.io, uppy.io",gh/1738798,,,,,gh/1738798,1,False
 github:timer,github,timer,,,,,,,,gh/63537249,,,,gh/63537249,1,False
 github:timhoffm,github,timhoffm,,,,,,,,gh/1385122,,,,gh/1385122,1,False
-github:timothygu,github,timothygu,,,,,,,,gh/29849956,,,,gh/29849956,1,False
+github/1538624,github,timothygu,1538624,Timothy Gu,timothygu99@gmail.com,https://github.com/TimothyGu,@Stripe,Software Engineer at @Stripe. ex-@stanford ex-@UCLA ex-@google ex-@teslamotors | Work account: @timothyg-stripe,,gh/29849956,,,,gh/29849956,1,False
 github:timrwood,github,timrwood,,,,,,,,gh/1424470,,,,gh/1424470,1,False
 github/25254,github,tj,25254,TJ,,https://github.com/tj,Apex,,gh/2206953|gh/6229722,gh/2206953|gh/2871998,gh/2206953,,,gh/2206953|gh/2871998|gh/6229722,3,True
-github:tjguk,github,tjguk,,,,,,,gh/23124645,gh/23124645,,,,gh/23124645,1,False
+github/580948,github,tjguk,580948,Tim Golden,mail@timgolden.me.uk,https://github.com/tjguk,,,gh/23124645,gh/23124645,,,,gh/23124645,1,False
 github/2833077,github,tkem,2833077,Thomas Kemmer,tkemmer@computer.org,https://github.com/tkem,,,gh/18006791,gh/18006791,gh/18006791,,,gh/18006791,1,True
 github:tlyu,github,tlyu,,,,,,,,gh/4307702,,,,gh/4307702,1,True
 github:tob2,github,tob2,,,,,,,,gh/22711503,,,,gh/22711503,1,False
 github:tomaugspurger,github,tomaugspurger,,,,,,,,gh/130727736,,,,gh/130727736,1,False
 github/71256,github,tootallnate,71256,Nathan Rajlich,,https://github.com/TooTallNate,@vercel,"Programmer / Nerd. Former @nodejs core committer. Revolutionizing deployments @vercel. Before you ask, I'm 6’6”",gh/11293703|gh/19321056,gh/11293703|gh/19321056|gh/2871998,,,,gh/11293703|gh/19321056|gh/2871998,3,False
-github:torvalds,github,torvalds,,,,,,,gh/2325298,,,,,gh/2325298,1,False
+github/1024025,github,torvalds,1024025,Linus Torvalds,,https://github.com/torvalds,Linux Foundation,,gh/2325298,,,,,gh/2325298,1,False
 github:tottoto,github,tottoto,,,,,,,,gh/183281612,,,,gh/183281612,1,False
-github:trentm,github,trentm,,,,,,,,gh/185901023|gh/255986659|gh/367032142|gh/4058064,,,,gh/185901023|gh/255986659|gh/367032142|gh/4058064,4,False
+github/46866,github,trentm,46866,Trent Mick,,https://github.com/trentm,@elastic,,,gh/185901023|gh/255986659|gh/367032142|gh/4058064,,,,gh/185901023|gh/255986659|gh/367032142|gh/4058064,4,False
 github:trivikr,github,trivikr,,,,,,,,gh/149673986|gh/208319207|gh/87228090,,,,gh/149673986|gh/208319207|gh/87228090,3,False
 github:trott,github,trott,,,,,,,,gh/27193779,,,,gh/27193779,1,False
 github/72844,github,troygoode,72844,Troy Goode,,https://github.com/troygoode,Founder @trycourier,,gh/3053807,gh/3053807,,,,gh/3053807,1,False
@@ -917,7 +930,7 @@ github:tseaver,github,tseaver,,,,,,,,gh/159736041|gh/16316451|gh/226992462,,,,gh
 github:tustvold,github,tustvold,,,,,,,,gh/358917250,,,,gh/358917250,1,False
 github:tylerjereddy,github,tylerjereddy,,,,,,,,gh/1460385,,,,gh/1460385,1,False
 github:typescript-bot,github,typescript-bot,,,,,,,,gh/6093316,,,,gh/6093316,1,False
-github:tytso,github,tytso,,,,,,,,gh/4307702,,,,gh/4307702,1,False
+github/51416,github,tytso,51416,Theodore Ts'o,tytso@mit.edu,https://github.com/tytso,Google,,,gh/4307702,,,,gh/4307702,1,False
 github:ubizjak,github,ubizjak,,,,,,,,gh/22711503,,,,gh/22711503,1,False
 github:ueno,github,ueno,,,,,,,,gh/12060420,,,,gh/12060420,1,False
 github:uniqueiniquity,github,uniqueiniquity,,,,,,,,gh/6093316,,,,gh/6093316,1,False
@@ -934,7 +947,9 @@ github:vjpai,github,vjpai,,,,,,,,gh/27729880,,,,gh/27729880,1,False
 github:vks,github,vks,,,,,,,,gh/30227790,,,,gh/30227790,1,False
 github/11783500,github,vorner,11783500,Michal 'vorner' Vaner,vorner+github@vorner.cz,https://github.com/vorner,@prusa3d,Self-appointed member of the Rust Evangelist Strike Force. Nomadic contributor. Computer dark arts practitioner. An infinite fountain of bug-reports.,gh/137260008,gh/137260008,,,,gh/137260008,1,False
 github:voxpelli,github,voxpelli,,,,,,,,,gh/175398594,,,gh/175398594,1,
-github:vsajip,github,vsajip,,,,,,,,gh/436970140,,,,gh/436970140,1,False
+github/130553,github,vsajip,130553,Vinay Sajip,vinay_sajip@yahoo.co.uk,https://github.com/vsajip,,"I'm a developer experienced in desktop & Web development.
+
+I'm a Python committer - I implemented stdlib logging, venv and the Windows Python launcher.",,gh/436970140,,,,gh/436970140,1,False
 github:vvakame,github,vvakame,,,,,,,,gh/6093316,,,,gh/6093316,1,True
 github:warrenweckesser,github,warrenweckesser,,,,,,,,gh/1460385,,,,gh/1460385,1,False
 github/10602,github,watson,10602,Thomas Watson,w@tson.dk,https://github.com/watson,@DataDog,"Computer programmer, Node.js Core member, open source hacker working at @DataDog, formerly Tech Lead at @elastic + @opbeat",gh/71475907,,,,,gh/71475907,1,False
@@ -949,7 +964,7 @@ github/54771,github,whitequark,54771,Catherine,whitequark@whitequark.org,https:/
 github:wiggin15,github,wiggin15,,,,,,,,gh/18892209,,,,gh/18892209,1,False
 github:willmcgugan,github,willmcgugan,,,,,,,,gh/220809393,gh/220809393,,,gh/220809393,1,True
 github/9063376,github,withoutboats,9063376,srrrse,saoirse@without.boats,https://github.com/withoutboats,,"In civilizations without boats, dreams dry up, espionage takes the place of adventure, and police take the place of pirates.",gh/86326466,,,,,gh/86326466,1,False
-github:wooorm,github,wooorm,,,,,,,,gh/157420458|gh/41795086,,,,gh/157420458|gh/41795086,2,True
+github/944406,github,wooorm,944406,Titus,tituswormer@gmail.com,https://github.com/wooorm,@igalia,making it easier for developers to develop in javascript and rust · syntax trees · markup,,gh/157420458|gh/41795086,,,,gh/157420458|gh/41795086,2,True
 github:xfxyjwf,github,xfxyjwf,,,,,,,,gh/23357588,,,,gh/23357588,1,False
 github:xhochy,github,xhochy,,,,,,,,gh/51905353,,,,gh/51905353,1,False
 github:xiangyan99,github,xiangyan99,,,,,,,,gh/4127088,,,,gh/4127088,1,False
@@ -957,7 +972,10 @@ github:xitology,github,xitology,,,,,,,,gh/2699072|gh/2700147,,,,gh/2699072|gh/27
 github:xrmx,github,xrmx,,,,,,,,gh/185478926|gh/220524743,,,,gh/185478926|gh/220524743,2,False
 github/1493671,github,xtuc,1493671,Sven Sauleau,github@sauleau.com,https://github.com/xtuc,,https://twitter.com/svensauleau,gh/113006071,gh/113006071,,,,gh/113006071,1,False
 github:xxczaki,github,xxczaki,,,,,,,,gh/29849956,,,,gh/29849956,1,True
-github:yaacovcr,github,yaacovcr,,,,,,,,gh/54432168,gh/54432168,,,gh/54432168,1,True
+github/4108384,github,yaacovcr,4108384,Yaacov Rydzinski,yaacovcr@gmail.com,https://github.com/yaacovCR,,"programmer
+radiologist
+student
+father",,gh/54432168,gh/54432168,,,gh/54432168,1,True
 github:yangtse,github,yangtse,,,,,,,,gh/571708,,,,gh/571708,1,False
 github:yannbf,github,yannbf,,,,,,,,gh/54173593,,,,gh/54173593,1,False
 github:yashykt,github,yashykt,,,,,,,,gh/27729880,,,,gh/27729880,1,False
@@ -965,14 +983,14 @@ github:yocontra,github,yocontra,,,,,,,,,gh/29154915,,,gh/29154915,1,
 github:yoshi-automation,github,yoshi-automation,,,,,,,,gh/16316451,,,,gh/16316451,1,False
 github:yuwata,github,yuwata,,,,,,,,gh/32873313,,,,gh/32873313,1,False
 github:yyx990803,github,yyx990803,,,,,,,,gh/137078487,gh/137078487,,,gh/137078487,1,True
-github:zatrazz,github,zatrazz,,,,,,,,gh/13868694,,,,gh/13868694,1,
+github:zatrazz,github,zatrazz,,,,,,,,gh/13868694,,,,gh/13868694,1,False
 github:zekth,github,zekth,,,,,,,,gh/419317518,,,,gh/419317518,1,False
 github:zensh,github,zensh,,,,,,,,gh/25396227,,,,gh/25396227,1,True
 github/830952,github,zertosh,830952,Andres Suarez,,https://github.com/zertosh,,,gh/41947687,gh/41947687,,,,gh/41947687,1,False
 github/3268430,github,zesterer,3268430,Joshua Barretto,joshua@jsbarretto.com,https://github.com/zesterer,,"Interested in things. Usually exhausted.
 
 None of the code I write comes out of an LLM. Any mistakes are my own.",gh/21686666,gh/21686666,,,,gh/21686666,1,True
-github:zkat,github,zkat,,,,,,,,gh/193812470|gh/193817839,,,,gh/193812470|gh/193817839,2,True
+github/17535,github,zkat,17535,Kat Marchán,kzm@zkat.tech,https://github.com/zkat,"Fastly, Inc",too tired,,gh/193812470|gh/193817839,,,,gh/193812470|gh/193817839,2,True
 github/2213682,github,zloirock,2213682,Denis Pushkarev,zloirock@zloirock.ru,https://github.com/zloirock,,,gh/11481338,gh/11481338,,,,gh/11481338,1,True
 github:zoofood,github,zoofood,,,,,,,,gh/367032142,,,,gh/367032142,1,False
 github:zpao,github,zpao,,,,,,,,gh/10270250,,,,gh/10270250,1,False
@@ -984,6 +1002,7 @@ npm/43081j,npm,43081j,43081j,,43081james@gmail.com,https://www.npmjs.com/~43081j
 npm/7rulnik,npm,7rulnik,7rulnik,,v7rulnik@gmail.com,https://www.npmjs.com/~7rulnik,,,,,,gh/330043541,,gh/330043541,1,
 npm/__hai,npm,__hai,__hai,,haijie0619@gmail.com,https://www.npmjs.com/~__hai,,,,,,gh/143057914|gh/24119524|gh/48954523|gh/5400204|gh/7730086|gh/80306715,,gh/143057914|gh/24119524|gh/48954523|gh/5400204|gh/7730086|gh/80306715,6,
 npm/aaronabramov,npm,aaronabramov,aaronabramov,,aaron@abramov.io,https://www.npmjs.com/~aaronabramov,,,,,,gh/15062869,,gh/15062869,1,
+npm/aarongarciah,npm,aarongarciah,aarongarciah,,aaron.garcia.hervas@gmail.com,https://www.npmjs.com/~aarongarciah,,,,,,gh/23083156,,gh/23083156,1,
 npm/abetomo,npm,abetomo,abetomo,,abe@enzou.tokyo,https://www.npmjs.com/~abetomo,,,,,,gh/2206953,,gh/2206953,1,
 npm/additiveamateur,npm,additiveamateur,additiveamateur,,carlo@machina.bio,https://www.npmjs.com/~additiveamateur,,,,,,gh/281084700,,gh/281084700,1,
 npm/addyosmani,npm,addyosmani,addyosmani,,addyosmani@gmail.com,https://www.npmjs.com/~addyosmani,,,,,,gh/55424670,,gh/55424670,1,
@@ -1018,8 +1037,7 @@ npm/arekinath,npm,arekinath,arekinath,,alex@cooperi.net,https://www.npmjs.com/~a
 npm/ariperkkio,npm,ariperkkio,ariperkkio,,ari.perkkio@gmail.com,https://www.npmjs.com/~ariperkkio,,,,,,gh/434708679,,gh/434708679,1,
 npm/ariya,npm,ariya,ariya,,ariya.hidayat@gmail.com,https://www.npmjs.com/~ariya,,,,,,gh/2833537,,gh/2833537,1,
 npm/aseemk,npm,aseemk,aseemk,,aseem.kishore@gmail.com,https://www.npmjs.com/~aseemk,,,,,,gh/4463453,,gh/4463453,1,
-npm/aspro83,npm,aspro83,aspro83,,danniintheus@gmail.com,https://www.npmjs.com/~aspro83,,,,,,gh/208362715,,gh/208362715,1,
-npm/atomiks,npm,atomiks,atomiks,,cc.glows@gmail.com,https://www.npmjs.com/~atomiks,,,,,,gh/54994103,,gh/54994103,1,
+npm/atomiks,npm,atomiks,atomiks,,cc.glows@gmail.com,https://www.npmjs.com/~atomiks,,,,,,gh/23083156|gh/54994103,,gh/23083156|gh/54994103,2,
 npm/auth0npm,npm,auth0npm,auth0npm,,devops+npm@auth0.com,https://www.npmjs.com/~auth0npm,,,,,,gh/8116861,,gh/8116861,1,
 npm/avivkeller,npm,avivkeller,avivkeller,,me@aviv.sh,https://www.npmjs.com/~avivkeller,,,,,,gh/143057914|gh/24119524|gh/48954523|gh/5400204|gh/7730086|gh/80306715,,gh/143057914|gh/24119524|gh/48954523|gh/5400204|gh/7730086|gh/80306715,6,
 npm/awaterma,npm,awaterma,awaterma,,awaterma@awaterma.net,https://www.npmjs.com/~awaterma,,,,,,gh/2606873,,gh/2606873,1,
@@ -1027,7 +1045,6 @@ npm/aws-crypto-tools-ci-bot,npm,aws-crypto-tools-ci-bot,aws-crypto-tools-ci-bot,
 npm/aws-sdk-bot,npm,aws-sdk-bot,aws-sdk-bot,,aws-sdk-js-automation@amazon.com,https://www.npmjs.com/~aws-sdk-bot,,,,,,gh/208319207|gh/87228090,,gh/208319207|gh/87228090,2,
 npm/azure-sdk,npm,azure-sdk,azure-sdk,,azure-sdk-npmjs@microsoft.com,https://www.npmjs.com/~azure-sdk,,,,,,gh/108311273,,gh/108311273,1,
 npm/azz,npm,azz,azz,,lucas@azzola.dev,https://www.npmjs.com/~azz,,,,,,gh/75104123,,gh/75104123,1,
-npm/babeljs,npm,babeljs,babeljs,,asciiguyfieri@gmail.com,https://www.npmjs.com/~babeljs,,,,,,gh/55723051,,gh/55723051,1,
 npm/bahamat,npm,bahamat,bahamat,,bahamat@digitalelf.net,https://www.npmjs.com/~bahamat,,,,,,gh/4058064|gh/4767976,,gh/4058064|gh/4767976,2,
 npm/bcoe,npm,bcoe,bcoe,,bencoe@gmail.com,https://www.npmjs.com/~bcoe,,,,,,gh/14210523|gh/15639771|gh/211950686|gh/34287546|gh/35711072|gh/39720886|gh/50258379|gh/58830287|gh/60489570|gh/81482340,,gh/14210523|gh/15639771|gh/211950686|gh/34287546|gh/35711072|gh/39720886|gh/50258379|gh/58830287|gh/60489570|gh/81482340,10,
 npm/beatgammit,npm,beatgammit,beatgammit,,t.jameson.little@gmail.com,https://www.npmjs.com/~beatgammit,,,,,,gh/2853282,,gh/2853282,1,
@@ -1040,10 +1057,10 @@ npm/bitinn,npm,bitinn,bitinn,,bitinn@gmail.com,https://www.npmjs.com/~bitinn,,,,
 npm/blakeembrey,npm,blakeembrey,blakeembrey,,hello@blakeembrey.com,https://www.npmjs.com/~blakeembrey,,,,,,gh/12823654|gh/15482433|gh/15484233|gh/15544623|gh/17533192|gh/17690272|gh/17789771|gh/19380178|gh/20498698|gh/20814275|gh/22894570|gh/22970419|gh/24216676|gh/24300217|gh/30172150|gh/3275614|gh/35914020|gh/37428186|gh/4475810|gh/4617552|gh/4627131|gh/4879977|gh/5265803|gh/60721766|gh/8274071|gh/9440238,,gh/12823654|gh/15482433|gh/15484233|gh/15544623|gh/17533192|gh/17690272|gh/17789771|gh/19380178|gh/20498698|gh/20814275|gh/22894570|gh/22970419|gh/24216676|gh/24300217|gh/30172150|gh/3275614|gh/35914020|gh/37428186|gh/4475810|gh/4617552|gh/4627131|gh/4879977|gh/5265803|gh/60721766|gh/8274071|gh/9440238,26,
 npm/blesh,npm,blesh,blesh,,ben@benlesh.com,https://www.npmjs.com/~blesh,,,,,,gh/32247847,,gh/32247847,1,
 npm/bnjmnt4n,npm,bnjmnt4n,bnjmnt4n,,demoneaux@gmail.com,https://www.npmjs.com/~bnjmnt4n,,,,,,gh/3955647,,gh/3955647,1,
-npm/boopathi,npm,boopathi,boopathi,,me@boopathi.in,https://www.npmjs.com/~boopathi,,,,,,gh/55723051,,gh/55723051,1,
 npm/bowerman,npm,bowerman,bowerman,,me@andrewbowerman.com,https://www.npmjs.com/~bowerman,,,,,,gh/991475,,gh/991475,1,
 npm/bradzacher,npm,bradzacher,bradzacher,,brad.zacher@gmail.com,https://www.npmjs.com/~bradzacher,,,,,,gh/165536154,,gh/165536154,1,
 npm/brianc,npm,brianc,brianc,,brian.m.carlson@gmail.com,https://www.npmjs.com/~brianc,,,,,,gh/991475,,gh/991475,1,
+npm/brijeshb42,npm,brijeshb42,brijeshb42,,brijeshb42@gmail.com,https://www.npmjs.com/~brijeshb42,,,,,,gh/23083156,,gh/23083156,1,
 npm/brizental,npm,brizental,brizental,,brizental@mozilla.com,https://www.npmjs.com/~brizental,,,,,,gh/2014930,,gh/2014930,1,
 npm/broofa,npm,broofa,broofa,,robert@broofa.com,https://www.npmjs.com/~broofa,,,,,,gh/1203139|gh/1208666|gh/534940,,gh/1203139|gh/1208666|gh/534940,3,
 npm/brophdawg11,npm,brophdawg11,brophdawg11,,matt@brophy.org,https://www.npmjs.com/~brophdawg11,,,,,,gh/19872456,,gh/19872456,1,
@@ -1090,8 +1107,8 @@ npm/dcousens,npm,dcousens,dcousens,,npm2023@dcousens.com,https://www.npmjs.com/~
 npm/defunctzombie,npm,defunctzombie,defunctzombie,,shtylman@gmail.com,https://www.npmjs.com/~defunctzombie,,,,,,gh/14568009|gh/1649251|gh/5265803|gh/7580644,,gh/14568009|gh/1649251|gh/5265803|gh/7580644,4,
 npm/delvedor,npm,delvedor,delvedor,,tommydelved@gmail.com,https://www.npmjs.com/~delvedor,,,,,,gh/419317518,,gh/419317518,1,
 npm/devinivy,npm,devinivy,devinivy,,devinivy@gmail.com,https://www.npmjs.com/~devinivy,,,,,,gh/5831189,,gh/5831189,1,
-npm/devongovett,npm,devongovett,devongovett,,devongovett@gmail.com,https://www.npmjs.com/~devongovett,,,,,,gh/208362715,,gh/208362715,1,
 npm/dfcreative,npm,dfcreative,dfcreative,,df.creative@gmail.com,https://www.npmjs.com/~dfcreative,,,,,,gh/27038309,,gh/27038309,1,
+npm/diegoandai,npm,diegoandai,diegoandai,,diego@mui.com,https://www.npmjs.com/~diegoandai,,,,,,gh/23083156,,gh/23083156,1,
 npm/dmitrysoshnikov,npm,dmitrysoshnikov,dmitrysoshnikov,,dmitry.soshnikov@gmail.com,https://www.npmjs.com/~dmitrysoshnikov,,,,,,gh/85459304,,gh/85459304,1,
 npm/domenic,npm,domenic,domenic,,d@domenic.me|domenic@domenicdenicola.com,https://www.npmjs.com/~domenic,,,,,,gh/1025209|gh/1981208|gh/23000311|gh/28553202|gh/34761352|gh/36964214|gh/71014420,,gh/1025209|gh/1981208|gh/23000311|gh/28553202|gh/34761352|gh/36964214|gh/71014420,7,
 npm/domyen,npm,domyen,domyen,,dom@hichroma.com,https://www.npmjs.com/~domyen,,,,,,gh/54173593,,gh/54173593,1,
@@ -1126,7 +1143,7 @@ npm/ev1stensberg,npm,ev1stensberg,ev1stensberg,,evenstensberg@gmail.com,https://
 npm/evanw,npm,evanw,evanw,,evan.exe@gmail.com,https://www.npmjs.com/~evanw,,,,,,gh/61137153|gh/7682781,,gh/61137153|gh/7682781,2,
 npm/eventualbuddha,npm,eventualbuddha,eventualbuddha,,brian@donovans.cc,https://www.npmjs.com/~eventualbuddha,,,,,,gh/47284288,,gh/47284288,1,
 npm/evilebottnawi,npm,evilebottnawi,evilebottnawi,,sheo13666q@gmail.com,https://www.npmjs.com/~evilebottnawi,,,,,,gh/143057914|gh/24119524|gh/33943153|gh/36500102|gh/40920306|gh/42766912|gh/48954523|gh/5400204|gh/6503675|gh/7730086|gh/80306715,,gh/143057914|gh/24119524|gh/33943153|gh/36500102|gh/40920306|gh/42766912|gh/48954523|gh/5400204|gh/6503675|gh/7730086|gh/80306715,11,
-npm/existentialism,npm,existentialism,existentialism,,bng412@gmail.com,https://www.npmjs.com/~existentialism,,,,,,gh/190579283|gh/24560307|gh/55723051,,gh/190579283|gh/24560307|gh/55723051,3,
+npm/existentialism,npm,existentialism,existentialism,,bng412@gmail.com,https://www.npmjs.com/~existentialism,,,,,,gh/190579283|gh/24560307,,gh/190579283|gh/24560307,2,
 npm/explodingcabbage,npm,explodingcabbage,explodingcabbage,,markrobertamery+npm@gmail.com,https://www.npmjs.com/~explodingcabbage,,,,,,gh/1542219,,gh/1542219,1,
 npm/fabiosantoscode,npm,fabiosantoscode,fabiosantoscode,,fabiosantosart@gmail.com,https://www.npmjs.com/~fabiosantoscode,,,,,,gh/29097127,,gh/29097127,1,
 npm/factorui.npm,npm,factorui.npm,factorui.npm,,factorui.npm@mozilla.com,https://www.npmjs.com/~factorui.npm,,,,,,gh/2014930,,gh/2014930,1,
@@ -1167,7 +1184,7 @@ npm/hiogawa,npm,hiogawa,hiogawa,,hi.ogawa.zz@gmail.com,https://www.npmjs.com/~hi
 npm/hjr3,npm,hjr3,hjr3,,herman@hermanradtke.com,https://www.npmjs.com/~hjr3,,,,,,gh/991475,,gh/991475,1,
 npm/hmanilla,npm,hmanilla,hmanilla,,hmanilla+npm@mozilla.com,https://www.npmjs.com/~hmanilla,,,,,,gh/2014930,,gh/2014930,1,
 npm/hueniverse,npm,hueniverse,hueniverse,,eran@hammer.io,https://www.npmjs.com/~hueniverse,,,,,,gh/5831189,,gh/5831189,1,
-npm/hzoo,npm,hzoo,hzoo,,hi@henryzoo.com,https://www.npmjs.com/~hzoo,,,,,,gh/190579283|gh/24560307|gh/55723051,,gh/190579283|gh/24560307|gh/55723051,3,
+npm/hzoo,npm,hzoo,hzoo,,hi@henryzoo.com,https://www.npmjs.com/~hzoo,,,,,,gh/190579283|gh/24560307,,gh/190579283|gh/24560307,2,
 npm/iarna,npm,iarna,iarna,,me@re-becca.org,https://www.npmjs.com/~iarna,,,,,,gh/31432421,,gh/31432421,1,
 npm/ichernev,npm,ichernev,ichernev,,me@iskren.info,https://www.npmjs.com/~ichernev,,,,,,gh/1424470,,gh/1424470,1,
 npm/ikatyang,npm,ikatyang,ikatyang,,ikatyang@gmail.com,https://www.npmjs.com/~ikatyang,,,,,,gh/75104123,,gh/75104123,1,
@@ -1180,6 +1197,7 @@ npm/jakebailey,npm,jakebailey,jakebailey,,jacob.b.bailey@gmail.com,https://www.n
 npm/jakxz,npm,jakxz,jakxz,,jasonk92@gmail.com,https://www.npmjs.com/~jakxz,,,,,,gh/211950686|gh/60489570|gh/81482340,,gh/211950686|gh/60489570|gh/81482340,3,
 npm/jameshenry,npm,jameshenry,jameshenry,,james@henry.sc,https://www.npmjs.com/~jameshenry,,,,,,gh/165536154,,gh/165536154,1,
 npm/jamestalmage,npm,jamestalmage,jamestalmage,,james@talmage.io,https://www.npmjs.com/~jamestalmage,,,,,,gh/48974178,,gh/48974178,1,
+npm/janpotoms,npm,janpotoms,janpotoms,,potoms.jan@gmail.com,https://www.npmjs.com/~janpotoms,,,,,,gh/23083156,,gh/23083156,1,
 npm/jaredhanson,npm,jaredhanson,jaredhanson,,jaredhanson@gmail.com,https://www.npmjs.com/~jaredhanson,,,,,,gh/11349896,,gh/11349896,1,
 npm/jaredwray,npm,jaredwray,jaredwray,,me@jaredwray.com,https://www.npmjs.com/~jaredwray,,,,,,gh/9267870|gh/96540810,,gh/9267870|gh/96540810,2,
 npm/jason-green,npm,jason-green,jason-green,,jasoniangreen@gmail.com,https://www.npmjs.com/~jason-green,,,,,,gh/281084700,,gh/281084700,1,
@@ -1223,7 +1241,6 @@ npm/jviereck,npm,jviereck,jviereck,,julian.viereck@gmail.com,https://www.npmjs.c
 npm/ka-weihe,npm,ka-weihe,ka-weihe,,k@weihe.dk,https://www.npmjs.com/~ka-weihe,,,,,,gh/158960628,,gh/158960628,1,
 npm/kael,npm,kael,kael,,i@kael.me,https://www.npmjs.com/~kael,,,,,,gh/12519245,,gh/12519245,1,
 npm/kamilkisiela,npm,kamilkisiela,kamilkisiela,,kamil.kisiela@gmail.com,https://www.npmjs.com/~kamilkisiela,,,,,,gh/54432168,,gh/54432168,1,
-npm/kangax,npm,kangax,kangax,,kangax@gmail.com,https://www.npmjs.com/~kangax,,,,,,gh/55723051,,gh/55723051,1,
 npm/kasperpeulen,npm,kasperpeulen,kasperpeulen,,kasperpeulen@gmail.com,https://www.npmjs.com/~kasperpeulen,,,,,,gh/54173593,,gh/54173593,1,
 npm/kassens,npm,kassens,kassens,,jkassens@fb.com,https://www.npmjs.com/~kassens,,,,,,gh/6930489,,gh/6930489,1,
 npm/kdy1,npm,kdy1,kdy1,,kdy.1997.dev@gmail.com,https://www.npmjs.com/~kdy1,,,,,,gh/115110181,,gh/115110181,1,
@@ -1257,8 +1274,9 @@ npm/ljharb,npm,ljharb,ljharb,,ljharb@gmail.com,https://www.npmjs.com/~ljharb,,,,
 npm/llisi-moz,npm,llisi-moz,llisi-moz,,llisi+npm@mozilla.com,https://www.npmjs.com/~llisi-moz,,,,,,gh/2014930,,gh/2014930,1,
 npm/lloydbenson,npm,lloydbenson,lloydbenson,,lloyd.benson@gmail.com,https://www.npmjs.com/~lloydbenson,,,,,,gh/5831189,,gh/5831189,1,
 npm/lo1tuma,npm,lo1tuma,lo1tuma,,schreck.mathias@gmail.com,https://www.npmjs.com/~lo1tuma,,,,,,gh/15186239,,gh/15186239,1,
-npm/loganfsmyth,npm,loganfsmyth,loganfsmyth,,loganfsmyth@gmail.com,https://www.npmjs.com/~loganfsmyth,,,,,,gh/132383032|gh/2014930|gh/24560307|gh/55723051,,gh/132383032|gh/2014930|gh/24560307|gh/55723051,4,
+npm/loganfsmyth,npm,loganfsmyth,loganfsmyth,,loganfsmyth@gmail.com,https://www.npmjs.com/~loganfsmyth,,,,,,gh/132383032|gh/2014930|gh/24560307,,gh/132383032|gh/2014930|gh/24560307,3,
 npm/longlho,npm,longlho,longlho,,holevietlong@gmail.com,https://www.npmjs.com/~longlho,,,,,,gh/19117456,,gh/19117456,1,
+npm/lovell,npm,lovell,lovell,,npm@lovell.info,https://www.npmjs.com/~lovell,,,,,,gh/96149091,,gh/96149091,1,
 npm/lpinca,npm,lpinca,lpinca,,luigipinca@gmail.com,https://www.npmjs.com/~lpinca,,,,,,gh/13100677|gh/2744972,,gh/13100677|gh/2744972,2,
 npm/ludovicofischer,npm,ludovicofischer,ludovicofischer,,livrerie@gmail.com,https://www.npmjs.com/~ludovicofischer,,,,,,gh/33943153,,gh/33943153,1,
 npm/lukastaegert,npm,lukastaegert,lukastaegert,,lukas.taegert@tngtech.com,https://www.npmjs.com/~lukastaegert,,,,,,gh/203607977,,gh/203607977,1,
@@ -1292,13 +1310,16 @@ npm/metro-bot,npm,metro-bot,metro-bot,,metro-maintainers@meta.com,https://www.np
 npm/michael.hicks,npm,michael.hicks,michael.hicks,,michael.hicks@joyent.com,https://www.npmjs.com/~michael.hicks,,,,,,gh/4058064|gh/4767976,,gh/4058064|gh/4767976,2,
 npm/michaeldeboey,npm,michaeldeboey,michaeldeboey,,info@michaeldeboey.be,https://www.npmjs.com/~michaeldeboey,,,,,,gh/568240379,,gh/568240379,1,
 npm/michaelficarra,npm,michaelficarra,michaelficarra,,npm@michael.ficarra.me,https://www.npmjs.com/~michaelficarra,,,,,,gh/11412938|gh/14677293|gh/27429822|gh/3611422|gh/6145439,,gh/11412938|gh/14677293|gh/27429822|gh/3611422|gh/6145439,5,
+npm/michaldudak,npm,michaldudak,michaldudak,,michal@dudak.me,https://www.npmjs.com/~michaldudak,,,,,,gh/23083156,,gh/23083156,1,
 npm/microsoft-oss-releases,npm,microsoft-oss-releases,microsoft-oss-releases,,microsoft-oss-publishing@microsoft.com,https://www.npmjs.com/~microsoft-oss-releases,,,,,,gh/108311273|gh/34414315,,gh/108311273|gh/34414315,2,
 npm/microsoft1es,npm,microsoft1es,microsoft1es,,npmjs@microsoft.com,https://www.npmjs.com/~microsoft1es,,,,,,gh/108311273|gh/20929025|gh/34414315,,gh/108311273|gh/20929025|gh/34414315,3,
 npm/mikeal,npm,mikeal,mikeal,,mikeal.rogers@gmail.com,https://www.npmjs.com/~mikeal,,,,,,gh/1755793,,gh/1755793,1,
 npm/mischah,npm,mischah,mischah,,mail@michael-kuehnel.de,https://www.npmjs.com/~mischah,,,,,,gh/10114077,,gh/10114077,1,
+npm/mj12albert,npm,mj12albert,mj12albert,,albert@albertyu.co,https://www.npmjs.com/~mj12albert,,,,,,gh/23083156,,gh/23083156,1,
 npm/mj1856,npm,mj1856,mj1856,,mj1856@hotmail.com,https://www.npmjs.com/~mj1856,,,,,,gh/1424470,,gh/1424470,1,
 npm/mjackson,npm,mjackson,mjackson,,mjijackson+npm@gmail.com,https://www.npmjs.com/~mjackson,,,,,,gh/19872456,,gh/19872456,1,
 npm/mlifshin,npm,mlifshin,mlifshin,,mlifshin+npm@mozilla.com,https://www.npmjs.com/~mlifshin,,,,,,gh/2014930,,gh/2014930,1,
+npm/mnajdova,npm,mnajdova,mnajdova,,mnajdova@gmail.com,https://www.npmjs.com/~mnajdova,,,,,,gh/23083156,,gh/23083156,1,
 npm/monteslu,npm,monteslu,monteslu,,monteslu@gmail.com,https://www.npmjs.com/~monteslu,,,,,,gh/991475,,gh/991475,1,
 npm/moox,npm,moox,moox,,npm@moox.io,https://www.npmjs.com/~moox,,,,,,gh/219192307|gh/27038309|gh/36500102|gh/40920306,,gh/219192307|gh/27038309|gh/36500102|gh/40920306,4,
 npm/motdotenv,npm,motdotenv,motdotenv,,mot@dotenv.org,https://www.npmjs.com/~motdotenv,,,,,,gh/11205780,,gh/11205780,1,
@@ -1321,7 +1342,7 @@ npm/neoziro,npm,neoziro,neoziro,,berge.greg@gmail.com,https://www.npmjs.com/~neo
 npm/nexdrew,npm,nexdrew,nexdrew,,andrewbgoode@gmail.com,https://www.npmjs.com/~nexdrew,,,,,,gh/39720886|gh/50258379,,gh/39720886|gh/50258379,2,
 npm/nick.tracey,npm,nick.tracey,nick.tracey,,nick.tracey@vercel.com,https://www.npmjs.com/~nick.tracey,,,,,,gh/3655872,,gh/3655872,1,
 npm/nickfitzgerald,npm,nickfitzgerald,nickfitzgerald,,fitzgen@gmail.com,https://www.npmjs.com/~nickfitzgerald,,,,,,gh/11461122|gh/2014930,,gh/11461122|gh/2014930,2,
-npm/nicolo-ribaudo,npm,nicolo-ribaudo,nicolo-ribaudo,,hello+npm@nicr.dev|nicolo.ribaudo@gmail.com,https://www.npmjs.com/~nicolo-ribaudo,,,,,,gh/190579283|gh/24560307|gh/253327079|gh/49437324|gh/55723051,,gh/190579283|gh/24560307|gh/253327079|gh/49437324|gh/55723051,5,
+npm/nicolo-ribaudo,npm,nicolo-ribaudo,nicolo-ribaudo,,hello+npm@nicr.dev|nicolo.ribaudo@gmail.com,https://www.npmjs.com/~nicolo-ribaudo,,,,,,gh/190579283|gh/24560307|gh/253327079|gh/49437324,,gh/190579283|gh/24560307|gh/253327079|gh/49437324,4,
 npm/niftylettuce,npm,niftylettuce,niftylettuce,,niftylettuce@gmail.com,https://www.npmjs.com/~niftylettuce,,,,,,gh/114743189|gh/1755793,,gh/114743189|gh/1755793,2,
 npm/nlf,npm,nlf,nlf,,quitlahok@gmail.com,https://www.npmjs.com/~nlf,,,,,,gh/22266795|gh/5831189,,gh/22266795|gh/5831189,2,
 npm/node-fetch-bot,npm,node-fetch-bot,node-fetch-bot,,jimmy+node-fetch@warting.se,https://www.npmjs.com/~node-fetch-bot,,,,,,gh/29849956,,gh/29849956,1,
@@ -1337,6 +1358,7 @@ npm/octokitbot,npm,octokitbot,octokitbot,,security+octokitbot@github.com,https:/
 npm/okuryu,npm,okuryu,okuryu,,okuryu@okuryu.com,https://www.npmjs.com/~okuryu,,,,,,gh/19117456|gh/24106944,,gh/19117456|gh/24106944,2,
 npm/olalonde,npm,olalonde,olalonde,,olalonde@gmail.com,https://www.npmjs.com/~olalonde,,,,,,gh/6697086,,gh/6697086,1,
 npm/oliver.moran,npm,oliver.moran,oliver.moran,,oliver@nth-iteration.ie,https://www.npmjs.com/~oliver.moran,,,,,,gh/24008065,,gh/24008065,1,
+npm/oliviertassinari,npm,oliviertassinari,oliviertassinari,,olivier.tassinari@gmail.com,https://www.npmjs.com/~oliviertassinari,,,,,,gh/23083156,,gh/23083156,1,
 npm/oozcitak,npm,oozcitak,oozcitak,,oozcitak@gmail.com,https://www.npmjs.com/~oozcitak,,,,,,gh/1042809,,gh/1042809,1,
 npm/openjs-operations,npm,openjs-operations,openjs-operations,,operations@openjsf.org,https://www.npmjs.com/~openjs-operations,,,,,,gh/15062869,,gh/15062869,1,
 npm/openjsfoundation,npm,openjsfoundation,openjsfoundation,,npm@openjsf.org,https://www.npmjs.com/~openjsfoundation,,,,,,gh/11061773|gh/27620277|gh/4286644|gh/791446923,,gh/11061773|gh/27620277|gh/4286644|gh/791446923,4,
@@ -1399,10 +1421,12 @@ npm/shellscape,npm,shellscape,shellscape,,andrew@shellscape.org,https://www.npmj
 npm/shilman,npm,shilman,shilman,,shilman@gmail.com,https://www.npmjs.com/~shilman,,,,,,gh/54173593,,gh/54173593,1,
 npm/shinnn,npm,shinnn,shinnn,,snnskwtnb@gmail.com,https://www.npmjs.com/~shinnn,,,,,,gh/10579821|gh/26001547,,gh/10579821|gh/26001547,2,
 npm/sibiraj-s,npm,sibiraj-s,sibiraj-s,,npmjs.unbroken940@passmail.com,https://www.npmjs.com/~sibiraj-s,,,,,,gh/71475907,,gh/71475907,1,
+npm/silviuaavram,npm,silviuaavram,silviuaavram,,silviu.avram91@gmail.com,https://www.npmjs.com/~silviuaavram,,,,,,gh/23083156,,gh/23083156,1,
 npm/simenb,npm,simenb,simenb,,sbekkhus91@gmail.com,https://www.npmjs.com/~simenb,,,,,,gh/143001748|gh/15062869|gh/16523712,,gh/143001748|gh/15062869|gh/16523712,3,
 npm/simoneb,npm,simoneb,simoneb,,simone.busoli@gmail.com,https://www.npmjs.com/~simoneb,,,,,,gh/419317518,,gh/419317518,1,
 npm/sinclair,npm,sinclair,sinclair,,haydn.developer@gmail.com,https://www.npmjs.com/~sinclair,,,,,,gh/87454905,,gh/87454905,1,
 npm/sindresorhus,npm,sindresorhus,sindresorhus,,sindresorhus@gmail.com,https://www.npmjs.com/~sindresorhus,,,,,,gh/11516031|gh/11803168|gh/11855007|gh/11855195|gh/14468669|gh/14847357|gh/15014856|gh/15186239|gh/16457190|gh/175398594|gh/18242629|gh/18444852|gh/18469325|gh/18938743|gh/19105307|gh/20451415|gh/20576837|gh/21005682|gh/21054113|gh/21069494|gh/21169121|gh/21304485|gh/21672939|gh/21673868|gh/22020904|gh/22022707|gh/22794601|gh/23512229|gh/23512396|gh/25116836|gh/25121561|gh/29094022|gh/29436825|gh/29769737|gh/29771015|gh/29771247|gh/29773710|gh/30900285|gh/30903733|gh/315531538|gh/31656998|gh/33590534|gh/348660847|gh/34965664|gh/38718671|gh/38923193|gh/39222301|gh/39222730|gh/40721875|gh/41053676|gh/41367145|gh/41388258|gh/41585934|gh/41723004|gh/41724281|gh/41790094|gh/41842429|gh/41905436|gh/43191689|gh/44264225|gh/47453723|gh/47475908|gh/47504070|gh/48706449|gh/48707028|gh/48783244|gh/50187748|gh/601943060|gh/62838930|gh/711160838|gh/71381729|gh/714044439|gh/71526722|gh/71534796|gh/71542716|gh/716660564|gh/73665728|gh/74265632|gh/74266248|gh/793180075|gh/795552264|gh/7985040|gh/86679721|gh/88415331|gh/90292430|gh/90776169|gh/93189529,,gh/11516031|gh/11803168|gh/11855007|gh/11855195|gh/14468669|gh/14847357|gh/15014856|gh/15186239|gh/16457190|gh/175398594|gh/18242629|gh/18444852|gh/18469325|gh/18938743|gh/19105307|gh/20451415|gh/20576837|gh/21005682|gh/21054113|gh/21069494|gh/21169121|gh/21304485|gh/21672939|gh/21673868|gh/22020904|gh/22022707|gh/22794601|gh/23512229|gh/23512396|gh/25116836|gh/25121561|gh/29094022|gh/29436825|gh/29769737|gh/29771015|gh/29771247|gh/29773710|gh/30900285|gh/30903733|gh/315531538|gh/31656998|gh/33590534|gh/348660847|gh/34965664|gh/38718671|gh/38923193|gh/39222301|gh/39222730|gh/40721875|gh/41053676|gh/41367145|gh/41388258|gh/41585934|gh/41723004|gh/41724281|gh/41790094|gh/41842429|gh/41905436|gh/43191689|gh/44264225|gh/47453723|gh/47475908|gh/47504070|gh/48706449|gh/48707028|gh/48783244|gh/50187748|gh/601943060|gh/62838930|gh/711160838|gh/71381729|gh/714044439|gh/71526722|gh/71534796|gh/71542716|gh/716660564|gh/73665728|gh/74265632|gh/74266248|gh/793180075|gh/795552264|gh/7985040|gh/86679721|gh/88415331|gh/90292430|gh/90776169|gh/93189529,87,
+npm/siriwatknp,npm,siriwatknp,siriwatknp,,siriwatkunaporn@gmail.com,https://www.npmjs.com/~siriwatknp,,,,,,gh/23083156,,gh/23083156,1,
 npm/smelukov,npm,smelukov,smelukov,,s.melukov@gmail.com,https://www.npmjs.com/~smelukov,,,,,,gh/67236461,,gh/67236461,1,
 npm/smithy-team,npm,smithy-team,smithy-team,,aws-javascript-sdk-team+npm@amazon.com,https://www.npmjs.com/~smithy-team,,,,,,gh/208319207,,gh/208319207,1,
 npm/snugug,npm,snugug,snugug,,sam@snug.ug,https://www.npmjs.com/~snugug,,,,,,gh/55424670,,gh/55424670,1,
@@ -1455,7 +1479,6 @@ npm/urigo,npm,urigo,urigo,,uri.goldshtein@gmail.com,https://www.npmjs.com/~urigo
 npm/v1,npm,v1,v1,,npm@3rd-eden.com,https://www.npmjs.com/~v1,,,,,,gh/13100677|gh/26316179|gh/2744972,,gh/13100677|gh/26316179|gh/2744972,3,
 npm/valentinpalkovic,npm,valentinpalkovic,valentinpalkovic,,dev@valentinpalkovic.dev,https://www.npmjs.com/~valentinpalkovic,,,,,,gh/54173593,,gh/54173593,1,
 npm/vercel-release-bot,npm,vercel-release-bot,vercel-release-bot,,infra+release@vercel.com,https://www.npmjs.com/~vercel-release-bot,,,,,,gh/3655872|gh/644461337,,gh/3655872|gh/644461337,2,
-npm/vignesh.shanmugam,npm,vignesh.shanmugam,vignesh.shanmugam,,vignesh.shanmugam22@gmail.com,https://www.npmjs.com/~vignesh.shanmugam,,,,,,gh/55723051,,gh/55723051,1,
 npm/vinjiang,npm,vinjiang,vinjiang,,vj_msft@live.com,https://www.npmjs.com/~vinjiang,,,,,,gh/108311273,,gh/108311273,1,
 npm/vitaly,npm,vitaly,vitaly,,vitaly@rcdesign.ru|vitaly@rcopen.com,https://www.npmjs.com/~vitaly,,,,,,gh/16231859|gh/2504175|gh/4325614,,gh/16231859|gh/2504175|gh/4325614,3,
 npm/vitestbot,npm,vitestbot,vitestbot,,vitest.dev@gmail.com,https://www.npmjs.com/~vitestbot,,,,,,gh/434708679,,gh/434708679,1,

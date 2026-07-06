@@ -46,8 +46,9 @@ def to_repo_id(raw: object) -> str:
 
     The pipeline's join key is namespaced by host: GitHub repos are keyed by
     GitHub's stable numeric Repos-API id as `gh/<id>`; GitLab repos use
-    `gl/<host>-<id>` (or a bare `gl/<id>` for gitlab.com), produced by the value
-    stage. This is idempotent: already-namespaced ids (`gh/…`, `gl/…`) and
+    `gl/<nickname>-<id>` (or a bare `gl/<id>` for gitlab.com; host nicknames per
+    `HOST_NICKNAMES` in `src/sources/gitlab/gitlab_client.py`), produced by the
+    value stage. This is idempotent: already-namespaced ids (`gh/…`, `gl/…`) and
     empties pass through unchanged; a bare legacy numeric id (`119609`) is
     promoted to `gh/119609`. Both `load_repo_ids` and `RepoEntry.repo_id` return
     this form, so every stage writer downstream of the loader emits it.
@@ -118,7 +119,7 @@ def _read_gitlab_projects(path: str = GITLAB_PROJECTS_FILE) -> dict[str, RepoEnt
     """Read data/sources/gitlab/repos.csv → {gl/ repo_id: RepoEntry}.
 
     The GitLab analogue of `_read_github_repos`'s `meta`, keyed by the stable
-    `gl/{host}-{id}` repo_id the value stage stamps onto value.csv — so a GitLab
+    `gl/{nickname}-{id}` repo_id the value stage stamps onto value.csv — so a GitLab
     top repo enriches from the GitLab project API (archived / stars / valid /
     path) instead of the GitHub Repos API. Only valid (fetched, 200) projects
     with a gl/ id are indexed; `size_kb` stays 0 (the project API doesn't expose
