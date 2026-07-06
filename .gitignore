@@ -15,3 +15,6 @@ docs/superpowers/
 
 # Repology HTML scrape cache — regenerable, never commit (parsed output is project-urls.csv)
 data/sources/repology/html-cache/
+
+# ecosyste.ms criticality raw package cache (regenerable; audit copy is local)
+data/sources/ecosystems/raw/criticality/

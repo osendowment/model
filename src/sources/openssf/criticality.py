@@ -437,11 +437,11 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     args = build_parser().parse_args()
 
-    # Archived repos are IN scope (skip_archived=False): value.csv's
-    # `criticality` column must be non-empty for every valid class-A GitHub
-    # repo, archived included — the tool scores archived repos fine.
+    # Archived repos are IN scope (load_top_slugs includes them by default):
+    # value.csv's `criticality` column must be non-empty for every valid
+    # class-A GitHub repo, archived included — the tool scores them fine.
     scope = [r.lower()
-             for r in (args.repos or load_top_slugs(skip_archived=False))]
+             for r in (args.repos or load_top_slugs())]
     scope = list(dict.fromkeys(scope))  # dedupe, preserve order
     if not scope:
         raise SystemExit("No repos — pass slugs or populate data/value/value.csv")

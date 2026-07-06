@@ -15,7 +15,7 @@ hosting — and distills them into:
    `data/eligibility/eligibility.csv` as two of the four eligibility checks.
 
 Scope: the top repos — valid class-A, **archived included**
-(`load_top_repos(skip_archived=False)`), so an archived repo keeps its funding
+(`load_top_repos()`, which includes archived by default), so an archived repo keeps its funding
 row and surfaces downstream as `active=False` rather than being dropped
 (counts in
 [stats.md → Eligibility → Intent and nonprofit](../stats.md#intent-and-nonprofit);

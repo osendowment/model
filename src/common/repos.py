@@ -176,14 +176,17 @@ def load_top_repos(
     value_file: str = VALUE_FILE,
     repos_file: str = REPOS_FILE,
     overrides_file: str = OVERRIDES_FILE,
-    skip_archived: bool = True,
+    skip_archived: bool = False,
     skip_invalid: bool = True,
 ) -> list[RepoEntry]:
     """Return the *top* repos — valid class-A — sorted by slug.
 
-    Scope = valid class-A AND not-archived, EXCEPT live-upstream GitHub
-    mirrors (kept despite an archived mirror flag). The risk pipeline runs
-    on this set: repos whose `class` in `value.csv` is one of
+    Scope = valid class-A. Archived repos are **included by default**
+    (`skip_archived=False`): the risk and eligibility stages both score them
+    and surface archival as a signal (risk rescored, eligibility `active=False`)
+    rather than dropping them silently. Pass `skip_archived=True` to exclude
+    them. The risk pipeline runs on this set: repos whose `class` in
+    `value.csv` is one of
     `settings.json top_repos.classes` (default {A}) AND whose `platform` is one
     of `top_repos.platforms` (default {github}) AND whose unified `git_valid`
     column is `True`.
@@ -200,11 +203,11 @@ def load_top_repos(
       (`browserify/events`) — the form the Search API and downstream joins need.
     - Deduped by canonical slug; highest class wins (A > B > C).
     - repo_id / archived / size_kb / stars enriched from `data/sources/github/repos.csv`.
-      `skip_archived` drops archived repos — EXCEPT live-upstream GitHub
-      mirrors (from `overrides.csv`, see `_read_live_upstream_mirror_slugs`),
-      whose archived flag is on the mirror while the real upstream is alive;
-      those are kept so they still get scored. Dropped archived slugs are
-      logged at INFO for auditability.
+      When `skip_archived=True` (opt-in), archived repos are dropped — EXCEPT
+      live-upstream GitHub mirrors (from `overrides.csv`, see
+      `_read_live_upstream_mirror_slugs`), whose archived flag is on the mirror
+      while the real upstream is alive; those are kept so they still get scored.
+      Dropped archived slugs are logged at INFO for auditability.
     - Repos missing from github/repos.csv are returned with `enriched=False`
       and default metadata; those still get processed.
     """
@@ -315,8 +318,8 @@ def load_live_upstream_mirrors(
     """Canonical slugs of live-upstream GitHub mirrors (archived-exempt).
 
     The same exemption set `load_top_repos` applies internally to its
-    `skip_archived` drop, exposed for callers that load the scope with
-    `skip_archived=False` and apply the exemption themselves — the
+    `skip_archived=True` drop, exposed for callers that load the (default)
+    archived-inclusive scope and apply the exemption themselves — the
     eligibility stage's `build_active` marks archived repos `active=False`
     EXCEPT these mirrors (archived flag on the GitHub mirror, live upstream
     elsewhere).

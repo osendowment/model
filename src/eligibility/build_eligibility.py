@@ -34,9 +34,33 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 LICENSES_FILE = DATA_DIR / "eligibility" / "licenses.csv"
 FUNDING_FILE = DATA_DIR / "eligibility" / "funding.csv"
 ACTIVE_FILE = DATA_DIR / "eligibility" / "active.csv"
+VALUE_FILE = DATA_DIR / "value" / "value.csv"
+RISK_FILE = DATA_DIR / "risk" / "risk.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility" / "eligibility.csv"
 
-FIELDS = ["repo", "repo_id", "oss", "intent", "nonprofit", "active", "eligible"]
+# Signal-completeness components. A component counts only when its cell is
+# non-empty AND non-zero — a blank is a missing signal, and a 0 (e.g. an
+# explicit eco_crit=False, or a zero risk dimension) is a null contribution.
+VALUE_COMPONENTS = ("openssf_crit", "eco_crit", "top_eco_pct")            # value.csv
+RISK_COMPONENTS = ("concentration", "complexity", "security", "workload")  # risk.csv
+
+FIELDS = ["repo", "repo_id", "oss", "intent", "nonprofit", "active", "eligible",
+          "value_comps", "risk_comps", "complete"]
+
+
+def _count_nonzero(values) -> int:
+    """How many of `values` are present AND non-zero (blank / 0 don't count)."""
+    n = 0
+    for v in values:
+        s = (v or "").strip()
+        if not s:
+            continue
+        try:
+            if float(s) != 0.0:
+                n += 1
+        except ValueError:
+            n += 1  # a non-numeric non-empty flag still counts as present
+    return n
 
 
 def build() -> list[dict]:
@@ -44,11 +68,13 @@ def build() -> list[dict]:
     # other id-capable join in the pipeline — a slug join would only be
     # safe while the intermediates are freshly co-generated; across a
     # GitHub rename with a stale intermediate it would misalign the flags.
-    eligible_scope = load_top_repos(skip_archived=False)
+    eligible_scope = load_top_repos()
     oss = load_column_by_id(LICENSES_FILE, "oss")
     intent = load_column_by_id(FUNDING_FILE, "intent")
     nonprofit = load_column_by_id(FUNDING_FILE, "nonprofit")
     active = load_column_by_id(ACTIVE_FILE, "active")
+    value_cols = {c: load_column_by_id(VALUE_FILE, c) for c in VALUE_COMPONENTS}
+    risk_cols = {c: load_column_by_id(RISK_FILE, c) for c in RISK_COMPONENTS}
 
     rows: list[dict] = []
     for entry in eligible_scope:
@@ -62,11 +88,18 @@ def build() -> list[dict]:
             "nonprofit": nonprofit.get(rid, "True") != "False",
             "active": active.get(rid, "") == "True",
         }
+        # Signal completeness: how many value / risk components carry a real
+        # (non-empty, non-zero) value, and whether the repo is fully covered.
+        value_comps = _count_nonzero(value_cols[c].get(rid, "") for c in VALUE_COMPONENTS)
+        risk_comps = _count_nonzero(risk_cols[c].get(rid, "") for c in RISK_COMPONENTS)
         rows.append({
             "repo": repo,
             "repo_id": entry.repo_id,
             **flags,
             "eligible": all(flags.values()),
+            "value_comps": value_comps,
+            "risk_comps": risk_comps,
+            "complete": value_comps >= 2 and risk_comps == 4,
         })
     return rows
 
@@ -101,6 +134,16 @@ def main() -> None:
                   f"[bold green]{n_eligible:,}[/bold green]",
                   f"[bold green]{100 * n_eligible / total:.1f}%[/bold green]", "")
     console.print(table)
+
+    # Signal completeness (value_comps ≥ 2 AND risk_comps = 4).
+    incomplete = [r for r in rows if not r["complete"]]
+    low_value = sum(1 for r in incomplete if r["value_comps"] < 2)
+    low_risk = sum(1 for r in incomplete if r["risk_comps"] < 4)
+    console.print(
+        f"\n[bold]complete[/bold] (value_comps≥2 & risk_comps=4): "
+        f"[green]{total - len(incomplete):,}[/green] / {total:,}  |  "
+        f"[yellow]incomplete {len(incomplete):,}[/yellow] "
+        f"(value_comps<2: {low_value:,}, risk_comps<4: {low_risk:,})")
 
     console.print(f"\n[dim]Wrote {total:,} repos × {len(FIELDS)} columns → {OUTPUT_FILE}[/dim]")
 

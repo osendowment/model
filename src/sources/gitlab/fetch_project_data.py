@@ -6,7 +6,8 @@ that instance and flattens the response to `data/sources/gitlab/projects.csv`.
 Owner/group metadata goes to `data/sources/gitlab/namespaces.csv`.
 
 Mirrors src/sources/github/fetch_repo_owner_data.py (same TTL/upsert/redirect
-patterns), keyed on the unified `repo_id = gl/{host}/{project_id}`.
+patterns), keyed on the unified `repo_id = gl/{host}-{project_id}` (bare
+`gl/{project_id}` for gitlab.com; see `gitlab_client.make_repo_id`).
 
 Usage:
     uv run python -m src.sources.gitlab.fetch_project_data

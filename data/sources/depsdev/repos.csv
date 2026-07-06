@@ -7,6 +7,7 @@ adobe/react-spectrum,gh/208362715,6.7,2026-04-20,109488,Apache-2.0,582,,,2026-05
 agronholm/anyio,gh/145337588,5.3,2026-04-20,90992,MIT,84,,,2026-05-03T19:09:23+00:00
 agronholm/exceptiongroup,gh/447694800,4,2026-04-20,113528,non-standard,6,,,2026-05-03T19:09:24+00:00
 ai/nanoid,gh/99401299,6.7,2026-04-20,11670,MIT,2,,,2026-05-03T19:09:26+00:00
+aio-libs-abandoned/async-timeout,gh/67703198,,,49411,,,,,2026-07-05T23:23:02+00:00
 aio-libs/aiobotocore,gh/36618494,7.7,2026-04-20,1123,Apache-2.0,25,,,2026-05-03T19:09:22+00:00
 aio-libs/aiohttp,gh/13258039,7.1,2026-05-04,36933,non-standard,260,,,2026-05-17T23:42:53+00:00
 aio-libs/aiosignal,gh/205007356,6.7,2026-04-20,39198,Apache-2.0,3,,,2026-05-03T19:09:26+00:00
@@ -27,6 +28,7 @@ amanieu/parking_lot,gh/58731560,4.1,2026-04-20,63431,Apache-2.0,77,,,2026-05-03T
 andialbrecht/sqlparse,gh/4067434,4.8,2026-04-20,16617,BSD-3-Clause,258,,,2026-05-03T19:09:27+00:00
 andrewrk/node-pend,gh/11836813,2,2026-04-20,85510,MIT,0,,,2026-05-03T19:09:27+00:00
 andyperlitch/jsbn,gh/9710533,2.5,2026-04-20,7886,non-standard,20,,,2026-05-03T19:09:28+00:00
+angular/angular-cli,gh/36891867,8.1,2026-06-22,384,MIT,307,in_progress,18,2026-07-05T23:23:04+00:00
 annotated-types/annotated-types,gh/487934134,3.6,2026-04-20,94335,MIT,11,,,2026-05-03T19:09:28+00:00
 antonk52/lilconfig,gh/238967485,3.4,2026-04-20,58844,MIT,4,,,2026-05-03T19:09:32+00:00
 apache/airflow,gh/33884891,7.5,2026-04-20,4191,Apache-2.0,1719,,,2026-05-03T19:09:33+00:00
@@ -36,6 +38,7 @@ archlinux/linux,gh/142707813,,,,,,,,2026-05-17T23:42:49+00:00
 ardatan/graphql-tools,gh/54432168,5.9,2026-04-20,23755,MIT,159,,,2026-05-03T19:09:34+00:00
 ardatan/whatwg-node,gh/429511342,,,9709,MIT,14,,,2026-05-03T19:09:32+00:00
 assert-rs/snapbox,gh/424722460,,,12,Apache-2.0,46,,,2026-05-03T19:09:32+00:00
+astanin/python-tabulate,gh/205875548,4,2026-06-22,14075,MIT,77,,,2026-07-05T23:23:03+00:00
 astral-sh/ruff,gh/523043277,,,1836,MIT,1960,,,2026-05-03T19:09:33+00:00
 auth0/node-jwa,gh/8116861,,,,MIT,17,,,2026-05-17T23:42:52+00:00
 autotools-mirror/autoconf,gh/47662429,,,,GPL-2.0,0,,,2026-05-03T19:09:33+00:00
@@ -51,6 +54,7 @@ azure/msrest-for-python,gh/71186468,3.6,2026-04-20,1176,MIT,0,,,2026-05-03T19:09
 azuread/microsoft-authentication-library-for-python,gh/67243113,6.5,2026-04-20,2308,non-standard,80,,,2026-05-03T19:09:36+00:00
 babel/babel,gh/24560307,7.2,2026-04-20,17860474,MIT,753,in_progress,27,2026-05-03T19:09:51+00:00
 babel/babel-polyfills,gh/190579283,4.6,2026-04-20,415388,MIT,32,,,2026-05-03T19:09:36+00:00
+babel/minify,gh/55723051,3.4,2026-06-22,60758,MIT,201,,,2026-07-05T23:23:06+00:00
 bdwgc/bdwgc,gh/2109456,,,,non-standard,186,in_progress,97,2026-05-17T23:42:52+00:00
 beatgammit/base64-js,gh/2853282,2.1,2026-04-20,467134,MIT,4,,,2026-05-03T19:09:37+00:00
 benjaminp/six,gh/77868600,3.9,2026-04-20,170000,MIT,109,,,2026-05-03T19:09:37+00:00
@@ -115,6 +119,7 @@ colorjs/color-name,gh/27038309,2.5,2026-04-20,52431,MIT,0,,,2026-05-03T19:10:16+
 comex/rust-shlex,gh/37886228,3.6,2026-04-20,42884,non-standard,5,,,2026-05-03T19:10:16+00:00
 component/escape-html,gh/5444800,2,2026-04-20,334855,MIT,2,,,2026-05-03T19:10:17+00:00
 component/toidentifier,gh/114743189,2.8,2026-04-20,328769,MIT,1,,,2026-05-03T19:10:17+00:00
+composefs/tar-rs,gh/21946092,,,161,Apache-2.0,135,,,2026-07-05T23:23:02+00:00
 conventional-changelog/commitlint,gh/51575745,5.9,2026-04-20,36171,MIT,166,,,2026-05-03T19:10:18+00:00
 conventional-changelog/conventional-changelog,gh/15639771,4.7,2026-04-20,13603,non-standard,249,,,2026-05-03T19:10:18+00:00
 cosmiconfig/cosmiconfig,gh/45750507,5.4,2026-04-20,18566,MIT,16,,,2026-05-03T19:10:17+00:00
@@ -146,6 +151,7 @@ defunctzombie/node-process,gh/7580644,2.1,2026-05-04,,MIT,16,,,2026-05-17T23:42:
 django/asgiref,gh/48501860,4,2026-04-20,16040,BSD-3-Clause,73,,,2026-05-03T19:10:31+00:00
 djc/rustc-version-rs,gh/41272773,,,11413,Apache-2.0,0,,,2026-05-03T19:10:31+00:00
 dmitrysoshnikov/regexp-tree,gh/85459304,2.9,2026-04-20,8850,MIT,52,,,2026-05-03T19:10:31+00:00
+docutils/docutils,gh/44840244,,,6456,,6,,,2026-07-05T23:23:03+00:00
 dominictarr/through,gh/4885140,2.1,2026-04-20,263063,non-standard,13,,,2026-05-03T19:10:32+00:00
 doowb/ansi-colors,gh/47135420,2.1,2026-04-20,45528,MIT,19,,,2026-05-03T19:10:32+00:00
 douglasdwyer/wasm_sync,gh/668034655,,,11,,0,,,2026-05-03T19:10:32+00:00
@@ -277,12 +283,14 @@ googleapis/google-cloud-node-core,gh/1052931509,,,40071,Apache-2.0,1,,,2026-05-0
 googleapis/google-cloud-python,gh/16316451,6.9,2026-05-04,5296,Apache-2.0,1051,,,2026-05-17T23:43:03+00:00
 googleapis/google-resumable-media-python,gh/88091939,6,2026-04-20,3853,Apache-2.0,0,,,2026-05-03T19:11:54+00:00
 googleapis/python-api-core,gh/226992456,7.1,2026-04-20,8933,Apache-2.0,0,,,2026-05-03T19:11:54+00:00
+googleapis/python-cloud-core,gh/226992462,6.6,2026-06-22,4210,Apache-2.0,0,,,2026-07-05T23:23:01+00:00
 googleapis/python-crc32c,gh/159736041,7.5,2026-04-20,6740,Apache-2.0,0,,,2026-05-03T19:11:54+00:00
 googleapis/python-storage,gh/226992639,5.8,2026-04-20,2651,Apache-2.0,0,,,2026-05-03T19:11:55+00:00
 googlechrome/workbox,gh/55424670,5,2026-04-20,6526,MIT,81,,,2026-05-03T19:11:56+00:00
 gozala/events,gh/1649251,3.5,2026-04-20,182915,MIT,13,,,2026-05-03T19:11:55+00:00
 gpg/libgpg-error,gh/42075984,,,,GPL-2.0,2,,,2026-05-03T19:11:55+00:00
 grahamdumpleton/wrapt,gh/10357291,3.8,2026-04-20,18198,non-standard,0,,,2026-05-03T19:11:55+00:00
+grantjenks/python-sortedcontainers,gh/17144859,2.7,2026-06-22,11058,non-standard,35,,,2026-07-05T23:23:03+00:00
 graydon/exhaustigen-rs,gh/432630522,,,2,,4,,,2026-05-03T19:11:56+00:00
 gregberge/svgr,gh/102155012,4.9,2026-04-20,32580,MIT,143,,,2026-05-03T19:11:56+00:00
 grncdr/merge-stream,gh/10579821,2.5,2026-04-20,169478,MIT,0,,,2026-05-03T19:11:56+00:00
@@ -296,6 +304,7 @@ hapijs/hoek,gh/5831189,3.9,2026-04-20,9313,non-standard,3,,,2026-05-03T19:11:59+
 harfbuzz/harfbuzz,gh/5050525,7.8,2026-04-20,,non-standard,89,in_progress,97,2026-05-03T19:11:58+00:00
 hiddentao/fast-levenshtein,gh/9490451,2.3,2026-04-20,4260,MIT,10,,,2026-05-03T19:12:00+00:00
 httplib2/httplib2,gh/53002916,5.3,2026-04-20,5514,non-standard,61,,,2026-05-03T19:12:00+00:00
+huggingface/huggingface_hub,gh/323591830,6.4,2026-06-22,18364,Apache-2.0,207,,,2026-07-05T23:23:03+00:00
 hukkin/tomli,gh/370616797,5,2026-04-20,51844,MIT,7,,,2026-05-03T19:12:01+00:00
 hyperium/http,gh/84983058,5.1,2026-04-20,2778,Apache-2.0,176,,,2026-05-03T19:12:01+00:00
 hyperium/http-body,gh/183281612,3.9,2026-04-20,1676,MIT,26,,,2026-05-03T19:12:01+00:00
@@ -341,6 +350,7 @@ isaacs/cliui,gh/634056857,,,13248,non-standard,0,,,2026-05-03T19:12:26+00:00
 isaacs/core-util-is,gh/12391440,3,2026-04-20,530596,MIT,3,,,2026-05-03T19:12:27+00:00
 isaacs/fs-minipass,gh/102982143,,,,non-standard,3,,,2026-05-17T23:42:50+00:00
 isaacs/fs.realpath,gh/61231712,3.4,2026-04-20,520523,non-standard,0,,,2026-05-03T19:12:27+00:00
+isaacs/inflight-deprecated-do-not-use,gh/19442260,,,557688,,,,,2026-07-05T23:23:00+00:00
 isaacs/inherits,gh/1580001,3.6,2026-04-20,1198563,non-standard,6,,,2026-05-03T19:12:27+00:00
 isaacs/isexe,gh/49804297,5.4,2026-04-20,6423,non-standard,6,,,2026-05-03T19:12:27+00:00
 isaacs/minimatch,gh/2056549,6.2,2026-04-20,69367,non-standard,7,,,2026-05-03T19:12:28+00:00
@@ -526,6 +536,7 @@ medikoo/d,gh/10817569,2.8,2026-04-20,113525,non-standard,6,,,2026-05-03T19:14:05
 medikoo/es5-ext,gh/1792941,3.1,2026-04-20,227076,non-standard,46,,,2026-05-03T19:14:05+00:00
 medikoo/es6-symbol,gh/14423385,3.1,2026-04-20,113480,non-standard,2,,,2026-05-03T19:14:05+00:00
 medikoo/type,gh/177198492,3.2,2026-04-20,113662,non-standard,5,,,2026-05-03T19:14:05+00:00
+meinersbur/isl,gh/37677854,,,,MIT,1,,,2026-07-05T23:23:00+00:00
 mhammond/pywin32,gh/108187130,4.8,2026-04-20,1107,,395,,,2026-05-03T19:14:05+00:00
 micheles/decorator,gh/14656555,4.1,2026-04-20,23174,non-standard,13,,,2026-05-03T19:14:06+00:00
 micromark/micromark,gh/157420458,3.6,2026-04-20,281631,MIT,10,,,2026-05-03T19:14:15+00:00
@@ -540,6 +551,7 @@ microsoft/tslib,gh/34414315,7,2026-04-20,1452364,non-standard,60,,,2026-05-03T19
 microsoft/typescript,gh/20929025,7.9,2026-04-20,4424,Apache-2.0,5036,,,2026-05-03T19:14:16+00:00
 microsoft/windows-rs,gh/208102250,5.4,2026-04-20,223540,Apache-2.0,42,,,2026-05-03T19:14:18+00:00
 minimistjs/minimist,gh/549230701,5.3,2026-04-20,578963,MIT,14,,,2026-05-03T19:14:16+00:00
+mirror/ncurses,gh/22324756,,,,non-standard,2,,,2026-07-05T23:23:00+00:00
 mitsuhiko/insta,gh/165561258,4,2026-04-20,13,Apache-2.0,75,,,2026-05-03T19:14:16+00:00
 mlocati/gettext-iconv-windows,gh/12751919,,,,,,,,2026-05-03T19:14:17+00:00
 mm2/little-cms,gh/507969,6.4,2026-04-20,,MIT,10,,,2026-05-03T19:14:17+00:00
@@ -552,6 +564,7 @@ mrabarnett/mrab-regex,gh/309446978,4.9,2026-04-20,29140,non-standard,77,,,2026-0
 mrmlnc/fast-glob,gh/77467076,3.2,2026-04-20,169714,MIT,41,,,2026-05-03T19:14:19+00:00
 msgpack/msgpack-python,gh/2242705,5,2026-04-20,14482,non-standard,10,,,2026-05-03T19:14:19+00:00
 mvdnes/spin-rs,gh/21686666,5.5,2026-04-20,309,MIT,11,,,2026-05-03T19:14:20+00:00
+myrne/performance-now,gh/10219264,,,257482,MIT,19,,,2026-07-05T23:23:02+00:00
 mysticatea/abort-controller,gh/105228556,2.1,2026-04-20,119972,MIT,24,,,2026-05-03T19:14:20+00:00
 mysticatea/event-target-shim,gh/31137469,3,2026-04-20,927,MIT,29,,,2026-05-03T19:14:20+00:00
 netflix/vmaf,gh/51317975,2.8,2026-05-04,,non-standard,96,,,2026-05-17T23:42:55+00:00
@@ -624,6 +637,7 @@ pkgconf/pkgconf,gh/4180110,4.7,2026-04-20,,non-standard,8,,,2026-05-03T19:15:03+
 pnggroup/libpng,gh/3768025,,,,non-standard,185,,,2026-05-17T23:43:03+00:00
 postcss/postcss,gh/13078968,6,2026-04-20,206012,MIT,28,,,2026-05-03T19:15:03+00:00
 postcss/postcss-selector-parser,gh/36500102,3.6,2026-04-20,63413,MIT,37,,,2026-05-03T19:15:04+00:00
+postcss/postcss-value-parser,gh/40920306,,,138318,,,,,2026-07-05T23:23:01+00:00
 prettier/prettier,gh/75104123,6.8,2026-04-20,13097,MIT,1475,,,2026-05-03T19:15:04+00:00
 primus/eventemitter3,gh/13100677,2.9,2026-04-20,64842,MIT,21,,,2026-05-03T19:15:04+00:00
 proptest-rs/proptest,gh/94702898,,,2270,Apache-2.0,139,,,2026-05-03T19:15:04+00:00
@@ -659,12 +673,14 @@ python-greenlet/greenlet,gh/3003137,4.8,2026-04-20,26791,non-standard,21,,,2026-
 python-hyper/brotlicffi,gh/43543393,5.4,2026-04-20,47,MIT,13,,,2026-05-03T19:15:19+00:00
 python-hyper/h11,gh/57372073,4.4,2026-04-20,90269,MIT,37,,,2026-05-03T19:15:19+00:00
 python-jsonschema/jsonschema,gh/3072629,7.6,2026-04-20,44728,MIT,52,,,2026-05-03T19:15:20+00:00
+python-jsonschema/jsonschema-specifications,gh/582755777,4.5,2026-06-22,53049,MIT,0,,,2026-07-05T23:23:01+00:00
 python-jsonschema/referencing,gh/569027868,6.7,2026-04-20,46337,MIT,17,,,2026-05-03T19:15:20+00:00
 python-pillow/pillow,gh/5171600,8.2,2026-05-04,80569,non-standard,130,,,2026-05-17T23:43:05+00:00
 python-poetry/poetry,gh/123303402,2.8,2026-05-04,279,MIT,555,,,2026-05-17T23:43:05+00:00
 python-poetry/poetry-core,gh/238972646,5.8,2026-04-20,,MIT,22,,,2026-05-03T19:15:20+00:00
 python-poetry/tomlkit,gh/140365570,,,6382,MIT,38,,,2026-05-03T19:15:20+00:00
 python-trio/sniffio,gh/142657210,4.5,2026-04-20,32648,non-standard,12,,,2026-05-03T19:15:21+00:00
+python/cpython,gh/81598961,7.9,2026-06-22,,non-standard,9415,passing,169,2026-07-05T23:23:00+00:00
 python/importlib_metadata,gh/306448340,5.7,2026-04-20,44301,,12,,,2026-05-03T19:15:21+00:00
 python/importlib_resources,gh/306147182,5.2,2026-04-20,14062,,7,,,2026-05-03T19:15:21+00:00
 python/mypy,gh/7053637,6.9,2026-04-20,1427,non-standard,3138,,,2026-05-03T19:15:21+00:00
@@ -684,6 +700,9 @@ raynos/function-bind,gh/10727014,4.5,2026-04-20,1102752,MIT,1,,,2026-05-03T19:15
 raynos/xtend,gh/4419184,2.8,2026-04-20,330720,MIT,0,,,2026-05-03T19:15:39+00:00
 rayon-rs/either,gh/42479602,,,35413,Apache-2.0,19,,,2026-05-03T19:15:40+00:00
 rayon-rs/rayon,gh/24725038,4.5,2026-04-20,29595,Apache-2.0,217,,,2026-05-03T19:15:40+00:00
+react/create-react-app,gh/63537249,,,376088,,,,,2026-07-05T23:23:04+00:00
+react/metro,gh/76504246,,,874,MIT,458,,,2026-07-05T23:23:05+00:00
+react/react,gh/10270250,,,238804,MIT,1255,,,2026-07-05T23:23:05+00:00
 reactivex/rxjs,gh/32247847,5.3,2026-04-20,145630,Apache-2.0,294,,,2026-05-03T19:15:40+00:00
 realpython/pytest-mypy,gh/69576530,,,5,MIT,8,,,2026-05-03T19:15:40+00:00
 remix-run/react-router,gh/19872456,5.1,2026-04-20,49954,MIT,163,,,2026-05-03T19:15:41+00:00
@@ -702,6 +721,7 @@ rust-cli/env_logger,gh/96382888,6.2,2026-04-20,2416,Apache-2.0,46,,,2026-05-03T1
 rust-embedded/critical-section,gh/365854323,4.2,2026-04-20,1776,Apache-2.0,2,,,2026-05-03T19:15:47+00:00
 rust-fuzz/arbitrary,gh/90591032,4.4,2026-04-20,1379,Apache-2.0,36,,,2026-05-03T19:15:47+00:00
 rust-itertools/itertools,gh/22360263,5.4,2026-04-20,1835,Apache-2.0,180,,,2026-05-03T19:15:48+00:00
+rust-lang-deprecated/tempdir,gh/31728565,,,2250,,,,,2026-07-05T23:23:02+00:00
 rust-lang-nursery/lazy-static.rs,gh/21157492,5.5,2026-04-20,42497,Apache-2.0,35,,,2026-05-03T19:15:48+00:00
 rust-lang/cc-rs,gh/26039547,7.3,2026-04-20,81343,Apache-2.0,160,,,2026-05-03T19:15:48+00:00
 rust-lang/cfg-if,gh/38723660,3.9,2026-04-20,80588,Apache-2.0,6,,,2026-05-03T19:15:48+00:00
@@ -728,6 +748,7 @@ rustcrypto/hashes,gh/74106774,4.8,2026-04-20,806,,31,,,2026-05-03T19:16:01+00:00
 rustcrypto/stream-ciphers,gh/83051505,5,2026-04-20,15,,6,,,2026-05-03T19:16:01+00:00
 rustcrypto/traits,gh/85605821,5.2,2026-04-20,2675,,50,,,2026-05-03T19:16:02+00:00
 rustcrypto/utils,gh/77307442,4.6,2026-04-20,15907,,27,,,2026-05-03T19:16:03+00:00
+rvagg/archived-prr,gh/9151864,,,98555,,,,,2026-07-05T23:23:04+00:00
 rvagg/bl,gh/10706095,4.4,2026-04-20,41,non-standard,1,,,2026-05-03T19:16:02+00:00
 rvagg/prr,gh/9151864,2.1,2026-04-20,98540,MIT,0,,,2026-05-03T19:16:02+00:00
 rvagg/through2,gh/11808187,2.9,2026-04-20,14582,MIT,6,,,2026-05-03T19:16:03+00:00
@@ -751,6 +772,7 @@ servo/rust-smallvec,gh/33456236,3.9,2026-04-20,38847,Apache-2.0,51,,,2026-05-03T
 servo/rust-url,gh/14934771,6.1,2026-04-20,84896,Apache-2.0,178,,,2026-05-03T19:16:15+00:00
 shtylman/node-process,gh/7580644,2.1,2026-04-20,202456,MIT,16,,,2026-05-03T19:16:15+00:00
 sinclairzx81/sinclair-typebox,gh/1122129819,,,43480,non-standard,1,,,2026-05-03T19:16:15+00:00
+sinclairzx81/typebox,gh/87454905,4.2,2026-06-22,43837,non-standard,5,,,2026-07-05T23:23:04+00:00
 sindresorhus/ansi-escapes,gh/40721875,3.8,2026-04-20,9190,MIT,1,,,2026-05-03T19:16:16+00:00
 sindresorhus/array-union,gh/21005682,3.7,2026-04-20,2583,MIT,0,,,2026-05-03T19:16:16+00:00
 sindresorhus/binary-extensions,gh/29771015,3.9,2026-04-20,381,MIT,0,,,2026-05-03T19:16:16+00:00
@@ -890,6 +912,7 @@ tokio-rs/tracing,gh/165289175,6.1,2026-04-20,67889,MIT,826,,,2026-05-03T19:17:38
 toml-rs/toml,gh/95902102,7.8,2026-04-20,0,Apache-2.0,61,,,2026-05-03T19:17:37+00:00
 tootallnate/proxy-agents,gh/11293703,4,2026-04-20,5648,,42,,,2026-05-03T19:17:38+00:00
 tootallnate/util-deprecate,gh/19321056,2.3,2026-04-20,783078,MIT,1,,,2026-05-03T19:17:38+00:00
+torvalds/linux,gh/2325298,3,2026-06-22,,non-standard,3,,,2026-07-05T23:23:05+00:00
 tower-rs/tower,gh/98244646,4.7,2026-04-20,17772,MIT,87,,,2026-05-03T19:17:39+00:00
 tox-dev/filelock,gh/17098256,,,27639,MIT,0,,,2026-05-03T19:17:39+00:00
 tox-dev/platformdirs,gh/367032142,,,43671,MIT,0,,,2026-05-03T19:17:39+00:00
@@ -901,6 +924,7 @@ trysound/postcss-value-parser,gh/40920306,2.8,2026-04-20,137839,MIT,23,,,2026-05
 tsconfig/bases,gh/263697285,4.5,2026-04-20,33180,MIT,53,,,2026-05-03T19:17:40+00:00
 tukaani-project/xz,gh/553665726,5.8,2026-04-20,,non-standard,6,,,2026-05-03T19:17:40+00:00
 typescript-eslint/typescript-eslint,gh/165536154,5.8,2026-04-20,128211,MIT,302,,,2026-05-03T19:17:42+00:00
+typeshed-internal/stub_uploader,gh/331669593,5,2026-06-22,4655,Apache-2.0,12,,,2026-07-05T23:23:06+00:00
 unicode-org/icu,gh/49244766,9,2026-05-04,,non-standard,116,passing,149,2026-05-17T23:43:16+00:00
 unicode-org/icu4x,gh/243395141,6.4,2026-04-20,280,non-standard,662,,,2026-05-03T19:17:42+00:00
 unicode-rs/unicode-xid,gh/34637906,3.2,2026-04-20,9574,non-standard,6,,,2026-05-03T19:17:40+00:00
@@ -923,6 +947,7 @@ wbond/asn1crypto,gh/36823669,4.3,2026-04-20,1747,MIT,62,,,2026-05-03T19:17:46+00
 webmproject/libwebp,gh/23368445,3.2,2026-04-20,,BSD-3-Clause,4,,,2026-05-03T19:17:47+00:00
 webpack/enhanced-resolve,gh/5400204,5.6,2026-04-20,71508,MIT,10,,,2026-05-03T19:17:47+00:00
 webpack/loader-utils,gh/6503675,5.1,2026-04-20,46248,MIT,14,,,2026-05-03T19:17:47+00:00
+webpack/minimizer-webpack-plugin,gh/143057914,,,45610,MIT,7,,,2026-07-05T23:23:05+00:00
 webpack/schema-utils,gh/80306715,4.2,2026-04-20,63263,MIT,7,,,2026-05-03T19:17:48+00:00
 webpack/tapable,gh/7730086,5.7,2026-04-20,76332,MIT,3,,,2026-05-03T19:17:48+00:00
 webpack/terser-webpack-plugin,gh/143057914,,,59161,MIT,4,,,2026-05-03T19:17:48+00:00

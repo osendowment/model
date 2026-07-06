@@ -30,7 +30,7 @@ def test_active_truth_table(monkeypatch):
         RepoEntry(repo="dead/eol", repo_id="4"),
     ]
     monkeypatch.setattr(ba, "load_top_repos",
-                        lambda skip_archived: entries)
+                        lambda *a, **k: entries)
     # eol override joined by repo_id — the slug may drift after a rename
     monkeypatch.setattr(ba, "load_eol_overrides", lambda: ({"4": True}, {}))
     monkeypatch.setattr(ba, "load_live_upstream_mirrors",

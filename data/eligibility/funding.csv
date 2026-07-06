@@ -66,7 +66,7 @@ boto/botocore,gh/6670942,False,0,0,0,100.0,1613,1153,False,False,,False,False,,F
 boto/s3transfer,gh/49535299,False,0,0,0,100.0,232,152,False,False,,False,False,,False,,,False,0,,0,100.0,,,amazon.com,company,0,1,True,False
 brianc/node-postgres,gh/991475,True,16,0,16,24.95,13114,1309,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,63,True,True
 broofa/mime,gh/534940,True,5,0,5,33.76,2355,322,True,True,github,False,True,https://github.com/sponsors/broofa,False,,,True,2,,0,100.0,,,,,1,70,True,True
-broofa/node-int64,gh/1208666,,,0,0,100.0,205,45,,,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,True,True
+broofa/node-int64,gh/1208666,,,0,0,100.0,205,45,,,,False,False,,False,,,True,0,,0,100.0,,,,,1,100,True,True
 browserify/events,gh/1649251,False,0,0,0,100.0,1409,174,True,True,tidelift,False,False,,False,,,False,1,,0,100.0,,,,,1,79,True,True
 browserify/node-util,gh/14568009,False,0,0,0,100.0,254,92,True,True,tidelift,False,False,,False,,,True,1,,0,100.0,,,,,1,79,True,True
 browserify/randombytes,gh/29300004,False,0,0,0,100.0,102,47,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,True,True
@@ -158,7 +158,7 @@ dtolnay/dissimilar,gh/229514821,True,126,0,126,11.36,238,16,True,True,github,Fal
 dtolnay/indoc,gh/54252316,True,126,0,126,11.36,778,24,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,48,True,True
 dtolnay/itoa,gh/61962375,True,126,0,126,11.36,368,44,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,48,True,True
 dtolnay/no-panic,gh/143469762,True,126,0,126,11.36,1190,18,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,48,True,True
-dtolnay/paste,gh/155652490,,,0,0,100.0,1086,70,,,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,True,True
+dtolnay/paste,gh/155652490,,,0,0,100.0,1086,70,,,,False,False,,False,,,True,0,,0,100.0,,,,,1,100,True,True
 dtolnay/proc-macro2,gh/91860126,True,126,0,126,11.36,917,136,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,48,True,True
 dtolnay/quote,gh/67273122,True,126,0,126,11.36,1537,112,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,48,True,True
 dtolnay/ref-cast,gh/106295902,True,126,0,126,11.36,219,20,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,48,True,True
@@ -207,7 +207,7 @@ executablebooks/mdurl,gh/387293763,False,0,0,0,100.0,14,11,False,False,,False,Fa
 exodusoss/bytes,gh/885154008,False,0,0,0,100.0,14,5,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 expressjs/body-parser,gh/15669006,False,0,0,0,100.0,5501,753,True,True,open_collective,False,True,https://opencollective.com/express,False,,,False,2,,0,100.0,,,,,1,79,True,True
 expressjs/serve-static,gh/17464338,False,0,0,0,100.0,1424,240,True,True,open_collective,False,True,https://opencollective.com/express,False,,,False,2,,0,100.0,,,,,1,79,True,True
-facebook/prop-types,gh/87597642,,,0,0,100.0,4455,348,,,,False,False,,False,,,False,0,for-the-mage,0,100.0,,,,,1,100,True,True
+facebook/prop-types,gh/87597642,,,0,0,100.0,4455,348,,,,False,False,,False,,,True,0,for-the-mage,0,100.0,,,,,1,100,True,True
 facebook/regenerator,gh/13346571,,,0,0,100.0,3831,1140,,,,False,False,,False,,,False,0,for-the-mage,0,100.0,,,,,1,100,True,True
 facebook/watchman,gh/6930489,False,0,0,0,100.0,13570,1060,False,False,,False,False,,False,,,True,0,,0,100.0,,,meta.com,company,0,1,True,False
 facebook/zstd,gh/29759715,False,0,0,0,100.0,27026,2465,False,False,,False,False,,False,,,False,0,,0,100.0,,,meta.com,company,0,1,True,False
@@ -335,7 +335,7 @@ isaacs/cliui,gh/634056857,True,22,0,22,21.97,2,2,True,True,github,False,False,,F
 isaacs/core-util-is,gh/12391440,True,22,0,22,21.97,101,20,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,60,True,True
 isaacs/fs-minipass,gh/102982143,True,22,0,22,21.97,20,4,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,60,True,True
 isaacs/fs.realpath,gh/61231712,True,22,0,22,21.97,25,11,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,60,True,True
-isaacs/inflight-deprecated-do-not-use,gh/19442260,,,0,0,100.0,76,18,,,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,True,True
+isaacs/inflight-deprecated-do-not-use,gh/19442260,,,0,0,100.0,76,18,,,,False,False,,False,,,True,0,,0,100.0,,,,,1,100,True,True
 isaacs/inherits,gh/1580001,True,22,0,22,21.97,353,84,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,60,True,True
 isaacs/isexe,gh/49804297,True,22,0,22,21.97,52,20,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,60,True,True
 isaacs/minimatch,gh/2056549,True,22,0,22,21.97,3500,336,True,True,github,False,True,https://github.com/sponsors/isaacs,False,,,True,2,,0,100.0,,,,,1,60,True,True
@@ -368,7 +368,7 @@ jbgutierrez/path-parse,gh/34113780,False,0,0,0,100.0,56,36,False,False,,False,Fa
 jd/tenacity,gh/65468547,True,2,0,2,39.38,8565,324,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,73,True,True
 jensyt/imurmurhash-js,gh/11802843,False,0,0,0,100.0,103,6,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 jestjs/jest,gh/15062869,False,0,0,0,100.0,45339,6644,True,True,open_collective,False,False,,False,,,True,1,,0,100.0,lf/openjs,nonprofit,,,0.5,79,True,True
-jimmywarting/node-domexception,gh/371470141,,,,0,100.0,12,3,,,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
+jimmywarting/node-domexception,gh/371470141,,,,0,100.0,12,3,,,,False,False,,False,,,True,0,,0,100.0,,,,,1,100,True,True
 jimp-dev/jimp,gh/24008065,False,0,0,0,100.0,14601,779,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,100,True,True
 jmespath/jmespath.py,gh/8300763,False,0,0,0,100.0,2432,197,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 joblib/joblib,gh/654608,False,0,0,0,100.0,4341,451,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
@@ -798,7 +798,7 @@ sindresorhus/package-directory,gh/41724281,True,186,12,198,8.6,251,21,True,False
 sindresorhus/parent-module,gh/50187748,True,186,12,198,8.6,78,10,True,False,"github,open_collective,custom,tidelift",False,True,https://github.com/sponsors/sindresorhus,False,,,True,5,sindresorhus,297.51,15.92,,,,,1,24,True,True
 sindresorhus/parse-json,gh/41367145,True,186,12,198,8.6,371,38,True,False,"github,open_collective,buy_me_a_coffee,custom",False,True,https://github.com/sponsors/sindresorhus,False,,,True,5,sindresorhus,297.51,15.92,,,,,1,24,True,True
 sindresorhus/path-exists,gh/34965664,True,186,12,198,8.6,156,20,True,False,"github,open_collective,tidelift,custom",False,False,,False,,,True,4,sindresorhus,297.51,15.92,,,,,1,24,True,True
-sindresorhus/path-is-absolute,gh/30900285,,,12,12,27.28,43,10,,,,False,False,,False,,,False,0,sindresorhus,297.51,15.92,,,,,1,35,True,True
+sindresorhus/path-is-absolute,gh/30900285,,,12,12,27.28,43,10,,,,False,False,,False,,,True,0,sindresorhus,297.51,15.92,,,,,1,35,True,True
 sindresorhus/path-key,gh/48706449,True,186,12,198,8.6,46,14,True,False,"github,open_collective,buy_me_a_coffee,custom",False,True,https://github.com/sponsors/sindresorhus,False,,,True,5,sindresorhus,297.51,15.92,,,,,1,24,True,True
 sindresorhus/path-type,gh/41905436,True,186,12,198,8.6,80,15,True,False,"github,open_collective,buy_me_a_coffee,custom",False,True,https://github.com/sponsors/sindresorhus,False,,,True,5,sindresorhus,297.51,15.92,,,,,1,24,True,True
 sindresorhus/pify,gh/41585934,True,186,12,198,8.6,1510,71,True,False,"github,open_collective,tidelift,custom",False,True,https://github.com/sponsors/sindresorhus,False,,,True,5,sindresorhus,297.51,15.92,,,,,1,24,True,True
@@ -908,7 +908,7 @@ watson/ci-info,gh/71475907,False,0,0,0,100.0,364,56,True,True,github,False,True,
 wbond/asn1crypto,gh/36823669,True,4,0,4,36.2,359,146,True,True,"github,tidelift",False,False,,False,,,True,2,,0,100.0,,,,,1,71,True,True
 webmproject/libwebp,gh/23368445,False,0,0,0,100.0,2309,598,False,False,,False,False,,False,,,False,0,,0,100.0,,,google.com,company,0,1,True,False
 webpack/enhanced-resolve,gh/5400204,False,0,0,0,100.0,982,203,True,True,open_collective,False,False,,False,,,True,1,webpack,23866.86,2.76,,,,,1,30,True,True
-webpack/loader-utils,gh/6503675,,,0,0,100.0,772,188,,,,False,False,,False,,,False,0,webpack,23866.86,2.76,,,,,1,30,True,True
+webpack/loader-utils,gh/6503675,,,0,0,100.0,772,188,,,,False,False,,False,,,True,0,webpack,23866.86,2.76,,,,,1,30,True,True
 webpack/minimizer-webpack-plugin,gh/143057914,False,0,0,0,100.0,1961,166,True,True,open_collective,False,False,,False,,,True,1,webpack,23866.86,2.76,,,,,1,30,True,True
 webpack/schema-utils,gh/80306715,False,0,0,0,100.0,249,42,True,True,open_collective,False,True,https://opencollective.com/webpack,False,,,True,2,webpack,23866.86,2.76,,,,,1,30,True,True
 webpack/tapable,gh/7730086,False,0,0,0,100.0,3854,395,True,True,open_collective,False,True,https://opencollective.com/webpack,False,,,True,2,webpack,23866.86,2.76,,,,,1,30,True,True

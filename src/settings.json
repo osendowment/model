@@ -29,9 +29,11 @@
     "comment": "load_top_repos scope — a value.csv row is a 'top repo' iff platform in platforms AND class in classes AND git_valid==True. GitHub + GitLab: the risk builders rank each percentile-based dimension over the full top-repo population (github + gitlab together — platform does not matter), so GitLab repos rank in alongside GitHub. classes must match risk_input.value_classes."
   },
   "value_score": {
-    "criticality_weight": 0.8,
+    "criticality_weight": 0.6,
+    "eco_crit_weight": 0.2,
     "centrality_weight": 0.2,
-    "comment": "value.csv `score` = criticality_weight*(openssf_crit*100) + centrality_weight*top_eco_pct, range 0-100. openssf_crit is the OpenSSF criticality score (0-1); top_eco_pct is the repo's PageRank percentile in its top ecosystem (0-100, already a percentile). Weights should sum to 1; criticality-dominant so a foundational-but-quiet micro-dep can't outrank a genuinely critical project. Only computed where openssf_crit is present (valid class-A GitHub)."
+    "min_components": 2,
+    "comment": "value.csv `score`, 0-100: a pro-rata blend of up to three components — openssf_crit (weight criticality_weight; OpenSSF criticality score 0-1, scaled *100), eco_crit (weight eco_crit_weight; ecosyste.ms critical flag 0/1, scaled *100), and top_eco_pct (weight centrality_weight; the repo's PageRank percentile in its top ecosystem, already 0-100). Only PRESENT (non-blank) components are summed, then renormalized by their weight total, so a repo missing one still scores on the same 0-100 scale (e.g. openssf_crit + top_eco_pct only → 0.75/0.25). A row needs at least min_components present or `score` stays blank. Full weights (0.6/0.2/0.2) sum to 1 and are criticality-dominant so a foundational-but-quiet micro-dep can't outrank a genuinely critical project. openssf_crit is GitHub-only; eco_crit covers GitHub and GitLab, so valid GitLab class-A repos score from eco_crit + top_eco_pct."
   },
   "concentration": {
     "window_years": 5,

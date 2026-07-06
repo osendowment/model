@@ -15,7 +15,7 @@ def test_eligible_is_and_of_four_flags(tmp_path, monkeypatch):
              "f/missing-funding")
     entries = [RepoEntry(repo=r, repo_id=str(i + 1))
                for i, r in enumerate(slugs)]
-    monkeypatch.setattr(be, "load_top_repos", lambda skip_archived: entries)
+    monkeypatch.setattr(be, "load_top_repos", lambda *a, **k: entries)
 
     # The rollup joins the per-dimension CSVs by repo_id, not slug.
     lic = tmp_path / "licenses.csv"
@@ -58,7 +58,7 @@ def test_rollup_flags_resolve_by_id_across_a_rename(tmp_path, monkeypatch):
     the same immutable repo_id. The id join must find every flag; the old
     slug join silently lost them all (eligible flipped to False)."""
     entries = [RepoEntry(repo="react/react", repo_id="10270250")]
-    monkeypatch.setattr(be, "load_top_repos", lambda skip_archived: entries)
+    monkeypatch.setattr(be, "load_top_repos", lambda *a, **k: entries)
     lic = tmp_path / "licenses.csv"
     _write(lic, "repo,repo_id,oss", ["facebook/react,10270250,True"])
     fund = tmp_path / "funding.csv"

@@ -164,15 +164,33 @@ class TestLoadGitlabTargets:
         monkeypatch.setattr(sc, "GITLAB_PROJECTS", tmp_path / "nope.csv")
         assert load_gitlab_targets() == []
 
+    def test_classes_filter_joins_to_value(self, tmp_path, monkeypatch):
+        # projects.csv has 3 valid rows; the class set from value.csv only
+        # allows two of them → the third (e.g. a leaked class-C row) is dropped.
+        csv_path = self._write(tmp_path, (
+            "gitlab.com/keep/a,gitlab.com,gl/1,True\n"
+            "salsa.debian.org/keep/b,salsa.debian.org,gl/salsa.debian.org-2,True\n"
+            "gitlab.com/drop/c,gitlab.com,gl/3,True\n"
+        ))
+        monkeypatch.setattr(sc, "GITLAB_PROJECTS", csv_path)
+        import src.sources.gitlab.fetch_project_data as fpd
+        monkeypatch.setattr(fpd, "load_gitlab_rows", lambda classes=None: [
+            {"project": "gitlab.com/keep/a"}, {"project": "salsa.debian.org/keep/b"}])
+        got = sorted(t["project"] for t in load_gitlab_targets(classes={"A"}))
+        assert got == ["gitlab.com/keep/a", "salsa.debian.org/keep/b"]
+        # no classes → all three valid rows
+        assert len(load_gitlab_targets()) == 3
+
 
 class TestRunGitlabOrchestration:
-    """_run_gitlab's target-selection: drop hosts with no token, then (unless
-    --force) drop already-scored projects, before handing off to
-    fetch_all_gitlab. fetch_all_gitlab itself is stubbed — no subprocess."""
+    """_run_gitlab's target-selection: score tokenless self-hosted hosts
+    anonymously, drop only tokenless SCORECARD_ANON_UNRELIABLE hosts
+    (gitlab.com), then (unless --force) drop already-scored projects, before
+    handing off to fetch_all_gitlab. fetch_all_gitlab itself is stubbed."""
 
     def _wire(self, monkeypatch, *, targets, token_map, already_scored):
         import src.sources.gitlab.gitlab_client as glc
-        monkeypatch.setattr(sc, "load_gitlab_targets", lambda hosts=None: [
+        monkeypatch.setattr(sc, "load_gitlab_targets", lambda hosts=None, classes=None: [
             t for t in targets if not hosts or t["host"] in hosts])
         monkeypatch.setattr(glc, "load_token_map", lambda: dict(token_map))
         monkeypatch.setattr(sc, "load_already_scored", lambda p: set(already_scored))
@@ -190,25 +208,44 @@ class TestRunGitlabOrchestration:
 
     def _args(self, **kw):
         import argparse
-        base = {"host": None, "force": False, "concurrency": 5,
+        base = {"host": None, "classes": None, "force": False, "concurrency": 5,
                 "repos": [], "file": None}
         base.update(kw)
         return argparse.Namespace(**base)
 
-    async def test_drops_no_token_host_and_already_scored(self, monkeypatch):
+    async def test_tokenless_selfhosted_scored_anon_gitlabcom_dropped(self, monkeypatch):
         targets = [
             {"project": "gitlab.com/a/b", "host": "gitlab.com", "repo_id": "gl/1"},
             {"project": "gitlab.com/c/d", "host": "gitlab.com", "repo_id": "gl/2"},
             {"project": "salsa.debian.org/x/y", "host": "salsa.debian.org",
              "repo_id": "gl/salsa.debian.org-3"},
         ]
+        # token only for gitlab.com; salsa (self-hosted) has none.
         captured = self._wire(monkeypatch, targets=targets,
-                              token_map={"gitlab.com": "glpat-x"},       # no salsa token
+                              token_map={"gitlab.com": "glpat-x"},
                               already_scored={"gitlab.com/a/b"})         # a/b already done
         await sc._run_gitlab(self._args())
         got = sorted(t["project"] for t in captured["targets"])
-        assert got == ["gitlab.com/c/d"]        # salsa dropped (no token), a/b dropped (scored)
+        # salsa kept (scored anonymously), gitlab.com c/d kept (has token),
+        # a/b dropped (already scored) — no host dropped for lack of a token.
+        assert got == ["gitlab.com/c/d", "salsa.debian.org/x/y"]
         assert captured["concurrency"] == 5
+
+    async def test_tokenless_gitlabcom_is_dropped(self, monkeypatch):
+        # gitlab.com is SCORECARD_ANON_UNRELIABLE — with no token it is skipped,
+        # while a tokenless self-hosted host in the same run is still scored.
+        targets = [
+            {"project": "gitlab.com/a/b", "host": "gitlab.com", "repo_id": "gl/1"},
+            {"project": "salsa.debian.org/x/y", "host": "salsa.debian.org",
+             "repo_id": "gl/salsa.debian.org-3"},
+        ]
+        captured = self._wire(monkeypatch, targets=targets,
+                              token_map={},                    # no tokens at all
+                              already_scored=set())
+        await sc._run_gitlab(self._args())
+        got = sorted(t["project"] for t in captured["targets"])
+        assert got == ["salsa.debian.org/x/y"]   # gitlab.com dropped, salsa scored anon
+        assert captured["token_map"] == {}        # empty token → fetch layer routes anon
 
     async def test_force_keeps_already_scored(self, monkeypatch):
         targets = [
@@ -222,7 +259,8 @@ class TestRunGitlabOrchestration:
         got = sorted(t["project"] for t in captured["targets"])
         assert got == ["gitlab.com/a/b", "gitlab.com/c/d"]   # --force keeps the scored one
 
-    async def test_no_token_at_all_makes_no_fetch(self, monkeypatch):
+    async def test_only_tokenless_gitlabcom_makes_no_fetch(self, monkeypatch):
+        # Nothing left after dropping tokenless gitlab.com → early return.
         targets = [{"project": "gitlab.com/a/b", "host": "gitlab.com",
                     "repo_id": "gl/1"}]
         captured = self._wire(monkeypatch, targets=targets,

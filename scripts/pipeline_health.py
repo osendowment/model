@@ -189,32 +189,79 @@ SCORE_COMPONENT_COVERAGE: dict[str, list[str]] = {
     "risk/workload.csv": ["score"],
 }
 
+# Dimensions whose score needs source code to exist. A repo scc measured at
+# 0 loc (an empty/stub archived snapshot — code moved away, or a
+# deprecation-notice repo) is legitimately unscoreable here, so it is exempt
+# from the 100% gate for these files only. Concentration (commits) and
+# security (scorecard/CVE) don't need loc, so they must still cover every repo.
+_NEEDS_SOURCE_CODE = {"risk/complexity.csv", "risk/workload.csv"}
+
+
+def _zero_loc_repos() -> set[str]:
+    """Lowercased slugs whose scc measured 0 lines of code at EVERY snapshot —
+    no source to analyse. Complexity needs source and workload's loc-per-AC
+    ratio derives from it, so these repos cannot carry those scores no matter
+    how many times they are fetched; exempting them keeps the coverage gate a
+    real fetch-gap detector instead of failing on repos with nothing to measure.
+
+    scc.csv is long, with a `loc` row per (repo, end-of-year sha), so a repo
+    that was empty in an early year but has code later reads loc>0 somewhere —
+    only a repo whose MAX loc across all snapshots is 0 is genuinely codeless
+    (an empty/stub archived snapshot)."""
+    path = ROOT / "data" / "sources" / "git" / "scc.csv"
+    if not path.exists():
+        return set()
+    max_loc: dict[str, float] = {}
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            if (row.get("metric") or "").strip() != "loc":
+                continue
+            repo = (row.get("repo") or "").strip().lower()
+            if not repo:
+                continue
+            try:
+                v = float((row.get("value") or "0").strip() or 0)
+            except ValueError:
+                v = 0.0
+            max_loc[repo] = max(max_loc.get(repo, 0.0), v)
+    return {repo for repo, m in max_loc.items() if m == 0.0}
+
 
 def check_score_component_coverage() -> list[Result]:
-    """Score-forming component columns must be 100% across the risk-scope set.
+    """Score-forming component columns must be 100% across the risk-scope set
+    (excluding, for the source-code dimensions, repos with no code to measure).
 
     For concentration, the builder imputes dormant / bot-only / new repos
     (bus factor 1, HHI 10000), so a blank `bf_commits_git_5y` / `hhi_commits_git_5y`
     / `score` means an upstream git fetch failed — surfaced here as the gap to
     fix (raise the fetch `--timeout` or re-run the fetcher for the listed repos).
+    Complexity/workload additionally exempt scc-0-loc repos (empty/stub archived
+    snapshots), which are genuinely unscoreable rather than a fetch gap.
     """
     from src.common.repos import load_top_repos
 
     repos = [e.repo for e in load_top_repos()]
-    n = len(repos)
+    zero_loc = _zero_loc_repos()
     out: list[Result] = []
     for fname, cols in SCORE_COMPONENT_COVERAGE.items():
         disk = _read_csv_by_repo(ROOT / "data" / fname)
+        if fname in _NEEDS_SOURCE_CODE:
+            scope = [r for r in repos if r.lower() not in zero_loc]
+        else:
+            scope = repos
+        n = len(scope)
+        exempt = len(repos) - n
+        note = f"; {exempt} no-code exempt" if exempt else ""
         for col in cols:
-            missing = [r for r in repos
+            missing = [r for r in scope
                        if not str(disk.get(r, {}).get(col, "")).strip()]
             present = n - len(missing)
             ok = not missing
             if ok:
-                detail = f"{present}/{n} (100%)"
+                detail = f"{present}/{n} (100%{note})"
             else:
                 shown = ", ".join(missing[:5]) + (" …" if len(missing) > 5 else "")
-                detail = f"{present}/{n} — {len(missing)} missing: {shown}"
+                detail = f"{present}/{n} — {len(missing)} missing: {shown}{note}"
             out.append((f"{fname}:{col}", ok, detail))
     return out
 
@@ -234,6 +281,10 @@ SCORE_INPUTS: dict[str, list[str]] = {
     "risk/risk.csv":          ["concentration", "complexity", "security", "workload"],
 }
 
+# Column holding each file's aggregated score (default "score"; the top-level
+# risk.csv names it "risk_score", value.csv would be "value_score").
+SCORE_COLUMN: dict[str, str] = {"risk/risk.csv": "risk_score"}
+
 
 def check_score_input_completeness() -> list[Result]:
     """A component score / the risk score may be present only if ALL its scored
@@ -252,7 +303,8 @@ def check_score_input_completeness() -> list[Result]:
             out.append((f"{fname} score⟸inputs", False, "file missing"))
             continue
         rows = list(csv.DictReader(open(path, encoding="utf-8")))
-        scored = [r for r in rows if str(r.get("score", "")).strip()]
+        score_col = SCORE_COLUMN.get(fname, "score")
+        scored = [r for r in rows if str(r.get(score_col, "")).strip()]
         bad = [r.get("repo", "?") for r in scored
                if not all(str(r.get(c, "")).strip() for c in inputs)]
         ok = not bad

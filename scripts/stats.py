@@ -272,8 +272,8 @@ def risk_stats() -> dict:
             distribution.append({"label": sub_label, "column": raw_col,
                                  "is_component": False, "fmt": fmt,
                                  "scored": scored, "q": q})
-    o_scored, o_q = col_dist(risk, "score")
-    distribution.append({"label": "Overall", "column": "score",
+    o_scored, o_q = col_dist(risk, "risk_score")
+    distribution.append({"label": "Overall", "column": "risk_score",
                          "is_component": True, "fmt": "int",
                          "scored": o_scored, "q": o_q})
 

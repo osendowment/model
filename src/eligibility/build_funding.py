@@ -498,7 +498,7 @@ def build() -> list[dict]:
     # Eligibility scope = top repos INCLUDING archived ones (unlike risk):
     # archived repos must appear in the stage output so build_eligibility can
     # mark them active=False instead of silently dropping them.
-    eligible = load_top_repos(skip_archived=False)
+    eligible = load_top_repos()
     # GitHub-repo signals join on the stable repo_id (rename-proof) — including
     # repo-level FLOSS manifests, whose rows carry a fetcher-stamped repo_id
     # (canonical-slug fallback for blank-id rows). The other external matches
