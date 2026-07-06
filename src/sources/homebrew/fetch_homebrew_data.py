@@ -29,9 +29,15 @@ from rich.table import Table
 
 # ── config ────────────────────────────────────────────────────────────────────
 
+from src.common.freshness import file_is_fresh
+
 RAW_FORMULAS = "data/sources/homebrew/raw/formulas.csv"
 RAW_DEPS = "data/sources/homebrew/raw/dependencies.csv"
 RAW_DOWNLOADS = "data/sources/homebrew/raw/downloads.csv"
+
+# Formula index / analytics move slowly; a warm pipeline run should not
+# re-download them. --refresh (propagated by the pipeline runner) overrides.
+TTL_DAYS = 7
 
 FORMULA_URL = "https://formulae.brew.sh/api/formula.json"
 ANALYTICS_URL = "https://formulae.brew.sh/api/analytics/install/365d.json"
@@ -358,6 +364,10 @@ def main() -> None:
     p.add_argument("--years", type=int, nargs="+", default=YEARS)
     p.add_argument("--limit", type=int, default=None,
                    help="Cap per-year analytics rows (keeps top-installs; for testing)")
+    p.add_argument("--refresh", action="store_true",
+                   help=f"Force refetch, ignoring the {TTL_DAYS}-day output TTL")
+    p.add_argument("--offline", action="store_true",
+                   help="Skip all network fetches (keep whatever is cached)")
     args = p.parse_args()
 
     console.rule("[bold]homebrew — fetch_homebrew_data")
@@ -368,9 +378,20 @@ def main() -> None:
     console.print()
 
     t0 = time.perf_counter()
-    if args.step in ("formulas", "all"):
+
+    def _skip(label: str, *outputs: str) -> bool:
+        """True when this step's outputs are all within TTL (or --offline)."""
+        if args.offline:
+            console.print(f"  [dim]{label}: skipped (--offline)[/dim]")
+            return True
+        if not args.refresh and all(file_is_fresh(o, TTL_DAYS) for o in outputs):
+            console.print(f"  [dim]{label}: outputs fresh (< {TTL_DAYS}d) — skipping; --refresh to force[/dim]")
+            return True
+        return False
+
+    if args.step in ("formulas", "all") and not _skip("formulas", RAW_FORMULAS, RAW_DEPS):
         step_formulas()
-    if args.step in ("analytics", "all"):
+    if args.step in ("analytics", "all") and not _skip("analytics", RAW_DOWNLOADS):
         step_analytics(args.years, args.limit)
     console.print(f"\n[bold green]Done in {time.perf_counter() - t0:.1f}s[/bold green]")
 
