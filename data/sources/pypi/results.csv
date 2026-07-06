@@ -365,7 +365,7 @@
 "llvmlite","numba/llvmlite","https://github.com/numba/llvmlite.git","eco","168805577","52551941","98141225","153660928","213228475","326445315","True","0.00037388","B","gh/22725061","","bsd-2-clause and apache-2.0 with llvm-exception"
 "pyodbc","mkleehammer/pyodbc","https://github.com/mkleehammer/pyodbc.git","eco","261271912","129042818","238307296","289285896","307811622","341911930","True","0.00037371","B","gh/59235","","mit"
 "lazy-object-proxy","ionelmc/python-lazy-object-proxy","https://github.com/ionelmc/python-lazy-object-proxy.git","eco","248424614","139800515","165507010","202859489","353309370","380646687","True","0.00037301","B","gh/26403639","","bsd-2-clause"
-"grpcio-health-checking","grpc/grpc","https://github.com/grpc/grpc.git","eco","257971683","10081827","13244449","53221008","152877187","1060433945","True","0.00036975","B","gh/27729880","","apache-2.0"
+"grpcio-health-checking","grpc/grpc","https://github.com/grpc/grpc.git","native","257971683","10081827","13244449","53221008","152877187","1060433945","True","0.00036975","B","gh/27729880","","apache-2.0"
 "python-slugify","un33k/python-slugify","https://github.com/un33k/python-slugify.git","eco","235326801","42849474","95106334","144531801","369667447","524478950","True","0.00036928","B","gh/6220331","","mit"
 "tinycss2","kozea/tinycss2","https://github.com/kozea/tinycss2.git","eco","218974371","13067286","81163404","156743430","286561846","557335891","True","0.00036504","B","gh/9770554","","bsd-3-clause"
 "pylint","pylint-dev/pylint","https://github.com/pylint-dev/pylint.git","eco","229166159","117819556","137853235","188013139","317317560","384827306","True","0.00036449","B","gh/47671127","","gpl-2.0-or-later"
