@@ -153,7 +153,7 @@ PageRank = 0). C/C++'s `Results` is smaller than `After dep tree` because the
 cpp pipeline applies an `is_cpp` filter — language-agnostic distro packages get
 dropped.
 
-See [docs/stats.md → Value](stats.md#per-ecosystem-value-funnel) for the
+See the preview stats sheet → Value for the
 per-ecosystem funnel counts and repo-coverage percentages.
 
 ## Ecosystems
@@ -314,7 +314,7 @@ package (no `repo`, kept as its own row so nothing is dropped).
 *Strongest* class is the highest class a repo achieves across any of its
 ecosystems (the `class` column in `value.csv`).
 
-See [docs/stats.md → Value](stats.md#repo-class-distribution) for the per-class ×
+See the preview stats sheet → Value for the per-class ×
 per-ecosystem counts and the GitHub-group / orphan split.
 
 EOL information is intentionally **not** stored here — it feeds the
@@ -370,7 +370,7 @@ project-owned hosts) carry a first-class identity and are not silently
 dropped at the value-pipeline level — but they are still excluded from the
 downstream analyses (e.g. libunistring on savannah). Per-ecosystem GitHub vs
 Git coverage (and the load-bearing class-A subset) is in
-[docs/stats.md → Value](stats.md#repo-identity-coverage-valuecsv).
+the preview stats sheet → Value.
 
 To fully fix: per-host adapters for license/EOL/contributor checks against
 codeberg, savannah, sourceware, etc.

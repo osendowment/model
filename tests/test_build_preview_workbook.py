@@ -35,10 +35,9 @@ def _write_csv(path, header, rows):
         w.writerows(rows)
 
 
-def _write_stats_md(tmp_path):
-    p = tmp_path / "stats.md"
-    p.write_text(_STATS_MD, encoding="utf-8")
-    return p
+def _patch_stats_md(monkeypatch):
+    """Feed the fixture markdown in place of the live generator."""
+    monkeypatch.setattr(bpw, "_stats_markdown", lambda: _STATS_MD)
 
 
 def test_cell_value_coerces_numbers_and_keeps_ids_as_text():
@@ -58,7 +57,7 @@ def test_build_writes_two_named_sheets_with_styled_filtered_headers(tmp_path, mo
     _write_csv(people_csv, ["person_id", "platform", "login"],
                [["github/1", "github", "octocat"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv), ("people", people_csv)])
-    monkeypatch.setattr(bpw, "STATS_MD", _write_stats_md(tmp_path))
+    _patch_stats_md(monkeypatch)
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
 
     bpw.build()
@@ -95,7 +94,7 @@ def test_build_skips_missing_csv_without_error(tmp_path, monkeypatch):
     out = tmp_path / "preview.xlsx"
     _write_csv(repos_csv, ["repo_id"], [["gh/1"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv), ("people", missing_csv)])
-    monkeypatch.setattr(bpw, "STATS_MD", _write_stats_md(tmp_path))
+    _patch_stats_md(monkeypatch)
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
 
     bpw.build()
@@ -122,7 +121,7 @@ def test_repos_sheet_hyperlinks_and_decision_column_fills(tmp_path, monkeypatch)
                [["a/keep", "70.00", "80.00", "True", "90.00", "gh/1"],
                 ["c/lab", "60.00", "70.00", "False", "80.00", "gl/debian-9"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv)])
-    monkeypatch.setattr(bpw, "STATS_MD", _write_stats_md(tmp_path))
+    _patch_stats_md(monkeypatch)
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
 
     bpw.build()
@@ -139,13 +138,13 @@ def test_repos_sheet_hyperlinks_and_decision_column_fills(tmp_path, monkeypatch)
 
 
 def test_stats_sheet_renders_markdown_tables(tmp_path, monkeypatch):
-    """Every stats.md table lands as a stacked block: bold section heading,
+    """Every the preview stats sheet table lands as a stacked block: bold section heading,
     styled header row, markdown dressing stripped, counts as real numbers."""
     repos_csv = tmp_path / "repos.csv"
     out = tmp_path / "preview.xlsx"
     _write_csv(repos_csv, ["repo_id"], [["gh/1"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv)])
-    monkeypatch.setattr(bpw, "STATS_MD", _write_stats_md(tmp_path))
+    _patch_stats_md(monkeypatch)
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
 
     bpw.build()

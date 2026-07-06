@@ -14,7 +14,7 @@ per-host token.
 > through `value.csv`, `src.common.repos.load_top_repos`, and all four risk dimensions into
 > `risk.csv`. The clone-based fetchers (sha-metrics = scc + lizard, contributors) and
 > Scorecard's GitLab mode (`src/sources/openssf/scorecard.py --gitlab`, see below) run
-> against GitLab hosts. Coverage/funnel counts live in [stats.md](../stats.md) — this page
+> against GitLab hosts. Coverage/funnel counts live in the preview stats sheet — this page
 > describes **how** the data is fetched, not **how many**.
 
 ## Data Sources

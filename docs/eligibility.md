@@ -17,7 +17,7 @@ eligible = oss AND intent AND nonprofit AND active
 
 `src.eligibility.build_eligibility` joins the four flags into
 `data/eligibility/eligibility.csv`. Coverage counts live in
-[stats.md](stats.md#eligibility).
+the preview stats sheet.
 
 It also stamps three **signal-completeness** columns (independent of the
 `eligible` verdict): `value_comps` and `risk_comps` count how many value
@@ -196,4 +196,4 @@ eligibility.
 
 `scripts/pipeline_health.py` verifies every stage CSV matches its
 builder's current output; `scripts/stats.py` recomputes the
-[stats.md](stats.md#eligibility) coverage tables.
+the preview stats sheet coverage tables.

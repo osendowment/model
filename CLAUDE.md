@@ -43,22 +43,21 @@ Exception: regenerable vendor-dump data never enters git/LFS. The raw 3.9 GB cra
 
 ## Documentation
 
-`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md`, `eligibility.md` — plus the cross-cutting **`docs/stats.md`** and **`docs/data-sources.md`**, with everything else in a subfolder:
+`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md`, `eligibility.md` — plus **`docs/data-sources.md`**, with everything else in a subfolder:
 
-- `docs/stats.md` — **the single home for every pipeline/funnel/coverage/distribution number** (see rule below).
 - `docs/data-sources.md` — the source × stage matrix: one row per external source (favicon + link to its `sources/` page), columns Value / Risk / Eligibility.
 - `docs/sources/<source>.md` — one page per external data source.
 - `docs/components/<component>.md` — cross-cutting component docs (e.g. `validation.md`, how `data/value/validation.csv` is formed).
 
 When a doc's content spans multiple stages, fold it into the relevant stage page(s) rather than adding a new top-level overview doc.
 
-### Stats live only in `docs/stats.md`
+### Stats live only on the preview stats sheet
 
-**Every pipeline/funnel/coverage/distribution figure belongs in `docs/stats.md` and nowhere else.** That means: per-stage funnel counts (packages → dep tree → results → with-repo), class/score distributions, repo-identity coverage, and per-component "N of the top repos carry signal X" coverage tables. `stats.md` has `## Value`, `## Risk`, and `## Eligibility` sections (Risk and Eligibility now share one scope — the valid class-A set **including archived repos**, which surface in eligibility as `active=False`), with a funnel-style table per component.
+**Every pipeline/funnel/coverage/distribution figure lives on the `stats` sheet of `data/preview/preview.xlsx` and nowhere else.** The sheet is rendered at build time by `src.build_preview_workbook` from `scripts/stats.py` (the generator — every figure recomputed from the live CSVs; `--markdown` emits the same tables as text). There is no stats document in `docs/` to refresh or drift. That covers: per-stage funnel counts (packages → dep tree → results → with-repo), class/score distributions, repo-identity coverage, and per-component "N of the top repos carry signal X" coverage tables (Risk and Eligibility share one scope — the valid class-A set **including archived repos**, which surface in eligibility as `active=False`).
 
-- Methodology pages (`value.md`, `risk.md`, `eligibility.md`, the component and source docs) describe **how** a metric is built (formulas, schemas, column descriptions, worked illustrative examples) and **link to** `stats.md` for **how many** — they must not restate the counts.
+- Methodology pages (`value.md`, `risk.md`, `eligibility.md`, the component and source docs) describe **how** a metric is built (formulas, schemas, column descriptions, worked illustrative examples) and **point to** the preview stats sheet for **how many** — they must not restate the counts.
 - A single concrete number that *defines* a parameter (e.g. "top = 95% of cumulative downloads") stays in the methodology page — it's config, not a result.
-- One number, one place: when a run changes the counts, only `stats.md` is edited. A coverage/funnel count found in any other page is a bug — move it to `stats.md` and leave a pointer.
+- One number, one place: adding a new figure means adding it to `scripts/stats.py`, never hard-coding it in a doc. A coverage/funnel count found in any page is a bug — move it into the generator and leave a pointer.
 
 ## Philosophy
 

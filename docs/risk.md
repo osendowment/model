@@ -239,7 +239,7 @@ the OpenSSF Scorecard axis; the CVE axis takes over only for the minority whose
 `cve_score` exceeds their openssf axis. When one axis is missing entirely the
 other alone scores the repo (`max_composite_any`) — e.g. a GitLab repo with no
 Scorecard still gets a security score from the CVE axis. (CVE coverage is in
-[stats.md → Risk → Security](stats.md#security).)
+the preview stats sheet → Risk → Security.)
 
 ## Data Sources
 
@@ -303,7 +303,7 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 
 Per-source-file coverage across the top repos, the `risk.csv` rollup, and the
 sub-100% per-dimension columns all live in
-[docs/stats.md → Risk](stats.md#risk). Refresh them with
+the preview stats sheet → Risk. Refresh them with
 `uv run python scripts/coverage_report.py`. `risk.csv` holds one row per top repo
 — four 0–100 dimension scores plus an overall `risk_score`; the detailed metric and
 `*_p` percentile columns live in the per-dimension `data/risk/*.csv` files.
@@ -317,7 +317,7 @@ repo, not a data-collection bug:
 - **Scorecard files (~99%)** — a mix of brand-new risk-scope additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
 - **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos.
 - **churn** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
-- **Structurally-sparse columns** — `bestpractices_badge_id` (only CII-enrolled repos), `cognitive_*` (only languages with a Lizard cognitive parser), and `issue_trend_score` (only repos with `mean_opened_per_year ≥ 1`) are sparse by definition. Their coverage is in [stats.md](stats.md#risk).
+- **Structurally-sparse columns** — `bestpractices_badge_id` (only CII-enrolled repos), `cognitive_*` (only languages with a Lizard cognitive parser), and `issue_trend_score` (only repos with `mean_opened_per_year ≥ 1`) are sparse by definition. Their coverage is in the preview stats sheet.
 
 ## Output
 

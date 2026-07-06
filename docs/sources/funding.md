@@ -102,4 +102,4 @@ over the scraped value. See [components/funding.md](../components/funding.md).
 - Rosters may contain duplicate project rows; harmless — the matcher indexes
   into sets. Non-matching metadata columns (category, language, description)
   are informational only.
-- Match coverage and per-host counts: [stats.md](../stats.md).
+- Match coverage and per-host counts: the preview stats sheet.

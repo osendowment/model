@@ -7,7 +7,7 @@ repositories. The model uses four connectors/extractors against it, all under
 > **Status:** the criticality connector's `critical` flag now feeds the **Value** stage as
 > `value.csv`'s `eco_crit` column — the 0.2-weight component of `value_score`, and the only
 > importance signal GitLab class-A repos carry (see [value.md](../value.md), applied by
-> `src.value.apply_criticality`). Coverage counts live in [stats.md](../stats.md#value); this page
+> `src.value.apply_criticality`). Coverage counts live in the preview stats sheet; this page
 > describes **how** the data is fetched, not **how many**.
 
 ## Packages connector (URL backfill)

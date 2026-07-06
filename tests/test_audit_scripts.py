@@ -68,16 +68,6 @@ def test_data_anomalies_clean_or_reports():
     assert rc in (0, 1)
 
 
-def test_stats_md_is_not_stale():
-    """scripts/stats.py recomputes every docs/stats.md figure from the live CSVs;
-    its --check headline gate must pass, i.e. stats.md reflects the current run.
-    Regression for stats.md drifting after a value/scope/risk regeneration."""
-    mod = _load_module(SCRIPTS / "stats.py")
-    v, r, e = mod.value_stats(), mod.risk_stats(), mod.eligibility_stats()
-    assert mod.check(v, r, e) == 0, "docs/stats.md headline numbers are stale — " \
-        "re-run `uv run python scripts/stats.py --markdown`"
-
-
 def test_eligibility_csv_keeps_company_backed_flagged_nonprofit():
     """Company-backed repos (funding host_type/owner_type == company) are KEPT
     in eligibility.csv and flagged nonprofit=False — they are not dropped.
@@ -188,7 +178,7 @@ def test_valid_repos_have_a_reachable_upstream():
     (b) a github row carries the canonical github clone URL AND a `gh/` repo_id;
     (c) a gitlab row's repo_id, IF present, is a `gl/` id (never `gh/`); it may be
         empty for a repo not yet fetched from the GitLab API — that is coverage,
-        tracked in stats.md, not an invariant;
+        tracked in the preview stats sheet, not an invariant;
     (d) any other host (codeberg/bitbucket/custom) carries NO repo_id;
     (e) a `gl/` id appears ONLY on a gitlab row.
     Plus the global rule: a non-empty repo_id (gh/ or gl/) ⇒ git_valid.

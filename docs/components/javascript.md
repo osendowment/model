@@ -84,7 +84,7 @@ JavaScript / TypeScript (npm)
 
 ### npm funnel & classes
 
-See [docs/stats.md → Value](../stats.md#per-ecosystem-value-funnel) for the npm funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
+See the preview stats sheet → Value for the npm funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
 
 npm has the cleanest upstream identity (highest GitHub-repo coverage) of the four
 ecosystems, so essentially all load-bearing npm packages reach Risk and

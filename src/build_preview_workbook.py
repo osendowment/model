@@ -8,11 +8,11 @@ single spreadsheet for non-technical review, one sheet per CSV ('repos',
 Excel numbers, not text, so sorting/filtering behaves numerically rather
 than alphabetically.
 
-A third sheet, 'stats', renders every markdown table from `docs/stats.md`
-(the single source of truth for pipeline counts/funnels) as stacked blocks —
-each under its section heading, with the same styled header row. Refresh
-stats.md first (`scripts/stats.py --markdown`) so the sheet reflects the
-current data.
+A third sheet, 'stats', renders every pipeline count/funnel/coverage table
+as stacked blocks — each under its section heading, with the same styled
+header row. The tables come straight from the generator
+(`scripts/stats.py`, its markdown renderer), computed from the live CSVs at
+build time: this sheet IS the single home of the pipeline's numbers.
 
 The CSV sheets get:
     - a styled header row (bold white text on a dark-blue fill) so it reads
@@ -45,7 +45,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 REPOS_CSV = DATA_DIR / "preview" / "repos.csv"
 PEOPLE_CSV = DATA_DIR / "preview" / "people.csv"
-STATS_MD = ROOT / "docs" / "stats.md"
+STATS_SCRIPT = ROOT / "scripts" / "stats.py"
 OUTPUT_FILE = DATA_DIR / "preview" / "preview.xlsx"
 
 SHEETS = [("repos", REPOS_CSV), ("people", PEOPLE_CSV)]
@@ -184,8 +184,21 @@ def _is_md_separator(line: str) -> bool:
     return bool(body) and set(body) <= set("-:| ")
 
 
-def _write_stats_sheet(ws: Worksheet, md_path: Path) -> int:
-    """Render every markdown table in `md_path` as a stacked block: its nearest
+def _stats_markdown() -> str:
+    """The stats tables as markdown, straight from the generator.
+
+    `scripts/stats.py` computes every count from the live CSVs; its
+    `markdown()` renderer is the one source of truth for the numbers on
+    this sheet (the preview stats sheet no longer exists)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_stats_gen", STATS_SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.markdown(mod.value_stats(), mod.risk_stats(), mod.eligibility_stats())
+
+
+def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
+    """Render every markdown table in `md_text` as a stacked block: its nearest
     heading above as a bold section title, then the table with a styled header
     row. Prose between tables is skipped. Returns the number of tables written.
 
@@ -194,7 +207,7 @@ def _write_stats_sheet(ws: Worksheet, md_path: Path) -> int:
     values with number formats, and a column whose data is entirely
     numeric/percent gets its header right-aligned to sit over the numbers.
     """
-    lines = md_path.read_text(encoding="utf-8").splitlines()
+    lines = md_text.splitlines()
     heading = ""
     tables = 0
     i = 0
@@ -262,8 +275,8 @@ def build() -> None:
         console.print(f"  [cyan]{name}[/cyan]: {n:,} rows ← {path}")
 
     ws = wb.create_sheet("stats")
-    n = _write_stats_sheet(ws, STATS_MD)
-    console.print(f"  [cyan]stats[/cyan]: {n} tables ← {STATS_MD}")
+    n = _write_stats_sheet(ws, _stats_markdown())
+    console.print(f"  [cyan]stats[/cyan]: {n} tables ← scripts/stats.py (live CSVs)")
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     wb.save(OUTPUT_FILE)

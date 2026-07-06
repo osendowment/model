@@ -55,4 +55,4 @@ In `data/sources/crates/`:
 | `github-repos.csv` | Package-to-GitHub-repo mappings |
 | `results.csv` | All dep-tree crates with pagerank + value_class |
 
-Row counts: see the per-ecosystem value funnel in [stats.md](../stats.md#value).
+Row counts: see the per-ecosystem value funnel in the preview stats sheet.

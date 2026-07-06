@@ -112,7 +112,7 @@ uv run python -m src.sources.cpp.process_data [--top-share F]
 
 ### cpp funnel & classes
 
-See [docs/stats.md → Value](../stats.md#per-ecosystem-value-funnel) for the C/C++ funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
+See the preview stats sheet → Value for the C/C++ funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
 
 `Results` is smaller than `After dep tree` because the `is_cpp` filter drops
 language-agnostic distro packages that rode in as dependencies.

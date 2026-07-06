@@ -259,7 +259,7 @@ scores are present).
 
 ## Coverage
 
-See [docs/stats.md → Risk → Concentration](../stats.md#concentration) for current per-signal coverage over the top repos and the score distribution.
+See the preview stats sheet → Risk → Concentration for current per-signal coverage over the top repos and the score distribution.
 
 ## Limitations
 

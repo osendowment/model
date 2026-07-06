@@ -2,7 +2,7 @@
 
 Every external source the pipeline consumes, and what each stage takes from
 it. Details per source live in [docs/sources/](sources/); counts and coverage
-live in [stats.md](stats.md).
+live in the preview stats sheet.
 
 | Source | Value | Risk | Eligibility |
 |--------|-------|------|-------------|

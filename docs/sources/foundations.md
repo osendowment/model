@@ -9,7 +9,7 @@ Joining them to repos — `match_repos.py`, the slug/org-prefix/domain priority
 rules, and `host-by-repo.csv` — is documented in [funding.md](funding.md).
 Downstream, the matched `host` feeds `nonprofit` and `host_score` in the
 eligibility funding dimension ([components/funding.md](../components/funding.md));
-coverage numbers live in [stats.md](../stats.md).
+coverage numbers live in the preview stats sheet.
 
 ## Rosters
 

@@ -5,7 +5,7 @@ The set of SPDX license ids the model treats as software open source:
 `EXTRAS` dict. Feeds the eligibility stage's `oss` flag — a repo's resolved
 license (or any component of its SPDX expression) must be in this set; see
 the license section of [eligibility.md](../eligibility.md), counts in
-[stats.md](../stats.md#licenses-scope-940).
+the preview stats sheet.
 
 Two review bodies are unified: OSI's formal approvals and the FSF's
 free-software list (as carried by SPDX's `isFsfLibre` flag). FSF-libre

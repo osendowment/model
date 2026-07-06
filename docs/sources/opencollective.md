@@ -5,7 +5,7 @@ donations. Two datasets are pulled: the **reverse map** (which GitHub
 repo/org each collective declares it funds) and **annual gross budgets** per
 collective. Both feed `src/eligibility/build_funding.py` — see
 [funding.md](../components/funding.md) for slug attribution and scoring;
-coverage counts are in [stats.md](../stats.md#intent-and-nonprofit).
+coverage counts are in the preview stats sheet.
 
 ## Data Source
 

@@ -74,7 +74,7 @@ value rollup's ecosyste.ms authority pass,
 
 ### PyPI funnel & classes
 
-See [docs/stats.md → Value](../stats.md#per-ecosystem-value-funnel) for the PyPI funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
+See the preview stats sheet → Value for the PyPI funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
 
 ## Limitations
 

@@ -17,7 +17,7 @@ Repository metadata, contributor metrics, and code complexity for open-source pr
 ## Raw Data
 
 In `data/sources/github/search/`:
-- `top-repos.csv` -- searched repos with metadata (stars, forks, license, language, etc.; counts in [stats.md](../stats.md))
+- `top-repos.csv` -- searched repos with metadata (stars, forks, license, language, etc.; counts in the preview stats sheet)
 - `repo-counts.csv` -- cached search API counts (skip repeat queries)
 
 Contributor raw data (long format; bus factor / HHI are computed downstream by

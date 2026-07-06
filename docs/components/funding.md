@@ -19,7 +19,7 @@ Scope: the top repos — valid class-A, **archived included**
 (`load_top_repos()`, which includes archived by default), so an archived repo keeps its funding
 row and surfaces downstream as `active=False` rather than being dropped
 (counts in
-[stats.md → Eligibility → Intent and nonprofit](../stats.md#intent-and-nonprofit);
+the preview stats sheet → Eligibility → Intent and nonprofit;
 see [value.md](../value.md)).
 Build step: `src/eligibility/build_funding.py`.
 
@@ -346,7 +346,7 @@ Worked examples (from the current `funding.csv`):
 Note the third axis lifts *funded-but-unbacked* repos (vuejs, axios sit well
 above the two-axis geometric mean of their channel percentiles): "no
 institutional backer" (`host_score = 1` → backing 100) is a
-risk voice, not a no-op. (Intent/nonprofit coverage → [stats.md](../stats.md#intent-and-nonprofit).)
+risk voice, not a no-op. (Intent/nonprofit coverage → the preview stats sheet.)
 
 ## Output
 
@@ -436,7 +436,7 @@ already-resourced projects become ineligible without being hidden.
 
 ## Coverage
 
-See [stats.md → Eligibility → Intent and nonprofit](../stats.md#intent-and-nonprofit)
+See the preview stats sheet → Eligibility → Intent and nonprofit
 for current per-channel coverage over the top repos and the score distribution.
 
 ## Limitations
@@ -452,7 +452,7 @@ for current per-channel coverage over the top repos and the score distribution.
   (`astral.sh`, company) pinned it to `score` 1 / `nonprofit=false`; corporate
   backing that nobody has curated yet still goes unseen.
 - **funding.json is still negligible** in this cohort (coverage →
-  [stats.md](../stats.md#intent-and-nonprofit)) — the structured-manifest
+  the preview stats sheet) — the structured-manifest
   ecosystem hasn't reached it. `has_funding_json` does feed `intent` and the
   declared-channel score cap, but carries no dollar signal.
 - **`score` is a percentile, not a class.** It's a 1–100 risk number, not a
@@ -462,5 +462,5 @@ for current per-channel coverage over the top repos and the score distribution.
   `intent`/`nonprofit` booleans.
 - **OC is the only $ amount.** GitHub Sponsors and Patreon/Tidelift amounts
   aren't public, so dollar figures exist only for the repos with an attributed
-  Open Collective (coverage → [stats.md](../stats.md#intent-and-nonprofit));
+  Open Collective (coverage → the preview stats sheet);
   the sponsorship axis is a *count*, not a *sum*.

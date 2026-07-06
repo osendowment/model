@@ -66,7 +66,7 @@ uv run python -m src.sources.depsdev.fetch --force          # ignore TTL
 source when the local openssf row is missing (`openssf_score_source =
 "depsdev"`) and takes `bestpractices_badge_id` from the wide file — see
 [components/security.md](../components/security.md) and [risk.md](../risk.md).
-Coverage counts live in [stats.md](../stats.md).
+Coverage counts live in the preview stats sheet.
 
 ## Caveats
 

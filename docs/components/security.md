@@ -183,7 +183,7 @@ are present (a partial geometric mean is not comparable across repos).
 
 ## Coverage
 
-See [docs/stats.md → Risk → Security](../stats.md#security) for current per-signal coverage over the top repos and the score distribution.
+See the preview stats sheet → Risk → Security for current per-signal coverage over the top repos and the score distribution.
 
 ## Limitations
 

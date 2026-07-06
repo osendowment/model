@@ -1,14 +1,14 @@
-#!/usr/bin/env python3
-"""Generate every pipeline statistic that lives in `docs/stats.md`.
+"""Generate every pipeline statistic shown on the preview workbook's stats sheet.
 
-`docs/stats.md` is the single source of truth for the model's counts, funnels,
-coverage and distribution figures. This script recomputes ALL of them from the
-live CSVs so a refresh is one command instead of a hand-audit:
+The single source of truth for the model's counts, funnels, coverage and
+distribution figures. Everything is recomputed from the live CSVs:
 
   uv run python scripts/stats.py              # rich dashboard (read the numbers)
-  uv run python scripts/stats.py --markdown   # emit the stats.md tables verbatim
-  uv run python scripts/stats.py --check       # diff computed headline numbers
-                                               # against docs/stats.md (drift gate)
+  uv run python scripts/stats.py --markdown   # emit the tables as markdown
+
+`src.build_preview_workbook` imports this module and renders `markdown()`
+straight onto the `stats` sheet of data/preview/preview.xlsx — there is no
+intermediate stats document to refresh or drift.
 
 Every figure is derived from data, never hard-coded:
   - Value tables       ← data/value/value.csv (+ data/value/stats.csv
@@ -21,7 +21,7 @@ Every figure is derived from data, never hard-coded:
 
 The Risk denominator is the top-repo set (`load_top_repos()`), matching what the
 builders actually score; a blank score is therefore a real coverage gap, except
-where the metric legitimately doesn't exist (documented in stats.md prose).
+where the metric legitimately doesn't exist.
 """
 from __future__ import annotations
 
@@ -411,7 +411,7 @@ def _pct(n: int, d: int) -> str:
     if not d:
         return "—"
     p = 100 * n / d
-    # stats.md convention: an exact 100% is written "100%", everything else 1dp.
+    # the preview stats sheet convention: an exact 100% is written "100%", everything else 1dp.
     return "100%" if n == d else f"{p:.1f}%"
 
 
@@ -539,7 +539,7 @@ def dashboard(v: dict, r: dict, e: dict) -> None:
     console.print(t)
 
 
-# ── rendering: markdown (stats.md tables) ────────────────────────────────────
+# ── rendering: markdown (the preview stats sheet tables) ────────────────────────────────────
 
 def markdown(v: dict, r: dict, e: dict) -> str:
     out: list[str] = []
@@ -670,41 +670,14 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     return "\n".join(out)
 
 
-# ── drift check ──────────────────────────────────────────────────────────────
-
-def check(v: dict, r: dict, e: dict) -> int:
-    """Verify docs/stats.md is current; exit 1 on drift.
-
-    Every generated table DATA row (any `| … |` line carrying a digit — headers
-    and separators have none) must appear verbatim in stats.md. This is a full
-    match, not a loose substring (a stale `817` can't hide behind another `817`),
-    over every figure the generator owns. Static tables (the per-eco value funnel)
-    are not generated here, so they are not checked.
-    """
-    text = (ROOT / "docs" / "stats.md").read_text(encoding="utf-8")
-    rows = [ln.strip() for ln in markdown(v, r, e).splitlines()
-            if ln.strip().startswith("|") and any(ch.isdigit() for ch in ln)]
-    missing = [ln for ln in rows if ln not in text]
-    if missing:
-        console.print(f"[red]docs/stats.md is STALE — {len(missing)} row(s) drifted:[/red]")
-        for ln in missing:
-            console.print(f"  {ln}")
-        console.print("[dim]refresh: uv run python scripts/stats.py --markdown[/dim]")
-        return 1
-    console.print(f"[green]docs/stats.md current — all {len(rows)} data rows match.[/green]")
-    return 0
-
-
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Compute docs/stats.md figures.")
-    ap.add_argument("--markdown", action="store_true", help="emit stats.md tables")
-    ap.add_argument("--check", action="store_true",
-                    help="exit 1 if docs/stats.md headline numbers drift")
+    ap = argparse.ArgumentParser(description="Compute the pipeline statistics.")
+    ap.add_argument("--markdown", action="store_true",
+                    help="emit the stats tables as markdown (the preview "
+                         "workbook's stats sheet builds from this renderer)")
     args = ap.parse_args()
 
     v, r, e = value_stats(), risk_stats(), eligibility_stats()
-    if args.check:
-        return check(v, r, e)
     if args.markdown:
         print(markdown(v, r, e))
         return 0
