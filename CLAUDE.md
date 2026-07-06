@@ -43,9 +43,10 @@ Exception: regenerable vendor-dump data never enters git/LFS. The raw 3.9 GB cra
 
 ## Documentation
 
-`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md`, `eligibility.md` — plus the cross-cutting **`docs/stats.md`**, with everything else in a subfolder:
+`docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md`, `eligibility.md` — plus the cross-cutting **`docs/stats.md`** and **`docs/data-sources.md`**, with everything else in a subfolder:
 
 - `docs/stats.md` — **the single home for every pipeline/funnel/coverage/distribution number** (see rule below).
+- `docs/data-sources.md` — the source × stage matrix: one row per external source (favicon + link to its `sources/` page), columns Value / Risk / Eligibility.
 - `docs/sources/<source>.md` — one page per external data source.
 - `docs/components/<component>.md` — cross-cutting component docs (e.g. `validation.md`, how `data/value/validation.csv` is formed).
 
