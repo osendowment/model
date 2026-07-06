@@ -225,7 +225,7 @@ def _cache_path(eco: str, pkg: str) -> Path:
     """One cache file per (ecosystem, package).
 
     Deliberately a SEPARATE cache from ``packages.py`` (which caches the same
-    endpoint under ``sources/{eco}/raw/ecosystems/``). They cannot be shared:
+    endpoint under ``sources/ecosystems/{eco}/raw/``). They cannot be shared:
     for cpp, packages.py queries debian first (widest URL coverage) while this
     fetcher queries spack/conan first — debian reports ``rank_average=100`` for
     every package, so reusing packages.py's cpp cache would silently zero out

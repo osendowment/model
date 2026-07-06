@@ -9,8 +9,8 @@ cross-registry consensus.
 For each ecosystem (npm, pypi, crates, cpp), reads `data/sources/{eco}/results.csv`
 and finds packages with empty `github_repo` AND empty `git`. Queries
 ecosyste.ms for those packages, caches the full raw JSON response under
-`data/sources/{eco}/raw/ecosystems/{package}.json` (90-day TTL), and writes a
-downstream-consumable index at `data/sources/{eco}/raw/ecosystems.csv`:
+`data/sources/ecosystems/{eco}/raw/{package}.json` (90-day TTL), and writes a
+downstream-consumable index at `data/sources/ecosystems/{eco}/packages.csv`:
 
     package, registry_hit, repository_url, homepage, fetched_at
 
@@ -129,7 +129,7 @@ def _cache_path(eco: str, pkg: str) -> Path:
     # Some package names contain '/' (npm scopes like @babel/core). Replace with
     # '__' to keep one file per package without nested directories.
     safe = pkg.replace("/", "__")
-    return DATA_DIR / "sources" / eco / "raw" / "ecosystems" / f"{safe}.json"
+    return DATA_DIR / "sources" / "ecosystems" / eco / "raw" / f"{safe}.json"
 
 
 def _read_cached(path: Path) -> dict | None:
@@ -151,7 +151,7 @@ def _write_cached(path: Path, payload: dict) -> None:
 
 
 def _read_index(eco: str) -> dict[str, dict[str, str]]:
-    path = DATA_DIR / "sources" / eco / "raw" / "ecosystems.csv"
+    path = DATA_DIR / "sources" / "ecosystems" / eco / "packages.csv"
     if not path.exists():
         return {}
     out: dict[str, dict[str, str]] = {}
@@ -162,7 +162,7 @@ def _read_index(eco: str) -> dict[str, dict[str, str]]:
 
 
 def _write_index(eco: str, rows: dict[str, dict[str, str]]) -> None:
-    path = DATA_DIR / "sources" / eco / "raw" / "ecosystems.csv"
+    path = DATA_DIR / "sources" / "ecosystems" / eco / "packages.csv"
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=INDEX_FIELDS,

@@ -487,12 +487,12 @@ def _pick_git(merged: dict[str, str]) -> str:
 
 
 def _load_ecosystems_urls(ecosystem: str) -> dict[str, list[str]]:
-    """Load ecosyste.ms-derived URLs from data/sources/{eco}/raw/ecosystems.csv.
+    """Load ecosyste.ms-derived URLs from data/sources/ecosystems/{eco}/packages.csv.
 
     Returns {package: [repository_url, homepage]} skipping empty values.
     `merge_urls()` will classify each URL into the right platform slot.
     """
-    path = DATA_DIR / "sources" / ecosystem / "raw" / "ecosystems.csv"
+    path = DATA_DIR / "sources" / "ecosystems" / ecosystem / "packages.csv"
     if not path.exists():
         return {}
     out: dict[str, list[str]] = {}

@@ -10,7 +10,7 @@ already have URLs for, so the audit step can compare ecosyste.ms's canonical
 repo against ours (`audit_ecosystems.py`).
 
 It shares the raw-JSON cache with `packages.py`
-(`data/sources/<eco>/raw/ecosystems/<pkg>.json`, fetched via the same
+(`data/sources/ecosystems/<eco>/raw/<pkg>.json`, fetched via the same
 `_fetch_one`), so a package fetched by either connector is reused by the other.
 The consolidated, cross-ecosystem index is written to a single file:
 

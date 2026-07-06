@@ -14,7 +14,7 @@ repositories. The model uses four connectors/extractors against it, all under
 
 `src/sources/ecosystems/packages.py` — for packages the native registry crawl left without a
 repo URL, queries `packages.ecosyste.ms/api/v1/registries/{registry}/packages/{name}` and writes
-`data/sources/{eco}/raw/ecosystems.csv` (`package, registry_hit, repository_url, homepage,
+`data/sources/ecosystems/{eco}/packages.csv` (`package, registry_hit, repository_url, homepage,
 fetched_at`). Used by the Value stage to fill missing `github_repo` / `git_url`.
 
 ## Candidates connector (class-A audit fetch)
@@ -24,7 +24,7 @@ missing both a `github_repo` and a `git` URL), this fetches ecosyste.ms data for
 class-A candidate** package, to obtain an *independent* repository identity that
 `src/value/audit_ecosystems.py` compares against ours (that audit writes
 `data/sources/ecosystems/audit.csv`). It shares the raw-JSON cache with `packages.py`
-(`data/sources/{eco}/raw/ecosystems/{package}.json`) and writes the consolidated
+(`data/sources/ecosystems/{eco}/raw/{package}.json`) and writes the consolidated
 cross-ecosystem index `data/sources/ecosystems/packages.csv` (`ecosystem, package, purl,
 registry_hit, repository_url, homepage, repo_host, repo_full_name, repo_archived, repo_fork,
 repo_stars, last_synced_at, fetched_at`). Incremental with a 1-year TTL.
@@ -116,7 +116,7 @@ a `repository_url` to the correct registry name, e.g. `bdwgc/bdwgc → bdw-gc`, 
 to value class A by default (`--classes A B …`, or `all`); criticality is an importance signal for
 the head of the distribution. Raw package JSON is cached per `(ecosystem, package)` under
 `data/sources/ecosystems/raw/criticality/` for audit. This cache is deliberately **separate**
-from `packages.py`'s (`data/sources/{eco}/raw/ecosystems/`) and the two cannot be merged: the
+from `packages.py`'s (`data/sources/ecosystems/{eco}/raw/`) and the two cannot be merged: the
 fetchers query cpp registries in different orders (debian-first for URL coverage vs spack-first
 for a real ranking), and debian reports `rank_average=100` for every package — sharing the cache
 would silently regress cpp rankings to 100 (see `_cache_path` in `criticality.py`).

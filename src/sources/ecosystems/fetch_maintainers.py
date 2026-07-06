@@ -53,7 +53,7 @@ FIELDS = ["ecosystem", "package", "repo_id", "login", "name", "email", "role",
 def _cache_path(data_dir: Path, eco: str, pkg: str) -> Path:
     """Where packages.py/candidates.py cached this package's raw ecosyste.ms JSON."""
     safe = pkg.replace("/", "__")
-    return data_dir / "sources" / eco / "raw" / "ecosystems" / f"{safe}.json"
+    return data_dir / "sources" / "ecosystems" / eco / "raw" / f"{safe}.json"
 
 
 def _read_cached(path: Path) -> dict | None:
