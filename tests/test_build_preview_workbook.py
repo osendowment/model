@@ -1,9 +1,31 @@
-"""Tests for src/build_preview_workbook.py — repos.csv + people.csv -> preview.xlsx."""
+"""Tests for src/build_preview_workbook.py — repos/people/stats -> preview.xlsx."""
 import csv
 
 from openpyxl import load_workbook
 
 from src import build_preview_workbook as bpw
+
+_STATS_MD = """# Pipeline Statistics
+
+Some prose that must be skipped.
+
+## Value
+
+### Repo identity coverage
+
+| Step | A | Total | Comment |
+|---|--:|--:|---|
+| Packages | 3,425 | 17,647 | package universe |
+| **Valid repos** | **947** | **11,378** | upstream resolves |
+
+more prose
+
+### Coverage
+
+| Signal | Filled |
+|---|--:|
+| `openssf_crit` | 921 |
+"""
 
 
 def _write_csv(path, header, rows):
@@ -11,6 +33,12 @@ def _write_csv(path, header, rows):
         w = csv.writer(f)
         w.writerow(header)
         w.writerows(rows)
+
+
+def _write_stats_md(tmp_path):
+    p = tmp_path / "stats.md"
+    p.write_text(_STATS_MD, encoding="utf-8")
+    return p
 
 
 def test_cell_value_coerces_numbers_and_keeps_ids_as_text():
@@ -30,12 +58,13 @@ def test_build_writes_two_named_sheets_with_styled_filtered_headers(tmp_path, mo
     _write_csv(people_csv, ["person_id", "platform", "login"],
                [["github/1", "github", "octocat"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv), ("people", people_csv)])
+    monkeypatch.setattr(bpw, "STATS_MD", _write_stats_md(tmp_path))
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
 
     bpw.build()
 
     wb = load_workbook(out)
-    assert wb.sheetnames == ["repos", "people"]
+    assert wb.sheetnames == ["repos", "people", "stats"]
 
     ws = wb["repos"]
     assert ws.max_row == 3          # header + 2 data rows
@@ -66,10 +95,38 @@ def test_build_skips_missing_csv_without_error(tmp_path, monkeypatch):
     out = tmp_path / "preview.xlsx"
     _write_csv(repos_csv, ["repo_id"], [["gh/1"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv), ("people", missing_csv)])
+    monkeypatch.setattr(bpw, "STATS_MD", _write_stats_md(tmp_path))
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
 
     bpw.build()
 
     wb = load_workbook(out)
-    assert wb.sheetnames == ["repos", "people"]
+    assert wb.sheetnames == ["repos", "people", "stats"]
     assert wb["people"].max_row == 1   # empty sheet, no header written
+
+
+def test_stats_sheet_renders_markdown_tables(tmp_path, monkeypatch):
+    """Every stats.md table lands as a stacked block: bold section heading,
+    styled header row, markdown dressing stripped, counts as real numbers."""
+    repos_csv = tmp_path / "repos.csv"
+    out = tmp_path / "preview.xlsx"
+    _write_csv(repos_csv, ["repo_id"], [["gh/1"]])
+    monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv)])
+    monkeypatch.setattr(bpw, "STATS_MD", _write_stats_md(tmp_path))
+    monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
+
+    bpw.build()
+
+    ws = load_workbook(out)["stats"]
+    got = [[c.value for c in row] for row in ws.iter_rows()]
+    # block 1: heading, header, two data rows (bold + thousands stripped)
+    assert got[0][0] == "Repo identity coverage"
+    assert ws.cell(row=1, column=1).font.bold is True
+    assert got[1][:4] == ["Step", "A", "Total", "Comment"]
+    assert ws.cell(row=2, column=1).fill.start_color.rgb == "001F3864"
+    assert got[2][:3] == ["Packages", 3425, 17647]
+    assert got[3][:3] == ["Valid repos", 947, 11378]      # **bold** stripped
+    # blank separator, then block 2 under its own heading (`code` stripped)
+    assert got[4] == [None] * len(got[4])
+    assert got[5][0] == "Coverage"
+    assert got[7][:2] == ["openssf_crit", 921]

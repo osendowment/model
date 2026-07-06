@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build data/preview/preview.xlsx — repos.csv + people.csv as one workbook.
+"""Build data/preview/preview.xlsx — repos.csv + people.csv + stats as one workbook.
 
 The terminal step of the pipeline: combines the two preview CSVs
 (src.build_results -> repos.csv, src.build_people -> people.csv) into a
@@ -8,7 +8,13 @@ single spreadsheet for non-technical review, one sheet per CSV ('repos',
 Excel numbers, not text, so sorting/filtering behaves numerically rather
 than alphabetically.
 
-Both sheets get:
+A third sheet, 'stats', renders every markdown table from `docs/stats.md`
+(the single source of truth for pipeline counts/funnels) as stacked blocks —
+each under its section heading, with the same styled header row. Refresh
+stats.md first (`scripts/stats.py --markdown`) so the sheet reflects the
+current data.
+
+The CSV sheets get:
     - a styled header row (bold white text on a dark-blue fill) so it reads
       as a header at a glance, distinct from the data rows
     - an AutoFilter over the full used range, so every column has a
@@ -30,15 +36,18 @@ from rich.console import Console
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
 REPOS_CSV = DATA_DIR / "preview" / "repos.csv"
 PEOPLE_CSV = DATA_DIR / "preview" / "people.csv"
+STATS_MD = ROOT / "docs" / "stats.md"
 OUTPUT_FILE = DATA_DIR / "preview" / "preview.xlsx"
 
 SHEETS = [("repos", REPOS_CSV), ("people", PEOPLE_CSV)]
 
 HEADER_FILL = PatternFill(start_color="1F3864", end_color="1F3864", fill_type="solid")
 HEADER_FONT = Font(bold=True, color="FFFFFF")
+SECTION_FONT = Font(bold=True, size=13)
 
 
 def _cell_value(raw: str) -> int | float | str | None:
@@ -86,6 +95,79 @@ def _write_sheet(ws: Worksheet, csv_path: Path) -> int:
     return len(data_rows)
 
 
+def _md_cell(raw: str) -> int | float | str | None:
+    """One markdown table cell → an Excel value.
+
+    Strips the markdown dressing (`**bold**`, `` `code` `` — including code
+    spans inside prose), then coerces thousands-separated counts to real
+    numbers. Percent strings ("97.8%") and prose stay text; a
+    blank/placeholder cell becomes an empty cell."""
+    s = raw.strip().strip("*").replace("`", "").strip()
+    if s in ("", "—", "·"):
+        return None
+    plain = s.replace(",", "")
+    try:
+        return int(plain)
+    except ValueError:
+        pass
+    try:
+        return float(plain)
+    except ValueError:
+        return s
+
+
+def _is_md_separator(line: str) -> bool:
+    """A markdown table's |---|--:|---| alignment row (no letters/digits)."""
+    body = line.strip().strip("|")
+    return bool(body) and set(body) <= set("-:| ")
+
+
+def _write_stats_sheet(ws: Worksheet, md_path: Path) -> int:
+    """Render every markdown table in `md_path` as a stacked block: its nearest
+    heading above as a bold section title, then the table with a styled header
+    row. Prose between tables is skipped. Returns the number of tables written.
+    """
+    lines = md_path.read_text(encoding="utf-8").splitlines()
+    heading = ""
+    tables = 0
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        if line.startswith("#"):
+            heading = line.lstrip("#").strip()
+            i += 1
+            continue
+        if not line.startswith("|"):
+            i += 1
+            continue
+        # A table block: consecutive `|`-rows; second row is the alignment row.
+        block = []
+        while i < len(lines) and lines[i].strip().startswith("|"):
+            if not _is_md_separator(lines[i]):
+                block.append([c for c in lines[i].strip().strip("|").split("|")])
+            i += 1
+        if not block:
+            continue
+        if tables:
+            ws.append([])  # blank separator between blocks
+        ws.append([heading])
+        ws.cell(row=ws.max_row, column=1).font = SECTION_FONT
+        header_row_idx = ws.max_row + 1
+        for j, cells in enumerate(block):
+            ws.append([_md_cell(c) for c in cells])
+            if j == 0:
+                for col_idx in range(1, len(cells) + 1):
+                    cell = ws.cell(row=header_row_idx, column=col_idx)
+                    cell.font = HEADER_FONT
+                    cell.fill = HEADER_FILL
+        tables += 1
+
+    ws.column_dimensions["A"].width = 36
+    for col in "BCDEFG":
+        ws.column_dimensions[col].width = 14
+    return tables
+
+
 def build() -> None:
     wb = Workbook()
     wb.remove(wb.active)  # drop the default blank sheet; we name our own
@@ -94,6 +176,10 @@ def build() -> None:
         ws = wb.create_sheet(name)
         n = _write_sheet(ws, path)
         console.print(f"  [cyan]{name}[/cyan]: {n:,} rows ← {path}")
+
+    ws = wb.create_sheet("stats")
+    n = _write_stats_sheet(ws, STATS_MD)
+    console.print(f"  [cyan]stats[/cyan]: {n} tables ← {STATS_MD}")
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     wb.save(OUTPUT_FILE)
