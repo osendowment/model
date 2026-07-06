@@ -49,6 +49,8 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.tables import load_rows_by_id
+
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -71,19 +73,6 @@ FIELDS = (
 )
 
 
-def _index_by_id(path: Path) -> dict[str, dict]:
-    """{repo_id: row} from a CSV; rows with a blank repo_id are skipped."""
-    out: dict[str, dict] = {}
-    if not path.exists():
-        return out
-    with open(path, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            rid = (row.get("repo_id") or "").strip()
-            if rid:
-                out.setdefault(rid, row)
-    return out
-
-
 def _num(x: str) -> float | None:
     try:
         return float(x)
@@ -92,9 +81,9 @@ def _num(x: str) -> float | None:
 
 
 def build() -> list[dict]:
-    value_by_id = _index_by_id(VALUE_FILE)
-    risk_by_id = _index_by_id(RISK_FILE)
-    language_by_id = _index_by_id(GITHUB_REPOS_FILE)
+    value_by_id = load_rows_by_id(VALUE_FILE)
+    risk_by_id = load_rows_by_id(RISK_FILE)
+    language_by_id = load_rows_by_id(GITHUB_REPOS_FILE)
 
     with open(ELIGIBILITY_FILE, encoding="utf-8") as f:
         eligibility_rows = list(csv.DictReader(f))
