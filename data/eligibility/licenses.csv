@@ -174,6 +174,7 @@ eemeli/yaml,gh/119439276,isc,registry,True
 ehmicky/human-signals,gh/214467546,apache-2.0,registry,True
 eliben/pycparser,gh/10589864,bsd-3-clause,registry,True
 emotion-js/emotion,gh/92570536,mit,registry,True
+enarx/ciborium,gh/313759241,apache-2.0,registry,True
 encode/httpcore,gh/237210639,bsd-3-clause,registry,True
 encode/httpx,gh/179492861,bsd-3-clause,registry,True
 epoberezkin/fast-deep-equal,gh/94483360,mit,registry,True
@@ -268,6 +269,7 @@ gnome/pango,gh/4537144,lgpl-2.0-or-later,registry,True
 gnutls/gnutls,gl/179611,gpl-3.0,github,True
 gnutls/libtasn1,gl/919981,noassertion,github,
 google/brotli,gh/24993138,mit,registry,True
+google/highway,gh/206791328,noassertion,github,
 google/zerocopy,gh/534354967,bsd-2-clause or apache-2.0 or mit,registry,True
 googleapis/google-cloud-python,gh/16316451,apache-2.0,registry,True
 googleapis/python-cloud-core,gh/226992462,apache-2.0,registry,True
@@ -426,6 +428,7 @@ jslicense/spdx-correct.js,gh/34817196,apache-2.0,registry,True
 jslicense/spdx-exceptions.json,gh/40062896,cc-by-3.0,registry,False
 jslicense/spdx-expression-parse.js,gh/40067336,mit,registry,True
 jslicense/spdx-license-ids,gh/26001547,cc0-1.0,registry,False
+json-c/json-c,gh/1139119,mit,registry,True
 json5/json5,gh/4463453,mit,registry,True
 juliangruber/balanced-match,gh/13538817,mit,registry,True
 juliangruber/brace-expansion,gh/13539234,mit,registry,True
@@ -445,6 +448,7 @@ kpdecker/jsdiff,gh/1542219,bsd-3-clause,registry,True
 krb5/krb5,gh/4307702,bsd-2-clause and bsd-2-clause-first-lines and bsd-3-clause and bsd-4-clause and brian-gladman-2-clause and cmu-mach-nodoc and fsfullrwd and hpnd and hpnd-export2-us and hpnd-export-us and hpnd-export-us-acknowledgement and hpnd-export-us-modify and isc and mit and mit-cmu and oldap-2.8 and openvision and (bsd-2-clause or gpl-2.0-or-later),registry,True
 kriskowal/asap,gh/11295071,mit,registry,True
 kriszyp/json-schema,gh/947175,(afl-2.1 or bsd-3-clause),registry,True
+la10736/rstest,gh/124802455,mit or apache-2.0,registry,True
 langchain-ai/langchain,gh/552661142,mit,registry,True
 laurent-laporte-pro/deprecated,gh/111412148,mit,registry,True
 lddubeau/xmlchars,gh/139881982,mit,registry,True
@@ -458,7 +462,6 @@ libpixman/pixman,gh/81675971,mit,registry,True
 libtiff/libtiff,gl/4720790,libtiff,gitlab,False
 libuv/libuv,gh/14812739,mit,registry,True
 linusu/buffer-from,gh/66025821,mit,registry,True
-linux-audit/audit-userspace,gh/52464964,gpl-2.0,github,True
 linux-pam/linux-pam,gh/76264690,bsd-3-clause,override,True
 litejs/natural-compare-lite,gh/9146732,mit,registry,True
 ljharb/call-bind,gh/308533760,mit,registry,True
@@ -550,7 +553,6 @@ multimedia-team/aom,gl/salsa.debian.org-29534,bsd-2-clause,gitlab,True
 myrne/performance-now,gh/10219264,mit,registry,True
 mysticatea/abort-controller,gh/105228556,mit,registry,True
 mysticatea/event-target-shim,gh/31137469,mit,registry,True
-netflix/vmaf,gh/51317975,bsd-2-clause-patent,override,True
 nghttp2/nghttp2,gh/11452676,mit,registry,True
 nicolo-ribaudo/babel-preset-current-node-syntax,gh/253327079,mit,registry,True
 nlnetlabs/unbound,gh/94195301,bsd-3-clause,registry,True
@@ -624,7 +626,6 @@ protocolbuffers/protobuf,gh/23357588,bsd-3-clause,registry,True
 psf/requests,gh/1362490,apache-2.0,registry,True
 psycopg/psycopg2,gh/7730829,lgpl-2.1,registry,True
 pvorb/clone,gh/2317381,mit,registry,True
-py4j/py4j,gh/1045976,bsd-3-clause,registry,True
 pyasn1/pyasn1,gh/512723255,bsd-2-clause,registry,True
 pyasn1/pyasn1-modules,gh/512723354,bsd-3-clause,registry,True
 pyca/bcrypt,gh/9993757,apache-2.0,registry,True
@@ -870,7 +871,6 @@ tkem/cachetools,gh/18006791,mit,registry,True
 tokio-rs/bytes,gh/30062547,mit,registry,True
 tokio-rs/loom,gh/161875917,mit,registry,True
 tokio-rs/prost,gh/94262864,apache-2.0,registry,True
-tokio-rs/slab,gh/37093133,mit,registry,True
 tokio-rs/tokio,gh/67836789,mit,registry,True
 tokio-rs/tracing,gh/165289175,mit,registry,True
 toml-rs/toml,gh/95902102,mit or apache-2.0,registry,True
@@ -895,7 +895,6 @@ unshiftio/requires-port,gh/26316179,mit,registry,True
 uqfoundation/dill,gh/11031844,bsd-3-clause,registry,True
 urllib3/urllib3,gh/2410676,mit,registry,True
 util-linux/util-linux,gh/2339555,bsd-3-clause and bsd-4-clause-uc and gpl-2.0-only and gpl-2.0-or-later and gpl-3.0-or-later and lgpl-2.1-or-later and licenseref-homebrew-public-domain,registry,True
-utopia-team/dbus,gl/salsa.debian.org-9742,other,gitlab,
 uuidjs/uuid,gh/1203139,mit,registry,True
 vercel/ai,gh/644461337,apache-2.0,registry,True
 vercel/ms,gh/3655872,mit,registry,True
@@ -921,7 +920,6 @@ websockets/ws,gh/2744972,mit,registry,True
 wesleytodd/setprototypeof,gh/30301031,isc,registry,True
 whitequark/ipaddr.js,gh/2110585,mit,registry,True
 withoutboats/heck,gh/86326466,mit or apache-2.0,registry,True
-xiph/ogg,gh/33956205,bsd-3-clause,registry,True
 xorg-team/lib/libx11,gl/salsa.debian.org-4306,bsd-1-clause,gitlab,True
 xorg-team/lib/libxau,gl/salsa.debian.org-4307,mit-open-group,gitlab,False
 xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,mit-open-group,gitlab,False

@@ -283,6 +283,7 @@ gnutls/gnutls,gl/179611,Debian:gnutls,2026-07-05T23:08:01+00:00
 gnutls/libtasn1,gl/919981,Debian:libtasn1,2026-07-05T23:08:02+00:00
 gnutls/nettle,gh/59017402,Debian:nettle,2026-05-18T01:13:30+00:00
 google/brotli,gh/24993138,"PyPI:brotli,Debian:brotli",2026-07-05T16:34:00+00:00
+google/highway,gh/206791328,"Debian:highway-simd-library,Debian:python:numpy",2026-07-06T11:06:58+00:00
 google/zerocopy,gh/534354967,"crates.io:zerocopy,crates.io:zerocopy-derive",2026-07-05T16:34:00+00:00
 googleapis/google-auth-library-python,gh/69199387,PyPI:google-auth,2026-05-03T18:58:23+00:00
 googleapis/google-cloud-node-core,gh/1052931509,"npm:gaxios,npm:google-auth-library,npm:gcp-metadata,npm:google-logging-utils,npm:teeny-request,npm:google-gax,npm:proto3-json-serializer,npm:googleapis-common",2026-05-03T18:58:31+00:00
@@ -449,6 +450,7 @@ jslicense/spdx-correct.js,gh/34817196,npm:spdx-correct,2026-07-05T16:34:55+00:00
 jslicense/spdx-exceptions.json,gh/40062896,npm:spdx-exceptions,2026-07-05T16:34:55+00:00
 jslicense/spdx-expression-parse.js,gh/40067336,npm:spdx-expression-parse,2026-07-05T16:34:55+00:00
 jslicense/spdx-license-ids,gh/26001547,npm:spdx-license-ids,2026-07-05T16:34:56+00:00
+json-c/json-c,gh/1139119,Debian:json-c,2026-07-06T11:06:58+00:00
 json5/json5,gh/4463453,npm:json5,2026-07-05T16:34:56+00:00
 juliangruber/balanced-match,gh/13538817,npm:balanced-match,2026-07-05T16:34:56+00:00
 juliangruber/brace-expansion,gh/13539234,npm:brace-expansion,2026-07-05T16:34:56+00:00
@@ -468,6 +470,7 @@ kpdecker/jsdiff,gh/1542219,npm:diff,2026-07-05T16:34:59+00:00
 krb5/krb5,gh/4307702,Debian:krb5,2026-07-05T16:35:02+00:00
 kriskowal/asap,gh/11295071,npm:asap,2026-07-05T16:34:59+00:00
 kriszyp/json-schema,gh/947175,npm:json-schema,2026-07-05T16:34:59+00:00
+la10736/rstest,gh/124802455,"crates.io:rstest,crates.io:rstest_reuse,crates.io:rstest_macros",2026-07-06T11:06:59+00:00
 langchain-ai/langchain,gh/552661142,"PyPI:langchain-core,PyPI:langchain,PyPI:langchain-openai,PyPI:langchain-community,PyPI:langchain-text-splitters,PyPI:langchain-anthropic,PyPI:langchain-classic,PyPI:langchain-tests",2026-07-05T16:35:07+00:00
 laurent-laporte-pro/deprecated,gh/111412148,PyPI:deprecated,2026-07-05T16:35:00+00:00
 lddubeau/xmlchars,gh/139881982,npm:xmlchars,2026-05-03T18:59:15+00:00

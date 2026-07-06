@@ -7,6 +7,7 @@ git://git.altlinux.org/people/ldv/packages/?p=libutempter.git,False,ls-remote,20
 git://git.code.sf.net/p/giflib/code,True,ls-remote,2026-04-27T20:41:04Z
 git://git.code.sf.net/p/net-snmp/code,True,ls-remote,2026-04-27T20:41:04Z
 git://git.code.sf.net/p/opencore-amr/code,True,ls-remote,2026-04-27T20:41:04Z
+git://git.coolaj86.com/coolaj86/atob.js.git,False,ls-remote,2026-07-06T10:53:22Z
 git://git.coolaj86.com/coolaj86/btoa.js.git,False,ls-remote,2026-05-17T23:15:11Z
 git://git.coolaj86.com/coolaj86/remedial.js,False,ls-remote,2026-05-17T23:15:11Z
 git://git.debian.org/?p=users/ron/libao.git,False,ls-remote,2026-05-17T23:15:11Z
@@ -46,6 +47,7 @@ git://git.ortolo.eu/pkg-libasyncns.git,False,ls-remote,2026-05-17T23:15:11Z
 git://git.osgeo.org/gitea/geos/geos.git,False,ls-remote,2026-05-17T23:15:11Z
 git://git.osgeo.org/gitea/rttopo/librttopo,False,ls-remote,2026-05-17T23:15:11Z
 git://git.samba.org/samba.git,True,ls-remote,2026-05-17T23:15:11Z
+git://git.savannah.gnu.org/automake.git,True,ls-remote,2026-07-06T10:53:22Z
 git://git.savannah.gnu.org/bash.git,True,ls-remote,2026-04-27T20:41:04Z
 git://git.savannah.gnu.org/cpio.git,True,ls-remote,2026-04-27T20:41:04Z
 git://git.savannah.gnu.org/diffutils.git,True,ls-remote,2026-04-27T20:41:04Z
@@ -74,7 +76,9 @@ git://git.sr.ht/~ilkecan/indent-rs,False,ls-remote,2026-05-17T23:15:11Z
 git://git.sr.ht/~kvsari/derive-getters,False,ls-remote,2026-05-17T23:15:11Z
 git://git.sr.ht/~mcepl/m2crypto,False,ls-remote,2026-05-17T23:15:11Z
 git://git.sr.ht/~nkeor/human_bytes,False,ls-remote,2026-05-17T23:15:11Z
+git://git.sr.ht/~tdeo/serde_bare,False,ls-remote,2026-07-06T10:53:22Z
 git://git.unturf.com/python/nested-lookup,False,ls-remote,2026-05-17T23:15:11Z
+git://git.woa.com/tencent-cloud-datalake/goosefs-client-rust,False,ls-remote,2026-07-06T10:53:22Z
 git://git.zapb.de/libjaylink/libjaylink,False,ls-remote,2026-05-17T23:15:11Z
 git://jugit.fz-juelich.de/mlz/libcerf,False,ls-remote,2026-05-17T23:15:11Z
 git://sourceware.org/git/binutils-gdb.git,True,ls-remote,2026-05-31T23:17:28Z
@@ -104,7 +108,9 @@ https://codeberg.org/adamreichold/sif-itree.git,True,ls-remote,2026-05-17T23:15:
 https://codeberg.org/bromind/dot-parser.git,True,ls-remote,2026-05-17T23:15:11Z
 https://codeberg.org/commons-rs/unit-prefix.git,True,ls-remote,2026-05-17T23:15:11Z
 https://codeberg.org/dashea/requests-file.git,True,ls-remote,2026-06-28T13:20:44Z
+https://codeberg.org/dequbed/rsasl.git,True,ls-remote,2026-07-06T10:53:22Z
 https://codeberg.org/goat7658/doctest-file.git,True,ls-remote,2026-05-17T23:15:11Z
+https://codeberg.org/guile/guile.git,True,ls-remote,2026-07-06T10:53:22Z
 https://codeberg.org/gumbo-parser/gumbo-parser.git,True,ls-remote,2026-05-17T23:15:11Z
 https://codeberg.org/hjacobs/python-clickclick.git,True,ls-remote,2026-05-17T23:15:11Z
 https://codeberg.org/jasterv/test-context.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -131,10 +137,15 @@ https://codeberg.org/wvwwvwwv/scalable-delayed-dealloc.git,True,ls-remote,2026-0
 https://codeberg.org/wvwwvwwv/synchronous-and-asynchronous.git,True,ls-remote,2026-05-17T23:15:11Z
 https://codeberg.org/xfix/array-macro.git,False,ls-remote,2026-05-17T23:15:11Z
 https://codeberg.org/xfix/enum-map.git,True,ls-remote,2026-05-17T23:15:11Z
+https://dev.gnupg.org/source/libgcrypt.git,False,ls-remote,2026-07-06T10:53:22Z
 https://git.libssh.org/projects/libssh.git,True,ls-remote,2026-04-27T20:41:04Z
 https://git.openldap.org/openldap/openldap.git,True,ls-remote,2026-04-27T20:41:04Z
 https://git.postgresql.org/git/postgresql.git,True,ls-remote,2026-04-27T20:41:04Z
 https://git.qemu.org/git/qemu.git,True,ls-remote,2026-04-27T20:41:04Z
+https://git.savannah.gnu.org/git/gettext.git,True,ls-remote,2026-07-06T10:53:22Z
+https://git.savannah.gnu.org/git/libunistring.git,True,ls-remote,2026-07-06T10:53:22Z
+https://git.savannah.gnu.org/git/readline.git,True,ls-remote,2026-07-06T10:53:22Z
+https://git.savannah.nongnu.org/git/acl.git,True,ls-remote,2026-07-06T10:53:22Z
 https://gitlab.cern.ch/dmc/gfal2-bindings.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.cern.ch/fts/fts-rest-flask.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/accounts-sso/accounts-qml-module.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -156,10 +167,12 @@ https://gitlab.com/cardoe/enum-primitive-derive.git,True,ls-remote,2026-05-17T23
 https://gitlab.com/catamphetamine/libphonenumber-js.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/chris-morgan/symlink.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/cjwatson/libpipeline.git,True,ls-remote,2026-04-27T20:41:04Z
+https://gitlab.com/cjwatson/man-db.git,True,ls-remote,2026-07-06T10:53:22Z
 https://gitlab.com/creepyskeleton/proc-macro-error.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.com/cryptsetup/cryptsetup.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/dajoha/color-print.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/davidbittner/ansi-parser.git,True,ls-remote,2026-05-17T23:15:11Z
+https://gitlab.com/dns2utf8/sudo.rs.git,True,ls-remote,2026-07-06T10:53:22Z
 https://gitlab.com/doctormo/python-crontab.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/drj11/pypng.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/drobilla/zix.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -255,6 +268,7 @@ https://gitlab.freedesktop.org/libdecor/libdecor.git,True,ls-remote,2026-05-17T2
 https://gitlab.freedesktop.org/libinput/libei.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.freedesktop.org/libspectre/libspectre.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.freedesktop.org/mesa/drm.git,True,ls-remote,2026-04-27T20:41:04Z
+https://gitlab.freedesktop.org/mesa/glu.git,True,ls-remote,2026-07-06T10:53:22Z
 https://gitlab.freedesktop.org/mesa/mesa.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.freedesktop.org/mobile-broadband/libqrtr-glib.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.freedesktop.org/networkmanager/networkmanager.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -306,6 +320,7 @@ https://gitlab.gnome.org/gnome/gnome-session.git,True,ls-remote,2026-05-17T23:15
 https://gitlab.gnome.org/gnome/gnome-settings-daemon.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.gnome.org/gnome/gnome-shell.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.gnome.org/gnome/gspell.git,True,ls-remote,2026-05-17T23:15:11Z
+https://gitlab.gnome.org/gnome/gtk-vnc.git,True,ls-remote,2026-07-06T10:53:22Z
 https://gitlab.gnome.org/gnome/gtksourceview.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.gnome.org/gnome/libdazzle.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.gnome.org/gnome/libdex.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -321,6 +336,7 @@ https://gitlab.gnome.org/gnome/libwnck.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.gnome.org/gnome/libxml2.git,True,ls-remote,2026-06-28T13:20:44Z
 https://gitlab.gnome.org/gnome/libxslt.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.gnome.org/gnome/metacity.git,True,ls-remote,2026-05-17T23:15:11Z
+https://gitlab.gnome.org/gnome/phodav.git,True,ls-remote,2026-07-06T10:53:22Z
 https://gitlab.gnome.org/gnome/pygobject.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.gnome.org/gnome/tinysparql.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.gnome.org/world/dleyna.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -332,6 +348,7 @@ https://gitlab.gnome.org/world/gedit/libgedit-tepl.git,True,ls-remote,2026-05-17
 https://gitlab.gnome.org/world/rust/soup3-rs.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.inria.fr/mpc/mpc.git,True,ls-remote,2026-05-31T23:17:28Z
 https://gitlab.inria.fr/mpfr/mpfr.git,True,ls-remote,2026-05-31T23:17:28Z
+https://gitlab.isc.org/isc-projects/bind9.git,True,ls-remote,2026-07-06T10:53:22Z
 https://gitlab.isc.org/isc-projects/dhcp.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.kitware.com/utils/rust-yaml-merge-keys.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.linss.com/open-source/python/uri-template.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -935,6 +952,7 @@ https://salsa.debian.org/printing-team/pnm2ppa.git,True,ls-remote,2026-05-17T23:
 https://salsa.debian.org/pulseaudio-team/pavucontrol.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/pulseaudio-team/pulseaudio.git,True,ls-remote,2026-06-28T19:52:26Z
 https://salsa.debian.org/pulseaudio-team/webrtc-audio-processing.git,False,ls-remote,2026-05-17T23:15:11Z
+https://salsa.debian.org/python-team/packages/mercurial.git,True,ls-remote,2026-07-06T10:53:22Z
 https://salsa.debian.org/qemu-team/qemu.git,True,ls-remote,2026-06-28T19:52:26Z
 https://salsa.debian.org/qemu-team/spice-protocol.git,False,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/qt-kde-team/3rdparty/lensfun.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -988,6 +1006,7 @@ https://salsa.debian.org/science-team/mpi-defaults.git,False,ls-remote,2026-05-1
 https://salsa.debian.org/science-team/mpich.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/science-team/qhull.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/selinux-team/libsepol.git,True,ls-remote,2026-06-28T19:52:26Z
+https://salsa.debian.org/ssh-team/putty.git,True,ls-remote,2026-07-06T10:53:22Z
 https://salsa.debian.org/sudo-team/sudo.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/tcltk-team/blt.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/tcltk-team/tcltk-defaults.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -1091,3 +1110,4 @@ https://salsa.debian.org/xorg-team/lib/xcb-util-renderutil.git,True,ls-remote,20
 https://salsa.debian.org/xorg-team/lib/xcb-util-wm.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/xorg-team/lib/xcb-util.git,False,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/yangfl-guest/libwmf.git,True,ls-remote,2026-05-17T23:15:11Z
+https://sourceware.org/git/binutils-gdb.git,True,ls-remote,2026-07-06T10:53:22Z

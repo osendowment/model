@@ -125,6 +125,7 @@ conventional-changelog/conventional-changelog,gh/15639771,4.7,2026-04-20,13603,n
 cosmiconfig/cosmiconfig,gh/45750507,5.4,2026-04-20,18566,MIT,16,,,2026-05-03T19:10:17+00:00
 coveragepy/coveragepy,gh/138421996,,,3460,Apache-2.0,273,,,2026-05-03T19:10:17+00:00
 cpburnz/python-pathspec,gh/14648551,,,8997,non-standard,2,,,2026-05-03T19:10:18+00:00
+cpython-team/python3-defaults,gl/salsa.debian.org-27547,,,,,,,,2026-07-06T11:07:54+00:00
 crate-py/rpds,gh/608018848,,,47621,MIT,5,,,2026-05-17T23:42:53+00:00
 criterion-rs/criterion.rs,gh/1081104682,,,1647,Apache-2.0,26,,,2026-05-03T19:10:18+00:00
 crossbeam-rs/crossbeam,gh/35566048,5.5,2026-04-20,69127,Apache-2.0,155,,,2026-05-03T19:10:18+00:00
@@ -145,6 +146,10 @@ davisjam/safe-regex,gh/90781457,3,2026-04-20,4916,non-standard,11,,,2026-05-03T1
 dchest/tweetnacl-js,gh/15649752,2.5,2026-04-20,47986,non-standard,6,,,2026-05-03T19:10:30+00:00
 dcodeio/long.js,gh/8678904,3.1,2026-04-20,148325,Apache-2.0,1,,,2026-05-03T19:10:30+00:00
 dcodeio/protobuf.js,gh/8507859,5.8,2026-04-20,685370,non-standard,392,,,2026-05-03T19:10:31+00:00
+debian/bzip2,gl/salsa.debian.org-9696,,,,,,,,2026-07-06T11:07:53+00:00
+debian/ca-certificates,gl/salsa.debian.org-2995,,,,,,,,2026-07-06T11:07:55+00:00
+debian/gdbm,gl/salsa.debian.org-32157,,,,,,,,2026-07-06T11:07:53+00:00
+debian/giflib,gl/salsa.debian.org-12522,,,,,,,,2026-07-06T11:07:55+00:00
 debug-js/debug,gh/2871998,2.9,2026-04-20,660364,MIT,86,,,2026-05-03T19:10:30+00:00
 definitelytyped/definitelytyped,gh/6093316,6.5,2026-04-20,4317293,non-standard,699,,,2026-05-03T19:10:35+00:00
 defunctzombie/node-process,gh/7580644,2.1,2026-05-04,,MIT,16,,,2026-05-17T23:42:52+00:00
@@ -178,6 +183,7 @@ eemeli/yaml,gh/119439276,7.2,2026-04-20,71181,non-standard,31,,,2026-05-03T19:10
 ehmicky/human-signals,gh/214467546,2.8,2026-04-20,11485,Apache-2.0,0,,,2026-05-03T19:10:53+00:00
 eliben/pycparser,gh/10589864,6.1,2026-04-20,83282,non-standard,32,,,2026-05-03T19:10:54+00:00
 emotion-js/emotion,gh/92570536,5.6,2026-04-20,766853,MIT,372,,,2026-05-03T19:10:55+00:00
+enarx/ciborium,gh/313759241,4.8,2026-06-22,21015,non-standard,53,,,2026-07-06T11:07:58+00:00
 encode/httpcore,gh/237210639,5.4,2026-04-20,78180,BSD-3-Clause,39,,,2026-05-03T19:10:54+00:00
 encode/httpx,gh/179492861,5.7,2026-04-20,314,BSD-3-Clause,148,,,2026-05-03T19:10:54+00:00
 epoberezkin/ajv-keywords,gh/60477053,3.2,2026-04-20,64637,MIT,47,,,2026-05-03T19:10:55+00:00
@@ -277,6 +283,7 @@ gnutls/gnutls,gh/58873704,,,,GPL-3.0,0,,,2026-05-03T19:11:52+00:00
 gnutls/libtasn1,gh/59017205,,,,,,,,2026-05-03T19:11:52+00:00
 gnutls/nettle,gh/59017402,,,,LGPL-3.0,0,,,2026-05-03T19:11:53+00:00
 google/brotli,gh/24993138,7.3,2026-04-20,4400,MIT,95,in_progress,57,2026-05-03T19:11:53+00:00
+google/highway,gh/206791328,6.4,2026-06-22,,non-standard,79,,,2026-07-06T11:07:57+00:00
 google/zerocopy,gh/534354967,6.4,2026-04-20,69424,Apache-2.0,389,,,2026-05-03T19:11:53+00:00
 googleapis/google-auth-library-python,gh/69199387,7.3,2026-04-20,0,Apache-2.0,0,,,2026-05-03T19:11:53+00:00
 googleapis/google-cloud-node-core,gh/1052931509,,,40071,Apache-2.0,1,,,2026-05-03T19:11:54+00:00
@@ -303,6 +310,7 @@ gyscos/zstd-rs,gh/52115335,4.7,2026-04-20,974,BSD-3-Clause,82,,,2026-05-03T19:11
 hapijs/hoek,gh/5831189,3.9,2026-04-20,9313,non-standard,3,,,2026-05-03T19:11:59+00:00
 harfbuzz/harfbuzz,gh/5050525,7.8,2026-04-20,,non-standard,89,in_progress,97,2026-05-03T19:11:58+00:00
 hiddentao/fast-levenshtein,gh/9490451,2.3,2026-04-20,4260,MIT,10,,,2026-05-03T19:12:00+00:00
+holmgren/nettle,gl/salsa.debian.org-50952,,,,,,,,2026-07-06T11:07:53+00:00
 httplib2/httplib2,gh/53002916,5.3,2026-04-20,5514,non-standard,61,,,2026-05-03T19:12:00+00:00
 huggingface/huggingface_hub,gh/323591830,6.4,2026-06-22,18364,Apache-2.0,207,,,2026-07-05T23:23:03+00:00
 hukkin/tomli,gh/370616797,5,2026-04-20,51844,MIT,7,,,2026-05-03T19:12:01+00:00
@@ -442,6 +450,7 @@ jslicense/spdx-correct.js,gh/34817196,3,2026-04-20,202905,Apache-2.0,2,,,2026-05
 jslicense/spdx-exceptions.json,gh/40062896,2.7,2026-05-04,,,2,,,2026-05-17T23:42:50+00:00
 jslicense/spdx-expression-parse.js,gh/40067336,2.8,2026-04-20,5261,MIT,8,,,2026-05-03T19:13:24+00:00
 jslicense/spdx-license-ids,gh/26001547,2.5,2026-05-04,209992,,0,,,2026-05-17T23:42:54+00:00
+json-c/json-c,gh/1139119,5.2,2026-06-22,,non-standard,23,,,2026-07-06T11:07:57+00:00
 json5/json5,gh/4463453,3.8,2026-04-20,192736,non-standard,41,,,2026-05-03T19:13:24+00:00
 juliangruber/balanced-match,gh/13538817,5.7,2026-04-20,73426,non-standard,9,,,2026-05-03T19:13:24+00:00
 juliangruber/brace-expansion,gh/13539234,6.3,2026-04-20,72859,non-standard,5,,,2026-05-03T19:13:25+00:00
@@ -461,6 +470,7 @@ kpdecker/jsdiff,gh/1542219,3.5,2026-04-20,741,BSD-3-Clause,14,,,2026-05-03T19:13
 krb5/krb5,gh/4307702,5.3,2026-04-20,,,39,,,2026-05-03T19:13:28+00:00
 kriskowal/asap,gh/11295071,2.5,2026-04-20,179544,MIT,14,,,2026-05-03T19:13:29+00:00
 kriszyp/json-schema,gh/947175,3.4,2026-04-20,222155,non-standard,30,,,2026-05-03T19:13:29+00:00
+la10736/rstest,gh/124802455,3.4,2026-06-22,3,Apache-2.0,72,,,2026-07-06T11:07:58+00:00
 langchain-ai/langchain,gh/552661142,6.5,2026-04-20,10031,MIT,557,,,2026-05-03T19:13:29+00:00
 laurent-laporte-pro/deprecated,gh/111412148,,,9564,MIT,9,,,2026-05-03T19:13:30+00:00
 lddubeau/xmlchars,gh/139881982,3,2026-04-20,84225,MIT,13,,,2026-05-03T19:13:31+00:00
@@ -472,6 +482,7 @@ libidn/libidn2,gh/87378214,,,,GPL-3.0,0,,,2026-05-03T19:13:32+00:00
 libjpeg-turbo/libjpeg-turbo,gh/39760454,5.3,2026-05-04,,non-standard,16,,,2026-05-17T23:42:54+00:00
 libjxl/libjxl,gh/340219494,8.7,2026-04-20,,BSD-3-Clause,443,silver,291,2026-05-03T19:13:32+00:00
 libpixman/pixman,gh/81675971,,,,,,,,2026-05-03T19:13:32+00:00
+libtiff/libtiff,gl/4720790,,,,,,,,2026-07-06T11:07:56+00:00
 libuv/libuv,gh/14812739,6,2026-04-20,,MIT,213,,,2026-05-03T19:13:33+00:00
 linusu/buffer-from,gh/66025821,2,2026-04-20,279300,MIT,1,,,2026-05-03T19:13:33+00:00
 linux-audit/audit-userspace,gh/52464964,4.5,2026-04-20,,GPL-2.0,14,,,2026-05-03T19:13:33+00:00
@@ -531,6 +542,7 @@ matplotlib/matplotlib,gh/1385122,9.1,2026-04-20,49245,,1501,,,2026-05-03T19:14:0
 mcavage/node-assert-plus,gh/4767976,2.9,2026-04-20,227020,MIT,12,,,2026-05-03T19:14:04+00:00
 mcollina/fastq,gh/37368217,4.2,2026-04-20,187530,non-standard,21,,,2026-05-03T19:14:04+00:00
 mcollina/reusify,gh/42106515,3.9,2026-04-20,189924,MIT,5,,,2026-05-03T19:14:04+00:00
+md/tcp-wrappers,gl/salsa.debian.org-28852,,,,,,,,2026-07-06T11:07:54+00:00
 mdn/data,gh/70901646,7.2,2026-05-04,1055,non-standard,37,,,2026-05-17T23:42:54+00:00
 medikoo/d,gh/10817569,2.8,2026-04-20,113525,non-standard,6,,,2026-05-03T19:14:05+00:00
 medikoo/es5-ext,gh/1792941,3.1,2026-04-20,227076,non-standard,46,,,2026-05-03T19:14:05+00:00
@@ -560,9 +572,12 @@ more-itertools/more-itertools,gh/4144530,5,2026-04-20,18879,MIT,8,,,2026-05-03T1
 motdotla/dotenv,gh/11205780,4.4,2026-04-20,18626,non-standard,2,,,2026-05-03T19:14:18+00:00
 moxystudio/node-cross-spawn,gh/21335844,3.2,2026-04-20,303406,MIT,32,,,2026-05-03T19:14:18+00:00
 mozilla/source-map,gh/2014930,4.2,2026-04-20,99143,non-standard,65,,,2026-05-03T19:14:19+00:00
+mpc/mpc,gl/gitlab.inria.fr-22470,,,,,,,,2026-07-06T11:07:54+00:00
+mpfr/mpfr,gl/gitlab.inria.fr-33626,,,,,,,,2026-07-06T11:07:55+00:00
 mrabarnett/mrab-regex,gh/309446978,4.9,2026-04-20,29140,non-standard,77,,,2026-05-03T19:14:19+00:00
 mrmlnc/fast-glob,gh/77467076,3.2,2026-04-20,169714,MIT,41,,,2026-05-03T19:14:19+00:00
 msgpack/msgpack-python,gh/2242705,5,2026-04-20,14482,non-standard,10,,,2026-05-03T19:14:19+00:00
+multimedia-team/aom,gl/salsa.debian.org-29534,,,,,,,,2026-07-06T11:07:56+00:00
 mvdnes/spin-rs,gh/21686666,5.5,2026-04-20,309,MIT,11,,,2026-05-03T19:14:20+00:00
 myrne/performance-now,gh/10219264,,,257482,MIT,19,,,2026-07-05T23:23:02+00:00
 mysticatea/abort-controller,gh/105228556,2.1,2026-04-20,119972,MIT,24,,,2026-05-03T19:14:20+00:00
@@ -883,6 +898,7 @@ systemd/systemd,gh/32873313,8.8,2026-04-20,,GPL-2.0,3279,passing,187,2026-05-03T
 taiki-e/pin-project,gh/164668916,6.5,2026-04-20,18508,Apache-2.0,8,,,2026-05-03T19:17:16+00:00
 taiki-e/pin-project-lite,gh/216847853,6.5,2026-04-20,36425,Apache-2.0,10,,,2026-05-03T19:17:16+00:00
 taiki-e/portable-atomic,gh/448365131,7.2,2026-04-20,2229,Apache-2.0,16,,,2026-05-03T19:17:16+00:00
+takluyver/jeepney,gl/2780772,,,15124,,,,,2026-07-06T11:07:57+00:00
 tapjs/signal-exit,gh/35711072,3.4,2026-04-20,144406,non-standard,11,,,2026-05-03T19:17:16+00:00
 tapjs/stack-utils,gh/48974178,3.4,2026-04-20,77953,MIT,17,,,2026-05-03T19:17:17+00:00
 tartley/colorama,gh/18892209,3.9,2026-04-20,20221,BSD-3-Clause,134,,,2026-05-03T19:17:17+00:00
@@ -961,6 +977,12 @@ wesleytodd/setprototypeof,gh/30301031,3.2,2026-04-20,329247,non-standard,1,,,202
 whitequark/ipaddr.js,gh/2110585,4.1,2026-04-20,,MIT,13,,,2026-05-03T19:17:50+00:00
 withoutboats/heck,gh/86326466,3,2026-04-20,3003,Apache-2.0,14,,,2026-05-03T19:17:51+00:00
 xiph/ogg,gh/33956205,2.5,2026-04-20,,BSD-3-Clause,17,,,2026-05-03T19:17:51+00:00
+xorg-team/lib/libx11,gl/salsa.debian.org-4306,,,,,,,,2026-07-06T11:07:54+00:00
+xorg-team/lib/libxau,gl/salsa.debian.org-4307,,,,,,,,2026-07-06T11:07:56+00:00
+xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,,,,,,,,2026-07-06T11:07:56+00:00
+xorg-team/lib/libxext,gl/salsa.debian.org-4314,,,,,,,,2026-07-06T11:07:55+00:00
+xorg-team/lib/libxrender,gl/salsa.debian.org-4328,,,,,,,,2026-07-06T11:07:57+00:00
+xorg/proto/xorgproto,gl/gitlab.freedesktop.org-788,,,,,,,,2026-07-06T11:07:58+00:00
 xtuc/webassemblyjs,gh/113006071,1.7,2026-04-20,462488,MIT,82,,,2026-05-03T19:18:07+00:00
 yahoo/serialize-javascript,gh/24106944,4.7,2026-04-20,1556,non-standard,44,,,2026-05-03T19:17:51+00:00
 yaml/libyaml,gh/2699072,4.2,2026-04-20,,MIT,115,,,2026-05-03T19:17:51+00:00

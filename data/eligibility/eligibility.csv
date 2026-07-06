@@ -174,6 +174,7 @@ eemeli/yaml,gh/119439276,True,True,True,True,True,3,4,True
 ehmicky/human-signals,gh/214467546,True,False,True,True,False,3,4,True
 eliben/pycparser,gh/10589864,True,False,True,True,False,3,4,True
 emotion-js/emotion,gh/92570536,True,True,True,True,True,3,4,True
+enarx/ciborium,gh/313759241,True,False,True,True,False,2,4,True
 encode/httpcore,gh/237210639,True,True,True,True,True,3,4,True
 encode/httpx,gh/179492861,True,True,True,True,True,3,4,True
 epoberezkin/fast-deep-equal,gh/94483360,True,True,True,True,True,3,4,True
@@ -268,6 +269,7 @@ gnome/pango,gh/4537144,True,True,True,True,True,2,4,True
 gnutls/gnutls,gl/179611,True,False,True,True,False,1,4,False
 gnutls/libtasn1,gl/919981,False,False,True,True,False,1,4,False
 google/brotli,gh/24993138,True,True,False,True,False,2,4,True
+google/highway,gh/206791328,False,False,True,True,False,1,4,False
 google/zerocopy,gh/534354967,True,True,False,True,False,3,4,True
 googleapis/google-cloud-python,gh/16316451,True,True,False,True,False,3,4,True
 googleapis/python-cloud-core,gh/226992462,True,False,True,False,False,3,4,True
@@ -426,6 +428,7 @@ jslicense/spdx-correct.js,gh/34817196,True,False,True,True,False,3,4,True
 jslicense/spdx-exceptions.json,gh/40062896,False,False,True,True,False,3,4,True
 jslicense/spdx-expression-parse.js,gh/40067336,True,False,True,True,False,3,4,True
 jslicense/spdx-license-ids,gh/26001547,False,False,True,True,False,3,4,True
+json-c/json-c,gh/1139119,True,False,True,True,False,1,4,False
 json5/json5,gh/4463453,True,False,True,True,False,3,4,True
 juliangruber/balanced-match,gh/13538817,True,True,True,True,True,3,4,True
 juliangruber/brace-expansion,gh/13539234,True,True,True,True,True,3,4,True
@@ -445,6 +448,7 @@ kpdecker/jsdiff,gh/1542219,True,False,True,True,False,3,4,True
 krb5/krb5,gh/4307702,True,True,True,True,True,2,4,True
 kriskowal/asap,gh/11295071,True,False,True,True,False,3,4,True
 kriszyp/json-schema,gh/947175,True,False,True,True,False,3,4,True
+la10736/rstest,gh/124802455,True,False,True,True,False,1,4,False
 langchain-ai/langchain,gh/552661142,True,True,False,True,False,3,4,True
 laurent-laporte-pro/deprecated,gh/111412148,True,False,True,True,False,3,4,True
 lddubeau/xmlchars,gh/139881982,True,False,True,False,False,3,4,True
@@ -458,7 +462,6 @@ libpixman/pixman,gh/81675971,True,True,True,True,True,2,4,True
 libtiff/libtiff,gl/4720790,False,False,True,True,False,1,4,False
 libuv/libuv,gh/14812739,True,True,True,True,True,2,4,True
 linusu/buffer-from,gh/66025821,True,True,True,True,True,3,4,True
-linux-audit/audit-userspace,gh/52464964,True,False,True,True,False,2,4,True
 linux-pam/linux-pam,gh/76264690,True,False,True,True,False,2,4,True
 litejs/natural-compare-lite,gh/9146732,True,True,True,True,True,3,4,True
 ljharb/call-bind,gh/308533760,True,True,True,True,True,3,4,True
@@ -550,7 +553,6 @@ multimedia-team/aom,gl/salsa.debian.org-29534,True,False,True,True,False,1,4,Fal
 myrne/performance-now,gh/10219264,True,False,True,True,False,3,4,True
 mysticatea/abort-controller,gh/105228556,True,True,True,True,True,3,4,True
 mysticatea/event-target-shim,gh/31137469,True,True,True,True,True,3,4,True
-netflix/vmaf,gh/51317975,True,True,False,True,False,2,4,True
 nghttp2/nghttp2,gh/11452676,True,True,True,True,True,2,4,True
 nicolo-ribaudo/babel-preset-current-node-syntax,gh/253327079,True,True,True,True,True,3,4,True
 nlnetlabs/unbound,gh/94195301,True,True,True,True,True,2,4,True
@@ -624,7 +626,6 @@ protocolbuffers/protobuf,gh/23357588,True,True,False,True,False,3,4,True
 psf/requests,gh/1362490,True,True,True,True,True,3,4,True
 psycopg/psycopg2,gh/7730829,True,True,True,True,True,3,4,True
 pvorb/clone,gh/2317381,True,True,True,True,True,3,4,True
-py4j/py4j,gh/1045976,True,False,True,True,False,3,4,True
 pyasn1/pyasn1,gh/512723255,True,True,True,True,True,3,4,True
 pyasn1/pyasn1-modules,gh/512723354,True,True,True,True,True,3,4,True
 pyca/bcrypt,gh/9993757,True,False,True,True,False,3,4,True
@@ -870,7 +871,6 @@ tkem/cachetools,gh/18006791,True,True,True,True,True,3,4,True
 tokio-rs/bytes,gh/30062547,True,True,True,True,True,3,4,True
 tokio-rs/loom,gh/161875917,True,True,True,True,True,2,4,True
 tokio-rs/prost,gh/94262864,True,True,True,True,True,3,4,True
-tokio-rs/slab,gh/37093133,True,True,True,True,True,3,4,True
 tokio-rs/tokio,gh/67836789,True,True,True,True,True,3,4,True
 tokio-rs/tracing,gh/165289175,True,True,True,True,True,3,4,True
 toml-rs/toml,gh/95902102,True,True,True,True,True,3,4,True
@@ -895,7 +895,6 @@ unshiftio/requires-port,gh/26316179,True,True,True,True,True,3,4,True
 uqfoundation/dill,gh/11031844,True,True,True,True,True,3,4,True
 urllib3/urllib3,gh/2410676,True,True,True,True,True,3,4,True
 util-linux/util-linux,gh/2339555,True,False,True,True,False,2,4,True
-utopia-team/dbus,gl/salsa.debian.org-9742,False,False,True,True,False,1,4,False
 uuidjs/uuid,gh/1203139,True,True,True,True,True,3,4,True
 vercel/ai,gh/644461337,True,True,False,True,False,2,4,True
 vercel/ms,gh/3655872,True,True,False,True,False,3,4,True
@@ -921,7 +920,6 @@ websockets/ws,gh/2744972,True,True,True,True,True,3,4,True
 wesleytodd/setprototypeof,gh/30301031,True,True,True,True,True,3,4,True
 whitequark/ipaddr.js,gh/2110585,True,True,True,True,True,3,4,True
 withoutboats/heck,gh/86326466,True,True,True,True,True,3,4,True
-xiph/ogg,gh/33956205,True,True,True,True,True,2,4,True
 xorg-team/lib/libx11,gl/salsa.debian.org-4306,True,False,True,True,False,1,4,False
 xorg-team/lib/libxau,gl/salsa.debian.org-4307,False,False,True,True,False,1,4,False
 xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,False,False,True,True,False,1,4,False
