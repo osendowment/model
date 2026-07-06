@@ -228,7 +228,13 @@ def join_valid(
     return value_rows
 
 
-def _write_validation(rows: list[dict], path: Path = VALIDATION_FILE) -> None:
+def _write_validation(rows: list[dict], path: Path | None = None) -> None:
+    # `path` defaults to the CURRENT value of the module-level VALIDATION_FILE,
+    # resolved at call time rather than captured as a stale default-argument
+    # value at import time — a test's `monkeypatch.setattr(module,
+    # "VALIDATION_FILE", tmp_path)` must actually redirect this write, not
+    # silently fall through to the real path (and clobber real data).
+    path = path if path is not None else VALIDATION_FILE
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:

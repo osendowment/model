@@ -21,6 +21,7 @@ dependencies = [
     "lizard>=1.22.1",
     "multimetric>=2.4.4",
     "networkx>=3.6.1",
+    "openpyxl>=3.1.5",
     "polars>=1.39.3",
     "psycopg[binary]>=3.3.3",
     "pydantic>=2.11.7",

@@ -171,6 +171,13 @@ def backfill(sha_file: str = SHA_FILE, repo_ids: dict[str, str] | None = None) -
 
 # ───────────────────────── snapshot SHA cascade ─────────────────────────
 
+# Generous walk-back cap for `resolve_snapshot_sha` — wide enough to reach any
+# real GitHub repo's dated fallback year (GitHub itself launched 2008; the
+# oldest dormant-repo fallback observed in this dataset is 2007). Not a
+# per-repo unbounded scan: a fixed, cheap range.
+SNAPSHOT_WALKBACK_YEARS = 30
+
+
 def resolve_snapshot_sha(
     sha_data: dict[tuple[str, str], dict[str, str]],
     repo: str, year: int,
@@ -181,18 +188,18 @@ def resolve_snapshot_sha(
     empty when the repo had no commits in that year. For LOC /
     sparse-checkout purposes we still want the most-recent codebase
     state at-or-before year-end — so when ``last_sha`` is empty, walk
-    back through earlier years (cap 10y) until we find a populated
-    one. Returns ``""`` if no SHA found at all (project hadn't started
-    yet, or empty repo).
+    back through earlier years (cap `SNAPSHOT_WALKBACK_YEARS`) until we
+    find a populated one — including a dormant repo's dated fallback
+    year written by `src.sources.git.resolve_head` (e.g. 2020, or as far
+    back as any real commit exists). Returns ``""`` if no SHA found at
+    all (project hadn't started yet, empty repo, or resolve_head
+    genuinely couldn't parse a date for it) — no undated "HEAD" fallback.
     """
-    for y in range(year, year - 10, -1):
+    for y in range(year, year - SNAPSHOT_WALKBACK_YEARS, -1):
         sha = sha_data.get((repo, str(y)), {}).get("last_sha") or ""
         if sha:
             return sha
-    # Last resort: dormant repos with no commits in the year window have
-    # a pseudo-row at year="HEAD" populated by `src.sources.git.resolve_head` —
-    # use that so sha-pinned fetchers still get a snapshot to analyse.
-    return sha_data.get((repo, "HEAD"), {}).get("last_sha") or ""
+    return ""
 
 
 # ──────────────────────────── HTTP plumbing ─────────────────────────────

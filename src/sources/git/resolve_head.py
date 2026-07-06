@@ -1,4 +1,4 @@
-"""Resolve HEAD sha for repos with no commits in 2021-2025.
+"""Resolve a dated snapshot sha for repos with no commits in 2021-2025.
 
 Some risk-scope repos are dormant — their last commit is older than the
 window covered by `commits-years.csv` (default 2021-2025). Without a
@@ -7,11 +7,12 @@ sha they can't be analysed by sha-pinned fetchers (scc, lizard).
 This module fills those gaps by fetching the repo's latest default-branch
 commit (sha + date) via the GitHub API and inserting it into
 `commits-years.csv` under its **real commit year** (e.g. 2020) — so the
-LOC/complexity snapshot is dated rather than an opaque "HEAD". A `year=HEAD`
-alias row (same sha) is also written: the sha-pinned fetchers special-case it,
-and `resolve_snapshot_sha` falls
-back to it for repos older than its 10-year walk-back. Active repos are
-untouched. There is always a snapshot sha when the repo has any commit.
+LOC/complexity snapshot is always dated, never an opaque "HEAD". No
+alias/fallback row is written: `resolve_snapshot_sha`'s walk-back window
+(see `commits_years.py`) is wide enough to reach any real year this module
+records. If a commit's date genuinely can't be parsed, NO row is written for
+that repo — a missing snapshot is honest; a mislabeled one is not. Active
+repos are untouched.
 
 Usage:
     uv run python -m src.sources.git.resolve_head           # all risk-scope repos with no last_sha
@@ -39,7 +40,6 @@ console = Console()
 log = logging.getLogger(__name__)
 
 GITHUB_API = "https://api.github.com"
-HEAD_YEAR = "HEAD"
 
 
 def _tokens() -> list[str]:
@@ -68,10 +68,10 @@ async def resolve_head_sha(
     """Return ``(sha, year)`` for the latest default-branch commit via the API.
 
     ``year`` is the committer year of that commit (e.g. 2020 for a repo whose
-    last activity predates the 2021-2025 window), so the snapshot can be
-    recorded under its real year instead of an opaque "HEAD". ``year`` is 0 if
-    the date can't be parsed. Returns None if the repo is missing / private /
-    API error.
+    last activity predates the 2021-2025 window), so the snapshot is always
+    recorded under its real year. ``year`` is 0 if the date can't be parsed —
+    callers must not write a row in that case. Returns None if the repo is
+    missing / private / API error.
     """
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
     # /commits returns commits on the default branch by default. Cap at the end
@@ -109,9 +109,16 @@ async def main_async(args):
     eligible = {e.repo for e in load_top_repos()}
     sha_data = load_sha_data(args.sha_file)
 
+    # Purge any stale "HEAD" pseudo-rows left by a previous version of this
+    # module — it no longer writes them (see module docstring). Self-healing
+    # so a stray alias can't silently linger across runs.
+    stale_head = {k for k in sha_data if k[1] == "HEAD"}
+    for k in stale_head:
+        del sha_data[k]
+
     # "Done" = the repo has a real sha in a settings window year (active repo).
-    # Dormant repos have only fallback rows (dated pre-window and/or HEAD), so
-    # they remain candidates and are (re)resolved into a dated snapshot capped at
+    # Dormant repos have only a dated pre-window fallback row (if any), so they
+    # remain candidates and are (re)resolved into a dated snapshot capped at
     # the last complete year — cheap (~tens of repos) and idempotent in result
     # (the same pre-window commit resolves each run).
     window = {str(y) for y in DEFAULT_YEARS}
@@ -150,23 +157,27 @@ async def main_async(args):
                 progress.advance(task)
 
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
-    resolved = 0; failed = 0
+    resolved = 0; undated = 0; failed = 0
     for repo, sha, year in done:
-        if sha:
+        if sha and year:
+            # Record the snapshot under its REAL commit year (e.g. 2020) — the
+            # only row we ever write. No opaque "HEAD" alias.
             row = {"first_sha": sha, "last_sha": sha, "commits": "1", "fetched_at": now}
-            # Record the snapshot under its REAL commit year (e.g. 2020) so the
-            # LOC/complexity walk reads a dated fallback instead of an opaque
-            # "HEAD". Keep the "HEAD" alias too: the sha-pinned fetchers
-            # (scc, lizard) special-case it as the dormant snapshot.
-            if year:
-                sha_data[(repo, str(year))] = dict(row)
-            sha_data[(repo, HEAD_YEAR)] = dict(row)
+            sha_data[(repo, str(year))] = row
             resolved += 1
+        elif sha:
+            # Found a commit but couldn't parse its date — write nothing rather
+            # than fake a year. Rare (git commit dates are near-always ISO 8601).
+            undated += 1
         else:
             failed += 1
 
     write_sha_data(args.sha_file, sha_data)
-    console.print(f"[green]Resolved {resolved} HEAD shas → {args.sha_file}[/green]")
+    if stale_head:
+        console.print(f"[dim]Purged {len(stale_head)} stale HEAD pseudo-rows.[/dim]")
+    console.print(f"[green]Resolved {resolved} dated snapshots → {args.sha_file}[/green]")
+    if undated:
+        console.print(f"[yellow]{undated} repos had a commit with an unparseable date — no row written.[/yellow]")
     if failed:
         console.print(f"[yellow]Failed for {failed} repos (likely private/deleted).[/yellow]")
 
