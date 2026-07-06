@@ -24,10 +24,10 @@ It also stamps three **signal-completeness** columns (independent of the
 components (`openssf_crit`, `eco_crit`, `top_eco_pct`) and risk components
 (`concentration`, `complexity`, `security`, `workload`) carry a real
 (non-empty, **non-zero**) value, and `complete = value_comps ≥ 2 AND
-risk_comps = 4` flags a repo with full coverage. Archived repos are now in the
-risk stage too, so they carry real risk scores and can be `complete`; the only
-repos left `risk_comps < 4` are those whose archived snapshot has no source to
-measure (scc 0-loc → blank complexity/workload).
+risk_comps = 4` flags a repo with full coverage. Archived repos are in the
+risk stage too, so they carry real risk scores and can be `complete` —
+including empty-tree stubs, whose complexity/workload score as measured
+zeros (floor percentiles) rather than staying blank.
 
 ## Scope
 

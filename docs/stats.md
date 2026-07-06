@@ -103,7 +103,7 @@ A handful of archived/stub repos (e.g. `bincode-org/bincode`,
 lines of code because the default branch was stripped to a README. These score
 as measured zeros (floor percentiles) in complexity and workload rather than
 staying blank, so all four dimensions and `risk_score` cover 100% of the risk
-scope; the repos still surface in eligibility as `active=False` and `code=False`.
+scope; the repos still surface in eligibility as `active=False`.
 
 ### Score distribution by component (scope 940)
 
@@ -210,9 +210,9 @@ net-new issues per active contributor, plus issue-debt and trend.
 **Eligibility covers the 940 top repos** — the valid class-A set INCLUDING
 archived repos, which surface here as `active=False` instead of being dropped.
 This is the same 940-repo scope the risk stage now runs on (both stages include
-archived and both platforms); the five checks per repo roll into
+archived and both platforms); the four checks per repo roll into
 `data/eligibility/eligibility.csv`: `eligible = oss AND intent AND nonprofit
-AND active AND code`. Methodology: [eligibility.md](eligibility.md) +
+AND active`. Methodology: [eligibility.md](eligibility.md) +
 [funding.md](components/funding.md).
 
 ### Licenses (scope 940)
@@ -275,15 +275,12 @@ soliciting support — a higher-priority target for outreach.
 ### Eligibility rollup
 
 *sole blocker* = repos failing ONLY that check — what fixing it alone would
-unlock. Missing intent is by far the binding constraint. `code` (the measured
-snapshot has source, `loc_eoy > 0`) is False only for the archived README-only
-stubs, which already fail `active` — hence 0 sole blocks.
+unlock. Missing intent is by far the binding constraint.
 
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
 | oss | 919 | 97.8% | 1 |
 | intent | 717 | 76.3% | 192 |
 | nonprofit | 881 | 93.7% | 59 |
-| active | 918 | 97.7% | 10 |
-| code | 938 | 99.8% | 0 |
+| active | 918 | 97.7% | 11 |
 | **eligible** | **646** | **68.7%** | |
