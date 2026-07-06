@@ -10,7 +10,7 @@ The GitHub API is faked: `FakeLimiter` serves a scripted sequence of
 
 from __future__ import annotations
 
-from src.sources.github.fetch_repo_owner_data import _fetch_repo
+from src.sources.github.fetch_repo_owner_data import _fetch_repo, _flat_repo
 
 
 class FakeResponse:
@@ -96,7 +96,7 @@ class TestRedirectChain:
         assert row is not None
         assert row["repo"] == "old/name"
         assert row["full_name"] == "new/name"
-        assert row["repo_id"] == 999
+        assert row["repo_id"] == "gh/999"   # canonical unified id, never bare
         assert len(limiter.calls) == 3   # all three hops were followed
 
     async def test_multi_hop_chain_ending_in_404(self):
@@ -118,3 +118,18 @@ class TestRedirectChain:
         slug, row, status = await _fetch_repo(limiter, None, "loop/repo")
         assert row is None
         assert status == "redirect_loop"
+
+
+# ── _flat_repo id stamping (canonical `gh/{id}`, never the bare numeric) ─────
+
+class TestFlatRepo:
+    def test_stamps_gh_prefixed_repo_id(self):
+        row = _flat_repo({"id": 42, "full_name": "Foo/Bar", "owner": {}},
+                         "Foo/Bar")
+        assert row["repo_id"] == "gh/42"
+        assert row["repo"] == "foo/bar"          # keyed by the slug we asked for
+        assert row["full_name"] == "Foo/Bar"     # payload name kept verbatim
+
+    def test_blank_repo_id_when_api_id_missing(self):
+        row = _flat_repo({"full_name": "o/r"}, "o/r")
+        assert row["repo_id"] == ""              # never invented
