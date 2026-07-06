@@ -118,3 +118,68 @@ def test_sponsors_by_login_and_owner_sponsors_by_repo():
 def test_users_by_login_keys_lowercased():
     rows = [{"login": "Alice", "name": "Alice A"}]
     assert bp._users_by_login(rows) == {"alice": {"login": "Alice", "name": "Alice A"}}
+
+
+def _write(path, header, rows):
+    import csv as _csv
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = _csv.writer(f)
+        w.writerow(header)
+        w.writerows(rows)
+
+
+def test_build_end_to_end(tmp_path, monkeypatch):
+    monkeypatch.setattr(bp, "RESULTS_FILE", tmp_path / "results.csv")
+    monkeypatch.setattr(bp, "REPOS_FILE", tmp_path / "repos.csv")
+    monkeypatch.setattr(bp, "USERS_FILE", tmp_path / "users.csv")
+    monkeypatch.setattr(bp, "FUNDING_YML_FILE", tmp_path / "funding-yml.csv")
+    monkeypatch.setattr(bp, "SPONSORS_FILE", tmp_path / "sponsors.csv")
+    monkeypatch.setattr(bp, "MAINTAINER_SPONSORS_FILE", tmp_path / "maintainer-sponsors.csv")
+    monkeypatch.setattr(bp, "ECOSYSTEM_MAINTAINERS_FILE", tmp_path / "eco-maintainers.csv")
+    monkeypatch.setattr(bp, "MAINTAINER_OVERRIDES_FILE", tmp_path / "overrides.csv")
+
+    _write(tmp_path / "results.csv", ["repo_id", "repo"], [["gh/1", "acme/widget"]])
+    _write(tmp_path / "repos.csv", ["repo_id", "owner_login", "owner_type"],
+           [["gh/1", "alice", "User"]])
+    _write(tmp_path / "users.csv",
+           ["login", "user_id", "name", "email", "html_url", "company", "bio"],
+           [["alice", "1", "Alice A", "a@example.com", "https://github.com/alice", "", ""]])
+    _write(tmp_path / "funding-yml.csv", ["repo_id", "github"], [["gh/1", "alice, bob"]])
+    _write(tmp_path / "sponsors.csv", ["repo_id", "gh_sponsors_enabled"], [["gh/1", "True"]])
+    _write(tmp_path / "maintainer-sponsors.csv", ["login", "has_sponsors_listing"], [])
+    _write(tmp_path / "eco-maintainers.csv",
+           ["ecosystem", "package", "repo_id", "login", "name", "email", "uuid", "html_url"],
+           [["npm", "widget", "gh/1", "carol", "Carol C", "c@example.com", "carol",
+             "https://npmjs.com/~carol"]])
+    _write(tmp_path / "overrides.csv", ["login", "reason"], [["alice", "known fundable"]])
+
+    monkeypatch.setattr(
+        bp, "_key_contributor_pairs",
+        lambda target_repo_ids, cum_share: [("alice", "gh/1")] if "gh/1" in target_repo_ids else [],
+    )
+
+    rows = bp.build()
+    by_login = {r["login"]: r for r in rows}
+
+    assert set(by_login) == {"alice", "bob", "carol"}
+
+    alice = by_login["alice"]
+    assert alice["platform"] == "github"
+    assert alice["person_id"] == "github/1"
+    assert alice["owner_repo_ids"] == "gh/1"
+    assert alice["key_contributor_repo_ids"] == "gh/1"
+    assert alice["funding_yml_maintainer_repo_ids"] == "gh/1"
+    assert alice["repo_ids"] == "gh/1"
+    assert alice["repo_count"] == "1"
+    assert alice["has_sponsors_listing"] == "True"       # via owner sponsors.csv fallback
+    assert alice["curated_override_reason"] == "known fundable"
+
+    bob = by_login["bob"]
+    assert bob["person_id"] == "github:bob"              # no users.csv entry -> login fallback
+    assert bob["funding_yml_maintainer_repo_ids"] == "gh/1"
+    assert bob["owner_repo_ids"] == ""
+
+    carol = by_login["carol"]
+    assert carol["platform"] == "npm"
+    assert carol["person_id"] == "npm/carol"
+    assert carol["ecosystem_maintainer_repo_ids"] == "gh/1"

@@ -34,6 +34,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.params import KEY_CONTRIBUTORS_CUM_SHARE
 from src.sources.github.key_contributors import load_key_contributors
 from src.sources.github.models import is_bot
 
@@ -270,3 +271,81 @@ def _sponsors_by_login(maintainer_sponsors_rows: list[dict]) -> dict[str, str]:
 def _owner_sponsors_by_repo(sponsors_rows: list[dict]) -> dict[str, str]:
     return {(r.get("repo_id") or "").strip(): (r.get("gh_sponsors_enabled") or "").strip()
             for r in sponsors_rows if (r.get("repo_id") or "").strip()}
+
+
+def _read_csv(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    with open(path, encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def build() -> list[dict[str, str]]:
+    target_repo_ids = _target_repo_ids(_read_csv(RESULTS_FILE))
+    repos_rows = _read_csv(REPOS_FILE)
+    users_by_login = _users_by_login(_read_csv(USERS_FILE))
+    org_logins = _org_logins(repos_rows)
+
+    people: dict[str, dict] = {}
+
+    for login, repo_id in _owner_pairs(repos_rows, target_repo_ids):
+        _add_github_contribution(people, "owner_repo_ids", login, repo_id, users_by_login)
+
+    for login, repo_id in _key_contributor_pairs(target_repo_ids, KEY_CONTRIBUTORS_CUM_SHARE):
+        _add_github_contribution(people, "key_contributor_repo_ids", login, repo_id, users_by_login)
+
+    funding_yml_rows = _read_csv(FUNDING_YML_FILE)
+    for login, repo_id in _funding_yml_pairs(funding_yml_rows, target_repo_ids, org_logins):
+        _add_github_contribution(people, "funding_yml_maintainer_repo_ids", login, repo_id,
+                                 users_by_login)
+
+    eco_rows = _ecosystem_maintainer_rows(_read_csv(ECOSYSTEM_MAINTAINERS_FILE), target_repo_ids)
+    for row in eco_rows:
+        _add_ecosystem_contribution(people, row)
+
+    _apply_curated_overrides(people, _read_csv(MAINTAINER_OVERRIDES_FILE))
+
+    sponsors_by_login = _sponsors_by_login(_read_csv(MAINTAINER_SPONSORS_FILE))
+    owner_sponsors_by_repo = _owner_sponsors_by_repo(_read_csv(SPONSORS_FILE))
+    for person in people.values():
+        if person["platform"] != "github":
+            continue
+        listing = sponsors_by_login.get(person["login"].lower(), "")
+        if not listing:
+            for repo_id in person["owner_repo_ids"]:
+                listing = owner_sponsors_by_repo.get(repo_id, "")
+                if listing:
+                    break
+        person["has_sponsors_listing"] = listing
+
+    return [_finalize_row(p) for p in people.values()]
+
+
+def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    console.print("[bold]Building people.csv...[/bold]\n")
+    rows = build()
+    rows.sort(key=lambda r: (r["platform"], r["login"]))
+
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=FIELDS)
+        w.writeheader()
+        w.writerows(rows)
+
+    table = Table(title="[bold]People coverage[/bold]", show_header=True,
+                  header_style="bold dim", padding=(0, 1))
+    table.add_column("Role", style="bold")
+    table.add_column("People", justify="right")
+    for col, label in zip(ROLE_COLUMNS,
+                          ("Owners", "Key contributors", "FUNDING.yml maintainers",
+                           "Ecosystem maintainers")):
+        n = sum(1 for r in rows if r[col])
+        table.add_row(label, f"{n:,}")
+    table.add_row("[bold]Total people[/bold]", f"[bold]{len(rows):,}[/bold]")
+    console.print(table)
+    console.print(f"\n[dim]Wrote {len(rows):,} rows -> {OUTPUT_FILE}[/dim]")
+
+
+if __name__ == "__main__":
+    main()
