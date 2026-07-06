@@ -402,6 +402,7 @@ SOURCE_SCHEMA_CONTRACT: dict[str, object] = {
     "sources/github/repos.csv": "fetched_at",
     "sources/github/sponsors.csv": "fetched_at",
     "sources/github/funding-yml.csv": "fetched_at",
+    "sources/gitlab/funding-files.csv": "fetched_at",
     "sources/npm/funding.csv": "fetched_at",
     "sources/pypi/funding.csv": "fetched_at",
     "sources/funding/host-by-repo.csv": "host_checked",

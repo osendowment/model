@@ -39,6 +39,7 @@ FETCHERS = [
     Step("cpp-eol",       "src.sources.cpp.check_eol",                    fetch=True),
     # funding-intent signals (moved here from the risk pipeline)
     Step("funding-yml",   "src.sources.github.fetch_funding_yml",         fetch=True),
+    Step("gitlab-funding", "src.sources.gitlab.fetch_funding_files",      fetch=True),
     Step("npm-funding",   "src.sources.npm.fetch_funding",                fetch=True),
     Step("pypi-funding",  "src.sources.pypi.fetch_funding",               fetch=True),
     Step("sponsors",      "src.sources.github.fetch_sponsors",            fetch=True),
