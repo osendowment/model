@@ -64,17 +64,27 @@ def _make_args(offline: bool = False, refresh: bool = False,
     )
 
 
-def _run_and_capture(steps, args):
-    """Run pipeline with subprocess.run mocked; return list of called argvs."""
+class _FakeProc:
+    """Popen stand-in: instant success with empty output."""
+
+    def __init__(self, returncode=0):
+        self.returncode = returncode
+        import io
+        self.stdout = io.StringIO("")
+
+    def poll(self):
+        return self.returncode
+
+
+def _run_and_capture(steps, args, returncode=0):
+    """Run pipeline with subprocess.Popen mocked; return list of called argvs."""
     called = []
 
-    def fake_run(cmd, **kwargs):
+    def fake_popen(cmd, **kwargs):
         called.append(list(cmd))
-        r = MagicMock()
-        r.returncode = 0
-        return r
+        return _FakeProc(returncode)
 
-    with patch("src.common.pipeline_runner.subprocess.run", side_effect=fake_run):
+    with patch("src.common.pipeline_runner.subprocess.Popen", side_effect=fake_popen):
         rc = run_pipeline(steps, args)
     return rc, called
 
@@ -137,15 +147,9 @@ def test_run_pipeline_both_flags():
 
 
 def test_run_pipeline_returns_nonzero_on_failure():
-    def fake_run(cmd, **kwargs):
-        r = MagicMock()
-        r.returncode = 1
-        return r
-
     steps = [Step("a", "m.a")]
     args = _make_args()
-    with patch("src.common.pipeline_runner.subprocess.run", side_effect=fake_run):
-        rc = run_pipeline(steps, args)
+    rc, _ = _run_and_capture(steps, args, returncode=1)
     assert rc == 1
 
 
