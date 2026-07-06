@@ -209,98 +209,138 @@ def _with_sides(cell, **sides) -> None:
                          bottom=sides.get("bottom", b.bottom))
 
 
+def _render_table(ws: Worksheet, block: list[list[str]],
+                  top_row: int, start_col: int) -> int:
+    """Render one parsed markdown table at (top_row, start_col); returns its
+    last row. Handles typed cells + number formats, whole-row bold from
+    `**` markers, `^` separator lines, numeric-header right-alignment and
+    the thin box outline."""
+    n_cols = max(len(cells) for cells in block)
+    numeric_col = [True] * n_cols
+    has_data_col = [False] * n_cols
+    separator_rows: list[int] = []
+    for j, cells in enumerate(block):
+        row_idx = top_row + j
+        first = cells[0].strip()
+        if first.startswith("^"):
+            separator_rows.append(row_idx)
+            cells = [first.lstrip("^")] + cells[1:]
+        bold = cells[0].strip().startswith("**")
+        for k, (v, fmt) in enumerate(_md_cell(x) for x in cells):
+            cell = ws.cell(row=row_idx, column=start_col + k, value=v)
+            if fmt:
+                cell.number_format = fmt
+            if j == 0:
+                cell.font = HEADER_FONT
+                cell.fill = HEADER_FILL
+            else:
+                if bold:
+                    cell.font = Font(bold=True)
+                if v is not None:
+                    has_data_col[k] = True
+                    if not isinstance(v, (int, float)):
+                        numeric_col[k] = False
+    for k in range(n_cols):
+        if has_data_col[k] and numeric_col[k]:
+            ws.cell(row=top_row, column=start_col + k).alignment = \
+                Alignment(horizontal="right")
+    # thin box outline + separator lines above marked rows
+    last_row = top_row + len(block) - 1
+    last_col = start_col + n_cols - 1
+    for row in range(top_row, last_row + 1):
+        _with_sides(ws.cell(row=row, column=start_col), left=THIN)
+        _with_sides(ws.cell(row=row, column=last_col), right=THIN)
+    for col in range(start_col, last_col + 1):
+        _with_sides(ws.cell(row=top_row, column=col), top=THIN)
+        _with_sides(ws.cell(row=last_row, column=col), bottom=THIN)
+        for row in separator_rows:
+            _with_sides(ws.cell(row=row, column=col), top=THIN)
+    return last_row
+
+
+BANNER_FONT = Font(bold=True, color="FFFFFF", size=12)
+
+
 def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
-    """Render every markdown table in `md_text` as a stacked block: its nearest
-    heading above as a bold section title, then the table with a styled header
-    row. Prose between tables is skipped. Returns the number of tables written.
+    """Render the generator's markdown as the stats sheet.
 
-    Layout: gridlines are off — each table carries its own thin box outline.
-    Column A stays empty (a gutter, like a document margin); every block
-    starts at column B. Numeric/percent cells are written as typed values
-    with number formats, and a column whose data is entirely numeric/percent
-    gets its header right-aligned to sit over the numbers.
-
-    Row markup (from the generator's markdown):
-      - a first cell starting with `^` draws a thin separator line ABOVE the
-        row (subsection breaks, total rows);
-      - a `**bold**` first cell bolds the whole row (totals / emphasis).
+    Layout rules (mirroring the reviewed design):
+      - gridlines off; column A is an empty gutter, content starts at B;
+      - `## …` headings are STAGE BANNERS — bold white on the header fill;
+      - `### …` headings are bold sub-titles, printed once above their table;
+      - a `<!-- beside -->` directive renders the NEXT table to the right of
+        the previous one (same rows, one gap column) — used for the CPP
+        ecosystem breakdown next to the value funnel;
+      - `^` first-cell markers draw separator lines, `**` rows are bold.
     """
     ws.sheet_view.showGridLines = False
     lines = md_text.splitlines()
     heading = ""
+    heading_level = 3
+    heading_emitted = True
+    beside = False
+    prev = None  # (top_row, start_col, n_cols, last_row) of the previous table
+    cursor = 2   # next free row (row 1 stays blank, like the column-A gutter)
     tables = 0
     i = 0
     while i < len(lines):
         line = lines[i].strip()
         if line.startswith("#"):
+            heading_level = len(line) - len(line.lstrip("#"))
             heading = line.lstrip("#").strip()
+            if heading_level == 2:
+                # Stage banner — standalone, emitted immediately.
+                cell = ws.cell(row=cursor, column=2, value=heading)
+                cell.font = BANNER_FONT
+                cell.fill = HEADER_FILL
+                cursor += 3  # banner + two blank rows
+                heading_emitted = True
+            else:
+                heading_emitted = False
+            i += 1
+            continue
+        if line == "<!-- beside -->":
+            beside = True
             i += 1
             continue
         if not line.startswith("|"):
             i += 1
             continue
-        # A table block: consecutive `|`-rows; second row is the alignment row.
         block = []
         while i < len(lines) and lines[i].strip().startswith("|"):
             if not _is_md_separator(lines[i]):
-                block.append([c for c in lines[i].strip().strip("|").split("|")])
+                block.append([x for x in lines[i].strip().strip("|").split("|")])
             i += 1
         if not block:
             continue
-        if tables:
-            ws.append([])  # blank separator between blocks
-        ws.append([None, heading])
-        ws.cell(row=ws.max_row, column=2).font = SECTION_FONT
-        header_row_idx = ws.max_row + 1
-        n_cols = max(len(cells) for cells in block)
-        numeric_col = [True] * n_cols  # column has ONLY numeric/percent data
-        has_data_col = [False] * n_cols
-        separator_rows: list[int] = []
-        for j, cells in enumerate(block):
-            first = cells[0].strip()
-            sep = first.startswith("^")
-            bold = first.lstrip("^").strip().startswith("**")
-            if sep:
-                cells = [first.lstrip("^")] + cells[1:]
-            parsed = [_md_cell(c) for c in cells]
-            ws.append([None] + [v for v, _ in parsed])
-            if sep:
-                separator_rows.append(ws.max_row)
-            for k, (v, fmt) in enumerate(parsed):
-                cell = ws.cell(row=ws.max_row, column=k + 2)
-                if fmt:
-                    cell.number_format = fmt
-                if j == 0:
-                    cell.font = HEADER_FONT
-                    cell.fill = HEADER_FILL
-                else:
-                    if bold:
-                        cell.font = Font(bold=True)
-                    if v is not None:
-                        has_data_col[k] = True
-                        if not isinstance(v, (int, float)):
-                            numeric_col[k] = False
-        for k in range(n_cols):
-            if has_data_col[k] and numeric_col[k]:
-                ws.cell(row=header_row_idx, column=k + 2).alignment = \
-                    Alignment(horizontal="right")
-        # thin box outline around the table + separator lines above marked rows
-        last_row = ws.max_row
-        first_col, last_col = 2, n_cols + 1
-        for row in range(header_row_idx, last_row + 1):
-            _with_sides(ws.cell(row=row, column=first_col), left=THIN)
-            _with_sides(ws.cell(row=row, column=last_col), right=THIN)
-        for col in range(first_col, last_col + 1):
-            _with_sides(ws.cell(row=header_row_idx, column=col), top=THIN)
-            _with_sides(ws.cell(row=last_row, column=col), bottom=THIN)
-            for row in separator_rows:
-                _with_sides(ws.cell(row=row, column=col), top=THIN)
+
+        if beside and prev is not None:
+            top_row, start_col = prev[0], prev[1] + prev[2] + 1
+            last = _render_table(ws, block, top_row, start_col)
+            cursor = max(cursor, last + 2)
+            prev = (top_row, start_col, max(len(r) for r in block), last)
+            beside = False
+            tables += 1
+            continue
+
+        if not heading_emitted:
+            cell = ws.cell(row=cursor, column=2, value=heading)
+            cell.font = SECTION_FONT
+            cursor += 1  # sub-title sits directly above its table
+            heading_emitted = True
+        top_row = cursor
+        last = _render_table(ws, block, top_row, 2)
+        prev = (top_row, 2, max(len(r) for r in block), last)
+        cursor = last + 3  # two blank rows between blocks
         tables += 1
 
     ws.column_dimensions["A"].width = 2
     ws.column_dimensions["B"].width = 60  # metric labels carry the folded descriptions
     for col in "CDEFGH":
         ws.column_dimensions[col].width = 14
+    ws.column_dimensions["I"].width = 26  # beside-table label column
+    for col in "JKLM":
+        ws.column_dimensions[col].width = 12
     return tables
 
 

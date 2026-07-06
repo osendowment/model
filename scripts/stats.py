@@ -37,6 +37,7 @@ from rich.table import Table
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+from src.common.params import VALUE_CLASS_A, VALUE_CLASS_B  # noqa: E402
 from src.common.repos import load_top_repos  # noqa: E402
 
 console = Console()
@@ -215,9 +216,36 @@ def value_stats() -> dict:
             "results": n, "github": wgh, "git": wgit,
         }
 
+    # avg annual downloads (2021-2025) per stats.csv column; cpp = debian+homebrew
+    years = [f"downloads_{y}" for y in range(2021, 2026)]
+    avg_dl = {}
+    for col in ("npm", "pypi", "crates", "debian", "homebrew"):
+        vals = [float(smatrix.get(y, {}).get(col) or 0) for y in years]
+        avg_dl[col] = sum(vals) / len(years)
+    avg_dl["cpp"] = avg_dl["debian"] + avg_dl["homebrew"]
+
+    # all tracked packages: the per-registry universe we measure downloads on
+    def _col_set(path: str, col: str) -> set[str]:
+        return {r[col] for r in _load(path) if (r.get(col) or "").strip()}
+
+    deb_names = _col_set("data/sources/debian/raw/cpp-packages.csv", "package")
+    brew_names = _col_set("data/sources/homebrew/raw/formulas.csv", "name")
+    tracked = {
+        "npm": len(_col_set("data/sources/npm/raw/downloads.csv", "package")),
+        "pypi": len(_col_set("data/sources/pypi/bigquery/bq-package-downloads.csv",
+                             "package")),
+        "crates": len(_col_set("data/sources/crates/db-dump/crates.csv", "name")),
+        "debian": len(deb_names),
+        "homebrew": len(brew_names),
+        "cpp": len(deb_names | brew_names),
+    }
+    top_pkgs = {eco: int(smatrix.get("packages_top", {}).get(eco, 0) or 0)
+                for eco in ("npm", "pypi", "crates", "debian", "homebrew", "cpp")}
+
     return {
         "rows": m, "github": gh, "git": git, "valid": valid, "orphan": orphan,
-        "git_urls": git_urls,
+        "git_urls": git_urls, "avg_dl": avg_dl, "tracked": tracked,
+        "top_pkgs": top_pkgs,
         "pkg_class": pkg_class, "ght_class": ght_class,
         "classes": classes, "by_class": by_class, "funnel": funnel,
     }
@@ -566,69 +594,59 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     out: list[str] = []
     a = out.append
 
-    a("### End-to-end funnel\n")
-    a("| Stage | Count | % |")
-    a("|---|--:|--:|")
-    for stage, cnt, denom, denom_label, comment in funnel_stats(v, r, e):
-        pct = _pct(cnt, denom) if denom else ""
-        # one self-describing label: stage — comment (% is of <denominator>)
-        label = f"{stage} — {comment}" + (f" (% of {denom_label})" if denom else "")
-        mark = "**" if stage in ("top repos", "eligible") else ""
-        sep = "^" if stage in ("value_score present", "eligible") else ""
-        a(f"| {sep}{mark}{label}{mark} | {mark}{cnt:,}{mark} | {mark}{pct}{mark} |")
-    a("")
+    a("## Stage 1: Value\n")
 
-    a("### Per-ecosystem value funnel\n")
-    a("| Metric | npm | pypi | crates | cpp | Total |")
-    a("|---|--:|--:|--:|--:|--:|")
     fu = v["funnel"]
     gu = v["git_urls"]
+    dl = v["avg_dl"]
+    tr = v["tracked"]
+    tp = v["top_pkgs"]
+
+    a("| Funnel step | npm | pypi | crates | cpp | Total |")
+    a("|---|--:|--:|--:|--:|--:|")
+    a("| Avg annual downloads (2021-2025) | "
+      + " | ".join(f"{int(dl[eco]):,}" for eco in ECOSYSTEMS)
+      + f" | {int(sum(dl[eco] for eco in ECOSYSTEMS)):,} |")
+    a("| All tracked packages | "
+      + " | ".join(f"{tr[eco]:,}" for eco in ECOSYSTEMS)
+      + f" | {sum(tr[eco] for eco in ECOSYSTEMS):,} |")
 
     def _eco_row(label: str, key: str) -> str:
         vals = [fu[eco][key] for eco in ECOSYSTEMS]
         return (f"| {label} | " + " | ".join(f"{x:,}" for x in vals)
                 + f" | {sum(vals):,} |")
 
-    # package-level rows (per-eco results.csv)
-    a(_eco_row("Top packages representing 95% of downloads", "top"))
+    a(_eco_row("Top packages representing 95% of downloads (2021-2025)", "top"))
     a(_eco_row("Target packages (top + their dependency tree)", "deps"))
     a(_eco_row("Targets with a git URL", "git"))
-    # repo-level rows (value.csv) — the bridge to the Repo URLs table below:
-    # per eco a repo counts once per ecosystem, the Total is deduped, so the
-    # Total cells equal that table's unique totals.
     uniq = [gu["by_eco"][eco]["total"] for eco in ECOSYSTEMS]
-    a("| ^Unique git URLs (Total deduped — see Repo URLs) | "
-      + " | ".join(f"{x:,}" for x in uniq) + f" | {gu['all']['total']:,} |")
-    ghgl = [gu["by_eco"][eco]["ghgl"] for eco in ECOSYSTEMS]
-    ghgl_total = gu["github"]["total"] + gu["gitlab"]["total"]
-    a("| Unique GitHub + GitLab repos | "
-      + " | ".join(f"{x:,}" for x in ghgl) + f" | {ghgl_total:,} |")
+    a("| ^**Unique repo URLs** | " + " | ".join(f"**{x:,}**" for x in uniq)
+      + f" | **{gu['all']['total']:,}** |")
     a("")
 
-    a("### Repo identity coverage\n")
-    a("| Step | A | B | C | Total |")
+    # the cpp column decomposed by sub-source, rendered BESIDE the funnel table
+    a("<!-- beside -->")
+    a("| CPP ecosystem | Homebrew | Debian | Total | Unique |")
     a("|---|--:|--:|--:|--:|")
-    bc = v["by_class"]
+    a(f"| Avg annual downloads (2021-2025) | {int(dl['homebrew']):,} "
+      f"| {int(dl['debian']):,} | {int(dl['cpp']):,} | |")
+    a(f"| All tracked packages | {tr['homebrew']:,} | {tr['debian']:,} "
+      f"| {tr['homebrew'] + tr['debian']:,} | {tr['cpp']:,} |")
+    a(f"| Top packages | {tp['homebrew']:,} | {tp['debian']:,} "
+      f"| {tp['homebrew'] + tp['debian']:,} | {tp['cpp']:,} |")
+    a("")
 
-    def _id_row(label: str, d: dict, comment: str, bold: bool = False) -> str:
-        cells = [f"{x:,}" for x in (d["A"], d["B"], d["C"], d["A"] + d["B"] + d["C"])]
-        full = f"{label} — {comment}"
-        if bold:
-            return f"| **{full}** | " + " | ".join(f"**{x}**" for x in cells) + " |"
-        return f"| {full} | " + " | ".join(cells) + " |"
+    a("| Repo types | Min cum PR pct | Max cum PR pct |")
+    a("|---|--:|--:|")
+    a(f"| Class A - core representing {int(VALUE_CLASS_A * 100)}% of "
+      f"downloads-weighted PageRank | 0 | {VALUE_CLASS_A} |")
+    a(f"| Class B - next {int(round((VALUE_CLASS_B - VALUE_CLASS_A) * 100))}% of the "
+      f"ecosystem value | {VALUE_CLASS_A} | {VALUE_CLASS_B} |")
+    a(f"| Class C - long tail of packages/repos | {VALUE_CLASS_B} | 1 |")
+    a("")
 
-    a(_id_row("Packages", v["pkg_class"], "package universe (after dep tree)"))
-    a(_id_row("GitHub total repos", v["ght_class"], "package appearances in a github group"))
-    a(_id_row("GitHub unique repos", {c: bc[c]["github"] for c in "ABC"},
-              f"deduped; + {v['orphan']:,} orphans = {v['rows']:,} repos"))
-    a(_id_row("Valid repos", {c: bc[c]["valid"] for c in "ABC"},
-              "upstream resolves — github/gitlab API or non-github ls-remote; "
-              "incl. archived mirrors", bold=True))
-
-    a("\n### Repo URLs\n")
     a("| Repo URLs | A | B | C | Total | % Total |")
     a("|---|--:|--:|--:|--:|--:|")
-    gu = v["git_urls"]
     grand = gu["all"]["total"]
 
     def _gu_row(label: str, key: str, bold: bool = False) -> str:
@@ -652,7 +670,9 @@ def markdown(v: dict, r: dict, e: dict) -> str:
         cells = [f"{b['A']:,}", f"{b['B']:,}", f"{b['C']:,}", f"{b['total']:,}",
                  _pct(b["total"], grand)]
         a(f"| {'^' if i == 0 else ''}{eco} | " + " | ".join(cells) + " |")
-    a(_gu_row("^Total repo URLs (unique)", "all", bold=True))
+    a(_gu_row("^Unique repo URLs", "all", bold=True))
+
+    a("\n## Stage 2: Risk")
 
     n = r["scope"]
     a(f"\n### Score distribution by component (scope {n})\n")
@@ -676,6 +696,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
             a(f"| {mark}{label}{mark} | {mark}{cnt}{mark} | {mark}{_pct(cnt, n)}{mark} |")
 
     # ── Eligibility sections ──
+    a("\n## Stage 3: Eligibility\n")
     ne = e["scope"]
     lic, act = e["licenses"], e["active"]
     a(f"\n### Licenses (scope {ne})\n")
