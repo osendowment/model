@@ -150,7 +150,14 @@ def _analyze_dir(path: str) -> tuple[int, int, int, int, int]:
         timeout=SCC_TIMEOUT_S,
     )
     if result.returncode != 0:
-        return 0, 0, 0, 0, 0
+        # Fail loudly: callers catch this into their error field and skip the
+        # write, so a failed scc run never lands in scc.csv as a fake all-zero
+        # row. A written loc=0 row therefore always means "measured: the
+        # checkout genuinely has no source files".
+        raise RuntimeError(
+            f"scc failed (rc={result.returncode}): "
+            f"{result.stderr.decode(errors='replace')[:120]}"
+        )
     data = json.loads(result.stdout)
     files = lines = code = uloc = complexity = 0
     for lang in data:
