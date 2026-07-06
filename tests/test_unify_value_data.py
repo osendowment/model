@@ -976,3 +976,58 @@ class TestInvariants:
 
 if __name__ == "__main__":  # pragma: no cover
     pytest.main([__file__, "-v"])
+
+
+class TestPrScore:
+    """pr_score: per-eco ln(PR mass) min-max → p2-norm across ecos → max=100."""
+
+    def test_top_repo_is_100_and_order_follows_mass(self):
+        rows = [
+            _pkg_row("big", "npm", github_repo="o/big", pagerank="0.5"),
+            _pkg_row("mid", "npm", github_repo="o/mid", pagerank="0.05"),
+            _pkg_row("tiny", "npm", github_repo="o/tiny", pagerank="0.005"),
+        ]
+        aggs = {a["repo"]: a for a in aggregate_by_repo(rows)}
+        assert aggs["o/big"]["pr_score"] == "100.00"
+        # equal ln-spacing (×10 steps) → the middle repo lands halfway
+        assert aggs["o/mid"]["pr_score"] == "50.00"
+        assert aggs["o/tiny"]["pr_score"] == "0.00"   # the eco's min anchor
+
+    def test_monorepo_sums_package_mass_before_log(self):
+        rows = [
+            _pkg_row("a1", "npm", github_repo="o/mono", pagerank="0.3"),
+            _pkg_row("a2", "npm", github_repo="o/mono", pagerank="0.2"),
+            _pkg_row("solo", "npm", github_repo="o/solo", pagerank="0.5"),
+            _pkg_row("small", "npm", github_repo="o/small", pagerank="0.005"),
+        ]
+        aggs = {a["repo"]: a for a in aggregate_by_repo(rows)}
+        # mono's mass (0.3+0.2) equals solo's single package → same score
+        assert aggs["o/mono"]["pr_score"] == aggs["o/solo"]["pr_score"] == "100.00"
+
+    def test_second_ecosystem_adds_with_p2_diminishing_returns(self):
+        rows = [
+            # champion of npm only
+            _pkg_row("n", "npm", github_repo="o/npm-only", pagerank="0.9"),
+            _pkg_row("nmin", "npm", github_repo="o/nmin", pagerank="0.001"),
+            # champion of BOTH ecosystems → p2-norm = √2 of a single 1.0
+            _pkg_row("b1", "npm", github_repo="o/both", pagerank="0.9"),
+            _pkg_row("b2", "pypi", github_repo="o/both", pagerank="0.9"),
+            _pkg_row("pmin", "pypi", github_repo="o/pmin", pagerank="0.001"),
+        ]
+        aggs = {a["repo"]: a for a in aggregate_by_repo(rows)}
+        assert aggs["o/both"]["pr_score"] == "100.00"
+        # single-eco champion = 100/√2 ≈ 70.71 — breadth rewarded, boundedly
+        assert aggs["o/npm-only"]["pr_score"] == "70.71"
+
+    def test_no_pagerank_signal_leaves_blank(self):
+        rows = [
+            _pkg_row("ranked", "npm", github_repo="o/ranked", pagerank="0.5"),
+            _pkg_row("lesser", "npm", github_repo="o/lesser", pagerank="0.01"),
+            _pkg_row("orphan", "cpp", github_repo="", git_url="", pagerank="0.0"),
+        ]
+        aggs = aggregate_by_repo(rows)
+        blanks = [a for a in aggs if a["pr_score"] == ""]
+        assert len(blanks) == 1                      # the zero-PR orphan
+        assert blanks[0]["packages"] == 1
+        ranked = next(a for a in aggs if a["repo"] == "o/ranked")
+        assert ranked["pr_score"] == "100.00"

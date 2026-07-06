@@ -100,6 +100,8 @@ Value
     ├── top_eco                   ← derived (best percentile eco)          [2021–2025]
     ├── top_eco_pkg               ← derived (highest-PR pkg in top_eco)    [2021–2025]
     ├── top_eco_pct               ← derived (100 − pr_cum_pct, 0–100)      [2021–2025]
+    ├── pr_score                  ← derived (per-eco ln PR-mass min-max    [2021–2025]
+    │                                → p2-norm across ecos → max = 100)
     ├── class_{npm,pypi,crates,cpp}
     │                              ← derived (per-eco cum-PR share)        [2021–2025]
     ├── class                     ← derived (strongest across ecos)        [2021–2025]
@@ -297,6 +299,7 @@ subgraphs.
 | `top_eco` | Ecosystem where the repo is highest-ranked (max PR percentile). `npm` / `pypi` / `crates` / `cpp`. |
 | `top_eco_pkg` | Highest-PR package in `top_eco` (e.g. `@babel/helper-plugin-utils` for babel/babel) |
 | `top_eco_pct` | PR percentile in `top_eco` (`100 − pr_cum_pct`). 0–100, **higher = better**. babel/babel ≈ 92.24; tail near 0. |
+| `pr_score` | Cross-ecosystem dependency-mass score, 0–100 (two decimals), **higher = better**. Per ecosystem the repo's PR mass (Σ package PageRank) is `ln`-scaled and min-max normalized over that ecosystem's repos; the per-eco normals combine as a **p-norm with p = 2** (`PR_SCORE_P` in `unify_value_data.py`) — a real second-ecosystem footprint adds up to ~41% (√2), a token registry listing ~nothing, and an extra ecosystem never lowers the score — then the column is rescaled so the top repo = 100 (currently protocolbuffers/protobuf; the four single-eco champions glibc/babel/serde/typing_extensions sit at ~93). Complements `top_eco_pct`: cumulative *position* in one ecosystem vs actual dependency *mass* across all of them. Blank only for groups with no PageRank signal at all. Not (yet) part of the `value_score` blend. |
 | `class` | Strongest of the per-ecosystem classes (A < B < C) |
 | `class_npm`, `class_pypi`, `class_crates`, `class_cpp` | A/B/C from per-ecosystem cumulative PR share; empty if no package in that ecosystem |
 | `openssf_crit` | OpenSSF criticality score ·100 (0–100, two decimals, higher = more critical; the source CSV keeps the raw 0–1 value), joined from `data/sources/openssf/criticality.csv` by `src.value.apply_criticality` (the last value.csv-writing pipeline step). **Non-empty for every valid class-A GitHub repo, archived included** — that is the fetch scope, and `scripts/pipeline_health.py` gates on it. Empty for non-GitHub rows (the tool is GitHub-only), B/C rows outside the fetch scope, and unresolved/invalid repos. |

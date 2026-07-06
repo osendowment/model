@@ -13,8 +13,8 @@ key for orphans), and writes `data/value/value.csv` with **one row per repo**:
 
     repo, platform, repo_id, git_url, mirror_url, git_valid,
     ecosystems, packages, top_eco, top_eco_pkg,
-    top_eco_pct, class, class_npm, class_pypi, class_crates, class_cpp,
-    openssf_crit, score
+    top_eco_pct, pr_score, class, class_npm, class_pypi, class_crates,
+    class_cpp, openssf_crit, score
 
 Repo identity is a `(platform, repo, repo_id)` triple, all derived from the
 canonical `git_url`:
@@ -50,6 +50,13 @@ cumulative-share cutoffs as the package-level value pipeline (≤75% A,
 means closer to the top of the ecosystem; `top_eco` is the ecosystem with
 the max percentile and `top_eco_pkg` is the highest-PR package in it.
 
+`pr_score` is the cross-ecosystem dependency-mass score (0–100, two
+decimals): per ecosystem the group's PR mass is ln-scaled and min-max
+normalized, the per-eco normals combine as a p-norm (PR_SCORE_P = 2), and
+the column is rescaled so the top repo (currently protobuf) = 100. It
+complements `top_eco_pct`: percentile position in ONE ecosystem vs actual
+dependency mass across ALL of them.
+
 Rows are sorted by `top_eco_pct` desc so the highest-importance repos
 come first.
 
@@ -65,6 +72,7 @@ Usage:
 from __future__ import annotations
 
 import csv
+import math
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -99,7 +107,7 @@ CLASS_RANK = {"A": 0, "B": 1, "C": 2}
 FIELDS = (
     ["repo", "platform", "repo_id", "git_url", "mirror_url", "git_valid",
      "ecosystems", "packages",
-     "top_eco", "top_eco_pkg", "top_eco_pct", "class"]
+     "top_eco", "top_eco_pkg", "top_eco_pct", "pr_score", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
     # `openssf_crit` (OpenSSF criticality score ·100, 0-100), `eco_crit` (ecosyste.ms
     # critical flag: 1 critical / 0 explicitly-not / blank unknown), and
@@ -114,7 +122,15 @@ FIELDS = (
 # Internal scratch keys carried on each aggregate dict during computation.
 # Stripped before writing — DictWriter would `extrasaction="ignore"` them
 # anyway, but explicit removal keeps the test surface clean.
-_INTERNAL_PREFIXES = ("_pkgs_", "_pr_sum_", "_pr_pct_", "_top_pkg_", "group_key")
+_INTERNAL_PREFIXES = ("_pkgs_", "_pr_sum_", "_pr_pct_", "_pr_norms", "_top_pkg_",
+                      "group_key")
+
+# p-norm exponent for `pr_score`'s cross-ecosystem combination. p=2 rewards a
+# real multi-ecosystem footprint with diminishing returns: a second ecosystem
+# at equal strength adds ~41% (√2), a token registry listing ~nothing — and
+# adding an ecosystem can never lower the score (monotone), unlike an
+# adaptive p=n_ecos, which would penalize the third ecosystem.
+PR_SCORE_P = 2
 
 
 def _normalise_repo(repo: str) -> str:
@@ -592,6 +608,35 @@ def aggregate_by_repo(
             a[f"_pr_pct_{eco}"] = 100.0 - cum_pct
         for a in aggs:
             a.setdefault(f"class_{eco}", "")
+
+    # pr_score — cross-ecosystem dependency-mass score (0–100, two decimals).
+    # Per ecosystem, a repo's raw PR mass (`_pr_sum_<eco>`, the Σ pagerank of
+    # its packages there) is ln-scaled and min-max normalized over the repos
+    # present in that ecosystem — ln compresses the heavy-headed PR
+    # distribution so the scale reads as orders of magnitude, anchored at the
+    # ecosystem's weakest/strongest repos. The per-eco normals combine as a
+    # PR_SCORE_P-norm (breadth rewarded, diminishing), then the whole column
+    # is rescaled so the top repo = 100. Blank for groups with no PageRank
+    # signal at all (orphans whose packages carry no rank). Unlike
+    # `top_eco_pct` (a cumulative-position percentile in one ecosystem),
+    # pr_score measures actual dependency mass across all of them.
+    for eco in ECOSYSTEMS:
+        massy = [a for a in aggs if a[f"_pr_sum_{eco}"] > 0]
+        if not massy:
+            continue
+        logs = [math.log(a[f"_pr_sum_{eco}"]) for a in massy]
+        lmn, lmx = min(logs), max(logs)
+        span = (lmx - lmn) or 1.0
+        for a, lv in zip(massy, logs):
+            a.setdefault("_pr_norms", []).append((lv - lmn) / span)
+    pr_raw = {
+        id(a): sum(n ** PR_SCORE_P for n in a["_pr_norms"]) ** (1.0 / PR_SCORE_P)
+        for a in aggs if a.get("_pr_norms")
+    }
+    pr_max = max(pr_raw.values(), default=0.0)
+    for a in aggs:
+        raw = pr_raw.get(id(a))
+        a["pr_score"] = f"{100.0 * raw / pr_max:.2f}" if raw is not None and pr_max else ""
 
     # top_eco / top_eco_pkg / top_eco_pct + cross-eco strongest `class`.
     # Every group has at least one package in some ecosystem (it wouldn't
