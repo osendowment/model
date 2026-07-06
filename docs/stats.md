@@ -23,12 +23,12 @@ Packages remaining after each Value stage, plus the share with a known upstream 
 
 | Metric | npm | pypi | crates | cpp | Total | Comment |
 |---|--:|--:|--:|--:|--:|---|
-| Top packages | 5,765 | 2,460 | 3,719 | 1,329 | 13,273 | Representing 95% of downloads per eco |
-| **After dep tree** | **6,370** | **3,139** | **6,218** | **1,639** | **17,366** | Extended via own dependencies |
-| Git URL | 6,318 | 2,929 | 6,137 | 1,311 | 16,695 | Any git host |
-| GitHub repo | 6,310 | 2,899 | 6,009 | 530 | 15,748 | Github repository |
-| Git % | 99.6% | 94.8% | 93.6% |
-| **GitHub %** | **99%** | **92%** | **97%** | **32%** | **91%** | |
+| Top packages | 5,765 | 2,460 | 3,719 | 1,335 | 13,279 | Representing 95% of downloads per eco |
+| **After dep tree** | **6,370** | **3,139** | **6,486** | **1,652** | **17,647** | Extended via own dependencies |
+| Git URL | 6,319 | 2,927 | 6,403 | 1,364 | 17,013 | Any git host |
+| GitHub repo | 6,310 | 2,898 | 6,276 | 564 | 16,048 | Github repository |
+| Git % | 99.2% | 93.2% | 98.7% | 82.6% | 96.4% | |
+| **GitHub %** | **99%** | **92%** | **97%** | **34%** | **91%** | |
 
 Note that after dep tree is de-duplicated, cpp unions the Debian + Homebrew graphs, Repology-canonicalised to one name each, and leave only C/C++ packages.
 
@@ -45,8 +45,9 @@ upstream that resolves (`git ls-remote`). It is therefore measured over all
 12,116 repos and can exceed the GitHub-unique count — only 738 (url-less orphans
 + dead URLs) are invalid. Archived GitHub mirrors of a live upstream stay *valid*
 (they resolve). The numeric `repo_id` is GitHub + GitLab only, and
-risk/eligibility scope is still GitHub-gated (`settings.json top_repos.platforms`)
-— a valid non-GitHub upstream is recorded, not pulled into scope.
+risk/eligibility scope is gated to those two platforms
+(`settings.json top_repos.platforms`) — a valid upstream on any other host is
+recorded, not pulled into scope.
 
 | Step | A | B | C | Total | Comment |
 |---|--:|--:|--:|--:|---|
@@ -62,9 +63,9 @@ risk/eligibility scope is still GitHub-gated (`settings.json top_repos.platforms
 
 | Signal | Filled | Comment |
 |---|--:|---|
-| `openssf_crit` | 921 | GitHub-only; valid class-A GitHub gate **915 / 915** (enforced by `pipeline_health.py`) |
+| `openssf_crit` | 918 | GitHub-only; valid class-A GitHub gate **912 / 915** — 3 blanks currently flagged by `pipeline_health.py` |
 | `eco_crit` | 794 | explicit flags only — 788 critical (`1`) / 6 not (`0`); a checked-but-blank flag (spack/debian cpp) is left empty, never 0 |
-| `value_score` | 923 | ≥ 2 components present; 2 GitLab class-A repos scored — only those with an explicit `eco_crit`; the rest have just `top_eco_pct` and stay blank |
+| `value_score` | 920 | ≥ 2 components present; 2 GitLab class-A repos scored — only those with an explicit `eco_crit`; the rest have just `top_eco_pct` and stay blank |
 
 `value_score` range 0–100: **min 17.7 / mean 53.7 / max 81.4**.
 
@@ -94,7 +95,7 @@ Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 GitLab), **archived included** (they enter risk scope like every other stage;
 archival surfaces in eligibility as `active=False`); each funnel below starts
 from those 940. `risk.csv` ranks all 940 on the four scored dimensions; the
-funding signals and the intent/nonprofit flags moved to the
+funding signals and the intent/nonprofit flags live in the
 [Eligibility](#eligibility) stage. Methodology: [risk.md](risk.md) + component
 docs.
 
@@ -108,7 +109,7 @@ scope; the repos still surface in eligibility as `active=False`.
 ### Score distribution by component (scope 940)
 
 - **Bold row** = the component's 0–100 risk score (feeds `risk.csv`); rows beneath = the **raw metric** in natural units, *before* its 0–100 percentile (percentiles are 0/25/50/75/100 by construction — useless).
-- **Completeness rule:** overall `risk_score` = geomean of the four component scores, blank unless all four present (likewise each component vs its inputs); `pipeline_health.py` enforces it.
+- **Completeness rule:** overall `risk_score` = geomean of the four component scores, blank unless all four present; likewise concentration / complexity / workload vs their inputs — security is worst-of (`max_composite_any`) and scores off whichever axis is present. `pipeline_health.py` enforces it.
 - **100%-populated:** zero-active-contributor repos score with AC=1 (flagged `dormant`) rather than abstaining.
 - Highlights: median **bus factor 1**, **75% have 0 CVEs** (max 10,602).
 
@@ -209,8 +210,8 @@ net-new issues per active contributor, plus issue-debt and trend.
 
 **Eligibility covers the 940 top repos** — the valid class-A set INCLUDING
 archived repos, which surface here as `active=False` instead of being dropped.
-This is the same 940-repo scope the risk stage now runs on (both stages include
-archived and both platforms); the four checks per repo roll into
+Risk runs on the same 940-repo scope (both stages include archived repos and
+both platforms); the four checks per repo roll into
 `data/eligibility/eligibility.csv`: `eligible = oss AND intent AND nonprofit
 AND active`. Methodology: [eligibility.md](eligibility.md) +
 [funding.md](components/funding.md).
@@ -234,9 +235,10 @@ extras. Unknown (no license signal) is tracked separately from known non-OSS.
 | oss=False (known non-OSS) | 10 | 1.1% |
 | oss unknown (no signal) | 11 | 1.2% |
 
-The known non-OSS split: 4 content-licensed data repos (CC0/CC-BY — free for
-documents, not software OSS by this model's strict policy) and 6 on
-OSI-unapproved software licenses (mit-open-group, bzip2, libtiff, SGI-B).
+Of the 10 known non-OSS: 4 are content-licensed data repos (CC0/CC-BY — free
+for documents, not software OSS by this model's strict policy); the other 6
+ship under software licenses that are not OSI-approved (bzip2-1.0.6, libtiff,
+MIT-Open-Group, SGI-B-1.1).
 
 ### Activity
 

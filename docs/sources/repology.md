@@ -22,6 +22,7 @@ can be aggregated correctly across ecosystems.
 ## Raw Data
 
 - `data/sources/repology/packages.csv` -- project, repo, srcname, binname, visiblename, version, status, categories, licenses
+- `data/sources/repology/project-urls.csv` -- cache of git-URL candidates scraped from Repology's per-project information pages (project, candidate_url, platform, status, fetched_at); written by `src/sources/cpp/fetch_repology_urls.py`, not by this fetcher
 
 ## Scripts
 

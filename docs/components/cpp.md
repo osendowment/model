@@ -18,7 +18,7 @@ underlying sources are documented separately:
 | [Debian UDD](https://udd-mirror.debian.net) | C/C++ classification via debtags | `data/sources/debian/raw/cpp-packages.csv` |
 | [Homebrew formula API](https://formulae.brew.sh) | formula deps (`runtime`+`build`), `homepage`, `source_url`, `license`, `language` | `data/sources/homebrew/raw/{formulas,dependencies}.csv` |
 | [Homebrew analytics](https://formulae.brew.sh) (via Wayback) | 365-day install counts (downloads proxy) | `data/sources/homebrew/raw/downloads.csv` |
-| [Repology](https://repology.org) | canonical project name + upstream repo URLs | `data/sources/repology/packages.csv` |
+| [Repology](https://repology.org) | canonical project names (`packages.csv`, via `src/sources/repology/fetch_repology_data.py`) + upstream repo URL candidates (`project-urls.csv`, via `src/sources/cpp/fetch_repology_urls.py`) | `data/sources/repology/{packages,project-urls}.csv` |
 | [OSS-Fuzz](https://github.com/google/oss-fuzz) | fuzz-tested project list + `main_repo` | `data/sources/ossfuzz/projects.csv` |
 
 Both download proxies come from sparse Wayback snapshots — see the per-source docs
@@ -46,7 +46,7 @@ propagate PageRank. Two filters combine:
 | Source | Collected at fetch | Filter applied by cpp |
 |---|---|---|
 | Debian (`fetch_debian_data.py`) | `Depends` + `Pre-Depends` only — already runtime-only; `Build-Depends`/`Recommends`/`Suggests` not collected | none (all of it is used) |
-| Homebrew (`fetch_homebrew_data.py`) | both `runtime` and `build` types stored in raw deps | `cpp/process_data.py:277` — `if dep_type != "runtime": continue` |
+| Homebrew (`fetch_homebrew_data.py`) | both `runtime` and `build` types stored in raw deps | `cpp/process_data.py` (`build_homebrew_edges`) — rows with `dep_type != "runtime"` are skipped |
 
 The `type` column in `data/sources/cpp/dependency-tree.csv` is uniformly
 `"declared"` — the cpp pipeline's own term for "runtime dep declared by either
@@ -59,7 +59,9 @@ reflects who *runs* with whom, not who *builds* whom, so build infrastructure
 After unification, cpp uses the shared scoring mechanics (download-weighted
 PageRank α = 0.85, then A/B/C cumulative-share cutoffs — see
 [`value.md`](../value.md)). Orchestrated by `src.value.cpp_pipeline`, which runs
-the Debian → Homebrew → Repology sub-pipelines, then the cpp aggregation.
+the Debian and Homebrew sub-pipelines, then the Repology upstream-URL fetch
+(`fetch-repology` → `src.sources.cpp.fetch_repology_urls`), then the cpp
+aggregation.
 
 ```
 C / C++ (Debian + Homebrew + Repology)
@@ -100,10 +102,12 @@ In `data/sources/cpp/`:
 - `top-packages.csv` — top C/C++ projects by download mass
 - `dependency-tree.csv` — runtime project→project edges (`type` = `"declared"`)
 - `github-repos.csv` — project→GitHub-repo mappings
-- `results.csv` — all dep-tree projects with `pagerank` + `value_class`
+- `results.csv` — all dep-tree projects with `pagerank` + `value_class` (plus
+  the repo-identity columns `git`, `eco_guess`, `repo_id`, `mirror_url` and
+  `license`)
 
 ```bash
-uv run python -m src.sources.cpp.process_data [--top-share F] [--include-non-cpp]
+uv run python -m src.sources.cpp.process_data [--top-share F]
 ```
 
 ### cpp funnel & classes
@@ -112,9 +116,6 @@ See [docs/stats.md → Value](../stats.md#per-ecosystem-value-funnel) for the C/
 
 `Results` is smaller than `After dep tree` because the `is_cpp` filter drops
 language-agnostic distro packages that rode in as dependencies.
-
-Per-package class counts await the next full pipeline run — the per-package
-`results.csv` `value_class` is still on the legacy 4-class scheme.
 
 ## Limitations
 

@@ -8,7 +8,8 @@ risk) and its **count of distinct CVEs over 2021–2025** (more CVEs → more ri
 signals (OSS-Fuzz enrollment, OpenSSF Best Practices
 badge) that do **not** enter the score.
 
-Scope: the top repos in the risk pipeline (see
+Scope: the top repos in the risk pipeline — valid class-A repos across both
+platforms (GitHub + GitLab), archived included (see
 [value.md](../value.md)). Build step: `src/risk/build_security.py`.
 
 ## Metrics Roadmap
@@ -35,7 +36,7 @@ Security  → data/risk/security.csv  (class-A risk repos)  →  risk.csv col `s
 ├── bestpractices_badge_id    ← deps.dev (OpenSSF Best Practices badge tier)               [most recent]
 ├── fetched_at                ← checked_at of the OpenSSF score row used                   [2025 EOY]
 │
-└── score  (the score)        ← derived (max / worst-of openssf_score_p, cve_score)        [composite]
+└── score  (the score)        ← derived (max / worst-of the present axes: openssf_score_p, cve_score) [composite]
     └─ carried into risk.csv as column `security`
 ```
 
@@ -48,7 +49,8 @@ Security  → data/risk/security.csv  (class-A risk repos)  →  risk.csv col `s
    (`depsdev/repos.csv`). Each is TTL/sha-gated so re-runs only fetch what's
    missing or stale.
 2. **Snapshot-join** — the two sha-pinned long files (openssf, depsdev)
-   are keyed by `(repo, sha)`. For each repo, `build_security.py` walks
+   are keyed by `(repo_id, sha)` (the stable numeric id, so renamed repos
+   still join). For each repo, `build_security.py` walks
    the per-year `last_sha` priority from `commits-years.csv` (2025→2024→…→2021)
    and picks the first sha that has rows in that file. If no year matches, it
    falls back to any sha present for the repo (deterministic lexicographic
@@ -57,7 +59,7 @@ Security  → data/risk/security.csv  (class-A risk repos)  →  risk.csv col `s
    count distinct CVEs, set `ossfuzz_enrolled` and
    `bestpractices_badge_id`.
 4. **Score** — `add_percentiles(...)` ranks the population, then `score` =
-   max ("worst-of") of `openssf_score_p` and `cve_score`.
+   max ("worst-of") of the present axes among `openssf_score_p` and `cve_score`.
 5. **Aggregate** — `aggregate_risk.py` carries **only** this component's `score`
    into `risk.csv` as the column `security`.
 
@@ -73,41 +75,46 @@ yields a score, `openssf_score` and `openssf_score_source` are empty.
 Pipeline order (`src/risk/run_risk_pipeline.py`). The risk runner fetches these
 sources by default (incremental — each fetcher skips data already present, so a
 re-run only fills gaps); pass `--skip-fetch` to rebuild from existing data without
-fetching:
+fetching. The runner is trimmed to **score-forming fetchers only** — audit-only
+fetchers (churn, GitHub-method contributors) are run by hand:
 
 ```
-commits-years → … → cves → scorecard → depsdev → … → security-build → aggregate
+commits-years → … → cves → scorecard → depsdev → … → security → workload → aggregate
 ```
 
 ## Collection
 
-Seven source files feed the build. The two Git-snapshot long files
+Eight input files feed the build. The two Git-snapshot long files
 (`git/openssf.csv`, `git/depsdev.csv`) carry
-`repo, repo_id, commit_sha, metric, value, checked_at` — one row per check
-metric per sha — and are joined on the snapshot sha. The rest join on `repo`.
+`repo, repo_id, git_url, commit_sha, metric, value, checked_at` — one row per
+check metric per sha — and are joined on `(repo_id, sha)`. The rest join on the
+stable `repo_id` (rename-proof); OSS-Fuzz rows lacking a `repo_id` fall back to
+canonical-slug matching.
 
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
 |---|---|---|---|
-| `value/value.csv` | (value stage) | class-A value-class scope | `repo` |
-| `git/commits-years.csv` | `src.sources.git.commits_years` | per-(repo, year) `last_sha` — the snapshot pin | `repo`, `year` |
-| `git/openssf.csv` | `src/sources/openssf/scorecard.py` | OpenSSF Scorecard `score` + 18 checks per `(repo, sha)` — see [openssf.md](../sources/openssf.md) | `repo`, `sha` |
-| `git/depsdev.csv` | `src/sources/depsdev/fetch.py` | deps.dev-mirrored Scorecard `score` + checks (**fallback** when local row missing) | `repo`, `sha` |
-| `osv/cves.csv` | `src/sources/osv/fetch_cves.py` | per-CVE rows `(repo, date, cve, package-source)` | `repo` |
-| `osv/queried.csv` | `src/sources/osv/fetch_cves.py` | sidecar — repos OSV was queried for (confirms true zeros) | `repo` |
-| `ossfuzz/projects.csv` | `src/sources/ossfuzz/fetch_ossfuzz_data.py` | OSS-Fuzz enrollment — see [ossfuzz.md](../sources/ossfuzz.md) | `github_repo` |
-| `depsdev/repos.csv` | `src/sources/depsdev/fetch.py` | non-sha enrichment: `bestpractices_badge_id` | `repo` |
+| `value/value.csv` | (value stage) | valid class-A top-repo scope (GitHub + GitLab, archived included) | `repo_id` |
+| `git/commits-years.csv` | `src.sources.git.commits_years` | per-(repo, year) `last_sha` — the snapshot pin | `repo_id`, `year` |
+| `git/openssf.csv` | `src/sources/openssf/scorecard.py` | OpenSSF Scorecard `score` + 18 checks per `(repo, sha)` — see [openssf.md](../sources/openssf.md) | `repo_id`, `sha` |
+| `git/depsdev.csv` | `src/sources/depsdev/fetch.py` | deps.dev-mirrored Scorecard `score` + checks (**fallback** when local row missing) | `repo_id`, `sha` |
+| `osv/cves.csv` | `src/sources/osv/fetch_cves.py` | per-CVE rows `(repo, repo_id, date, cve)` | `repo_id` |
+| `osv/queried.csv` | `src/sources/osv/fetch_cves.py` | sidecar — repos OSV was queried for (confirms true zeros) | `repo_id` |
+| `ossfuzz/projects.csv` | `src/sources/ossfuzz/fetch_ossfuzz_data.py` | OSS-Fuzz enrollment — see [ossfuzz.md](../sources/ossfuzz.md) | `repo_id` (slug fallback) |
+| `depsdev/repos.csv` | `src/sources/depsdev/fetch.py` | non-sha enrichment: `bestpractices_badge_id` | `repo_id` |
 
 ## Processing & scoring
 
 ### CVE counting (distinct ids, 5-year window)
 
-Each row in `osv/cves.csv` is one `(repo, cve, package-source)` tuple — multiple
+Each row in `osv/cves.csv` is one `(repo, repo_id, date, cve)` tuple — multiple
 package mappings can produce duplicate `(repo, cve)` pairs, so the build
 **dedupes on the CVE id within a repo**. The date filter keeps only CVEs whose
 `date[:4]` falls in 2021–2025. Resolution is three-way: a count if the repo
 appears in `cves.csv`; `0` if it's absent but present in `queried.csv` (a
 confirmed zero); `""` if it was never queried (unknown — keeps a failed/skipped
-fetch from masquerading as zero).
+fetch from masquerading as zero). Known package-name mismaps are corrected at
+fetch time via the curated `data/risk/cve-package-overrides.csv`, which replaces
+a repo's OSV package list wholesale.
 
 ### The percentiles (`_p`)
 
@@ -126,15 +133,19 @@ score = max(openssf_score_p, cve_score)
 ```
 
 `composite_cols = ["openssf_score_p", "cve_score"]`, composed with
-`composite_fn = max_composite`. `score` is populated **only when both
-`openssf_score` and `cve_count_5y` are present**; otherwise it is `""`. Max
-("worst-of") means a repo that is bad on *either* axis (low Scorecard or many
-CVEs) carries that axis's full risk — the two axes do **not** compound and
-neither dilutes the other. In particular a repo with real CVEs is never masked
-by an otherwise-good Scorecard. Because most repos have zero CVEs and thus share
-`cve_score = 50` (neutral), for the majority `score = openssf_score_p` (which
-clears 50 for most), so it tracks the OpenSSF axis; the CVE axis takes over only
-for the minority whose `cve_score` exceeds their openssf axis.
+`composite_fn = max_composite_any`. `score` is the max over the **present**
+axes: it is `""` only when *both* `openssf_score_p` and `cve_score` are missing.
+A repo with a CVE count but no OpenSSF Scorecard (the common GitLab case —
+Scorecard's GitLab scan is a separate, gated run) still gets a security score
+from the CVE axis alone; when both axes are present the result is the strict
+max. Max ("worst-of") means a repo that is bad on *either* axis (low Scorecard
+or many CVEs) carries that axis's full risk — the two axes do **not** compound
+and neither dilutes the other. In particular a repo with real CVEs is never
+masked by an otherwise-good Scorecard. Because most repos have zero CVEs and
+thus share `cve_score = 50` (neutral), for the majority `score =
+openssf_score_p` (which clears 50 for most), so it tracks the OpenSSF axis; the
+CVE axis takes over only for the minority whose `cve_score` exceeds their
+openssf axis.
 
 ## Output
 
@@ -153,7 +164,7 @@ file; `fetched_at` here is the `checked_at` of the OpenSSF score row that was us
 | `bestpractices_badge_id` | `passing` \| `silver` \| `gold` \| `in_progress` \| `""` |
 | `openssf_score_p` | risk pctl of `openssf_score` (lower-is-worse) |
 | `cve_score` | neutral-anchored CVE risk score: 0 → 50, ≥1 ranked into (50,100] |
-| `score` | **security-risk score** (max / worst-of the two `_p`; `""` if either missing) |
+| `score` | **security-risk score** (max / worst-of the present axes; `""` only if both missing) |
 | `fetched_at` | `checked_at` of the OpenSSF score row used |
 
 ### `data/risk/risk.csv` (aggregate)
@@ -163,11 +174,12 @@ under the column name `security` — every other column above stays in
 `security.csv`. The full `risk.csv` schema is:
 
 ```
-repo, repo_id, concentration, complexity, security, funding, workload, score
+repo, repo_id, concentration, complexity, security, workload, risk_score
 ```
 
-where `security` is this component's `score`, and the final `score` is the
-geometric mean of the present component scores.
+where `security` is this component's `score`, and the final `risk_score` is the
+geometric mean of the four component scores — populated only when **all four**
+are present (a partial geometric mean is not comparable across repos).
 
 ## Coverage
 
@@ -180,8 +192,10 @@ See [docs/stats.md → Risk → Security](../stats.md#security) for current per-
   surfaced but **not scored** — they are context, not inputs.
 - **CVE mapping is package-name-bound.** CVE counts depend on OSV mapping a CVE
   to the repo via its published package names. C/Debian-mapped repos with
-  package-name mismatches under-count (e.g. `cpython`→0, `linux`→7); a `0`
-  reflects "no mapped CVEs", not necessarily "no vulnerabilities".
+  package-name mismatches under-count; known mismaps (e.g. `python/cpython`,
+  `torvalds/linux`) are corrected via the curated
+  `data/risk/cve-package-overrides.csv`, but a residual `0` still reflects
+  "no mapped CVEs", not necessarily "no vulnerabilities".
 - **CVE axis is coarse for the majority.** Most repos have zero CVEs and
   share `cve_score = 50` (the neutral baseline), so for them `score` mostly
   tracks the OpenSSF axis; the CVE axis only re-ranks the minority that carry CVEs.

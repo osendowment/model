@@ -59,6 +59,62 @@ def test_workload_blanks_issues_when_repo_not_fetched(monkeypatch):
     assert absent["nni_per_ac"] == ""
 
 
+def test_workload_blanks_issues_on_partial_year_coverage(monkeypatch):
+    """A repo with SOME years fetched but not all (e.g. 2025's closed-issue
+    fetch failed while 2021-2024 succeeded) must stay entirely blank, not
+    partially summed with the missing year silently read as 0.
+
+    Regression: `_load_issues_long` used to backfill any missing (repo, year)
+    cell to 0, so a partial fetch gap fed a real-looking but wrong
+    net_new_issues_5y into the SCORED nni_per_ac metric.
+    """
+    import types
+    from src.risk import build_workload as bw
+
+    repos = [types.SimpleNamespace(repo="o/partial", repo_id="o/partial")]
+    years = list(bw.YEARS)
+    issues = {
+        # opened: every year present (fully fetched).
+        "opened_issues": {"o/partial": {y: 10 for y in years}},
+        # closed: last window year missing entirely (fetch failure/gap).
+        "closed_issues": {"o/partial": {y: 5 for y in years[:-1]}},
+    }
+    monkeypatch.setattr(bw, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bw, "load_rows_by_id", lambda *a, **k: {})
+    monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
+    monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
+    monkeypatch.setattr(bw, "_load_issues_long", lambda path: issues)
+    monkeypatch.setattr(bw, "load_column_by_id",
+                        lambda path, col: {"o/partial": "5"})
+
+    row = {r["repo"]: r for r in bw.build()}["o/partial"]
+    assert row["issues_opened_5y"] == ""
+    assert row["issues_closed_5y"] == ""
+    assert row["net_new_issues_5y"] == ""
+    assert row["nni_per_ac"] == ""
+    assert row["issue_close_ratio"] == ""
+
+
+def test_load_issues_long_does_not_backfill_missing_years(tmp_path):
+    """_load_issues_long must NOT invent a 0 for a (repo_id, year, metric)
+    cell that's simply absent from the long-format file — that's the job of
+    the `issues_fetched` all-years gate in build(), not the loader."""
+    import csv
+    from pathlib import Path
+    from src.risk.build_workload import _load_issues_long
+
+    p = Path(tmp_path) / "issues.csv"
+    with open(p, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["repo", "repo_id", "year", "metric", "value"])
+        w.writeheader()
+        w.writerow({"repo": "o/r", "repo_id": "gh/1", "year": "2021",
+                    "metric": "opened_issues", "value": "3"})
+
+    out = _load_issues_long(p)
+    assert out["opened_issues"]["gh/1"] == {2021: 3}   # only the year that's present
+    assert "gh/1" not in out["closed_issues"]           # no fabricated entry at all
+
+
 def test_issue_sums_windowed_to_years(monkeypatch):
     """*_5y issue figures must sum ONLY the YEARS window, not stray years.
 

@@ -158,11 +158,10 @@ def load_repos(classes: set[str] | None, value_file: Path | None = None) -> list
     """Class-scoped repos from value.csv carrying their canonical package.
 
     Scopes on ``class`` alone — NOT via ``src.common.repos.load_top_repos`` — on
-    purpose: that loader's ``valid`` gate requires a GitHub ``platform``, which
-    would exclude every GitLab-hosted repo, but GitLab repos are exactly what
-    this signal needs to cover. Criticality is a package-importance factor, not a
-    risk-completeness gate, so a not-yet-``valid`` or archived class-A repo still
-    has a meaningful criticality. Each row carries value.csv's ``git_valid`` (as
+    purpose: that loader gates on ``git_valid`` and the GitHub/GitLab platform
+    allow-list, but criticality is a package-importance factor, not a
+    risk-completeness gate, so a not-yet-``valid``, other-host, or archived
+    class-A repo still has a meaningful criticality. Each row carries value.csv's ``git_valid`` (as
     ``valid``) so a downstream consumer can re-apply the gate and the scope stays
     auditable.
 

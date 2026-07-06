@@ -9,17 +9,17 @@ Used as one of two inputs (alongside Homebrew) for the C/C++ ecosystem pipeline.
 
 **Package index**: [deb.debian.org](https://deb.debian.org/debian/dists/stable/main/binary-amd64/Packages.xz) -- latest dependency edges, homepage, and VCS metadata.
 
-**C/C++ classification**: [UDD (Debian Package Database)](https://udd-mirror.debian.net) -- PostgreSQL mirror queried for debtags (`implemented-in::c`, `implemented-in::c++`). Public access: `host=udd-mirror.debian.net user=udd-mirror password=udd-mirror`.
+**C/C++ classification**: [UDD (Debian Package Database)](https://udd-mirror.debian.net) -- PostgreSQL mirror, public access: `host=udd-mirror.debian.net user=udd-mirror password=udd-mirror`. Union of three signals: binaries directly debtagged `implemented-in::c`/`implemented-in::c++`, binaries whose *source* package is tagged, and binaries in the library sections (`libs`, `libdevel`, `oldlibs`) of current stable.
 
 No authentication required. Wayback snapshots may be sparse for some years.
 
 ## Raw Data
 
-In `data/sources/debian/raw/`:
-- `downloads.csv` -- binary, year, downloads (from popcon)
-- `dependencies.csv` -- binary, dep_name. **Runtime only**: combines `Depends` + `Pre-Depends` from each binary's stanza. `Build-Depends`, `Recommends`, `Suggests` are intentionally not collected.
-- `package-metadata.csv` -- binary, source, homepage, vcs_browser, section
-- `cpp-packages.csv` -- debtags-identified C/C++ binaries
+In `data/sources/debian/raw/` (`package` = binary package name throughout):
+- `downloads.csv` -- package, year, downloads (from popcon)
+- `dependencies.csv` -- package, dep_name, dep_version, fetched_at. **Runtime only**: combines `Depends` + `Pre-Depends` from each binary's stanza. `Build-Depends`, `Recommends`, `Suggests` are intentionally not collected.
+- `package-metadata.csv` -- package, source, homepage, vcs_browser, section
+- `cpp-packages.csv` -- package, tag, via (C/C++ binaries from the UDD signal union; `via` records which signal matched)
 - `aliases.csv` -- t64 version renames (current <-> old)
 
 ## Scripts
@@ -30,7 +30,7 @@ In `data/sources/debian/raw/`:
 | `src/sources/debian/process_data.py` | Build outputs (source-level aggregation) |
 
 ```bash
-uv run src/sources/debian/fetch_debian_data.py [--step packages|popcon|index] [--years 2023 2024 2025]
+uv run src/sources/debian/fetch_debian_data.py [--step packages|popcon|index|all] [--years 2023 2024 2025] [--limit N]
 uv run python -m src.sources.debian.process_data
 ```
 
