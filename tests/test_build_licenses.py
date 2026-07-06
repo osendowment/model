@@ -127,7 +127,7 @@ class TestSourcePrecedence:
             repo_id: str
 
         monkeypatch.setattr(bl, "load_top_repos",
-                            lambda **kw: [E("gnome/glib", "gl/gitlab.gnome.org-658")])
+                            lambda **kw: [E("gnome/glib", "gl/gnome-658")])
         monkeypatch.setattr(bl, "load_oss_approved", lambda: {"lgpl-2.1", "mit"})
         monkeypatch.setattr(bl, "load_license_overrides", lambda: overrides or {})
         monkeypatch.setattr(bl, "load_registry_licenses", lambda: registry or {})
@@ -140,19 +140,19 @@ class TestSourcePrecedence:
         # GitLab API detects lgpl-2.1. The junk sentinel must not claim the slot.
         row = self._build(monkeypatch,
                           registry={"gnome/glib": "noassertion"},
-                          gitlab={"gl/gitlab.gnome.org-658": "lgpl-2.1"})
+                          gitlab={"gl/gnome-658": "lgpl-2.1"})
         assert (row["license"], row["license_source"]) == ("lgpl-2.1", "gitlab")
         assert row["oss"] is True
 
     def test_meaningful_registry_still_wins_over_gitlab(self, monkeypatch):
         row = self._build(monkeypatch,
                           registry={"gnome/glib": "mit"},
-                          gitlab={"gl/gitlab.gnome.org-658": "lgpl-2.1"})
+                          gitlab={"gl/gnome-658": "lgpl-2.1"})
         assert (row["license"], row["license_source"]) == ("mit", "registry")
 
     def test_all_sources_junk_keeps_first_sentinel_traceable(self, monkeypatch):
         row = self._build(monkeypatch,
                           registry={"gnome/glib": "noassertion"},
-                          gitlab={"gl/gitlab.gnome.org-658": "other"})
+                          gitlab={"gl/gnome-658": "other"})
         assert (row["license"], row["license_source"]) == ("noassertion", "registry")
         assert row["oss"] == ""   # unknown, not False

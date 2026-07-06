@@ -696,7 +696,7 @@ class TestRepoOverrides:
                      git_url="https://salsa.debian.org/sanvila/gettext.git",
                      pagerank="1.0", value_class="A"),
         ]
-        rows[0]["repo_id"] = "gl/salsa.debian.org-91954"
+        rows[0]["repo_id"] = "gl/debian-91954"
         overrides = {("gettext", "cpp"):
                      {"repo": "", "git_url": "https://git.savannah.gnu.org/git/gettext.git",
                       "valid": ""}}
@@ -733,7 +733,7 @@ class TestRepoOverrides:
                      git_url="https://salsa.debian.org/debian/some-pkg.git",
                      pagerank="1.0", value_class="A"),
         ]
-        rows[0]["repo_id"] = "gl/salsa.debian.org-123"
+        rows[0]["repo_id"] = "gl/debian-123"
         overrides = {("some-pkg", "cpp"):
                      {"repo": "real/upstream", "git_url": "", "valid": ""}}
         fixed = apply_repo_overrides(

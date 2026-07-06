@@ -23,16 +23,16 @@ row; the post-scope stages are each expressed against `top repos`.
 
 | Stage | Count | % | of | Comment |
 |---|--:|--:|---|---|
-| packages (after dep tree) | 17,647 | — | — | package universe across the four ecosystems |
-| distinct repos | 12,116 | 68.7% | packages | package→repo union (any host), incl. url-less orphans |
-| valid repos | 11,378 | 93.9% | repos | upstream resolves — GitHub/GitLab API or git ls-remote |
+| packages (after dep tree) | 17,590 | — | — | package universe across the four ecosystems |
+| distinct repos | 12,090 | 68.7% | packages | package→repo union (any host), incl. url-less orphans |
+| valid repos | 11,349 | 93.9% | repos | upstream resolves — GitHub/GitLab API or git ls-remote |
 | class-A repos | 953 | 8.4% | valid | strongest class = A (≤75% cumulative PageRank share) |
 | **top repos** | **940** | **98.6%** | class A | valid class-A on GitHub+GitLab, archived included — the risk/eligibility scope |
 | value_score present | 917 | 97.6% | top repos | ≥2 value components (openssf_crit / eco_crit / top_eco_pct) |
 | risk_score present | 940 | 100% | top repos | all four risk dimensions scored |
 | fully scored | 917 | 97.6% | top repos | value_score × risk_score → preview `score` |
-| **eligible** | **666** | **70.9%** | top repos | oss AND intent AND nonprofit AND active |
-| priority-ranked | 646 | 68.7% | top repos | eligible AND fully scored → preview `priority` |
+| **eligible** | **665** | **70.7%** | top repos | oss AND intent AND nonprofit AND active |
+| priority-ranked | 645 | 68.6% | top repos | eligible AND fully scored → preview `priority` |
 
 
 ## Value
@@ -46,11 +46,11 @@ Packages remaining after each Value stage, plus the share with a known upstream 
 
 | Metric | npm | pypi | crates | cpp | Total | Comment |
 |---|--:|--:|--:|--:|--:|---|
-| Top packages | 5,765 | 2,460 | 3,719 | 1,335 | 13,279 | Representing 95% of downloads per eco |
-| **After dep tree** | **6,370** | **3,139** | **6,486** | **1,652** | **17,647** | Extended via own dependencies |
-| Git URL | 6,319 | 2,927 | 6,403 | 1,364 | 17,013 | Any git host |
-| GitHub repo | 6,310 | 2,898 | 6,276 | 564 | 16,048 | Github repository |
-| Git % | 99.2% | 93.2% | 98.7% | 82.6% | 96.4% | |
+| Top packages | 5,735 | 2,460 | 3,719 | 1,335 | 13,249 | Representing 95% of downloads per eco |
+| **After dep tree** | **6,313** | **3,139** | **6,486** | **1,652** | **17,590** | Extended via own dependencies |
+| Git URL | 6,258 | 2,927 | 6,403 | 1,364 | 16,952 | Any git host |
+| GitHub repo | 6,249 | 2,898 | 6,276 | 564 | 15,987 | Github repository |
+| Git % | 99.1% | 93.2% | 98.7% | 82.6% | 96.4% | |
 | **GitHub %** | **99%** | **92%** | **97%** | **34%** | **91%** | |
 
 Note that after dep tree is de-duplicated, cpp unions the Debian + Homebrew graphs, Repology-canonicalised to one name each, and leave only C/C++ packages.
@@ -60,12 +60,12 @@ Note that after dep tree is de-duplicated, cpp unions the Debian + Homebrew grap
 From the package universe down to the valid repos, per `class` and total. Each
 row is classed by the repo's `class` (A/B/C). Packages → GitHub total are
 appearance-level (a repo counts once per ecosystem); the distinct-repo rows
-follow. **GitHub unique** counts only GitHub-hosted repos — the other 1,561
+follow. **GitHub unique** counts only GitHub-hosted repos — the other 1,562
 (gitlab / other-host / url-less) are the "orphans". **Valid** is host-agnostic:
 a GitHub repo that resolves (API 200), a GitLab project that resolves (GitLab
 API — these also get a `gl/{nickname}-{id}` / `gl/{id}` repo_id), *or* any other
 upstream that resolves (`git ls-remote`). It is therefore measured over all
-12,116 repos and can exceed the GitHub-unique count — only 738 (url-less orphans
+12,090 repos and can exceed the GitHub-unique count — only 741 (url-less orphans
 + dead URLs) are invalid. Archived GitHub mirrors of a live upstream stay *valid*
 (they resolve). The numeric `repo_id` is GitHub + GitLab only, and
 risk/eligibility scope is gated to those two platforms
@@ -74,10 +74,10 @@ recorded, not pulled into scope.
 
 | Step | A | B | C | Total | Comment |
 |---|--:|--:|--:|--:|---|
-| Packages | 3,425 | 4,711 | 9,511 | 17,647 | package universe (after dep tree) |
-| GitHub total repos | 3,387 | 4,313 | 8,348 | 16,048 | package appearances in a github group |
-| GitHub unique repos | 915 | 2,739 | 6,901 | 10,555 | deduped; + 1,561 orphans = 12,116 repos |
-| **Valid repos** | **947** | **2,985** | **7,446** | **11,378** | upstream resolves — github/gitlab API or non-github ls-remote; incl. archived mirrors |
+| Packages | 3,388 | 4,734 | 9,468 | 17,590 | package universe (after dep tree) |
+| GitHub total repos | 3,350 | 4,336 | 8,301 | 15,987 | package appearances in a github group |
+| GitHub unique repos | 915 | 2,740 | 6,873 | 10,528 | deduped; + 1,562 orphans = 12,090 repos |
+| **Valid repos** | **947** | **2,986** | **7,416** | **11,349** | upstream resolves — github/gitlab API or non-github ls-remote; incl. archived mirrors |
 
 ### Value score coverage
 
@@ -101,14 +101,14 @@ Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 
 | Metric | A | B | C |
 |---|--:|--:|--:|
-| npm | 570 | 1,402 | 2,411 |
+| npm | 570 | 1,403 | 2,387 |
 | pypi | 165 | 636 | 1,711 |
 | crates | 132 | 528 | 2,982 |
-| cpp | 88 | 571 | 970 |
-| **Repos** | **953** | **3,131** | **8,032** |
+| cpp | 88 | 571 | 967 |
+| **Repos** | **953** | **3,132** | **8,005** |
 | GitHub % | 96.0% | 87.5% | 85.9% |
-| Git % | 99.4% | 96.1% | 93.7% |
-| Valid % | 99.4% | 95.3% | 92.7% |
+| Git % | 99.4% | 96.1% | 93.6% |
+| Valid % | 99.4% | 95.3% | 92.6% |
 
 
 ## Risk
@@ -144,15 +144,15 @@ Generated by `scripts/stats.py`.
 | · bus factor | `bf_commits_git_5y` | 1 | 1 | 1 | 2 | 280 |
 | · HHI | `hhi_commits_git_5y` | 19 | 3,060 | 5,556 | 8,987 | 10,000 |
 | **Complexity** | `score` | **1** | **26** | **49** | **73** | **100** |
-| · lines of code | `loc_eoy` | 0 | 365 | 2,751 | 21,612 | 36,990,782 |
+| · lines of code | `loc_eoy` | 0 | 365 | 2,704 | 21,612 | 36,990,782 |
 | · cyclomatic max | `cyclomatic_max` | 0 | 7 | 18 | 48 | 12,556 |
 | **Security** | `score` | **50** | **50** | **72** | **84** | **100** |
 | · OpenSSF score (0–10) | `openssf_score` | 1.8 | 3.8 | 4.4 | 6.1 | 9.6 |
 | · CVE count 5y | `cve_count_5y` | 0 | 0 | 0 | 0 | 10,602 |
 | **Workload** | `score` | **2** | **38** | **56** | **70** | **97** |
-| · LOC / contributor | `loc_per_ac` | 0 | 107 | 302 | 820 | 353,301 |
+| · LOC / contributor | `loc_per_ac` | 0 | 107 | 302 | 804 | 353,301 |
 | · CVE / contributor | `cve_per_ac` | 0.00 | 0.00 | 0.00 | 0.00 | 14.00 |
-| · net-new-issues / contributor | `nni_per_ac` | -9.93 | 0.00 | 0.31 | 1.00 | 315.00 |
+| · net-new-issues / contributor | `nni_per_ac` | -9.93 | 0.00 | 0.30 | 1.00 | 315.00 |
 | **Overall** | `risk_score` | **11** | **44** | **54** | **65** | **94** |
 
 Sub-100% gaps below are structural (the signal genuinely doesn't exist for that
@@ -168,7 +168,7 @@ feeds the score, fully imputed → 100%.
 |---|---:|---:|
 | input top repos | 940 | 100% |
 | bus factor / HHI (git 5y) computed | 940 | 100% |
-| bus factor / HHI (GitHub) computed | 896 | 95.3% |
+| bus factor / HHI (GitHub) computed | 902 | 96.0% |
 | **Concentration score** | **940** | **100%** |
 
 73.8% of top repos have a git `_5y` bus factor of 1 (a single author covers ≥50%
@@ -185,7 +185,7 @@ git churn at the per-year EOY sha.
 | lines of code (scc) | 940 | 100% |
 | cyclomatic max (lizard) | 940 | 100% |
 | cognitive max (lizard) | 939 | 99.9% |
-| churn 5y | 876 | 93.2% |
+| churn 5y | 882 | 93.8% |
 | **Complexity score** | **940** | **100%** |
 
 `cognitive_*` needs a Lizard cognitive parser for the language; churn (bare
@@ -202,7 +202,7 @@ OSV CVE counts + semgrep SAST.
 | OpenSSF score present | 940 | 100% |
 | CVE count 5y > 0 | 208 | 22.1% |
 | OSS-Fuzz enrolled | 135 | 14.4% |
-| CII Best Practices badge | 30 | 3.2% |
+| CII Best Practices badge | 31 | 3.3% |
 | **Security score** | **940** | **100%** |
 
 Score is `max(openssf_score_p, cve_score)` (worst-of, not geomean). ~78% have
@@ -219,7 +219,7 @@ net-new issues per active contributor, plus issue-debt and trend.
 | Step | Repos | % |
 |---|---:|---:|
 | input top repos | 940 | 100% |
-| issues data present | 915 | 97.3% |
+| issues data present | 922 | 98.1% |
 | per-AC ratios (loc/cve/nni) computed | 940 | 100% |
 | `issue_close_ratio` computed | 836 | 88.9% |
 | `issue_trend_score` computed | 632 | 67.2% |
@@ -290,8 +290,8 @@ company-backed (Meta, Google, Microsoft, …). See [funding.md](components/fundi
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 737 | 78.4% |
-| intent — no funding signal | 203 | 21.6% |
+| intent — any funding signal | 736 | 78.3% |
+| intent — no funding signal | 204 | 21.7% |
 | nonprofit — community / independent | 881 | 93.7% |
 | nonprofit — company-backed | 59 | 6.3% |
 
@@ -308,7 +308,7 @@ unlock. Missing intent is by far the binding constraint.
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
 | oss | 936 | 99.6% | 1 |
-| intent | 737 | 78.4% | 189 |
+| intent | 736 | 78.3% | 190 |
 | nonprofit | 881 | 93.7% | 59 |
 | active | 918 | 97.7% | 11 |
-| **eligible** | **666** | **70.9%** | |
+| **eligible** | **665** | **70.7%** | |

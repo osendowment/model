@@ -403,13 +403,22 @@ def _load_gitlab_hosts(path: Path = GITLAB_HOSTS_FILE) -> dict[str, tuple[str, s
 
 
 def _gitlab_instance(repo_id: str) -> str:
-    """The GitLab instance host from a `gl/` repo_id: `gl/{host}-{id}` → host,
-    bare `gl/{id}` → gitlab.com; "" for anything else."""
+    """The GitLab instance HOST from a `gl/` repo_id.
+
+    Ids are `gl/{nickname}-{id}` (nickname per gitlab_client.HOST_NICKNAMES,
+    e.g. `gl/debian-9696` → salsa.debian.org) or bare `gl/{id}` → gitlab.com;
+    "" for anything else. The curated gitlab-hosts.csv stays keyed by the
+    real instance host — more readable than nicknames."""
+    from src.sources.gitlab.gitlab_client import HOST_NICKNAMES
     rid = (repo_id or "").strip()
     if not rid.startswith("gl/"):
         return ""
     rest = rid[3:]
-    return "gitlab.com" if rest.isdigit() else rest.rsplit("-", 1)[0]
+    if rest.isdigit():
+        return "gitlab.com"
+    nickname = rest.rsplit("-", 1)[0]
+    by_nickname = {n: h for h, n in HOST_NICKNAMES.items() if n}
+    return by_nickname.get(nickname, "")
 
 
 def _fundable_orgs(path: Path) -> dict[str, dict]:

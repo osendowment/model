@@ -220,7 +220,9 @@ def test_results_columns():
         + YEAR_COLS
         + ["top", "pagerank", "value_class", "repo_id", "mirror_url", "license"]
     )
-    assert cols == expected
+    # column ORDER is append-order-dependent (enrichment scripts add missing
+    # columns as they run), so pin the exact SET, not the sequence.
+    assert sorted(cols) == sorted(expected)
 
 
 def test_results_non_empty():

@@ -638,9 +638,11 @@ def test_overrides_use_canonical_host_codes():
 # ── GitLab funding checks ─────────────────────────────────────────────────────
 
 def test_gitlab_instance_parsing():
+    # ids carry HOST_NICKNAMES nicknames; the helper returns the real host
     assert bf._gitlab_instance("gl/12345") == "gitlab.com"
-    assert bf._gitlab_instance("gl/salsa.debian.org-9696") == "salsa.debian.org"
-    assert bf._gitlab_instance("gl/gitlab.inria.fr-22470") == "gitlab.inria.fr"
+    assert bf._gitlab_instance("gl/debian-9696") == "salsa.debian.org"
+    assert bf._gitlab_instance("gl/inria-22470") == "gitlab.inria.fr"
+    assert bf._gitlab_instance("gl/unknown-1") == ""   # unregistered nickname
     assert bf._gitlab_instance("gh/123") == ""
     assert bf._gitlab_instance("") == ""
 
@@ -662,7 +664,7 @@ def test_build_gitlab_instance_host_gives_intent(monkeypatch):
     `host` → intent True (and the nonprofit host halves the backing score); a
     gitlab.com repo gets nothing — commercial shared hosting backs nothing."""
     _base_mocks(monkeypatch, [
-        E("debian/bzip2", repo_id="gl/salsa.debian.org-9696"),
+        E("debian/bzip2", repo_id="gl/debian-9696"),
         E("takluyver/jeepney", repo_id="gl/2780772"),
         E("rich/r"),
     ])
@@ -691,18 +693,18 @@ def test_build_gitlab_funding_files_feed_yml_and_manifest(monkeypatch, tmp_path)
             return {"rich/r": {"gh_sponsorships_in": "100"}}
         if "funding-files.csv" in str(p):
             # keyed by the stable gl/ repo_id, like the real load_rows_by_id
-            return {"gl/gitlab.gnome.org-658": {"has_funding_yml": "True",
+            return {"gl/gnome-658": {"has_funding_yml": "True",
                                                 "has_funding_links": "True",
                                                 "funding_link_platforms": "custom",
                                                 "has_funding_json_file": "False"},
-                    "gl/gitlab.inria.fr-22470": {"has_funding_yml": "False",
+                    "gl/inria-22470": {"has_funding_yml": "False",
                                                  "has_funding_links": "False",
                                                  "funding_link_platforms": "",
                                                  "has_funding_json_file": "True"}}
         return {}
     _base_mocks(monkeypatch, [
-        E("gnome/glib", repo_id="gl/gitlab.gnome.org-658"),
-        E("mpc/mpc", repo_id="gl/gitlab.inria.fr-22470"),
+        E("gnome/glib", repo_id="gl/gnome-658"),
+        E("mpc/mpc", repo_id="gl/inria-22470"),
         E("rich/r"),
     ])
     monkeypatch.setattr(bf, "load_rows_by_id", rows_by_repo)

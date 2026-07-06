@@ -609,6 +609,7 @@ scikit-build/ninja-python-distributions,gh/75102202,0.39779,Python,Apache Licens
 alexei/sprintf.js,gh/9175790,0.39767,JavaScript,"BSD 3-Clause ""New"" or ""Revised"" License",2140,2013-04-02T17:32:26Z,2023-09-11T13:07:32Z,161,34,26,4,0,1,0,0,0,94,False,2026-06-29T11:41:55+00:00,ok,
 sindresorhus/make-dir,gh/90776169,0.39733,JavaScript,MIT License,480,2017-05-09T17:57:35Z,2025-09-10T18:24:26Z,111,9,11,4,0.06,1,0,0,0,240,False,2026-06-29T14:58:11+00:00,ok,
 mathiasbynens/regexpu-core,gh/49437324,0.39680,JavaScript,MIT License,81,2016-01-11T16:03:04Z,2025-09-22T15:20:12Z,127,9,7,3,0.13,1,1,0,0,517,False,2026-06-29T13:48:34+00:00,ok,
+lovell/detect-libc,gh/96149091,0.39632,JavaScript,Apache License 2.0,77,2017-07-03T20:44:48Z,2025-10-05T12:44:12Z,109,9,9,4,0.21,1,0,0,0,268,False,2026-07-06T16:30:56+00:00,ok,
 exodusoss/bytes,gh/885154008,0.39595,JavaScript,MIT License,16,2024-11-08T03:52:36Z,2026-05-20T10:04:14Z,20,1,6,2,18.56,18,0,0,0,121,False,2026-07-05T15:40:11+00:00,ok,
 jaraco/jaraco.develop,gh/48289082,0.39557,Python,,7,2010-04-05T03:50:34Z,2026-04-13T23:34:36Z,197,2,29,6,0.42,1,0,0,0,12,False,2026-06-29T13:07:01+00:00,ok,
 burntsushi/same-file,gh/78375612,0.39526,Rust,The Unlicense,122,2017-01-08T22:48:33Z,2025-10-17T12:41:27Z,115,8,14,7,0.02,1,0,0,0,39,False,2026-06-29T11:53:43+00:00,ok,

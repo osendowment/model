@@ -115,15 +115,19 @@ def _write_sheet(ws: Worksheet, csv_path: Path) -> int:
 
 def _repo_url(repo: str, repo_id: str) -> str | None:
     """The repo's home page, derived from its platform-qualified id:
-    `gh/<n>` → github.com, bare `gl/<n>` → gitlab.com, `gl/<host>-<n>` → that
-    self-hosted GitLab instance. Unknown/blank id → no link."""
+    `gh/<n>` → github.com, bare `gl/<n>` → gitlab.com, `gl/<nickname>-<n>` →
+    that self-hosted GitLab instance (nickname resolved via
+    gitlab_client.HOST_NICKNAMES). Unknown/blank id → no link."""
     if repo_id.startswith("gh/"):
         return f"https://github.com/{repo}"
     if repo_id.startswith("gl/"):
+        from src.sources.gitlab.gitlab_client import HOST_NICKNAMES
         rest = repo_id[3:]
         if rest.isdigit():
             return f"https://gitlab.com/{repo}"
-        return f"https://{rest.rsplit('-', 1)[0]}/{repo}"
+        nickname = rest.rsplit("-", 1)[0]
+        host = {n: h for h, n in HOST_NICKNAMES.items() if n}.get(nickname)
+        return f"https://{host}/{repo}" if host else None
     return None
 
 

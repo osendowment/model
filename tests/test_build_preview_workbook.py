@@ -108,8 +108,9 @@ def test_build_skips_missing_csv_without_error(tmp_path, monkeypatch):
 def test_repo_url_per_platform():
     assert bpw._repo_url("a/b", "gh/123") == "https://github.com/a/b"
     assert bpw._repo_url("a/b", "gl/456") == "https://gitlab.com/a/b"
-    assert (bpw._repo_url("mpc/mpc", "gl/gitlab.inria.fr-22470")
+    assert (bpw._repo_url("mpc/mpc", "gl/inria-22470")
             == "https://gitlab.inria.fr/mpc/mpc")
+    assert bpw._repo_url("a/b", "gl/unknown-1") is None
     assert bpw._repo_url("a/b", "") is None
 
 
@@ -119,7 +120,7 @@ def test_repos_sheet_hyperlinks_and_decision_column_fills(tmp_path, monkeypatch)
     _write_csv(repos_csv,
                ["repo", "value_score", "risk_score", "eligible", "score", "repo_id"],
                [["a/keep", "70.00", "80.00", "True", "90.00", "gh/1"],
-                ["c/lab", "60.00", "70.00", "False", "80.00", "gl/salsa.debian.org-9"]])
+                ["c/lab", "60.00", "70.00", "False", "80.00", "gl/debian-9"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv)])
     monkeypatch.setattr(bpw, "STATS_MD", _write_stats_md(tmp_path))
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
