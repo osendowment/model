@@ -29,6 +29,8 @@ Usage:
 """
 
 import argparse
+import functools
+from datetime import datetime, timedelta, timezone
 import asyncio
 import csv
 import functools
@@ -300,7 +302,9 @@ async def fetch_all(
         async with semaphore:
             token = tokens[idx % len(tokens)]
             loop = asyncio.get_running_loop()
-            data = await loop.run_in_executor(None, run_scorecard, repo, token)
+            data = await loop.run_in_executor(
+                None,
+                functools.partial(run_scorecard, repo, token, tolerate_partial=True))
             results[repo] = data
             upsert_json(DEFAULT_DATA_OUTPUT, {repo: data})
             upsert_long(DEFAULT_LONG_OUTPUT, {repo: data}, repo_ids=repo_ids)
@@ -461,6 +465,19 @@ def upsert_long(
     repo_ids = repo_ids or {}
     for repo, data in new_results.items():
         if data.get("error"):
+            # Tombstone: one scan_error row (sha "unscanned") so the skip-scan
+            # backs off for SCAN_ERROR_RETRY_DAYS instead of re-running
+            # scorecard (up to SUBPROCESS_TIMEOUT_S) on a known-failing repo
+            # every single pipeline run. Auditability: the failure is explicit
+            # in the CSV, and it re-tries once the retry window passes.
+            upsert_snapshot(
+                long_path,
+                repo=repo,
+                repo_id=repo_ids.get(repo, ""),
+                commit_sha="unscanned",
+                metrics={"scan_error": str(data.get("message", ""))[:160]},
+                checked_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            )
             continue
         commit_sha = (data.get("repo") or {}).get("commit") or ""
         if not commit_sha:
@@ -514,14 +531,31 @@ def display_summary(results: dict[str, dict]) -> None:
 # ---------------------------------------------------------------------------
 
 
+SCAN_ERROR_RETRY_DAYS = 7  # back-off window before re-trying a failed scan
+
+
 def load_already_scored(long_path: Path) -> set[str]:
     """Return repos that already have a `score` row in the long-format CSV.
 
     A repo is considered "scored" if any (repo, sha, score) row exists —
-    we don't try to determine sha freshness here. Use --force to rescan.
+    we don't try to determine sha freshness here. A repo whose latest
+    attempt is a `scan_error` tombstone within SCAN_ERROR_RETRY_DAYS also
+    counts (back-off — without it a chronically failing repo re-runs
+    scorecard, up to SUBPROCESS_TIMEOUT_S, on every single pipeline run);
+    older tombstones fall out and the repo is retried. Use --force to rescan.
     """
     rows = read_long(long_path)
-    return {repo for (repo, _sha, metric) in rows.keys() if metric == "score"}
+    scored = {repo for (repo, _sha, metric) in rows.keys() if metric == "score"}
+    cutoff = datetime.now(timezone.utc) - timedelta(days=SCAN_ERROR_RETRY_DAYS)
+    for (repo, _sha, metric), row in rows.items():
+        if metric != "scan_error" or repo in scored:
+            continue
+        try:
+            if datetime.fromisoformat(row.get("checked_at", "")) >= cutoff:
+                scored.add(repo)
+        except ValueError:
+            continue
+    return scored
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -649,18 +683,15 @@ async def main() -> None:
         if skipped:
             console.print(f"[dim]Skipping {len(skipped)} already-scored repo(s). Use --force to rescan.[/dim]")
         if not repos:
-            console.print("[green]All repos already scored — nothing to do.[/green]")
-            return
+            console.print("[green]All GitHub repos already scored.[/green]")
 
-    repo_ids = load_repo_id_map()
-
-    console.print(f"[bold]Fetching OpenSSF Scorecards for {len(repos)} risk repo(s)...[/bold]\n")
-
-    results = await fetch_all(repos, concurrency=args.concurrency, repo_ids=repo_ids)
-
-    display_summary(results)
-    console.print(f"\n[green]Raw JSON  → {DEFAULT_DATA_OUTPUT}[/green]")
-    console.print(f"[green]Long CSV  → {DEFAULT_LONG_OUTPUT}[/green]")
+    if repos:
+        repo_ids = load_repo_id_map()
+        console.print(f"[bold]Fetching OpenSSF Scorecards for {len(repos)} risk repo(s)...[/bold]\n")
+        results = await fetch_all(repos, concurrency=args.concurrency, repo_ids=repo_ids)
+        display_summary(results)
+        console.print(f"\n[green]Raw JSON  → {DEFAULT_DATA_OUTPUT}[/green]")
+        console.print(f"[green]Long CSV  → {DEFAULT_LONG_OUTPUT}[/green]")
 
     # The risk scope includes GitLab-hosted repos, and the pipeline invokes
     # this module bare — without this, GitLab repos silently never get an

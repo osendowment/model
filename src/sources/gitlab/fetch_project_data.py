@@ -240,13 +240,27 @@ async def _fetch_namespace(limiter, session, item: dict) -> tuple[str, dict | No
         async with resp:
             if resp.status == 200:
                 return key, _flat_namespace(await resp.json(), host, key), "ok"
-            if resp.status == 404:
-                return key, None, "404"
             if resp.status == 429:
                 await asyncio.sleep(2)
                 continue
-            return key, None, f"http_{resp.status}"
+            # Definitive failure (404 gone, 401 no token for host, …):
+            # persist a TOMBSTONE row so the TTL backoff applies — without it
+            # these namespaces are "missing" and re-hammered on EVERY run
+            # (observed: 216 identical 401/404 fetches per pipeline run).
+            # Transient network errors below still return None (retried).
+            status = "404" if resp.status == 404 else f"http_{resp.status}"
+            return key, _tombstone_namespace(host, key, status), status
     return key, None, "error"
+
+
+def _tombstone_namespace(host: str, ns_key: str, status: str) -> dict:
+    """Minimal row recording a definitive fetch failure (kind='', description
+    carries the status) — enough for _filter_stale's TTL to skip it."""
+    return {
+        "namespace": ns_key, "namespace_id": "", "host": host, "kind": "",
+        "name": "", "path": "", "full_path": "", "web_url": "",
+        "description": f"fetch failed: {status}", "fetched_at": _now_iso(),
+    }
 
 
 def _load_existing(path: Path, key: str) -> dict[str, dict]:

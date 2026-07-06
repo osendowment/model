@@ -17,10 +17,10 @@ Usage:
 from src.common.pipeline_runner import Step, build_parser, run_pipeline
 
 STEPS = [
-    Step("npm",        "src.value.npm_pipeline",     fetch=True, pipeline=True),
-    Step("crates",     "src.value.crates_pipeline",  fetch=True, pipeline=True),
-    Step("pypi",       "src.value.pypi_pipeline",    fetch=True, pipeline=True),
-    Step("cpp",        "src.value.cpp_pipeline",     fetch=True, pipeline=True),
+    Step("npm",        "src.value.npm_pipeline",     fetch=True, pipeline=True, pgroup="eco"),
+    Step("crates",     "src.value.crates_pipeline",  fetch=True, pipeline=True, pgroup="eco"),
+    Step("pypi",       "src.value.pypi_pipeline",    fetch=True, pipeline=True, pgroup="eco"),
+    Step("cpp",        "src.value.cpp_pipeline",     fetch=True, pipeline=True, pgroup="eco"),
     Step("stats",      "src.value.build_stats"),
     Step("git-urls",   "src.value.build_git_urls"),
     Step("eco-fetch",  "src.sources.ecosystems.candidates",      net=True),
