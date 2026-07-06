@@ -15,8 +15,6 @@ Inputs:
 
 Run:
     uv run src/sources/homebrew/process_data.py
-    uv run src/sources/homebrew/process_data.py --top-min 10000
-    uv run src/sources/homebrew/process_data.py --include-all-langs
 """
 
 import argparse

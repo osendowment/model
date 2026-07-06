@@ -23,12 +23,12 @@ Packages remaining after each Value stage, plus the share with a known upstream 
 
 | Metric | npm | pypi | crates | cpp | Total | Comment |
 |---|--:|--:|--:|--:|--:|---|
-| Top packages | 5,765 | 2,460 | 3,719 | 1,329 | 13,273 | Representing 95% of downloads per eco |
-| **After dep tree** | **6,370** | **3,139** | **6,218** | **1,639** | **17,366** | Extended via own dependencies |
-| Git URL | 6,318 | 2,929 | 6,137 | 1,311 | 16,695 | Any git host |
-| GitHub repo | 6,310 | 2,899 | 6,009 | 530 | 15,748 | Github repository |
-| Git % | 99.6% | 94.8% | 93.6% |
-| **GitHub %** | **99%** | **92%** | **97%** | **32%** | **91%** | |
+| Top packages | 5,765 | 2,460 | 3,719 | 1,335 | 13,279 | Representing 95% of downloads per eco |
+| **After dep tree** | **6,370** | **3,139** | **6,486** | **1,652** | **17,647** | Extended via own dependencies |
+| Git URL | 6,319 | 2,927 | 6,403 | 1,364 | 17,013 | Any git host |
+| GitHub repo | 6,310 | 2,898 | 6,276 | 564 | 16,048 | Github repository |
+| Git % | 99.2% | 93.2% | 98.7% | 82.6% | 96.4% | |
+| **GitHub %** | **99%** | **92%** | **97%** | **34%** | **91%** | |
 
 Note that after dep tree is de-duplicated, cpp unions the Debian + Homebrew graphs, Repology-canonicalised to one name each, and leave only C/C++ packages.
 
@@ -37,16 +37,17 @@ Note that after dep tree is de-duplicated, cpp unions the Debian + Homebrew grap
 From the package universe down to the valid repos, per `class` and total. Each
 row is classed by the repo's `class` (A/B/C). Packages → GitHub total are
 appearance-level (a repo counts once per ecosystem); the distinct-repo rows
-follow. **GitHub unique** counts only GitHub-hosted repos — the other 1,580
+follow. **GitHub unique** counts only GitHub-hosted repos — the other 1,561
 (gitlab / other-host / url-less) are the "orphans". **Valid** is host-agnostic:
 a GitHub repo that resolves (API 200), a GitLab project that resolves (GitLab
 API — these also get a `gl/{host}-{id}` / `gl/{id}` repo_id), *or* any other
 upstream that resolves (`git ls-remote`). It is therefore measured over all
-12,017 repos and can exceed the GitHub-unique count — only 774 (url-less orphans
+12,116 repos and can exceed the GitHub-unique count — only 738 (url-less orphans
 + dead URLs) are invalid. Archived GitHub mirrors of a live upstream stay *valid*
 (they resolve). The numeric `repo_id` is GitHub + GitLab only, and
-risk/eligibility scope is still GitHub-gated (`settings.json top_repos.platforms`)
-— a valid non-GitHub upstream is recorded, not pulled into scope.
+risk/eligibility scope is gated to those two platforms
+(`settings.json top_repos.platforms`) — a valid upstream on any other host is
+recorded, not pulled into scope.
 
 | Step | A | B | C | Total | Comment |
 |---|--:|--:|--:|--:|---|
@@ -62,7 +63,7 @@ risk/eligibility scope is still GitHub-gated (`settings.json top_repos.platforms
 
 | Signal | Filled | Comment |
 |---|--:|---|
-| `openssf_crit` | 918 | GitHub-only; valid class-A GitHub gate **912 / 915** — 3 blanks (json-c/json-c, google/highway, la10736/rstest) flagged by `pipeline_health.py` |
+| `openssf_crit` | 918 | GitHub-only; valid class-A GitHub gate **912 / 915** — 3 blanks currently flagged by `pipeline_health.py` |
 | `eco_crit` | 794 | explicit flags only — 788 critical (`1`) / 6 not (`0`); a checked-but-blank flag (spack/debian cpp) is left empty, never 0 |
 | `value_score` | 920 | ≥ 2 components present; 2 GitLab class-A repos scored — only those with an explicit `eco_crit`; the rest have just `top_eco_pct` and stay blank |
 
@@ -94,21 +95,21 @@ Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 GitLab), **archived included** (they enter risk scope like every other stage;
 archival surfaces in eligibility as `active=False`); each funnel below starts
 from those 940. `risk.csv` ranks all 940 on the four scored dimensions; the
-funding signals and the intent/nonprofit flags moved to the
+funding signals and the intent/nonprofit flags live in the
 [Eligibility](#eligibility) stage. Methodology: [risk.md](risk.md) + component
 docs.
 
 A handful of archived/stub repos (e.g. `bincode-org/bincode`,
 `isaacs/inflight-deprecated-do-not-use`) have empty snapshots — scc measures 0
-lines of code — so complexity and workload (both need source) are legitimately
-blank for them; overall `risk_score` lands at 938/940, and the
-`pipeline_health` coverage gate exempts these no-code repos from the two
-source-dependent dimensions.
+lines of code because the default branch was stripped to a README. These score
+as measured zeros (floor percentiles) in complexity and workload rather than
+staying blank, so all four dimensions and `risk_score` cover 100% of the risk
+scope; the repos still surface in eligibility as `active=False`.
 
 ### Score distribution by component (scope 940)
 
 - **Bold row** = the component's 0–100 risk score (feeds `risk.csv`); rows beneath = the **raw metric** in natural units, *before* its 0–100 percentile (percentiles are 0/25/50/75/100 by construction — useless).
-- **Completeness rule:** overall `risk_score` = geomean of the four component scores, blank unless all four present (likewise each component vs its inputs); `pipeline_health.py` enforces it.
+- **Completeness rule:** overall `risk_score` = geomean of the four component scores, blank unless all four present; likewise concentration / complexity / workload vs their inputs — security is worst-of (`max_composite_any`) and scores off whichever axis is present. `pipeline_health.py` enforces it.
 - **100%-populated:** zero-active-contributor repos score with AC=1 (flagged `dormant`) rather than abstaining.
 - Highlights: median **bus factor 1**, **75% have 0 CVEs** (max 10,602).
 
@@ -116,20 +117,20 @@ Generated by `scripts/stats.py`.
 
 | Component / subcomponent | Column | Min | P25 | P50 | P75 | Max |
 |---|---|--:|--:|--:|--:|--:|
-| **Concentration** | `score` | **1** | **41** | **75** | **95** | **100** |
+| **Concentration** | `score` | **1** | **42** | **75** | **95** | **100** |
 | · bus factor | `bf_commits_git_5y` | 1 | 1 | 1 | 2 | 280 |
 | · HHI | `hhi_commits_git_5y` | 19 | 3,060 | 5,556 | 8,987 | 10,000 |
-| **Complexity** | `score` | **1** | **25** | **49** | **73** | **100** |
-| · lines of code | `loc_eoy` | 3 | 371 | 2,804 | 21,614 | 36,990,782 |
+| **Complexity** | `score` | **1** | **26** | **49** | **73** | **100** |
+| · lines of code | `loc_eoy` | 0 | 365 | 2,751 | 21,612 | 36,990,782 |
 | · cyclomatic max | `cyclomatic_max` | 0 | 7 | 18 | 48 | 12,556 |
 | **Security** | `score` | **50** | **50** | **72** | **84** | **100** |
 | · OpenSSF score (0–10) | `openssf_score` | 1.8 | 3.8 | 4.5 | 6.1 | 9.6 |
 | · CVE count 5y | `cve_count_5y` | 0 | 0 | 0 | 0 | 10,602 |
-| **Workload** | `score` | **4** | **38** | **56** | **70** | **97** |
-| · LOC / contributor | `loc_per_ac` | 2 | 110 | 302 | 823 | 353,301 |
+| **Workload** | `score` | **2** | **38** | **56** | **70** | **97** |
+| · LOC / contributor | `loc_per_ac` | 0 | 107 | 302 | 820 | 353,301 |
 | · CVE / contributor | `cve_per_ac` | 0.00 | 0.00 | 0.00 | 0.00 | 14.00 |
 | · net-new-issues / contributor | `nni_per_ac` | -9.93 | 0.00 | 0.31 | 1.00 | 315.00 |
-| **Overall** | `risk_score` | **15** | **44** | **54** | **65** | **94** |
+| **Overall** | `risk_score` | **11** | **44** | **54** | **65** | **95** |
 
 Sub-100% gaps below are structural (the signal genuinely doesn't exist for that
 repo), not collection bugs.
@@ -158,11 +159,11 @@ git churn at the per-year EOY sha.
 | Step | Repos | % |
 |---|---:|---:|
 | input top repos | 940 | 100% |
-| lines of code (scc) | 938 | 99.8% |
-| cyclomatic max (lizard) | 938 | 99.8% |
-| cognitive max (lizard) | 937 | 99.7% |
+| lines of code (scc) | 940 | 100% |
+| cyclomatic max (lizard) | 940 | 100% |
+| cognitive max (lizard) | 939 | 99.9% |
 | churn 5y | 876 | 93.2% |
-| **Complexity score** | **938** | **99.8%** |
+| **Complexity score** | **940** | **100%** |
 
 `cognitive_*` needs a Lizard cognitive parser for the language; churn (bare
 clone) is the heaviest fetch and times out on the largest mirrors (gcc, ffmpeg).
@@ -196,12 +197,12 @@ net-new issues per active contributor, plus issue-debt and trend.
 |---|---:|---:|
 | input top repos | 940 | 100% |
 | issues data present | 915 | 97.3% |
-| per-AC ratios (loc/cve/nni) computed | 938 | 99.8% |
+| per-AC ratios (loc/cve/nni) computed | 940 | 100% |
 | `issue_close_ratio` computed | 836 | 88.9% |
 | `issue_trend_score` computed | 632 | 67.2% |
-| **Workload score** | **938** | **99.8%** |
+| **Workload score** | **940** | **100%** |
 
-- 66 dormant repos (`dormant=1`, zero active contributors) score with AC=1 — the burden on one notional maintainer — rather than blank.
+- 76 dormant repos (`dormant=1`, zero active contributors) score with AC=1 — the burden on one notional maintainer — rather than blank.
 - No-issue repos still score: `nni_per_ac_p` neutral-filled to 50. `issue_trend_score` needs `mean_opened_per_year ≥ 1`, so quiet repos are omitted.
 
 
@@ -209,8 +210,8 @@ net-new issues per active contributor, plus issue-debt and trend.
 
 **Eligibility covers the 940 top repos** — the valid class-A set INCLUDING
 archived repos, which surface here as `active=False` instead of being dropped.
-This is the same 940-repo scope the risk stage now runs on (both stages include
-archived and both platforms); the four checks per repo roll into
+Risk runs on the same 940-repo scope (both stages include archived repos and
+both platforms); the four checks per repo roll into
 `data/eligibility/eligibility.csv`: `eligible = oss AND intent AND nonprofit
 AND active`. Methodology: [eligibility.md](eligibility.md) +
 [funding.md](components/funding.md).
@@ -234,8 +235,10 @@ extras. Unknown (no license signal) is tracked separately from known non-OSS.
 | oss=False (known non-OSS) | 10 | 1.1% |
 | oss unknown (no signal) | 11 | 1.2% |
 
-The 4 known non-OSS are content-licensed data repos (CC0/CC-BY — free for
-documents, not software OSS by this model's strict policy).
+Of the 10 known non-OSS: 4 are content-licensed data repos (CC0/CC-BY — free
+for documents, not software OSS by this model's strict policy); the other 6
+ship under software licenses that are not OSI-approved (bzip2-1.0.6, libtiff,
+MIT-Open-Group, SGI-B-1.1).
 
 ### Activity
 

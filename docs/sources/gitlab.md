@@ -9,13 +9,13 @@ same identity, owner, and SHA-anchor signals a GitHub repo does. The GitLab API 
 identical across instances (`/api/v4`), so multi-instance support is a per-host base URL +
 per-host token.
 
-> **Status:** collection layer (project/namespace/SHA-anchor) **plus** Scorecard GitLab mode
-> (`src/sources/openssf/scorecard.py --gitlab`, see below). These outputs are produced but
-> **not yet consumed** by the Value or Risk stages — wiring GitLab repos into `value.csv` /
-> `risk.csv` (validation, `load_top_repos`, clone host-parametrization) is a follow-on plan, so
-> the collected security scores don't yet aggregate into `risk.csv`. Coverage/funnel counts
-> therefore live in `docs/stats.md` only once that wiring lands — this page describes **how**
-> the data is fetched, not **how many**.
+> **Status:** fully wired in. GitLab is a first-class platform in the pipeline scope
+> (`src/settings.json` `top_repos.platforms = ["github", "gitlab"]`): GitLab rows carry
+> through `value.csv`, `src.common.repos.load_top_repos`, and all four risk dimensions into
+> `risk.csv`. The clone-based fetchers (sha-metrics = scc + lizard, contributors) and
+> Scorecard's GitLab mode (`src/sources/openssf/scorecard.py --gitlab`, see below) run
+> against GitLab hosts. Coverage/funnel counts live in [stats.md](../stats.md) — this page
+> describes **how** the data is fetched, not **how many**.
 
 ## Data Sources
 
@@ -42,19 +42,23 @@ commit count (`X-Total` header). This is the SHA anchor sha-pinned analyses (scc
 key off. (GitLab omits `X-Total` for result sets > 10,000, so `commits` may under-report in
 that rare case; `last_sha` — the anchor — is unaffected.)
 
-**Git metrics** (future): the clone-based fetchers (sha-metrics=scc+lizard/contributors/churn) are
-host-agnostic and will run on GitLab clone URLs once `src/sources/git/clone.py` is
-host-parametrized — a follow-on plan, not part of this layer.
+**Git metrics**: the clone-based fetchers (sha-metrics=scc+lizard, contributors) are
+host-agnostic — each clone is routed through the repo's real `git_url` (the `repo_url`
+override in `src/sources/git/clone.py`), so they run on GitLab clone URLs and key their
+rows on the `gl/…` repo_id.
 
 **Authentication**: per-host tokens via the `PRIVATE-TOKEN` header. Resolution precedence per
 host: `GITLAB_TOKENS` (JSON `{host: token}`) → `GITLAB_TOKEN_<HOST_SLUG>` (dots→underscores,
 upper) → `GITLAB_TOKEN` (default applied to known hosts). Missing → anonymous for that host
 (public read works at a lower rate limit). Note: the bare `GITLAB_TOKEN` / per-host
 `GITLAB_TOKEN_<SLUG>` fallbacks only cover the curated `KNOWN_GITLAB_HOSTS`
-(gitlab.com, salsa.debian.org, invent.kde.org, gitlab.gnome.org, gitlab.freedesktop.org);
-a valid but non-curated host (e.g. `gitlab.cern.ch`) is only tokenised via an explicit
-`GITLAB_TOKENS` JSON entry — otherwise Scorecard's GitLab mode silently skips it (its
-checks 401 anonymously). Tokens are **per-instance** — a gitlab.com token does
+(gitlab.com, salsa.debian.org, invent.kde.org, code.videolan.org); any other host
+(host detection also accepts any `gitlab.*` hostname) is only tokenised via an explicit
+`GITLAB_TOKENS` JSON entry. A tokenless host is still scored: self-hosted instances serve
+their REST API anonymously, so Scorecard's GitLab mode scores them token-free (a few
+auth-only checks come back inconclusive), and only gitlab.com is skipped without a token —
+its anonymous quota is too small for Scorecard's call volume (`SCORECARD_ANON_UNRELIABLE`).
+Tokens are **per-instance** — a gitlab.com token does
 not authenticate against salsa.debian.org. Rate limiting honours each host's
 `RateLimit-Remaining` / `RateLimit-Reset` headers, with a minimum backoff floor and per-host
 isolation (an exhausted host never blocks requests to another host).
@@ -83,10 +87,10 @@ In `data/sources/gitlab/`:
 - **`namespaces.csv`** — owner/group metadata (mirrors `github/users.csv`):
   `namespace` (= `host/full_path`, the key), `namespace_id`, `host`, `kind`, `name`, `path`,
   `full_path`, `web_url`, `description`, `fetched_at`.
-- **`commits-years.csv`** — the SHA anchor, keyed on `repo_id`:
-  `repo_id`, `git_url`, `project`, `year`, `first_sha` (blank — anchors use `last_sha`),
-  `last_sha`, `commits`, `fetched_at`. Standalone for now; a follow-on plan folds it into a
-  shared `data/sources/git/commits-years.csv`.
+- SHA anchors land in the **shared** `data/sources/git/commits-years.csv` beside the GitHub
+  rows (same unified schema: `repo, repo_id, git_url, year, first_sha, last_sha, commits,
+  fetched_at`), upserted by `(repo, repo_id, year)` so a GitHub mirror sharing a slug keeps
+  its own `gh/…` row.
 
 Each fetcher records `fetched_at` and a success flag (`valid`) or a status sidecar, so a
 genuinely-absent value is distinguishable from a failed fetch (auditability).
@@ -102,9 +106,10 @@ A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honour th
   tokens, rate limiter).
 - `src/sources/gitlab/fetch_project_data.py` — projects + namespaces →
   `repos.csv` / `namespaces.csv`. CLI: `--target {projects,namespaces,both}`, `--limit`, `--force`.
-- `src/sources/gitlab/commits_years.py` — per-year SHA anchor → `commits-years.csv`.
-  CLI: `--limit`, `--force`. Selection is per-`(repo_id, year)`, so a newly-added year is picked
-  up for already-anchored projects.
+- `src/sources/gitlab/commits_years.py` — per-year SHA anchor → the shared
+  `data/sources/git/commits-years.csv`. Scope: the GitLab members of `load_top_repos()`
+  (risk scope). CLI: `--limit`, `--force`. Selection is per-`(repo_id, year)`, so a
+  newly-added year is picked up for already-anchored projects.
 - `src/sources/openssf/scorecard.py --gitlab [--host {host} …]` — OpenSSF Scorecard security
   scores for the valid GitLab projects in `repos.csv`, per-host `GITLAB_AUTH_TOKEN`. Uses a
   GitLab-applicable check subset (`GITLAB_SCORECARD_CHECKS`) and tolerates the CLI's non-zero

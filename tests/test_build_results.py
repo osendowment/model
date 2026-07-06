@@ -47,11 +47,11 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
     assert keep["language"] == "typescript"        # lowercased
     assert keep["ecosystem"] == "npm"
     assert keep["openssf_crit"] == "0.71"
-    assert keep["eco_crit"] == "1"
-    assert keep["top_eco_pct"] == "55.5"
-    assert keep["value_score"] == "72.3"
-    assert keep["concentration"] == "10" and keep["workload"] == "40"
-    assert keep["risk_score"] == "80"
+    assert keep["eco_crit"] == "1"          # a 0/1 flag, not a score -- left raw
+    assert keep["top_eco_pct"] == "55.50"   # rounded to 2dp
+    assert keep["value_score"] == "72.30"
+    assert keep["concentration"] == "10.00" and keep["workload"] == "40.00"
+    assert keep["risk_score"] == "80.00"
     assert keep["eligible"] == "True"
     assert list(keep.keys()) == br.FIELDS
 
@@ -102,9 +102,41 @@ def test_missing_risk_leaves_score_blank(tmp_path, monkeypatch):
     rows = br.build()
     assert len(rows) == 1
     assert rows[0]["risk_score"] == ""
-    assert rows[0]["value_score"] == "63.7"
+    assert rows[0]["value_score"] == "63.70"
     assert rows[0]["score"] == ""
     assert rows[0]["priority"] == ""
+
+
+def test_score_columns_rounded_to_two_decimals(tmp_path, monkeypatch):
+    """openssf_crit / top_eco_pct / value_score / risk components / risk_score
+    all round to 2dp regardless of upstream precision; eco_crit (a 0/1 flag,
+    not a score) is left as its raw upstream value; score itself is computed
+    from the FULL-PRECISION upstream values, unaffected by the display
+    rounding of value_score/risk_score."""
+    elig = tmp_path / "eligibility.csv"
+    val = tmp_path / "value.csv"
+    risk = tmp_path / "risk.csv"
+    _write(elig, ["repo", "repo_id", "eligible"], [["o/r", "gh/1", "True"]])
+    _write(val, ["repo", "repo_id", "top_eco", "openssf_crit", "eco_crit",
+                 "top_eco_pct", "value_score"],
+           [["o/r", "gh/1", "npm", "0.604553", "1", "39.35893", "64.145678"]])
+    _write(risk, ["repo", "repo_id", "concentration", "complexity", "security",
+                  "workload", "risk_score"],
+           [["o/r", "gh/1", "95.001", "94", "75.999", "88", "88.4321"]])
+    _patch(monkeypatch, elig, val, risk)
+
+    rows = br.build()
+    row = rows[0]
+    assert row["openssf_crit"] == "0.60"
+    assert row["eco_crit"] == "1"
+    assert row["top_eco_pct"] == "39.36"
+    assert row["value_score"] == "64.15"
+    assert row["concentration"] == "95.00"
+    assert row["complexity"] == "94.00"
+    assert row["security"] == "76.00"
+    assert row["workload"] == "88.00"
+    assert row["risk_score"] == "88.43"
+    assert row["score"] == "100.00"  # only row -> always scales to 100
 
 
 def test_missing_language_row_leaves_blank(tmp_path, monkeypatch):

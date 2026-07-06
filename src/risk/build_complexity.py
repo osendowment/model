@@ -39,6 +39,15 @@ settings `years` window where commits-years.csv has a `last_sha` populated AND
 `commits > 0` (the chosen year is recorded in `loc_year`). If no year has a
 usable sha, the row is left empty — we don't fall back to HEAD or a stale sha.
 
+Empty-tree repos: a snapshot whose scc row reports loc=0 is normally skipped as
+"not measured" (historically scc wrote all-zero rows on failed checkouts). But
+when EVERY measured snapshot of a repo is loc=0, the default branch is genuinely
+code-free — an archived stub stripped to a README (bincode-org/bincode,
+isaacs/inflight-deprecated-do-not-use). Those repos take the newest measured
+zero snapshot and score as real zeros (floor percentiles) instead of blanking
+the dimension; absent lizard metrics are read as measured zeros too, since a
+tree with zero source files has zero functions by definition.
+
 Metric mapping:
     scc.loc                      → loc_eoy
     scc.sloc                     → sloc_eoy
@@ -130,9 +139,9 @@ def _per_year_shas(commits_years_file: Path) -> dict[str, dict[int, str]]:
     A pair is "usable" when ``last_sha`` is non-empty AND ``commits > 0``.
     EVERY real year is kept — not just the settings window — so a dormant
     repo's pre-window fallback snapshot (e.g. year 2020, recorded by
-    `resolve_head`) is available to the walk in `build()`. The `HEAD`
-    pseudo-row is bucketed as year 0 (ultimate fallback). Repos with no usable
-    year get no key.
+    `resolve_head`) is available to the walk in `build()`. Rows are always
+    keyed by a real commit year — there is no undated "HEAD" pseudo-row.
+    Repos with no usable year get no key.
     """
     by_id: dict[str, dict[int, str]] = {}
     if not commits_years_file.exists():
@@ -146,12 +155,6 @@ def _per_year_shas(commits_years_file: Path) -> dict[str, dict[int, str]]:
             if not last_sha:
                 continue
             yr_raw = (row.get("year") or "").strip()
-            if yr_raw == "HEAD":
-                # Dormant repo (no commits in the window). resolve_head writes
-                # this pseudo-row. Bucket as year=0 so the walk-down loop
-                # in build() can pick it up as a last-resort fallback.
-                by_id.setdefault(rid, {})[0] = last_sha
-                continue
             try:
                 year = int(yr_raw)
                 commits = int((row.get("commits") or "0").strip())
@@ -249,9 +252,9 @@ def build() -> list[dict]:
 
         # Walk newest→oldest over EVERY available snapshot year, picking the
         # most-recent whose sha has scc loc>0. Real years (incl. pre-window
-        # dormant-repo fallbacks from resolve_head, e.g. 2020) sort ahead of the
-        # HEAD pseudo-row (year 0, the ultimate fallback). So as long as the repo
-        # has any usable sha there is always a snapshot to score.
+        # dormant-repo fallbacks from resolve_head, e.g. 2020) are all that's
+        # ever present here — so as long as the repo has any usable sha, its
+        # year_label is always a real, dated year, never "HEAD".
         scc_vals: dict[str, str] = {}
         lz_vals: dict[str, str] = {}
         year_label = ""
@@ -263,8 +266,28 @@ def build() -> list[dict]:
             if _is_nonzero(candidate.get("loc", "")):
                 scc_vals = candidate
                 lz_vals = lizard_idx.get((rid, sha), {})
-                year_label = "HEAD" if y == 0 else str(y)
+                year_label = str(y)
                 break
+
+        # Empty-tree fallback: every measured snapshot reports loc=0, so the
+        # default branch is genuinely code-free (archived stub stripped to a
+        # README). Score the newest measured snapshot as a real zero instead of
+        # blanking the dimension — and since a tree with zero source files has
+        # zero functions by definition, read absent lizard metrics as measured
+        # zeros. A bogus zero from a failed checkout can't reach here for any
+        # repo with a healthy snapshot: the loc>0 walk above wins first.
+        if not scc_vals:
+            for y in sorted(year_to_sha, reverse=True):
+                sha = year_to_sha.get(y)
+                if not sha:
+                    continue
+                candidate = scc_idx.get((rid, sha), {})
+                if candidate.get("loc", "") != "":
+                    scc_vals = candidate
+                    measured = lizard_idx.get((rid, sha), {})
+                    lz_vals = {m: measured.get(m) or "0" for m in LIZARD_METRICS}
+                    year_label = str(y)
+                    break
 
         # False-zero guard: scc measured real branching but lizard found zero
         # functions → lizard analysed an off-mainline (template) tree. Drop the

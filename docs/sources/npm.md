@@ -4,7 +4,7 @@ Package downloads, dependencies, and repository mappings for the JavaScript/Type
 
 ## Data Sources
 
-**Downloads**: [npm downloads API](https://api.npmjs.org/downloads/point) -- bulk endpoint, up to 128 packages per request.
+**Downloads**: [npm downloads API](https://api.npmjs.org/downloads/point) -- bulk endpoint, up to 128 packages per request (unscoped packages only; scoped `@...` packages are rejected by the bulk endpoint and fetched one request per package-year).
 
 **Dependencies**: [npm registry](https://registry.npmjs.org) -- `/{package}/latest` returns declared runtime dependencies.
 
@@ -12,7 +12,7 @@ Package downloads, dependencies, and repository mappings for the JavaScript/Type
 
 **Ecosystem totals**: [npm downloads API](https://api.npmjs.org/downloads/point) -- total downloads per year (data starts Jan 2015).
 
-No authentication required. npm downloads API is rate-limited to ~5 req/s.
+No authentication required (an optional `NPM_TOKEN` in `.env` Bearer-auths registry.npmjs.org dependency lookups for a higher limit there; the downloads API ignores it). npm publishes no fixed rate limit; empirically a sustained ~1 req/s holds clean while a sustained ~2 req/s draws continuous 429s. The fetcher therefore enforces a global 1 req/s limiter (independent of `--concurrency`), pauses all in-flight tasks together on any 429 with tiered backoff (5 tiers, ~200 s cumulative tolerance), and uses a cookieless session so a rate-limit-flagged Cloudflare `_cfuvid` cookie can't keep it throttled.
 
 ## Raw Data
 
@@ -30,12 +30,12 @@ In `data/sources/npm/nice-registry/`:
 |--------|---------|
 | `src/sources/npm/fetch_npm_data.py` | Iterative crawler -- fetches downloads + deps until graph is complete |
 | `src/sources/npm/fetch_npm_stats.py` | Fetch ecosystem-wide annual download totals |
-| `src/sources/npm/fetch_nice_registry.py` | Download package-to-repo mappings (one-time) |
+| `src/sources/npm/fetch_nice_registry.py` | Download package-to-repo mappings (skipped when the local copy is < 24 h old) |
 | `src/sources/npm/process_data.py` | Build outputs from raw data |
 
 ```bash
 uv run src/sources/npm/fetch_nice_registry.py
-uv run src/sources/npm/fetch_npm_data.py [--max-rounds 3] [--concurrency 20]
+uv run src/sources/npm/fetch_npm_data.py [--max-rounds 20] [--concurrency 3] [--limit 50]
 uv run python -m src.sources.npm.fetch_npm_stats
 uv run python -m src.sources.npm.process_data [--ignore-gaps]
 ```
@@ -53,9 +53,11 @@ uv run python -m src.sources.npm.process_data [--ignore-gaps]
 
 In `data/sources/npm/`:
 
-| File | Rows | Description |
-|------|------|-------------|
-| `top-packages.csv` | ~5.8K | Packages covering 95% of downloads (+ `avg_downloads_share`) |
-| `dependency-tree.csv` | ~15K edges | Transitive deps from top packages |
-| `github-repos.csv` | ~6.3K | Package-to-GitHub-repo mappings |
-| `results.csv` | ~5.7K | All dep-tree packages with pagerank + value_class |
+| File | Description |
+|------|-------------|
+| `top-packages.csv` | Packages covering 95% of downloads (+ `avg_downloads_share`) |
+| `dependency-tree.csv` | Transitive dep edges from top packages |
+| `github-repos.csv` | Package-to-GitHub-repo mappings |
+| `results.csv` | All dep-tree packages with pagerank + value_class |
+
+Row counts: see the per-ecosystem value funnel in [stats.md](../stats.md#value).

@@ -55,7 +55,7 @@ bdwgc/bdwgc,gh/2109456,True,False,True,True,False,2,4,True
 beatgammit/base64-js,gh/2853282,True,True,True,True,True,3,4,True
 benjaminp/six,gh/77868600,True,False,True,True,False,3,4,True
 besser82/libxcrypt,gh/35503965,True,False,True,True,False,2,4,True
-bincode-org/bincode,gh/24130045,True,False,True,False,False,3,2,False
+bincode-org/bincode,gh/24130045,True,False,True,False,False,3,4,True
 bitflags/bitflags,gh/29287955,True,False,True,True,False,3,4,True
 blakeembrey/array-flatten,gh/17789771,True,True,True,True,True,3,4,True
 blakeembrey/change-case,gh/9440238,True,True,True,True,True,3,4,True
@@ -269,7 +269,7 @@ gnome/pango,gh/4537144,True,True,True,True,True,2,4,True
 gnutls/gnutls,gl/179611,True,False,True,True,False,1,4,False
 gnutls/libtasn1,gl/919981,False,False,True,True,False,1,4,False
 google/brotli,gh/24993138,True,True,False,True,False,2,4,True
-google/highway,gh/206791328,False,False,True,True,False,1,4,False
+google/highway,gh/206791328,False,False,True,True,False,2,4,True
 google/zerocopy,gh/534354967,True,True,False,True,False,3,4,True
 googleapis/google-cloud-python,gh/16316451,True,True,False,True,False,3,4,True
 googleapis/python-cloud-core,gh/226992462,True,False,True,False,False,3,4,True
@@ -337,7 +337,7 @@ isaacs/cliui,gh/634056857,True,True,True,True,True,3,4,True
 isaacs/core-util-is,gh/12391440,True,True,True,True,True,3,4,True
 isaacs/fs-minipass,gh/102982143,True,True,True,True,True,3,4,True
 isaacs/fs.realpath,gh/61231712,True,True,True,True,True,3,4,True
-isaacs/inflight-deprecated-do-not-use,gh/19442260,True,True,True,False,False,2,2,False
+isaacs/inflight-deprecated-do-not-use,gh/19442260,True,True,True,False,False,2,4,True
 isaacs/inherits,gh/1580001,True,True,True,True,True,3,4,True
 isaacs/isexe,gh/49804297,True,True,True,True,True,3,4,True
 isaacs/minimatch,gh/2056549,True,True,True,True,True,3,4,True
@@ -428,7 +428,7 @@ jslicense/spdx-correct.js,gh/34817196,True,False,True,True,False,3,4,True
 jslicense/spdx-exceptions.json,gh/40062896,False,False,True,True,False,3,4,True
 jslicense/spdx-expression-parse.js,gh/40067336,True,False,True,True,False,3,4,True
 jslicense/spdx-license-ids,gh/26001547,False,False,True,True,False,3,4,True
-json-c/json-c,gh/1139119,True,False,True,True,False,1,4,False
+json-c/json-c,gh/1139119,True,False,True,True,False,2,4,True
 json5/json5,gh/4463453,True,False,True,True,False,3,4,True
 juliangruber/balanced-match,gh/13538817,True,True,True,True,True,3,4,True
 juliangruber/brace-expansion,gh/13539234,True,True,True,True,True,3,4,True
@@ -448,7 +448,7 @@ kpdecker/jsdiff,gh/1542219,True,False,True,True,False,3,4,True
 krb5/krb5,gh/4307702,True,True,True,True,True,2,4,True
 kriskowal/asap,gh/11295071,True,False,True,True,False,3,4,True
 kriszyp/json-schema,gh/947175,True,False,True,True,False,3,4,True
-la10736/rstest,gh/124802455,True,False,True,True,False,1,4,False
+la10736/rstest,gh/124802455,True,False,True,True,False,2,4,True
 langchain-ai/langchain,gh/552661142,True,True,False,True,False,3,4,True
 laurent-laporte-pro/deprecated,gh/111412148,True,False,True,True,False,3,4,True
 lddubeau/xmlchars,gh/139881982,True,False,True,False,False,3,4,True

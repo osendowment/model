@@ -24,15 +24,17 @@ It also stamps three **signal-completeness** columns (independent of the
 components (`openssf_crit`, `eco_crit`, `top_eco_pct`) and risk components
 (`concentration`, `complexity`, `security`, `workload`) carry a real
 (non-empty, **non-zero**) value, and `complete = value_comps ≥ 2 AND
-risk_comps = 4` flags a repo with full coverage. Archived repos are now in the
-risk stage too, so they carry real risk scores and can be `complete`; the only
-repos left `risk_comps < 4` are those whose archived snapshot has no source to
-measure (scc 0-loc → blank complexity/workload).
+risk_comps = 4` flags a repo with full coverage. Archived repos are in the
+risk stage too, so they carry real risk scores and can be `complete` —
+including empty-tree stubs, whose complexity/workload score as measured
+zeros (floor percentiles) rather than staying blank.
 
 ## Scope
 
 Input is the top-repo set — valid class-A repos from `data/value/value.csv`
-(`risk_input.value_classes = ["A"]`), loaded via `load_top_repos()`, which
+(`settings.json top_repos`: `classes = ["A"]`, `platforms = ["github",
+"gitlab"]`, `git_valid == True`; `risk_input.value_classes` documents the
+same scope), loaded via `load_top_repos()`, which
 now **includes archived repos by default** (every stage shares this scope).
 Archived repos must appear in the stage output as `active=False` so the reason
 for their ineligibility is visible, rather than being silently dropped before
@@ -53,6 +55,8 @@ Eligibility
 │   │                                 (npm registry / PyPI JSON / crates
 │   │                                  db-dump / Homebrew formulas)
 │   ├── github license (fallback)   ← data/sources/github/repos.csv (Licensee)
+│   ├── gitlab license (fallback)   ← data/sources/gitlab/repos.csv
+│   │                                 (GitLab-hosted repos, keyed gl/ repo_id)
 │   ├── osi approved set            ← data/sources/osi/oss-licenses.csv
 │   │                                 (SPDX isOsiApproved ∪ curated extras,
 │   │                                  90-day TTL, self-bootstrapping)
@@ -88,7 +92,8 @@ assertion from `overrides.csv` first (highest priority, for repos whose
 LICENSE detection fails upstream), then the registry license (each
 ecosystem's `results.csv` `license` column, most common value across the
 repo's packages, ties alphabetical), the GitHub API license as
-fallback — and classifies it against the OSS-approved set in
+fallback (with the GitLab project license as the equivalent fallback for
+GitLab-hosted repos) — and classifies it against the OSS-approved set in
 `data/sources/osi/oss-licenses.csv` (SPDX `isOsiApproved` ∪ a small curated
 extras list — curl, ftl, libpng-2.0, mit-cmu, psf-2.0, blessing; content
 licenses like CC-BY/CC0 are deliberately **not** OSS). SPDX expressions
@@ -105,11 +110,18 @@ stays distinguishable from known-non-OSS. The rollup treats only
 Built by `build_funding` (moved unchanged from the risk stage — full
 methodology, score formula and worked examples in
 [components/funding.md](components/funding.md)). `intent` is True when the
-repo shows at least one funding signal: a GitHub sponsorship (in or out),
-the owner's Sponsors listing, a declared channel (FUNDING.yml,
-funding.json, npm/PyPI funding field, a real Open Collective, a curated
-PayPal.me handle), a bus-factor maintainer with a personal Sponsors
-listing, or an institutional host/owner. `nonprofit` defaults True and flips False only
+repo shows at least one funding signal: the owner's GitHub Sponsors
+listing being enabled (any inbound sponsor count implies it; outbound
+sponsoring feeds only the score, NOT intent), a declared channel
+(FUNDING.yml — a resolved funding link or the file's mere presence,
+funding.json — repo- or org-level, npm/PyPI funding field, a real Open
+Collective, a curated PayPal.me handle), a bus-factor maintainer with a
+personal Sponsors listing (union of the fetched listings and the curated
+`maintainer-overrides.csv`), or an institutional host/owner. `intent` then
+propagates at the owner level: once any repo an owner has in scope
+self-declares a channel, every repo of that owner gets `intent=True`
+(GitHub's own org-`.github`/personal-Sponsors semantics — see
+[components/funding.md](components/funding.md)). `nonprofit` defaults True and flips False only
 when a curated/scraped `company` host or owner backs the repo — those
 repos are already resourced, so they are ineligible but stay visible in
 the table.
@@ -134,16 +146,20 @@ the table.
 
 ## Stage overrides — `data/eligibility/overrides.csv`
 
-One curated row per repo, shared by two builders:
+One curated row per repo — or per org, when `repo` is an `owner/*` glob
+(applies to every in-scope repo under that owner that has no per-repo row;
+a per-repo row always wins) — shared by three builders:
 
 | Column | Used by | Meaning |
 |---|---|---|
-| `repo` | both | lowercased `owner/name` key |
+| `repo` | all | lowercased `owner/name` key (or `owner/*` org glob) |
+| `repo_id` | all | stable GitHub id — the actual join key (rename-proof) |
 | `host`, `host_type` | build_funding | legally-stewarding foundation/company (domain + company/nonprofit) |
 | `gh_user` | — | GitHub login (informational) |
 | `owner`, `owner_type` | build_funding | entity owning the GitHub org |
 | `oc_slug` | build_funding | curated Open Collective slug; empty on a curated row = authoritative "no OC" |
 | `license` | build_licenses | manual SPDX assertion (highest priority) when upstream detection fails — GitHub Licensee returns `noassertion` on bundled/dual/stacked LICENSE files, or the repo ships no standard LICENSE (e.g. node=`mit`, cpython=`python-2.0`, linux=`gpl-2.0-only`, icu=`unicode-3.0`) |
+| `paypal` | build_funding | curated PayPal.me URL — a declared (unmeasured) funding channel |
 | `eol` | build_active | manual end-of-life verdict (True/False/empty) |
 | `reason` | — | free-text audit context for the override |
 
@@ -152,11 +168,12 @@ this file is only for eligibility-stage judgments.)
 
 ## Outputs
 
-- `licenses.csv` — `repo, repo_id, license, license_source (override/registry/github/""), oss`
+- `licenses.csv` — `repo, repo_id, license, license_source (override/registry/github/gitlab/""), oss`
 - `active.csv` — `repo, repo_id, eol, archived, mirror, active`
 - `funding.csv` — funding signals + score per repo
   (schema in [components/funding.md](components/funding.md))
-- `eligibility.csv` — `repo, repo_id, oss, intent, nonprofit, active, eligible`
+- `eligibility.csv` — `repo, repo_id, oss, intent, nonprofit, active, eligible,
+  value_comps, risk_comps, complete`
 
 ## Running
 
@@ -169,9 +186,14 @@ uv run python -m src.eligibility.run_eligibility_pipeline --list         # show 
 Fetchers (all incremental / TTL-gated): the GitHub repo-owner refresh
 (archived flag + license fallback), the OSI license list, the per-eco
 license and EOL fetchers, the funding-intent fetchers (FUNDING.yml,
-npm/PyPI funding, Sponsors, FLOSS Fund, Open Collective) and the
-FOSS-foundation roster scrapers + host matcher. Builders: `licenses` →
-`active` → `funding-build` → `aggregate`.
+npm/PyPI funding, Sponsors, bus-factor maintainer Sponsors, FLOSS Fund,
+the Open Collective reverse-map + budgets) and the FOSS-foundation roster
+scrapers + host matcher. Builders: `licenses` → `active` → `funding-build`
+→ `aggregate`, then the terminal preview steps: `results`
+(`src.build_results` — the cross-stage rollup), `people`
+(`src.build_people` — owners/key contributors for outreach) and
+`preview-xlsx` (`src.build_preview_workbook` — both preview CSVs as
+one styled workbook).
 
 `scripts/pipeline_health.py` verifies every stage CSV matches its
 builder's current output; `scripts/stats.py` recomputes the

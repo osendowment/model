@@ -11,12 +11,13 @@ Three automated stages (run in order, each feeds the next):
 1. **Value** (`src.value.run_value_pipeline`) → `data/value/value.csv` — picks the
    most-depended-on packages per ecosystem and ranks them by
    download-weighted PageRank, then unifies per-package classes into one
-   row per GitHub repo. All classes A/B/C are included. (this doc)
+   row per repo (any host). All classes A/B/C are included. (this doc)
 2. **Risk** (`src.risk.run_risk_pipeline`) → `data/risk/risk.csv` — concentration
-   + complexity + security + workload scoring for **valid class-A repos** read
-   directly from `data/value/value.csv`. Target classes are configured in
-   `src/settings.json` under `risk_input.value_classes` (default
-   `["A"]`). See [docs/risk.md](risk.md).
+   + complexity + security + workload scoring for the **top repos** (valid
+   class-A on GitHub + GitLab, **archived included**) read directly from
+   `data/value/value.csv`. The scope is configured in `src/settings.json`
+   under `top_repos` (`platforms` + `classes`; `risk_input.value_classes`
+   documents the same class scope, default `["A"]`). See [docs/risk.md](risk.md).
 3. **Eligibility** (`src.eligibility.run_eligibility_pipeline`) →
    `data/eligibility/eligibility.csv` — four checks per **top repo** (the
    same valid class-A set, **archived included**): OSI-approved license
@@ -34,24 +35,25 @@ ecosystem ──► top packages ──► dep tree ──► PageRank ──►
 registries     (95% cum dl)    (BFS)       ↓
                                       value.csv
                                             │
-                                            ├─► class A repos ──► contributors + scc
+                                            ├─► top repos ─────► contributors + scc
                                             │   (settings.json          │
-                                            │    risk_input.            │
-                                            │    value_classes)     risk.csv
-                                            │
+                                            │    top_repos: gh+gl,      │
+                                            │    class A, archived  risk.csv
+                                            │    included)
                                             └─► top repos ──────► licenses · funding
-                                                (archived          · EOL/archived
-                                                 included)               │
+                                                (same set)         · EOL/archived
+                                                                         │
                                                                   eligibility.csv
                                                                   (oss · intent ·
                                                                    nonprofit · active
                                                                    → eligible)
 ```
 
-Risk and Eligibility both read their scope directly from `value.csv`: Risk
-scores the valid class-A repos (non-archived), while Eligibility runs on the
-same top set with archived repos included — archived repos surface there as
-`active=False` instead of being silently dropped.
+Risk and Eligibility both read the **same scope** directly from `value.csv`:
+the top repos — valid class-A rows on the platforms configured in
+`settings.json → top_repos` (GitHub + GitLab), **archived included**.
+Archived repos surface in eligibility as `active=False` instead of being
+silently dropped.
 
 Source-specific details live in [`docs/sources/`](sources/) (one `.md` per source).
 
@@ -75,20 +77,22 @@ Value
 │       (per-language metric lineage + sources live in each component doc)
 │
 └── Cross-ecosystem rollup → value/value.csv
-    ├── id                        ← derived (rank by top_eco_pct desc)    [2021–2025]
     ├── repo                      ← per-eco package→repo union (any host) [most recent]
     ├── platform                  ← host class of git_url                 [most recent]
     │                                (github/gitlab/codeberg/bitbucket
     │                                 /sourcehut/custom, empty for orphans)
-    ├── repo_id                   ← GitHub Repos API id, `gh/<numeric>`   [most recent]
-    │                                (empty for non-GitHub platforms)
+    ├── repo_id                   ← `gh/<numeric>` (GitHub Repos API) or  [most recent]
+    │                                `gl/<host>-<id>` (GitLab project API;
+    │                                 bare `gl/<id>` for gitlab.com);
+    │                                 empty for other platforms
     ├── git_url                   ← per-eco git.csv union                  [most recent]
     │                                (GitLab/Codeberg/Sourcehut/Bitbucket
     │                                 /custom hosts when no GH match)
     ├── mirror_url                ← GitHub Repos API `mirror_url`          [most recent]
+    │                                + override-declared live upstreams
     │                                (upstream a github mirror syncs from;
     │                                 e.g. gcc-mirror/gcc → gcc.gnu.org)
-    ├── valid                     ← build_validation (True/False/empty)    [most recent]
+    ├── git_valid                 ← build_validation (True/False)          [most recent]
     │                                (rollup of GitHub API + git ls-remote
     │                                 caches → value/validation.csv)
     ├── ecosystems                ← derived (eco set per repo)             [2021–2025]
@@ -98,7 +102,10 @@ Value
     ├── top_eco_pct               ← derived (100 − pr_cum_pct, 0–100)      [2021–2025]
     ├── class_{npm,pypi,crates,cpp}
     │                              ← derived (per-eco cum-PR share)        [2021–2025]
-    └── class                     ← derived (strongest across ecos)        [2021–2025]
+    ├── class                     ← derived (strongest across ecos)        [2021–2025]
+    ├── openssf_crit              ← openssf/criticality.csv (github-only)  [most recent]
+    ├── eco_crit                  ← ecosystems/criticality.csv (gh + gl)   [most recent]
+    └── value_score               ← derived 0–100 blend (apply_criticality)
 ```
 
 ## How It Works
@@ -201,6 +208,10 @@ Packages covering 95% of ecosystem downloads.
 | `avg_downloads_share` | Fraction of ecosystem-wide total downloads |
 | `2021`--`2025` | Downloads per year |
 
+cpp differs: no per-year columns; instead `debian_avg_downloads`,
+`debian_share`, `homebrew_avg_downloads`, `homebrew_share` (the two
+install-base proxies it is unified from).
+
 ### dependency-tree.csv
 
 Transitive dependency edges from top packages.
@@ -209,7 +220,7 @@ Transitive dependency edges from top packages.
 |--------|-------------|
 | `package` | Dependent package |
 | `dependency` | Dependency package |
-| `type` | `declared` (npm/pypi), `normal`/`build`/`dev` (crates) |
+| `type` | `declared` (npm/pypi/cpp), `normal`/`build`/`dev` (crates) |
 
 ### github-repos.csv
 
@@ -227,26 +238,41 @@ All dep-tree packages with downloads, PageRank, and value class.
 | Column | Description |
 |--------|-------------|
 | `package` | Package name |
-| `github_repo` | `owner/repo` slug |
+| `github_repo` | Bare GitHub `owner/repo` slug (empty if the repo isn't on GitHub) |
+| `git` | Canonical git clone URL across hosts (GitHub wins, else GitLab / Codeberg / … / custom) |
+| `eco_guess` | Provenance of the repo identity after the `resolve` step: `eco` (ecosyste.ms), `native` (registry metadata), `override`, or empty |
 | `avg_downloads` | Average annual downloads |
 | `2021`--`2025` | Downloads per year |
 | `top` | `True` if package is in the 95% cumulative set |
 | `pagerank` | Download-weighted PageRank score |
 | `value_class` | A/B/C (see [Value Classes](#value-classes)) |
+| `repo_id` | Stable namespaced repo id (`gh/<id>` / `gl/…`), stamped by the `resolve` step |
+| `mirror_url` | GitHub mirror's non-GitHub upstream, when known |
+| `license` | Registry-reported license (stamped by the per-eco `fetch_licenses.py`) |
+
+cpp differs: `debian_avg_downloads`, `homebrew_avg_downloads`, and the blended
+`downloads_score` replace `avg_downloads` + the per-year and `top` columns.
 
 ## Unified output
 
 `data/value/value.csv` is the canonical per-repo table — one row per repo
 (on any host), plus one row per orphan package (no `repo`) so nothing is
 dropped. **All classes A/B/C are included** — the complete long-tail table
-is kept. Produced by the `unify` step of `uv run python -m src.value.run_value_pipeline`
-(`src/value/unify_value_data.py`), which reads each ecosystem's `results.csv`
-and `eol.csv`, groups packages by repo, computes all per-ecosystem and
-cross-ecosystem aggregates in one pass, and writes the file sorted by
-`top_eco_pct` desc (most important repos first). There is no separate
-repo-aggregation step — `unify_value_data.py` produces the per-repo table
-directly. Manual repo / `git_url` / `valid` corrections are applied from
-`data/value/overrides.csv` (by `unify_value_data.py` + `build_validation.py`).
+is kept. Produced by the rollup steps of `uv run python -m src.value.run_value_pipeline`
+(`eco-fetch` → `resolve` → `unify` → `validation` → `criticality`): the
+`resolve` step (`apply_ecosystems_authority`) re-resolves each package's repo
+identity (override > ecosyste.ms > prior registry data) onto the per-eco
+`results.csv`; the `unify` step (`src/value/unify_value_data.py`) reads each
+ecosystem's `results.csv` and `eol.csv`, groups packages by repo, and computes
+all per-ecosystem and cross-ecosystem aggregates in one pass (sorted by
+`top_eco_pct` desc). There is no separate repo-aggregation step —
+`unify_value_data.py` produces the per-repo table directly. The final
+`criticality` step (`src.value.apply_criticality`) stamps `openssf_crit` /
+`eco_crit` / `value_score` and re-sorts the shipped file by `value_score`
+desc — unscored rows (below the 2-component floor, mostly class B/C) sink to
+the end in `top_eco_pct`-desc order. Manual repo / `git_url` corrections are
+applied from `data/value/overrides.csv` (by the `resolve` + `unify` steps);
+its `valid` pins are applied by `build_validation.py`.
 
 Per-ecosystem class is computed by summing the group's package PR within
 the ecosystem, ranking groups by that sum desc, and applying the same
@@ -260,17 +286,17 @@ subgraphs.
 
 | Column | Description |
 |--------|-------------|
-| `id` | Sequential numeric id (sorted by `top_eco_pct` desc) |
 | `repo` | Lowercase repo slug on its `platform` — GitHub `owner/repo`, GitLab's arbitrarily-nested `owner/…/repo`, Sourcehut `~user/repo`, custom best-effort path. Empty only for orphans (no upstream repo at all). |
-| `platform` | Host class of `git_url`: `github` / `gitlab` / `bitbucket` / `sourcehut` / `codeberg` / `custom`. Empty for orphan rows with no URL. Downstream GitHub-only consumers (risk, eligibility) filter on `platform == github`. |
-| `repo_id` | Stable repo id namespaced by platform: `gh/<numeric>` (GitHub Repos API id) for a resolved GitHub repo; empty for non-GitHub platforms (no numeric id) and unresolved/404 repos. |
-| `git_url` | Canonical git clone URL — `https://github.com/<repo>.git` for GitHub repos (so a valid repo always carries both `repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by `verify_git_urls`. Empty only for orphan packages with no upstream repo at all. |
-| `mirror_url` | For a **GitHub mirror repo**, the non-GitHub upstream it syncs from — GitHub's own `mirror_url` field (e.g. `gcc-mirror/gcc` → `git://gcc.gnu.org/git/gcc.git`). Populated by `verify_git_urls` from `data/sources/github/repos.csv`. Sparse: **only** repos GitHub natively imported as mirrors carry it (externally-maintained push-mirrors like `bminor/glibc` do not). Empty for ordinary and non-GitHub rows. Authoritative mirror→upstream link when present. |
+| `platform` | Host class of `git_url`: `github` / `gitlab` / `bitbucket` / `sourcehut` / `codeberg` / `custom`. Empty for orphan rows with no URL. Downstream consumers (risk, eligibility) filter on the platforms configured in `settings.json → top_repos.platforms` (currently `github` + `gitlab`). |
+| `repo_id` | Stable repo id namespaced by platform: `gh/<numeric>` (GitHub Repos API id) for a resolved GitHub repo; `gl/<host>-<id>` (bare `gl/<id>` for gitlab.com) for a project resolved via the GitLab project API on any GitLab host; empty for other platforms (no API id) and unresolved/404 repos. |
+| `git_url` | Canonical git clone URL — `https://github.com/<repo>.git` for GitHub repos (so a valid repo always carries both `repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by the shared git-URL helpers (`src/value/git_urls.py`). Empty only for orphan packages with no upstream repo at all. |
+| `mirror_url` | For a **GitHub mirror repo**, the non-GitHub upstream it syncs from (e.g. `gcc-mirror/gcc` → `https://gcc.gnu.org/git/gcc.git`). Two sources: GitHub's own `mirror_url` field from `data/sources/github/repos.csv` (stamped by the rollup's `resolve` step), and override-declared live upstreams — a `data/value/overrides.csv` repo override carrying a non-GitHub `git_url` (e.g. `bminor/glibc` → `https://sourceware.org/git/glibc.git`) is preserved here. Empty for ordinary and non-GitHub rows. Authoritative mirror→upstream link when present. |
+| `git_valid` | `True`/`False` — whether the repo's upstream is reachable. Host-agnostic: GitHub rows are checked via the Repos API cache, non-GitHub rows via `git ls-remote`; a GitLab `gl/` `repo_id` counts as proof on its own. `False` covers orphans and unreachable/404 targets. Set by `build_validation`; audit trail in [`data/value/validation.csv`](components/validation.md). |
 | `ecosystems` | Comma-separated list of ecosystems where the repo has packages (e.g. `crates,npm`) |
 | `packages` | Total package count in the repo |
 | `top_eco` | Ecosystem where the repo is highest-ranked (max PR percentile). `npm` / `pypi` / `crates` / `cpp`. |
 | `top_eco_pkg` | Highest-PR package in `top_eco` (e.g. `@babel/helper-plugin-utils` for babel/babel) |
-| `top_eco_pct` | PR percentile in `top_eco` (`100 − pr_cum_pct`). 0–100, **higher = better**. babel/babel = 92.25; tail near 0. |
+| `top_eco_pct` | PR percentile in `top_eco` (`100 − pr_cum_pct`). 0–100, **higher = better**. babel/babel ≈ 92.24; tail near 0. |
 | `class` | Strongest of the per-ecosystem classes (A < B < C) |
 | `class_npm`, `class_pypi`, `class_crates`, `class_cpp` | A/B/C from per-ecosystem cumulative PR share; empty if no package in that ecosystem |
 | `openssf_crit` | OpenSSF criticality score ·100 (0–100, two decimals, higher = more critical; the source CSV keeps the raw 0–1 value), joined from `data/sources/openssf/criticality.csv` by `src.value.apply_criticality` (the last value.csv-writing pipeline step). **Non-empty for every valid class-A GitHub repo, archived included** — that is the fetch scope, and `scripts/pipeline_health.py` gates on it. Empty for non-GitHub rows (the tool is GitHub-only), B/C rows outside the fetch scope, and unresolved/invalid repos. |
@@ -279,9 +305,9 @@ subgraphs.
 
 ### Repo class distribution
 
-After grouping packages by `git_url` / repo (or as orphans), `value.csv` collapses
-the package rows into one row per repo plus one per orphan
-package (no `repo`, kept under sequential ids so nothing is dropped).
+After grouping packages by `repo_id` / `git_url` (or as orphans), `value.csv`
+collapses the package rows into one row per repo plus one per orphan
+package (no `repo`, kept as its own row so nothing is dropped).
 *Strongest* class is the highest class a repo achieves across any of its
 ecosystems (the `class` column in `value.csv`).
 
@@ -321,31 +347,30 @@ relative to its real-world load-bearing role. To fix later: extend the
 cpp edge schema to keep the source-side type and add a build-aware PR
 overlay.
 
-### Project identity is GitHub-only
+### Project identity is GitHub/GitLab-only downstream
 
-Every downstream consumer (risk, eligibility, EOL, GitHub-derived
-contributor metrics) keys off GitHub identity — `value.csv` rows with
-`platform == github`. Projects that don't live on GitHub carry a non-GitHub
-`platform` (gitlab / codeberg / custom) and are excluded from those analyses.
+Downstream consumers (risk, eligibility, EOL, contributor metrics) key off
+the hosts configured in `settings.json → top_repos.platforms` — currently
+**GitHub and GitLab** (`value.csv` rows with `platform` `github` /
+`gitlab`). GitLab repos are first-class: they carry a `gl/…` `repo_id`
+resolved via the GitLab project API (on any GitLab host — gitlab.com,
+gitlab.gnome.org, gitlab.inria.fr, salsa.debian.org, …) and are scored by
+risk and eligibility alongside GitHub repos. Formerly-excluded projects now
+in scope this way include glib (gitlab.gnome.org) and mpfr (gitlab.inria.fr);
+glibc and gcc are covered via their GitHub mirrors (`bminor/glibc`,
+`gcc-mirror/gcc`) with the live upstream recorded in `mirror_url`.
 
-Examples affected: glibc (sourceware.org), gcc (gcc.gnu.org / Savannah),
-libunistring (savannah), glib (gitlab.gnome.org), mpfr (gitlab.inria.fr),
-curl (curl.se), ImageMagick (own host), many GNU/Apache/X.Org/KDE
-projects, kernel-adjacent code.
-
-**Status update**: `value.csv` now models every repo as a
-`(platform, repo, repo_id)` triple alongside `git_url`, so non-GitHub
-upstreams carry a first-class identity (host + slug) and are no longer
-silently dropped at the value-pipeline level. Per-ecosystem GitHub vs Git
-coverage (and the load-bearing class-A subset) is in
+`value.csv` models every repo as a `(platform, repo, repo_id)` triple
+alongside `git_url`, so upstreams on the remaining hosts (codeberg /
+bitbucket / sourcehut / custom: savannah, sourceware, kernel.org,
+project-owned hosts) carry a first-class identity and are not silently
+dropped at the value-pipeline level — but they are still excluded from the
+downstream analyses (e.g. libunistring on savannah). Per-ecosystem GitHub vs
+Git coverage (and the load-bearing class-A subset) is in
 [docs/stats.md → Value](stats.md#repo-identity-coverage-valuecsv).
 
-Downstream consumers (risk, eligibility, EOL, GitHub contributor metrics)
-still filter to `platform == github`, so a non-GitHub-only project (glibc,
-gcc, etc.) still slips out of those analyses even though it's now visible in
-`value.csv` with a populated `platform` / `repo` / `git_url`. To fully fix:
-per-host adapters for license/EOL/contributor checks against GitLab API,
-savannah, sourceware, etc.
+To fully fix: per-host adapters for license/EOL/contributor checks against
+codeberg, savannah, sourceware, etc.
 
 ### No package-level quality gate before results.csv
 
