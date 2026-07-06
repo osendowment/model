@@ -328,8 +328,8 @@ of the four scored risk dimensions: `concentration`, `complexity`, `security`,
 
 Instead, `src/eligibility/build_eligibility.py` joins the two boolean flag
 columns from `funding.csv` into `data/eligibility/eligibility.csv`, where they
-are two of the five checks behind
-`eligible = oss AND intent AND nonprofit AND active AND code`
+are two of the four checks behind
+`eligible = oss AND intent AND nonprofit AND active`
 (see [eligibility.md](../eligibility.md)):
 
 | `eligibility.csv` column | Source | Default |

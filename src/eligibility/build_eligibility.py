@@ -10,15 +10,8 @@ class-A, archived included) and derives one `eligible` verdict per repo:
     intent    ← funding.csv   `intent`  — any funding signal (missing → False)
     nonprofit ← funding.csv   `nonprofit` — not company-backed (missing → True)
     active    ← active.csv    `active`  — not EOL, not archived
-    code      ← risk/complexity.csv `loc_eoy` — the measured source snapshot
-                has code (loc > 0). Archived stubs whose default branch was
-                stripped to a README measure loc=0 and read False — there is
-                no code to fund. A missing measurement also reads False
-                (complexity covers 100% of the scope, so that only blocks
-                genuinely unmeasured repos; the auditable detail — loc_eoy,
-                loc_year — stays in complexity.csv).
 
-    eligible = oss AND intent AND nonprofit AND active AND code
+    eligible = oss AND intent AND nonprofit AND active
 
 (All per-signal detail columns stay in the per-dimension CSVs.)
 
@@ -43,11 +36,7 @@ FUNDING_FILE = DATA_DIR / "eligibility" / "funding.csv"
 ACTIVE_FILE = DATA_DIR / "eligibility" / "active.csv"
 VALUE_FILE = DATA_DIR / "value" / "value.csv"
 RISK_FILE = DATA_DIR / "risk" / "risk.csv"
-COMPLEXITY_FILE = DATA_DIR / "risk" / "complexity.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility" / "eligibility.csv"
-
-# The eligibility verdict flags, in column order. `eligible` = AND of all.
-FLAGS = ("oss", "intent", "nonprofit", "active", "code")
 
 # Signal-completeness components. A component counts only when its cell is
 # non-empty AND non-zero — a blank is a missing signal, and a 0 (e.g. an
@@ -55,16 +44,8 @@ FLAGS = ("oss", "intent", "nonprofit", "active", "code")
 VALUE_COMPONENTS = ("openssf_crit", "eco_crit", "top_eco_pct")            # value.csv
 RISK_COMPONENTS = ("concentration", "complexity", "security", "workload")  # risk.csv
 
-FIELDS = ["repo", "repo_id", *FLAGS, "eligible",
+FIELDS = ["repo", "repo_id", "oss", "intent", "nonprofit", "active", "eligible",
           "value_comps", "risk_comps", "complete"]
-
-
-def _is_positive(val: str) -> bool:
-    """True iff `val` parses as a number > 0. Blank / zero / junk → False."""
-    try:
-        return float((val or "").strip() or 0) > 0
-    except ValueError:
-        return False
 
 
 def _count_nonzero(values) -> int:
@@ -92,7 +73,6 @@ def build() -> list[dict]:
     intent = load_column_by_id(FUNDING_FILE, "intent")
     nonprofit = load_column_by_id(FUNDING_FILE, "nonprofit")
     active = load_column_by_id(ACTIVE_FILE, "active")
-    loc_eoy = load_column_by_id(COMPLEXITY_FILE, "loc_eoy")
     value_cols = {c: load_column_by_id(VALUE_FILE, c) for c in VALUE_COMPONENTS}
     risk_cols = {c: load_column_by_id(RISK_FILE, c) for c in RISK_COMPONENTS}
 
@@ -107,7 +87,6 @@ def build() -> list[dict]:
             # matching build_funding's default.
             "nonprofit": nonprofit.get(rid, "True") != "False",
             "active": active.get(rid, "") == "True",
-            "code": _is_positive(loc_eoy.get(rid, "")),
         }
         # Signal completeness: how many value / risk components carry a real
         # (non-empty, non-zero) value, and whether the repo is fully covered.
@@ -142,11 +121,13 @@ def main() -> None:
     table.add_column("True", justify="right")
     table.add_column("%", justify="right")
     table.add_column("sole blocker", justify="right")
-    for flag in FLAGS:
+    for flag in ("oss", "intent", "nonprofit", "active"):
         n = sum(1 for r in rows if r[flag])
         # Repos failing ONLY this check — what fixing it alone would unlock.
         sole = sum(1 for r in rows
-                   if not r[flag] and all(r[f] for f in FLAGS if f != flag))
+                   if not r[flag] and all(r[f] for f in
+                                          ("oss", "intent", "nonprofit", "active")
+                                          if f != flag))
         table.add_row(flag, f"{n:,}", f"{100 * n / total:.1f}%", f"{sole:,}")
     table.add_section()
     table.add_row("[bold green]eligible[/bold green]",

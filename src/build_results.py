@@ -22,8 +22,8 @@ Columns:
     value_score       0-100 value blend                  (value.csv `value_score`)
     concentration, complexity, security, workload        (risk.csv components)
     risk_score        overall risk score, 0-100          (risk.csv `risk_score`)
-    oss, intent, nonprofit, active, code                  (eligibility.csv components)
-    eligible          oss AND intent AND nonprofit AND active AND code
+    oss, intent, nonprofit, active                        (eligibility.csv components)
+    eligible          oss AND intent AND nonprofit AND active
     score             value_score * risk_score, scaled so the highest row = 100.
                       Computed for every row with both value_score and
                       risk_score present, regardless of eligibility.
@@ -63,7 +63,7 @@ GITLAB_REPOS_FILE = DATA_DIR / "sources" / "gitlab" / "repos.csv"
 OUTPUT_FILE = DATA_DIR / "preview" / "repos.csv"
 
 RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
-ELIGIBILITY_COMPONENTS = ["oss", "intent", "nonprofit", "active", "code"]
+ELIGIBILITY_COMPONENTS = ["oss", "intent", "nonprofit", "active"]
 
 FIELDS = (
     ["repo_id", "repo", "language", "ecosystem", "openssf_crit", "eco_crit",

@@ -297,7 +297,7 @@ def risk_stats() -> dict:
 
 # ── eligibility ──────────────────────────────────────────────────────────────
 
-ELIGIBILITY_FLAGS = ("oss", "intent", "nonprofit", "active", "code")
+ELIGIBILITY_FLAGS = ("oss", "intent", "nonprofit", "active")
 
 
 def eligibility_scope_set() -> set[str]:

@@ -2,10 +2,10 @@
 
 Stage 3 of the pipeline (Value → Risk → **Eligibility**). Takes the top
 repos and answers one question per repo: **is it eligible for funding?**
-Five independent checks, one AND-rollup:
+Four independent checks, one AND-rollup:
 
 ```
-eligible = oss AND intent AND nonprofit AND active AND code
+eligible = oss AND intent AND nonprofit AND active
 ```
 
 | Check | Meaning | Built by | Output |
@@ -14,9 +14,8 @@ eligible = oss AND intent AND nonprofit AND active AND code
 | `intent` | shows any funding signal | `src.eligibility.build_funding` | `data/eligibility/funding.csv` |
 | `nonprofit` | not company-backed | `src.eligibility.build_funding` | `data/eligibility/funding.csv` |
 | `active` | not EOL, not archived | `src.eligibility.build_active` | `data/eligibility/active.csv` |
-| `code` | measured snapshot has code (loc > 0) | `src.eligibility.build_eligibility` (from `data/risk/complexity.csv` `loc_eoy`) | — |
 
-`src.eligibility.build_eligibility` joins the five flags into
+`src.eligibility.build_eligibility` joins the four flags into
 `data/eligibility/eligibility.csv`. Coverage counts live in
 [stats.md](stats.md#eligibility).
 
@@ -25,10 +24,10 @@ It also stamps three **signal-completeness** columns (independent of the
 components (`openssf_crit`, `eco_crit`, `top_eco_pct`) and risk components
 (`concentration`, `complexity`, `security`, `workload`) carry a real
 (non-empty, **non-zero**) value, and `complete = value_comps ≥ 2 AND
-risk_comps = 4` flags a repo with full coverage. Archived repos are in the
-risk stage too, so they carry real risk scores and can be `complete` —
-including empty-tree stubs, whose complexity/workload score as measured
-zeros (floor percentiles) rather than staying blank.
+risk_comps = 4` flags a repo with full coverage. Archived repos are now in the
+risk stage too, so they carry real risk scores and can be `complete`; the only
+repos left `risk_comps < 4` are those whose archived snapshot has no source to
+measure (scc 0-loc → blank complexity/workload).
 
 ## Scope
 
@@ -76,14 +75,11 @@ Eligibility
 │                                     (data/value/overrides.csv rows with a
 │                                      non-github git_url, e.g. bminor/glibc)
 │
-├── code — Has source code (derived in build_eligibility)
-│   └── loc_eoy > 0                 ← data/risk/complexity.csv (scc snapshot)
-│
 └── Final rollup (→ eligibility.csv)
-    └── eligible = oss AND intent AND nonprofit AND active AND code
+    └── eligible = oss AND intent AND nonprofit AND active
 ```
 
-## The five checks
+## The four checks
 
 ### `oss` — OSI-approved license
 
@@ -136,25 +132,6 @@ the table.
 
 `active = NOT eol AND (NOT archived OR mirror)`.
 
-### `code` — the repo has source code
-
-Derived directly in `build_eligibility` from the risk stage's complexity
-snapshot (`data/risk/complexity.csv` `loc_eoy`, the scc measurement of the
-repo's most recent code-bearing end-of-year tree): `code = loc_eoy > 0`.
-There is no per-dimension CSV — the auditable detail (`loc_eoy`, `loc_year`)
-already lives in `complexity.csv`.
-
-`False` means scc measured zero source lines at every snapshot — an archived
-stub whose default branch was stripped to a README (e.g.
-`bincode-org/bincode`, `isaacs/inflight-deprecated-do-not-use`). There is no
-code to fund, so the repo is ineligible regardless of its other flags. A
-missing measurement also reads `False`, but complexity covers 100% of the
-scope so in practice this only ever reflects a measured zero. Note the check
-is per-snapshot, not per-current-tree: a repo whose code was removed *after*
-its last measured snapshot (e.g. `googleapis/python-cloud-core`, emptied in
-2026 after a code-bearing 2025 snapshot) stays `code=True` until a newer
-snapshot is measured.
-
 ## Stage overrides — `data/eligibility/overrides.csv`
 
 One curated row per repo, shared by two builders:
@@ -179,7 +156,7 @@ this file is only for eligibility-stage judgments.)
 - `active.csv` — `repo, repo_id, eol, archived, mirror, active`
 - `funding.csv` — funding signals + score per repo
   (schema in [components/funding.md](components/funding.md))
-- `eligibility.csv` — `repo, repo_id, oss, intent, nonprofit, active, code, eligible, value_comps, risk_comps, complete`
+- `eligibility.csv` — `repo, repo_id, oss, intent, nonprofit, active, eligible`
 
 ## Running
 
