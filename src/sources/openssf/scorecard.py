@@ -563,8 +563,15 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-async def _run_gitlab(args: argparse.Namespace) -> None:
-    """Score GitLab projects (per-host tokens) → same data.json + openssf.csv."""
+async def _run_gitlab(args: argparse.Namespace,
+                      only_repo_ids: set[str] | None = None) -> None:
+    """Score GitLab projects (per-host tokens) → same data.json + openssf.csv.
+
+    `only_repo_ids` restricts targets to those repo_ids — the pipeline passes
+    the top-scope gl/ ids so a bare run scores ONLY what risk.csv needs
+    (same lean-fetch discipline as the GitHub pass), never the whole
+    gitlab/repos.csv backlog. Explicit --gitlab runs stay unrestricted.
+    """
     from src.sources.gitlab.gitlab_client import load_token_map
 
     if args.repos or args.file:
@@ -574,6 +581,8 @@ async def _run_gitlab(args: argparse.Namespace) -> None:
     hosts = set(args.host) if args.host else None
     classes = set(args.classes) if args.classes else None
     targets = load_gitlab_targets(hosts, classes)
+    if only_repo_ids is not None:
+        targets = [t for t in targets if t["repo_id"] in only_repo_ids]
     token_map = load_token_map()
 
     # A token gets a host more checks + higher rate limits, but self-hosted
@@ -652,6 +661,20 @@ async def main() -> None:
     display_summary(results)
     console.print(f"\n[green]Raw JSON  → {DEFAULT_DATA_OUTPUT}[/green]")
     console.print(f"[green]Long CSV  → {DEFAULT_LONG_OUTPUT}[/green]")
+
+    # The risk scope includes GitLab-hosted repos, and the pipeline invokes
+    # this module bare — without this, GitLab repos silently never get an
+    # openssf_score (16 blank salsa/inria/freedesktop rows observed). Scoped
+    # to the TOP repos' gl/ ids only (lean-fetch discipline: a bare run
+    # fetches exactly what risk.csv needs); its already-scored skip keeps
+    # repeat runs incremental. Full-backlog scoring stays manual: --gitlab.
+    if not args.repos and not args.file:
+        from src.common.repos import load_top_repos
+        top_gl_ids = {e.repo_id for e in load_top_repos(skip_archived=False)
+                      if e.repo_id.startswith("gl/")}
+        if top_gl_ids:
+            console.print("\n[bold]GitLab pass (top-scope only)[/bold]")
+            await _run_gitlab(args, only_repo_ids=top_gl_ids)
 
 
 if __name__ == "__main__":
