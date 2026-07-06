@@ -13,20 +13,28 @@ Run:
     uv run src/sources/npm/fetch_npm_data.py --max-rounds 3
     uv run src/sources/npm/fetch_npm_data.py --concurrency 20
     uv run src/sources/npm/fetch_npm_data.py --limit 50   # test mode
+
+NPM_TOKEN (optional, in .env) Bearer-auths requests to registry.npmjs.org
+(dependency lookups) for a higher rate limit there. api.npmjs.org/downloads
+is a separate, public unauthenticated stats endpoint and ignores it.
 """
 
 import argparse
 import asyncio
 import csv
 import os
+import random
 import time
 from collections import defaultdict
 from datetime import datetime, timezone
 
 import aiohttp
+from dotenv import load_dotenv
 from rich.console import Console
 from rich.table import Table
 from tqdm import tqdm
+
+load_dotenv()
 
 RAW_DOWNLOADS = "data/sources/npm/raw/downloads.csv"
 RAW_DEPS      = "data/sources/npm/raw/dependencies.csv"
@@ -34,11 +42,25 @@ NPM_DOWNLOADS = "https://api.npmjs.org/downloads/point"
 NPM_REGISTRY  = "https://registry.npmjs.org"
 YEARS         = [2021, 2022, 2023, 2024, 2025]
 BATCH_SIZE    = 128
-CONCURRENCY   = 5
-MAX_RETRIES   = 4
-RETRY_BACKOFF = [5, 15, 30, 60]
-RATE_PER_SEC  = 5.0
+# npm publishes no fixed req/s number for either host (their docs only commit
+# to 128 pkgs/365 days per bulk downloads call, already BATCH_SIZE). Empirically
+# verified: a sustained 1.0 req/s held clean (60/60 requests, 0 429s over 94s),
+# while 2.0 req/s sustained triggered continuous 429s (confirmed via isolated
+# reproduction — not a burst/concurrency effect, and not a long-lived IP block:
+# short bursts at 2.0 succeeded too; only sustained load surfaced it). Rate
+# limiter enforces this globally regardless of CONCURRENCY, so concurrency only
+# affects in-flight parallelism, not throughput.
+CONCURRENCY   = 3
+# Observed npm behaviour: a freshly started client gets ~90-120s of solid 429s
+# before requests start flowing (rolling-window budget), so retries must
+# survive that warm-up. 5 tiers ≈ 200s of cumulative tolerance.
+MAX_RETRIES   = 5
+RETRY_BACKOFF = [5, 15, 30, 60, 90]
+RATE_PER_SEC  = 1.0
 USER_AGENT    = "osendowment-model/1.0 (research; +https://endowment.dev)"
+NPM_TOKEN     = os.environ.get("NPM_TOKEN", "")
+
+FETCH_FAILED = object()  # sentinel: retries exhausted, no real answer — must never stand in for a real 0/empty
 
 console = Console()
 
@@ -123,14 +145,88 @@ class RateLimiter:
         self._rate = rate
         self._lock = asyncio.Lock()
         self._last = 0.0
+        self._pause_until = 0.0
+
+    def pause(self, seconds: float) -> None:
+        """Hold ALL requests for `seconds` — call on a 429 so concurrent tasks
+        wait out the throttle window together instead of each burning a
+        request (and collecting its own 429) probing the same window. npm's
+        Retry-After is always 0, so callers pass their backoff tier."""
+        now = asyncio.get_event_loop().time()
+        self._pause_until = max(self._pause_until, now + seconds)
 
     async def acquire(self) -> None:
         async with self._lock:
-            now  = asyncio.get_event_loop().time()
-            wait = self._last + 1.0 / self._rate - now
-            if wait > 0:
-                await asyncio.sleep(wait)
+            while True:
+                now  = asyncio.get_event_loop().time()
+                wait = max(self._last + 1.0 / self._rate - now,
+                           self._pause_until - now)
+                if wait <= 0:
+                    break
+                await asyncio.sleep(wait)  # loop: pause_until may extend while sleeping
             self._last = asyncio.get_event_loop().time()
+
+
+def _backoff_wait(attempt: int, retry_after: str | None = None) -> float:
+    """Seconds to sleep before retrying. Honours a server Retry-After header
+    when present and positive (some 429s send "0", which is not a real
+    signal to retry immediately — fall back to our schedule instead), else
+    our fixed schedule; jitter desyncs concurrent requests that would
+    otherwise all retry in lockstep."""
+    parsed = float(retry_after) if retry_after and retry_after.isdigit() else None
+    base = parsed if parsed and parsed > 0 else RETRY_BACKOFF[min(attempt, len(RETRY_BACKOFF) - 1)]
+    return base + random.uniform(0, base * 0.2)
+
+
+class FetchProgress:
+    """Shared counters for periodic plain-text status logging.
+
+    tqdm's carriage-return progress bar is unreadable once stdout is
+    redirected to a log file (every update overwrites the same line, so a
+    file tail shows one giant line). This gives a plain, newline-terminated
+    summary a log-file reader can grep/tail directly, without needing to know
+    it must convert \\r to \\n first.
+    """
+
+    def __init__(self) -> None:
+        self.waits = 0
+        self.exhausted = 0
+        self.ok = 0          # HTTP 200 with data
+        self.not_found = 0   # HTTP 404 (package/year didn't exist)
+        self.timeouts = 0    # request timed out / transport error
+        self.errors = 0      # other HTTP errors
+
+    def wait(self) -> None:
+        self.waits += 1
+
+    def exhaust(self) -> None:
+        self.exhausted += 1
+
+
+async def _log_status_periodically(
+    label: str, bar: tqdm, progress: FetchProgress, interval: float = 20.0,
+    raw_dl: dict | None = None, flush_every: int = 3,
+) -> None:
+    """Print one clean status line every `interval` seconds until cancelled.
+
+    When `raw_dl` is given, also flush it to disk every `flush_every` ticks so
+    a killed/crashed run keeps its partial per-year data instead of losing
+    everything fetched since the last completion-gated save.
+    """
+    t0 = time.monotonic()
+    tick = 0
+    while True:
+        await asyncio.sleep(interval)
+        tick += 1
+        print(
+            f"[status] {label} t={time.monotonic() - t0:.0f}s "
+            f"done={bar.n}/{bar.total} ok={progress.ok} 404={progress.not_found} "
+            f"429_waits={progress.waits} timeouts={progress.timeouts} "
+            f"errors={progress.errors} exhausted={progress.exhausted}",
+            flush=True,
+        )
+        if raw_dl is not None and tick % flush_every == 0:
+            write_raw_downloads(raw_dl)
 
 
 # ── npm downloads API ─────────────────────────────────────────────────────────
@@ -147,8 +243,10 @@ async def fetch_downloads_batch(
     year: int,
     pkgs: list[str],
     bar: tqdm | None = None,
+    progress: FetchProgress | None = None,
 ) -> tuple[int, dict[str, int | None]]:
-    """Return {pkg: count} where None means the package didn't exist that year."""
+    """Return {pkg: count} where None means the package didn't exist that year,
+    FETCH_FAILED means retries were exhausted — never a real 0."""
     url = f"{NPM_DOWNLOADS}/{year}-01-01:{year}-12-31/{','.join(pkgs)}"
     async with sem:
         for attempt in range(MAX_RETRIES):
@@ -156,15 +254,19 @@ async def fetch_downloads_batch(
             try:
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=60)) as r:
                     if r.status == 404:
+                        if progress: progress.not_found += 1
                         return year, {p: None for p in pkgs}
                     if r.status == 429:
-                        wait = RETRY_BACKOFF[min(attempt, len(RETRY_BACKOFF) - 1)]
-                        if bar: bar.set_description(f"  downloads [rate limit — waiting {wait}s]")
+                        if progress: progress.wait()
+                        wait = _backoff_wait(attempt, r.headers.get("Retry-After"))
+                        rl.pause(wait)  # hold ALL tasks — don't let others probe the same window
+                        if bar: bar.set_description(f"  downloads [rate limit — waiting {wait:.0f}s]")
                         await asyncio.sleep(wait)
                         if bar: bar.set_description("  downloads")
                         continue
                     r.raise_for_status()
                     data = await r.json(content_type=None)
+                    if progress: progress.ok += 1
                     if "downloads" in data:
                         # single-package response — None means not found
                         dl = data.get("downloads")
@@ -174,16 +276,25 @@ async def fetch_downloads_batch(
                         p: None if info is None else (info.get("downloads") or 0)
                         for p, info in data.items()
                     }
-            except Exception:
+            except asyncio.TimeoutError:
+                if progress: progress.timeouts += 1
                 if attempt < MAX_RETRIES - 1:
-                    wait = RETRY_BACKOFF[min(attempt, len(RETRY_BACKOFF) - 1)]
-                    if bar: bar.set_description(f"  downloads [retry {attempt + 1}/{MAX_RETRIES} in {wait}s]")
+                    wait = _backoff_wait(attempt)
+                    if bar: bar.set_description(f"  downloads [timeout — retry {attempt + 1}/{MAX_RETRIES} in {wait:.0f}s]")
                     await asyncio.sleep(wait)
                     if bar: bar.set_description("  downloads")
-    return year, {p: 0 for p in pkgs}  # failed after retries — treat as unknown
+            except Exception:
+                if progress: progress.errors += 1
+                if attempt < MAX_RETRIES - 1:
+                    wait = _backoff_wait(attempt)
+                    if bar: bar.set_description(f"  downloads [retry {attempt + 1}/{MAX_RETRIES} in {wait:.0f}s]")
+                    await asyncio.sleep(wait)
+                    if bar: bar.set_description("  downloads")
+    if progress: progress.exhaust()
+    return year, {p: FETCH_FAILED for p in pkgs}  # retries exhausted — unresolved, retried next round
 
 
-SAVE_INTERVAL = 200  # save raw_dl to disk every N completed packages
+SAVE_INTERVAL = 50  # save raw_dl to disk every N completed packages
 
 
 def _apply_short_circuit(
@@ -205,59 +316,141 @@ def _apply_short_circuit(
             return
 
 
+async def fetch_package_downloads(
+    session: aiohttp.ClientSession,
+    sem: asyncio.Semaphore,
+    rl: RateLimiter,
+    pkg: str,
+    raw_dl: dict,
+    bar: tqdm | None = None,
+    progress: FetchProgress | None = None,
+) -> bool:
+    """Fetch one scoped package's missing years sequentially, newest first.
+
+    npm's bulk endpoint rejects scoped names ("scoped packages are not
+    currently supported in bulk lookups"), so one request per (package, year)
+    is the minimum. Fetching a package's years inside ONE task — rather than
+    scattering them across a year-grouped task list — means packages complete
+    (and get persisted) steadily from the start of the run instead of only
+    after the final year's task queue drains at the very end.
+
+    Writes fetched years straight into raw_dl, never touching years already
+    present. A 404 year means the package didn't exist then — that year and
+    all earlier missing years are recorded as 0 without further requests.
+    Returns True if the package now has all YEARS present, False if a fetch
+    exhausted retries (gap left for the next round — never a fake 0).
+    """
+    # `sem` gates WHOLE packages, not individual requests. asyncio semaphores
+    # are FIFO: were each year-request to re-acquire a shared request-level
+    # semaphore, a package's year-2 request would queue behind every other
+    # package's year-1 request, degrading execution to year-grouped order —
+    # where no package completes until the very end of the run. Holding the
+    # slot for all of a package's years keeps completions steady.
+    async with sem:
+        inner = asyncio.Semaphore(1)  # fetch_downloads_batch requires a sem; years here run sequentially anyway
+        needed = [y for y in sorted(YEARS, reverse=True) if (pkg, y) not in raw_dl]
+        for i, year in enumerate(needed):
+            _, res = await fetch_downloads_batch(session, inner, rl, year, [pkg], bar, progress)
+            count = res[pkg]
+            if count is FETCH_FAILED:
+                return False
+            if count is None:
+                # didn't exist this year — this and all earlier missing years are 0
+                for y2 in needed[i:]:
+                    raw_dl[(pkg, y2)] = {"package": pkg, "year": y2, "downloads": 0}
+                break
+            raw_dl[(pkg, year)] = {"package": pkg, "year": year, "downloads": count}
+        return True
+
+
 async def _fetch_downloads_async(
     packages: list[str],
     concurrency: int,
     raw_dl: dict,
     bar: tqdm,
-) -> None:
-    """One session, all (year × batch) tasks at once. Saves raw_dl every SAVE_INTERVAL packages."""
+) -> int:
+    """One session; bulk batches for unscoped, one sequential task per scoped
+    package. Saves raw_dl every SAVE_INTERVAL completed packages. Returns the
+    number of packages left unresolved (retries exhausted)."""
     unscoped = [p for p in packages if not p.startswith("@")]
     scoped   = [p for p in packages if p.startswith("@")]
 
-    all_tasks = (
-        [(y, b) for y in YEARS for b in batches(unscoped, BATCH_SIZE)]
-        + [(y, [p]) for y in YEARS for p in scoped]
-    )
+    sem        = asyncio.Semaphore(concurrency)
+    rl         = RateLimiter(RATE_PER_SEC)
+    progress   = FetchProgress()
+    n_done     = 0
+    unresolved = 0
 
-    sem     = asyncio.Semaphore(concurrency)
-    rl      = RateLimiter(RATE_PER_SEC)
-    pkg_yrs: dict[str, dict[int, int | None]] = {p: {} for p in packages}
-    waiting: dict[str, int] = {p: len(YEARS) for p in packages}  # year results still outstanding
-    n_done  = 0
+    # DummyCookieJar: do NOT persist Cloudflare's per-session _cfuvid cookie.
+    # A long-running session that carries a rate-limit-flagged _cfuvid keeps
+    # being throttled on every retry, while a cookieless client (like curl)
+    # gets a fresh budget — observed directly: curl succeeded instantly while
+    # a cookied session was stuck in continuous 429s from the same IP.
+    async with aiohttp.ClientSession(
+        headers={"User-Agent": USER_AGENT},
+        cookie_jar=aiohttp.DummyCookieJar(),
+    ) as session:
+        status_task = asyncio.ensure_future(
+            _log_status_periodically("downloads", bar, progress, raw_dl=raw_dl))
+        try:
+            # ── unscoped: bulk-batched, ~5 requests per 128 packages ──
+            if unscoped:
+                pkg_yrs: dict[str, dict[int, int | None]] = {p: {} for p in unscoped}
+                waiting: dict[str, int] = {p: len(YEARS) for p in unscoped}
+                futs = [
+                    asyncio.ensure_future(fetch_downloads_batch(session, sem, rl, y, b, bar, progress))
+                    for y in YEARS for b in batches(unscoped, BATCH_SIZE)
+                ]
+                for fut in asyncio.as_completed(futs):
+                    year, res = await fut
+                    newly_complete: list[str] = []
+                    for pkg, count in res.items():
+                        if year in pkg_yrs[pkg]:
+                            continue  # already filled by short-circuit
+                        if count is FETCH_FAILED:
+                            continue  # unresolved — retried next round
+                        pkg_yrs[pkg][year] = count
+                        waiting[pkg] -= 1
+                        if count is None:
+                            # package didn't exist this year — pre-fill earlier years
+                            for earlier in YEARS:
+                                if earlier < year and earlier not in pkg_yrs[pkg]:
+                                    pkg_yrs[pkg][earlier] = 0
+                                    waiting[pkg] -= 1
+                        if waiting[pkg] == 0:
+                            newly_complete.append(pkg)
+                    for pkg in newly_complete:
+                        _apply_short_circuit(pkg, pkg_yrs[pkg], raw_dl)
+                        bar.update(1)
+                        n_done += 1
+                    if newly_complete and n_done % SAVE_INTERVAL < len(newly_complete):
+                        write_raw_downloads(raw_dl)
+                unresolved += sum(1 for p in unscoped if waiting[p] > 0)
 
-    async with aiohttp.ClientSession(headers={"User-Agent": USER_AGENT}) as session:
-        futs = [
-            asyncio.ensure_future(fetch_downloads_batch(session, sem, rl, y, b, bar))
-            for y, b in all_tasks
-        ]
-        for fut in asyncio.as_completed(futs):
-            year, res = await fut
-            newly_complete: list[str] = []
-
-            for pkg, count in res.items():
-                if year in pkg_yrs[pkg]:
-                    continue  # already filled by short-circuit
-                pkg_yrs[pkg][year] = count
-                waiting[pkg] -= 1
-                if count is None:
-                    # package didn't exist this year — pre-fill all earlier years
-                    for earlier in YEARS:
-                        if earlier < year and earlier not in pkg_yrs[pkg]:
-                            pkg_yrs[pkg][earlier] = 0
-                            waiting[pkg] -= 1
-                if waiting[pkg] == 0:
-                    newly_complete.append(pkg)
-
-            for pkg in newly_complete:
-                _apply_short_circuit(pkg, pkg_yrs[pkg], raw_dl)
-                bar.update(1)
-                n_done += 1
-
-            if newly_complete and n_done % SAVE_INTERVAL < len(newly_complete):
-                write_raw_downloads(raw_dl)
+            # ── scoped: one task per package, its years fetched sequentially ──
+            if scoped:
+                futs = [
+                    asyncio.ensure_future(
+                        fetch_package_downloads(session, sem, rl, p, raw_dl, bar, progress))
+                    for p in scoped
+                ]
+                for fut in asyncio.as_completed(futs):
+                    if not await fut:
+                        unresolved += 1
+                        continue
+                    bar.update(1)
+                    n_done += 1
+                    if n_done % SAVE_INTERVAL == 0:
+                        write_raw_downloads(raw_dl)
+        finally:
+            status_task.cancel()
+            try:
+                await status_task
+            except asyncio.CancelledError:
+                pass
 
     write_raw_downloads(raw_dl)  # final flush
+    return unresolved
 
 
 # ── npm registry deps ─────────────────────────────────────────────────────────
@@ -268,7 +461,9 @@ async def fetch_deps_one(
     rl: RateLimiter,
     package: str,
     bar: tqdm | None = None,
-) -> tuple[str, list[tuple[str, str]]]:
+) -> tuple[str, list[tuple[str, str]] | None]:
+    """Return (package, deps). deps is None when retries were exhausted —
+    never treat that the same as a package confirmed to have zero deps."""
     url = f"{NPM_REGISTRY}/{package}/latest"
     async with sem:
         for attempt in range(MAX_RETRIES):
@@ -278,8 +473,9 @@ async def fetch_deps_one(
                     if r.status == 404:
                         return package, []
                     if r.status == 429:
-                        wait = RETRY_BACKOFF[min(attempt, len(RETRY_BACKOFF) - 1)]
-                        if bar: bar.set_description(f"  deps [rate limit — waiting {wait}s]")
+                        wait = _backoff_wait(attempt, r.headers.get("Retry-After"))
+                        rl.pause(wait)  # hold ALL tasks — don't let others probe the same window
+                        if bar: bar.set_description(f"  deps [rate limit — waiting {wait:.0f}s]")
                         await asyncio.sleep(wait)
                         if bar: bar.set_description("  deps")
                         continue
@@ -288,19 +484,29 @@ async def fetch_deps_one(
                     return package, list((data.get("dependencies") or {}).items())
             except Exception:
                 if attempt < MAX_RETRIES - 1:
-                    wait = RETRY_BACKOFF[min(attempt, len(RETRY_BACKOFF) - 1)]
-                    if bar: bar.set_description(f"  deps [retry {attempt + 1}/{MAX_RETRIES} in {wait}s]")
+                    wait = _backoff_wait(attempt)
+                    if bar: bar.set_description(f"  deps [retry {attempt + 1}/{MAX_RETRIES} in {wait:.0f}s]")
                     await asyncio.sleep(wait)
                     if bar: bar.set_description("  deps")
-    return package, []
+    return package, None  # retries exhausted — unresolved, retried next round
+
+
+def _registry_headers() -> dict[str, str]:
+    headers = {"User-Agent": USER_AGENT}
+    if NPM_TOKEN:
+        headers["Authorization"] = f"Bearer {NPM_TOKEN}"
+    return headers
 
 
 async def fetch_all_deps(
     packages: list[str], concurrency: int, bar: tqdm | None = None
-) -> dict[str, list[tuple[str, str]]]:
+) -> dict[str, list[tuple[str, str]] | None]:
     sem = asyncio.Semaphore(concurrency)
     rl  = RateLimiter(RATE_PER_SEC)
-    async with aiohttp.ClientSession(headers={"User-Agent": USER_AGENT}) as session:
+    async with aiohttp.ClientSession(
+        headers=_registry_headers(),
+        cookie_jar=aiohttp.DummyCookieJar(),  # see downloads session — don't carry a flagged _cfuvid
+    ) as session:
         futs = [asyncio.ensure_future(fetch_deps_one(session, sem, rl, p, bar)) for p in packages]
         results = []
         for fut in asyncio.as_completed(futs):
@@ -322,6 +528,8 @@ def fetch_and_save_deps(packages: list[str], concurrency: int = CONCURRENCY) -> 
             deps_data = asyncio.run(fetch_all_deps(chunk, concurrency, bar=bar))
             now       = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")
             for pkg, deps in deps_data.items():
+                if deps is None:
+                    continue  # retries exhausted — leave unfetched, retried next round
                 if deps:
                     raw_deps[pkg] = [(dep_name, dep_ver, now) for dep_name, dep_ver in deps if dep_name]
                     edge_count += len(raw_deps[pkg])
@@ -331,11 +539,11 @@ def fetch_and_save_deps(packages: list[str], concurrency: int = CONCURRENCY) -> 
     return edge_count
 
 
-def fetch_and_save_downloads(packages: list[str], concurrency: int = CONCURRENCY) -> None:
-    """One asyncio.run(), one session, all years dispatched at once."""
+def fetch_and_save_downloads(packages: list[str], concurrency: int = CONCURRENCY) -> int:
+    """One asyncio.run(), one session. Returns the unresolved-package count."""
     raw_dl = load_raw_downloads()
     with tqdm(total=len(packages), desc="  downloads", unit="pkg") as bar:
-        asyncio.run(_fetch_downloads_async(packages, concurrency, raw_dl, bar))
+        return asyncio.run(_fetch_downloads_async(packages, concurrency, raw_dl, bar))
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
@@ -382,8 +590,17 @@ def main() -> None:
             pkgs = sorted(missing_dl)[:args.limit] if args.limit else sorted(missing_dl)
             console.print(f"\n  Fetching downloads for {len(pkgs):,} packages …")
             t = time.perf_counter()
-            fetch_and_save_downloads(pkgs, args.concurrency)
-            console.print(f"  Done ({time.perf_counter()-t:.1f}s)")
+            unresolved = fetch_and_save_downloads(pkgs, args.concurrency)
+            console.print(
+                f"  Done ({time.perf_counter()-t:.1f}s)"
+                + (f" — [yellow]{unresolved} unresolved (retries exhausted)[/yellow]"
+                   if unresolved else "")
+            )
+            if unresolved:
+                # npm's rolling-window throttle caused the exhaustion; barging
+                # straight into the next round just re-triggers it.
+                console.print("  [yellow]cooling down 60s before continuing[/yellow]")
+                time.sleep(60)
 
         if need_deps:
             pkgs = sorted(need_deps)[:args.limit] if args.limit else sorted(need_deps)
