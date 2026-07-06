@@ -28,11 +28,11 @@ row; the post-scope stages are each expressed against `top repos`.
 | valid repos | 11,466 | 94.9% | repos | upstream resolves — GitHub/GitLab API or git ls-remote |
 | class-A repos | 953 | 8.3% | valid | strongest class = A (≤75% cumulative PageRank share) |
 | **top repos** | **940** | **98.6%** | class A | valid class-A on GitHub+GitLab, archived included — the risk/eligibility scope |
-| value_score present | 920 | 97.9% | top repos | ≥2 value components (openssf_crit / eco_crit / top_eco_pct) |
+| value_score present | 940 | 100% | top repos | ≥2 value components (openssf_crit / eco_crit / top_eco_pct) |
 | risk_score present | 940 | 100% | top repos | all four risk dimensions scored |
-| fully scored | 920 | 97.9% | top repos | value_score × risk_score → preview `score` |
+| fully scored | 940 | 100% | top repos | value_score × risk_score → preview `score` |
 | **eligible** | **665** | **70.7%** | top repos | oss AND intent AND nonprofit AND active |
-| priority-ranked | 647 | 68.8% | top repos | eligible AND fully scored → preview `priority` |
+| priority-ranked | 665 | 70.7% | top repos | eligible AND fully scored → preview `priority` |
 
 
 ## Value
