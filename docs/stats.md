@@ -24,15 +24,15 @@ row; the post-scope stages are each expressed against `top repos`.
 | Stage | Count | % | of | Comment |
 |---|--:|--:|---|---|
 | packages (after dep tree) | 17,590 | — | — | package universe across the four ecosystems |
-| distinct repos | 12,090 | 68.7% | packages | package→repo union (any host), incl. url-less orphans |
-| valid repos | 11,349 | 93.9% | repos | upstream resolves — GitHub/GitLab API or git ls-remote |
-| class-A repos | 953 | 8.4% | valid | strongest class = A (≤75% cumulative PageRank share) |
+| distinct repos | 12,081 | 68.7% | packages | package→repo union (any host), incl. url-less orphans |
+| valid repos | 11,464 | 94.9% | repos | upstream resolves — GitHub/GitLab API or git ls-remote |
+| class-A repos | 953 | 8.3% | valid | strongest class = A (≤75% cumulative PageRank share) |
 | **top repos** | **940** | **98.6%** | class A | valid class-A on GitHub+GitLab, archived included — the risk/eligibility scope |
-| value_score present | 917 | 97.6% | top repos | ≥2 value components (openssf_crit / eco_crit / top_eco_pct) |
+| value_score present | 920 | 97.9% | top repos | ≥2 value components (openssf_crit / eco_crit / top_eco_pct) |
 | risk_score present | 940 | 100% | top repos | all four risk dimensions scored |
-| fully scored | 917 | 97.6% | top repos | value_score × risk_score → preview `score` |
+| fully scored | 920 | 97.9% | top repos | value_score × risk_score → preview `score` |
 | **eligible** | **665** | **70.7%** | top repos | oss AND intent AND nonprofit AND active |
-| priority-ranked | 645 | 68.6% | top repos | eligible AND fully scored → preview `priority` |
+| priority-ranked | 647 | 68.8% | top repos | eligible AND fully scored → preview `priority` |
 
 
 ## Value
@@ -74,10 +74,10 @@ recorded, not pulled into scope.
 
 | Step | A | B | C | Total | Comment |
 |---|--:|--:|--:|--:|---|
-| Packages | 3,388 | 4,734 | 9,468 | 17,590 | package universe (after dep tree) |
-| GitHub total repos | 3,350 | 4,336 | 8,301 | 15,987 | package appearances in a github group |
-| GitHub unique repos | 915 | 2,740 | 6,873 | 10,528 | deduped; + 1,562 orphans = 12,090 repos |
-| **Valid repos** | **947** | **2,986** | **7,416** | **11,349** | upstream resolves — github/gitlab API or non-github ls-remote; incl. archived mirrors |
+| Packages | 3,392 | 4,736 | 9,462 | 17,590 | package universe (after dep tree) |
+| GitHub total repos | 3,354 | 4,377 | 8,358 | 16,089 | package appearances in a github group |
+| GitHub unique repos | 915 | 2,776 | 6,928 | 10,619 | deduped; + 1,462 orphans = 12,081 repos |
+| **Valid repos** | **947** | **3,016** | **7,501** | **11,464** | upstream resolves — github/gitlab API or non-github ls-remote; incl. archived mirrors |
 
 ### Value score coverage
 
@@ -104,11 +104,11 @@ Cumulative-PageRank-share cutoffs: A ≤75%, B ≤95%, C rest.
 | npm | 570 | 1,403 | 2,387 |
 | pypi | 165 | 636 | 1,711 |
 | crates | 132 | 528 | 2,982 |
-| cpp | 88 | 571 | 967 |
-| **Repos** | **953** | **3,132** | **8,005** |
-| GitHub % | 96.0% | 87.5% | 85.9% |
-| Git % | 99.4% | 96.1% | 93.6% |
-| Valid % | 99.4% | 95.3% | 92.6% |
+| cpp | 88 | 568 | 968 |
+| **Repos** | **953** | **3,128** | **8,000** |
+| GitHub % | 96.0% | 88.7% | 86.6% |
+| Git % | 99.4% | 97.2% | 94.8% |
+| Valid % | 99.4% | 96.4% | 93.8% |
 
 
 ## Risk
@@ -184,7 +184,7 @@ git churn at the per-year EOY sha.
 | input top repos | 940 | 100% |
 | lines of code (scc) | 940 | 100% |
 | cyclomatic max (lizard) | 940 | 100% |
-| cognitive max (lizard) | 939 | 99.9% |
+| cognitive max (lizard) | 940 | 100% |
 | churn 5y | 882 | 93.8% |
 | **Complexity score** | **940** | **100%** |
 

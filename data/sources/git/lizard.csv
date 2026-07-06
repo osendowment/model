@@ -6122,10 +6122,13 @@ scikit-learn/scikit-learn,gh/843222,https://github.com/scikit-learn/scikit-learn
 scikit-learn/scikit-learn,gh/843222,https://github.com/scikit-learn/scikit-learn.git,04c9f3eee9dafa76b92bc589e55e700398ca6e10,cyclomatic_max,71,2026-05-18T17:46:44Z
 scikit-learn/scikit-learn,gh/843222,https://github.com/scikit-learn/scikit-learn.git,04c9f3eee9dafa76b92bc589e55e700398ca6e10,cyclomatic_total,28958,2026-05-18T17:46:44Z
 scikit-learn/scikit-learn,gh/843222,https://github.com/scikit-learn/scikit-learn.git,04c9f3eee9dafa76b92bc589e55e700398ca6e10,files,938,2026-06-28T17:33:06Z
-scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,cyclomatic_avg,2.96,2026-05-18T23:45:33Z
-scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,cyclomatic_max,252,2026-05-18T23:45:33Z
-scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,cyclomatic_total,83975,2026-05-18T23:45:33Z
-scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,files,1648,2026-05-18T23:45:33Z
+scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,cognitive_avg,3.17,2026-07-06T17:12:43Z
+scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,cognitive_max,537,2026-07-06T17:12:43Z
+scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,cognitive_total,90444,2026-07-06T17:12:43Z
+scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,cyclomatic_avg,2.96,2026-07-06T17:12:43Z
+scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,cyclomatic_max,252,2026-07-06T17:12:43Z
+scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,cyclomatic_total,83975,2026-07-06T17:12:43Z
+scipy/scipy,gh/1460385,https://github.com/scipy/scipy.git,2335807e25747c4dd41ba0c939b181168512a7c2,files,1648,2026-07-06T17:12:43Z
 seanmonstar/reqwest,gh/62350380,https://github.com/seanmonstar/reqwest.git,b34756641647f0d9f0a9177eb9d74a943d2fb02d,cognitive_avg,1.05,2026-06-28T17:33:06Z
 seanmonstar/reqwest,gh/62350380,https://github.com/seanmonstar/reqwest.git,b34756641647f0d9f0a9177eb9d74a943d2fb02d,cognitive_max,198,2026-06-28T17:33:06Z
 seanmonstar/reqwest,gh/62350380,https://github.com/seanmonstar/reqwest.git,b34756641647f0d9f0a9177eb9d74a943d2fb02d,cognitive_total,1393,2026-06-28T17:33:06Z

@@ -5,6 +5,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 797,tarcieri,True,ok,2026-07-05T18:37:01+00:00
 1270,haberman,False,ok,2026-07-05T18:37:00+00:00
 1377,stefanpenner,False,ok,2026-07-05T18:36:59+00:00
+1665,ebassi,False,ok,2026-07-06T17:14:31+00:00
 1839,chriseppstein,False,ok,2026-07-05T18:36:53+00:00
 1938,eventualbuddha,False,ok,2026-07-05T18:36:55+00:00
 2644,jd,True,ok,2026-07-05T18:37:00+00:00
@@ -78,6 +79,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 52195,mcollina,True,ok,2026-07-05T18:36:51+00:00
 52677,dchest,False,ok,2026-07-05T18:36:55+00:00
 52799,srittau,False,ok,2026-07-05T18:36:59+00:00
+53172,pwithnall,False,ok,2026-07-06T17:14:31+00:00
 54418,brettcannon,True,ok,2026-07-05T18:36:51+00:00
 54771,whitequark,True,ok,2026-07-05T18:36:54+00:00
 54884,gitster,False,ok,2026-07-05T18:36:58+00:00
@@ -91,6 +93,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 61977,seberg,False,ok,2026-07-05T18:36:54+00:00
 63622,byron,True,ok,2026-07-05T18:36:51+00:00
 63648,sebmarkbage,False,ok,2026-07-05T18:36:54+00:00
+63962,nwellnhof,False,ok,2026-07-06T17:14:31+00:00
 64996,alexcrichton,False,ok,2026-07-05T18:36:54+00:00
 66740,zsol,False,ok,2026-07-05T18:36:57+00:00
 67512,dougwilson,False,ok,2026-07-05T18:36:58+00:00
@@ -123,6 +126,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 106176,kuba,False,ok,2026-07-05T18:36:55+00:00
 106511,andrewrk,True,ok,2026-07-05T18:36:56+00:00
 111730,pprett,False,ok,2026-07-05T18:37:01+00:00
+111994,tagoh,False,ok,2026-07-06T17:14:31+00:00
 112982,jridgewell,False,ok,2026-07-05T18:36:57+00:00
 117777,wez,True,ok,2026-07-05T18:36:54+00:00
 118266,keithamus,True,ok,2026-07-05T18:37:00+00:00
@@ -243,6 +247,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 335567,carreau,True,ok,2026-07-05T18:36:52+00:00
 340349,msullivan,False,ok,2026-07-05T18:36:53+00:00
 342993,indygreg,True,ok,2026-07-05T18:36:56+00:00
+345675,3v1n0,False,ok,2026-07-06T17:14:31+00:00
 347870,sebmaster,False,ok,2026-07-05T18:36:54+00:00
 349618,keszybz,False,ok,2026-07-05T18:37:00+00:00
 352304,kaelzhang,False,ok,2026-07-05T18:36:59+00:00
@@ -296,6 +301,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 512616,jbowler,False,ok,2026-07-05T18:37:00+00:00
 520669,dhermes,False,ok,2026-07-05T18:36:56+00:00
 522231,kevinbeaty,False,ok,2026-07-05T18:37:00+00:00
+531817,jas4711,False,ok,2026-07-06T17:14:31+00:00
 542108,lukekarrys,True,ok,2026-07-05T18:36:59+00:00
 554369,willmcgugan,True,ok,2026-07-05T18:36:54+00:00
 554612,legrandin,False,ok,2026-07-05T18:36:56+00:00
@@ -347,6 +353,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 753512,kanongil,False,ok,2026-07-05T18:36:59+00:00
 755743,kuhe,False,ok,2026-07-05T18:36:55+00:00
 757060,ichernev,False,ok,2026-07-05T18:36:56+00:00
+769861,hadess,False,ok,2026-07-06T17:14:31+00:00
 781746,jhnns,False,ok,2026-07-06T11:10:43+00:00
 789564,kapetan,False,ok,2026-07-05T18:36:59+00:00
 795070,stefwalter,False,ok,2026-07-05T18:36:59+00:00
@@ -413,6 +420,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 1131567,shinnn,False,ok,2026-07-05T18:36:56+00:00
 1136893,dcodeio,True,ok,2026-07-05T18:36:55+00:00
 1141869,tehshrike,False,ok,2026-07-05T18:37:02+00:00
+1145674,owtaylor,False,ok,2026-07-06T17:14:31+00:00
 1145762,sffc,False,ok,2026-07-05T18:36:55+00:00
 1148376,jimmywarting,True,ok,2026-07-05T18:37:01+00:00
 1162160,rich-harris,False,ok,2026-07-05T18:36:52+00:00
@@ -480,6 +488,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 1726460,jcgregorio,False,ok,2026-07-05T18:37:00+00:00
 1740641,es128,False,ok,2026-07-05T18:37:01+00:00
 1742914,arigo,False,ok,2026-07-05T18:36:57+00:00
+1745073,nmav,False,ok,2026-07-06T17:14:31+00:00
 1749548,jeffposnick,False,ok,2026-07-05T18:37:01+00:00
 1755071,adriangb,True,ok,2026-07-05T18:36:54+00:00
 1765950,elenril,False,ok,2026-07-05T18:37:00+00:00
@@ -757,6 +766,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 35119617,dmontagu,False,ok,2026-07-05T18:36:57+00:00
 35274124,douglasdwyer,False,ok,2026-07-05T18:36:58+00:00
 35884252,amoghrajesh,False,ok,2026-07-05T18:36:55+00:00
+36541154,allisonkarlitskaya,False,ok,2026-07-06T17:14:31+00:00
 37087391,urhengulas,False,ok,2026-07-05T18:36:53+00:00
 39066999,josecorella,False,ok,2026-07-05T18:36:55+00:00
 39780829,laiapat,False,ok,2026-07-05T18:36:55+00:00
@@ -813,6 +823,7 @@ user_id,login,has_sponsors_listing,status,fetched_at
 119669540,lumirlumir,True,ok,2026-07-05T18:36:59+00:00
 120408189,larhzu,False,ok,2026-07-05T18:36:55+00:00
 123121746,aws-smithy-automation,False,ok,2026-07-05T18:36:58+00:00
+133952079,fanc999-1,False,ok,2026-07-06T17:14:31+00:00
 141773976,rh-steve-grubb,False,ok,2026-07-05T18:36:52+00:00
 145818923,google-pr-creation-bot,False,ok,2026-07-05T18:36:58+00:00
 177763422,edoerpani,False,ok,2026-07-05T18:36:59+00:00

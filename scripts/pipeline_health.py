@@ -888,21 +888,42 @@ def check_overrides_integrity() -> list[Result]:
                 + (" …" if len(orphans) > 3 else "") if orphans
                 else "every (package, ecosystem) key matches an input row"))
 
+    # Rows whose key left the TOP scope but still matches a repo in the full
+    # value table are DORMANT, not orphaned: repos oscillate around the class
+    # boundary, and the curation re-applies the moment they re-enter scope.
+    # Only a key matching nothing anywhere (typo / unhandled rename) fails.
+    all_ids: set[str] = set()
+    all_owners: set[str] = set()
+    with open(ROOT / "data" / "value" / "value.csv", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            if (rid := (r.get("repo_id") or "").strip()):
+                all_ids.add(rid)
+            all_owners.add((r.get("repo") or "").split("/", 1)[0].lower())
+
     bad: list[str] = []
+    dormant: list[str] = []
     n = 0
     with open(ROOT / "data" / "eligibility" / "overrides.csv", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             n += 1
             slug = (r.get("repo") or "").strip().lower()
             if slug.endswith("/*"):
-                if slug[:-2] not in scope_owners:
-                    bad.append(slug)
-            elif (r.get("repo_id") or "").strip() not in scope_ids:
-                bad.append(slug)
-    out.append(("eligibility/overrides.csv", not bad,
-                f"{len(bad)} orphan row(s): " + ", ".join(bad[:3])
-                + (" …" if len(bad) > 3 else "") if bad
-                else f"all {n} rows target in-scope repos/owners"))
+                owner = slug[:-2]
+                if owner in scope_owners:
+                    continue
+                (dormant if owner in all_owners else bad).append(slug)
+            else:
+                rid = (r.get("repo_id") or "").strip()
+                if rid in scope_ids:
+                    continue
+                (dormant if rid in all_ids else bad).append(slug)
+    detail = (f"{len(bad)} orphan row(s): " + ", ".join(bad[:3])
+              + (" …" if len(bad) > 3 else "")) if bad else \
+             f"all {n} rows resolve" + \
+             (f" ({len(dormant)} dormant, out of top scope: " +
+              ", ".join(dormant[:3]) + (" …" if len(dormant) > 3 else "") + ")"
+              if dormant else "")
+    out.append(("eligibility/overrides.csv", not bad, detail))
 
     people_logins: set[str] = set()
     people_path = ROOT / "data" / "preview" / "people.csv"
