@@ -546,26 +546,51 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a = out.append
 
     a("### End-to-end funnel\n")
-    a("| Stage | Count | % | of | Comment |")
-    a("|---|--:|--:|---|---|")
+    a("| Stage | Count | % |")
+    a("|---|--:|--:|")
     for stage, cnt, denom, denom_label, comment in funnel_stats(v, r, e):
-        pct = _pct(cnt, denom) if denom else "—"
-        of = denom_label or "—"
+        pct = _pct(cnt, denom) if denom else ""
+        # one self-describing label: stage — comment (% is of <denominator>)
+        label = f"{stage} — {comment}" + (f" (% of {denom_label})" if denom else "")
         mark = "**" if stage in ("top repos", "eligible") else ""
-        a(f"| {mark}{stage}{mark} | {mark}{cnt:,}{mark} | {mark}{pct}{mark} "
-          f"| {of} | {comment} |")
+        a(f"| {mark}{label}{mark} | {mark}{cnt:,}{mark} | {mark}{pct}{mark} |")
+    a("")
+
+    a("### Per-ecosystem value funnel\n")
+    a("| Metric | npm | pypi | crates | cpp | Total |")
+    a("|---|--:|--:|--:|--:|--:|")
+    fu = v["funnel"]
+
+    def _eco_row(label: str, key: str) -> str:
+        vals = [fu[eco][key] for eco in ECOSYSTEMS]
+        return (f"| {label} | " + " | ".join(f"{x:,}" for x in vals)
+                + f" | {sum(vals):,} |")
+
+    def _eco_pct_row(label: str, num_key: str, den_key: str) -> str:
+        cells = [_pct(fu[eco][num_key], fu[eco][den_key]) for eco in ECOSYSTEMS]
+        tot_n = sum(fu[eco][num_key] for eco in ECOSYSTEMS)
+        tot_d = sum(fu[eco][den_key] for eco in ECOSYSTEMS)
+        return f"| {label} | " + " | ".join(cells) + f" | {_pct(tot_n, tot_d)} |"
+
+    a(_eco_row("top packages — 95% of downloads", "top"))
+    a(_eco_row("after dep tree — + transitive deps", "deps"))
+    a(_eco_row("with git URL — any host", "git"))
+    a(_eco_row("with GitHub repo", "github"))
+    a(_eco_pct_row("git URL % — of dep-tree packages", "git", "results"))
+    a(_eco_pct_row("GitHub % — of dep-tree packages", "github", "results"))
     a("")
 
     a("### Repo identity coverage\n")
-    a("| Step | A | B | C | Total | Comment |")
-    a("|---|--:|--:|--:|--:|---|")
+    a("| Step | A | B | C | Total |")
+    a("|---|--:|--:|--:|--:|")
     bc = v["by_class"]
 
     def _id_row(label: str, d: dict, comment: str, bold: bool = False) -> str:
         cells = [f"{x:,}" for x in (d["A"], d["B"], d["C"], d["A"] + d["B"] + d["C"])]
+        full = f"{label} — {comment}"
         if bold:
-            return f"| **{label}** | " + " | ".join(f"**{x}**" for x in cells) + f" | {comment} |"
-        return f"| {label} | " + " | ".join(cells) + f" | {comment} |"
+            return f"| **{full}** | " + " | ".join(f"**{x}**" for x in cells) + " |"
+        return f"| {full} | " + " | ".join(cells) + " |"
 
     a(_id_row("Packages", v["pkg_class"], "package universe (after dep tree)"))
     a(_id_row("GitHub total repos", v["ght_class"], "package appearances in a github group"))

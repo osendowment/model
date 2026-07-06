@@ -257,7 +257,7 @@ def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
         tables += 1
 
     ws.column_dimensions["A"].width = 2
-    ws.column_dimensions["B"].width = 36
+    ws.column_dimensions["B"].width = 60  # metric labels carry the folded descriptions
     for col in "CDEFGH":
         ws.column_dimensions[col].width = 14
     return tables
