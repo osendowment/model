@@ -22,8 +22,24 @@ Checks:
   6. Long-format git files have no duplicate (repo, sha, metric) keys.
   7. Every GitLab host in the data has a repo_id nickname registered in
      `HOST_NICKNAMES` (src/sources/gitlab/gitlab_client.py).
-  8. Every gl/ repo_id on disk matches the one unified shape —
-     `gl/{digits}` (gitlab.com) or `gl/{nickname}-{digits}`.
+  8. Every repo_id on disk matches the one unified id shape — `gh/{digits}`,
+     `gl/{digits}` (gitlab.com), or `gl/{nickname}-{digits}`.
+  9. Id-agreement: every in-scope slug in an id-joined source has rows under
+     the repo_id value.csv assigns it (catches silent join-drops when a
+     source stamped a different id, e.g. a GitHub mirror of a GitLab repo).
+ 10. Fetch-date cells in the contract files parse as ISO dates and are not
+     future-dated.
+ 11. data/value/validation.csv and data/value/stats.csv match fresh
+     (no-network) builder runs — stats.csv especially, since stats.py
+     --check reads it as an input and cannot see it go stale.
+ 12. The preview deliverables (repos.csv / people.csv / preview.xlsx) match
+     their builders; the xlsx is compared by cell content, not bytes.
+ 13. Curated override rows (value, eligibility, maintainer, cve-package)
+     still point at in-scope keys — an orphaned override is a silent no-op.
+ 14. The npm downloads.status sidecar is well-formed and agrees with
+     downloads.csv.
+ 15. value.csv enum domains: platform in its declared set, git_valid
+     strictly True/False.
 
 Usage:
     uv run python scripts/pipeline_health.py
@@ -37,6 +53,7 @@ import glob
 import re
 import sys
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 from rich.console import Console
@@ -61,6 +78,20 @@ def _norm(rows: list[dict]) -> dict[str, dict[str, str]]:
 def _read_csv_by_repo(path: Path) -> dict[str, dict[str, str]]:
     with open(path, encoding="utf-8") as f:
         return {r["repo"]: dict(r) for r in csv.DictReader(f)}
+
+
+def _set_diff_detail(built: dict, disk: dict) -> str:
+    """'repo set differs' detail with the actual members, not just counts."""
+    only_built = sorted(set(built) - set(disk))
+    only_disk = sorted(set(disk) - set(built))
+    bits = [f"builder {len(built)}, disk {len(disk)}"]
+    if only_built:
+        bits.append("builder-only: " + ", ".join(only_built[:3])
+                    + (" …" if len(only_built) > 3 else ""))
+    if only_disk:
+        bits.append("disk-only: " + ", ".join(only_disk[:3])
+                    + (" …" if len(only_disk) > 3 else ""))
+    return f"repo set differs ({'; '.join(bits)})"
 
 
 def _cell_diffs(built: dict, disk: dict) -> int:
@@ -100,8 +131,7 @@ def check_dimension_csvs() -> list[Result]:
         built = _norm(mod.build())
         disk = _read_csv_by_repo(path)
         if set(built) != set(disk):
-            out.append((f"{name}.csv", False,
-                        f"repo set differs (builder {len(built)}, disk {len(disk)})"))
+            out.append((f"{name}.csv", False, _set_diff_detail(built, disk)))
             continue
         diffs = _cell_diffs(built, disk)
         out.append((f"{name}.csv", diffs == 0,
@@ -118,8 +148,7 @@ def check_risk_data() -> list[Result]:
     built = _norm(rows)
     disk = _read_csv_by_repo(ROOT / "data" / "risk" / "risk.csv")
     if set(built) != set(disk):
-        return [("risk.csv", False,
-                 f"repo set differs (builder {len(built)}, disk {len(disk)})")]
+        return [("risk.csv", False, _set_diff_detail(built, disk))]
     diffs = _cell_diffs(built, disk)
     return [("risk.csv", diffs == 0,
              "in sync" if diffs == 0
@@ -133,27 +162,35 @@ def check_eligibility_data() -> list[Result]:
     built = _norm(build())
     disk = _read_csv_by_repo(ROOT / "data" / "eligibility" / "eligibility.csv")
     if set(built) != set(disk):
-        return [("eligibility.csv", False,
-                 f"repo set differs (builder {len(built)}, disk {len(disk)})")]
+        return [("eligibility.csv", False, _set_diff_detail(built, disk))]
     diffs = _cell_diffs(built, disk)
     return [("eligibility.csv", diffs == 0,
              "in sync" if diffs == 0
              else f"{diffs} stale cells — re-run build_eligibility")]
 
 
+_VALUE_ROWS_CACHE: list[dict] | None = None
+
+
+def _collect_value_rows() -> list[dict]:
+    """unify's per-package input rows, collected once per run (expensive —
+    shared by check_value_data and check_overrides_integrity)."""
+    global _VALUE_ROWS_CACHE
+    if _VALUE_ROWS_CACHE is None:
+        from src.value.unify_value_data import ECOSYSTEMS, collect_ecosystem
+        rows: list[dict] = []
+        for eco in ECOSYSTEMS:
+            eco_rows, _ = collect_ecosystem(eco)
+            rows.extend(eco_rows)
+        _VALUE_ROWS_CACHE = rows
+    return _VALUE_ROWS_CACHE
+
+
 def check_value_data() -> list[Result]:
     """value.csv class assignments must match a fresh unify run."""
-    from src.value.unify_value_data import (
-        ECOSYSTEMS,
-        aggregate_by_repo,
-        collect_ecosystem,
-    )
+    from src.value.unify_value_data import aggregate_by_repo
 
-    all_rows: list[dict] = []
-    for eco in ECOSYSTEMS:
-        rows, _ = collect_ecosystem(eco)
-        all_rows.extend(rows)
-    built = aggregate_by_repo(all_rows)
+    built = aggregate_by_repo(_collect_value_rows())
     disk = list(csv.DictReader(open(ROOT / "data" / "value" / "value.csv", encoding="utf-8")))
 
     if len(built) != len(disk):
@@ -330,9 +367,66 @@ ID_JOINED_SOURCES = [
     "sources/github/contributor-commits.csv",
     "sources/git/commits-years.csv",
     "sources/git/churn.csv",
+    "sources/git/depsdev.csv",
     "sources/github/issues.csv",
     "sources/osv/cves.csv",
 ]
+
+
+def _value_id_by_slug() -> dict[str, str]:
+    """{repo slug lowercased: repo_id} from value.csv (blank ids skipped)."""
+    out: dict[str, str] = {}
+    with open(ROOT / "data" / "value" / "value.csv", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            slug = (r.get("repo") or "").strip().lower()
+            rid = (r.get("repo_id") or "").strip()
+            if slug and rid:
+                out[slug] = rid
+    return out
+
+
+def check_source_value_id_agreement() -> list[Result]:
+    """Every in-scope slug's rows in an id-joined source include the repo_id
+    value.csv currently assigns to that slug.
+
+    The builders join these files by the value-stage id, so a slug whose rows
+    all carry a *different* id (e.g. the GitHub-mirror id of a repo whose
+    canonical home resolved to GitLab) is silently invisible to every join —
+    the dimension goes blank with no error. Rows under a stale id are
+    tolerated when rows under the current id also exist (dead weight, joins
+    fine); the failure is only when the current id is entirely absent.
+    Repair: scripts/heal_repo_id_drift.py restamps drifted-only slugs.
+    """
+    from src.common.repos import load_top_repos
+
+    scope = {e.repo for e in load_top_repos(skip_archived=False)}
+    value_id = _value_id_by_slug()
+    out: list[Result] = []
+    for rel in ID_JOINED_SOURCES:
+        path = ROOT / "data" / rel
+        if not path.exists():
+            out.append((f"{rel}:id agreement", False, "file missing"))
+            continue
+        ids_by_slug: dict[str, set[str]] = {}
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                slug = (row.get("repo") or "").strip().lower()
+                rid = (row.get("repo_id") or "").strip()
+                if rid and slug in scope and slug in value_id:
+                    ids_by_slug.setdefault(slug, set()).add(rid)
+        drifted = sorted(s for s, ids in ids_by_slug.items() if value_id[s] not in ids)
+        stale_extra = sum(1 for s, ids in ids_by_slug.items()
+                          if value_id[s] in ids and len(ids) > 1)
+        note = f" ({stale_extra} slug(s) also carry stale extra ids)" if stale_extra else ""
+        if drifted:
+            shown = ", ".join(drifted[:3]) + (" …" if len(drifted) > 3 else "")
+            out.append((f"{rel}:id agreement", False,
+                        f"{len(drifted)} in-scope slug(s) with no row under the "
+                        f"value.csv id: {shown}{note}"))
+        else:
+            out.append((f"{rel}:id agreement", True,
+                        f"{len(ids_by_slug)} in-scope slugs agree with value.csv{note}"))
+    return out
 
 
 def check_source_repo_id_integrity() -> list[Result]:
@@ -402,6 +496,7 @@ SOURCE_SCHEMA_CONTRACT: dict[str, object] = {
     "sources/funding/host-by-repo.csv": "host_checked",
     "sources/ossfuzz/projects.csv": "fetched_at",
     "sources/floss-fund/funding-json.csv": "fetched_at",
+    "sources/github/canonical-repos.csv": "fetched_at",
 }
 
 
@@ -493,19 +588,20 @@ def check_gitlab_host_nicknames() -> list[Result]:
     return out
 
 
-def check_gitlab_id_shape() -> list[Result]:
-    """Every gl/ repo_id on disk matches the one unified shape.
+def check_repo_id_shape() -> list[Result]:
+    """Every repo_id on disk matches the one unified id shape.
 
-    Shape: bare `gl/{digits}` (gitlab.com) or `gl/{nickname}-{digits}` with
-    a nickname registered in `HOST_NICKNAMES`. Scans the repo_id column of
-    every CSV under data/ that has one (header sniff first, so vendor dumps
-    and non-id files cost nothing). Catches any residue of a different id
-    form — e.g. an id written by a fetcher predating the current map.
+    Allowed forms: blank, `gh/{digits}`, bare `gl/{digits}` (gitlab.com), or
+    `gl/{nickname}-{digits}` with a nickname registered in `HOST_NICKNAMES`.
+    Everything else fails — bare numerics (a fetcher writing the raw API id),
+    host-form gl/ ids, or garbage. Scans the repo_id column of every CSV
+    under data/ that has one (header sniff first, so vendor dumps and non-id
+    files cost nothing). Repair: scripts/heal_repo_id_drift.py.
     """
     from src.sources.gitlab.gitlab_client import HOST_NICKNAMES
 
     nicks = sorted(n for n in HOST_NICKNAMES.values() if n)
-    valid = re.compile(rf"gl/(?:(?:{'|'.join(map(re.escape, nicks))})-)?\d+")
+    valid = re.compile(rf"gh/\d+|gl/(?:(?:{'|'.join(map(re.escape, nicks))})-)?\d+")
     out: list[Result] = []
     scanned = 0
     for path in sorted((ROOT / "data").rglob("*.csv")):
@@ -516,25 +612,408 @@ def check_gitlab_id_shape() -> list[Result]:
         with open(path, encoding="utf-8") as f:
             for row in csv.DictReader(f):
                 rid = (row.get("repo_id") or "").strip()
-                if rid.startswith("gl/") and not valid.fullmatch(rid):
+                if rid and not valid.fullmatch(rid):
                     bad.add(rid)
         if bad:
             sample = ", ".join(sorted(bad)[:3]) + (" …" if len(bad) > 3 else "")
-            out.append((f"{path.relative_to(ROOT)}:gl-id-shape", False,
-                        f"{len(bad)} non-canonical gl/ id(s): {sample}"))
-    out.append(("gitlab:id shape", not out or all(ok for _, ok, _ in out),
-                f"all gl/ ids canonical across {scanned} repo_id-keyed files"
+            out.append((f"{path.relative_to(ROOT)}:id-shape", False,
+                        f"{len(bad)} non-canonical repo_id(s): {sample}"))
+    out.append(("repo_id shape", not out or all(ok for _, ok, _ in out),
+                f"all repo_ids canonical across {scanned} repo_id-keyed files"
                 if not [1 for _, ok, _ in out if not ok] else
-                "non-canonical gl/ ids found (see rows above)"))
+                "non-canonical repo_ids found (see rows above)"))
+    return out
+
+
+def _parse_fetch_date(raw: str):
+    """ISO-8601 → aware datetime (naive treated as UTC); None if unparseable."""
+    from datetime import timezone
+    try:
+        dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+
+def check_fetch_date_sanity() -> list[Result]:
+    """Every fetch-date cell in the contract files is a parseable ISO date
+    that is not in the future.
+
+    The freshness gates (`src/common/freshness.py`) treat any timestamp
+    >= cutoff as fresh with no upper bound, so a future-dated or malformed
+    cell silently pins a row fresh forever (or stale forever) — this is the
+    audit the gates don't do. Blank cells are allowed (rows predating date
+    tracking); only non-blank cells are validated. +1 day of tolerance
+    absorbs timezone skew.
+    """
+    from datetime import timedelta, timezone
+
+    horizon = datetime.now(timezone.utc) + timedelta(days=1)
+    files: dict[str, str] = {}
+    for rel, date_spec in SOURCE_SCHEMA_CONTRACT.items():
+        if isinstance(date_spec, tuple):
+            _, side_rel, side_col = date_spec
+            files[side_rel] = side_col
+        else:
+            files[rel] = date_spec
+    out: list[Result] = []
+    bad_files = 0
+    for rel, col in sorted(files.items()):
+        path = ROOT / "data" / rel
+        if not path.exists():
+            continue  # missing files are check_source_schema_contract's finding
+        malformed: set[str] = set()
+        future: set[str] = set()
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                raw = (row.get(col) or "").strip()
+                if not raw:
+                    continue
+                dt = _parse_fetch_date(raw)
+                if dt is None:
+                    malformed.add(raw)
+                elif dt > horizon:
+                    future.add(raw)
+        if malformed or future:
+            bad_files += 1
+            bits = []
+            if malformed:
+                bits.append(f"{len(malformed)} malformed (e.g. {sorted(malformed)[0]!r})")
+            if future:
+                bits.append(f"{len(future)} future-dated (e.g. {sorted(future)[-1]!r})")
+            out.append((f"{rel}:{col}", False, "; ".join(bits)))
+    out.append(("fetch dates sane", bad_files == 0,
+                f"{len(files)} dated files — all cells parseable, none future"
+                if bad_files == 0 else f"{bad_files} file(s) with bad date cells"))
+    return out
+
+
+def check_validation_data() -> list[Result]:
+    """validation.csv must equal a fresh (no-network) build_validation run.
+
+    Replicates main()'s pure path — collect targets from value.csv, verdicts
+    from the source caches, override pins on top — without the ls-remote
+    refresh or the write-back. build()'s hard gate (a target with no verdict)
+    is reproduced as a FAIL here instead of a SystemExit.
+    """
+    from src.value.build_validation import (
+        VALIDATION_FIELDS,
+        VALUE_FILE,
+        apply_overrides,
+        build,
+        collect_targets,
+        load_verdicts,
+    )
+    from src.value.unify_value_data import load_repo_overrides
+
+    with open(VALUE_FILE, encoding="utf-8") as f:
+        value_rows = list(csv.DictReader(f))
+    targets = collect_targets(value_rows)
+    verdicts = apply_overrides(load_verdicts(), load_repo_overrides())
+    missing = sorted(k for k in targets if k not in verdicts)
+    if missing:
+        shown = ", ".join(f"{t} [{ty}]" for t, ty in missing[:3])
+        return [("validation.csv", False,
+                 f"{len(missing)} target(s) with no verdict: {shown} — "
+                 "run the value rollup")]
+    built_rows, _ = build(targets, verdicts)
+    built = {(r["target"], r["type"]): r for r in built_rows}
+    with open(ROOT / "data" / "value" / "validation.csv", encoding="utf-8") as f:
+        disk = {(r["target"], r["type"]): dict(r) for r in csv.DictReader(f)}
+    if set(built) != set(disk):
+        only_b = len(set(built) - set(disk))
+        only_d = len(set(disk) - set(built))
+        return [("validation.csv", False,
+                 f"target set differs (builder {len(built)}, disk {len(disk)}; "
+                 f"{only_b} builder-only, {only_d} disk-only) — re-run build_validation")]
+    diffs = sum(1 for k in built
+                for col in VALIDATION_FIELDS
+                if built[k].get(col, "") != disk[k].get(col, ""))
+    return [("validation.csv", diffs == 0,
+             f"in sync ({len(built):,} targets)" if diffs == 0
+             else f"{diffs} stale cells — re-run build_validation")]
+
+
+def check_stats_data() -> list[Result]:
+    """stats.csv must equal a fresh (no-network) build_stats run.
+
+    stats.csv feeds `scripts/stats.py` and `src/common/params.py` as an
+    *input*, and `stats.py --check` recomputes docs figures FROM it — so a
+    stale stats.csv self-certifies there; this is the only guard that
+    re-derives it. npm downloads come from the on-disk year cache instead of
+    `load_npm()` (which fetches missing years); if the cache is behind, the
+    mismatch surfaces here and a real `build_stats` run repairs both.
+    """
+    from src.sources.npm.fetch_npm_stats import _load_existing
+    from src.value.build_stats import (
+        ALL_ECOSYSTEMS,
+        DOWNLOAD_ECOSYSTEMS,
+        DOWNLOAD_LOADERS,
+        build_stats_rows,
+        package_counts,
+    )
+
+    downloads = {
+        eco: (_load_existing() if eco == "npm" else DOWNLOAD_LOADERS[eco]())
+        for eco in DOWNLOAD_ECOSYSTEMS
+    }
+    counts = {eco: package_counts(eco) for eco in ALL_ECOSYSTEMS}
+    built = {r["metric"]: {k: str(v) for k, v in r.items()}
+             for r in build_stats_rows(downloads, counts)}
+    with open(ROOT / "data" / "value" / "stats.csv", encoding="utf-8") as f:
+        disk = {r["metric"]: dict(r) for r in csv.DictReader(f)}
+    if set(built) != set(disk):
+        return [("stats.csv", False, _set_diff_detail(built, disk))]
+    diffs = sum(1 for m in built
+                for eco in ALL_ECOSYSTEMS
+                if built[m].get(eco, "") != disk[m].get(eco, ""))
+    return [("stats.csv", diffs == 0,
+             f"in sync ({len(built)} metrics)" if diffs == 0
+             else f"{diffs} stale cells — re-run build_stats")]
+
+
+def check_preview_data() -> list[Result]:
+    """The preview deliverables are in sync end to end.
+
+    repos.csv vs build_results.build(), people.csv vs build_people.build()
+    (sorted the way main() writes), and preview.xlsx cell contents vs both
+    CSVs. The xlsx is compared by *content* (openpyxl), never by bytes —
+    Workbook.save() embeds timestamps, so bytes are non-deterministic.
+    """
+    from openpyxl import load_workbook
+
+    from src.build_people import build as build_people_rows
+    from src.build_preview_workbook import OUTPUT_FILE, SHEETS, _cell_value
+    from src.build_results import build as build_repos_rows
+
+    out: list[Result] = []
+
+    built = {r["repo_id"]: {k: ("" if v is None else str(v)) for k, v in r.items()}
+             for r in build_repos_rows()}
+    disk = {}
+    with open(ROOT / "data" / "preview" / "repos.csv", encoding="utf-8") as f:
+        disk = {r["repo_id"]: dict(r) for r in csv.DictReader(f)}
+    if set(built) != set(disk):
+        out.append(("preview/repos.csv", False, _set_diff_detail(built, disk)))
+    else:
+        diffs = _cell_diffs(built, disk)
+        out.append(("preview/repos.csv", diffs == 0,
+                    f"in sync ({len(built)} repos)" if diffs == 0
+                    else f"{diffs} stale cells — re-run build_results"))
+
+    people = build_people_rows()
+    people.sort(key=lambda r: (r["platform"], r["login"]))
+    built_rows = [{k: ("" if v is None else str(v)) for k, v in r.items()}
+                  for r in people]
+    with open(ROOT / "data" / "preview" / "people.csv", encoding="utf-8") as f:
+        disk_rows = [dict(r) for r in csv.DictReader(f)]
+    if len(built_rows) != len(disk_rows):
+        out.append(("preview/people.csv", False,
+                    f"row count differs (builder {len(built_rows)}, disk {len(disk_rows)}) "
+                    "— re-run build_people"))
+    else:
+        diffs = sum(1 for b, d in zip(built_rows, disk_rows)
+                    for k in set(b) | set(d) if b.get(k, "") != d.get(k, ""))
+        out.append(("preview/people.csv", diffs == 0,
+                    f"in sync ({len(built_rows):,} people)" if diffs == 0
+                    else f"{diffs} stale cells — re-run build_people"))
+
+    if not OUTPUT_FILE.exists():
+        out.append(("preview/preview.xlsx", False, "file missing — re-run build_preview_workbook"))
+        return out
+    wb = load_workbook(OUTPUT_FILE, read_only=True)
+    stale = []
+    for sheet, csv_path in SHEETS:
+        with open(csv_path, encoding="utf-8", newline="") as f:
+            expected = [[_cell_value(c) for c in row] for row in csv.reader(f)]
+        if sheet not in wb.sheetnames:
+            stale.append(f"{sheet}: sheet missing")
+            continue
+        actual = [list(row) for row in wb[sheet].iter_rows(values_only=True)]
+        if len(actual) != len(expected):
+            stale.append(f"{sheet}: {len(actual)-1} rows vs {len(expected)-1} in CSV")
+        else:
+            cells = sum(1 for a, e in zip(actual, expected)
+                        if list(a) + [None] * (len(e) - len(a)) != e)
+            if cells:
+                stale.append(f"{sheet}: {cells} differing row(s)")
+    wb.close()
+    out.append(("preview/preview.xlsx", not stale,
+                "both sheets match the CSVs" if not stale
+                else "; ".join(stale) + " — re-run build_preview_workbook"))
+    return out
+
+
+def check_overrides_integrity() -> list[Result]:
+    """Every curated override row still points at something that exists.
+
+    Overrides are silent no-ops when their key no longer matches — a renamed
+    slug, a package that left the dep tree, a repo that left scope — so rot
+    is invisible until someone notices a correction stopped applying. Orphan
+    rules per file (mirroring each consumer's join):
+      - value/overrides.csv: (package, ecosystem) must appear in unify's
+        per-package input rows.
+      - eligibility/overrides.csv: per-repo rows by repo_id in the top scope
+        (archived included); `owner/*` rows by owner having an in-scope repo.
+      - eligibility/maintainer-overrides.csv: login appears as a github
+        person in preview/people.csv.
+      - risk/cve-package-overrides.csv: github_repo (rename-canonicalized)
+        is an in-scope slug.
+    """
+    from src.common.repos import canonical_repo_map, load_top_repos
+    from src.value.unify_value_data import load_repo_overrides
+
+    out: list[Result] = []
+    top = load_top_repos(skip_archived=False)
+    scope_slugs = {e.repo for e in top}
+    scope_ids = {e.repo_id for e in top if e.repo_id}
+    scope_owners = {s.split("/", 1)[0] for s in scope_slugs}
+
+    value_pkgs = {(r.get("package", ""), r.get("ecosystem", ""))
+                  for r in _collect_value_rows()}
+    orphans = sorted(f"{p}/{e}" for (p, e) in load_repo_overrides() if (p, e) not in value_pkgs)
+    out.append(("value/overrides.csv", not orphans,
+                f"{len(orphans)} orphan key(s): " + ", ".join(orphans[:3])
+                + (" …" if len(orphans) > 3 else "") if orphans
+                else "every (package, ecosystem) key matches an input row"))
+
+    bad: list[str] = []
+    n = 0
+    with open(ROOT / "data" / "eligibility" / "overrides.csv", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            n += 1
+            slug = (r.get("repo") or "").strip().lower()
+            if slug.endswith("/*"):
+                if slug[:-2] not in scope_owners:
+                    bad.append(slug)
+            elif (r.get("repo_id") or "").strip() not in scope_ids:
+                bad.append(slug)
+    out.append(("eligibility/overrides.csv", not bad,
+                f"{len(bad)} orphan row(s): " + ", ".join(bad[:3])
+                + (" …" if len(bad) > 3 else "") if bad
+                else f"all {n} rows target in-scope repos/owners"))
+
+    people_logins: set[str] = set()
+    people_path = ROOT / "data" / "preview" / "people.csv"
+    if people_path.exists():
+        with open(people_path, encoding="utf-8") as f:
+            people_logins = {(r.get("login") or "").strip().lower()
+                             for r in csv.DictReader(f)
+                             if (r.get("platform") or "") == "github"}
+    bad = []
+    with open(ROOT / "data" / "eligibility" / "maintainer-overrides.csv",
+              encoding="utf-8") as f:
+        bad = [login for r in csv.DictReader(f)
+               if (login := (r.get("login") or "").strip().lower())
+               and login not in people_logins]
+    out.append(("eligibility/maintainer-overrides.csv", not bad,
+                f"{len(bad)} login(s) not in people.csv: " + ", ".join(bad[:3]) if bad
+                else "every login resolves to a github person"))
+
+    canon = canonical_repo_map()
+    bad = []
+    with open(ROOT / "data" / "risk" / "cve-package-overrides.csv",
+              encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            slug = (r.get("github_repo") or "").strip().lower()
+            if slug and canon.get(slug, slug) not in scope_slugs:
+                bad.append(slug)
+    bad = sorted(set(bad))
+    out.append(("risk/cve-package-overrides.csv", not bad,
+                f"{len(bad)} out-of-scope repo(s): " + ", ".join(bad[:3])
+                + (" …" if len(bad) > 3 else "") if bad
+                else "every override repo is in scope"))
+    return out
+
+
+def check_npm_downloads_status() -> list[Result]:
+    """The npm downloads sidecar is well-formed and consistent with the data.
+
+    Invariants the writer guarantees today (fetch_npm_data stamps a package
+    only after its year rows are written): status ∈ {ok, not_found};
+    checked_at parses; every stamped package has all model years in
+    downloads.csv; a not_found package's years are all zero. Full coverage
+    (every downloads.csv package stamped) is NOT asserted — legacy rows
+    predate the sidecar and are only stamped as they are re-fetched.
+    """
+    from src.common.params import YEARS
+
+    status_path = ROOT / "data" / "sources" / "npm" / "raw" / "downloads.status.csv"
+    dl_path = ROOT / "data" / "sources" / "npm" / "raw" / "downloads.csv"
+    if not status_path.exists():
+        return [("npm downloads.status", False, "sidecar missing")]
+    years = {str(y) for y in YEARS}
+    dl: dict[str, dict[str, str]] = {}
+    with open(dl_path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            dl.setdefault(r.get("package", ""), {})[r.get("year", "")] = \
+                (r.get("downloads") or "").strip()
+    problems: list[str] = []
+    n = 0
+    with open(status_path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            n += 1
+            pkg = (r.get("package") or "").strip()
+            status = (r.get("status") or "").strip()
+            if status not in ("ok", "not_found"):
+                problems.append(f"{pkg}: bad status {status!r}")
+                continue
+            try:
+                datetime.strptime((r.get("checked_at") or "").strip(),
+                                  "%Y-%m-%d %H:%M:%S.%f")
+            except ValueError:
+                problems.append(f"{pkg}: bad checked_at")
+                continue
+            pkg_years = dl.get(pkg, {})
+            if not years <= set(pkg_years):
+                problems.append(f"{pkg}: stamped but years missing from downloads.csv")
+            elif status == "not_found" and any(pkg_years[y] not in ("", "0") for y in years):
+                problems.append(f"{pkg}: not_found but has nonzero downloads")
+    return [("npm downloads.status", not problems,
+             f"{len(problems)} inconsistent row(s): " + "; ".join(problems[:3])
+             + (" …" if len(problems) > 3 else "") if problems
+             else f"{n} stamped packages consistent with downloads.csv")]
+
+
+def check_value_domains() -> list[Result]:
+    """value.csv enum columns stay inside their declared domains.
+
+    platform ∈ {github, gitlab, bitbucket, sourcehut, codeberg, custom, ''}
+    (docs/value.md); git_valid is strictly True/False (CLAUDE.md contract) —
+    a stray value here means a writer regression, and every downstream
+    filter compares against these exact strings.
+    """
+    platforms = {"github", "gitlab", "bitbucket", "sourcehut", "codeberg", "custom", ""}
+    bad_platform: Counter = Counter()
+    bad_valid: Counter = Counter()
+    with open(ROOT / "data" / "value" / "value.csv", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            p = (r.get("platform") or "").strip()
+            if p not in platforms:
+                bad_platform[p] += 1
+            v = r.get("git_valid") or ""
+            if v not in ("True", "False"):
+                bad_valid[v] += 1
+    out: list[Result] = []
+    out.append(("value.csv:platform", not bad_platform,
+                "all rows in the declared platform set" if not bad_platform
+                else f"stray platform value(s): {dict(bad_platform)}"))
+    out.append(("value.csv:git_valid", not bad_valid,
+                "strictly True/False" if not bad_valid
+                else f"non-boolean value(s): {dict(bad_valid)}"))
     return out
 
 
 CHECKS = [check_dimension_csvs, check_risk_data, check_eligibility_data,
-          check_value_data, check_value_criticality,
-          check_source_repo_id_integrity, check_source_schema_contract,
+          check_value_data, check_value_criticality, check_validation_data,
+          check_stats_data, check_preview_data,
+          check_source_repo_id_integrity, check_source_value_id_agreement,
+          check_source_schema_contract,
           check_score_component_coverage,
           check_score_input_completeness, check_long_format_keys,
-          check_gitlab_host_nicknames, check_gitlab_id_shape]
+          check_gitlab_host_nicknames, check_repo_id_shape,
+          check_fetch_date_sanity, check_overrides_integrity,
+          check_npm_downloads_status, check_value_domains]
 
 
 def main() -> int:
