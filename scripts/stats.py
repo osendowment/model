@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from collections import Counter
 import sys
 from pathlib import Path
 
@@ -129,16 +130,23 @@ def value_stats() -> dict:
     orphan = m - gh
 
     # git-URL breakdown: host family (from `platform`) and validity, over the
-    # rows that carry a git URL at all.
+    # rows that carry a git URL at all — each bucket split by strongest class.
     with_url = [r for r in rows if _present(r.get("git_url"))]
+
+    def _url_bucket(sub: list[dict]) -> dict:
+        by_class = Counter((r.get("class") or "").strip() for r in sub)
+        return {"A": by_class["A"], "B": by_class["B"], "C": by_class["C"],
+                "total": len(sub)}
+
     git_urls = {
-        "total": len(with_url),
-        "github": sum(1 for r in with_url if (r.get("platform") or "") == "github"),
-        "gitlab": sum(1 for r in with_url if (r.get("platform") or "") == "gitlab"),
-        "valid": sum(1 for r in with_url if _truthy(r.get("git_valid"))),
+        "github": _url_bucket([r for r in with_url if (r.get("platform") or "") == "github"]),
+        "gitlab": _url_bucket([r for r in with_url if (r.get("platform") or "") == "gitlab"]),
+        "others": _url_bucket([r for r in with_url
+                               if (r.get("platform") or "") not in ("github", "gitlab")]),
+        "valid": _url_bucket([r for r in with_url if _truthy(r.get("git_valid"))]),
+        "invalid": _url_bucket([r for r in with_url if not _truthy(r.get("git_valid"))]),
+        "all": _url_bucket(with_url),
     }
-    git_urls["others"] = git_urls["total"] - git_urls["github"] - git_urls["gitlab"]
-    git_urls["invalid"] = git_urls["total"] - git_urls["valid"]
 
     def _is_active(r: dict) -> bool:
         if not _is_github(r):
@@ -553,7 +561,8 @@ def markdown(v: dict, r: dict, e: dict) -> str:
         # one self-describing label: stage — comment (% is of <denominator>)
         label = f"{stage} — {comment}" + (f" (% of {denom_label})" if denom else "")
         mark = "**" if stage in ("top repos", "eligible") else ""
-        a(f"| {mark}{label}{mark} | {mark}{cnt:,}{mark} | {mark}{pct}{mark} |")
+        sep = "^" if stage in ("value_score present", "eligible") else ""
+        a(f"| {sep}{mark}{label}{mark} | {mark}{cnt:,}{mark} | {mark}{pct}{mark} |")
     a("")
 
     a("### Per-ecosystem value funnel\n")
@@ -576,7 +585,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a(_eco_row("after dep tree — + transitive deps", "deps"))
     a(_eco_row("with git URL — any host", "git"))
     a(_eco_row("with GitHub repo", "github"))
-    a(_eco_pct_row("git URL % — of dep-tree packages", "git", "results"))
+    a(_eco_pct_row("^git URL % — of dep-tree packages", "git", "results"))
     a(_eco_pct_row("GitHub % — of dep-tree packages", "github", "results"))
     a("")
 
@@ -601,16 +610,28 @@ def markdown(v: dict, r: dict, e: dict) -> str:
               "incl. archived mirrors", bold=True))
 
     a("\n### Git URLs\n")
-    a("| Git URL | Repos | % |")
-    a("|---|--:|--:|")
+    a("| Git URL | A | B | C | Total | % Total |")
+    a("|---|--:|--:|--:|--:|--:|")
     gu = v["git_urls"]
-    a(f"| on GitHub | {gu['github']:,} | {_pct(gu['github'], gu['total'])} |")
-    a(f"| on GitLab | {gu['gitlab']:,} | {_pct(gu['gitlab'], gu['total'])} |")
-    a(f"| on other hosts | {gu['others']:,} | {_pct(gu['others'], gu['total'])} |")
-    a(f"| **valid — upstream resolves** | **{gu['valid']:,}** "
-      f"| **{_pct(gu['valid'], gu['total'])}** |")
-    a(f"| invalid — unreachable | {gu['invalid']:,} | {_pct(gu['invalid'], gu['total'])} |")
-    a(f"| total with a git URL | {gu['total']:,} | 100% |")
+    grand = gu["all"]["total"]
+
+    def _gu_row(label: str, key: str, bold: bool = False) -> str:
+        b = gu[key]
+        cells = [f"{b['A']:,}", f"{b['B']:,}", f"{b['C']:,}", f"{b['total']:,}",
+                 _pct(b["total"], grand)]
+        marker = "^" if label.startswith("^") else ""
+        plain = label.lstrip("^")
+        if bold:
+            return (f"| {marker}**{plain}** | "
+                    + " | ".join(f"**{x}**" for x in cells) + " |")
+        return f"| {marker}{plain} | " + " | ".join(cells) + " |"
+
+    a(_gu_row("GitHub repos", "github"))
+    a(_gu_row("GitLab repos", "gitlab"))
+    a(_gu_row("Other repos", "others"))
+    a(_gu_row("^Valid (upstream resolves)", "valid"))
+    a(_gu_row("Invalid (unreachable)", "invalid"))
+    a(_gu_row("^Total git URLs", "all", bold=True))
 
     a("\n### Repo class distribution\n")
     a("| Metric | A | B | C |")
@@ -682,7 +703,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a("|---|---:|---:|")
     a(f"| intent — any funding signal | {it} | {_pct(it, ne)} |")
     a(f"| intent — no funding signal | {ne - it} | {_pct(ne - it, ne)} |")
-    a(f"| nonprofit — community / independent | {npt} | {_pct(npt, ne)} |")
+    a(f"| ^nonprofit — community / independent | {npt} | {_pct(npt, ne)} |")
     a(f"| nonprofit — company-backed | {ne - npt} | {_pct(ne - npt, ne)} |")
 
     a("\n### Eligibility rollup\n")
@@ -690,7 +711,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a("|---|---:|---:|---:|")
     for f in ELIGIBILITY_FLAGS:
         a(f"| {f} | {e['rollup'][f]} | {_pct(e['rollup'][f], ne)} | {e['sole'][f]} |")
-    a(f"| **eligible** | **{e['rollup']['eligible']}** | "
+    a(f"| ^**eligible** | **{e['rollup']['eligible']}** | "
       f"**{_pct(e['rollup']['eligible'], ne)}** | |")
     return "\n".join(out)
 

@@ -35,7 +35,7 @@ import csv
 from pathlib import Path
 
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.worksheet.worksheet import Worksheet
 from rich.console import Console
 
@@ -197,16 +197,35 @@ def _stats_markdown() -> str:
     return mod.markdown(mod.value_stats(), mod.risk_stats(), mod.eligibility_stats())
 
 
+THIN = Side(style="thin", color="000000")
+
+
+def _with_sides(cell, **sides) -> None:
+    """Merge border sides onto a cell without clobbering the ones it has."""
+    b = cell.border
+    cell.border = Border(left=sides.get("left", b.left),
+                         right=sides.get("right", b.right),
+                         top=sides.get("top", b.top),
+                         bottom=sides.get("bottom", b.bottom))
+
+
 def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
     """Render every markdown table in `md_text` as a stacked block: its nearest
     heading above as a bold section title, then the table with a styled header
     row. Prose between tables is skipped. Returns the number of tables written.
 
-    Layout: column A stays empty (a gutter, like a document margin) — every
-    block starts at column B. Numeric/percent cells are written as typed
-    values with number formats, and a column whose data is entirely
-    numeric/percent gets its header right-aligned to sit over the numbers.
+    Layout: gridlines are off — each table carries its own thin box outline.
+    Column A stays empty (a gutter, like a document margin); every block
+    starts at column B. Numeric/percent cells are written as typed values
+    with number formats, and a column whose data is entirely numeric/percent
+    gets its header right-aligned to sit over the numbers.
+
+    Row markup (from the generator's markdown):
+      - a first cell starting with `^` draws a thin separator line ABOVE the
+        row (subsection breaks, total rows);
+      - a `**bold**` first cell bolds the whole row (totals / emphasis).
     """
+    ws.sheet_view.showGridLines = False
     lines = md_text.splitlines()
     heading = ""
     tables = 0
@@ -236,9 +255,17 @@ def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
         n_cols = max(len(cells) for cells in block)
         numeric_col = [True] * n_cols  # column has ONLY numeric/percent data
         has_data_col = [False] * n_cols
+        separator_rows: list[int] = []
         for j, cells in enumerate(block):
+            first = cells[0].strip()
+            sep = first.startswith("^")
+            bold = first.lstrip("^").strip().startswith("**")
+            if sep:
+                cells = [first.lstrip("^")] + cells[1:]
             parsed = [_md_cell(c) for c in cells]
             ws.append([None] + [v for v, _ in parsed])
+            if sep:
+                separator_rows.append(ws.max_row)
             for k, (v, fmt) in enumerate(parsed):
                 cell = ws.cell(row=ws.max_row, column=k + 2)
                 if fmt:
@@ -246,14 +273,28 @@ def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
                 if j == 0:
                     cell.font = HEADER_FONT
                     cell.fill = HEADER_FILL
-                elif v is not None:
-                    has_data_col[k] = True
-                    if not isinstance(v, (int, float)):
-                        numeric_col[k] = False
+                else:
+                    if bold:
+                        cell.font = Font(bold=True)
+                    if v is not None:
+                        has_data_col[k] = True
+                        if not isinstance(v, (int, float)):
+                            numeric_col[k] = False
         for k in range(n_cols):
             if has_data_col[k] and numeric_col[k]:
                 ws.cell(row=header_row_idx, column=k + 2).alignment = \
                     Alignment(horizontal="right")
+        # thin box outline around the table + separator lines above marked rows
+        last_row = ws.max_row
+        first_col, last_col = 2, n_cols + 1
+        for row in range(header_row_idx, last_row + 1):
+            _with_sides(ws.cell(row=row, column=first_col), left=THIN)
+            _with_sides(ws.cell(row=row, column=last_col), right=THIN)
+        for col in range(first_col, last_col + 1):
+            _with_sides(ws.cell(row=header_row_idx, column=col), top=THIN)
+            _with_sides(ws.cell(row=last_row, column=col), bottom=THIN)
+            for row in separator_rows:
+                _with_sides(ws.cell(row=row, column=col), top=THIN)
         tables += 1
 
     ws.column_dimensions["A"].width = 2
