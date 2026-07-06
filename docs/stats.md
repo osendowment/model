@@ -109,7 +109,7 @@ source-dependent dimensions.
 ### Score distribution by component (scope 940)
 
 - **Bold row** = the component's 0–100 risk score (feeds `risk.csv`); rows beneath = the **raw metric** in natural units, *before* its 0–100 percentile (percentiles are 0/25/50/75/100 by construction — useless).
-- **Completeness rule:** overall `risk_score` = geomean of the four component scores, blank unless all four present (likewise each component vs its inputs); `pipeline_health.py` enforces it.
+- **Completeness rule:** overall `risk_score` = geomean of the four component scores, blank unless all four present; likewise concentration / complexity / workload vs their inputs — security is worst-of (`max_composite_any`) and scores off whichever axis is present. `pipeline_health.py` enforces it.
 - **100%-populated:** zero-active-contributor repos score with AC=1 (flagged `dormant`) rather than abstaining.
 - Highlights: median **bus factor 1**, **75% have 0 CVEs** (max 10,602).
 
