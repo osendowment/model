@@ -485,7 +485,7 @@ def dashboard(v: dict, r: dict, e: dict) -> None:
                        ("· from registry", lic["registry"]),
                        ("· from GitHub", lic["github"]),
                        ("· from GitLab", lic["gitlab"]),
-                       ("oss=True (OSI-approved)", lic["oss_true"]),
+                       ("oss=True (OSS-approved)", lic["oss_true"]),
                        ("oss=False (known non-OSS)", lic["oss_false"]),
                        ("oss unknown (no signal)", lic["oss_unknown"])):
         t.add_row(label, str(cnt), _pct(cnt, ne))
@@ -608,7 +608,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
                        ("· from registry", lic["registry"]),
                        ("· from GitHub", lic["github"]),
                        ("· from GitLab", lic["gitlab"]),
-                       ("**oss=True (OSI-approved)**", lic["oss_true"]),
+                       ("**oss=True (OSS-approved)**", lic["oss_true"]),
                        ("oss=False (known non-OSS)", lic["oss_false"]),
                        ("oss unknown (no signal)", lic["oss_unknown"])):
         mark = "**" if label.startswith("**") else ""

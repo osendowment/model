@@ -1,24 +1,26 @@
-# OSI (OSS License List)
+# OSS License Set (unified OSI ∪ FSF)
 
 The set of SPDX license ids the model treats as software open source:
-SPDX `isOsiApproved` ∪ a hand-curated `EXTRAS` dict. Feeds the eligibility
-stage's `oss` flag — a repo's resolved license (or any component of its SPDX
-expression) must be in this set; see the license section of
-[eligibility.md](../eligibility.md), counts in
+`isOsiApproved` ∪ (`isFsfLibre` − content licenses) ∪ a hand-curated
+`EXTRAS` dict. Feeds the eligibility stage's `oss` flag — a repo's resolved
+license (or any component of its SPDX expression) must be in this set; see
+the license section of [eligibility.md](../eligibility.md), counts in
 [stats.md](../stats.md#licenses-scope-940).
 
-Strict software OSS, **not** FSF "free software" — FSF's `isFsfLibre` also
-covers content licenses (CC-BY-4.0, CC0-1.0, GFDL) that are free for
-documents/data but not software OSS, so they are deliberately excluded.
+Two review bodies are unified: OSI's formal approvals and the FSF's
+free-software list (as carried by SPDX's `isFsfLibre` flag). FSF-libre
+CONTENT licenses (CC-BY-*, CC0, GFDL, OFL fonts, ODbL data) are free for
+documents/data but not software OSS, so they are deliberately excluded
+(`CONTENT_LICENSE_PREFIXES` in `src/sources/osi/fetch_licenses.py`). Running
+the builder prints the OSI-vs-FSF comparison (`--compare` for report-only).
 
 ## Data Source
 
-**Source**: the [SPDX license-list-data](https://github.com/spdx/license-list-data)
-JSON dump (`json/licenses.json`, raw from GitHub) — **not** the OSI API. SPDX
-ids match what npm/PyPI/crates/Homebrew publishers actually declare, the OSI's
-own JSON API returns empty bodies, and SPDX carries both the `isOsiApproved`
-flag and a `seeAlso` list that usually includes the OSI license-page URL.
-No authentication (single JSON download).
+**Source**: `data/sources/spdx/licenses.csv` — the full SPDX License List
+stored by `src.sources.spdx.fetch_licenses` (see [spdx.md](spdx.md)); this
+module takes no network of its own. SPDX ids match what
+npm/PyPI/crates/Homebrew publishers actually declare, and the list carries
+both approval flags per license.
 
 ## Curated extras
 
@@ -49,7 +51,7 @@ the `source` column records which rule admitted each row.
 | `spdx_id` | `apache-2.0` | lowercased SPDX id — the join key |
 | `spdx_id_canonical` | `Apache-2.0` | original SPDX casing |
 | `name` | `Apache License 2.0` | full human-readable name |
-| `source` | `osi` / `extras` | which inclusion rule admitted it |
+| `source` | `osi` / `fsf` / `extras` | which inclusion rule admitted it (`osi` wins the label when both bodies list it) |
 | `is_deprecated` | `False` | SPDX deprecated the id (still OSS) |
 | `reference` | `https://spdx.org/licenses/Apache-2.0.html` | SPDX page |
 | `osi_url` | `https://opensource.org/license/apache-2.0` | first opensource.org link in `seeAlso`; empty for most extras |
@@ -59,11 +61,13 @@ the `source` column records which rule admitted each row.
 
 | Script | Purpose |
 |--------|---------|
-| `src/sources/osi/fetch_licenses.py` | Fetch SPDX list, apply `isOsiApproved` ∪ `EXTRAS`, write CSV |
+| `src/sources/spdx/fetch_licenses.py` | Fetch the full SPDX License List (both flags) → `data/sources/spdx/licenses.csv` |
+| `src/sources/osi/fetch_licenses.py` | Build the unified OSS set from it (`osi` ∪ `fsf` software ∪ `EXTRAS`), print the OSI-vs-FSF comparison, write CSV |
 
 ```bash
-uv run python -m src.sources.osi.fetch_licenses          # respects 90-day TTL
-uv run python -m src.sources.osi.fetch_licenses --force  # ignore TTL
+uv run python -m src.sources.osi.fetch_licenses            # respects 90-day TTL
+uv run python -m src.sources.osi.fetch_licenses --force    # refetch SPDX + rebuild
+uv run python -m src.sources.osi.fetch_licenses --compare  # comparison only
 ```
 
 ## Refresh & Caveats

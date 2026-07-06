@@ -28,6 +28,7 @@ FETCHERS = [
     # Licensee detection into gitlab/repos.csv, 90-day TTL)
     Step("gitlab-projects", "src.sources.gitlab.fetch_project_data",      fetch=True),
     # license signals (homebrew before cpp — cpp joins homebrew's licenses)
+    Step("spdx",          "src.sources.spdx.fetch_licenses",              fetch=True),
     Step("osi",           "src.sources.osi.fetch_licenses",               fetch=True),
     Step("npm-lic",       "src.sources.npm.fetch_licenses",               fetch=True),
     Step("pypi-lic",      "src.sources.pypi.fetch_licenses",              fetch=True),

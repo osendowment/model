@@ -2,7 +2,7 @@
 """Build data/eligibility/licenses.csv — per-repo license + OSS flag.
 
 For every top repo (valid class-A, archived included) resolve one SPDX
-license string and classify it against the OSI-approved set:
+license string and classify it against the OSS-approved set:
 
 - **manual override** (highest priority) — the `license` column of
   data/eligibility/overrides.csv, a curated SPDX assertion for repos whose
@@ -27,9 +27,11 @@ A source only claims the slot with a MEANINGFUL license: an unknown sentinel
 later source; when every source is unknown, the first sentinel is kept so
 the empty verdict stays traceable.
 - **`oss`** is ternary: True when the license (or any component of an SPDX
-  expression) is in the OSI-approved set — data/sources/osi/oss-licenses.csv,
-  the union of SPDX `isOsiApproved` and a small curated extras list (see
-  src.sources.osi.fetch_licenses). False when the license is known but not
+  expression) is in the OSS-approved set — data/sources/osi/oss-licenses.csv,
+  the unified list built from the SPDX License List (Linux Foundation):
+  OSI-approved ∪ FSF-libre software licenses (content licenses excluded) ∪
+  a small curated extras list (see src.sources.osi.fetch_licenses /
+  src.sources.spdx.fetch_licenses). False when the license is known but not
   approved. Empty when there is no license signal at all (empty /
   noassertion / other / none) — unknown is not the same as known-non-OSS.
 
@@ -89,7 +91,8 @@ _UNKNOWN_LICENSES = {"", "noassertion", "other", "none"}
 
 
 def load_oss_approved(path: Path = OSI_FILE) -> set[str]:
-    """Lowercased SPDX ids of the OSS-approved set (OSI ∪ curated extras).
+    """Lowercased SPDX ids of the OSS-approved set
+    (OSI ∪ FSF-libre software ∪ curated extras).
 
     Self-heals: invokes the OSI fetcher first (no-op while the file is
     within its 90-day TTL), so the pipeline is self-bootstrapping.

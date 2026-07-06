@@ -246,8 +246,10 @@ Per-repo license resolution ([eligibility.md](eligibility.md)) — manual
 registry license (per-eco results.csv), then the GitHub / GitLab Licensee
 fallbacks (github/repos.csv, gitlab/repos.csv); an unknown sentinel
 (`noassertion`/`other`) never shadows a later real detection. `oss` = the
-SPDX id (or any component of an SPDX expression) is OSI-approved ∪ curated
-extras. Unknown (no license signal) is tracked separately from known non-OSS.
+SPDX id (or any component of an SPDX expression) is in the unified
+OSS-approved set — OSI-approved ∪ FSF-libre software licenses ∪ curated
+extras, built from the SPDX License List ([sources/spdx.md](sources/spdx.md)).
+Unknown (no license signal) is tracked separately from known non-OSS.
 
 | Step | Repos | % |
 |---|---:|---:|
@@ -257,13 +259,13 @@ extras. Unknown (no license signal) is tracked separately from known non-OSS.
 | · from registry | 893 | 95.0% |
 | · from GitHub | 10 | 1.1% |
 | · from GitLab | 19 | 2.0% |
-| **oss=True (OSI-approved)** | **923** | **98.2%** |
+| **oss=True (OSS-approved)** | **923** | **98.2%** |
 | oss=False (known non-OSS) | 10 | 1.1% |
 | oss unknown (no signal) | 7 | 0.7% |
 
 Of the 10 known non-OSS: 4 are content-licensed data repos (CC0/CC-BY — free
 for documents, not software OSS by this model's strict policy); the other 6
-ship under software licenses that are not OSI-approved (bzip2-1.0.6, libtiff,
+ship under software licenses outside the OSS-approved set (bzip2-1.0.6, libtiff,
 MIT-Open-Group, SGI-B-1.1).
 
 ### Activity

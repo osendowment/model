@@ -1,41 +1,46 @@
-"""Fetch the OSI-approved license list and write to CSV.
+"""Build the unified OSS-approved license set and write to CSV.
 
-Inclusion rule:  `isOsiApproved`  ∪  `EXTRAS`.
+Inclusion rule:  `isOsiApproved`  ∪  (`isFsfLibre` − content licenses)  ∪  `EXTRAS`.
 
-Strict OSS (software open source), **not** FSF "free software". The
-distinction matters: FSF's `isFsfLibre` flag covers content licenses
-(CC-BY-4.0, CC0-1.0, GFDL) that are free for documents/data but
-aren't software OSS in the OSI sense. Excluding them keeps the
-endowment's eligibility scope to real software projects.
+Consumes the raw SPDX License List stored by
+`src.sources.spdx.fetch_licenses` (data/sources/spdx/licenses.csv — the
+Linux Foundation's canonical registry, carrying BOTH approval flags), and
+unifies the two review bodies:
 
-`EXTRAS` covers a handful of licenses that are universally treated as
-software OSS but never went through OSI's formal review (curl, ftl,
-libpng-2.0, mit-cmu, psf-2.0, blessing) — see the dict below.
+  • **OSI** (`isOsiApproved`) — passed the Open Source Initiative's formal
+    license review.
+  • **FSF** (`isFsfLibre`) — listed as free by the Free Software Foundation.
+    FSF-libre covers several genuine software licenses OSI never reviewed —
+    but ALSO content licenses (CC-BY-*, CC0, GFDL) that are free for
+    documents/data, not software OSS. Those are excluded by
+    `CONTENT_LICENSE_PREFIXES`, keeping the endowment's eligibility scope
+    to real software projects.
+  • `EXTRAS` — a hand-curated handful universally treated as software OSS
+    that neither body ever reviewed (curl, blessing, …) — see the dict below.
 
-Why SPDX (and not `api.opensource.org/licenses`):
-
-  • SPDX is the authoritative SPDX-ID source — its IDs match what npm,
-    PyPI, crates, and Homebrew publishers actually declare.
-  • The OSI's own JSON API was returning empty bodies during testing.
-  • SPDX includes the `isOsiApproved` flag and a `seeAlso` list that
-    typically contains the OSI license page URL — best of both.
+Running this module also prints the OSI-vs-FSF comparison (overlap, each
+side's exclusives, and the content licenses the union deliberately drops).
 
 Output: `data/sources/osi/oss-licenses.csv`. Columns:
 
   spdx_id           — lowercased SPDX ID (the join key, e.g. `apache-2.0`)
   spdx_id_canonical — original SPDX casing (`Apache-2.0`)
   name              — full human-readable name
-  source            — `osi` or `extras` (the rule that admitted it)
+  source            — `osi` (OSI-approved, whether or not FSF also lists it),
+                      `fsf` (FSF-libre software license OSI never approved),
+                      or `extras` (the rule that admitted it)
   is_deprecated     — `True` if SPDX deprecated this ID (still OSS but legacy)
   reference         — `https://spdx.org/licenses/{id}.html`
   osi_url           — first `https://opensource.org/license/...` link from seeAlso
   fetched_at        — UTC ISO 8601 timestamp
 
-90-day TTL — re-runs within the window are no-ops unless `--force`.
+90-day TTL — re-runs within the window are no-ops unless `--force` (which
+also refetches the underlying SPDX list).
 
 Usage:
     uv run python -m src.sources.osi.fetch_licenses
     uv run python -m src.sources.osi.fetch_licenses --force
+    uv run python -m src.sources.osi.fetch_licenses --compare   # report only
 """
 
 import argparse
@@ -45,9 +50,10 @@ import logging
 import os
 from pathlib import Path
 
-import httpx
 from rich.console import Console
 from rich.table import Table
+
+from src.sources.spdx import fetch_licenses as spdx
 
 logging.basicConfig(level="INFO")
 log = logging.getLogger(__name__)
@@ -56,14 +62,24 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "sources" / "osi"
 OUT = DATA_DIR / "oss-licenses.csv"
 
-SPDX_LIST_URL = (
-    "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
-)
-USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"
 TTL_DAYS = 90
 
 FIELDS = ["spdx_id", "spdx_id_canonical", "name", "source", "is_deprecated",
           "reference", "osi_url", "fetched_at"]
+
+# FSF-libre ids that are CONTENT licenses — free for documents, data, fonts
+# and artwork, but not software OSS in the OSI sense. They are excluded from
+# the FSF side of the union so the endowment's eligibility scope stays on
+# real software projects (a CC-BY data repo remains oss=False on purpose).
+# Prefix match on the lowercased SPDX id.
+CONTENT_LICENSE_PREFIXES: tuple[str, ...] = (
+    "cc-by",    # CC-BY-* / CC-BY-SA-* — content attribution licenses
+    "cc0",      # CC0-1.0 — public-domain dedication for content/data
+    "gfdl",     # GNU Free Documentation License family
+    "ofl",      # SIL Open Font License (fonts; OSI-approved variants stay via OSI)
+    "fal",      # Free Art License
+    "odbl",     # Open Database License — data(base) contents, not software
+)
 
 # SPDX IDs that are universally treated as software OSS but never made
 # it onto OSI's official list — almost always because the author never
@@ -255,55 +271,101 @@ def _is_fresh(path: Path) -> bool:
     return False
 
 
-def fetch() -> list[dict]:
-    log.info("fetching SPDX license list ...")
-    resp = httpx.get(SPDX_LIST_URL, timeout=30,
-                     headers={"User-Agent": USER_AGENT})
-    resp.raise_for_status()
-    data = resp.json()
+def _is_content_license(spdx_id: str) -> bool:
+    return spdx_id.startswith(CONTENT_LICENSE_PREFIXES)
 
+
+def _flag(row: dict, key: str) -> bool:
+    return (row.get(key) or "").strip().lower() == "true"
+
+
+def build_rows(spdx_rows: list[dict]) -> list[dict]:
+    """The raw SPDX list → the unified OSS-approved rows.
+
+    Pass order fixes the `source` label: OSI approval wins the label even
+    when FSF also lists the license; `fsf` marks the licenses ONLY the FSF
+    union contributes; `extras` the hand-curated remainder.
+    """
     rows: list[dict] = []
     now = _now_iso()
     seen: set[str] = set()
-    by_id = {l.get("licenseId", "").lower(): l for l in data.get("licenses", [])}
+    by_id = {r["spdx_id"]: r for r in spdx_rows}
 
-    def _add(lic: dict, source: str) -> None:
-        spdx = lic.get("licenseId", "")
-        key = spdx.lower()
+    def _add(r: dict, source: str) -> None:
+        key = r["spdx_id"]
         if key in seen:
             return
         seen.add(key)
-        # Pick the OSI URL from seeAlso when available — otherwise empty.
-        osi_url = ""
-        for u in lic.get("seeAlso") or []:
-            if "opensource.org/license" in u or "opensource.org/licenses" in u:
-                osi_url = u
-                break
         rows.append({
             "spdx_id": key,
-            "spdx_id_canonical": spdx,
-            "name": lic.get("name", ""),
+            "spdx_id_canonical": r.get("spdx_id_canonical", ""),
+            "name": r.get("name", ""),
             "source": source,
-            "is_deprecated": bool(lic.get("isDeprecatedLicenseId", False)),
-            "reference": lic.get("reference", ""),
-            "osi_url": osi_url,
+            "is_deprecated": _flag(r, "is_deprecated"),
+            "reference": r.get("reference", ""),
+            "osi_url": r.get("osi_url", ""),
             "fetched_at": now,
         })
 
     # Pass 1: every OSI-approved license.
-    for lic in data.get("licenses", []):
-        if lic.get("isOsiApproved"):
-            _add(lic, source="osi")
-    # Pass 2: hand-curated extras (universally OSS, OSI never reviewed).
+    for r in spdx_rows:
+        if _flag(r, "is_osi_approved"):
+            _add(r, source="osi")
+    # Pass 2: FSF-libre SOFTWARE licenses OSI never approved (content excluded).
+    for r in spdx_rows:
+        if _flag(r, "is_fsf_libre") and not _is_content_license(r["spdx_id"]):
+            _add(r, source="fsf")
+    # Pass 3: hand-curated extras (universally OSS, neither body reviewed).
     for spdx_lc in EXTRAS:
-        lic = by_id.get(spdx_lc)
-        if lic is None:
+        r = by_id.get(spdx_lc)
+        if r is None:
             log.warning("EXTRAS entry %s not found in SPDX list — skipping", spdx_lc)
             continue
-        _add(lic, source="extras")
+        _add(r, source="extras")
 
     rows.sort(key=lambda r: r["spdx_id"])
     return rows
+
+
+def fetch(force: bool = False) -> list[dict]:
+    """Ensure the raw SPDX list is fresh, then build the unified set."""
+    spdx.ensure(force=force, verbose=False)
+    return build_rows(spdx.load())
+
+
+def compare(spdx_rows: list[dict]) -> dict:
+    """OSI vs FSF comparison over the raw SPDX list (non-deprecated ids)."""
+    live = [r for r in spdx_rows if not _flag(r, "is_deprecated")]
+    osi = {r["spdx_id"] for r in live if _flag(r, "is_osi_approved")}
+    fsf = {r["spdx_id"] for r in live if _flag(r, "is_fsf_libre")}
+    fsf_only = fsf - osi
+    return {
+        "osi": osi, "fsf": fsf, "both": osi & fsf,
+        "osi_only": osi - fsf,
+        "fsf_only_software": {s for s in fsf_only if not _is_content_license(s)},
+        "fsf_only_content": {s for s in fsf_only if _is_content_license(s)},
+    }
+
+
+def print_comparison(spdx_rows: list[dict]) -> None:
+    c = compare(spdx_rows)
+    tbl = Table(title="[bold]OSI vs FSF (SPDX License List, non-deprecated)[/bold]",
+                header_style="bold dim", padding=(0, 1))
+    tbl.add_column("Set", style="bold")
+    tbl.add_column("Licenses", justify="right")
+    tbl.add_row("OSI-approved", f"{len(c['osi'])}")
+    tbl.add_row("FSF-libre", f"{len(c['fsf'])}")
+    tbl.add_row("both (overlap)", f"{len(c['both'])}")
+    tbl.add_row("OSI only", f"{len(c['osi_only'])}")
+    tbl.add_row("FSF only — software (admitted by the union)",
+                f"{len(c['fsf_only_software'])}", style="bold green")
+    tbl.add_row("FSF only — content (excluded)",
+                f"{len(c['fsf_only_content'])}", style="dim")
+    console.print(tbl)
+    console.print("[bold]FSF-only software licenses the union adds:[/bold] "
+                  + ", ".join(sorted(c["fsf_only_software"])))
+    console.print("[dim]content licenses excluded: "
+                  + ", ".join(sorted(c["fsf_only_content"])) + "[/dim]")
 
 
 def _write(rows: list[dict]) -> None:
@@ -336,17 +398,18 @@ def ensure(force: bool = False, verbose: bool = True) -> Path:
         console.print(
             f"[dim]osi/oss-licenses.csv: "
             f"{'forced refresh' if force else 'missing or stale'} → "
-            f"fetching SPDX list[/dim]")
-    rows = fetch()
+            f"building from the SPDX list[/dim]")
+    rows = fetch(force=force)
     _write(rows)
     if verbose:
         n = len(rows)
         by_src = {s: sum(1 for r in rows if r["source"] == s)
-                  for s in ("osi", "extras")}
+                  for s in ("osi", "fsf", "extras")}
         deprecated = sum(1 for r in rows if r["is_deprecated"])
         console.print(
             f"[dim]  → {n:,} OSS SPDX ids "
-            f"(osi={by_src['osi']}, extras={by_src['extras']}, "
+            f"(osi={by_src['osi']}, fsf={by_src['fsf']}, "
+            f"extras={by_src['extras']}, "
             f"deprecated={deprecated}) written to {OUT}[/dim]")
     return OUT
 
@@ -354,11 +417,18 @@ def ensure(force: bool = False, verbose: bool = True) -> Path:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("--force", action="store_true",
-                   help="ignore 90-day TTL and re-fetch")
+                   help="ignore 90-day TTL and re-fetch the SPDX list")
+    p.add_argument("--compare", action="store_true",
+                   help="print the OSI-vs-FSF comparison from existing data and exit")
     args = p.parse_args()
 
+    if args.compare:
+        spdx.ensure(verbose=False)
+        print_comparison(spdx.load())
+        return
+
     console.rule("[bold cyan]osi/fetch_licenses")
-    console.print(f"  Source: [dim]{SPDX_LIST_URL}[/dim]")
+    console.print(f"  Source: [dim]{spdx.OUT}[/dim] (SPDX License List)")
     console.print(f"  TTL:    [dim]{TTL_DAYS} days[/dim]   "
                   f"force=[dim]{args.force}[/dim]")
 
@@ -366,25 +436,19 @@ def main() -> None:
         console.print(f"  [green]✓ fresh[/green] — keeping [cyan]{OUT}[/cyan]")
         return
 
-    rows = fetch()
+    rows = fetch(force=args.force)
     _write(rows)
 
     n = len(rows)
     by_src = {s: sum(1 for r in rows if r["source"] == s)
-              for s in ("osi", "extras")}
+              for s in ("osi", "fsf", "extras")}
     deprecated = sum(1 for r in rows if r["is_deprecated"])
-    console.print(f"  Fetched [bold]{n:,}[/bold] OSS SPDX ids "
-                  f"(osi={by_src['osi']}, extras={by_src['extras']}, "
-                  f"deprecated={deprecated})")
+    console.print(f"  Built [bold]{n:,}[/bold] OSS SPDX ids "
+                  f"(osi={by_src['osi']}, fsf={by_src['fsf']}, "
+                  f"extras={by_src['extras']}, deprecated={deprecated})")
     console.print(f"  → wrote [cyan]{OUT}[/cyan]")
 
-    # Show a sample
-    tbl = Table(title="[bold]Sample (first 12 by SPDX id)[/bold]",
-                header_style="bold dim", padding=(0, 1))
-    tbl.add_column("spdx_id"); tbl.add_column("name")
-    for r in rows[:12]:
-        tbl.add_row(r["spdx_id"], r["name"][:55])
-    console.print(tbl)
+    print_comparison(spdx.load())
 
 
 if __name__ == "__main__":
