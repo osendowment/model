@@ -1,199 +1,198 @@
 spdx_id,spdx_id_canonical,name,source,is_deprecated,reference,osi_url,fetched_at
-0bsd,0BSD,BSD Zero Clause License,osi,False,https://spdx.org/licenses/0BSD.html,https://opensource.org/license/0BSD,2026-07-06T15:43:02Z
-aal,AAL,Attribution Assurance License,osi,False,https://spdx.org/licenses/AAL.html,https://opensource.org/license/AAL,2026-07-06T15:43:02Z
-afl-1.1,AFL-1.1,Academic Free License v1.1,osi,False,https://spdx.org/licenses/AFL-1.1.html,http://wayback.archive.org/web/20021004124254/http://www.opensource.org/licenses/academic.php,2026-07-06T15:43:02Z
-afl-1.2,AFL-1.2,Academic Free License v1.2,osi,False,https://spdx.org/licenses/AFL-1.2.html,http://wayback.archive.org/web/20021204204652/http://www.opensource.org/licenses/academic.php,2026-07-06T15:43:02Z
-afl-2.0,AFL-2.0,Academic Free License v2.0,osi,False,https://spdx.org/licenses/AFL-2.0.html,http://wayback.archive.org/web/20060924134533/http://www.opensource.org/licenses/afl-2.0.txt,2026-07-06T15:43:02Z
-afl-2.1,AFL-2.1,Academic Free License v2.1,osi,False,https://spdx.org/licenses/AFL-2.1.html,,2026-07-06T15:43:02Z
-afl-3.0,AFL-3.0,Academic Free License v3.0,osi,False,https://spdx.org/licenses/AFL-3.0.html,https://opensource.org/license/AFL-3.0,2026-07-06T15:43:02Z
-agpl-1.0,AGPL-1.0,Affero General Public License v1.0,fsf,True,https://spdx.org/licenses/AGPL-1.0.html,,2026-07-06T15:43:02Z
-agpl-3.0,AGPL-3.0,GNU Affero General Public License v3.0,osi,True,https://spdx.org/licenses/AGPL-3.0.html,https://opensource.org/license/AGPL-3.0,2026-07-06T15:43:02Z
-agpl-3.0-only,AGPL-3.0-only,GNU Affero General Public License v3.0 only,osi,False,https://spdx.org/licenses/AGPL-3.0-only.html,https://opensource.org/license/AGPL-3.0-only,2026-07-06T15:43:02Z
-agpl-3.0-or-later,AGPL-3.0-or-later,GNU Affero General Public License v3.0 or later,osi,False,https://spdx.org/licenses/AGPL-3.0-or-later.html,https://opensource.org/license/AGPL-3.0,2026-07-06T15:43:02Z
-alglib-documentation,ALGLIB-Documentation,ALGLIB Documentation License,osi,False,https://spdx.org/licenses/ALGLIB-Documentation.html,,2026-07-06T15:43:02Z
-apache-1.0,Apache-1.0,Apache License 1.0,fsf,False,https://spdx.org/licenses/Apache-1.0.html,,2026-07-06T15:43:02Z
-apache-1.1,Apache-1.1,Apache License 1.1,osi,False,https://spdx.org/licenses/Apache-1.1.html,https://opensource.org/license/apache-1.1,2026-07-06T15:43:02Z
-apache-2.0,Apache-2.0,Apache License 2.0,osi,False,https://spdx.org/licenses/Apache-2.0.html,https://opensource.org/license/apache-2.0,2026-07-06T15:43:02Z
-apl-1.0,APL-1.0,Adaptive Public License 1.0,osi,False,https://spdx.org/licenses/APL-1.0.html,https://opensource.org/license/APL-1.0,2026-07-06T15:43:02Z
-apsl-1.0,APSL-1.0,Apple Public Source License 1.0,osi,False,https://spdx.org/licenses/APSL-1.0.html,,2026-07-06T15:43:02Z
-apsl-1.1,APSL-1.1,Apple Public Source License 1.1,osi,False,https://spdx.org/licenses/APSL-1.1.html,,2026-07-06T15:43:02Z
-apsl-1.2,APSL-1.2,Apple Public Source License 1.2,osi,False,https://spdx.org/licenses/APSL-1.2.html,,2026-07-06T15:43:02Z
-apsl-2.0,APSL-2.0,Apple Public Source License 2.0,osi,False,https://spdx.org/licenses/APSL-2.0.html,,2026-07-06T15:43:02Z
-artistic-1.0,Artistic-1.0,Artistic License 1.0,osi,False,https://spdx.org/licenses/Artistic-1.0.html,https://opensource.org/license/Artistic-1.0,2026-07-06T15:43:02Z
-artistic-1.0-cl8,Artistic-1.0-cl8,Artistic License 1.0 w/clause 8,osi,False,https://spdx.org/licenses/Artistic-1.0-cl8.html,https://opensource.org/license/Artistic-1.0,2026-07-06T15:43:02Z
-artistic-1.0-perl,Artistic-1.0-Perl,Artistic License 1.0 (Perl),osi,False,https://spdx.org/licenses/Artistic-1.0-Perl.html,,2026-07-06T15:43:02Z
-artistic-2.0,Artistic-2.0,Artistic License 2.0,osi,False,https://spdx.org/licenses/Artistic-2.0.html,https://opensource.org/license/Artistic-2.0,2026-07-06T15:43:02Z
-bittorrent-1.1,BitTorrent-1.1,BitTorrent Open Source License v1.1,fsf,False,https://spdx.org/licenses/BitTorrent-1.1.html,,2026-07-06T15:43:02Z
-blessing,blessing,SQLite Blessing,extras,False,https://spdx.org/licenses/blessing.html,,2026-07-06T15:43:02Z
-blueoak-1.0.0,BlueOak-1.0.0,Blue Oak Model License 1.0.0,osi,False,https://spdx.org/licenses/BlueOak-1.0.0.html,,2026-07-06T15:43:02Z
-bsd-1-clause,BSD-1-Clause,BSD 1-Clause License,osi,False,https://spdx.org/licenses/BSD-1-Clause.html,,2026-07-06T15:43:02Z
-bsd-2-clause,BSD-2-Clause,"BSD 2-Clause ""Simplified"" License",osi,False,https://spdx.org/licenses/BSD-2-Clause.html,https://opensource.org/license/BSD-2-Clause,2026-07-06T15:43:02Z
-bsd-2-clause-freebsd,BSD-2-Clause-FreeBSD,BSD 2-Clause FreeBSD License,fsf,True,https://spdx.org/licenses/BSD-2-Clause-FreeBSD.html,,2026-07-06T15:43:02Z
-bsd-2-clause-netbsd,BSD-2-Clause-NetBSD,BSD 2-Clause NetBSD License,fsf,True,https://spdx.org/licenses/BSD-2-Clause-NetBSD.html,,2026-07-06T15:43:02Z
-bsd-2-clause-patent,BSD-2-Clause-Patent,BSD-2-Clause Plus Patent License,osi,False,https://spdx.org/licenses/BSD-2-Clause-Patent.html,https://opensource.org/license/BSD-2-Clause-Patent,2026-07-06T15:43:02Z
-bsd-3-clause,BSD-3-Clause,"BSD 3-Clause ""New"" or ""Revised"" License",osi,False,https://spdx.org/licenses/BSD-3-Clause.html,https://opensource.org/license/BSD-3-Clause,2026-07-06T15:43:02Z
-bsd-3-clause-clear,BSD-3-Clause-Clear,BSD 3-Clause Clear License,fsf,False,https://spdx.org/licenses/BSD-3-Clause-Clear.html,,2026-07-06T15:43:02Z
-bsd-3-clause-lbnl,BSD-3-Clause-LBNL,Lawrence Berkeley National Labs BSD variant license,osi,False,https://spdx.org/licenses/BSD-3-Clause-LBNL.html,,2026-07-06T15:43:02Z
-bsd-3-clause-open-mpi,BSD-3-Clause-Open-MPI,BSD 3-Clause Open MPI variant,osi,False,https://spdx.org/licenses/BSD-3-Clause-Open-MPI.html,,2026-07-06T15:43:02Z
-bsd-4-clause,BSD-4-Clause,"BSD 4-Clause ""Original"" or ""Old"" License",fsf,False,https://spdx.org/licenses/BSD-4-Clause.html,,2026-07-06T15:43:02Z
-bsl-1.0,BSL-1.0,Boost Software License 1.0,osi,False,https://spdx.org/licenses/BSL-1.0.html,https://opensource.org/license/BSL-1.0,2026-07-06T15:43:02Z
-cal-1.0,CAL-1.0,Cryptographic Autonomy License 1.0,osi,False,https://spdx.org/licenses/CAL-1.0.html,https://opensource.org/license/CAL-1.0,2026-07-06T15:43:02Z
-cal-1.0-combined-work-exception,CAL-1.0-Combined-Work-Exception,Cryptographic Autonomy License 1.0 (Combined Work Exception),osi,False,https://spdx.org/licenses/CAL-1.0-Combined-Work-Exception.html,https://opensource.org/license/CAL-1.0,2026-07-06T15:43:02Z
-catosl-1.1,CATOSL-1.1,Computer Associates Trusted Open Source License 1.1,osi,False,https://spdx.org/licenses/CATOSL-1.1.html,https://opensource.org/license/CATOSL-1.1,2026-07-06T15:43:02Z
-cddl-1.0,CDDL-1.0,Common Development and Distribution License 1.0,osi,False,https://spdx.org/licenses/CDDL-1.0.html,https://opensource.org/license/CDDL-1.0,2026-07-06T15:43:02Z
-cddl-1.1,CDDL-1.1,Common Development and Distribution License 1.1,osi,False,https://spdx.org/licenses/CDDL-1.1.html,,2026-07-06T15:43:02Z
-cecill-2.0,CECILL-2.0,CeCILL Free Software License Agreement v2.0,fsf,False,https://spdx.org/licenses/CECILL-2.0.html,,2026-07-06T15:43:02Z
-cecill-2.1,CECILL-2.1,CeCILL Free Software License Agreement v2.1,osi,False,https://spdx.org/licenses/CECILL-2.1.html,,2026-07-06T15:43:02Z
-cecill-b,CECILL-B,CeCILL-B Free Software License Agreement,fsf,False,https://spdx.org/licenses/CECILL-B.html,,2026-07-06T15:43:02Z
-cecill-c,CECILL-C,CeCILL-C Free Software License Agreement,fsf,False,https://spdx.org/licenses/CECILL-C.html,,2026-07-06T15:43:02Z
-cern-ohl-p-2.0,CERN-OHL-P-2.0,CERN Open Hardware Licence Version 2 - Permissive,osi,False,https://spdx.org/licenses/CERN-OHL-P-2.0.html,,2026-07-06T15:43:02Z
-cern-ohl-s-2.0,CERN-OHL-S-2.0,CERN Open Hardware Licence Version 2 - Strongly Reciprocal,osi,False,https://spdx.org/licenses/CERN-OHL-S-2.0.html,,2026-07-06T15:43:02Z
-cern-ohl-w-2.0,CERN-OHL-W-2.0,CERN Open Hardware Licence Version 2 - Weakly Reciprocal,osi,False,https://spdx.org/licenses/CERN-OHL-W-2.0.html,,2026-07-06T15:43:02Z
-clartistic,ClArtistic,Clarified Artistic License,fsf,False,https://spdx.org/licenses/ClArtistic.html,,2026-07-06T15:43:02Z
-cnri-python,CNRI-Python,CNRI Python License,osi,False,https://spdx.org/licenses/CNRI-Python.html,https://opensource.org/license/CNRI-Python,2026-07-06T15:43:02Z
-condor-1.1,Condor-1.1,Condor Public License v1.1,fsf,False,https://spdx.org/licenses/Condor-1.1.html,,2026-07-06T15:43:02Z
-cpal-1.0,CPAL-1.0,Common Public Attribution License 1.0,osi,False,https://spdx.org/licenses/CPAL-1.0.html,https://opensource.org/license/CPAL-1.0,2026-07-06T15:43:02Z
-cpl-1.0,CPL-1.0,Common Public License 1.0,osi,False,https://spdx.org/licenses/CPL-1.0.html,https://opensource.org/license/CPL-1.0,2026-07-06T15:43:02Z
-cua-opl-1.0,CUA-OPL-1.0,CUA Office Public License v1.0,osi,False,https://spdx.org/licenses/CUA-OPL-1.0.html,https://opensource.org/license/CUA-OPL-1.0,2026-07-06T15:43:02Z
-curl,curl,curl License,extras,False,https://spdx.org/licenses/curl.html,,2026-07-06T15:43:02Z
-ecl-1.0,ECL-1.0,Educational Community License v1.0,osi,False,https://spdx.org/licenses/ECL-1.0.html,https://opensource.org/license/ECL-1.0,2026-07-06T15:43:02Z
-ecl-2.0,ECL-2.0,Educational Community License v2.0,osi,False,https://spdx.org/licenses/ECL-2.0.html,https://opensource.org/license/ECL-2.0,2026-07-06T15:43:02Z
-ecos-2.0,eCos-2.0,eCos license version 2.0,fsf,True,https://spdx.org/licenses/eCos-2.0.html,,2026-07-06T15:43:02Z
-efl-1.0,EFL-1.0,Eiffel Forum License v1.0,osi,False,https://spdx.org/licenses/EFL-1.0.html,https://opensource.org/license/EFL-1.0,2026-07-06T15:43:02Z
-efl-2.0,EFL-2.0,Eiffel Forum License v2.0,osi,False,https://spdx.org/licenses/EFL-2.0.html,https://opensource.org/license/EFL-2.0,2026-07-06T15:43:02Z
-entessa,Entessa,Entessa Public License v1.0,osi,False,https://spdx.org/licenses/Entessa.html,https://opensource.org/license/Entessa,2026-07-06T15:43:02Z
-epl-1.0,EPL-1.0,Eclipse Public License 1.0,osi,False,https://spdx.org/licenses/EPL-1.0.html,https://opensource.org/license/EPL-1.0,2026-07-06T15:43:02Z
-epl-2.0,EPL-2.0,Eclipse Public License 2.0,osi,False,https://spdx.org/licenses/EPL-2.0.html,https://www.opensource.org/license/EPL-2.0,2026-07-06T15:43:02Z
-eudatagrid,EUDatagrid,EU DataGrid Software License,osi,False,https://spdx.org/licenses/EUDatagrid.html,https://opensource.org/license/EUDatagrid,2026-07-06T15:43:02Z
-eupl-1.1,EUPL-1.1,European Union Public License 1.1,osi,False,https://spdx.org/licenses/EUPL-1.1.html,https://opensource.org/license/EUPL-1.1,2026-07-06T15:43:02Z
-eupl-1.2,EUPL-1.2,European Union Public License 1.2,osi,False,https://spdx.org/licenses/EUPL-1.2.html,https://opensource.org/license/EUPL-1.2,2026-07-06T15:43:02Z
-fair,Fair,Fair License,osi,False,https://spdx.org/licenses/Fair.html,https://opensource.org/license/Fair,2026-07-06T15:43:02Z
-frameworx-1.0,Frameworx-1.0,Frameworx Open License 1.0,osi,False,https://spdx.org/licenses/Frameworx-1.0.html,https://opensource.org/license/Frameworx-1.0,2026-07-06T15:43:02Z
-fsfap,FSFAP,FSF All Permissive License,fsf,False,https://spdx.org/licenses/FSFAP.html,,2026-07-06T15:43:02Z
-ftl,FTL,Freetype Project License,fsf,False,https://spdx.org/licenses/FTL.html,,2026-07-06T15:43:02Z
-gnuplot,gnuplot,gnuplot License,fsf,False,https://spdx.org/licenses/gnuplot.html,,2026-07-06T15:43:02Z
-gpl-2.0,GPL-2.0,GNU General Public License v2.0 only,osi,True,https://spdx.org/licenses/GPL-2.0.html,https://opensource.org/license/GPL-2.0,2026-07-06T15:43:02Z
-gpl-2.0+,GPL-2.0+,GNU General Public License v2.0 or later,osi,True,https://spdx.org/licenses/GPL-2.0+.html,https://opensource.org/license/GPL-2.0,2026-07-06T15:43:02Z
-gpl-2.0-only,GPL-2.0-only,GNU General Public License v2.0 only,osi,False,https://spdx.org/licenses/GPL-2.0-only.html,https://opensource.org/license/GPL-2.0-only,2026-07-06T15:43:02Z
-gpl-2.0-or-later,GPL-2.0-or-later,GNU General Public License v2.0 or later,osi,False,https://spdx.org/licenses/GPL-2.0-or-later.html,https://opensource.org/license/GPL-2.0,2026-07-06T15:43:02Z
-gpl-3.0,GPL-3.0,GNU General Public License v3.0 only,osi,True,https://spdx.org/licenses/GPL-3.0.html,https://opensource.org/license/GPL-3.0,2026-07-06T15:43:02Z
-gpl-3.0+,GPL-3.0+,GNU General Public License v3.0 or later,osi,True,https://spdx.org/licenses/GPL-3.0+.html,https://opensource.org/license/GPL-3.0,2026-07-06T15:43:02Z
-gpl-3.0-only,GPL-3.0-only,GNU General Public License v3.0 only,osi,False,https://spdx.org/licenses/GPL-3.0-only.html,https://opensource.org/license/GPL-3.0-only,2026-07-06T15:43:02Z
-gpl-3.0-or-later,GPL-3.0-or-later,GNU General Public License v3.0 or later,osi,False,https://spdx.org/licenses/GPL-3.0-or-later.html,https://opensource.org/license/GPL-3.0,2026-07-06T15:43:02Z
-gpl-3.0-with-gcc-exception,GPL-3.0-with-GCC-exception,GNU General Public License v3.0 w/GCC Runtime Library exception,osi,True,https://spdx.org/licenses/GPL-3.0-with-GCC-exception.html,,2026-07-06T15:43:02Z
-hpnd,HPND,Historical Permission Notice and Disclaimer,osi,False,https://spdx.org/licenses/HPND.html,https://opensource.org/license/HPND,2026-07-06T15:43:02Z
-icu,ICU,ICU License,osi,False,https://spdx.org/licenses/ICU.html,,2026-07-06T15:43:02Z
-ijg,IJG,Independent JPEG Group License,fsf,False,https://spdx.org/licenses/IJG.html,,2026-07-06T15:43:02Z
-imatix,iMatix,iMatix Standard Function Library Agreement,fsf,False,https://spdx.org/licenses/iMatix.html,,2026-07-06T15:43:02Z
-imlib2,Imlib2,Imlib2 License,fsf,False,https://spdx.org/licenses/Imlib2.html,,2026-07-06T15:43:02Z
-intel,Intel,Intel Open Source License,osi,False,https://spdx.org/licenses/Intel.html,https://opensource.org/license/Intel,2026-07-06T15:43:02Z
-ipa,IPA,IPA Font License,osi,False,https://spdx.org/licenses/IPA.html,https://opensource.org/license/IPA,2026-07-06T15:43:02Z
-ipl-1.0,IPL-1.0,IBM Public License v1.0,osi,False,https://spdx.org/licenses/IPL-1.0.html,https://opensource.org/license/IPL-1.0,2026-07-06T15:43:02Z
-isc,ISC,ISC License,osi,False,https://spdx.org/licenses/ISC.html,https://opensource.org/license/ISC,2026-07-06T15:43:02Z
-jam,Jam,Jam License,osi,False,https://spdx.org/licenses/Jam.html,,2026-07-06T15:43:02Z
-lgpl-2.0,LGPL-2.0,GNU Library General Public License v2 only,osi,True,https://spdx.org/licenses/LGPL-2.0.html,,2026-07-06T15:43:02Z
-lgpl-2.0+,LGPL-2.0+,GNU Library General Public License v2 or later,osi,True,https://spdx.org/licenses/LGPL-2.0+.html,,2026-07-06T15:43:02Z
-lgpl-2.0-only,LGPL-2.0-only,GNU Library General Public License v2 only,osi,False,https://spdx.org/licenses/LGPL-2.0-only.html,,2026-07-06T15:43:02Z
-lgpl-2.0-or-later,LGPL-2.0-or-later,GNU Library General Public License v2 or later,osi,False,https://spdx.org/licenses/LGPL-2.0-or-later.html,,2026-07-06T15:43:02Z
-lgpl-2.1,LGPL-2.1,GNU Lesser General Public License v2.1 only,osi,True,https://spdx.org/licenses/LGPL-2.1.html,https://opensource.org/license/LGPL-2.1,2026-07-06T15:43:02Z
-lgpl-2.1+,LGPL-2.1+,GNU Lesser General Public License v2.1 or later,osi,True,https://spdx.org/licenses/LGPL-2.1+.html,https://opensource.org/license/LGPL-2.1,2026-07-06T15:43:02Z
-lgpl-2.1-only,LGPL-2.1-only,GNU Lesser General Public License v2.1 only,osi,False,https://spdx.org/licenses/LGPL-2.1-only.html,https://opensource.org/license/LGPL-2.1-only,2026-07-06T15:43:02Z
-lgpl-2.1-or-later,LGPL-2.1-or-later,GNU Lesser General Public License v2.1 or later,osi,False,https://spdx.org/licenses/LGPL-2.1-or-later.html,https://opensource.org/license/LGPL-2.1,2026-07-06T15:43:02Z
-lgpl-3.0,LGPL-3.0,GNU Lesser General Public License v3.0 only,osi,True,https://spdx.org/licenses/LGPL-3.0.html,https://opensource.org/license/LGPL-3.0,2026-07-06T15:43:02Z
-lgpl-3.0+,LGPL-3.0+,GNU Lesser General Public License v3.0 or later,osi,True,https://spdx.org/licenses/LGPL-3.0+.html,https://opensource.org/license/LGPL-3.0,2026-07-06T15:43:02Z
-lgpl-3.0-only,LGPL-3.0-only,GNU Lesser General Public License v3.0 only,osi,False,https://spdx.org/licenses/LGPL-3.0-only.html,https://opensource.org/license/LGPL-3.0,2026-07-06T15:43:02Z
-lgpl-3.0-or-later,LGPL-3.0-or-later,GNU Lesser General Public License v3.0 or later,osi,False,https://spdx.org/licenses/LGPL-3.0-or-later.html,https://opensource.org/license/LGPL-3.0,2026-07-06T15:43:02Z
-libpng-2.0,libpng-2.0,PNG Reference Library version 2,extras,False,https://spdx.org/licenses/libpng-2.0.html,,2026-07-06T15:43:02Z
-liliq-p-1.1,LiLiQ-P-1.1,Licence Libre du Québec – Permissive version 1.1,osi,False,https://spdx.org/licenses/LiLiQ-P-1.1.html,http://opensource.org/license/LiLiQ-P-1.1,2026-07-06T15:43:02Z
-liliq-r-1.1,LiLiQ-R-1.1,Licence Libre du Québec – Réciprocité version 1.1,osi,False,https://spdx.org/licenses/LiLiQ-R-1.1.html,http://opensource.org/license/LiLiQ-R-1.1,2026-07-06T15:43:02Z
-liliq-rplus-1.1,LiLiQ-Rplus-1.1,Licence Libre du Québec – Réciprocité forte version 1.1,osi,False,https://spdx.org/licenses/LiLiQ-Rplus-1.1.html,http://opensource.org/license/LiLiQ-Rplus-1.1,2026-07-06T15:43:02Z
-lpl-1.0,LPL-1.0,Lucent Public License Version 1.0,osi,False,https://spdx.org/licenses/LPL-1.0.html,https://opensource.org/license/LPL-1.0,2026-07-06T15:43:02Z
-lpl-1.02,LPL-1.02,Lucent Public License v1.02,osi,False,https://spdx.org/licenses/LPL-1.02.html,https://opensource.org/license/LPL-1.02,2026-07-06T15:43:02Z
-lppl-1.2,LPPL-1.2,LaTeX Project Public License v1.2,fsf,False,https://spdx.org/licenses/LPPL-1.2.html,,2026-07-06T15:43:02Z
-lppl-1.3a,LPPL-1.3a,LaTeX Project Public License v1.3a,fsf,False,https://spdx.org/licenses/LPPL-1.3a.html,,2026-07-06T15:43:02Z
-lppl-1.3c,LPPL-1.3c,LaTeX Project Public License v1.3c,osi,False,https://spdx.org/licenses/LPPL-1.3c.html,https://opensource.org/license/LPPL-1.3c,2026-07-06T15:43:02Z
-miros,MirOS,The MirOS Licence,osi,False,https://spdx.org/licenses/MirOS.html,https://opensource.org/license/MirOS,2026-07-06T15:43:02Z
-mit,MIT,MIT License,osi,False,https://spdx.org/licenses/MIT.html,https://opensource.org/license/MIT,2026-07-06T15:43:02Z
-mit-0,MIT-0,MIT No Attribution,osi,False,https://spdx.org/licenses/MIT-0.html,,2026-07-06T15:43:02Z
-mit-cmu,MIT-CMU,CMU License,extras,False,https://spdx.org/licenses/MIT-CMU.html,,2026-07-06T15:43:02Z
-mit-modern-variant,MIT-Modern-Variant,MIT License Modern Variant,osi,False,https://spdx.org/licenses/MIT-Modern-Variant.html,,2026-07-06T15:43:02Z
-motosoto,Motosoto,Motosoto License,osi,False,https://spdx.org/licenses/Motosoto.html,https://opensource.org/license/Motosoto,2026-07-06T15:43:02Z
-mpl-1.0,MPL-1.0,Mozilla Public License 1.0,osi,False,https://spdx.org/licenses/MPL-1.0.html,https://opensource.org/license/MPL-1.0,2026-07-06T15:43:02Z
-mpl-1.1,MPL-1.1,Mozilla Public License 1.1,osi,False,https://spdx.org/licenses/MPL-1.1.html,https://opensource.org/license/MPL-1.1,2026-07-06T15:43:02Z
-mpl-2.0,MPL-2.0,Mozilla Public License 2.0,osi,False,https://spdx.org/licenses/MPL-2.0.html,https://opensource.org/license/MPL-2.0,2026-07-06T15:43:02Z
-mpl-2.0-no-copyleft-exception,MPL-2.0-no-copyleft-exception,Mozilla Public License 2.0 (no copyleft exception),osi,False,https://spdx.org/licenses/MPL-2.0-no-copyleft-exception.html,https://opensource.org/license/MPL-2.0,2026-07-06T15:43:02Z
-ms-pl,MS-PL,Microsoft Public License,osi,False,https://spdx.org/licenses/MS-PL.html,https://opensource.org/license/MS-PL,2026-07-06T15:43:02Z
-ms-rl,MS-RL,Microsoft Reciprocal License,osi,False,https://spdx.org/licenses/MS-RL.html,https://opensource.org/license/MS-RL,2026-07-06T15:43:02Z
-mulanpsl-2.0,MulanPSL-2.0,"Mulan Permissive Software License, Version 2",osi,False,https://spdx.org/licenses/MulanPSL-2.0.html,,2026-07-06T15:43:02Z
-multics,Multics,Multics License,osi,False,https://spdx.org/licenses/Multics.html,https://opensource.org/license/Multics,2026-07-06T15:43:02Z
-nasa-1.3,NASA-1.3,NASA Open Source Agreement 1.3,osi,False,https://spdx.org/licenses/NASA-1.3.html,https://opensource.org/license/NASA-1.3,2026-07-06T15:43:02Z
-naumen,Naumen,Naumen Public License,osi,False,https://spdx.org/licenses/Naumen.html,https://opensource.org/license/Naumen,2026-07-06T15:43:02Z
-ncsa,NCSA,University of Illinois/NCSA Open Source License,osi,False,https://spdx.org/licenses/NCSA.html,https://opensource.org/license/NCSA,2026-07-06T15:43:02Z
-ngpl,NGPL,Nethack General Public License,osi,False,https://spdx.org/licenses/NGPL.html,https://opensource.org/license/NGPL,2026-07-06T15:43:02Z
-nokia,Nokia,Nokia Open Source License,osi,False,https://spdx.org/licenses/Nokia.html,https://opensource.org/license/Nokia,2026-07-06T15:43:02Z
-nosl,NOSL,Netizen Open Source License,fsf,False,https://spdx.org/licenses/NOSL.html,,2026-07-06T15:43:02Z
-npl-1.0,NPL-1.0,Netscape Public License v1.0,fsf,False,https://spdx.org/licenses/NPL-1.0.html,,2026-07-06T15:43:02Z
-npl-1.1,NPL-1.1,Netscape Public License v1.1,fsf,False,https://spdx.org/licenses/NPL-1.1.html,,2026-07-06T15:43:02Z
-nposl-3.0,NPOSL-3.0,Non-Profit Open Software License 3.0,osi,False,https://spdx.org/licenses/NPOSL-3.0.html,https://opensource.org/license/NPOSL-3.0,2026-07-06T15:43:02Z
-ntp,NTP,NTP License,osi,False,https://spdx.org/licenses/NTP.html,https://opensource.org/license/NTP,2026-07-06T15:43:02Z
-nunit,Nunit,Nunit License,fsf,True,https://spdx.org/licenses/Nunit.html,,2026-07-06T15:43:02Z
-oclc-2.0,OCLC-2.0,OCLC Research Public License 2.0,osi,False,https://spdx.org/licenses/OCLC-2.0.html,https://opensource.org/license/OCLC-2.0,2026-07-06T15:43:02Z
-odbl-1.0,ODbL-1.0,Open Data Commons Open Database License v1.0,fsf,False,https://spdx.org/licenses/ODbL-1.0.html,,2026-07-06T15:43:02Z
-ofl-1.1,OFL-1.1,SIL Open Font License 1.1,osi,False,https://spdx.org/licenses/OFL-1.1.html,https://opensource.org/license/OFL-1.1,2026-07-06T15:43:02Z
-ofl-1.1-no-rfn,OFL-1.1-no-RFN,SIL Open Font License 1.1 with no Reserved Font Name,osi,False,https://spdx.org/licenses/OFL-1.1-no-RFN.html,https://opensource.org/license/OFL-1.1,2026-07-06T15:43:02Z
-ofl-1.1-rfn,OFL-1.1-RFN,SIL Open Font License 1.1 with Reserved Font Name,osi,False,https://spdx.org/licenses/OFL-1.1-RFN.html,https://opensource.org/license/OFL-1.1,2026-07-06T15:43:02Z
-ogtsl,OGTSL,Open Group Test Suite License,osi,False,https://spdx.org/licenses/OGTSL.html,https://opensource.org/license/OGTSL,2026-07-06T15:43:02Z
-oldap-2.3,OLDAP-2.3,Open LDAP Public License v2.3,fsf,False,https://spdx.org/licenses/OLDAP-2.3.html,,2026-07-06T15:43:02Z
-oldap-2.7,OLDAP-2.7,Open LDAP Public License v2.7,fsf,False,https://spdx.org/licenses/OLDAP-2.7.html,,2026-07-06T15:43:02Z
-oldap-2.8,OLDAP-2.8,Open LDAP Public License v2.8,osi,False,https://spdx.org/licenses/OLDAP-2.8.html,,2026-07-06T15:43:02Z
-olfl-1.3,OLFL-1.3,Open Logistics Foundation License Version 1.3,osi,False,https://spdx.org/licenses/OLFL-1.3.html,https://opensource.org/license/OLFL-1.3,2026-07-06T15:43:02Z
-openssl,OpenSSL,OpenSSL License,fsf,False,https://spdx.org/licenses/OpenSSL.html,,2026-07-06T15:43:02Z
-osc-1.0,OSC-1.0,OSC License 1.0,osi,False,https://spdx.org/licenses/OSC-1.0.html,https://opensource.org/license/OSC-1.0,2026-07-06T15:43:02Z
-oset-pl-2.1,OSET-PL-2.1,OSET Public License version 2.1,osi,False,https://spdx.org/licenses/OSET-PL-2.1.html,https://opensource.org/license/OSET-PL-2.1,2026-07-06T15:43:02Z
-osl-1.0,OSL-1.0,Open Software License 1.0,osi,False,https://spdx.org/licenses/OSL-1.0.html,https://opensource.org/license/OSL-1.0,2026-07-06T15:43:02Z
-osl-1.1,OSL-1.1,Open Software License 1.1,fsf,False,https://spdx.org/licenses/OSL-1.1.html,,2026-07-06T15:43:02Z
-osl-2.0,OSL-2.0,Open Software License 2.0,osi,False,https://spdx.org/licenses/OSL-2.0.html,,2026-07-06T15:43:02Z
-osl-2.1,OSL-2.1,Open Software License 2.1,osi,False,https://spdx.org/licenses/OSL-2.1.html,https://opensource.org/license/OSL-2.1,2026-07-06T15:43:02Z
-osl-3.0,OSL-3.0,Open Software License 3.0,osi,False,https://spdx.org/licenses/OSL-3.0.html,https://opensource.org/license/OSL-3.0,2026-07-06T15:43:02Z
-php-3.0,PHP-3.0,PHP License v3.0,osi,False,https://spdx.org/licenses/PHP-3.0.html,https://opensource.org/license/PHP-3.0,2026-07-06T15:43:02Z
-php-3.01,PHP-3.01,PHP License v3.01,osi,False,https://spdx.org/licenses/PHP-3.01.html,,2026-07-06T15:43:02Z
-postgresql,PostgreSQL,PostgreSQL License,osi,False,https://spdx.org/licenses/PostgreSQL.html,https://opensource.org/license/PostgreSQL,2026-07-06T15:43:02Z
-psf-2.0,PSF-2.0,Python Software Foundation License 2.0,extras,False,https://spdx.org/licenses/PSF-2.0.html,https://opensource.org/license/PSF-2-0,2026-07-06T15:43:02Z
-python-2.0,Python-2.0,Python License 2.0,osi,False,https://spdx.org/licenses/Python-2.0.html,https://opensource.org/license/Python-2.0,2026-07-06T15:43:02Z
-qpl-1.0,QPL-1.0,Q Public License 1.0,osi,False,https://spdx.org/licenses/QPL-1.0.html,https://opensource.org/license/QPL-1.0,2026-07-06T15:43:02Z
-rpl-1.1,RPL-1.1,Reciprocal Public License 1.1,osi,False,https://spdx.org/licenses/RPL-1.1.html,https://opensource.org/license/RPL-1.1,2026-07-06T15:43:02Z
-rpl-1.5,RPL-1.5,Reciprocal Public License 1.5,osi,False,https://spdx.org/licenses/RPL-1.5.html,https://opensource.org/license/RPL-1.5,2026-07-06T15:43:02Z
-rpsl-1.0,RPSL-1.0,RealNetworks Public Source License v1.0,osi,False,https://spdx.org/licenses/RPSL-1.0.html,https://opensource.org/license/RPSL-1.0,2026-07-06T15:43:02Z
-rscpl,RSCPL,Ricoh Source Code Public License,osi,False,https://spdx.org/licenses/RSCPL.html,https://opensource.org/license/RSCPL,2026-07-06T15:43:02Z
-ruby,Ruby,Ruby License,fsf,False,https://spdx.org/licenses/Ruby.html,,2026-07-06T15:43:02Z
-sgi-b-2.0,SGI-B-2.0,SGI Free Software License B v2.0,fsf,False,https://spdx.org/licenses/SGI-B-2.0.html,,2026-07-06T15:43:02Z
-simpl-2.0,SimPL-2.0,Simple Public License 2.0,osi,False,https://spdx.org/licenses/SimPL-2.0.html,https://opensource.org/license/SiMPL-2.0,2026-07-06T15:43:02Z
-sissl,SISSL,Sun Industry Standards Source License v1.1,osi,False,https://spdx.org/licenses/SISSL.html,https://opensource.org/license/SISSL,2026-07-06T15:43:02Z
-sleepycat,Sleepycat,Sleepycat License,osi,False,https://spdx.org/licenses/Sleepycat.html,https://opensource.org/license/Sleepycat,2026-07-06T15:43:02Z
-smlnj,SMLNJ,Standard ML of New Jersey License,fsf,False,https://spdx.org/licenses/SMLNJ.html,,2026-07-06T15:43:02Z
-spl-1.0,SPL-1.0,Sun Public License v1.0,osi,False,https://spdx.org/licenses/SPL-1.0.html,https://opensource.org/license/SPL-1.0,2026-07-06T15:43:02Z
-standardml-nj,StandardML-NJ,Standard ML of New Jersey License,fsf,True,https://spdx.org/licenses/StandardML-NJ.html,,2026-07-06T15:43:02Z
-ucl-1.0,UCL-1.0,Upstream Compatibility License v1.0,osi,False,https://spdx.org/licenses/UCL-1.0.html,https://opensource.org/license/UCL-1.0,2026-07-06T15:43:02Z
-unicode-3.0,Unicode-3.0,Unicode License v3,osi,False,https://spdx.org/licenses/Unicode-3.0.html,,2026-07-06T15:43:02Z
-unicode-dfs-2016,Unicode-DFS-2016,Unicode License Agreement - Data Files and Software (2016),osi,False,https://spdx.org/licenses/Unicode-DFS-2016.html,,2026-07-06T15:43:02Z
-unlicense,Unlicense,The Unlicense,osi,False,https://spdx.org/licenses/Unlicense.html,,2026-07-06T15:43:02Z
-upl-1.0,UPL-1.0,Universal Permissive License v1.0,osi,False,https://spdx.org/licenses/UPL-1.0.html,https://opensource.org/license/UPL-1.0,2026-07-06T15:43:02Z
-vim,Vim,Vim License,fsf,False,https://spdx.org/licenses/Vim.html,,2026-07-06T15:43:02Z
-vsl-1.0,VSL-1.0,Vovida Software License v1.0,osi,False,https://spdx.org/licenses/VSL-1.0.html,https://opensource.org/license/VSL-1.0,2026-07-06T15:43:02Z
-w3c,W3C,W3C Software Notice and License (2002-12-31),osi,False,https://spdx.org/licenses/W3C.html,https://opensource.org/license/W3C,2026-07-06T15:43:02Z
-w3c-20150513,W3C-20150513,W3C Software Notice and Document License (2015-05-13),osi,False,https://spdx.org/licenses/W3C-20150513.html,,2026-07-06T15:43:02Z
-watcom-1.0,Watcom-1.0,Sybase Open Watcom Public License 1.0,osi,False,https://spdx.org/licenses/Watcom-1.0.html,https://opensource.org/license/Watcom-1.0,2026-07-06T15:43:02Z
-wordnet,WordNet,WordNet License,osi,False,https://spdx.org/licenses/WordNet.html,,2026-07-06T15:43:02Z
-wtfpl,WTFPL,Do What The F*ck You Want To Public License,fsf,False,https://spdx.org/licenses/WTFPL.html,,2026-07-06T15:43:02Z
-wxwindows,wxWindows,wxWindows Library License,osi,True,https://spdx.org/licenses/wxWindows.html,https://opensource.org/license/wxWindows,2026-07-06T15:43:02Z
-x11,X11,X11 License,fsf,False,https://spdx.org/licenses/X11.html,,2026-07-06T15:43:02Z
-x11-distribute-modifications-variant,X11-distribute-modifications-variant,X11 License Distribution Modification Variant,extras,False,https://spdx.org/licenses/X11-distribute-modifications-variant.html,,2026-07-06T15:43:02Z
-xfree86-1.1,XFree86-1.1,XFree86 License 1.1,fsf,False,https://spdx.org/licenses/XFree86-1.1.html,,2026-07-06T15:43:02Z
-xinetd,xinetd,xinetd License,fsf,False,https://spdx.org/licenses/xinetd.html,,2026-07-06T15:43:02Z
-xnet,Xnet,X.Net License,osi,False,https://spdx.org/licenses/Xnet.html,https://opensource.org/license/Xnet,2026-07-06T15:43:02Z
-ypl-1.1,YPL-1.1,Yahoo! Public License v1.1,fsf,False,https://spdx.org/licenses/YPL-1.1.html,,2026-07-06T15:43:02Z
-zend-2.0,Zend-2.0,Zend License v2.0,fsf,False,https://spdx.org/licenses/Zend-2.0.html,,2026-07-06T15:43:02Z
-zimbra-1.3,Zimbra-1.3,Zimbra Public License v1.3,fsf,False,https://spdx.org/licenses/Zimbra-1.3.html,,2026-07-06T15:43:02Z
-zlib,Zlib,zlib License,osi,False,https://spdx.org/licenses/Zlib.html,https://opensource.org/license/Zlib,2026-07-06T15:43:02Z
-zpl-2.0,ZPL-2.0,Zope Public License 2.0,osi,False,https://spdx.org/licenses/ZPL-2.0.html,https://opensource.org/license/ZPL-2.0,2026-07-06T15:43:02Z
-zpl-2.1,ZPL-2.1,Zope Public License 2.1,osi,False,https://spdx.org/licenses/ZPL-2.1.html,,2026-07-06T15:43:02Z
+0bsd,0BSD,BSD Zero Clause License,osi,False,https://spdx.org/licenses/0BSD.html,https://opensource.org/license/0BSD,2026-07-06T15:49:36Z
+aal,AAL,Attribution Assurance License,osi,False,https://spdx.org/licenses/AAL.html,https://opensource.org/license/AAL,2026-07-06T15:49:36Z
+afl-1.1,AFL-1.1,Academic Free License v1.1,osi,False,https://spdx.org/licenses/AFL-1.1.html,http://wayback.archive.org/web/20021004124254/http://www.opensource.org/licenses/academic.php,2026-07-06T15:49:36Z
+afl-1.2,AFL-1.2,Academic Free License v1.2,osi,False,https://spdx.org/licenses/AFL-1.2.html,http://wayback.archive.org/web/20021204204652/http://www.opensource.org/licenses/academic.php,2026-07-06T15:49:36Z
+afl-2.0,AFL-2.0,Academic Free License v2.0,osi,False,https://spdx.org/licenses/AFL-2.0.html,http://wayback.archive.org/web/20060924134533/http://www.opensource.org/licenses/afl-2.0.txt,2026-07-06T15:49:36Z
+afl-2.1,AFL-2.1,Academic Free License v2.1,osi,False,https://spdx.org/licenses/AFL-2.1.html,,2026-07-06T15:49:36Z
+afl-3.0,AFL-3.0,Academic Free License v3.0,osi,False,https://spdx.org/licenses/AFL-3.0.html,https://opensource.org/license/AFL-3.0,2026-07-06T15:49:36Z
+agpl-1.0,AGPL-1.0,Affero General Public License v1.0,fsf,True,https://spdx.org/licenses/AGPL-1.0.html,,2026-07-06T15:49:36Z
+agpl-3.0,AGPL-3.0,GNU Affero General Public License v3.0,osi,True,https://spdx.org/licenses/AGPL-3.0.html,https://opensource.org/license/AGPL-3.0,2026-07-06T15:49:36Z
+agpl-3.0-only,AGPL-3.0-only,GNU Affero General Public License v3.0 only,osi,False,https://spdx.org/licenses/AGPL-3.0-only.html,https://opensource.org/license/AGPL-3.0-only,2026-07-06T15:49:36Z
+agpl-3.0-or-later,AGPL-3.0-or-later,GNU Affero General Public License v3.0 or later,osi,False,https://spdx.org/licenses/AGPL-3.0-or-later.html,https://opensource.org/license/AGPL-3.0,2026-07-06T15:49:36Z
+alglib-documentation,ALGLIB-Documentation,ALGLIB Documentation License,osi,False,https://spdx.org/licenses/ALGLIB-Documentation.html,,2026-07-06T15:49:36Z
+apache-1.0,Apache-1.0,Apache License 1.0,fsf,False,https://spdx.org/licenses/Apache-1.0.html,,2026-07-06T15:49:36Z
+apache-1.1,Apache-1.1,Apache License 1.1,osi,False,https://spdx.org/licenses/Apache-1.1.html,https://opensource.org/license/apache-1.1,2026-07-06T15:49:36Z
+apache-2.0,Apache-2.0,Apache License 2.0,osi,False,https://spdx.org/licenses/Apache-2.0.html,https://opensource.org/license/apache-2.0,2026-07-06T15:49:36Z
+apl-1.0,APL-1.0,Adaptive Public License 1.0,osi,False,https://spdx.org/licenses/APL-1.0.html,https://opensource.org/license/APL-1.0,2026-07-06T15:49:36Z
+apsl-1.0,APSL-1.0,Apple Public Source License 1.0,osi,False,https://spdx.org/licenses/APSL-1.0.html,,2026-07-06T15:49:36Z
+apsl-1.1,APSL-1.1,Apple Public Source License 1.1,osi,False,https://spdx.org/licenses/APSL-1.1.html,,2026-07-06T15:49:36Z
+apsl-1.2,APSL-1.2,Apple Public Source License 1.2,osi,False,https://spdx.org/licenses/APSL-1.2.html,,2026-07-06T15:49:36Z
+apsl-2.0,APSL-2.0,Apple Public Source License 2.0,osi,False,https://spdx.org/licenses/APSL-2.0.html,,2026-07-06T15:49:36Z
+artistic-1.0,Artistic-1.0,Artistic License 1.0,osi,False,https://spdx.org/licenses/Artistic-1.0.html,https://opensource.org/license/Artistic-1.0,2026-07-06T15:49:36Z
+artistic-1.0-cl8,Artistic-1.0-cl8,Artistic License 1.0 w/clause 8,osi,False,https://spdx.org/licenses/Artistic-1.0-cl8.html,https://opensource.org/license/Artistic-1.0,2026-07-06T15:49:36Z
+artistic-1.0-perl,Artistic-1.0-Perl,Artistic License 1.0 (Perl),osi,False,https://spdx.org/licenses/Artistic-1.0-Perl.html,,2026-07-06T15:49:36Z
+artistic-2.0,Artistic-2.0,Artistic License 2.0,osi,False,https://spdx.org/licenses/Artistic-2.0.html,https://opensource.org/license/Artistic-2.0,2026-07-06T15:49:36Z
+bittorrent-1.1,BitTorrent-1.1,BitTorrent Open Source License v1.1,fsf,False,https://spdx.org/licenses/BitTorrent-1.1.html,,2026-07-06T15:49:36Z
+blessing,blessing,SQLite Blessing,extras,False,https://spdx.org/licenses/blessing.html,,2026-07-06T15:49:36Z
+blueoak-1.0.0,BlueOak-1.0.0,Blue Oak Model License 1.0.0,osi,False,https://spdx.org/licenses/BlueOak-1.0.0.html,,2026-07-06T15:49:36Z
+bsd-1-clause,BSD-1-Clause,BSD 1-Clause License,osi,False,https://spdx.org/licenses/BSD-1-Clause.html,,2026-07-06T15:49:36Z
+bsd-2-clause,BSD-2-Clause,"BSD 2-Clause ""Simplified"" License",osi,False,https://spdx.org/licenses/BSD-2-Clause.html,https://opensource.org/license/BSD-2-Clause,2026-07-06T15:49:36Z
+bsd-2-clause-freebsd,BSD-2-Clause-FreeBSD,BSD 2-Clause FreeBSD License,fsf,True,https://spdx.org/licenses/BSD-2-Clause-FreeBSD.html,,2026-07-06T15:49:36Z
+bsd-2-clause-netbsd,BSD-2-Clause-NetBSD,BSD 2-Clause NetBSD License,fsf,True,https://spdx.org/licenses/BSD-2-Clause-NetBSD.html,,2026-07-06T15:49:36Z
+bsd-2-clause-patent,BSD-2-Clause-Patent,BSD-2-Clause Plus Patent License,osi,False,https://spdx.org/licenses/BSD-2-Clause-Patent.html,https://opensource.org/license/BSD-2-Clause-Patent,2026-07-06T15:49:36Z
+bsd-3-clause,BSD-3-Clause,"BSD 3-Clause ""New"" or ""Revised"" License",osi,False,https://spdx.org/licenses/BSD-3-Clause.html,https://opensource.org/license/BSD-3-Clause,2026-07-06T15:49:36Z
+bsd-3-clause-clear,BSD-3-Clause-Clear,BSD 3-Clause Clear License,fsf,False,https://spdx.org/licenses/BSD-3-Clause-Clear.html,,2026-07-06T15:49:36Z
+bsd-3-clause-lbnl,BSD-3-Clause-LBNL,Lawrence Berkeley National Labs BSD variant license,osi,False,https://spdx.org/licenses/BSD-3-Clause-LBNL.html,,2026-07-06T15:49:36Z
+bsd-3-clause-open-mpi,BSD-3-Clause-Open-MPI,BSD 3-Clause Open MPI variant,osi,False,https://spdx.org/licenses/BSD-3-Clause-Open-MPI.html,,2026-07-06T15:49:36Z
+bsd-4-clause,BSD-4-Clause,"BSD 4-Clause ""Original"" or ""Old"" License",fsf,False,https://spdx.org/licenses/BSD-4-Clause.html,,2026-07-06T15:49:36Z
+bsl-1.0,BSL-1.0,Boost Software License 1.0,osi,False,https://spdx.org/licenses/BSL-1.0.html,https://opensource.org/license/BSL-1.0,2026-07-06T15:49:36Z
+cal-1.0,CAL-1.0,Cryptographic Autonomy License 1.0,osi,False,https://spdx.org/licenses/CAL-1.0.html,https://opensource.org/license/CAL-1.0,2026-07-06T15:49:36Z
+cal-1.0-combined-work-exception,CAL-1.0-Combined-Work-Exception,Cryptographic Autonomy License 1.0 (Combined Work Exception),osi,False,https://spdx.org/licenses/CAL-1.0-Combined-Work-Exception.html,https://opensource.org/license/CAL-1.0,2026-07-06T15:49:36Z
+catosl-1.1,CATOSL-1.1,Computer Associates Trusted Open Source License 1.1,osi,False,https://spdx.org/licenses/CATOSL-1.1.html,https://opensource.org/license/CATOSL-1.1,2026-07-06T15:49:36Z
+cddl-1.0,CDDL-1.0,Common Development and Distribution License 1.0,osi,False,https://spdx.org/licenses/CDDL-1.0.html,https://opensource.org/license/CDDL-1.0,2026-07-06T15:49:36Z
+cddl-1.1,CDDL-1.1,Common Development and Distribution License 1.1,osi,False,https://spdx.org/licenses/CDDL-1.1.html,,2026-07-06T15:49:36Z
+cecill-2.0,CECILL-2.0,CeCILL Free Software License Agreement v2.0,fsf,False,https://spdx.org/licenses/CECILL-2.0.html,,2026-07-06T15:49:36Z
+cecill-2.1,CECILL-2.1,CeCILL Free Software License Agreement v2.1,osi,False,https://spdx.org/licenses/CECILL-2.1.html,,2026-07-06T15:49:36Z
+cecill-b,CECILL-B,CeCILL-B Free Software License Agreement,fsf,False,https://spdx.org/licenses/CECILL-B.html,,2026-07-06T15:49:36Z
+cecill-c,CECILL-C,CeCILL-C Free Software License Agreement,fsf,False,https://spdx.org/licenses/CECILL-C.html,,2026-07-06T15:49:36Z
+cern-ohl-p-2.0,CERN-OHL-P-2.0,CERN Open Hardware Licence Version 2 - Permissive,osi,False,https://spdx.org/licenses/CERN-OHL-P-2.0.html,,2026-07-06T15:49:36Z
+cern-ohl-s-2.0,CERN-OHL-S-2.0,CERN Open Hardware Licence Version 2 - Strongly Reciprocal,osi,False,https://spdx.org/licenses/CERN-OHL-S-2.0.html,,2026-07-06T15:49:36Z
+cern-ohl-w-2.0,CERN-OHL-W-2.0,CERN Open Hardware Licence Version 2 - Weakly Reciprocal,osi,False,https://spdx.org/licenses/CERN-OHL-W-2.0.html,,2026-07-06T15:49:36Z
+clartistic,ClArtistic,Clarified Artistic License,fsf,False,https://spdx.org/licenses/ClArtistic.html,,2026-07-06T15:49:36Z
+cnri-python,CNRI-Python,CNRI Python License,osi,False,https://spdx.org/licenses/CNRI-Python.html,https://opensource.org/license/CNRI-Python,2026-07-06T15:49:36Z
+condor-1.1,Condor-1.1,Condor Public License v1.1,fsf,False,https://spdx.org/licenses/Condor-1.1.html,,2026-07-06T15:49:36Z
+cpal-1.0,CPAL-1.0,Common Public Attribution License 1.0,osi,False,https://spdx.org/licenses/CPAL-1.0.html,https://opensource.org/license/CPAL-1.0,2026-07-06T15:49:36Z
+cpl-1.0,CPL-1.0,Common Public License 1.0,osi,False,https://spdx.org/licenses/CPL-1.0.html,https://opensource.org/license/CPL-1.0,2026-07-06T15:49:36Z
+cua-opl-1.0,CUA-OPL-1.0,CUA Office Public License v1.0,osi,False,https://spdx.org/licenses/CUA-OPL-1.0.html,https://opensource.org/license/CUA-OPL-1.0,2026-07-06T15:49:36Z
+curl,curl,curl License,extras,False,https://spdx.org/licenses/curl.html,,2026-07-06T15:49:36Z
+ecl-1.0,ECL-1.0,Educational Community License v1.0,osi,False,https://spdx.org/licenses/ECL-1.0.html,https://opensource.org/license/ECL-1.0,2026-07-06T15:49:36Z
+ecl-2.0,ECL-2.0,Educational Community License v2.0,osi,False,https://spdx.org/licenses/ECL-2.0.html,https://opensource.org/license/ECL-2.0,2026-07-06T15:49:36Z
+ecos-2.0,eCos-2.0,eCos license version 2.0,fsf,True,https://spdx.org/licenses/eCos-2.0.html,,2026-07-06T15:49:36Z
+efl-1.0,EFL-1.0,Eiffel Forum License v1.0,osi,False,https://spdx.org/licenses/EFL-1.0.html,https://opensource.org/license/EFL-1.0,2026-07-06T15:49:36Z
+efl-2.0,EFL-2.0,Eiffel Forum License v2.0,osi,False,https://spdx.org/licenses/EFL-2.0.html,https://opensource.org/license/EFL-2.0,2026-07-06T15:49:36Z
+entessa,Entessa,Entessa Public License v1.0,osi,False,https://spdx.org/licenses/Entessa.html,https://opensource.org/license/Entessa,2026-07-06T15:49:36Z
+epl-1.0,EPL-1.0,Eclipse Public License 1.0,osi,False,https://spdx.org/licenses/EPL-1.0.html,https://opensource.org/license/EPL-1.0,2026-07-06T15:49:36Z
+epl-2.0,EPL-2.0,Eclipse Public License 2.0,osi,False,https://spdx.org/licenses/EPL-2.0.html,https://www.opensource.org/license/EPL-2.0,2026-07-06T15:49:36Z
+eudatagrid,EUDatagrid,EU DataGrid Software License,osi,False,https://spdx.org/licenses/EUDatagrid.html,https://opensource.org/license/EUDatagrid,2026-07-06T15:49:36Z
+eupl-1.1,EUPL-1.1,European Union Public License 1.1,osi,False,https://spdx.org/licenses/EUPL-1.1.html,https://opensource.org/license/EUPL-1.1,2026-07-06T15:49:36Z
+eupl-1.2,EUPL-1.2,European Union Public License 1.2,osi,False,https://spdx.org/licenses/EUPL-1.2.html,https://opensource.org/license/EUPL-1.2,2026-07-06T15:49:36Z
+fair,Fair,Fair License,osi,False,https://spdx.org/licenses/Fair.html,https://opensource.org/license/Fair,2026-07-06T15:49:36Z
+frameworx-1.0,Frameworx-1.0,Frameworx Open License 1.0,osi,False,https://spdx.org/licenses/Frameworx-1.0.html,https://opensource.org/license/Frameworx-1.0,2026-07-06T15:49:36Z
+fsfap,FSFAP,FSF All Permissive License,fsf,False,https://spdx.org/licenses/FSFAP.html,,2026-07-06T15:49:36Z
+ftl,FTL,Freetype Project License,fsf,False,https://spdx.org/licenses/FTL.html,,2026-07-06T15:49:36Z
+gnuplot,gnuplot,gnuplot License,fsf,False,https://spdx.org/licenses/gnuplot.html,,2026-07-06T15:49:36Z
+gpl-2.0,GPL-2.0,GNU General Public License v2.0 only,osi,True,https://spdx.org/licenses/GPL-2.0.html,https://opensource.org/license/GPL-2.0,2026-07-06T15:49:36Z
+gpl-2.0+,GPL-2.0+,GNU General Public License v2.0 or later,osi,True,https://spdx.org/licenses/GPL-2.0+.html,https://opensource.org/license/GPL-2.0,2026-07-06T15:49:36Z
+gpl-2.0-only,GPL-2.0-only,GNU General Public License v2.0 only,osi,False,https://spdx.org/licenses/GPL-2.0-only.html,https://opensource.org/license/GPL-2.0-only,2026-07-06T15:49:36Z
+gpl-2.0-or-later,GPL-2.0-or-later,GNU General Public License v2.0 or later,osi,False,https://spdx.org/licenses/GPL-2.0-or-later.html,https://opensource.org/license/GPL-2.0,2026-07-06T15:49:36Z
+gpl-3.0,GPL-3.0,GNU General Public License v3.0 only,osi,True,https://spdx.org/licenses/GPL-3.0.html,https://opensource.org/license/GPL-3.0,2026-07-06T15:49:36Z
+gpl-3.0+,GPL-3.0+,GNU General Public License v3.0 or later,osi,True,https://spdx.org/licenses/GPL-3.0+.html,https://opensource.org/license/GPL-3.0,2026-07-06T15:49:36Z
+gpl-3.0-only,GPL-3.0-only,GNU General Public License v3.0 only,osi,False,https://spdx.org/licenses/GPL-3.0-only.html,https://opensource.org/license/GPL-3.0-only,2026-07-06T15:49:36Z
+gpl-3.0-or-later,GPL-3.0-or-later,GNU General Public License v3.0 or later,osi,False,https://spdx.org/licenses/GPL-3.0-or-later.html,https://opensource.org/license/GPL-3.0,2026-07-06T15:49:36Z
+gpl-3.0-with-gcc-exception,GPL-3.0-with-GCC-exception,GNU General Public License v3.0 w/GCC Runtime Library exception,osi,True,https://spdx.org/licenses/GPL-3.0-with-GCC-exception.html,,2026-07-06T15:49:36Z
+hpnd,HPND,Historical Permission Notice and Disclaimer,osi,False,https://spdx.org/licenses/HPND.html,https://opensource.org/license/HPND,2026-07-06T15:49:36Z
+icu,ICU,ICU License,osi,False,https://spdx.org/licenses/ICU.html,,2026-07-06T15:49:36Z
+ijg,IJG,Independent JPEG Group License,fsf,False,https://spdx.org/licenses/IJG.html,,2026-07-06T15:49:36Z
+imatix,iMatix,iMatix Standard Function Library Agreement,fsf,False,https://spdx.org/licenses/iMatix.html,,2026-07-06T15:49:36Z
+imlib2,Imlib2,Imlib2 License,fsf,False,https://spdx.org/licenses/Imlib2.html,,2026-07-06T15:49:36Z
+intel,Intel,Intel Open Source License,osi,False,https://spdx.org/licenses/Intel.html,https://opensource.org/license/Intel,2026-07-06T15:49:36Z
+ipa,IPA,IPA Font License,osi,False,https://spdx.org/licenses/IPA.html,https://opensource.org/license/IPA,2026-07-06T15:49:36Z
+ipl-1.0,IPL-1.0,IBM Public License v1.0,osi,False,https://spdx.org/licenses/IPL-1.0.html,https://opensource.org/license/IPL-1.0,2026-07-06T15:49:36Z
+isc,ISC,ISC License,osi,False,https://spdx.org/licenses/ISC.html,https://opensource.org/license/ISC,2026-07-06T15:49:36Z
+jam,Jam,Jam License,osi,False,https://spdx.org/licenses/Jam.html,,2026-07-06T15:49:36Z
+lgpl-2.0,LGPL-2.0,GNU Library General Public License v2 only,osi,True,https://spdx.org/licenses/LGPL-2.0.html,,2026-07-06T15:49:36Z
+lgpl-2.0+,LGPL-2.0+,GNU Library General Public License v2 or later,osi,True,https://spdx.org/licenses/LGPL-2.0+.html,,2026-07-06T15:49:36Z
+lgpl-2.0-only,LGPL-2.0-only,GNU Library General Public License v2 only,osi,False,https://spdx.org/licenses/LGPL-2.0-only.html,,2026-07-06T15:49:36Z
+lgpl-2.0-or-later,LGPL-2.0-or-later,GNU Library General Public License v2 or later,osi,False,https://spdx.org/licenses/LGPL-2.0-or-later.html,,2026-07-06T15:49:36Z
+lgpl-2.1,LGPL-2.1,GNU Lesser General Public License v2.1 only,osi,True,https://spdx.org/licenses/LGPL-2.1.html,https://opensource.org/license/LGPL-2.1,2026-07-06T15:49:36Z
+lgpl-2.1+,LGPL-2.1+,GNU Lesser General Public License v2.1 or later,osi,True,https://spdx.org/licenses/LGPL-2.1+.html,https://opensource.org/license/LGPL-2.1,2026-07-06T15:49:36Z
+lgpl-2.1-only,LGPL-2.1-only,GNU Lesser General Public License v2.1 only,osi,False,https://spdx.org/licenses/LGPL-2.1-only.html,https://opensource.org/license/LGPL-2.1-only,2026-07-06T15:49:36Z
+lgpl-2.1-or-later,LGPL-2.1-or-later,GNU Lesser General Public License v2.1 or later,osi,False,https://spdx.org/licenses/LGPL-2.1-or-later.html,https://opensource.org/license/LGPL-2.1,2026-07-06T15:49:36Z
+lgpl-3.0,LGPL-3.0,GNU Lesser General Public License v3.0 only,osi,True,https://spdx.org/licenses/LGPL-3.0.html,https://opensource.org/license/LGPL-3.0,2026-07-06T15:49:36Z
+lgpl-3.0+,LGPL-3.0+,GNU Lesser General Public License v3.0 or later,osi,True,https://spdx.org/licenses/LGPL-3.0+.html,https://opensource.org/license/LGPL-3.0,2026-07-06T15:49:36Z
+lgpl-3.0-only,LGPL-3.0-only,GNU Lesser General Public License v3.0 only,osi,False,https://spdx.org/licenses/LGPL-3.0-only.html,https://opensource.org/license/LGPL-3.0,2026-07-06T15:49:36Z
+lgpl-3.0-or-later,LGPL-3.0-or-later,GNU Lesser General Public License v3.0 or later,osi,False,https://spdx.org/licenses/LGPL-3.0-or-later.html,https://opensource.org/license/LGPL-3.0,2026-07-06T15:49:36Z
+libpng-2.0,libpng-2.0,PNG Reference Library version 2,extras,False,https://spdx.org/licenses/libpng-2.0.html,,2026-07-06T15:49:36Z
+liliq-p-1.1,LiLiQ-P-1.1,Licence Libre du Québec – Permissive version 1.1,osi,False,https://spdx.org/licenses/LiLiQ-P-1.1.html,http://opensource.org/license/LiLiQ-P-1.1,2026-07-06T15:49:36Z
+liliq-r-1.1,LiLiQ-R-1.1,Licence Libre du Québec – Réciprocité version 1.1,osi,False,https://spdx.org/licenses/LiLiQ-R-1.1.html,http://opensource.org/license/LiLiQ-R-1.1,2026-07-06T15:49:36Z
+liliq-rplus-1.1,LiLiQ-Rplus-1.1,Licence Libre du Québec – Réciprocité forte version 1.1,osi,False,https://spdx.org/licenses/LiLiQ-Rplus-1.1.html,http://opensource.org/license/LiLiQ-Rplus-1.1,2026-07-06T15:49:36Z
+lpl-1.0,LPL-1.0,Lucent Public License Version 1.0,osi,False,https://spdx.org/licenses/LPL-1.0.html,https://opensource.org/license/LPL-1.0,2026-07-06T15:49:36Z
+lpl-1.02,LPL-1.02,Lucent Public License v1.02,osi,False,https://spdx.org/licenses/LPL-1.02.html,https://opensource.org/license/LPL-1.02,2026-07-06T15:49:36Z
+lppl-1.2,LPPL-1.2,LaTeX Project Public License v1.2,fsf,False,https://spdx.org/licenses/LPPL-1.2.html,,2026-07-06T15:49:36Z
+lppl-1.3a,LPPL-1.3a,LaTeX Project Public License v1.3a,fsf,False,https://spdx.org/licenses/LPPL-1.3a.html,,2026-07-06T15:49:36Z
+lppl-1.3c,LPPL-1.3c,LaTeX Project Public License v1.3c,osi,False,https://spdx.org/licenses/LPPL-1.3c.html,https://opensource.org/license/LPPL-1.3c,2026-07-06T15:49:36Z
+miros,MirOS,The MirOS Licence,osi,False,https://spdx.org/licenses/MirOS.html,https://opensource.org/license/MirOS,2026-07-06T15:49:36Z
+mit,MIT,MIT License,osi,False,https://spdx.org/licenses/MIT.html,https://opensource.org/license/MIT,2026-07-06T15:49:36Z
+mit-0,MIT-0,MIT No Attribution,osi,False,https://spdx.org/licenses/MIT-0.html,,2026-07-06T15:49:36Z
+mit-cmu,MIT-CMU,CMU License,extras,False,https://spdx.org/licenses/MIT-CMU.html,,2026-07-06T15:49:36Z
+mit-modern-variant,MIT-Modern-Variant,MIT License Modern Variant,osi,False,https://spdx.org/licenses/MIT-Modern-Variant.html,,2026-07-06T15:49:36Z
+motosoto,Motosoto,Motosoto License,osi,False,https://spdx.org/licenses/Motosoto.html,https://opensource.org/license/Motosoto,2026-07-06T15:49:36Z
+mpl-1.0,MPL-1.0,Mozilla Public License 1.0,osi,False,https://spdx.org/licenses/MPL-1.0.html,https://opensource.org/license/MPL-1.0,2026-07-06T15:49:36Z
+mpl-1.1,MPL-1.1,Mozilla Public License 1.1,osi,False,https://spdx.org/licenses/MPL-1.1.html,https://opensource.org/license/MPL-1.1,2026-07-06T15:49:36Z
+mpl-2.0,MPL-2.0,Mozilla Public License 2.0,osi,False,https://spdx.org/licenses/MPL-2.0.html,https://opensource.org/license/MPL-2.0,2026-07-06T15:49:36Z
+mpl-2.0-no-copyleft-exception,MPL-2.0-no-copyleft-exception,Mozilla Public License 2.0 (no copyleft exception),osi,False,https://spdx.org/licenses/MPL-2.0-no-copyleft-exception.html,https://opensource.org/license/MPL-2.0,2026-07-06T15:49:36Z
+ms-pl,MS-PL,Microsoft Public License,osi,False,https://spdx.org/licenses/MS-PL.html,https://opensource.org/license/MS-PL,2026-07-06T15:49:36Z
+ms-rl,MS-RL,Microsoft Reciprocal License,osi,False,https://spdx.org/licenses/MS-RL.html,https://opensource.org/license/MS-RL,2026-07-06T15:49:36Z
+mulanpsl-2.0,MulanPSL-2.0,"Mulan Permissive Software License, Version 2",osi,False,https://spdx.org/licenses/MulanPSL-2.0.html,,2026-07-06T15:49:36Z
+multics,Multics,Multics License,osi,False,https://spdx.org/licenses/Multics.html,https://opensource.org/license/Multics,2026-07-06T15:49:36Z
+nasa-1.3,NASA-1.3,NASA Open Source Agreement 1.3,osi,False,https://spdx.org/licenses/NASA-1.3.html,https://opensource.org/license/NASA-1.3,2026-07-06T15:49:36Z
+naumen,Naumen,Naumen Public License,osi,False,https://spdx.org/licenses/Naumen.html,https://opensource.org/license/Naumen,2026-07-06T15:49:36Z
+ncsa,NCSA,University of Illinois/NCSA Open Source License,osi,False,https://spdx.org/licenses/NCSA.html,https://opensource.org/license/NCSA,2026-07-06T15:49:36Z
+ngpl,NGPL,Nethack General Public License,osi,False,https://spdx.org/licenses/NGPL.html,https://opensource.org/license/NGPL,2026-07-06T15:49:36Z
+nokia,Nokia,Nokia Open Source License,osi,False,https://spdx.org/licenses/Nokia.html,https://opensource.org/license/Nokia,2026-07-06T15:49:36Z
+nosl,NOSL,Netizen Open Source License,fsf,False,https://spdx.org/licenses/NOSL.html,,2026-07-06T15:49:36Z
+npl-1.0,NPL-1.0,Netscape Public License v1.0,fsf,False,https://spdx.org/licenses/NPL-1.0.html,,2026-07-06T15:49:36Z
+npl-1.1,NPL-1.1,Netscape Public License v1.1,fsf,False,https://spdx.org/licenses/NPL-1.1.html,,2026-07-06T15:49:36Z
+nposl-3.0,NPOSL-3.0,Non-Profit Open Software License 3.0,osi,False,https://spdx.org/licenses/NPOSL-3.0.html,https://opensource.org/license/NPOSL-3.0,2026-07-06T15:49:36Z
+ntp,NTP,NTP License,osi,False,https://spdx.org/licenses/NTP.html,https://opensource.org/license/NTP,2026-07-06T15:49:36Z
+nunit,Nunit,Nunit License,fsf,True,https://spdx.org/licenses/Nunit.html,,2026-07-06T15:49:36Z
+oclc-2.0,OCLC-2.0,OCLC Research Public License 2.0,osi,False,https://spdx.org/licenses/OCLC-2.0.html,https://opensource.org/license/OCLC-2.0,2026-07-06T15:49:36Z
+ofl-1.1,OFL-1.1,SIL Open Font License 1.1,osi,False,https://spdx.org/licenses/OFL-1.1.html,https://opensource.org/license/OFL-1.1,2026-07-06T15:49:36Z
+ofl-1.1-no-rfn,OFL-1.1-no-RFN,SIL Open Font License 1.1 with no Reserved Font Name,osi,False,https://spdx.org/licenses/OFL-1.1-no-RFN.html,https://opensource.org/license/OFL-1.1,2026-07-06T15:49:36Z
+ofl-1.1-rfn,OFL-1.1-RFN,SIL Open Font License 1.1 with Reserved Font Name,osi,False,https://spdx.org/licenses/OFL-1.1-RFN.html,https://opensource.org/license/OFL-1.1,2026-07-06T15:49:36Z
+ogtsl,OGTSL,Open Group Test Suite License,osi,False,https://spdx.org/licenses/OGTSL.html,https://opensource.org/license/OGTSL,2026-07-06T15:49:36Z
+oldap-2.3,OLDAP-2.3,Open LDAP Public License v2.3,fsf,False,https://spdx.org/licenses/OLDAP-2.3.html,,2026-07-06T15:49:36Z
+oldap-2.7,OLDAP-2.7,Open LDAP Public License v2.7,fsf,False,https://spdx.org/licenses/OLDAP-2.7.html,,2026-07-06T15:49:36Z
+oldap-2.8,OLDAP-2.8,Open LDAP Public License v2.8,osi,False,https://spdx.org/licenses/OLDAP-2.8.html,,2026-07-06T15:49:36Z
+olfl-1.3,OLFL-1.3,Open Logistics Foundation License Version 1.3,osi,False,https://spdx.org/licenses/OLFL-1.3.html,https://opensource.org/license/OLFL-1.3,2026-07-06T15:49:36Z
+openssl,OpenSSL,OpenSSL License,fsf,False,https://spdx.org/licenses/OpenSSL.html,,2026-07-06T15:49:36Z
+osc-1.0,OSC-1.0,OSC License 1.0,osi,False,https://spdx.org/licenses/OSC-1.0.html,https://opensource.org/license/OSC-1.0,2026-07-06T15:49:36Z
+oset-pl-2.1,OSET-PL-2.1,OSET Public License version 2.1,osi,False,https://spdx.org/licenses/OSET-PL-2.1.html,https://opensource.org/license/OSET-PL-2.1,2026-07-06T15:49:36Z
+osl-1.0,OSL-1.0,Open Software License 1.0,osi,False,https://spdx.org/licenses/OSL-1.0.html,https://opensource.org/license/OSL-1.0,2026-07-06T15:49:36Z
+osl-1.1,OSL-1.1,Open Software License 1.1,fsf,False,https://spdx.org/licenses/OSL-1.1.html,,2026-07-06T15:49:36Z
+osl-2.0,OSL-2.0,Open Software License 2.0,osi,False,https://spdx.org/licenses/OSL-2.0.html,,2026-07-06T15:49:36Z
+osl-2.1,OSL-2.1,Open Software License 2.1,osi,False,https://spdx.org/licenses/OSL-2.1.html,https://opensource.org/license/OSL-2.1,2026-07-06T15:49:36Z
+osl-3.0,OSL-3.0,Open Software License 3.0,osi,False,https://spdx.org/licenses/OSL-3.0.html,https://opensource.org/license/OSL-3.0,2026-07-06T15:49:36Z
+php-3.0,PHP-3.0,PHP License v3.0,osi,False,https://spdx.org/licenses/PHP-3.0.html,https://opensource.org/license/PHP-3.0,2026-07-06T15:49:36Z
+php-3.01,PHP-3.01,PHP License v3.01,osi,False,https://spdx.org/licenses/PHP-3.01.html,,2026-07-06T15:49:36Z
+postgresql,PostgreSQL,PostgreSQL License,osi,False,https://spdx.org/licenses/PostgreSQL.html,https://opensource.org/license/PostgreSQL,2026-07-06T15:49:36Z
+psf-2.0,PSF-2.0,Python Software Foundation License 2.0,extras,False,https://spdx.org/licenses/PSF-2.0.html,https://opensource.org/license/PSF-2-0,2026-07-06T15:49:36Z
+python-2.0,Python-2.0,Python License 2.0,osi,False,https://spdx.org/licenses/Python-2.0.html,https://opensource.org/license/Python-2.0,2026-07-06T15:49:36Z
+qpl-1.0,QPL-1.0,Q Public License 1.0,osi,False,https://spdx.org/licenses/QPL-1.0.html,https://opensource.org/license/QPL-1.0,2026-07-06T15:49:36Z
+rpl-1.1,RPL-1.1,Reciprocal Public License 1.1,osi,False,https://spdx.org/licenses/RPL-1.1.html,https://opensource.org/license/RPL-1.1,2026-07-06T15:49:36Z
+rpl-1.5,RPL-1.5,Reciprocal Public License 1.5,osi,False,https://spdx.org/licenses/RPL-1.5.html,https://opensource.org/license/RPL-1.5,2026-07-06T15:49:36Z
+rpsl-1.0,RPSL-1.0,RealNetworks Public Source License v1.0,osi,False,https://spdx.org/licenses/RPSL-1.0.html,https://opensource.org/license/RPSL-1.0,2026-07-06T15:49:36Z
+rscpl,RSCPL,Ricoh Source Code Public License,osi,False,https://spdx.org/licenses/RSCPL.html,https://opensource.org/license/RSCPL,2026-07-06T15:49:36Z
+ruby,Ruby,Ruby License,fsf,False,https://spdx.org/licenses/Ruby.html,,2026-07-06T15:49:36Z
+sgi-b-2.0,SGI-B-2.0,SGI Free Software License B v2.0,fsf,False,https://spdx.org/licenses/SGI-B-2.0.html,,2026-07-06T15:49:36Z
+simpl-2.0,SimPL-2.0,Simple Public License 2.0,osi,False,https://spdx.org/licenses/SimPL-2.0.html,https://opensource.org/license/SiMPL-2.0,2026-07-06T15:49:36Z
+sissl,SISSL,Sun Industry Standards Source License v1.1,osi,False,https://spdx.org/licenses/SISSL.html,https://opensource.org/license/SISSL,2026-07-06T15:49:36Z
+sleepycat,Sleepycat,Sleepycat License,osi,False,https://spdx.org/licenses/Sleepycat.html,https://opensource.org/license/Sleepycat,2026-07-06T15:49:36Z
+smlnj,SMLNJ,Standard ML of New Jersey License,fsf,False,https://spdx.org/licenses/SMLNJ.html,,2026-07-06T15:49:36Z
+spl-1.0,SPL-1.0,Sun Public License v1.0,osi,False,https://spdx.org/licenses/SPL-1.0.html,https://opensource.org/license/SPL-1.0,2026-07-06T15:49:36Z
+standardml-nj,StandardML-NJ,Standard ML of New Jersey License,fsf,True,https://spdx.org/licenses/StandardML-NJ.html,,2026-07-06T15:49:36Z
+ucl-1.0,UCL-1.0,Upstream Compatibility License v1.0,osi,False,https://spdx.org/licenses/UCL-1.0.html,https://opensource.org/license/UCL-1.0,2026-07-06T15:49:36Z
+unicode-3.0,Unicode-3.0,Unicode License v3,osi,False,https://spdx.org/licenses/Unicode-3.0.html,,2026-07-06T15:49:36Z
+unicode-dfs-2016,Unicode-DFS-2016,Unicode License Agreement - Data Files and Software (2016),osi,False,https://spdx.org/licenses/Unicode-DFS-2016.html,,2026-07-06T15:49:36Z
+unlicense,Unlicense,The Unlicense,osi,False,https://spdx.org/licenses/Unlicense.html,,2026-07-06T15:49:36Z
+upl-1.0,UPL-1.0,Universal Permissive License v1.0,osi,False,https://spdx.org/licenses/UPL-1.0.html,https://opensource.org/license/UPL-1.0,2026-07-06T15:49:36Z
+vim,Vim,Vim License,fsf,False,https://spdx.org/licenses/Vim.html,,2026-07-06T15:49:36Z
+vsl-1.0,VSL-1.0,Vovida Software License v1.0,osi,False,https://spdx.org/licenses/VSL-1.0.html,https://opensource.org/license/VSL-1.0,2026-07-06T15:49:36Z
+w3c,W3C,W3C Software Notice and License (2002-12-31),osi,False,https://spdx.org/licenses/W3C.html,https://opensource.org/license/W3C,2026-07-06T15:49:36Z
+w3c-20150513,W3C-20150513,W3C Software Notice and Document License (2015-05-13),osi,False,https://spdx.org/licenses/W3C-20150513.html,,2026-07-06T15:49:36Z
+watcom-1.0,Watcom-1.0,Sybase Open Watcom Public License 1.0,osi,False,https://spdx.org/licenses/Watcom-1.0.html,https://opensource.org/license/Watcom-1.0,2026-07-06T15:49:36Z
+wordnet,WordNet,WordNet License,osi,False,https://spdx.org/licenses/WordNet.html,,2026-07-06T15:49:36Z
+wtfpl,WTFPL,Do What The F*ck You Want To Public License,fsf,False,https://spdx.org/licenses/WTFPL.html,,2026-07-06T15:49:36Z
+wxwindows,wxWindows,wxWindows Library License,osi,True,https://spdx.org/licenses/wxWindows.html,https://opensource.org/license/wxWindows,2026-07-06T15:49:36Z
+x11,X11,X11 License,fsf,False,https://spdx.org/licenses/X11.html,,2026-07-06T15:49:36Z
+x11-distribute-modifications-variant,X11-distribute-modifications-variant,X11 License Distribution Modification Variant,extras,False,https://spdx.org/licenses/X11-distribute-modifications-variant.html,,2026-07-06T15:49:36Z
+xfree86-1.1,XFree86-1.1,XFree86 License 1.1,fsf,False,https://spdx.org/licenses/XFree86-1.1.html,,2026-07-06T15:49:36Z
+xinetd,xinetd,xinetd License,fsf,False,https://spdx.org/licenses/xinetd.html,,2026-07-06T15:49:36Z
+xnet,Xnet,X.Net License,osi,False,https://spdx.org/licenses/Xnet.html,https://opensource.org/license/Xnet,2026-07-06T15:49:36Z
+ypl-1.1,YPL-1.1,Yahoo! Public License v1.1,fsf,False,https://spdx.org/licenses/YPL-1.1.html,,2026-07-06T15:49:36Z
+zend-2.0,Zend-2.0,Zend License v2.0,fsf,False,https://spdx.org/licenses/Zend-2.0.html,,2026-07-06T15:49:36Z
+zimbra-1.3,Zimbra-1.3,Zimbra Public License v1.3,fsf,False,https://spdx.org/licenses/Zimbra-1.3.html,,2026-07-06T15:49:36Z
+zlib,Zlib,zlib License,osi,False,https://spdx.org/licenses/Zlib.html,https://opensource.org/license/Zlib,2026-07-06T15:49:36Z
+zpl-2.0,ZPL-2.0,Zope Public License 2.0,osi,False,https://spdx.org/licenses/ZPL-2.0.html,https://opensource.org/license/ZPL-2.0,2026-07-06T15:49:36Z
+zpl-2.1,ZPL-2.1,Zope Public License 2.1,osi,False,https://spdx.org/licenses/ZPL-2.1.html,,2026-07-06T15:49:36Z

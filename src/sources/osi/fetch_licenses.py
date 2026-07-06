@@ -117,27 +117,9 @@ EXTRAS: dict[str, str] = {
     "curl":        "MIT/X11 derivative; curl (Daniel Stenberg). "
                    "OSI submission filed 2026-02 (Christoph Röth)",
 
-    # ── ftl (FreeType Project License) ──────────────────────────────
-    # The FreeType project, started by David Turner in 1996 and led
-    # for the past two decades by Werner Lemberg. FreeType is the
-    # de-facto font rasterizer of the open-source world: it ships in
-    # every Linux distro, Android (since 1.0), ChromeOS, FreeBSD,
-    # NetBSD, Haiku, GhostScript, WebKit/Safari (until Apple's own
-    # rasterizer took over), and is dual-licensed so commercial
-    # consumers can pick the FTL or GPLv2. The FTL itself is a
-    # BSD-style attribution license drafted to satisfy David Turner's
-    # specific concern that derived works credit FreeType prominently
-    # — substantively in the BSD/MIT family. FSF marks it free
-    # (`isFsfLibre=true`); OSI never reviewed it because the FreeType
-    # team didn't submit. Debian and Fedora both ship FreeType in
-    # main/`free`.
-    # Sources:
-    #   SPDX:        https://spdx.org/licenses/FTL.html
-    #   FreeType:    https://freetype.org/license.html
-    #   FSF list:    https://www.gnu.org/licenses/license-list.html#FreeType
-    #   Wikipedia:   https://en.wikipedia.org/wiki/FreeType
-    "ftl":         "FreeType Project License — FreeType "
-                   "(David Turner, Werner Lemberg)",
+    # (ftl — the FreeType Project License — used to live here; it entered
+    #  the set via the FSF-libre pass once the union landed, so the entry
+    #  was removed. The redundancy warning below catches the next such case.)
 
     # ── libpng-2.0 ──────────────────────────────────────────────────
     # The libpng reference library, the canonical PNG codec used by
@@ -316,10 +298,18 @@ def build_rows(spdx_rows: list[dict]) -> list[dict]:
         if _flag(r, "is_fsf_libre") and not _is_content_license(r["spdx_id"]):
             _add(r, source="fsf")
     # Pass 3: hand-curated extras (universally OSS, neither body reviewed).
+    # An entry one of the bodies has since adopted is redundant — warn so it
+    # gets removed (the entries anticipate exactly this, e.g. curl's pending
+    # OSI review).
     for spdx_lc in EXTRAS:
         r = by_id.get(spdx_lc)
         if r is None:
             log.warning("EXTRAS entry %s not found in SPDX list — skipping", spdx_lc)
+            continue
+        if spdx_lc in seen:
+            log.warning(
+                "EXTRAS entry %s is now admitted by OSI/FSF — remove it from EXTRAS",
+                spdx_lc)
             continue
         _add(r, source="extras")
 

@@ -62,3 +62,18 @@ def test_content_prefixes_cover_the_known_families():
         assert osi._is_content_license(sid), sid
     for sid in ("x11", "openssl", "ruby", "wtfpl", "sgi-b-2.0"):
         assert not osi._is_content_license(sid), sid
+
+
+def test_redundant_extras_entry_warns_and_keeps_body_source(caplog):
+    import logging
+    rows_json = {"licenses": [
+        {"licenseId": "curl", "name": "curl License",
+         "isOsiApproved": False, "isFsfLibre": True, "reference": ""},
+    ]}
+    raw = _as_csv_strings(spdx.build_rows(rows_json, now="2026-07-06T00:00:00Z"))
+    with caplog.at_level(logging.WARNING):
+        rows = osi.build_rows(raw)
+    by_id = {r["spdx_id"]: r for r in rows}
+    # admitted once, via the body that lists it — not double-counted as extras
+    assert by_id["curl"]["source"] == "fsf"
+    assert any("remove it from EXTRAS" in m for m in caplog.messages)

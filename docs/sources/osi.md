@@ -36,7 +36,6 @@ the `source` column records which rule admitted each row.
 |-----------|---------|----------------|
 | `blessing` | SQLite | public-domain dedication |
 | `curl` | curl | MIT/X11 derivative |
-| `ftl` | FreeType | BSD-style attribution |
 | `libpng-2.0` | libpng | zlib/MIT-style permissive |
 | `mit-cmu` | Pillow | MIT variant (CMU) |
 | `psf-2.0` | CPython / PSF tooling | ≡ OSI-approved `python-2.0` |
