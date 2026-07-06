@@ -31,7 +31,7 @@ row; the post-scope stages are each expressed against `top repos`.
 | value_score present | 917 | 97.6% | top repos | ≥2 value components (openssf_crit / eco_crit / top_eco_pct) |
 | risk_score present | 940 | 100% | top repos | all four risk dimensions scored |
 | fully scored | 917 | 97.6% | top repos | value_score × risk_score → preview `score` |
-| **eligible** | **646** | **68.7%** | top repos | oss AND intent AND nonprofit AND active |
+| **eligible** | **652** | **69.4%** | top repos | oss AND intent AND nonprofit AND active |
 | priority-ranked | 646 | 68.7% | top repos | eligible AND fully scored → preview `priority` |
 
 
@@ -287,14 +287,14 @@ company-backed (Meta, Google, Microsoft, …). See [funding.md](components/fundi
 
 | Category | Repos | % |
 |---|---:|---:|
-| intent — any funding signal | 717 | 76.3% |
-| intent — no funding signal | 223 | 23.7% |
+| intent — any funding signal | 737 | 78.4% |
+| intent — no funding signal | 203 | 21.6% |
 | nonprofit — community / independent | 881 | 93.7% |
 | nonprofit — company-backed | 59 | 6.3% |
 
 The 59 company-backed repos are **kept in `eligibility.csv`** and flagged
 `nonprofit=False` (they are already resourced; the flag makes them ineligible
-without hiding them). The 223 repos with `intent=False` are not actively
+without hiding them). The 203 repos with `intent=False` are not actively
 soliciting support — a higher-priority target for outreach.
 
 ### Eligibility rollup
@@ -304,8 +304,8 @@ unlock. Missing intent is by far the binding constraint.
 
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
-| oss | 919 | 97.8% | 1 |
-| intent | 717 | 76.3% | 192 |
+| oss | 919 | 97.8% | 15 |
+| intent | 737 | 78.4% | 186 |
 | nonprofit | 881 | 93.7% | 59 |
 | active | 918 | 97.7% | 11 |
-| **eligible** | **646** | **68.7%** | |
+| **eligible** | **652** | **69.4%** | |
