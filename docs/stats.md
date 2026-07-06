@@ -100,10 +100,10 @@ docs.
 
 A handful of archived/stub repos (e.g. `bincode-org/bincode`,
 `isaacs/inflight-deprecated-do-not-use`) have empty snapshots — scc measures 0
-lines of code — so complexity and workload (both need source) are legitimately
-blank for them; overall `risk_score` lands at 940/942, and the
-`pipeline_health` coverage gate exempts these no-code repos from the two
-source-dependent dimensions.
+lines of code because the default branch was stripped to a README. These score
+as measured zeros (floor percentiles) in complexity and workload rather than
+staying blank, so all four dimensions and `risk_score` cover 100% of the risk
+scope; the repos still surface in eligibility as `active=False`.
 
 ### Score distribution by component (scope 942)
 

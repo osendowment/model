@@ -39,6 +39,15 @@ settings `years` window where commits-years.csv has a `last_sha` populated AND
 `commits > 0` (the chosen year is recorded in `loc_year`). If no year has a
 usable sha, the row is left empty — we don't fall back to HEAD or a stale sha.
 
+Empty-tree repos: a snapshot whose scc row reports loc=0 is normally skipped as
+"not measured" (historically scc wrote all-zero rows on failed checkouts). But
+when EVERY measured snapshot of a repo is loc=0, the default branch is genuinely
+code-free — an archived stub stripped to a README (bincode-org/bincode,
+isaacs/inflight-deprecated-do-not-use). Those repos take the newest measured
+zero snapshot and score as real zeros (floor percentiles) instead of blanking
+the dimension; absent lizard metrics are read as measured zeros too, since a
+tree with zero source files has zero functions by definition.
+
 Metric mapping:
     scc.loc                      → loc_eoy
     scc.sloc                     → sloc_eoy
@@ -265,6 +274,26 @@ def build() -> list[dict]:
                 lz_vals = lizard_idx.get((rid, sha), {})
                 year_label = "HEAD" if y == 0 else str(y)
                 break
+
+        # Empty-tree fallback: every measured snapshot reports loc=0, so the
+        # default branch is genuinely code-free (archived stub stripped to a
+        # README). Score the newest measured snapshot as a real zero instead of
+        # blanking the dimension — and since a tree with zero source files has
+        # zero functions by definition, read absent lizard metrics as measured
+        # zeros. A bogus zero from a failed checkout can't reach here for any
+        # repo with a healthy snapshot: the loc>0 walk above wins first.
+        if not scc_vals:
+            for y in sorted(year_to_sha, reverse=True):
+                sha = year_to_sha.get(y)
+                if not sha:
+                    continue
+                candidate = scc_idx.get((rid, sha), {})
+                if candidate.get("loc", "") != "":
+                    scc_vals = candidate
+                    measured = lizard_idx.get((rid, sha), {})
+                    lz_vals = {m: measured.get(m) or "0" for m in LIZARD_METRICS}
+                    year_label = "HEAD" if y == 0 else str(y)
+                    break
 
         # False-zero guard: scc measured real branching but lizard found zero
         # functions → lizard analysed an off-mainline (template) tree. Drop the
