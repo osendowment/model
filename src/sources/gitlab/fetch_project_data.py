@@ -324,14 +324,53 @@ async def fetch_many(items: list[dict], fetch_one, label: str
     return rows, status_counts
 
 
-def upsert(out_path: Path, key: str, fields: list[str], new_rows: list[dict]) -> int:
-    """Merge new rows into the CSV by `key`. Returns total written."""
+def _fresher(a: dict, b: dict) -> bool:
+    """True if row `a` should win over `b` for the same id: a valid row beats a
+    sparse/invalid one, then the more recently `fetched_at` wins (ties → a)."""
+    av = str(a.get("valid")).strip().lower() == "true"
+    bv = str(b.get("valid")).strip().lower() == "true"
+    if av != bv:
+        return av
+    return (a.get("fetched_at") or "") >= (b.get("fetched_at") or "")
+
+
+def _dedupe_by_id(rows: list[dict], id_field: str) -> list[dict]:
+    """Collapse rows sharing a non-blank `id_field` to the single freshest one.
+
+    A renamed GitLab project otherwise leaves a stale row under its old path
+    *and* a row under the new path — both carrying the same `repo_id`. Every
+    downstream join is by `repo_id`, so a duplicate lets an arbitrary (possibly
+    staler/blank) row win. Rows with a blank `id_field` (e.g. sparse 404 rows,
+    which carry no `repo_id`) are kept as-is, keyed by their own `project`."""
+    best: dict[str, dict] = {}
+    passthrough: list[dict] = []
+    for r in rows:
+        rid = (r.get(id_field) or "").strip()
+        if not rid:
+            passthrough.append(r)
+            continue
+        if rid not in best or _fresher(r, best[rid]):
+            best[rid] = r
+    return list(best.values()) + passthrough
+
+
+def upsert(out_path: Path, key: str, fields: list[str], new_rows: list[dict],
+           dedupe_by: str | None = None) -> int:
+    """Merge new rows into the CSV by `key`. Returns total written.
+
+    When `dedupe_by` is set (e.g. `"repo_id"`), rows that collapse to the same
+    value in that column after the merge are reduced to the freshest one — this
+    is what stops a renamed project from persisting under both its old and new
+    path (see `_dedupe_by_id`)."""
     existing = _load_existing(out_path, key)
     for r in new_rows:
         k = (r.get(key) or "").lower()
         if k:
             existing[k] = r
-    sorted_rows = sorted(existing.values(), key=lambda r: (r.get(key) or "").lower())
+    rows = list(existing.values())
+    if dedupe_by:
+        rows = _dedupe_by_id(rows, dedupe_by)
+    sorted_rows = sorted(rows, key=lambda r: (r.get(key) or "").lower())
     _atomic_write(out_path, sorted_rows, fields)
     return len(sorted_rows)
 
@@ -383,7 +422,8 @@ def fetch_and_persist(target: str = "projects", force: bool = False,
                           f"to_fetch={len(to_fetch):,}")
         new_rows, statuses = (asyncio.run(fetch_many(to_fetch, _fetch_project, "projects"))
                               if to_fetch else ([], {}))
-        total = upsert(REPOS_OUT, "project", PROJECT_FIELDS, new_rows)
+        total = upsert(REPOS_OUT, "project", PROJECT_FIELDS, new_rows,
+                       dedupe_by="repo_id")
         out["projects"] = {"fresh": fresh, "fetched": len(new_rows),
                            "statuses": statuses, "total": total}
 

@@ -5,17 +5,20 @@ fetch_repo_owner_data test), so no network is touched.
 """
 from __future__ import annotations
 
+import csv
 import datetime as dt
 from pathlib import Path
 
 from src.sources.gitlab.fetch_project_data import (
     PROJECT_FIELDS,
+    _dedupe_by_id,
     _fetch_languages,
     _fetch_namespace,
     _fetch_project,
     _filter_stale,
     _flat_namespace,
     _flat_project,
+    _fresher,
     _primary_language,
     load_gitlab_rows,
     upsert,
@@ -276,3 +279,50 @@ class TestUpsertAndStale:
         keys = sorted(x["project"] for x in to_fetch)
         assert keys == ["gitlab.com/c/d", "gitlab.com/e/f"]   # old + missing
         assert fresh == 1 and missing == 1
+
+
+class TestDedupeByRepoId:
+    def test_renamed_project_collapses_to_freshest(self):
+        # A rename leaves the same repo_id under two paths; the freshly-fetched
+        # row (with a language) must win over the stale blank one.
+        rows = [
+            {"project": "invent.kde.org/frameworks/plasma-framework",
+             "repo_id": "gl/invent.kde.org-2485", "valid": "True",
+             "language": "C++", "fetched_at": _iso_days_ago(0)},
+            {"project": "invent.kde.org/plasma/libplasma",
+             "repo_id": "gl/invent.kde.org-2485", "valid": "True",
+             "language": "", "fetched_at": _iso_days_ago(1)},
+        ]
+        out = _dedupe_by_id(rows, "repo_id")
+        assert len(out) == 1
+        assert out[0]["language"] == "C++"
+        assert out[0]["project"] == "invent.kde.org/frameworks/plasma-framework"
+
+    def test_blank_repo_id_rows_all_pass_through(self):
+        # sparse 404 rows carry no repo_id — they must NOT collapse into one.
+        rows = [
+            {"project": "gitlab.com/a/gone", "repo_id": "", "valid": "False"},
+            {"project": "gitlab.com/b/gone", "repo_id": "", "valid": "False"},
+            {"project": "gitlab.com/c/ok", "repo_id": "gl/9", "valid": "True",
+             "fetched_at": _iso_days_ago(0)},
+        ]
+        out = _dedupe_by_id(rows, "repo_id")
+        assert len(out) == 3
+
+    def test_valid_row_beats_sparse_row_with_same_id(self):
+        assert _fresher(
+            {"valid": "True", "fetched_at": _iso_days_ago(5)},
+            {"valid": "False", "fetched_at": _iso_days_ago(0)},
+        ) is True   # valid wins even though the sparse row is newer
+
+    def test_upsert_dedupes_by_repo_id(self, tmp_path):
+        out = tmp_path / "repos.csv"
+        n = upsert(out, "project", PROJECT_FIELDS, [
+            {"project": "h/old/x", "repo_id": "gl/1", "valid": True,
+             "language": "Rust", "fetched_at": _iso_days_ago(0)},
+            {"project": "h/new/x", "repo_id": "gl/1", "valid": True,
+             "language": "", "fetched_at": _iso_days_ago(3)},
+        ], dedupe_by="repo_id")
+        assert n == 1   # both paths share gl/1 → collapsed to the fresh Rust row
+        row = next(csv.DictReader(open(out)))
+        assert row["language"] == "Rust"
