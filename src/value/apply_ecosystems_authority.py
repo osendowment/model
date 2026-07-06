@@ -236,7 +236,7 @@ def _load_gitlab_repo_ids(path=None) -> dict[str, str]:
     """`{project_key: repo_id}` from gitlab/repos.csv, valid rows only.
 
     `project_key = "{host}/{path}".lower()` (the fetcher's upsert key); `repo_id`
-    is the `gl/{host}-{id}` / `gl/{id}` form. Only rows that resolved to a real
+    is the `gl/{nickname}-{id}` / `gl/{id}` form. Only rows that resolved to a real
     project (`valid == True`) with a `gl/` id are returned — so an unresolved /
     404 GitLab URL never gets an id (the validator half of the resolver).
     """
@@ -260,7 +260,7 @@ def _resolve_gitlab(rows: list[dict], offline: bool = False, force: bool = False
     `repo_id` (GitHub didn't claim it) and a GitLab clone URL is considered.
     Collects the distinct GitLab targets, TTL-fetches their project metadata into
     `data/sources/gitlab/repos.csv` (skipped under --offline), then stamps
-    `repo_id = gl/{host}-{id}` (`gl/{id}` for gitlab.com) for every target that
+    `repo_id = gl/{nickname}-{id}` (`gl/{id}` for gitlab.com) for every target that
     resolved to a valid project. A 404 / unreachable GitLab URL keeps an empty
     repo_id — it groups by `git_url` and gets `git_valid` from the ls-remote pass.
     """

@@ -142,7 +142,7 @@ class TestLoadGitlabTargets:
             "gitlab.com/gnutls/gnutls,gitlab.com,gl/1,True\n"
             "gitlab.com/gone/x,gitlab.com,gl/2,False\n"        # invalid
             "gitlab.com/no/id,gitlab.com,,True\n"                          # no repo_id
-            "salsa.debian.org/debian/foo,salsa.debian.org,gl/salsa.debian.org-9,True\n"
+            "salsa.debian.org/debian/foo,salsa.debian.org,gl/debian-9,True\n"
         ))
         monkeypatch.setattr(sc, "GITLAB_PROJECTS", csv_path)
         targets = load_gitlab_targets()
@@ -153,7 +153,7 @@ class TestLoadGitlabTargets:
     def test_host_filter(self, tmp_path, monkeypatch):
         csv_path = self._write(tmp_path, (
             "gitlab.com/a/b,gitlab.com,gl/1,True\n"
-            "salsa.debian.org/c/d,salsa.debian.org,gl/salsa.debian.org-2,True\n"
+            "salsa.debian.org/c/d,salsa.debian.org,gl/debian-2,True\n"
         ))
         monkeypatch.setattr(sc, "GITLAB_PROJECTS", csv_path)
         targets = load_gitlab_targets(hosts={"gitlab.com"})
@@ -169,7 +169,7 @@ class TestLoadGitlabTargets:
         # allows two of them → the third (e.g. a leaked class-C row) is dropped.
         csv_path = self._write(tmp_path, (
             "gitlab.com/keep/a,gitlab.com,gl/1,True\n"
-            "salsa.debian.org/keep/b,salsa.debian.org,gl/salsa.debian.org-2,True\n"
+            "salsa.debian.org/keep/b,salsa.debian.org,gl/debian-2,True\n"
             "gitlab.com/drop/c,gitlab.com,gl/3,True\n"
         ))
         monkeypatch.setattr(sc, "GITLAB_PROJECTS", csv_path)
@@ -218,7 +218,7 @@ class TestRunGitlabOrchestration:
             {"project": "gitlab.com/a/b", "host": "gitlab.com", "repo_id": "gl/1"},
             {"project": "gitlab.com/c/d", "host": "gitlab.com", "repo_id": "gl/2"},
             {"project": "salsa.debian.org/x/y", "host": "salsa.debian.org",
-             "repo_id": "gl/salsa.debian.org-3"},
+             "repo_id": "gl/debian-3"},
         ]
         # token only for gitlab.com; salsa (self-hosted) has none.
         captured = self._wire(monkeypatch, targets=targets,
@@ -237,7 +237,7 @@ class TestRunGitlabOrchestration:
         targets = [
             {"project": "gitlab.com/a/b", "host": "gitlab.com", "repo_id": "gl/1"},
             {"project": "salsa.debian.org/x/y", "host": "salsa.debian.org",
-             "repo_id": "gl/salsa.debian.org-3"},
+             "repo_id": "gl/debian-3"},
         ]
         captured = self._wire(monkeypatch, targets=targets,
                               token_map={},                    # no tokens at all

@@ -338,7 +338,7 @@ def load_gitlab_targets(hosts: set[str] | None = None,
 
     Returns ``[{project, host, repo_id}]`` where ``project`` = ``"{host}/{path}"``
     is a valid Scorecard ``--repo`` target (e.g. ``gitlab.com/gnutls/gnutls``)
-    and ``repo_id`` = ``gl/{host}-{id}`` (bare ``gl/{id}`` for gitlab.com; see
+    and ``repo_id`` = ``gl/{nickname}-{id}`` (bare ``gl/{id}`` for gitlab.com; see
     ``gitlab_client.make_repo_id``). Optionally filter to ``hosts``.
 
     ``classes`` (e.g. ``{"A"}``) scopes to those value classes by joining to
@@ -372,7 +372,7 @@ async def fetch_all_gitlab(
     token_map: dict[str, str],
     concurrency: int = 5,
 ) -> dict[str, dict]:
-    """Run Scorecard on GitLab targets, keyed on the ``gl/{host}-{id}`` repo_id.
+    """Run Scorecard on GitLab targets, keyed on the ``gl/{nickname}-{id}`` repo_id.
 
     Each subprocess gets its host's token via ``GITLAB_AUTH_TOKEN`` and the
     GitLab check subset. Upserts to the same ``data.json`` + ``openssf.csv``
@@ -545,7 +545,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--gitlab",
         action="store_true",
         help="Score GitLab projects from data/sources/gitlab/repos.csv using "
-             "per-host GITLAB tokens (GITLAB_TOKENS). Output keyed on gl/{host}-{id}.",
+             "per-host GITLAB tokens (GITLAB_TOKENS). Output keyed on gl/{nickname}-{id}.",
     )
     parser.add_argument(
         "--host",

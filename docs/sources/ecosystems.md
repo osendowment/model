@@ -67,7 +67,7 @@ fallback for packages the ranked registries don't carry.
 
 ### Columns (`criticality.csv`)
 
-`repo_id` (`gh/{id}` / `gl/{host}-{id}` / `gl/{id}`, read straight from value.csv's unified id),
+`repo_id` (`gh/{id}` / `gl/{nickname}-{id}` / `gl/{id}`, read straight from value.csv's unified id),
 `repository_url` (the row key), `class`,
 `valid` (value.csv's `git_valid`, carried so the scope stays filterable), `ecosystem` (`top_eco`),
 `package` (`top_eco_pkg`), `registry_hit` (which registry served it), `ok` (success flag), `error`

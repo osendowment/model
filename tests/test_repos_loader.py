@@ -193,7 +193,7 @@ def test_load_top_repos_sets_git_url_gitlab(tmp_path, monkeypatch):
     """A gitlab entry routes to its real gitlab clone URL, not github."""
     value = tmp_path / "value.csv"
     _write(value, ["repo", "repo_id", "git_url", "git_valid", "class", "platform"], [
-        {"repo": "gnome/glib", "repo_id": "gl/gitlab.gnome.org-658",
+        {"repo": "gnome/glib", "repo_id": "gl/gnome-658",
          "git_url": "https://gitlab.gnome.org/gnome/glib.git",
          "git_valid": "True", "class": "A", "platform": "gitlab"},
     ])
@@ -232,7 +232,7 @@ def test_to_repo_id_namespaces_and_is_idempotent():
     # idempotent — already-namespaced host ids are left alone
     assert repos.to_repo_id("gh/119609") == "gh/119609"
     assert repos.to_repo_id("gl/456") == "gl/456"                       # gitlab.com bare id
-    assert repos.to_repo_id("gl/salsa.debian.org-678") == "gl/salsa.debian.org-678"
+    assert repos.to_repo_id("gl/debian-678") == "gl/debian-678"
     # empty / missing -> empty (never "gh/")
     assert repos.to_repo_id("") == ""
     assert repos.to_repo_id(None) == ""
