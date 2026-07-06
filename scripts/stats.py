@@ -128,6 +128,18 @@ def value_stats() -> dict:
     valid = sum(1 for r in rows if _truthy(r.get("git_valid")))
     orphan = m - gh
 
+    # git-URL breakdown: host family (from `platform`) and validity, over the
+    # rows that carry a git URL at all.
+    with_url = [r for r in rows if _present(r.get("git_url"))]
+    git_urls = {
+        "total": len(with_url),
+        "github": sum(1 for r in with_url if (r.get("platform") or "") == "github"),
+        "gitlab": sum(1 for r in with_url if (r.get("platform") or "") == "gitlab"),
+        "valid": sum(1 for r in with_url if _truthy(r.get("git_valid"))),
+    }
+    git_urls["others"] = git_urls["total"] - git_urls["github"] - git_urls["gitlab"]
+    git_urls["invalid"] = git_urls["total"] - git_urls["valid"]
+
     def _is_active(r: dict) -> bool:
         if not _is_github(r):
             return False
@@ -184,6 +196,7 @@ def value_stats() -> dict:
 
     return {
         "rows": m, "github": gh, "git": git, "valid": valid, "orphan": orphan,
+        "git_urls": git_urls,
         "pkg_class": pkg_class, "ght_class": ght_class,
         "classes": classes, "by_class": by_class, "funnel": funnel,
     }
@@ -561,6 +574,18 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a(_id_row("Valid repos", {c: bc[c]["valid"] for c in "ABC"},
               "upstream resolves — github/gitlab API or non-github ls-remote; "
               "incl. archived mirrors", bold=True))
+
+    a("\n### Git URLs\n")
+    a("| Git URL | Repos | % |")
+    a("|---|--:|--:|")
+    gu = v["git_urls"]
+    a(f"| on GitHub | {gu['github']:,} | {_pct(gu['github'], gu['total'])} |")
+    a(f"| on GitLab | {gu['gitlab']:,} | {_pct(gu['gitlab'], gu['total'])} |")
+    a(f"| on other hosts | {gu['others']:,} | {_pct(gu['others'], gu['total'])} |")
+    a(f"| **valid — upstream resolves** | **{gu['valid']:,}** "
+      f"| **{_pct(gu['valid'], gu['total'])}** |")
+    a(f"| invalid — unreachable | {gu['invalid']:,} | {_pct(gu['invalid'], gu['total'])} |")
+    a(f"| total with a git URL | {gu['total']:,} | 100% |")
 
     a("\n### Repo class distribution\n")
     a("| Metric | A | B | C |")

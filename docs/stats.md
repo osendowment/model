@@ -72,6 +72,17 @@ risk/eligibility scope is gated to those two platforms
 (`settings.json top_repos.platforms`) — a valid upstream on any other host is
 recorded, not pulled into scope.
 
+### Git URLs
+
+| Git URL | Repos | % |
+|---|--:|--:|
+| on GitHub | 10,619 | 91.8% |
+| on GitLab | 839 | 7.2% |
+| on other hosts | 115 | 1.0% |
+| **valid — upstream resolves** | **11,466** | **99.1%** |
+| invalid — unreachable | 107 | 0.9% |
+| total with a git URL | 11,573 | 100% |
+
 | Step | A | B | C | Total | Comment |
 |---|--:|--:|--:|--:|---|
 | Packages | 3,392 | 4,736 | 9,462 | 17,590 | package universe (after dep tree) |
