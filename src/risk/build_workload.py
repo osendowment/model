@@ -88,7 +88,10 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 COMMITS_YEARS_FILE = DATA_DIR / "sources" / "git" / "commits-years.csv"
 OPENSSF_CHECKS_FILE = DATA_DIR / "sources" / "openssf" / "checks.csv"
-ISSUES_FILE = DATA_DIR / "sources" / "github" / "issues.csv"
+# Issue metrics come from two host-specific fetchers writing the same
+# long-format contract; the loader merges them (repo_id-keyed, disjoint sets).
+ISSUES_FILES = (DATA_DIR / "sources" / "github" / "issues.csv",
+                DATA_DIR / "sources" / "gitlab" / "issues.csv")
 OUTPUT_FILE = DATA_DIR / "risk" / "workload.csv"
 COMPLEXITY_FILE = DATA_DIR / "risk" / "complexity.csv"
 SECURITY_FILE = DATA_DIR / "risk" / "security.csv"
@@ -150,8 +153,8 @@ def _load_openssf_maintained() -> dict[str, str]:
     return out
 
 
-def _load_issues_long(path: Path) -> dict[str, dict[str, dict[int, int]]]:
-    """Project long-format issues.csv → wide-by-metric for the build's use.
+def _load_issues_long(*paths: Path) -> dict[str, dict[str, dict[int, int]]]:
+    """Project long-format issues.csv files → wide-by-metric for the build's use.
 
     Returns {metric: {repo_id: {year: count}}} where metric ∈ {opened_issues,
     closed_issues}. A year is present ONLY if it was actually fetched — no
@@ -164,17 +167,25 @@ def _load_issues_long(path: Path) -> dict[str, dict[str, dict[int, int]]]:
     before trusting any issue figure derived from this data. Unknown metrics
     are ignored.
     """
-    METRICS = ("opened_issues", "closed_issues")
-    out: dict[str, dict[str, dict[int, int]]] = {m: {} for m in METRICS}
+    out: dict[str, dict[str, dict[int, int]]] = {m: {} for m in _ISSUE_METRICS}
+    for path in paths:
+        _load_one_issues_file(path, out)
+    return out
+
+
+_ISSUE_METRICS = ("opened_issues", "closed_issues")
+
+
+def _load_one_issues_file(path: Path, out: dict) -> None:
     if not path.exists():
-        return out
+        return
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             slug = (row.get("repo_id") or "").strip()   # join on stable id, not name
             metric = (row.get("metric") or "").strip()
             year_s = (row.get("year") or "").strip()
             value = (row.get("value") or "").strip()
-            if not slug or metric not in METRICS or not year_s or value == "":
+            if not slug or metric not in _ISSUE_METRICS or not year_s or value == "":
                 continue
             try:
                 y = int(year_s)
@@ -182,7 +193,6 @@ def _load_issues_long(path: Path) -> dict[str, dict[str, dict[int, int]]]:
             except ValueError:
                 continue
             out[metric].setdefault(slug, {})[y] = v
-    return out
 
 
 def _num(value: str) -> float | None:
@@ -232,7 +242,7 @@ def build() -> list[dict]:
     repos = load_rows_by_id(REPOS_FILE)
     commits_years = _load_commits_years()
     maintained = _load_openssf_maintained()
-    issues = _load_issues_long(ISSUES_FILE)
+    issues = _load_issues_long(*ISSUES_FILES)
     opened = issues["opened_issues"]
     closed = issues["closed_issues"]
 

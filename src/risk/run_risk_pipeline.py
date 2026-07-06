@@ -35,6 +35,7 @@ FETCHERS = [
     # repos whose status row is already ok.
     Step("git-contributors", "src.sources.git.contributors",              fetch=True, pgroup="git-fetch"),  # concentration score + workload divisor
     Step("issues",        "src.sources.github.fetch_issue_metrics",       fetch=True, pgroup="git-fetch"),  # workload score
+    Step("gitlab-issues",  "src.sources.gitlab.fetch_issue_metrics",       fetch=True, pgroup="git-fetch"),  # workload score for gl/ repos
     # One clone per repo yields BOTH scc (loc/complexity → scc.csv) and lizard
     # (cyclomatic + cognitive → lizard.csv). cyclomatic_max is half the
     # complexity score, so a newly-scoped repo cannot be scored without this

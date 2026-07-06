@@ -35,6 +35,7 @@ def test_pipeline_runs_only_score_forming_fetchers():
         "src.sources.git.resolve_head",
         "src.sources.git.contributors",
         "src.sources.github.fetch_issue_metrics",
+        "src.sources.gitlab.fetch_issue_metrics",
         "src.sources.git.fetch_sha_metrics",
         "src.sources.osv.fetch_cves",
         "src.sources.openssf.scorecard",
