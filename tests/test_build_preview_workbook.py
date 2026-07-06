@@ -155,25 +155,29 @@ def test_stats_sheet_renders_markdown_tables(tmp_path, monkeypatch):
     # column A is an empty gutter — every block starts at column B; row 1 blank
     assert all(row[0] is None for row in got)
     assert got[0] == [None] * len(got[0])
-    # block 1: bold sub-title directly above the styled header row
-    assert got[1][1] == "Repo identity coverage"
-    assert ws.cell(row=2, column=2).font.bold is True
-    assert got[2][1:5] == ["Step", "A", "Total", "Comment"]
-    assert ws.cell(row=3, column=2).fill.start_color.rgb == "001F3864"
-    assert got[3][1:4] == ["Packages", 3425, 17647]
-    assert got[4][1:4] == ["Valid repos", 947, 11378]     # **bold** stripped
-    # bold row + typed numbers + right-aligned numeric headers + box border
+    # '## Value' renders as a stage BANNER: bold on the header fill, row 2
+    assert got[1][1] == "Value"
+    banner = ws.cell(row=2, column=2)
+    assert banner.font.bold is True and banner.fill.start_color.rgb == "001F3864"
+    # two blank rows, then block 1: bold sub-title directly above the header
+    assert got[4][1] == "Repo identity coverage"
     assert ws.cell(row=5, column=2).font.bold is True
-    assert ws.cell(row=4, column=3).number_format == "#,##0"
-    assert ws.cell(row=3, column=3).alignment.horizontal == "right"   # "A"
-    assert ws.cell(row=3, column=2).alignment.horizontal != "right"   # "Step"
-    assert ws.cell(row=3, column=2).border.left.style == "thin"
-    assert ws.cell(row=5, column=2).border.bottom.style == "thin"
+    assert got[5][1:5] == ["Step", "A", "Total", "Comment"]
+    assert ws.cell(row=6, column=2).fill.start_color.rgb == "001F3864"
+    assert got[6][1:4] == ["Packages", 3425, 17647]
+    assert got[7][1:4] == ["Valid repos", 947, 11378]     # **bold** stripped
+    # bold row + typed numbers + right-aligned numeric headers + box border
+    assert ws.cell(row=8, column=2).font.bold is True
+    assert ws.cell(row=7, column=3).number_format == "#,##0"
+    assert ws.cell(row=6, column=3).alignment.horizontal == "right"   # "A"
+    assert ws.cell(row=6, column=2).alignment.horizontal != "right"   # "Step"
+    assert ws.cell(row=6, column=2).border.left.style == "thin"
+    assert ws.cell(row=8, column=2).border.bottom.style == "thin"
     # two blank rows, then block 2 under its own sub-title
-    assert got[5] == [None] * len(got[5])
-    assert got[6] == [None] * len(got[6])
-    assert got[7][1] == "Coverage"
-    assert got[9][1:3] == ["openssf_crit", 921]
+    assert got[8] == [None] * len(got[8])
+    assert got[9] == [None] * len(got[9])
+    assert got[10][1] == "Coverage"
+    assert got[12][1:3] == ["openssf_crit", 921]
     # percent cells become real fractions with a percent format
-    pct = ws.cell(row=10, column=4)
+    pct = ws.cell(row=13, column=4)
     assert pct.value == 0.978 and pct.number_format == "0.0%"
