@@ -1,24 +1,43 @@
 #!/usr/bin/env python3
-"""Build data/preview/repos.csv — the final fundable-candidate table.
+"""Build data/preview/repos.csv — the final cross-stage rollup.
 
-The pipeline's terminal output. Every **eligible** top repo (eligibility.csv
-`eligible == True`) paired with its value score (top-ecosystem download share)
-and its overall risk score — the ranked shortlist the endowment funds from.
-Ineligible repos (not OSS, no funding intent, company-backed, or inactive) are
-excluded; filter upstream in eligibility.csv if you need the full set.
+The pipeline's terminal output. **Every top repo** (every row of
+`data/eligibility/eligibility.csv` — the full Value → Risk → Eligibility
+population, archived repos included), joined with its Value, Risk, and
+Eligibility signals plus two derived columns. Unlike a filtered shortlist,
+ineligible/incomplete repos stay in the table with their `eligible` flag
+visible — filter on it downstream if you want only fundable candidates.
 
 Columns:
-    repo_id      GitHub numeric id (stable across renames)
-    repo         canonical owner/name slug
-    ecosystem    the repo's top ecosystem            (value.csv `top_eco`)
-    value_score  0-100 value blend (crit/eco/central)  (value.csv `value_score`)
-    risk_score   overall risk score, 0-100           (risk.csv `risk_score`)
+    repo_id           stable platform-qualified id (`gh/<n>` / `gl/<host>-<n>`)
+    repo              canonical slug
+    language          GitHub-detected primary language, lowercased
+                      (`data/sources/github/repos.csv`; blank for GitLab repos
+                      and any repo not GitHub-fetched)
+    ecosystem         top ecosystem                     (value.csv `top_eco`)
+    openssf_crit      OpenSSF criticality score, 0-1     (value.csv)
+    eco_crit          ecosyste.ms critical flag, 0/1     (value.csv)
+    top_eco_pct       PageRank percentile in top_eco     (value.csv)
+    value_score       0-100 value blend                  (value.csv `value_score`)
+    concentration, complexity, security, workload        (risk.csv components)
+    risk_score        overall risk score, 0-100          (risk.csv `risk_score`)
+    oss, intent, nonprofit, active                        (eligibility.csv components)
+    eligible          oss AND intent AND nonprofit AND active
+    score             value_score * risk_score, scaled so the highest row = 100.
+                      Computed for every row with both value_score and
+                      risk_score present, regardless of eligibility.
+    priority          dense rank (1, 2, 3, …) by score desc, among eligible
+                      rows only — blank for ineligible rows and any row
+                      missing a score.
 
-Joins: eligibility.csv → risk.csv on the stable `repo_id`; eligibility.csv →
-value.csv on the canonical `repo` slug (value.csv's `repo_id` is the
-`gh/<n>` platform-qualified form, so the slug is the shared key there).
+Joins: every file keys on the stable `repo_id` — eligibility.csv's population
+(all top repos) drives the row set; value.csv / risk.csv / github/repos.csv
+are joined onto it. A repo missing from a joined file (e.g. an archived repo
+absent from risk.csv, or a GitLab repo absent from github/repos.csv) leaves
+those columns blank rather than dropping the row.
 
-Sorted by risk_score desc (most at-risk first), then value_score desc.
+Sorted by `score` desc (blank last), then `repo` — so row order matches
+`priority` order for the scored/eligible subset.
 
 Usage:
     uv run python -m src.build_results
@@ -36,73 +55,108 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 ELIGIBILITY_FILE = DATA_DIR / "eligibility" / "eligibility.csv"
 VALUE_FILE = DATA_DIR / "value" / "value.csv"
 RISK_FILE = DATA_DIR / "risk" / "risk.csv"
+GITHUB_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 OUTPUT_FILE = DATA_DIR / "preview" / "repos.csv"
 
-FIELDS = ["repo_id", "repo", "ecosystem", "value_score", "risk_score"]
+RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
+ELIGIBILITY_COMPONENTS = ["oss", "intent", "nonprofit", "active"]
+
+FIELDS = (
+    ["repo_id", "repo", "language", "ecosystem", "openssf_crit", "eco_crit",
+     "top_eco_pct", "value_score"]
+    + RISK_COMPONENTS
+    + ["risk_score"]
+    + ELIGIBILITY_COMPONENTS
+    + ["eligible", "score", "priority"]
+)
 
 
-def _value_maps() -> tuple[dict[str, dict], dict[str, dict]]:
-    """(by_id, by_slug) maps onto value.csv rows.
-
-    value.csv's canonical `gh/<n>` id is the primary join key (rename-proof,
-    matches eligibility's `repo_id`, which carries the same form).
-    The slug map remains as fallback for rows without an id (non-GitHub or
-    unresolved)."""
-    by_id: dict[str, dict] = {}
-    by_slug: dict[str, dict] = {}
-    if not VALUE_FILE.exists():
-        return by_id, by_slug
-    with open(VALUE_FILE, encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            rid = (r.get("repo_id") or "").strip()
-            if rid:
-                by_id.setdefault(rid, r)
-            slug = (r.get("repo") or "").strip().lower()
-            if slug:
-                by_slug[slug] = r
-    return by_id, by_slug
-
-
-def _risk_score_by_id() -> dict[str, str]:
-    """{repo_id → risk.csv `risk_score`}; join on the stable numeric id."""
-    out: dict[str, str] = {}
-    if not RISK_FILE.exists():
+def _index_by_id(path: Path) -> dict[str, dict]:
+    """{repo_id: row} from a CSV; rows with a blank repo_id are skipped."""
+    out: dict[str, dict] = {}
+    if not path.exists():
         return out
-    with open(RISK_FILE, encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            rid = (r.get("repo_id") or "").strip()
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            rid = (row.get("repo_id") or "").strip()
             if rid:
-                out[rid] = (r.get("risk_score") or "").strip()
+                out.setdefault(rid, row)
     return out
 
 
-def _num(x: str) -> float:
+def _num(x: str) -> float | None:
     try:
         return float(x)
     except (TypeError, ValueError):
-        return -1.0
+        return None
 
 
 def build() -> list[dict]:
-    value_by_id, value_by_slug = _value_maps()
-    risk = _risk_score_by_id()
+    value_by_id = _index_by_id(VALUE_FILE)
+    risk_by_id = _index_by_id(RISK_FILE)
+    language_by_id = _index_by_id(GITHUB_REPOS_FILE)
+
+    with open(ELIGIBILITY_FILE, encoding="utf-8") as f:
+        eligibility_rows = list(csv.DictReader(f))
 
     rows: list[dict] = []
-    with open(ELIGIBILITY_FILE, encoding="utf-8") as f:
-        for e in csv.DictReader(f):
-            if (e.get("eligible") or "").strip() != "True":
-                continue
-            repo = (e.get("repo") or "").strip()
-            rid = (e.get("repo_id") or "").strip()
-            v = value_by_id.get(rid) or value_by_slug.get(repo.lower(), {})
-            rows.append({
-                "repo_id": rid,
-                "repo": repo,
-                "ecosystem": (v.get("top_eco") or "").strip(),
-                "value_score": (v.get("value_score") or "").strip(),
-                "risk_score": risk.get(rid, ""),
-            })
-    rows.sort(key=lambda r: (_num(r["risk_score"]), _num(r["value_score"])), reverse=True)
+    raw_by_id: dict[str, float] = {}
+    for e in eligibility_rows:
+        rid = (e.get("repo_id") or "").strip()
+        repo = (e.get("repo") or "").strip()
+        v = value_by_id.get(rid, {})
+        r = risk_by_id.get(rid, {})
+        g = language_by_id.get(rid, {})
+
+        value_score = (v.get("value_score") or "").strip()
+        risk_score = (r.get("risk_score") or "").strip()
+        vs_num, rs_num = _num(value_score), _num(risk_score)
+        if vs_num is not None and rs_num is not None:
+            raw_by_id[rid] = vs_num * rs_num
+
+        row = {
+            "repo_id": rid,
+            "repo": repo,
+            "language": (g.get("language") or "").strip().lower(),
+            "ecosystem": (v.get("top_eco") or "").strip(),
+            "openssf_crit": (v.get("openssf_crit") or "").strip(),
+            "eco_crit": (v.get("eco_crit") or "").strip(),
+            "top_eco_pct": (v.get("top_eco_pct") or "").strip(),
+            "value_score": value_score,
+            **{col: (r.get(col) or "").strip() for col in RISK_COMPONENTS},
+            "risk_score": risk_score,
+            **{col: (e.get(col) or "").strip() for col in ELIGIBILITY_COMPONENTS},
+            "eligible": (e.get("eligible") or "").strip(),
+            "score": "",
+            "priority": "",
+        }
+        rows.append(row)
+
+    # score: value_score * risk_score, rescaled so the highest raw product in
+    # the table maps to 100. Computed for every row with both inputs present,
+    # regardless of eligibility.
+    max_raw = max(raw_by_id.values()) if raw_by_id else None
+    if max_raw:
+        for row in rows:
+            raw = raw_by_id.get(row["repo_id"])
+            if raw is not None:
+                row["score"] = f"{raw / max_raw * 100:.2f}"
+
+    # priority: dense 1,2,3… rank by score desc, eligible + scored rows only.
+    ranked = sorted(
+        (row for row in rows if row["eligible"] == "True" and row["score"]),
+        key=lambda row: (-float(row["score"]), row["repo"]),
+    )
+    for i, row in enumerate(ranked, start=1):
+        row["priority"] = str(i)
+
+    # Row order: scored rows first (score desc, matching priority order),
+    # then everything else by repo for determinism.
+    def _sort_key(row: dict) -> tuple:
+        s = row["score"]
+        return (s == "", -float(s) if s else 0.0, row["repo"])
+
+    rows.sort(key=_sort_key)
     return rows
 
 
@@ -114,16 +168,25 @@ def main() -> None:
         w.writeheader()
         w.writerows(rows)
 
-    table = Table(title="[bold]Results — top fundable candidates[/bold]",
+    table = Table(title="[bold]Results — top repos by priority[/bold]",
                   show_header=True, header_style="bold dim", padding=(0, 1))
     table.add_column("repo", style="bold")
     table.add_column("eco")
     table.add_column("value", justify="right")
     table.add_column("risk", justify="right")
+    table.add_column("score", justify="right")
+    table.add_column("pri", justify="right")
     for r in rows[:10]:
-        table.add_row(r["repo"], r["ecosystem"], r["value_score"], r["risk_score"])
+        table.add_row(r["repo"], r["ecosystem"], r["value_score"], r["risk_score"],
+                      r["score"], r["priority"])
     console.print(table)
-    console.print(f"\n[dim]Wrote {len(rows):,} eligible repos × {len(FIELDS)} columns → {OUTPUT_FILE}[/dim]")
+
+    eligible = sum(1 for r in rows if r["eligible"] == "True")
+    scored = sum(1 for r in rows if r["score"])
+    console.print(
+        f"\n[dim]{len(rows):,} top repos · {eligible:,} eligible · "
+        f"{scored:,} scored (value_score + risk_score present) → {OUTPUT_FILE}[/dim]"
+    )
 
 
 if __name__ == "__main__":
