@@ -317,6 +317,8 @@ https://gitlab.freedesktop.org/xorg/app/xkbcomp.git,True,ls-remote,2026-05-17T23
 https://gitlab.freedesktop.org/xorg/driver.git,False,ls-remote,2026-07-06T17:11:51Z
 https://gitlab.freedesktop.org/xorg/driver/xf86-video-ati.git,True,ls-remote,2026-07-06T17:11:51Z
 https://gitlab.freedesktop.org/xorg/driver/xf86-video-fbdev.git,True,ls-remote,2026-07-06T17:11:51Z
+https://gitlab.freedesktop.org/xorg/driver/xf86-video-vesa.git,True,ls-remote,2026-07-06T18:12:19Z
+https://gitlab.freedesktop.org/xorg/driver/xf86-video-vmware.git,True,ls-remote,2026-07-06T18:12:19Z
 https://gitlab.freedesktop.org/xorg/lib/libapplewm.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.freedesktop.org/xorg/lib/libice.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.freedesktop.org/xorg/lib/libpciaccess.git,True,ls-remote,2026-04-27T20:41:04Z

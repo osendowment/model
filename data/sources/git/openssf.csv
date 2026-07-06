@@ -19996,6 +19996,24 @@ isaacs/node-lru-cache,gh/679662,https://github.com/isaacs/node-lru-cache.git,823
 isaacs/node-lru-cache,gh/679662,https://github.com/isaacs/node-lru-cache.git,823ec403559681e649eaad361b484256bd50cd25,signed_releases,-1,2026-04-27T14:55:38+01:00
 isaacs/node-lru-cache,gh/679662,https://github.com/isaacs/node-lru-cache.git,823ec403559681e649eaad361b484256bd50cd25,token_permissions,0,2026-04-27T14:55:38+01:00
 isaacs/node-lru-cache,gh/679662,https://github.com/isaacs/node-lru-cache.git,823ec403559681e649eaad361b484256bd50cd25,vulnerabilities,9,2026-04-27T14:55:38+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,binary_artifacts,10,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,ci_tests,0,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,cii_best_practices,0,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,code_review,0,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,contributors,-1,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,dangerous_workflow,10,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,dependency_update_tool,0,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,fuzzing,0,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,license,9,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,maintained,0,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,packaging,-1,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,pinned_dependencies,1,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,sast,0,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,score,3.1,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,security_policy,10,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,signed_releases,-1,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,token_permissions,0,2026-07-06T19:07:47+01:00
+isaacs/node-mkdirp,gh/2718248,https://github.com/isaacs/node-mkdirp.git,fdf6005432c2506ce31f8cae237039dda2f8479d,vulnerabilities,0,2026-07-06T19:07:47+01:00
 isaacs/node-tar,gh/1534331,https://github.com/isaacs/node-tar.git,700734f9aeb113bcc5f1400d81b8be7d499e54a2,binary_artifacts,10,2026-04-27T17:16:18+01:00
 isaacs/node-tar,gh/1534331,https://github.com/isaacs/node-tar.git,700734f9aeb113bcc5f1400d81b8be7d499e54a2,branch_protection,3,2026-04-27T17:16:18+01:00
 isaacs/node-tar,gh/1534331,https://github.com/isaacs/node-tar.git,700734f9aeb113bcc5f1400d81b8be7d499e54a2,ci_tests,5,2026-04-27T17:16:18+01:00
@@ -39069,6 +39087,7 @@ rust-lang/regex,gh/27890669,https://github.com/rust-lang/regex.git,839d16bc65b60
 rust-lang/regex,gh/27890669,https://github.com/rust-lang/regex.git,839d16bc65b60e2006d3599d20bfa6efc14049d8,signed_releases,-1,2026-04-27T21:49:25+01:00
 rust-lang/regex,gh/27890669,https://github.com/rust-lang/regex.git,839d16bc65b60e2006d3599d20bfa6efc14049d8,token_permissions,10,2026-04-27T21:49:25+01:00
 rust-lang/regex,gh/27890669,https://github.com/rust-lang/regex.git,839d16bc65b60e2006d3599d20bfa6efc14049d8,vulnerabilities,10,2026-04-27T21:49:25+01:00
+rust-lang/rust,gh/724712,https://github.com/rust-lang/rust.git,unscanned,scan_error,empty stdout,2026-07-06T18:07:56+00:00
 rust-lang/tempdir,gh/31728565,https://github.com/rust-lang-deprecated/tempdir.git,403f918d9f3708ca144c727d20d2c1f8738767fc,binary_artifacts,10,2026-04-27T21:49:34+01:00
 rust-lang/tempdir,gh/31728565,https://github.com/rust-lang-deprecated/tempdir.git,403f918d9f3708ca144c727d20d2c1f8738767fc,branch_protection,0,2026-04-27T21:49:34+01:00
 rust-lang/tempdir,gh/31728565,https://github.com/rust-lang-deprecated/tempdir.git,403f918d9f3708ca144c727d20d2c1f8738767fc,ci_tests,0,2026-04-27T21:49:34+01:00
