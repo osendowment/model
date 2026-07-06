@@ -52,7 +52,7 @@ FETCHERS = [
     Step("maintainer-sponsors", "src.sources.github.fetch_maintainer_sponsors", fetch=True, pgroup="funding"),
     Step("floss-fund",    "src.sources.floss_fund.funding_json",          fetch=True, pgroup="funding"),
     Step("oc-collectives", "src.sources.opencollective.fetch_collectives", fetch=True, pgroup="funding"),
-    Step("opencollective", "src.sources.opencollective.fetch_budgets",    fetch=True)  # reads oc-collectives output — stays serial after the funding group,
+    Step("opencollective", "src.sources.opencollective.fetch_budgets",    fetch=True),  # reads oc-collectives output — stays serial after the funding group
     # FOSS-foundation rosters → host-by-repo (nonprofit / host signal)
     Step("apache",        "src.sources.funding.apache",                   fetch=True, pgroup="rosters"),
     Step("cncf",          "src.sources.funding.cncf",                     fetch=True, pgroup="rosters"),
