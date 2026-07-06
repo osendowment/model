@@ -41,8 +41,9 @@ AUDIT_STEPS = [
 
 # The cross-ecosystem rollup that turns existing per-ecosystem results.csv into
 # value.csv. Reads only the per-eco results.csv + the validation caches +
-# overrides.csv — no raw ecosystem data (e.g. the crates db-dump), so it runs
-# even when those large inputs are unmaterialised LFS pointers.
+# overrides.csv — no raw ecosystem data (e.g. the crates db-dump in the
+# gitignored tmp/), so it runs even on a checkout where those large
+# regenerable inputs have never been downloaded.
 #
 # Net steps use TTL caches — pass --offline to hard-forbid network (pure-cache
 # run) or --refresh to force refetch ignoring TTL.

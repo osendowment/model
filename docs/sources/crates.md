@@ -10,11 +10,13 @@ Package downloads, dependencies, and repository mappings for the Rust ecosystem.
 
 ## Raw Data
 
+In the gitignored `tmp/crates-db-dump/` (3.7 GB regenerable vendor snapshot -- re-downloaded on demand, never committed):
+- `crates.csv` -- crate ID, name, repository URL
+- `versions.csv` -- version ID, crate ID
+- `default_versions.csv` -- current (non-yanked) version per crate
+- `dependencies.csv` -- version-level dependency edges
+
 In `data/sources/crates/`:
-- `db-dump/crates.csv` -- crate ID, name, repository URL
-- `db-dump/versions.csv` -- version ID, crate ID
-- `db-dump/default_versions.csv` -- current (non-yanked) version per crate
-- `db-dump/dependencies.csv` -- version-level dependency edges
 - `version-downloads/YYYY-MM.csv` -- monthly per-version download totals
 
 ## Scripts

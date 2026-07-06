@@ -314,14 +314,14 @@ def pypi_urls() -> dict[str, list[str]]:
 
 def crates_urls() -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
-    path = DATA_DIR / "sources" / "crates" / "db-dump" / "crates.csv"
+    path = DATA_DIR.parent / "tmp" / "crates-db-dump" / "crates.csv"
     if not path.exists():
         return out
     if is_lfs_pointer(path):
         raise SystemExit(
-            f"{path} is a Git LFS pointer — the crates db-dump isn't materialised. "
-            "Run `uv run python -m src.sources.crates.fetch_db_dump` (or `git lfs pull`) "
-            "first, or use `--rollup` to rebuild value.csv from existing results.csv."
+            f"{path} is a Git LFS pointer — stray from when the dump lived in git. "
+            "Delete it and run `uv run python -m src.sources.crates.fetch_db_dump`, "
+            "or use `--rollup` to rebuild value.csv from existing results.csv."
         )
     df = pl.read_csv(path, columns=["name", "homepage", "repository"],
                      schema_overrides={"homepage": pl.Utf8, "repository": pl.Utf8})

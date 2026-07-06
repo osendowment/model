@@ -5,12 +5,16 @@ Strategy: parallel byte-range requests (server supports Accept-Ranges).
 Downloads N chunks concurrently, assembles into final file, then extracts.
 
 Extracts only:
-  data/sources/crates/db-dump/crates.csv
-  data/sources/crates/db-dump/versions.csv
-  data/sources/crates/db-dump/dependencies.csv
-  data/sources/crates/db-dump/default_versions.csv
+  tmp/crates-db-dump/crates.csv
+  tmp/crates-db-dump/versions.csv
+  tmp/crates-db-dump/dependencies.csv
+  tmp/crates-db-dump/default_versions.csv
 
-  - Skips download+extraction if data/sources/crates/db-dump/ already exists
+The dump is a 3.7 GB regenerable vendor snapshot, so it lives in the
+gitignored tmp/ — never in git (it was LFS-tracked once, which cost
+gigabytes per push for data any run can re-download in ~3 minutes).
+
+  - Skips download+extraction if tmp/crates-db-dump/ already exists
   - Deletes archive after extraction
   - Prints throughput and timing stats at each step
 
@@ -32,9 +36,8 @@ from rich.table import Table
 from src.common.lfs import has_real_data
 
 DUMP_URL  = "https://static.crates.io/db-dump.tar.gz"
-DATA_DIR  = "data/sources/crates"
-DUMP_DIR  = f"{DATA_DIR}/db-dump"
-DUMP_TAR  = f"{DATA_DIR}/db-dump.tar.gz"
+DUMP_DIR  = "tmp/crates-db-dump"
+DUMP_TAR  = "tmp/crates-db-dump.tar.gz"
 
 EXTRACT_TARGETS = {
     "crates.csv",
@@ -49,7 +52,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--chunks", type=int, default=8, help="Parallel download chunks (default: 8)")
 args = parser.parse_args()
 
-os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(DUMP_DIR, exist_ok=True)
 
 console.rule("[bold]crates.io DB dump fetcher")
 console.print(f"Output : [cyan]{DUMP_DIR}/[/cyan]")
@@ -58,7 +61,8 @@ console.print()
 
 # ── Skip if already extracted ──────────────────────────────────────────────────
 
-# A Git LFS pointer counts as missing — the real data isn't on disk, so re-fetch.
+# has_real_data also guards against stray LFS pointers from the era when the
+# dump lived in git — treat those as missing.
 all_present = all(has_real_data(f"{DUMP_DIR}/{f}") for f in EXTRACT_TARGETS)
 if all_present:
     console.print(f"[green]Already extracted[/green]: {DUMP_DIR}/")
@@ -69,7 +73,7 @@ if all_present:
 
 missing = [f for f in EXTRACT_TARGETS if not has_real_data(f"{DUMP_DIR}/{f}")]
 if missing:
-    console.print(f"[yellow]Missing/unmaterialised[/yellow]: {missing} — re-downloading dump")
+    console.print(f"[yellow]Missing[/yellow]: {missing} — re-downloading dump")
 
 # ── Get file size via HEAD ─────────────────────────────────────────────────────
 

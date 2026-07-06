@@ -1,4 +1,2 @@
-data/sources/crates/db-dump/*.csv filter=lfs diff=lfs merge=lfs -text
-data/sources/crates/db-dump/*.tar.gz filter=lfs diff=lfs merge=lfs -text
 data/sources/npm/github-repos.csv filter=lfs diff=lfs merge=lfs -text
 data/sources/npm/nice-registry/packages.csv filter=lfs diff=lfs merge=lfs -text

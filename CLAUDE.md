@@ -39,6 +39,8 @@ you what it is:
 
 Rule: a script reading external/fetched data points at `data/sources/<source>/…`; a script reading or writing a stage result points at `data/<stage>/…`. Never write a stage output into `data/sources/`, and never write fetched source data into a stage folder.
 
+Exception: huge regenerable vendor snapshots (the 3.7 GB crates db-dump → `tmp/crates-db-dump/`) live in the gitignored `tmp/`, not `data/sources/` — they are re-downloadable on demand and must never enter git/LFS.
+
 ## Documentation
 
 `docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md`, `eligibility.md` — plus the cross-cutting **`docs/stats.md`**, with everything else in a subfolder:

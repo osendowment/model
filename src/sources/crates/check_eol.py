@@ -15,9 +15,9 @@ signal of EOL.
 
 Reads:
     data/sources/crates/results.csv         — crates we care about
-    data/sources/crates/db-dump/crates.csv  — crate_id ↔ name
-    data/sources/crates/db-dump/default_versions.csv — crate_id → default version_id
-    data/sources/crates/db-dump/versions.csv — version_id → yanked
+    tmp/crates-db-dump/crates.csv  — crate_id ↔ name
+    tmp/crates-db-dump/default_versions.csv — crate_id → default version_id
+    tmp/crates-db-dump/versions.csv — version_id → yanked
 
 Writes:
     data/sources/crates/eol.csv
@@ -50,7 +50,7 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 RESULTS_FILE = DATA_DIR / "sources" / "crates" / "results.csv"
-DUMP_DIR = DATA_DIR / "sources" / "crates" / "db-dump"
+DUMP_DIR = DATA_DIR.parent / "tmp" / "crates-db-dump"  # gitignored vendor snapshot, see fetch_db_dump
 OUTPUT_FILE = DATA_DIR / "sources" / "crates" / "eol.csv"
 
 EOL_METHOD = "crates_yanked"
