@@ -137,7 +137,7 @@ davidhalter/parso,gh/90668463,mit,registry,True
 davisjam/safe-regex,gh/90781457,mit,registry,True
 dchest/tweetnacl-js,gh/15649752,unlicense,registry,True
 dcodeio/long.js,gh/8678904,apache-2.0,registry,True
-debian/bzip2,gl/salsa.debian.org-9696,bzip2-1.0.6,gitlab,False
+debian/bzip2,gl/salsa.debian.org-9696,bzip2-1.0.6,gitlab,True
 debian/ca-certificates,gl/salsa.debian.org-2995,,,
 debian/gdbm,gl/salsa.debian.org-32157,gpl-3.0,gitlab,True
 debian/giflib,gl/salsa.debian.org-12522,mit,gitlab,True
@@ -459,7 +459,7 @@ libidn/libidn2,gl/2882658,gpl-3.0,github,True
 libjpeg-turbo/libjpeg-turbo,gh/39760454,bsd-3-clause,override,True
 libjxl/libjxl,gh/340219494,bsd-3-clause,github,True
 libpixman/pixman,gh/81675971,mit,registry,True
-libtiff/libtiff,gl/4720790,libtiff,gitlab,False
+libtiff/libtiff,gl/4720790,libtiff,gitlab,True
 libuv/libuv,gh/14812739,mit,registry,True
 linusu/buffer-from,gh/66025821,mit,registry,True
 linux-pam/linux-pam,gh/76264690,bsd-3-clause,override,True
@@ -921,11 +921,11 @@ wesleytodd/setprototypeof,gh/30301031,isc,registry,True
 whitequark/ipaddr.js,gh/2110585,mit,registry,True
 withoutboats/heck,gh/86326466,mit or apache-2.0,registry,True
 xorg-team/lib/libx11,gl/salsa.debian.org-4306,bsd-1-clause,gitlab,True
-xorg-team/lib/libxau,gl/salsa.debian.org-4307,mit-open-group,gitlab,False
-xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,mit-open-group,gitlab,False
-xorg-team/lib/libxext,gl/salsa.debian.org-4314,mit-open-group,gitlab,False
+xorg-team/lib/libxau,gl/salsa.debian.org-4307,mit-open-group,gitlab,True
+xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,mit-open-group,gitlab,True
+xorg-team/lib/libxext,gl/salsa.debian.org-4314,mit-open-group,gitlab,True
 xorg-team/lib/libxrender,gl/salsa.debian.org-4328,other,gitlab,
-xorg/proto/xorgproto,gl/gitlab.freedesktop.org-788,sgi-b-1.1,gitlab,False
+xorg/proto/xorgproto,gl/gitlab.freedesktop.org-788,mit and sgi-b-1.1,override,True
 xtuc/webassemblyjs,gh/113006071,mit,registry,True
 yahoo/serialize-javascript,gh/24106944,bsd-3-clause,registry,True
 yaml/libyaml,gh/2699072,mit,registry,True

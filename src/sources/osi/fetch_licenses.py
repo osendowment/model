@@ -121,6 +121,58 @@ EXTRAS: dict[str, str] = {
     #  the set via the FSF-libre pass once the union landed, so the entry
     #  was removed. The redundancy warning below catches the next such case.)
 
+    # ── bzip2-1.0.6 ─────────────────────────────────────────────────
+    # Julian Seward's bzip2/libbzip2, the block-sorting compressor that
+    # ships in every Linux distro, macOS, and the BSDs, and backed
+    # kernel.org archives for a decade. The license is a short BSD-style
+    # permissive text (attribution + no-misrepresentation clauses);
+    # neither body lists it — OSI because nobody filed, FSF's list simply
+    # omits it — but Debian ships bzip2 in main and Fedora classifies
+    # `bzip2-1.0.6` as allowed. The Debian source package
+    # (salsa.debian.org/debian/bzip2, a top repo here) carries it.
+    # Sources:
+    #   SPDX:    https://spdx.org/licenses/bzip2-1.0.6.html
+    #   bzip2:   https://sourceware.org/bzip2/ (LICENSE in tarball)
+    #   Fedora:  https://gitlab.com/fedora/legal/fedora-license-data
+    #            (bzip2-1.0.6: allowed)
+    #   Debian:  bzip2 in main since 1997 (DFSG-free)
+    "bzip2-1.0.6": "BSD-style permissive; bzip2/libbzip2 "
+                   "(Julian Seward)",
+
+    # ── libtiff ─────────────────────────────────────────────────────
+    # The libtiff license (Sam Leffler / Silicon Graphics, 1988-1997) —
+    # an HPND/MIT-family permissive notice used by libtiff itself, the
+    # TIFF codec underneath GDK-Pixbuf, ImageMagick, Qt, PDF toolchains
+    # and practically every image pipeline. Neither body lists it (OSI:
+    # never submitted; FSF's list omits it), but Debian ships tiff in
+    # main and Fedora classifies `libtiff` as allowed.
+    # Sources:
+    #   SPDX:    https://spdx.org/licenses/libtiff.html
+    #   libtiff: https://gitlab.com/libtiff/libtiff (LICENSE.md)
+    #   Fedora:  https://gitlab.com/fedora/legal/fedora-license-data
+    #            (libtiff: allowed)
+    #   Debian:  tiff in main (DFSG-free)
+    "libtiff":     "HPND/MIT-family permissive; libtiff "
+                   "(Sam Leffler / SGI)",
+
+    # ── mit-open-group ──────────────────────────────────────────────
+    # The Open Group / X Consortium variant of MIT carried by the core
+    # X.Org protocol libraries (libXau, libXdmcp, libXext — all top
+    # repos here). Textually MIT plus the X-style "shall not be used in
+    # advertising" clause — the direct ancestor of the plain MIT/X11
+    # licence OSI approved. Neither body lists this exact variant; the
+    # X.Org stack has shipped under it in every distro's main/free
+    # repository since XFree86. Fedora classifies `MIT-Open-Group` as
+    # allowed.
+    # Sources:
+    #   SPDX:    https://spdx.org/licenses/MIT-Open-Group.html
+    #   X.Org:   https://gitlab.freedesktop.org/xorg/lib/libxau (COPYING)
+    #   Fedora:  https://gitlab.com/fedora/legal/fedora-license-data
+    #            (MIT-Open-Group: allowed)
+    #   Debian:  libxau et al. in main (DFSG-free)
+    "mit-open-group": "MIT/X11-family permissive; X.Org core libs "
+                      "(The Open Group)",
+
     # ── libpng-2.0 ──────────────────────────────────────────────────
     # The libpng reference library, the canonical PNG codec used by
     # every major browser (Chromium, Firefox, Safari, Edge), every

@@ -137,7 +137,7 @@ davidhalter/parso,gh/90668463,True,True,True,True,True,3,4,True
 davisjam/safe-regex,gh/90781457,True,False,True,True,False,3,4,True
 dchest/tweetnacl-js,gh/15649752,True,False,True,True,False,3,4,True
 dcodeio/long.js,gh/8678904,True,True,True,True,True,3,4,True
-debian/bzip2,gl/salsa.debian.org-9696,False,True,True,True,False,1,4,False
+debian/bzip2,gl/salsa.debian.org-9696,True,True,True,True,True,1,4,False
 debian/ca-certificates,gl/salsa.debian.org-2995,False,True,True,True,False,1,4,False
 debian/gdbm,gl/salsa.debian.org-32157,True,True,True,True,True,1,4,False
 debian/giflib,gl/salsa.debian.org-12522,True,True,True,True,True,1,4,False
@@ -459,7 +459,7 @@ libidn/libidn2,gl/2882658,True,False,True,True,False,1,4,False
 libjpeg-turbo/libjpeg-turbo,gh/39760454,True,True,True,True,True,2,4,True
 libjxl/libjxl,gh/340219494,True,True,False,True,False,2,4,True
 libpixman/pixman,gh/81675971,True,True,True,True,True,2,4,True
-libtiff/libtiff,gl/4720790,False,False,True,True,False,1,4,False
+libtiff/libtiff,gl/4720790,True,False,True,True,False,1,4,False
 libuv/libuv,gh/14812739,True,True,True,True,True,2,4,True
 linusu/buffer-from,gh/66025821,True,True,True,True,True,3,4,True
 linux-pam/linux-pam,gh/76264690,True,False,True,True,False,2,4,True
@@ -921,11 +921,11 @@ wesleytodd/setprototypeof,gh/30301031,True,True,True,True,True,3,4,True
 whitequark/ipaddr.js,gh/2110585,True,True,True,True,True,3,4,True
 withoutboats/heck,gh/86326466,True,True,True,True,True,3,4,True
 xorg-team/lib/libx11,gl/salsa.debian.org-4306,True,True,True,True,True,1,4,False
-xorg-team/lib/libxau,gl/salsa.debian.org-4307,False,True,True,True,False,1,4,False
-xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,False,True,True,True,False,1,4,False
-xorg-team/lib/libxext,gl/salsa.debian.org-4314,False,True,True,True,False,1,4,False
+xorg-team/lib/libxau,gl/salsa.debian.org-4307,True,True,True,True,True,1,4,False
+xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,True,True,True,True,True,1,4,False
+xorg-team/lib/libxext,gl/salsa.debian.org-4314,True,True,True,True,True,1,4,False
 xorg-team/lib/libxrender,gl/salsa.debian.org-4328,False,True,True,True,False,1,4,False
-xorg/proto/xorgproto,gl/gitlab.freedesktop.org-788,False,True,True,True,False,1,4,False
+xorg/proto/xorgproto,gl/gitlab.freedesktop.org-788,True,True,True,True,True,1,4,False
 xtuc/webassemblyjs,gh/113006071,True,False,True,True,False,3,4,True
 yahoo/serialize-javascript,gh/24106944,True,True,False,True,False,3,4,True
 yaml/libyaml,gh/2699072,True,True,True,True,True,2,4,True
