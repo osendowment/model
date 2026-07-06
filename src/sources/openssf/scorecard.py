@@ -55,7 +55,7 @@ console = Console()
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DATA_OUTPUT = ROOT / "data" / "sources" / "openssf" / "data.json"
 DEFAULT_LONG_OUTPUT = ROOT / "data" / "sources" / "git" / "openssf.csv"
-GITLAB_PROJECTS = ROOT / "data" / "sources" / "gitlab" / "projects.csv"
+GITLAB_PROJECTS = ROOT / "data" / "sources" / "gitlab" / "repos.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -334,7 +334,7 @@ async def fetch_all(
 
 def load_gitlab_targets(hosts: set[str] | None = None,
                         classes: set[str] | None = None) -> list[dict]:
-    """Valid GitLab projects from data/sources/gitlab/projects.csv.
+    """Valid GitLab projects from data/sources/gitlab/repos.csv.
 
     Returns ``[{project, host, repo_id}]`` where ``project`` = ``"{host}/{path}"``
     is a valid Scorecard ``--repo`` target (e.g. ``gitlab.com/gnutls/gnutls``)
@@ -342,9 +342,9 @@ def load_gitlab_targets(hosts: set[str] | None = None,
     ``gitlab_client.make_repo_id``). Optionally filter to ``hosts``.
 
     ``classes`` (e.g. ``{"A"}``) scopes to those value classes by joining to
-    ``value.csv`` on the project key — projects.csv has no class column, so the
+    ``value.csv`` on the project key — repos.csv has no class column, so the
     class comes from the same value.csv the fetcher scopes on. A project absent
-    from that class set (e.g. a class-C row that leaked into projects.csv) is
+    from that class set (e.g. a class-C row that leaked into repos.csv) is
     dropped.
     """
     out: list[dict] = []
@@ -544,7 +544,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--gitlab",
         action="store_true",
-        help="Score GitLab projects from data/sources/gitlab/projects.csv using "
+        help="Score GitLab projects from data/sources/gitlab/repos.csv using "
              "per-host GITLAB tokens (GITLAB_TOKENS). Output keyed on gl/{host}-{id}.",
     )
     parser.add_argument(
@@ -558,7 +558,7 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="+",
         default=None,
         help="With --gitlab: limit to these value classes (e.g. --classes A). "
-             "Default: every valid project in projects.csv.",
+             "Default: every valid project in repos.csv.",
     )
     return parser
 
@@ -569,7 +569,7 @@ async def _run_gitlab(args: argparse.Namespace) -> None:
 
     if args.repos or args.file:
         console.print("[yellow]--gitlab ignores positional repos / --file; "
-                      "targets come from data/sources/gitlab/projects.csv.[/yellow]")
+                      "targets come from data/sources/gitlab/repos.csv.[/yellow]")
 
     hosts = set(args.host) if args.host else None
     classes = set(args.classes) if args.classes else None

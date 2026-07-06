@@ -11,9 +11,10 @@ visible — filter on it downstream if you want only fundable candidates.
 Columns:
     repo_id           stable platform-qualified id (`gh/<n>` / `gl/<host>-<n>`)
     repo              canonical slug
-    language          GitHub-detected primary language, lowercased
-                      (`data/sources/github/repos.csv`; blank for GitLab repos
-                      and any repo not GitHub-fetched)
+    language          primary language, lowercased. GitHub repos from
+                      `data/sources/github/repos.csv`; GitLab repos fall back
+                      to `data/sources/gitlab/repos.csv` (GitLab Languages API).
+                      Blank for any repo not fetched on either host.
     ecosystem         top ecosystem                     (value.csv `top_eco`)
     openssf_crit      OpenSSF criticality score, 0-1     (value.csv)
     eco_crit          ecosyste.ms critical flag, 0/1     (value.csv)
@@ -31,10 +32,10 @@ Columns:
                       missing a score.
 
 Joins: every file keys on the stable `repo_id` — eligibility.csv's population
-(all top repos) drives the row set; value.csv / risk.csv / github/repos.csv
-are joined onto it. A repo missing from a joined file (e.g. an archived repo
-absent from risk.csv, or a GitLab repo absent from github/repos.csv) leaves
-those columns blank rather than dropping the row.
+(all top repos) drives the row set; value.csv / risk.csv / github/repos.csv /
+gitlab/repos.csv are joined onto it. A repo missing from a joined file (e.g. an
+archived repo absent from risk.csv, or a GitHub repo absent from
+gitlab/repos.csv) leaves those columns blank rather than dropping the row.
 
 Sorted by `score` desc (blank last), then `repo` — so row order matches
 `priority` order for the scored/eligible subset.
@@ -58,6 +59,7 @@ ELIGIBILITY_FILE = DATA_DIR / "eligibility" / "eligibility.csv"
 VALUE_FILE = DATA_DIR / "value" / "value.csv"
 RISK_FILE = DATA_DIR / "risk" / "risk.csv"
 GITHUB_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
+GITLAB_REPOS_FILE = DATA_DIR / "sources" / "gitlab" / "repos.csv"
 OUTPUT_FILE = DATA_DIR / "preview" / "repos.csv"
 
 RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
@@ -84,6 +86,7 @@ def build() -> list[dict]:
     value_by_id = load_rows_by_id(VALUE_FILE)
     risk_by_id = load_rows_by_id(RISK_FILE)
     language_by_id = load_rows_by_id(GITHUB_REPOS_FILE)
+    gitlab_language_by_id = load_rows_by_id(GITLAB_REPOS_FILE)
 
     with open(ELIGIBILITY_FILE, encoding="utf-8") as f:
         eligibility_rows = list(csv.DictReader(f))
@@ -96,6 +99,11 @@ def build() -> list[dict]:
         v = value_by_id.get(rid, {})
         r = risk_by_id.get(rid, {})
         g = language_by_id.get(rid, {})
+        # GitHub language first; GitLab repos (gl/ ids, absent from github/repos.csv)
+        # fall back to their GitLab Languages API result in gitlab/repos.csv.
+        language = (g.get("language") or "").strip()
+        if not language:
+            language = (gitlab_language_by_id.get(rid, {}).get("language") or "").strip()
 
         value_score = (v.get("value_score") or "").strip()
         risk_score = (r.get("risk_score") or "").strip()
@@ -106,7 +114,7 @@ def build() -> list[dict]:
         row = {
             "repo_id": rid,
             "repo": repo,
-            "language": (g.get("language") or "").strip().lower(),
+            "language": language.lower(),
             "ecosystem": (v.get("top_eco") or "").strip(),
             "openssf_crit": (v.get("openssf_crit") or "").strip(),
             "eco_crit": (v.get("eco_crit") or "").strip(),

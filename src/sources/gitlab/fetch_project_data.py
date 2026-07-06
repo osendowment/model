@@ -2,7 +2,8 @@
 
 Reads `data/value/value.csv`, selects every row whose `git_url` points at a
 GitLab instance, then hits `GET /projects/:url_encoded_path?license=true` on
-that instance and flattens the response to `data/sources/gitlab/projects.csv`.
+that instance and flattens the response to `data/sources/gitlab/repos.csv`
+(plus a best-effort `GET /projects/:id/languages` for the primary `language`).
 Owner/group metadata goes to `data/sources/gitlab/namespaces.csv`.
 
 Mirrors src/sources/github/fetch_repo_owner_data.py (same TTL/upsert/redirect
@@ -39,7 +40,7 @@ console = Console()
 
 REPO = Path(__file__).resolve().parents[3]
 VALUE_FILE = REPO / "data" / "value" / "value.csv"
-PROJECTS_OUT = REPO / "data" / "sources" / "gitlab" / "projects.csv"
+REPOS_OUT = REPO / "data" / "sources" / "gitlab" / "repos.csv"
 NAMESPACES_OUT = REPO / "data" / "sources" / "gitlab" / "namespaces.csv"
 
 TTL_DAYS = 90
@@ -50,7 +51,7 @@ PROJECT_FIELDS = [
     "project", "valid", "project_id", "repo_id", "host",
     "owner_type", "namespace_kind", "namespace_path",
     "name", "path_with_namespace", "description", "homepage",
-    "default_branch", "license", "topics",
+    "default_branch", "license", "language", "topics",
     "stars", "forks", "open_issues", "archived", "visibility",
     "created_at", "last_activity_at", "fetched_at",
 ]
@@ -63,6 +64,19 @@ NAMESPACE_FIELDS = [
 
 def _now_iso() -> str:
     return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _primary_language(langs: dict) -> str:
+    """Primary language = the key with the largest byte-share percentage.
+
+    `GET /projects/:id/languages` returns `{"C": 90.8, "CMake": 3.7, ...}`,
+    the GitLab analogue of GitHub-linguist. We keep only the top language as a
+    single string, mirroring GitHub's scalar `language` column. `{}` (empty or
+    binary-only repo) → "".
+    """
+    if not langs:
+        return ""
+    return max(langs, key=langs.get)
 
 
 def load_gitlab_rows(value_file: Path | None = None,
@@ -91,7 +105,7 @@ def load_gitlab_rows(value_file: Path | None = None,
     return sorted(seen.values(), key=lambda x: x["project"])
 
 
-def _flat_project(d: dict, host: str, project_key: str) -> dict:
+def _flat_project(d: dict, host: str, project_key: str, language: str = "") -> dict:
     ns = d.get("namespace") or {}
     kind = ns.get("kind", "")
     lic = d.get("license") if isinstance(d.get("license"), dict) else {}
@@ -112,6 +126,7 @@ def _flat_project(d: dict, host: str, project_key: str) -> dict:
         "homepage": d.get("web_url") or d.get("homepage") or "",
         "default_branch": d.get("default_branch", ""),
         "license": (lic or {}).get("key") or (lic or {}).get("nickname") or "",
+        "language": language,
         "topics": " | ".join(d.get("topics") or d.get("tag_list") or []),
         "stars": d.get("star_count", ""),
         "forks": d.get("forks_count", ""),
@@ -131,6 +146,36 @@ def _invalid_project_row(host: str, project_key: str) -> dict:
             "fetched_at": _now_iso()}
 
 
+async def _fetch_languages(limiter, session, host: str, project_id) -> str:
+    """Best-effort primary language via `GET /projects/:id/languages`.
+
+    Keyed by numeric id (rename/redirect-proof). Retries 429/transient with
+    backoff — same as `_fetch_project` — so a rate-limited miss doesn't get
+    mistaken for a genuinely empty breakdown. A blank is returned only when the
+    repo really has no detected languages (`{}`) or every retry is exhausted;
+    the project row still carries valid+fetched_at either way."""
+    if project_id in ("", None):
+        return ""
+    url = f"{api_base(host)}/projects/{project_id}/languages"
+    for attempt in range(4):
+        try:
+            resp = await limiter.get(session, host, url)
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            await asyncio.sleep(2 ** attempt)
+            continue
+        async with resp:
+            if resp.status == 200:
+                try:
+                    return _primary_language(await resp.json())
+                except (aiohttp.ClientError, ValueError):
+                    return ""
+            if resp.status == 429:                 # throttled — back off and retry
+                await asyncio.sleep(2 ** attempt)
+                continue
+            return ""                              # 404/other → genuinely no languages
+    return ""
+
+
 async def _fetch_project(limiter, session, item: dict) -> tuple[str, dict | None, str]:
     """Return (project_key, row, status). 200→ok row; 404→sparse invalid row;
     transient→None. Follows 301/302 rename chains to the terminal response."""
@@ -146,7 +191,9 @@ async def _fetch_project(limiter, session, item: dict) -> tuple[str, dict | None
                 break
             async with resp:
                 if resp.status == 200:
-                    return key, _flat_project(await resp.json(), host, key), "ok"
+                    d = await resp.json()
+                    lang = await _fetch_languages(limiter, session, host, d.get("id"))
+                    return key, _flat_project(d, host, key, lang), "ok"
                 if resp.status == 404:
                     return key, _invalid_project_row(host, key), "404"
                 if resp.status in (301, 302) and "Location" in resp.headers:
@@ -278,24 +325,63 @@ async def fetch_many(items: list[dict], fetch_one, label: str
     return rows, status_counts
 
 
-def upsert(out_path: Path, key: str, fields: list[str], new_rows: list[dict]) -> int:
-    """Merge new rows into the CSV by `key`. Returns total written."""
+def _fresher(a: dict, b: dict) -> bool:
+    """True if row `a` should win over `b` for the same id: a valid row beats a
+    sparse/invalid one, then the more recently `fetched_at` wins (ties → a)."""
+    av = str(a.get("valid")).strip().lower() == "true"
+    bv = str(b.get("valid")).strip().lower() == "true"
+    if av != bv:
+        return av
+    return (a.get("fetched_at") or "") >= (b.get("fetched_at") or "")
+
+
+def _dedupe_by_id(rows: list[dict], id_field: str) -> list[dict]:
+    """Collapse rows sharing a non-blank `id_field` to the single freshest one.
+
+    A renamed GitLab project otherwise leaves a stale row under its old path
+    *and* a row under the new path — both carrying the same `repo_id`. Every
+    downstream join is by `repo_id`, so a duplicate lets an arbitrary (possibly
+    staler/blank) row win. Rows with a blank `id_field` (e.g. sparse 404 rows,
+    which carry no `repo_id`) are kept as-is, keyed by their own `project`."""
+    best: dict[str, dict] = {}
+    passthrough: list[dict] = []
+    for r in rows:
+        rid = (r.get(id_field) or "").strip()
+        if not rid:
+            passthrough.append(r)
+            continue
+        if rid not in best or _fresher(r, best[rid]):
+            best[rid] = r
+    return list(best.values()) + passthrough
+
+
+def upsert(out_path: Path, key: str, fields: list[str], new_rows: list[dict],
+           dedupe_by: str | None = None) -> int:
+    """Merge new rows into the CSV by `key`. Returns total written.
+
+    When `dedupe_by` is set (e.g. `"repo_id"`), rows that collapse to the same
+    value in that column after the merge are reduced to the freshest one — this
+    is what stops a renamed project from persisting under both its old and new
+    path (see `_dedupe_by_id`)."""
     existing = _load_existing(out_path, key)
     for r in new_rows:
         k = (r.get(key) or "").lower()
         if k:
             existing[k] = r
-    sorted_rows = sorted(existing.values(), key=lambda r: (r.get(key) or "").lower())
+    rows = list(existing.values())
+    if dedupe_by:
+        rows = _dedupe_by_id(rows, dedupe_by)
+    sorted_rows = sorted(rows, key=lambda r: (r.get(key) or "").lower())
     _atomic_write(out_path, sorted_rows, fields)
     return len(sorted_rows)
 
 
 def _namespaces_from_projects() -> list[dict]:
-    """Derive namespace targets from projects.csv (after the project phase)."""
-    if not PROJECTS_OUT.exists():
+    """Derive namespace targets from repos.csv (after the project phase)."""
+    if not REPOS_OUT.exists():
         return []
     seen: dict[str, dict] = {}
-    with open(PROJECTS_OUT, encoding="utf-8") as f:
+    with open(REPOS_OUT, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             host = r.get("host") or ""
             full = r.get("namespace_path") or ""
@@ -328,7 +414,7 @@ def fetch_and_persist(target: str = "projects", force: bool = False,
 
     if target in ("projects", "both"):
         items = targets if targets is not None else load_gitlab_rows(classes=classes)
-        existing = _load_existing(PROJECTS_OUT, "project")
+        existing = _load_existing(REPOS_OUT, "project")
         to_fetch, fresh, missing = _filter_stale(items, existing, "project", force)
         if limit:
             to_fetch = to_fetch[:limit]
@@ -337,7 +423,8 @@ def fetch_and_persist(target: str = "projects", force: bool = False,
                           f"to_fetch={len(to_fetch):,}")
         new_rows, statuses = (asyncio.run(fetch_many(to_fetch, _fetch_project, "projects"))
                               if to_fetch else ([], {}))
-        total = upsert(PROJECTS_OUT, "project", PROJECT_FIELDS, new_rows)
+        total = upsert(REPOS_OUT, "project", PROJECT_FIELDS, new_rows,
+                       dedupe_by="repo_id")
         out["projects"] = {"fresh": fresh, "fetched": len(new_rows),
                            "statuses": statuses, "total": total}
 
