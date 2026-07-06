@@ -9,9 +9,9 @@ you what it is:
 - `src/sources/<source>/` — source-related scripts: everything that fetches or
   processes data from one external source. One folder per source — ecosystem
   registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git
-  analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`,
-  `depsdev/`, `osi/`, `ossfuzz/`, `repology/`, `floss_fund/`,
-  `opencollective/`, `foundations/`, `ecosystems/`). Module folders use
+  analysis (`git/`, `github/`, `gitlab/`), and the standalone sources (`osv/`,
+  `openssf/`, `depsdev/`, `osi/`, `ossfuzz/`, `repology/`, `floss_fund/`,
+  `funding/`, `opencollective/`, `ecosystems/`). Module folders use
   underscores (importable); the matching `data/sources/` folder may use a hyphen
   (e.g. code `floss_fund/` ↔ data `floss-fund/`).
 - `src/common/` — shared infrastructure used across stages: `params.py`, `repos.py`,
@@ -32,8 +32,8 @@ you what it is:
 
 `data/` mirrors the three-stage pipeline (Value → Risk → Eligibility), with all external-source data isolated under `data/sources/`:
 
-- `data/sources/<source>/` — raw + intermediate data fetched from external sources. One folder per source: ecosystem registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git analysis (`git/`, `github/`), and the standalone sources (`osv/`, `openssf/`, `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `endoflife/`, `floss-fund/`, `opencollective/`, `foundations/`).
-- `data/value/` — Value-stage outputs: `value.csv` (the unified per-repo value table; carries a tri-state `valid` column), `validation.csv` (git/GitHub validation audit table — rollup of the source caches), `overrides.csv` (curated manual repo/validity corrections), `stats.csv` (per-ecosystem stats matrix: metric rows × ecosystem columns — downloads per year + package/repo counts).
+- `data/sources/<source>/` — raw + intermediate data fetched from external sources. One folder per source: ecosystem registries (`npm/`, `pypi/`, `crates/`, `cpp/`, `debian/`, `homebrew/`), code/Git analysis (`git/`, `github/`, `gitlab/`), and the standalone sources (`osv/`, `openssf/`, `depsdev/`, `osi/`, `ossfuzz/`, `ossinsight/`, `repology/`, `endoflife/`, `floss-fund/`, `funding/`, `opencollective/`).
+- `data/value/` — Value-stage outputs: `value.csv` (the unified per-repo value table; carries a strict True/False `git_valid` column), `validation.csv` (git/GitHub validation audit table — rollup of the source caches), `overrides.csv` (curated manual repo/validity corrections), `stats.csv` (per-ecosystem stats matrix: metric rows × ecosystem columns — downloads per year + package/repo counts).
 - `data/risk/` — Risk-stage outputs: `risk.csv` (final aggregated risk table) plus the per-dimension builds (`concentration.csv`, `complexity.csv`, `security.csv`, `workload.csv`).
 - `data/eligibility/` — Eligibility-stage outputs: `eligibility.csv` (the rollup: `eligible = oss AND intent AND nonprofit AND active`) plus the per-dimension builds (`licenses.csv`, `active.csv`, `funding.csv`) and `overrides.csv` (curated per-repo host/owner backing, OC slug, and the manual `eol` verdict). Raw funding signals live under `data/sources/github/` (`sponsors.csv` inbound, `sponsorships.csv` outbound, `funding-yml.csv`), `data/sources/floss-fund/` (`funding-json.csv`), `data/sources/opencollective/` (`budgets.csv`), and `data/sources/funding/` (foundation rosters + `host-by-repo.csv`); license/EOL source signals under `data/sources/osi/` and the per-ecosystem folders.
 
