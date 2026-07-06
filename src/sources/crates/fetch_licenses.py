@@ -31,7 +31,7 @@ console = Console()
 
 DATA_DIR = Path(__file__).resolve().parents[3] / "data"
 RESULTS = DATA_DIR / "sources" / "crates" / "results.csv"
-DUMP = DATA_DIR.parent / "tmp" / "crates-db-dump"  # gitignored vendor snapshot, see fetch_db_dump
+DUMP = DATA_DIR / "sources" / "crates" / "db-dump"  # slim extracts (gitignored, regenerable), see fetch_db_dump
 
 
 def load_license_index() -> dict[str, str]:

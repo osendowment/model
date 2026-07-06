@@ -314,7 +314,7 @@ def pypi_urls() -> dict[str, list[str]]:
 
 def crates_urls() -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
-    path = DATA_DIR.parent / "tmp" / "crates-db-dump" / "crates.csv"
+    path = DATA_DIR / "sources" / "crates" / "db-dump" / "crates.csv"
     if not path.exists():
         return out
     if is_lfs_pointer(path):

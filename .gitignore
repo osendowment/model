@@ -19,5 +19,8 @@ data/sources/repology/html-cache/
 # ecosyste.ms criticality raw package cache (regenerable; audit copy is local)
 data/sources/ecosystems/raw/criticality/
 
-# Scratch + huge regenerable vendor snapshots (crates db-dump); never commit
+# Scratch + transient full vendor dumps; never commit
 tmp/
+
+# crates db-dump slim extracts — regenerable via fetch_db_dump (~560 MB); never commit
+data/sources/crates/db-dump/

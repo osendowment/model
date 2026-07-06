@@ -10,7 +10,7 @@ mechanics (the DB dump, download archives, fetch scripts) see the source referen
 
 | Source | Data collected | Raw file (`data/sources/crates/`) |
 |---|---|---|
-| [crates.io DB dump](https://static.crates.io/db-dump.tar.gz) | crate/version names, dependency edges, and each crate's `repository` URL | `tmp/crates-db-dump/{crates,versions,default_versions,dependencies}.csv` (gitignored, regenerable) |
+| [crates.io DB dump](https://static.crates.io/db-dump.tar.gz) | crate/version names, dependency edges, and each crate's `repository` URL | `db-dump/{crates,versions,default_versions,dependencies}.csv` (slim extracts; gitignored, regenerable) |
 | [crates.io download archives](https://static.crates.io/archive/version-downloads/) | daily per-version download counts (aggregated into per-crate annual totals) | `version-downloads/YYYY-MM.csv` |
 
 No authentication required; the archive endpoint supports parallel byte-range

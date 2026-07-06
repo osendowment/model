@@ -1,21 +1,25 @@
 """
-Download and unpack the crates.io DB dump as fast as possible.
+Download the crates.io DB dump and produce slim pipeline extracts.
 
 Strategy: parallel byte-range requests (server supports Accept-Ranges).
-Downloads N chunks concurrently, assembles into final file, then extracts.
+Downloads N chunks concurrently, assembles the archive, extracts the four
+source tables — all inside the gitignored tmp/ scratch dir — then writes
+slim extracts holding ONLY the columns the pipeline reads into
+data/sources/crates/db-dump/ and deletes the tmp artifacts.
 
-Extracts only:
-  tmp/crates-db-dump/crates.csv
-  tmp/crates-db-dump/versions.csv
-  tmp/crates-db-dump/dependencies.csv
-  tmp/crates-db-dump/default_versions.csv
+Slim extracts (data/sources/crates/db-dump/, gitignored — ~560 MB vs the
+3.9 GB raw dump, regenerable, never committed):
+  crates.csv           — id, name, repository, homepage
+  versions.csv         — id, crate_id, license, yanked
+  dependencies.csv     — version_id, crate_id, kind
+  default_versions.csv — crate_id, version_id (copied as-is)
 
-The dump is a 3.7 GB regenerable vendor snapshot, so it lives in the
-gitignored tmp/ — never in git (it was LFS-tracked once, which cost
-gigabytes per push for data any run can re-download in ~3 minutes).
+Consumers: crates process_data / fetch_licenses / check_eol and
+value.build_git_urls — all read these columns by name, per the data-org
+rule that source-derived inputs live under data/sources/<source>/.
 
-  - Skips download+extraction if tmp/crates-db-dump/ already exists
-  - Deletes archive after extraction
+  - Skips everything if all four slim extracts already exist
+  - Deletes the archive and full extraction after slimming
   - Prints throughput and timing stats at each step
 
 Run:
@@ -26,24 +30,28 @@ Run:
 import argparse
 import asyncio
 import os
+import shutil
 import tarfile
 import time
 
 import httpx
+import polars as pl
 from rich.console import Console
 from rich.table import Table
 
 from src.common.lfs import has_real_data
 
-DUMP_URL  = "https://static.crates.io/db-dump.tar.gz"
-DUMP_DIR  = "tmp/crates-db-dump"
-DUMP_TAR  = "tmp/crates-db-dump.tar.gz"
+DUMP_URL = "https://static.crates.io/db-dump.tar.gz"
+SLIM_DIR = "data/sources/crates/db-dump"   # pipeline-read extracts (gitignored)
+TMP_DIR  = "tmp/crates-db-dump"            # full raw extraction — transient
+TMP_TAR  = "tmp/crates-db-dump.tar.gz"
 
-EXTRACT_TARGETS = {
-    "crates.csv",
-    "versions.csv",
-    "dependencies.csv",
-    "default_versions.csv",
+# file -> columns the pipeline reads; None = keep file as-is (already minimal)
+SLIM_COLUMNS: dict[str, list[str] | None] = {
+    "crates.csv":           ["id", "name", "repository", "homepage"],
+    "versions.csv":         ["id", "crate_id", "license", "yanked"],
+    "dependencies.csv":     ["version_id", "crate_id", "kind"],
+    "default_versions.csv": None,
 }
 
 console = Console()
@@ -52,28 +60,28 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--chunks", type=int, default=8, help="Parallel download chunks (default: 8)")
 args = parser.parse_args()
 
-os.makedirs(DUMP_DIR, exist_ok=True)
-
 console.rule("[bold]crates.io DB dump fetcher")
-console.print(f"Output : [cyan]{DUMP_DIR}/[/cyan]")
+console.print(f"Output : [cyan]{SLIM_DIR}/[/cyan] (slim pipeline extracts)")
+console.print(f"Scratch: [cyan]{TMP_DIR}/[/cyan]")
 console.print(f"Chunks : {args.chunks} parallel")
 console.print()
 
-# ── Skip if already extracted ──────────────────────────────────────────────────
+# ── Skip if slim extracts already present ──────────────────────────────────────
 
-# has_real_data also guards against stray LFS pointers from the era when the
-# dump lived in git — treat those as missing.
-all_present = all(has_real_data(f"{DUMP_DIR}/{f}") for f in EXTRACT_TARGETS)
-if all_present:
-    console.print(f"[green]Already extracted[/green]: {DUMP_DIR}/")
-    for fname in sorted(EXTRACT_TARGETS):
-        size_mb = os.path.getsize(f"{DUMP_DIR}/{fname}") / 1024**2
+# has_real_data also treats stray LFS pointers (from the era when the dump
+# lived in git) as missing.
+if all(has_real_data(f"{SLIM_DIR}/{f}") for f in SLIM_COLUMNS):
+    console.print(f"[green]Already extracted[/green]: {SLIM_DIR}/")
+    for fname in sorted(SLIM_COLUMNS):
+        size_mb = os.path.getsize(f"{SLIM_DIR}/{fname}") / 1024**2
         console.print(f"  {fname:<40} {size_mb:7.1f} MB")
     raise SystemExit(0)
 
-missing = [f for f in EXTRACT_TARGETS if not has_real_data(f"{DUMP_DIR}/{f}")]
-if missing:
-    console.print(f"[yellow]Missing[/yellow]: {missing} — re-downloading dump")
+missing = [f for f in SLIM_COLUMNS if not has_real_data(f"{SLIM_DIR}/{f}")]
+console.print(f"[yellow]Missing[/yellow]: {missing} — downloading dump")
+
+os.makedirs(SLIM_DIR, exist_ok=True)
+os.makedirs(TMP_DIR, exist_ok=True)
 
 # ── Get file size via HEAD ─────────────────────────────────────────────────────
 
@@ -94,7 +102,6 @@ ranges = [
     for i in range(args.chunks)
 ]
 
-downloaded_bytes = [0] * args.chunks
 t_start = time.perf_counter()
 
 
@@ -102,14 +109,12 @@ async def fetch_chunk(client: httpx.AsyncClient, idx: int, start: int, end: int)
     headers = {"Range": f"bytes={start}-{end}"}
     r = await client.get(final_url, headers=headers, timeout=300)
     r.raise_for_status()
-    data = r.content
-    downloaded_bytes[idx] = len(data)
-    return data
+    return r.content
 
 
 async def download_all() -> None:
     async with httpx.AsyncClient(http2=True, timeout=300, follow_redirects=True) as client:
-        with console.status(f"[bold]Downloading {args.chunks} chunks in parallel…") as status:
+        with console.status(f"[bold]Downloading {args.chunks} chunks in parallel…"):
             tasks = [fetch_chunk(client, i, s, e) for i, (s, e) in enumerate(ranges)]
             chunks = await asyncio.gather(*tasks)
 
@@ -123,55 +128,66 @@ async def download_all() -> None:
     # All chunks are held in memory until here — write them in order to reassemble the file
     console.print("Writing to disk…", end=" ")
     t_write = time.perf_counter()
-    with open(DUMP_TAR, "wb") as f:
+    with open(TMP_TAR, "wb") as f:
         for chunk in chunks:
             f.write(chunk)
     console.print(f"done ({time.perf_counter() - t_write:.1f}s)")
 
 asyncio.run(download_all())
 
-# ── Extract ────────────────────────────────────────────────────────────────────
+# ── Extract full tables into tmp/ ──────────────────────────────────────────────
 
-console.print(f"\nExtracting to [cyan]{DUMP_DIR}/[/cyan] …")
-os.makedirs(DUMP_DIR, exist_ok=True)
+console.print(f"\nExtracting to [cyan]{TMP_DIR}/[/cyan] …")
 
 t_extract = time.perf_counter()
 total_uncompressed = 0
-with tarfile.open(DUMP_TAR, "r:gz") as tar:
+with tarfile.open(TMP_TAR, "r:gz") as tar:
     for member in tar.getmembers():
         # The dump has a dated top-level dir (e.g. 2025-03-15/data/crates.csv); skip everything else
         if "/data/" not in member.name or not member.isfile():
             continue
         fname = member.name.split("/data/")[-1]  # strip the dated prefix, keep just "crates.csv" etc.
-        if fname not in EXTRACT_TARGETS:
+        if fname not in SLIM_COLUMNS:
             continue
-        # Rewrite member.name so tar.extract places the file flat in DUMP_DIR (no subdirectory)
+        # Rewrite member.name so tar.extract places the file flat in TMP_DIR (no subdirectory)
         member.name = fname
-        tar.extract(member, DUMP_DIR, filter="data")
+        tar.extract(member, TMP_DIR, filter="data")
         total_uncompressed += member.size
 
-extract_elapsed = time.perf_counter() - t_extract
+console.print(f"[green]✓[/green] Extracted {total_uncompressed / 1024**2:.0f} MB "
+              f"in [bold]{time.perf_counter() - t_extract:.1f}s[/bold]")
 
-# ── Summary table ──────────────────────────────────────────────────────────────
+# ── Slim to pipeline columns ───────────────────────────────────────────────────
 
-table = Table(title=f"Extracted files → {DUMP_DIR}/", show_header=True)
+console.print(f"\nSlimming to [cyan]{SLIM_DIR}/[/cyan] …")
+t_slim = time.perf_counter()
+
+table = Table(title=f"Slim extracts → {SLIM_DIR}/", show_header=True)
 table.add_column("File", style="bold")
-table.add_column("Size (MB)", justify="right")
+table.add_column("Full (MB)", justify="right")
+table.add_column("Slim (MB)", justify="right")
 
 total_mb = 0
-for fname in sorted(EXTRACT_TARGETS):
-    size_mb = os.path.getsize(f"{DUMP_DIR}/{fname}") / 1024**2
-    total_mb += size_mb
-    table.add_row(fname, f"{size_mb:.1f}")
-table.add_row("[bold]TOTAL[/bold]", f"[bold]{total_mb:.1f}[/bold]")
+for fname, cols in SLIM_COLUMNS.items():
+    src, dst = f"{TMP_DIR}/{fname}", f"{SLIM_DIR}/{fname}"
+    if cols is None:
+        shutil.copy(src, dst)
+    else:
+        pl.scan_csv(src, infer_schema_length=0).select(cols) \
+          .collect(engine="streaming").write_csv(dst)
+    full_mb, slim_mb = os.path.getsize(src) / 1024**2, os.path.getsize(dst) / 1024**2
+    total_mb += slim_mb
+    table.add_row(fname, f"{full_mb:.1f}", f"{slim_mb:.1f}")
+table.add_row("[bold]TOTAL[/bold]", "", f"[bold]{total_mb:.1f}[/bold]")
 
 console.print(table)
-console.print(f"[green]✓[/green] Extracted {total_uncompressed / 1024**2:.0f} MB in [bold]{extract_elapsed:.1f}s[/bold]")
+console.print(f"[green]✓[/green] Slimmed in [bold]{time.perf_counter() - t_slim:.1f}s[/bold]")
 
-# ── Delete archive ─────────────────────────────────────────────────────────────
+# ── Delete tmp artifacts ───────────────────────────────────────────────────────
 
-os.remove(DUMP_TAR)
-console.print(f"[green]✓[/green] Deleted archive: {DUMP_TAR}")
+os.remove(TMP_TAR)
+shutil.rmtree(TMP_DIR)
+console.print(f"[green]✓[/green] Deleted scratch: {TMP_TAR}, {TMP_DIR}/")
 
 total_elapsed = time.perf_counter() - t_start
 console.print(f"\n[bold green]Done in {total_elapsed:.1f}s total[/bold green]")

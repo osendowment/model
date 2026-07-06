@@ -39,7 +39,7 @@ you what it is:
 
 Rule: a script reading external/fetched data points at `data/sources/<source>/…`; a script reading or writing a stage result points at `data/<stage>/…`. Never write a stage output into `data/sources/`, and never write fetched source data into a stage folder.
 
-Exception: huge regenerable vendor snapshots (the 3.7 GB crates db-dump → `tmp/crates-db-dump/`) live in the gitignored `tmp/`, not `data/sources/` — they are re-downloadable on demand and must never enter git/LFS.
+Exception: regenerable vendor-dump data never enters git/LFS. The raw 3.9 GB crates db-dump is transient scratch in the gitignored `tmp/`; `fetch_db_dump` slims it to the pipeline-read columns in `data/sources/crates/db-dump/` (~560 MB, gitignored) — re-downloadable on demand.
 
 ## Documentation
 

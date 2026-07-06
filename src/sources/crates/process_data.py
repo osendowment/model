@@ -10,7 +10,7 @@ Steps:
   6  Build results.csv            — all dep-tree packages with downloads + PageRank
 
 Reads:
-  tmp/crates-db-dump/{crates,versions,default_versions,dependencies}.csv
+  data/sources/crates/db-dump/{crates,versions,default_versions,dependencies}.csv
   data/sources/crates/version-downloads/YYYY-MM.csv
 
 Outputs:
@@ -42,7 +42,7 @@ from rich.table import Table
 from src.common.lfs import is_lfs_pointer
 from src.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
-DUMP_DIR    = "tmp/crates-db-dump"  # 3.7 GB regenerable vendor snapshot — gitignored, see fetch_db_dump
+DUMP_DIR    = "data/sources/crates/db-dump"  # slim pipeline extracts (gitignored, regenerable) — see fetch_db_dump
 MONTHLY_DIR = "data/sources/crates/version-downloads"
 DATA_DIR    = "data/sources/crates"
 
