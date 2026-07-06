@@ -238,3 +238,96 @@ class TestTTLNoOp:
         stats = await cr.run({"A"}, ttl_days=90, concurrency=2)
         assert called["n"] == 0            # no session opened → no fetch
         assert stats.cached == 1 and stats.fetched == 0 and stats.found == 1
+
+
+class TestPickLookupCritical:
+    def test_true_wins_over_false(self):
+        flag, via = cr.pick_lookup_critical([
+            {"registry_name": "spack", "name": "x", "critical": None},
+            {"registry_name": "npm", "name": "x", "critical": False},
+            {"registry_name": "conda", "name": "x", "critical": True},
+        ])
+        assert (flag, via) == ("True", "conda")
+
+    def test_explicit_false_when_no_true(self):
+        flag, via = cr.pick_lookup_critical([
+            {"registry_name": "spack", "name": "x", "critical": None},
+            {"registry_name": "npm", "name": "x", "critical": False},
+        ])
+        assert (flag, via) == ("False", "npm")
+
+    def test_blank_when_no_explicit_flag(self):
+        assert cr.pick_lookup_critical(
+            [{"registry_name": "spack", "name": "x", "critical": None}]) == ("", "")
+        assert cr.pick_lookup_critical([]) == ("", "")
+
+
+class FakeLookupSession:
+    """Serves one scripted response for the /packages/lookup endpoint."""
+    def __init__(self, resp):
+        self.resp = resp
+        self.calls: list[str] = []
+
+    def get(self, url, timeout=None):
+        self.calls.append(url)
+        return self.resp
+
+
+class TestLookupPackages:
+    async def test_fetches_trims_and_caches(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(cr, "DATA_DIR", tmp_path)
+        repo = Repo(repo_id="gh/1", repository_url="https://github.com/x/y",
+                    cls="A", valid="True", ecosystem="npm", package="y")
+        body = [{"registry_name": "conda", "name": "y", "critical": True,
+                 "rankings": {"average": 1.0}, "junk": "dropped"}]
+        session = FakeLookupSession(FakeResp(200, body))
+        pkgs = await cr._lookup_packages(session, repo, asyncio.Semaphore(1), 90)
+        assert pkgs == [{"registry_name": "conda", "name": "y", "critical": True}]
+        # second call is served from cache — no new HTTP
+        pkgs2 = await cr._lookup_packages(session, repo, asyncio.Semaphore(1), 90)
+        assert pkgs2 == pkgs and len(session.calls) == 1
+        # session=None with a fresh cache still answers
+        assert await cr._lookup_packages(None, repo, asyncio.Semaphore(1), 90) == pkgs
+
+    async def test_transient_error_returns_none_and_never_caches(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(cr, "DATA_DIR", tmp_path)
+        repo = Repo(repo_id="gh/2", repository_url="https://github.com/x/z",
+                    cls="A", valid="True", ecosystem="npm", package="z")
+        session = FakeLookupSession(FakeResp(500))
+        assert await cr._lookup_packages(session, repo, asyncio.Semaphore(1), 90) is None
+        assert not cr._lookup_cache_path(repo).exists()
+        # session=None with no cache: no answer, no crash
+        assert await cr._lookup_packages(None, repo, asyncio.Semaphore(1), 90) is None
+
+
+class TestRunBackfillsFlag:
+    async def test_flagless_cached_row_gets_flag_from_fresh_lookup_cache(
+            self, tmp_path, monkeypatch):
+        # Package cache fresh but flagless; lookup cache fresh with an explicit
+        # flag → run() backfills critical WITHOUT opening a session.
+        monkeypatch.setattr(cr, "DATA_DIR", tmp_path)
+        monkeypatch.setattr(cr, "OUT_FILE", tmp_path / "criticality.csv")
+        repo = Repo(repo_id="gh/3", repository_url="https://github.com/x/w",
+                    cls="A", valid="True", ecosystem="npm", package="w")
+        monkeypatch.setattr(cr, "load_repos", lambda classes, value_file=None: [repo])
+        cr._write_cached(cr._cache_path("npm", "w"), {
+            "ecosystem": "npm", "package": "w", "registry_hit": "npmjs.org",
+            "fetched_at": cr._now_iso(),
+            "data": {"name": "w", "rankings": {"average": 5.0}},  # no critical
+        })
+        cr._write_cached(cr._lookup_cache_path(repo), {
+            "repository_url": repo.repository_url, "fetched_at": cr._now_iso(),
+            "packages": [{"registry_name": "conda", "name": "w", "critical": True}],
+        })
+        called = {"n": 0}
+        orig = cr.aiohttp.ClientSession
+        monkeypatch.setattr(cr.aiohttp, "ClientSession",
+                            lambda *a, **k: called.__setitem__("n", called["n"] + 1) or orig(*a, **k))
+        stats = await cr.run({"A"}, ttl_days=90, concurrency=2)
+        assert called["n"] == 0
+        assert stats.backfilled == 1
+        row = next(r for r in stats.results)
+        assert row.critical == "True" and row.critical_via == "conda"
+        import csv as csv_mod
+        disk = list(csv_mod.DictReader(open(tmp_path / "criticality.csv")))
+        assert disk[0]["critical"] == "True" and disk[0]["critical_via"] == "conda"

@@ -9,6 +9,14 @@ endpoint 500s on them), this connector fetches the repo's *canonical* package
 directly — the ``top_eco`` / ``top_eco_pkg`` the value stage already resolved —
 so every row is the criticality of the one package that defines the repo.
 
+One deliberate exception: the ``critical`` flag is curated per registry
+package and many registries omit it (spack/conan/debian, plenty of
+npm/pypi/crates packages), so a row can resolve with a rank but no flag.
+For exactly those rows a repository_url lookup fallback scans the repo's
+OTHER packages for an EXPLICIT flag (conda's ``openssl`` where spack has
+none) — see ``pick_lookup_critical``. All numeric fields still come only
+from the canonical package, and a flag is never derived from rank_average.
+
 Writes one row per repo to:
 
     data/sources/ecosystems/criticality.csv
@@ -20,8 +28,13 @@ GitLab-hosted repos alike — the GitLab C libraries resolve as ``cpp`` packages
 
 Columns (one row per repo):
     repo_id, repository_url, class, valid, ecosystem, package, registry_hit,
-    ok, error, critical, rank_average, dependent_repos_count,
+    ok, error, critical, critical_via, rank_average, dependent_repos_count,
     dependent_packages_count, fetched_at
+
+``critical_via`` is the registry that supplied the flag — equal to
+``registry_hit`` when the canonical package carried it, another registry
+(e.g. ``conda``) when the lookup fallback found it, blank when no explicit
+flag exists anywhere.
 
 ``ok`` is the success flag. When False, ``error`` says why —
 ``not-found-in-any-registry`` (a genuine value-stage ↔ registry name mismatch,
@@ -110,7 +123,7 @@ PACKAGE_OVERRIDES: dict[str, str] = {
 
 CRIT_FIELDS = [
     "repo_id", "repository_url", "class", "valid", "ecosystem", "package",
-    "registry_hit", "ok", "error", "critical", "rank_average",
+    "registry_hit", "ok", "error", "critical", "critical_via", "rank_average",
     "dependent_repos_count", "dependent_packages_count", "fetched_at",
 ]
 
@@ -131,6 +144,7 @@ class CritResult:
     ok: bool = False
     registry_hit: str = ""
     critical: str = ""
+    critical_via: str = ""   # registry that supplied the flag (blank if none)
     rank_average: str = ""
     dependent_repos_count: str = ""
     dependent_packages_count: str = ""
@@ -346,13 +360,107 @@ async def _fetch_one(session: aiohttp.ClientSession, repo: Repo,
         log.warning("cache write failed for %s/%s: %s", repo.ecosystem, repo.package, e)
     fields = extract(payload)
     return CritResult(repo=repo, ok=True, registry_hit=registry_hit,
+                      critical_via=registry_hit if fields["critical"] else "",
                       fetched_at=fetched_at, **fields)
 
 
 def _result_from_cache(repo: Repo, cached: dict) -> CritResult:
     data = cached.get("data") or {}
+    fields = extract(data)
     return CritResult(repo=repo, ok=True, registry_hit=cached.get("registry_hit", ""),
-                      fetched_at=cached.get("fetched_at", ""), **extract(data))
+                      critical_via=(cached.get("registry_hit", "")
+                                    if fields["critical"] else ""),
+                      fetched_at=cached.get("fetched_at", ""), **fields)
+
+
+# ── critical-flag fallback (repository_url lookup) ──────────────────────────
+#
+# The `critical` flag is ecosyste.ms' curated list membership, set per
+# registry package — many registries omit it (spack/conan/debian, and plenty
+# of npm/pypi/crates packages), so a repo's canonical package can resolve
+# with a rank but no flag. Some OTHER package of the same repo often carries
+# it (conda's `openssl` where spack omits it; npm's `vitest` where
+# `@vitest/pretty-format` has none). The fallback asks the repository_url
+# lookup for every package of the repo and takes ONLY an explicit flag —
+# rank_average is never converted into one.
+
+
+def _lookup_cache_path(repo: Repo) -> Path:
+    safe = repo.repository_url.split("://", 1)[-1].replace("/", "__")
+    return (DATA_DIR / "sources" / "ecosystems" / "raw" / "criticality"
+            / "lookup" / f"{safe}.json")
+
+
+def _lookup_cache_fresh(repo: Repo, ttl_days: int) -> bool:
+    cached = _read_cached(_lookup_cache_path(repo))
+    return bool(cached) and _is_fresh(cached.get("fetched_at", ""), ttl_days)
+
+
+def pick_lookup_critical(packages: list[dict]) -> tuple[str, str]:
+    """Explicit critical flag across a repo's lookup packages → (flag, via).
+
+    Any package with ``critical=True`` wins — the repo ships at least one
+    critical package. Otherwise an explicit ``critical=False`` counts as a
+    checked "not on the list". Otherwise blank: unknown stays unknown."""
+    false_via = ""
+    for p in packages:
+        via = str(p.get("registry_name") or p.get("ecosystem") or "")
+        if p.get("critical") is True:
+            return "True", via
+        if p.get("critical") is False and not false_via:
+            false_via = via
+    return ("False", false_via) if false_via else ("", "")
+
+
+async def _lookup_packages(session: aiohttp.ClientSession | None, repo: Repo,
+                           sem: asyncio.Semaphore,
+                           ttl_days: int) -> list[dict] | None:
+    """The repo's packages from the lookup endpoint, trimmed and cached.
+
+    Returns None on a transient failure (no cache write — retried next run);
+    a clean empty list is cached like any other answer. With ``session=None``
+    only the cache is consulted (the no-network path)."""
+    cached = _read_cached(_lookup_cache_path(repo))
+    if cached and _is_fresh(cached.get("fetched_at", ""), ttl_days):
+        return cached.get("packages", [])
+    if session is None:
+        return None
+    q_url = urllib.parse.quote(repo.repository_url, safe="")
+    url = f"{ECOSYSTE_API}/packages/lookup?repository_url={q_url}"
+    async with sem:
+        for attempt in range(2):
+            try:
+                async with session.get(
+                    url, timeout=aiohttp.ClientTimeout(total=20)
+                ) as resp:
+                    if resp.status != 200:
+                        if resp.status in (429, 500, 502, 503, 504) and attempt == 0:
+                            await asyncio.sleep(2)
+                            continue
+                        log.debug("lookup %s: HTTP %s", repo.repository_url, resp.status)
+                        return None
+                    body = await resp.json()
+            except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as e:
+                if attempt == 0:
+                    await asyncio.sleep(1)
+                    continue
+                log.debug("lookup %s: %s", repo.repository_url, e)
+                return None
+            packages = [
+                {"registry_name": p.get("registry_name") or p.get("ecosystem") or "",
+                 "name": p.get("name") or "", "critical": p.get("critical")}
+                for p in body if isinstance(p, dict)
+            ] if isinstance(body, list) else []
+            try:
+                _write_cached(_lookup_cache_path(repo), {
+                    "repository_url": repo.repository_url,
+                    "fetched_at": _now_iso(), "packages": packages,
+                })
+            except OSError as e:
+                log.warning("lookup cache write failed for %s: %s",
+                            repo.repository_url, e)
+            return packages
+    return None
 
 
 # ── output ───────────────────────────────────────────────────────────────────
@@ -373,7 +481,8 @@ def _row(r: CritResult) -> dict[str, str]:
         "repo_id": r.repo.repo_id, "repository_url": r.repo.repository_url,
         "class": r.repo.cls, "valid": r.repo.valid, "ecosystem": r.repo.ecosystem,
         "package": r.repo.package, "registry_hit": r.registry_hit, "ok": str(r.ok),
-        "error": r.error, "critical": r.critical, "rank_average": r.rank_average,
+        "error": r.error, "critical": r.critical, "critical_via": r.critical_via,
+        "rank_average": r.rank_average,
         "dependent_repos_count": r.dependent_repos_count,
         "dependent_packages_count": r.dependent_packages_count, "fetched_at": r.fetched_at,
     }
@@ -385,8 +494,9 @@ def _write_out(rows: dict[str, dict[str, str]]) -> None:
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     tmp = OUT_FILE.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:
+        # restval: rows read from an older file may predate `critical_via`.
         w = csv.DictWriter(f, fieldnames=CRIT_FIELDS, extrasaction="ignore",
-                           quoting=csv.QUOTE_MINIMAL)
+                           restval="", quoting=csv.QUOTE_MINIMAL)
         w.writeheader()
         for url in sorted(rows):
             w.writerow(rows[url])
@@ -404,6 +514,7 @@ class RunStats:
     not_found: int = 0      # package matched no registry (name mismatch)
     critical: int = 0
     found: int = 0
+    backfilled: int = 0     # blank flags filled by the repository_url lookup
     results: list[CritResult] = field(default_factory=list)
 
 
@@ -431,27 +542,72 @@ async def run(classes: set[str] | None, ttl_days: int, concurrency: int,
                   f"{len(cached_results):,} cached | {len(to_fetch):,} to fetch[/dim]")
 
     fetched: dict[str, CritResult] = {}
-    if to_fetch:
-        sem = asyncio.Semaphore(concurrency)
-        progress = Progress(
+    sem = asyncio.Semaphore(concurrency)
+
+    def _progress() -> Progress:
+        return Progress(
             SpinnerColumn(), BarColumn(bar_width=16), TaskProgressColumn(),
             TextColumn("[dim]{task.completed}/{task.total}[/]"), TimeElapsedColumn(),
             TextColumn("[dim]{task.description}[/]"), console=console,
         )
+
+    async def _fetch_all(session: aiohttp.ClientSession) -> None:
+        progress = _progress()
+        with progress:
+            task = progress.add_task("package", total=len(to_fetch))
+
+            async def _go(repo: Repo) -> None:
+                res = await _fetch_one(session, repo, sem)
+                fetched[repo.repository_url] = res
+                progress.update(task, advance=1, description=repo.package[:26])
+
+            await asyncio.gather(*[_go(r) for r in to_fetch])
+
+    # Fallback: a resolved row without a critical flag gets a repository_url
+    # lookup — another package of the same repo may carry the explicit flag.
+    # Only explicit flags are taken; rank_average is never converted into one
+    # (unknown stays unknown).
+    async def _backfill_flags(session: aiohttp.ClientSession | None,
+                              need_flag: list[CritResult]) -> None:
+        progress = _progress()
+        with progress:
+            task = progress.add_task("flag lookup", total=len(need_flag))
+
+            async def _fill(res: CritResult) -> None:
+                packages = await _lookup_packages(session, res.repo, sem, ttl_days)
+                if packages is not None:
+                    flag, via = pick_lookup_critical(packages)
+                    if flag:
+                        res.critical, res.critical_via = flag, via
+                        stats.backfilled += 1
+                progress.update(task, advance=1, description=res.repo.package[:26])
+
+            await asyncio.gather(*[_fill(r) for r in need_flag])
+
+    def _flagless(results: dict[str, CritResult]) -> list[CritResult]:
+        return [r for r in results.values() if r.ok and not r.critical]
+
+    # A session is opened only when something actually needs HTTP — primary
+    # fetches, or a flagless row whose lookup cache is stale. A fully-fresh
+    # run (packages AND lookups cached) stays off the network entirely.
+    lookup_needs_http = any(not _lookup_cache_fresh(r.repo, ttl_days)
+                            for r in _flagless(cached_results))
+    if to_fetch or lookup_needs_http:
         async with aiohttp.ClientSession(
             headers={"User-Agent": USER_AGENT, "Accept": "application/json"}
         ) as session:
-            with progress:
-                task = progress.add_task("lookup", total=len(to_fetch))
+            if to_fetch:
+                await _fetch_all(session)
+            all_results = {**cached_results, **fetched}
+            need_flag = _flagless(all_results)
+            if need_flag:
+                await _backfill_flags(session, need_flag)
+    else:
+        all_results = dict(cached_results)
+        need_flag = _flagless(all_results)
+        if need_flag:  # every lookup cache is fresh — apply without HTTP
+            await _backfill_flags(None, need_flag)
 
-                async def _go(repo: Repo) -> None:
-                    res = await _fetch_one(session, repo, sem)
-                    fetched[repo.repository_url] = res
-                    progress.update(task, advance=1, description=repo.package[:26])
-
-                await asyncio.gather(*[_go(r) for r in to_fetch])
-
-    all_results = {**cached_results, **fetched}
     out = _read_out()
     for url, res in all_results.items():
         out[url] = _row(res)
@@ -522,6 +678,7 @@ def main() -> None:
     console.print(
         f"[dim]cached={stats.cached:,} fetched={stats.fetched:,} | "
         f"found={stats.found:,} critical={stats.critical:,} "
+        f"flag-backfilled={stats.backfilled:,} "
         f"not-found={stats.not_found:,} fetch-errors={stats.fetch_errors:,} | "
         f"{time.monotonic() - t_start:.1f}s[/dim]"
     )

@@ -56,6 +56,14 @@ package**: the `top_eco` / `top_eco_pkg` the Value stage already resolved. Every
 the criticality of the one package that defines the repo, and it works identically for GitHub and
 GitLab-hosted repos (a GitLab C library resolves as its `cpp` package).
 
+One deliberate exception: the `critical` flag is curated per registry package and many registries
+omit it (spack/conan/debian, plenty of npm/pypi/crates packages). When the canonical package
+resolves without a flag, a `packages/lookup?repository_url=` fallback scans the repo's **other**
+packages for an **explicit** flag (conda's `openssl` where spack has none; npm's `vitest` where
+`@vitest/pretty-format` carries nothing). Only explicit `critical` values are taken — a flag is
+never derived from `rank_average` — and all numeric fields still come from the canonical package
+alone. Lookup responses are cached (trimmed) under `raw/criticality/lookup/`, same TTL.
+
 ### Registry resolution
 
 `top_eco → registry`: `npm → npmjs.org`, `pypi → pypi.org`, `crates → crates.io`. For `cpp` the
@@ -71,7 +79,9 @@ fallback for packages the ranked registries don't carry.
 `repository_url` (the row key), `class`,
 `valid` (value.csv's `git_valid`, carried so the scope stays filterable), `ecosystem` (`top_eco`),
 `package` (`top_eco_pkg`), `registry_hit` (which registry served it), `ok` (success flag), `error`
-(reason when `ok=False`), `critical` (`True`/`False`/blank when the registry omits it),
+(reason when `ok=False`), `critical` (`True`/`False`/blank when no registry states it),
+`critical_via` (registry that supplied the flag — `registry_hit` when the canonical package carried
+it, another registry when the lookup fallback found it, blank when none),
 `rank_average` (percentile; **lower = more important**, e.g. express ≈ 0.08),
 `dependent_repos_count`, `dependent_packages_count`, `fetched_at`. Blank ≠ 0 throughout — a blank
 `critical` / `rank_average` / dependent count means the registry omitted the field (unknown), never
