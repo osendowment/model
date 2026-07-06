@@ -9,10 +9,6 @@ GitHub + GitLab, archived included), we hit two free APIs:
      plus a `scorecard.repository.commit` SHA and a list of per-check scores
      under `scorecard.checks[]`). Typically fresher than our local
      `data/sources/git/openssf.csv` (long-format, sha-pinned).
-   - `GET /v3alpha/systems/{ECO}/packages/{pkg}/versions/{default}:dependents`
-     → `dependentCount` for a package. We sum across all (eco, pkg) pairs
-     mapped to the repo via `data/{npm,pypi,crates}/results.csv`. Debian
-     packages (cpp) are skipped — deps.dev doesn't index Debian.
 
 2. **OpenSSF Best Practices Badge** (https://www.bestpractices.dev) — separate
    service; same script for convenience.
@@ -26,8 +22,6 @@ Two output files are written:
                                  dashboard consumers; ALSO written as `score`
                                  in the long file pinned to the snapshot SHA)
     depsdev_scorecard_date      (ISO date — same caveat as above)
-    depsdev_dependent_count     (int, summed across mapped pkgs; "" if
-                                 Debian-only or no published default version)
     depsdev_license             (SPDX-ish, from deps.dev project)
     depsdev_open_issues         (int, GitHub open-issue count from deps.dev)
     bestpractices_badge_id      (passing | silver | gold | "")
@@ -79,7 +73,6 @@ from yarl import URL
 
 from src.common.repos import load_top_repos
 from src.sources.git.long_format import upsert_rows as upsert_long_rows
-from src.sources.osv.fetch_cves import load_repo_package_mapping
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -91,24 +84,13 @@ LONG_FILE = DATA_DIR / "sources" / "git" / "depsdev.csv"
 FIELDS = [
     "repo", "repo_id",
     "depsdev_scorecard_overall", "depsdev_scorecard_date",
-    "depsdev_dependent_count", "depsdev_license", "depsdev_open_issues",
+    "depsdev_license", "depsdev_open_issues",
     "bestpractices_badge_id", "bestpractices_tiered_percentage",
     "fetched_at",
 ]
 
 DEPSDEV_BASE = "https://api.deps.dev"
 BESTPRACTICES_URL = "https://www.bestpractices.dev/projects.json"
-
-# Map our internal ecosystem name (from `osv/fetch_cves.ECOSYSTEM_FILES`) to
-# the deps.dev system identifier used in URLs. deps.dev does NOT index Debian
-# (cpp packages), so we drop those — the dependent count for cpp repos will
-# be empty unless they happen to also publish to npm/pypi/crates.
-ECO_TO_DEPSDEV_SYSTEM: dict[str, str] = {
-    "npm": "npm",
-    "PyPI": "pypi",
-    "crates.io": "cargo",
-    # "Debian" intentionally omitted — deps.dev returns "package not found"
-}
 
 TTL_DAYS_DEFAULT = 365
 REQUEST_TIMEOUT_S = 30
@@ -181,53 +163,6 @@ async def fetch_project(
     project_id = quote(f"github.com/{repo}", safe="")
     url = f"{DEPSDEV_BASE}/v3/projects/{project_id}"
     return await _request_json(session, url, label=f"depsdev-project[{repo}]")
-
-
-async def fetch_default_version(
-    session: aiohttp.ClientSession, system: str, package: str
-) -> str | None:
-    """Find the `isDefault=True` version for a package. None if missing.
-
-    deps.dev's `/dependents` endpoint requires a specific version — we use
-    the registry-default (latest stable) as the canonical anchor.
-    """
-    pkg_enc = quote(package, safe="")
-    url = f"{DEPSDEV_BASE}/v3alpha/systems/{system}/packages/{pkg_enc}"
-    data = await _request_json(
-        session, url, label=f"depsdev-pkg[{system}/{package}]"
-    )
-    if not data:
-        return None
-    for v in data.get("versions") or []:
-        if v.get("isDefault"):
-            return (v.get("versionKey") or {}).get("version")
-    return None
-
-
-async def fetch_dependent_count(
-    session: aiohttp.ClientSession, system: str, package: str
-) -> int | None:
-    """Return total `dependentCount` for the package's default version.
-
-    Returns None if either the package or its default-version dependents
-    endpoint is missing — caller treats that as "no data for this package".
-    """
-    version = await fetch_default_version(session, system, package)
-    if not version:
-        return None
-    pkg_enc = quote(package, safe="")
-    ver_enc = quote(version, safe="")
-    url = (
-        f"{DEPSDEV_BASE}/v3alpha/systems/{system}/packages/{pkg_enc}"
-        f"/versions/{ver_enc}:dependents"
-    )
-    data = await _request_json(
-        session, url, label=f"depsdev-deps[{system}/{package}@{version}]"
-    )
-    if not data:
-        return None
-    n = data.get("dependentCount")
-    return int(n) if isinstance(n, (int, float)) else None
 
 
 class BestPracticesLimiter:
@@ -362,14 +297,13 @@ def _extract_scorecard_long(
 
 async def _process_repo(
     repo: str,
-    packages: list[tuple[str, str]],
     session: aiohttp.ClientSession,
     repo_id_map: dict[str, str],
     last_request_ref: list[float],
     throttle_lock: asyncio.Lock,
     bp_limiter: BestPracticesLimiter,
 ) -> tuple[dict[str, str], list[dict[str, str]]]:
-    """Fetch project info + dependents (per package) + best-practices badge.
+    """Fetch project info + best-practices badge.
 
     Returns `(wide_row, long_rows)`:
     - `wide_row` populates `data/sources/depsdev/repos.csv`
@@ -419,24 +353,7 @@ async def _process_repo(
                     "checked_at": sc_checked_at,
                 })
 
-    # 2. Dependent count — sum across mapped packages in supported systems.
-    # Skip Debian (cpp) since deps.dev doesn't index it. If the repo has only
-    # Debian packages, dependent_count stays "" (legitimate "no data").
-    dep_total: int | None = None
-    for eco, pkg in packages:
-        system = ECO_TO_DEPSDEV_SYSTEM.get(eco)
-        if not system:
-            continue
-        n = await _throttled_get(
-            lambda system=system, pkg=pkg: fetch_dependent_count(session, system, pkg)
-        )
-        if n is None:
-            continue
-        dep_total = (dep_total or 0) + n
-
-    dep_total_str = str(dep_total) if dep_total is not None else ""
-
-    # 3. Best-Practices badge (separate API, separate global limiter)
+    # 2. Best-Practices badge (separate API, separate global limiter)
     badge, pct = await fetch_bestpractices(session, repo, bp_limiter)
 
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
@@ -445,7 +362,6 @@ async def _process_repo(
         "repo_id": repo_id_map.get(repo, ""),
         "depsdev_scorecard_overall": scorecard_overall,
         "depsdev_scorecard_date": scorecard_date,
-        "depsdev_dependent_count": dep_total_str,
         "depsdev_license": depsdev_license,
         "depsdev_open_issues": depsdev_open_issues,
         "bestpractices_badge_id": badge,
@@ -534,7 +450,6 @@ async def _worker(
     results: dict[str, dict[str, str]],
     long_rows_by_repo: dict[str, list[dict[str, str]]],
     repo_id_map: dict[str, str],
-    repo_pkg_map: dict[str, list[tuple[str, str]]],
     bp_limiter: BestPracticesLimiter,
     progress: Progress,
     task_id: int,
@@ -553,10 +468,9 @@ async def _worker(
         except asyncio.QueueEmpty:
             return
 
-        packages = repo_pkg_map.get(repo, [])
         try:
             row, long_rows = await _process_repo(
-                repo, packages, session, repo_id_map,
+                repo, session, repo_id_map,
                 last_request_ref, throttle_lock, bp_limiter,
             )
         except Exception as exc:
@@ -614,7 +528,6 @@ async def _periodic_flush(
 
 async def batch_fetch(
     repos_with_ids: list[tuple[str, str]],
-    repo_pkg_map: dict[str, list[tuple[str, str]]],
     *,
     force: bool,
     limit: int | None,
@@ -681,7 +594,7 @@ async def batch_fetch(
                     _worker(
                         f"w{i}", queue, session, new_results,
                         long_rows_by_repo,
-                        repo_id_map, repo_pkg_map, bp_limiter,
+                        repo_id_map, bp_limiter,
                         progress, task_id,
                     )
                 )
@@ -736,7 +649,7 @@ def print_summary(
     *,
     processed: list[str],
 ) -> None:
-    """Print: coverage, top-10 by dependent_count, badge distribution."""
+    """Print: coverage and badge distribution."""
     relevant = [rows[r] for r in processed if r in rows]
     total = len(relevant)
 
@@ -746,7 +659,6 @@ def print_summary(
     overview.add_row("Repos processed", str(total))
     for col in (
         "depsdev_scorecard_overall",
-        "depsdev_dependent_count",
         "depsdev_license",
         "depsdev_open_issues",
         "bestpractices_badge_id",
@@ -755,25 +667,6 @@ def print_summary(
         pct = 100 * n / total if total else 0
         overview.add_row(col, f"{n:,} ({pct:.1f}%)")
     console.print(overview)
-
-    # Top-10 by dependent count
-    by_dep: list[tuple[str, int]] = []
-    for r in relevant:
-        v = (r.get("depsdev_dependent_count") or "").strip()
-        if not v:
-            continue
-        try:
-            by_dep.append((r["repo"], int(v)))
-        except ValueError:
-            pass
-    by_dep.sort(key=lambda t: (-t[1], t[0]))
-    if by_dep:
-        top = Table(title="Top 10 repos by deps.dev dependent_count")
-        top.add_column("repo", style="cyan")
-        top.add_column("dependents", justify="right", style="bold")
-        for repo, n in by_dep[:10]:
-            top.add_row(repo, f"{n:,}")
-        console.print(top)
 
     # Badge distribution
     badges = Counter(
@@ -824,13 +717,6 @@ def main() -> None:
     repos_with_ids: list[tuple[str, str]] = sorted(
         {(e.repo, e.repo_id) for e in risk if e.repo}
     )
-    repo_pkg_map = load_repo_package_mapping()
-
-    n_with_supported_pkg = sum(
-        1 for r, _ in repos_with_ids
-        if any(ECO_TO_DEPSDEV_SYSTEM.get(eco) for eco, _ in repo_pkg_map.get(r, []))
-    )
-
     started = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     console.rule("[bold]deps.dev fetcher[/bold]")
     banner = Table(show_header=False, box=None, padding=(0, 1))
@@ -838,10 +724,6 @@ def main() -> None:
     banner.add_column()
     banner.add_row("script", "src.sources.depsdev.fetch")
     banner.add_row("risk repos", str(len(repos_with_ids)))
-    banner.add_row(
-        "with deps.dev-indexed pkgs",
-        f"{n_with_supported_pkg} (npm/pypi/cargo)",
-    )
     banner.add_row("output", str(OUTPUT_FILE))
     banner.add_row("concurrency", str(args.concurrency))
     banner.add_row("ttl-days", str(args.ttl_days))
@@ -853,7 +735,6 @@ def main() -> None:
 
     final_rows = asyncio.run(batch_fetch(
         repos_with_ids,
-        repo_pkg_map,
         force=args.force,
         limit=args.limit or None,
         seed=args.seed,
