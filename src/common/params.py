@@ -60,6 +60,7 @@ TOP_REPO_CLASSES: set[str] = set(_P["top_repos"]["classes"])
 VALUE_SCORE_CRIT_WEIGHT:       float = _P["value_score"]["criticality_weight"]
 VALUE_SCORE_ECO_CRIT_WEIGHT:   float = _P["value_score"]["eco_crit_weight"]
 VALUE_SCORE_CENTRALITY_WEIGHT: float = _P["value_score"]["centrality_weight"]
+VALUE_SCORE_PR_WEIGHT:         float = _P["value_score"]["pr_score_weight"]
 VALUE_SCORE_MIN_COMPONENTS:    int   = _P["value_score"]["min_components"]
 
 # Concentration window length (complete years). The bus-factor/HHI '_5y'

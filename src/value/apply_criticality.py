@@ -48,6 +48,7 @@ from rich.table import Table
 
 from src.common.params import (
     VALUE_SCORE_CENTRALITY_WEIGHT,
+    VALUE_SCORE_PR_WEIGHT,
     VALUE_SCORE_CRIT_WEIGHT,
     VALUE_SCORE_ECO_CRIT_WEIGHT,
     VALUE_SCORE_MIN_COMPONENTS,
@@ -134,7 +135,8 @@ def load_eco_crit(path: Path = ECO_CRIT_FILE) -> tuple[dict, dict]:
 
 
 def compute_score(openssf_crit: float | None, eco_crit: float | None,
-                  top_eco_pct: float | None) -> float | None:
+                  top_eco_pct: float | None,
+                  pr_score: float | None = None) -> float | None:
     """value.csv `value_score` — a 0–100 pro-rata blend of the present components.
 
     Each argument is the raw component value, or ``None`` when absent for this
@@ -142,13 +144,13 @@ def compute_score(openssf_crit: float | None, eco_crit: float | None,
       - ``openssf_crit`` — OpenSSF criticality, already ·100 (0–100, as stored).
       - ``eco_crit``     — ecosyste.ms critical flag, 0/1, scaled ·100 here.
       - ``top_eco_pct``  — PageRank percentile in the top ecosystem, already 0–100.
+      - ``pr_score``     — cross-ecosystem dependency-mass score, already 0–100.
 
     Present components are weighted (settings.json → value_score) and the sum is
-    renormalized by their weight total, so a repo missing one still lands on the
-    same 0–100 scale (e.g. openssf_crit + top_eco_pct only → 0.75/0.25). Returns
-    ``None`` — a blank `score` — when fewer than ``VALUE_SCORE_MIN_COMPONENTS``
-    components are present, so a single lone signal never masquerades as a full
-    score."""
+    renormalized by their weight total, so a repo missing some still lands on the
+    same 0–100 scale. Returns ``None`` — a blank `score` — when fewer than
+    ``VALUE_SCORE_MIN_COMPONENTS`` components are present, so a single lone
+    signal never masquerades as a full score."""
     parts: list[tuple[float, float]] = []  # (weight, value on 0–100)
     if openssf_crit is not None:
         parts.append((VALUE_SCORE_CRIT_WEIGHT, openssf_crit))
@@ -156,6 +158,8 @@ def compute_score(openssf_crit: float | None, eco_crit: float | None,
         parts.append((VALUE_SCORE_ECO_CRIT_WEIGHT, eco_crit * 100.0))
     if top_eco_pct is not None:
         parts.append((VALUE_SCORE_CENTRALITY_WEIGHT, top_eco_pct))
+    if pr_score is not None:
+        parts.append((VALUE_SCORE_PR_WEIGHT, pr_score))
     if len(parts) < VALUE_SCORE_MIN_COMPONENTS:
         return None
     wsum = sum(w for w, _ in parts)
@@ -220,7 +224,10 @@ def apply(value_file: Path = OUTPUT_FILE,
         # top_eco_pct — already a 0–100 percentile.
         top_eco_pct = _as_float(row.get("top_eco_pct"))
 
-        blended = compute_score(openssf, eco, top_eco_pct)
+        # pr_score — cross-ecosystem dependency mass, already 0–100.
+        pr_score = _as_float(row.get("pr_score"))
+
+        blended = compute_score(openssf, eco, top_eco_pct, pr_score)
         if blended is not None:
             row["value_score"] = f"{blended:.2f}"
 

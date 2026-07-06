@@ -10,30 +10,47 @@
   },
   "downloads_score": {
     "debian_weight": 1.39,
-    "homebrew_weight": 1.00,
+    "homebrew_weight": 1.0,
     "comment": "downloads_score = debian_weight*debian_avg + homebrew_weight*homebrew_avg. Default ratio 1.39:1 is inverse of ecosystem totals (debian ~181.9M vs homebrew ~252.8M annual installs) so a 'typical' package from either ecosystem contributes equally."
   },
   "value_classes": {
-    "A": [0, 0.75],
-    "B": [0.75, 0.95],
-    "C": [0.95, 1],
+    "A": [
+      0,
+      0.75
+    ],
+    "B": [
+      0.75,
+      0.95
+    ],
+    "C": [
+      0.95,
+      1
+    ],
     "comment": "Cumulative PageRank share intervals [lo, hi] per class (upper bound inclusive). Class A (<=75%) is also the risk-pipeline input scope; see risk_input.value_classes."
   },
   "risk_input": {
-    "value_classes": ["A"],
+    "value_classes": [
+      "A"
+    ],
     "comment": "Risk pipeline runs on valid class-A repos (value/value.csv class == 'A'). Kept as the documented risk scope; load_top_repos reads top_repos below."
   },
   "top_repos": {
-    "platforms": ["github", "gitlab"],
-    "classes": ["A"],
+    "platforms": [
+      "github",
+      "gitlab"
+    ],
+    "classes": [
+      "A"
+    ],
     "comment": "load_top_repos scope — a value.csv row is a 'top repo' iff platform in platforms AND class in classes AND git_valid==True. GitHub + GitLab: the risk builders rank each percentile-based dimension over the full top-repo population (github + gitlab together — platform does not matter), so GitLab repos rank in alongside GitHub. classes must match risk_input.value_classes."
   },
   "value_score": {
     "criticality_weight": 0.6,
     "eco_crit_weight": 0.2,
-    "centrality_weight": 0.2,
+    "centrality_weight": 0.1,
+    "pr_score_weight": 0.1,
     "min_components": 2,
-    "comment": "value.csv `score`, 0-100: a pro-rata blend of up to three components — openssf_crit (weight criticality_weight; OpenSSF criticality score 0-1, scaled *100), eco_crit (weight eco_crit_weight; ecosyste.ms critical flag 0/1, scaled *100), and top_eco_pct (weight centrality_weight; the repo's PageRank percentile in its top ecosystem, already 0-100). Only PRESENT (non-blank) components are summed, then renormalized by their weight total, so a repo missing one still scores on the same 0-100 scale (e.g. openssf_crit + top_eco_pct only → 0.75/0.25). A row needs at least min_components present or `score` stays blank. Full weights (0.6/0.2/0.2) sum to 1 and are criticality-dominant so a foundational-but-quiet micro-dep can't outrank a genuinely critical project. openssf_crit is GitHub-only; eco_crit covers GitHub and GitLab, so valid GitLab class-A repos score from eco_crit + top_eco_pct."
+    "comment": "value.csv `score`, 0-100: a pro-rata blend of up to four components — openssf_crit (weight criticality_weight; OpenSSF criticality score 0-1, scaled *100), eco_crit (weight eco_crit_weight; ecosyste.ms critical flag 0/1, scaled *100), top_eco_pct (weight centrality_weight; the repo's PageRank percentile in its top ecosystem, already 0-100), and pr_score (weight pr_score_weight; cross-ecosystem dependency-mass score, already 0-100). Only PRESENT (non-blank) components are summed, then renormalized by their weight total, so a repo missing some still scores on the same 0-100 scale. A row needs at least min_components present or `score` stays blank. Full weights (0.6/0.2/0.1/0.1) sum to 1 and are criticality-dominant so a foundational-but-quiet micro-dep can't outrank a genuinely critical project; the two PageRank-family factors (position vs mass) share the former 0.2 centrality weight. openssf_crit is GitHub-only; eco_crit covers GitHub and GitLab; top_eco_pct + pr_score cover every repo with a PageRank signal, so valid GitLab class-A repos score even when both crits are unknown."
   },
   "concentration": {
     "window_years": 5,
@@ -44,5 +61,11 @@
     "cum_share": 0.5,
     "comment": "Commit-share threshold for data/preview/people.csv's 'key contributor' role. Independent of concentration.bus_factor_threshold so it can be loosened later (e.g. to surface more contributors) without changing risk/eligibility scoring. Consumed only by src.build_people, via src.sources.github.key_contributors.load_key_contributors(cum_share=...)."
   },
-  "years": [2021, 2022, 2023, 2024, 2025]
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ]
 }
