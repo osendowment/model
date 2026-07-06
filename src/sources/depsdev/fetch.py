@@ -1,7 +1,7 @@
 """Fetch deps.dev project + Best-Practices badge data per risk repo.
 
-For each risk repo (A/B value-class repos from `data/value/value.csv`), we
-hit two free APIs:
+For each top repo (`src.common.repos.load_top_repos` — valid class-A,
+GitHub + GitLab, archived included), we hit two free APIs:
 
 1. **deps.dev** (https://api.deps.dev) — Google's dependency-graph index.
    - `GET /v3/projects/github.com%2F{owner}%2F{repo}` → project info, including

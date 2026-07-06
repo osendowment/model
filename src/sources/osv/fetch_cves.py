@@ -40,7 +40,7 @@ package returned None) do NOT update the sidecar — so a re-run retries.
 
 Re-run behaviour:
 - A repo is skipped if its `queried.csv` row's `fetched_at` is within
-  `--ttl-days` (default 7) and the lookup wasn't a failure.
+  `--ttl-days` (default 365) and the lookup wasn't a failure.
 - For repos we re-fetch, existing rows in `cves.csv` for that repo are
   replaced wholesale with the fresh result (an upsert keyed by repo).
 - Repos we don't touch keep their existing `cves.csv` rows untouched.
