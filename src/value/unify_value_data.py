@@ -425,11 +425,29 @@ def apply_repo_overrides(
         if ov:
             override_by_group[_group_key(row)] = ov
 
+    # Per group: normalized member git_url → that member's repo_id (members
+    # carrying both). Decides whether a git_url-only override *confirms* the
+    # member-derived id (the override URL is the very upstream the resolver
+    # stamped the id from — e.g. a curated gitlab.com/libtiff/libtiff URL on
+    # the group resolved to that project) or *discards* it (the override
+    # points somewhere else — e.g. gettext redirected from its salsa
+    # packaging repo to savannah, whose gl/ id must not survive).
+    def _norm(u: str) -> str:
+        u = (u or "").strip().lower().rstrip("/")
+        return u[:-4] if u.endswith(".git") else u
+
+    id_by_group_url: dict[tuple[str, str], str] = {}
+    for row in all_rows:
+        rid = (row.get("repo_id") or "").strip()
+        gu = _norm(row.get("git_url") or "")
+        if rid and gu:
+            id_by_group_url[(_group_key(row), gu)] = rid
+
     for a in aggs:
-        # Prefer the scratch `group_key`; fall back to `git_url` (identical
-        # for non-orphan groups) so the override still applies if called
-        # after `_strip_internals`.
-        key = a.get("group_key") or a.get("git_url") or ""
+        # Prefer the scratch `group_key`; fall back to the same key
+        # `_group_key` would derive — `repo_id` first, then `git_url` — so
+        # the override still applies if called after `_strip_internals`.
+        key = a.get("group_key") or a.get("repo_id") or a.get("git_url") or ""
         ov = override_by_group.get(key)
         if not ov:
             continue
@@ -442,14 +460,23 @@ def apply_repo_overrides(
             gu = ov.get("git_url", "")
             if gu and not gu.startswith("https://github.com/"):
                 a["mirror_url"] = gu
+            # A non-GitHub member id (e.g. gl/…) belongs to the identity the
+            # override just discarded — never carry it onto a github row.
+            if not (a.get("repo_id") or "").startswith("gh/"):
+                a["repo_id"] = ""
         elif ov.get("git_url"):
             # A git_url-only override declares a non-GitHub canonical source, so
             # re-derive `(platform, repo)` from it, dropping any (often
             # wrong/dead) member-derived github identity — otherwise it would
             # still win as the validation target. This is how a dead GitHub
-            # slug is removed via override.
+            # slug is removed via override. The member-derived repo_id
+            # survives ONLY when the override URL is the member upstream it
+            # was resolved from; an id from a discarded identity (e.g. a
+            # salsa packaging repo's gl/ id on what is now a savannah
+            # upstream) is cleared.
             a["git_url"] = ov["git_url"]
             a["platform"], a["repo"] = _identity("", ov["git_url"])
+            a["repo_id"] = id_by_group_url.get((key, _norm(ov["git_url"])), "")
     return aggs
 
 

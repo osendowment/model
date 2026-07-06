@@ -684,6 +684,63 @@ class TestRepoOverrides:
         assert fixed[0]["repo"] == "gnome/glib"
         assert "github_repo" not in fixed[0]
 
+    def test_git_url_only_override_clears_stale_repo_id(self):
+        # Regression: git/gettext + libgpg-error. A package resolved against a
+        # salsa packaging repo (gl/ repo_id stamped by the resolve step) is
+        # then redirected by a git_url-only override to its real custom-host
+        # upstream. The gl/ id belongs to the discarded salsa identity and
+        # must be cleared — a `custom` platform row never carries a repo_id.
+        rows = [
+            _pkg_row("gettext", "cpp",
+                     github_repo="",
+                     git_url="https://salsa.debian.org/sanvila/gettext.git",
+                     pagerank="1.0", value_class="A"),
+        ]
+        rows[0]["repo_id"] = "gl/salsa.debian.org-91954"
+        overrides = {("gettext", "cpp"):
+                     {"repo": "", "git_url": "https://git.savannah.gnu.org/git/gettext.git",
+                      "valid": ""}}
+        fixed = apply_repo_overrides(
+            aggregate_by_repo(rows, drop_d_class=False), rows, overrides)
+        assert fixed[0]["platform"] == "custom"
+        assert fixed[0]["repo_id"] == ""
+
+    def test_git_url_override_matching_member_upstream_keeps_repo_id(self):
+        # A curated gitlab URL that IS the member upstream the id was resolved
+        # from (e.g. tiff → gitlab.com/libtiff/libtiff, id gl/4720790) keeps
+        # that id — the override confirms the identity, it doesn't replace it.
+        rows = [
+            _pkg_row("tiff", "cpp",
+                     github_repo="",
+                     git_url="https://gitlab.com/libtiff/libtiff.git",
+                     pagerank="1.0", value_class="A"),
+        ]
+        rows[0]["repo_id"] = "gl/4720790"
+        overrides = {("tiff", "cpp"):
+                     {"repo": "", "git_url": "https://gitlab.com/libtiff/libtiff.git",
+                      "valid": ""}}
+        fixed = apply_repo_overrides(
+            aggregate_by_repo(rows, drop_d_class=False), rows, overrides)
+        assert fixed[0]["platform"] == "gitlab"
+        assert fixed[0]["repo_id"] == "gl/4720790"
+
+    def test_repo_override_clears_non_github_repo_id(self):
+        # A repo-override forces (platform=github, slug); a member-derived gl/
+        # id contradicts that platform and must not survive onto the row.
+        rows = [
+            _pkg_row("some-pkg", "cpp",
+                     github_repo="",
+                     git_url="https://salsa.debian.org/debian/some-pkg.git",
+                     pagerank="1.0", value_class="A"),
+        ]
+        rows[0]["repo_id"] = "gl/salsa.debian.org-123"
+        overrides = {("some-pkg", "cpp"):
+                     {"repo": "real/upstream", "git_url": "", "valid": ""}}
+        fixed = apply_repo_overrides(
+            aggregate_by_repo(rows, drop_d_class=False), rows, overrides)
+        assert fixed[0]["platform"] == "github"
+        assert fixed[0]["repo_id"] == ""
+
     def test_override_is_keyed_per_ecosystem(self):
         # An override for npm must not touch a same-named pypi package.
         rows = [
