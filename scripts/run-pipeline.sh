@@ -11,7 +11,7 @@ set -o pipefail
 cd "$(dirname "$0")/.." || exit 1
 
 t0=$(date +%s)
-for stage in value.run_value_pipeline risk.run_risk_pipeline eligibility.run_eligibility_pipeline; do
+for stage in value.run_value_pipeline risk.run_risk_pipeline eligibility.run_eligibility_pipeline run_preview_pipeline; do
   echo
   echo "=== src.$stage $* ==="
   uv run python -m "src.$stage" "$@" || { echo "ABORTED: src.$stage failed"; exit 1; }
