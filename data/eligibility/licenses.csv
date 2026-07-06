@@ -238,7 +238,7 @@ fitzgen/glob-to-regexp,gh/11461122,bsd-2-clause,registry,True
 floatdrop/require-from-string,gh/39301848,mit,registry,True
 floating-ui/floating-ui,gh/54994103,mit,registry,True
 follow-redirects/follow-redirects,gh/6697086,mit,registry,True
-fontconfig/fontconfig,gl/gitlab.freedesktop.org-890,noassertion,github,
+fontconfig/fontconfig,gl/gitlab.freedesktop.org-890,mit-modern-variant,gitlab,True
 form-data/form-data,gh/1755793,mit,registry,True
 formatjs/formatjs,gh/19117456,mit,registry,True
 freedesktop-unofficial-mirror/cairo,gh/34372735,lgpl-2.1-only or mpl-1.1,override,True
@@ -263,11 +263,11 @@ gkz/prelude-ls,gh/4457759,mit,registry,True
 gkz/type-check,gh/13182168,mit,registry,True
 gmp-mirror/gmp,gh/681340775,lgpl-3.0-or-later or gpl-2.0-or-later,registry,True
 gnome/gdk-pixbuf,gl/gitlab.gnome.org-1548,lgpl-2.1,github,True
-gnome/glib,gl/gitlab.gnome.org-658,noassertion,github,
-gnome/libxml2,gl/gitlab.gnome.org-1665,noassertion,github,
+gnome/glib,gl/gitlab.gnome.org-658,lgpl-2.1,gitlab,True
+gnome/libxml2,gl/gitlab.gnome.org-1665,mit,gitlab,True
 gnome/pango,gh/4537144,lgpl-2.0-or-later,registry,True
 gnutls/gnutls,gl/179611,gpl-3.0,github,True
-gnutls/libtasn1,gl/919981,noassertion,github,
+gnutls/libtasn1,gl/919981,gpl-3.0+,gitlab,True
 google/brotli,gh/24993138,mit,registry,True
 google/highway,gh/206791328,noassertion,github,
 google/zerocopy,gh/534354967,bsd-2-clause or apache-2.0 or mit,registry,True

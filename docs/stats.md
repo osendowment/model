@@ -31,7 +31,7 @@ row; the post-scope stages are each expressed against `top repos`.
 | value_score present | 917 | 97.6% | top repos | ≥2 value components (openssf_crit / eco_crit / top_eco_pct) |
 | risk_score present | 940 | 100% | top repos | all four risk dimensions scored |
 | fully scored | 917 | 97.6% | top repos | value_score × risk_score → preview `score` |
-| **eligible** | **652** | **69.4%** | top repos | oss AND intent AND nonprofit AND active |
+| **eligible** | **655** | **69.7%** | top repos | oss AND intent AND nonprofit AND active |
 | priority-ranked | 646 | 68.7% | top repos | eligible AND fully scored → preview `priority` |
 
 
@@ -243,7 +243,9 @@ AND active`. Methodology: [eligibility.md](eligibility.md) +
 
 Per-repo license resolution ([eligibility.md](eligibility.md)) — manual
 `license` assertion in `overrides.csv` first (detection-failure fix), then
-registry license (per-eco results.csv), GitHub Licensee fallback; `oss` = the
+registry license (per-eco results.csv), then the GitHub / GitLab Licensee
+fallbacks (github/repos.csv, gitlab/repos.csv); an unknown sentinel
+(`noassertion`/`other`) never shadows a later real detection. `oss` = the
 SPDX id (or any component of an SPDX expression) is OSI-approved ∪ curated
 extras. Unknown (no license signal) is tracked separately from known non-OSS.
 
@@ -253,10 +255,11 @@ extras. Unknown (no license signal) is tracked separately from known non-OSS.
 | license resolved | 937 | 99.7% |
 | · from override | 15 | 1.6% |
 | · from registry | 893 | 95.0% |
-| · from GitHub | 14 | 1.5% |
-| **oss=True (OSI-approved)** | **919** | **97.8%** |
+| · from GitHub | 10 | 1.1% |
+| · from GitLab | 19 | 2.0% |
+| **oss=True (OSI-approved)** | **923** | **98.2%** |
 | oss=False (known non-OSS) | 10 | 1.1% |
-| oss unknown (no signal) | 11 | 1.2% |
+| oss unknown (no signal) | 7 | 0.7% |
 
 Of the 10 known non-OSS: 4 are content-licensed data repos (CC0/CC-BY — free
 for documents, not software OSS by this model's strict policy); the other 6
@@ -304,8 +307,8 @@ unlock. Missing intent is by far the binding constraint.
 
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
-| oss | 919 | 97.8% | 15 |
-| intent | 737 | 78.4% | 186 |
+| oss | 923 | 98.2% | 12 |
+| intent | 737 | 78.4% | 187 |
 | nonprofit | 881 | 93.7% | 59 |
 | active | 918 | 97.7% | 11 |
-| **eligible** | **652** | **69.4%** | |
+| **eligible** | **655** | **69.7%** | |

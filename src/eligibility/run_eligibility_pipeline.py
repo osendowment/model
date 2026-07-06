@@ -24,6 +24,9 @@ from src.common.pipeline_runner import Step, build_parser, run_pipeline
 FETCHERS = [
     # repo state — archived flag + GitHub license fallback
     Step("repo-owner",    "src.sources.github.fetch_repo_owner_data",     fetch=True),
+    # GitLab project metadata — the GitLab license fallback (project API
+    # Licensee detection into gitlab/repos.csv, 90-day TTL)
+    Step("gitlab-projects", "src.sources.gitlab.fetch_project_data",      fetch=True),
     # license signals (homebrew before cpp — cpp joins homebrew's licenses)
     Step("osi",           "src.sources.osi.fetch_licenses",               fetch=True),
     Step("npm-lic",       "src.sources.npm.fetch_licenses",               fetch=True),

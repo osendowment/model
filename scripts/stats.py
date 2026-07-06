@@ -322,6 +322,7 @@ def eligibility_stats() -> dict:
         "override": sum(1 for r in lic if r.get("license_source") == "override"),
         "registry": sum(1 for r in lic if r.get("license_source") == "registry"),
         "github": sum(1 for r in lic if r.get("license_source") == "github"),
+        "gitlab": sum(1 for r in lic if r.get("license_source") == "gitlab"),
         "oss_true": sum(1 for r in lic if r.get("oss") == "True"),
         "oss_false": sum(1 for r in lic if r.get("oss") == "False"),
         "oss_unknown": sum(1 for r in lic if (r.get("oss") or "").strip() == ""),
@@ -483,6 +484,7 @@ def dashboard(v: dict, r: dict, e: dict) -> None:
                        ("· from override", lic["override"]),
                        ("· from registry", lic["registry"]),
                        ("· from GitHub", lic["github"]),
+                       ("· from GitLab", lic["gitlab"]),
                        ("oss=True (OSI-approved)", lic["oss_true"]),
                        ("oss=False (known non-OSS)", lic["oss_false"]),
                        ("oss unknown (no signal)", lic["oss_unknown"])):
@@ -605,6 +607,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
                        ("· from override", lic["override"]),
                        ("· from registry", lic["registry"]),
                        ("· from GitHub", lic["github"]),
+                       ("· from GitLab", lic["gitlab"]),
                        ("**oss=True (OSI-approved)**", lic["oss_true"]),
                        ("oss=False (known non-OSS)", lic["oss_false"]),
                        ("oss unknown (no signal)", lic["oss_unknown"])):

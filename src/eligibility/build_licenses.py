@@ -17,6 +17,15 @@ license string and classify it against the OSI-approved set:
   alphabetically.
 - **GitHub license** (fallback) — data/sources/github/repos.csv `license`
   (GitHub's Licensee detection), used when no registry license is found.
+- **GitLab license** (fallback) — data/sources/gitlab/repos.csv `license`
+  (the GitLab project API's Licensee detection, fetched by
+  src.sources.gitlab.fetch_project_data), keyed by the stable gl/ repo_id —
+  the GitLab analogue of the GitHub fallback.
+
+A source only claims the slot with a MEANINGFUL license: an unknown sentinel
+(`noassertion` / `other` / `none`) never shadows a real detection from a
+later source; when every source is unknown, the first sentinel is kept so
+the empty verdict stays traceable.
 - **`oss`** is ternary: True when the license (or any component of an SPDX
   expression) is in the OSI-approved set — data/sources/osi/oss-licenses.csv,
   the union of SPDX `isOsiApproved` and a small curated extras list (see
@@ -227,16 +236,28 @@ def build() -> list[dict]:
     for entry in eligible:
         repo = entry.repo
         rid = str(entry.repo_id).strip()
-        if overrides.get(rid):
-            lic, source = overrides[rid], "override"
-        elif registry.get(repo):
-            lic, source = registry[repo], "registry"
-        elif github.get(repo):
-            lic, source = github[repo], "github"
-        elif gitlab.get(rid):
-            lic, source = gitlab[rid], "gitlab"
-        else:
-            lic, source = "", ""
+        # Source precedence: override, registry, GitHub, GitLab — but only a
+        # MEANINGFUL license claims the slot: a registry "noassertion"/"other"
+        # must not shadow a real GitHub/GitLab Licensee detection (glib's cpp
+        # registry row says noassertion while the GitLab API reads lgpl-2.1).
+        # When every source is junk/empty, keep the first junk value so the
+        # "no signal" verdict stays traceable to the source that produced it.
+        candidates = (
+            ("override", overrides.get(rid, "")),
+            ("registry", registry.get(repo, "")),
+            ("github", github.get(repo, "")),
+            ("gitlab", gitlab.get(rid, "")),
+        )
+        lic, source = "", ""
+        for src, val in candidates:
+            if val and val not in _UNKNOWN_LICENSES:
+                lic, source = val, src
+                break
+        if not lic:
+            for src, val in candidates:
+                if val:
+                    lic, source = val, src
+                    break
         oss = classify_oss(lic, approved)
         rows.append({
             "repo": repo,

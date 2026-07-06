@@ -921,12 +921,12 @@ debian/bzip2,c,cpp,,,30.56,,80.18,74.50,72.60,76.18,75.81,False,True,True,True,F
 debian/ca-certificates,python,cpp,,,43.59,,66.33,3.24,72.60,29.26,25.99,False,True,True,True,False,,,gl/salsa.debian.org-2995
 debian/gdbm,c,cpp,,,27.77,,83.20,83.87,59.04,72.24,73.86,True,True,True,True,True,,,gl/salsa.debian.org-32157
 debian/giflib,c,cpp,,,27.13,,35.54,76.31,91.83,75.23,65.79,True,True,True,True,True,,,gl/salsa.debian.org-12522
-fontconfig/fontconfig,c,cpp,,,31.91,,64.23,87.92,59.04,65.93,68.47,False,True,True,True,False,,,gl/gitlab.freedesktop.org-890
+fontconfig/fontconfig,c,cpp,,,31.91,,64.23,87.92,59.04,65.93,68.47,True,True,True,True,True,,,gl/gitlab.freedesktop.org-890
 gnome/gdk-pixbuf,c,cpp,,,25.39,,31.73,81.80,92.55,68.46,63.68,True,True,True,True,True,,,gl/gitlab.gnome.org-1548
-gnome/glib,c,cpp,,,48.05,,18.17,97.71,50.00,69.43,49.83,False,True,True,True,False,,,gl/gitlab.gnome.org-658
-gnome/libxml2,c,cpp,,,29.32,,89.55,95.19,97.84,75.75,89.15,False,True,True,True,False,,,gl/gitlab.gnome.org-1665
+gnome/glib,c,cpp,,,48.05,,18.17,97.71,50.00,69.43,49.83,True,True,True,True,True,,,gl/gitlab.gnome.org-658
+gnome/libxml2,c,cpp,,,29.32,,89.55,95.19,97.84,75.75,89.15,True,True,True,True,True,,,gl/gitlab.gnome.org-1665
 gnutls/gnutls,c,cpp,,,32.63,,59.46,92.51,50.00,71.60,66.62,True,False,True,True,False,,,gl/179611
-gnutls/libtasn1,c,cpp,,,26.09,,86.69,81.11,52.02,70.14,71.17,False,False,True,True,False,,,gl/919981
+gnutls/libtasn1,c,cpp,,,26.09,,86.69,81.11,52.02,70.14,71.17,True,False,True,True,False,,,gl/919981
 holmgren/nettle,c,cpp,,,28.78,,84.71,89.89,87.50,79.06,85.19,False,True,True,True,False,,,gl/salsa.debian.org-50952
 libidn/libidn2,c,cpp,,,31.00,,90.77,71.74,50.00,68.88,68.82,True,False,True,True,False,,,gl/2882658
 md/tcp-wrappers,c,cpp,,,47.27,,95.56,59.47,81.17,70.97,75.64,False,True,True,True,False,,,gl/salsa.debian.org-28852

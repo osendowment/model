@@ -238,7 +238,7 @@ fitzgen/glob-to-regexp,gh/11461122,True,False,True,False,False,3,4,True
 floatdrop/require-from-string,gh/39301848,True,False,True,False,False,3,4,True
 floating-ui/floating-ui,gh/54994103,True,True,True,True,True,3,4,True
 follow-redirects/follow-redirects,gh/6697086,True,True,True,True,True,3,4,True
-fontconfig/fontconfig,gl/gitlab.freedesktop.org-890,False,True,True,True,False,1,4,False
+fontconfig/fontconfig,gl/gitlab.freedesktop.org-890,True,True,True,True,True,1,4,False
 form-data/form-data,gh/1755793,True,False,True,True,False,3,4,True
 formatjs/formatjs,gh/19117456,True,True,True,True,True,2,4,True
 freedesktop-unofficial-mirror/cairo,gh/34372735,True,True,True,True,True,2,4,True
@@ -263,11 +263,11 @@ gkz/prelude-ls,gh/4457759,True,False,True,True,False,3,4,True
 gkz/type-check,gh/13182168,True,False,True,True,False,3,4,True
 gmp-mirror/gmp,gh/681340775,True,True,True,True,True,2,4,True
 gnome/gdk-pixbuf,gl/gitlab.gnome.org-1548,True,True,True,True,True,1,4,False
-gnome/glib,gl/gitlab.gnome.org-658,False,True,True,True,False,1,4,False
-gnome/libxml2,gl/gitlab.gnome.org-1665,False,True,True,True,False,1,4,False
+gnome/glib,gl/gitlab.gnome.org-658,True,True,True,True,True,1,4,False
+gnome/libxml2,gl/gitlab.gnome.org-1665,True,True,True,True,True,1,4,False
 gnome/pango,gh/4537144,True,True,True,True,True,2,4,True
 gnutls/gnutls,gl/179611,True,False,True,True,False,1,4,False
-gnutls/libtasn1,gl/919981,False,False,True,True,False,1,4,False
+gnutls/libtasn1,gl/919981,True,False,True,True,False,1,4,False
 google/brotli,gh/24993138,True,True,False,True,False,2,4,True
 google/highway,gh/206791328,False,False,True,True,False,2,4,True
 google/zerocopy,gh/534354967,True,True,False,True,False,3,4,True
