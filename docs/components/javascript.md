@@ -15,7 +15,10 @@ the source reference [`sources/npm.md`](../sources/npm.md).
 | [npm registry](https://registry.npmjs.org) | declared runtime dependencies (`package → dep`) | `raw/dependencies.csv` |
 | [nice-registry](https://github.com/nice-registry/all-the-package-repos) | `package → repo_url` mapping (~2M packages) | `nice-registry/packages.csv` |
 
-No authentication required; the downloads API is rate-limited to ~5 req/s.
+No authentication required (an optional `NPM_TOKEN` raises the registry rate
+limit for dependency lookups). npm publishes no fixed rate limit for the
+downloads API; sustained ~1 req/s is the measured-safe rate, and the fetcher
+enforces it with a global rate limiter.
 
 ## Value pipeline
 
@@ -71,17 +74,17 @@ JavaScript / TypeScript (npm)
 |---|---|
 | `package` | Package name |
 | `github_repo` | `owner/repo` slug |
+| `git`, `eco_guess` | Canonical git URL + identity provenance (`eco` / `native` / `override`), rewritten by the value rollup's ecosyste.ms authority pass (`src.value.apply_ecosystems_authority`) |
 | `avg_downloads`, `2021`–`2025` | Downloads |
 | `top` | `True` if in the 95% cumulative set |
 | `pagerank` | Download-weighted PageRank score |
 | `value_class` | A/B/C |
+| `repo_id`, `mirror_url` | Stable numeric GitHub repo id; upstream URL when the GitHub repo is a mirror |
+| `license` | SPDX license (filled by `fetch_licenses.py`) |
 
 ### npm funnel & classes
 
 See [docs/stats.md → Value](../stats.md#per-ecosystem-value-funnel) for the npm funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
-
-Per-package class counts await the next full pipeline run — the per-package
-`results.csv` `value_class` is still on the legacy 4-class scheme.
 
 npm has the cleanest upstream identity (highest GitHub-repo coverage) of the four
 ecosystems, so essentially all load-bearing npm packages reach Risk and

@@ -69,14 +69,15 @@ Rust (crates.io)
 
 `results.csv` (`data/sources/crates/`) — one row per dep-tree crate, with
 `package`, `github_repo`, `avg_downloads`, the `2021`–`2025` columns, `top`,
-`pagerank`, and `value_class`.
+`pagerank`, and `value_class`, plus the repo-identity columns (`git`,
+`eco_guess`, `repo_id`, `mirror_url` — the git URL/slug is rewritten by the
+value rollup's ecosyste.ms authority pass,
+`src.value.apply_ecosystems_authority`) and `license` (filled by
+`fetch_licenses.py`).
 
 ### crates.io funnel & classes
 
 See [docs/stats.md → Value](../stats.md#per-ecosystem-value-funnel) for the crates.io funnel counts (top crates → dep tree → results → repo coverage) and class distribution.
-
-Per-package class counts await the next full pipeline run — the per-package
-`results.csv` `value_class` is still on the legacy 4-class scheme.
 
 The crates.io `repository` field resolves non-GitHub Git hosts, so Git coverage
 slightly exceeds GitHub coverage.
