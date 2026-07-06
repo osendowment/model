@@ -238,6 +238,12 @@ SCORE_INPUTS: dict[str, list[str]] = {
     "risk/risk.csv":          ["concentration", "complexity", "security", "workload"],
 }
 
+# Files whose builder composes with `max_composite_any` (worst-of over whichever
+# axes are present) instead of the strict all-inputs geometric mean. For these a
+# score needs AT LEAST ONE input, not all of them: security scores GitLab repos
+# without a Scorecard from the CVE axis alone (see src/risk/build_security.py).
+SCORE_INPUTS_ANY: set[str] = {"risk/security.csv"}
+
 # Column holding each file's aggregated score (default "score"; the top-level
 # risk.csv names it "risk_score", value.csv would be "value_score").
 SCORE_COLUMN: dict[str, str] = {"risk/risk.csv": "risk_score"}
@@ -245,13 +251,14 @@ SCORE_COLUMN: dict[str, str] = {"risk/risk.csv": "risk_score"}
 
 def check_score_input_completeness() -> list[Result]:
     """A component score / the risk score may be present only if ALL its scored
-    inputs are present.
+    inputs are present — except `SCORE_INPUTS_ANY` files, whose worst-of
+    (`max_composite_any`) composite needs at least ONE input.
 
     Enforces the completeness rule end to end: each component score is the
     geometric mean of its `composite_cols` (blanked when any is missing), and the
     overall risk score is the geometric mean of the four component scores (blanked
-    when any component is missing). A row carrying a score while one of its inputs
-    is blank violates the rule.
+    when any component is missing). A row carrying a score while its required
+    inputs are blank violates the rule.
     """
     out: list[Result] = []
     for fname, inputs in SCORE_INPUTS.items():
@@ -262,11 +269,14 @@ def check_score_input_completeness() -> list[Result]:
         rows = list(csv.DictReader(open(path, encoding="utf-8")))
         score_col = SCORE_COLUMN.get(fname, "score")
         scored = [r for r in rows if str(r.get(score_col, "")).strip()]
+        need = any if fname in SCORE_INPUTS_ANY else all
         bad = [r.get("repo", "?") for r in scored
-               if not all(str(r.get(c, "")).strip() for c in inputs)]
+               if not need(str(r.get(c, "")).strip() for c in inputs)]
         ok = not bad
         if ok:
-            detail = f"{len(scored):,} scored rows — every input present"
+            rule = "≥1 input present (worst-of)" if fname in SCORE_INPUTS_ANY \
+                else "every input present"
+            detail = f"{len(scored):,} scored rows — {rule}"
         else:
             shown = ", ".join(bad[:5]) + (" …" if len(bad) > 5 else "")
             detail = f"{len(bad)} score(s) with a missing input: {shown}"
