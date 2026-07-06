@@ -2,7 +2,8 @@
 
 Reads `data/value/value.csv`, selects every row whose `git_url` points at a
 GitLab instance, then hits `GET /projects/:url_encoded_path?license=true` on
-that instance and flattens the response to `data/sources/gitlab/projects.csv`.
+that instance and flattens the response to `data/sources/gitlab/projects.csv`
+(plus a best-effort `GET /projects/:id/languages` for the primary `language`).
 Owner/group metadata goes to `data/sources/gitlab/namespaces.csv`.
 
 Mirrors src/sources/github/fetch_repo_owner_data.py (same TTL/upsert/redirect
@@ -49,7 +50,7 @@ PROJECT_FIELDS = [
     "project", "valid", "project_id", "repo_id", "host",
     "owner_type", "namespace_kind", "namespace_path",
     "name", "path_with_namespace", "description", "homepage",
-    "default_branch", "license", "topics",
+    "default_branch", "license", "language", "topics",
     "stars", "forks", "open_issues", "archived", "visibility",
     "created_at", "last_activity_at", "fetched_at",
 ]
@@ -62,6 +63,19 @@ NAMESPACE_FIELDS = [
 
 def _now_iso() -> str:
     return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _primary_language(langs: dict) -> str:
+    """Primary language = the key with the largest byte-share percentage.
+
+    `GET /projects/:id/languages` returns `{"C": 90.8, "CMake": 3.7, ...}`,
+    the GitLab analogue of GitHub-linguist. We keep only the top language as a
+    single string, mirroring GitHub's scalar `language` column. `{}` (empty or
+    binary-only repo) → "".
+    """
+    if not langs:
+        return ""
+    return max(langs, key=langs.get)
 
 
 def load_gitlab_rows(value_file: Path | None = None,
@@ -90,7 +104,7 @@ def load_gitlab_rows(value_file: Path | None = None,
     return sorted(seen.values(), key=lambda x: x["project"])
 
 
-def _flat_project(d: dict, host: str, project_key: str) -> dict:
+def _flat_project(d: dict, host: str, project_key: str, language: str = "") -> dict:
     ns = d.get("namespace") or {}
     kind = ns.get("kind", "")
     lic = d.get("license") if isinstance(d.get("license"), dict) else {}
@@ -111,6 +125,7 @@ def _flat_project(d: dict, host: str, project_key: str) -> dict:
         "homepage": d.get("web_url") or d.get("homepage") or "",
         "default_branch": d.get("default_branch", ""),
         "license": (lic or {}).get("key") or (lic or {}).get("nickname") or "",
+        "language": language,
         "topics": " | ".join(d.get("topics") or d.get("tag_list") or []),
         "stars": d.get("star_count", ""),
         "forks": d.get("forks_count", ""),
@@ -130,6 +145,36 @@ def _invalid_project_row(host: str, project_key: str) -> dict:
             "fetched_at": _now_iso()}
 
 
+async def _fetch_languages(limiter, session, host: str, project_id) -> str:
+    """Best-effort primary language via `GET /projects/:id/languages`.
+
+    Keyed by numeric id (rename/redirect-proof). Retries 429/transient with
+    backoff — same as `_fetch_project` — so a rate-limited miss doesn't get
+    mistaken for a genuinely empty breakdown. A blank is returned only when the
+    repo really has no detected languages (`{}`) or every retry is exhausted;
+    the project row still carries valid+fetched_at either way."""
+    if project_id in ("", None):
+        return ""
+    url = f"{api_base(host)}/projects/{project_id}/languages"
+    for attempt in range(4):
+        try:
+            resp = await limiter.get(session, host, url)
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            await asyncio.sleep(2 ** attempt)
+            continue
+        async with resp:
+            if resp.status == 200:
+                try:
+                    return _primary_language(await resp.json())
+                except (aiohttp.ClientError, ValueError):
+                    return ""
+            if resp.status == 429:                 # throttled — back off and retry
+                await asyncio.sleep(2 ** attempt)
+                continue
+            return ""                              # 404/other → genuinely no languages
+    return ""
+
+
 async def _fetch_project(limiter, session, item: dict) -> tuple[str, dict | None, str]:
     """Return (project_key, row, status). 200→ok row; 404→sparse invalid row;
     transient→None. Follows 301/302 rename chains to the terminal response."""
@@ -145,7 +190,9 @@ async def _fetch_project(limiter, session, item: dict) -> tuple[str, dict | None
                 break
             async with resp:
                 if resp.status == 200:
-                    return key, _flat_project(await resp.json(), host, key), "ok"
+                    d = await resp.json()
+                    lang = await _fetch_languages(limiter, session, host, d.get("id"))
+                    return key, _flat_project(d, host, key, lang), "ok"
                 if resp.status == 404:
                     return key, _invalid_project_row(host, key), "404"
                 if resp.status in (301, 302) and "Location" in resp.headers:

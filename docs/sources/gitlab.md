@@ -26,6 +26,12 @@ project metadata for a `namespace/path` (path URL-encoded, slashes → `%2F`; mu
 response; the requested path stays the row key. A 404 is recorded as a sparse `valid=False`
 row so re-runs honour the TTL instead of re-hammering dead projects.
 
+**Languages API**: `GET https://{host}/api/v4/projects/{id}/languages` — the linguist-style
+byte-share breakdown (`{"C": 90.8, "CMake": 3.7, …}`). Fetched best-effort by numeric `id`
+(rename/redirect-proof) after each project's `200`; the top-share key becomes the scalar
+`language` column (mirroring `github/repos.csv`). Any failure or an empty breakdown → blank
+`language`; the row still carries `valid`+`fetched_at`, so a blank never masks a failed fetch.
+
 **Namespaces API**: `GET https://{host}/api/v4/namespaces/{urlencoded_full_path}` — owner
 metadata (group vs user). (Note: GitLab's Namespaces endpoint omits `description` for **user**
 namespaces, so that column is blank for individual owners.)
@@ -70,8 +76,8 @@ In `data/sources/gitlab/`:
   (= `gl/{host}/{project_id}`), `host`, `owner_type` (`Organization` if `namespace.kind==group`,
   else `User`), `namespace_kind` (raw `group`/`user`), `namespace_path`, `name`,
   `path_with_namespace`, `description`, `homepage` (`web_url`), `default_branch`, `license`
-  (SPDX-ish key), `topics`, `stars`, `forks`, `open_issues`, `archived`, `visibility`,
-  `created_at`, `last_activity_at`, `fetched_at`.
+  (SPDX-ish key), `language` (primary, from the Languages API), `topics`, `stars`, `forks`,
+  `open_issues`, `archived`, `visibility`, `created_at`, `last_activity_at`, `fetched_at`.
 - **`namespaces.csv`** — owner/group metadata (mirrors `github/users.csv`):
   `namespace` (= `host/full_path`, the key), `namespace_id`, `host`, `kind`, `name`, `path`,
   `full_path`, `web_url`, `description`, `fetched_at`.
