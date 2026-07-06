@@ -165,7 +165,7 @@ def load_repos(classes: set[str] | None, value_file: Path | None = None) -> list
     ``valid``) so a downstream consumer can re-apply the gate and the scope stays
     auditable.
 
-    The unified ``repo_id`` (``gh/{id}`` / ``gl/{host}-{id}``) is read straight
+    The unified ``repo_id`` (``gh/{id}`` / ``gl/{nickname}-{id}``) is read straight
     from value.csv — the value stage already resolved it for GitHub and GitLab
     rows alike, so no host-specific derivation is needed here.
 

@@ -129,7 +129,7 @@ class FakeSession:
 class TestFetchOneRegistryFallback:
     async def test_cpp_prefers_spack_then_falls_back_to_debian(self, monkeypatch, tmp_path):
         monkeypatch.setattr(cr, "DATA_DIR", tmp_path)  # cache writes to tmp
-        repo = Repo(repo_id="gl/salsa.debian.org/1",
+        repo = Repo(repo_id="gl/debian-1",
                     repository_url="https://salsa.debian.org/debian/bzip2",
                     cls="A", valid="True", ecosystem="cpp", package="bzip2")
         # spack has it with a real rank → debian never queried
@@ -190,7 +190,7 @@ class TestPackageOverrides:
         vf = tmp_path / "value.csv"
         vf.write_text(
             "repo,platform,repo_id,git_url,git_valid,top_eco,top_eco_pkg,class\n"
-            "mpc/mpc,gitlab,gl/gitlab.inria.fr-33626,https://gitlab.inria.fr/mpc/mpc.git,False,cpp,gnumpc,A\n"  # bad value name
+            "mpc/mpc,gitlab,gl/inria-33626,https://gitlab.inria.fr/mpc/mpc.git,False,cpp,gnumpc,A\n"  # bad value name
             "expressjs/express,github,gh/1,,True,npm,express,A\n",                                              # untouched
             encoding="utf-8")
         monkeypatch.setattr(cr, "PACKAGE_OVERRIDES",
@@ -198,7 +198,7 @@ class TestPackageOverrides:
         repos = {r.repository_url: r for r in cr.load_repos({"A"}, value_file=vf)}
         assert repos["https://gitlab.inria.fr/mpc/mpc"].package == "mpc"   # overridden
         # gitlab repo_id read straight from value.csv
-        assert repos["https://gitlab.inria.fr/mpc/mpc"].repo_id == "gl/gitlab.inria.fr-33626"
+        assert repos["https://gitlab.inria.fr/mpc/mpc"].repo_id == "gl/inria-33626"
         assert repos["https://github.com/expressjs/express"].package == "express"
 
 

@@ -119,7 +119,7 @@ conventional-changelog/conventional-changelog,gh/15639771,mit,registry,True
 cosmiconfig/cosmiconfig,gh/45750507,mit,registry,True
 coveragepy/coveragepy,gh/138421996,apache-2.0,registry,True
 cpburnz/python-pathspec,gh/14648551,mpl-2.0,registry,True
-cpython-team/python3-defaults,gl/salsa.debian.org-27547,,,
+cpython-team/python3-defaults,gl/debian-27547,,,
 crate-py/rpds,gh/608018848,mit,registry,True
 criterion-rs/criterion.rs,gh/1081104682,apache-2.0 or mit,registry,True
 crossbeam-rs/crossbeam,gh/35566048,mit or apache-2.0,registry,True
@@ -137,10 +137,10 @@ davidhalter/parso,gh/90668463,mit,registry,True
 davisjam/safe-regex,gh/90781457,mit,registry,True
 dchest/tweetnacl-js,gh/15649752,unlicense,registry,True
 dcodeio/long.js,gh/8678904,apache-2.0,registry,True
-debian/bzip2,gl/salsa.debian.org-9696,bzip2-1.0.6,gitlab,False
-debian/ca-certificates,gl/salsa.debian.org-2995,,,
-debian/gdbm,gl/salsa.debian.org-32157,gpl-3.0,gitlab,True
-debian/giflib,gl/salsa.debian.org-12522,mit,gitlab,True
+debian/bzip2,gl/debian-9696,bzip2-1.0.6,gitlab,False
+debian/ca-certificates,gl/debian-2995,,,
+debian/gdbm,gl/debian-32157,gpl-3.0,gitlab,True
+debian/giflib,gl/debian-12522,mit,gitlab,True
 debug-js/debug,gh/2871998,mit,registry,True
 definitelytyped/definitelytyped,gh/6093316,mit,registry,True
 defunctzombie/node-process,gh/7580644,mit,registry,True
@@ -238,7 +238,7 @@ fitzgen/glob-to-regexp,gh/11461122,bsd-2-clause,registry,True
 floatdrop/require-from-string,gh/39301848,mit,registry,True
 floating-ui/floating-ui,gh/54994103,mit,registry,True
 follow-redirects/follow-redirects,gh/6697086,mit,registry,True
-fontconfig/fontconfig,gl/gitlab.freedesktop.org-890,noassertion,github,
+fontconfig/fontconfig,gl/freedesktop-890,noassertion,github,
 form-data/form-data,gh/1755793,mit,registry,True
 formatjs/formatjs,gh/19117456,mit,registry,True
 freedesktop-unofficial-mirror/cairo,gh/34372735,lgpl-2.1-only or mpl-1.1,override,True
@@ -262,9 +262,9 @@ gkz/optionator,gh/13435927,mit,registry,True
 gkz/prelude-ls,gh/4457759,mit,registry,True
 gkz/type-check,gh/13182168,mit,registry,True
 gmp-mirror/gmp,gh/681340775,lgpl-3.0-or-later or gpl-2.0-or-later,registry,True
-gnome/gdk-pixbuf,gl/gitlab.gnome.org-1548,lgpl-2.1,github,True
-gnome/glib,gl/gitlab.gnome.org-658,noassertion,github,
-gnome/libxml2,gl/gitlab.gnome.org-1665,noassertion,github,
+gnome/gdk-pixbuf,gl/gnome-1548,lgpl-2.1,github,True
+gnome/glib,gl/gnome-658,noassertion,github,
+gnome/libxml2,gl/gnome-1665,noassertion,github,
 gnome/pango,gh/4537144,lgpl-2.0-or-later,registry,True
 gnutls/gnutls,gl/179611,gpl-3.0,github,True
 gnutls/libtasn1,gl/919981,noassertion,github,
@@ -289,7 +289,7 @@ gyscos/zstd-rs,gh/52115335,mit,registry,True
 hapijs/hoek,gh/5831189,bsd-3-clause,registry,True
 harfbuzz/harfbuzz,gh/5050525,mit,registry,True
 hiddentao/fast-levenshtein,gh/9490451,mit,registry,True
-holmgren/nettle,gl/salsa.debian.org-50952,other,gitlab,
+holmgren/nettle,gl/debian-50952,other,gitlab,
 httplib2/httplib2,gh/53002916,mit,registry,True
 huggingface/huggingface_hub,gh/323591830,apache-2.0,registry,True
 hukkin/tomli,gh/370616797,mit,registry,True
@@ -515,7 +515,7 @@ matklad/once_cell,gh/143220272,mit or apache-2.0,registry,True
 matplotlib/matplotlib,gh/1385122,python-2.0,registry,True
 mcollina/fastq,gh/37368217,isc,registry,True
 mcollina/reusify,gh/42106515,mit,registry,True
-md/tcp-wrappers,gl/salsa.debian.org-28852,,,
+md/tcp-wrappers,gl/debian-28852,,,
 mdn/data,gh/70901646,cc0-1.0,registry,False
 medikoo/d,gh/10817569,isc,registry,True
 medikoo/es5-ext,gh/1792941,isc,registry,True
@@ -544,12 +544,12 @@ more-itertools/more-itertools,gh/4144530,mit,registry,True
 motdotla/dotenv,gh/11205780,bsd-2-clause,registry,True
 moxystudio/node-cross-spawn,gh/21335844,mit,registry,True
 mozilla/source-map,gh/2014930,bsd-3-clause,registry,True
-mpc/mpc,gl/gitlab.inria.fr-22470,other,gitlab,
-mpfr/mpfr,gl/gitlab.inria.fr-33626,gpl-3.0+,gitlab,True
+mpc/mpc,gl/inria-22470,other,gitlab,
+mpfr/mpfr,gl/inria-33626,gpl-3.0+,gitlab,True
 mrabarnett/mrab-regex,gh/309446978,apache-2.0 and cnri-python,registry,True
 mrmlnc/fast-glob,gh/77467076,mit,registry,True
 msgpack/msgpack-python,gh/2242705,apache-2.0,registry,True
-multimedia-team/aom,gl/salsa.debian.org-29534,bsd-2-clause,gitlab,True
+multimedia-team/aom,gl/debian-29534,bsd-2-clause,gitlab,True
 myrne/performance-now,gh/10219264,mit,registry,True
 mysticatea/abort-controller,gh/105228556,mit,registry,True
 mysticatea/event-target-shim,gh/31137469,mit,registry,True
@@ -920,12 +920,12 @@ websockets/ws,gh/2744972,mit,registry,True
 wesleytodd/setprototypeof,gh/30301031,isc,registry,True
 whitequark/ipaddr.js,gh/2110585,mit,registry,True
 withoutboats/heck,gh/86326466,mit or apache-2.0,registry,True
-xorg-team/lib/libx11,gl/salsa.debian.org-4306,bsd-1-clause,gitlab,True
-xorg-team/lib/libxau,gl/salsa.debian.org-4307,mit-open-group,gitlab,False
-xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,mit-open-group,gitlab,False
-xorg-team/lib/libxext,gl/salsa.debian.org-4314,mit-open-group,gitlab,False
-xorg-team/lib/libxrender,gl/salsa.debian.org-4328,other,gitlab,
-xorg/proto/xorgproto,gl/gitlab.freedesktop.org-788,sgi-b-1.1,gitlab,False
+xorg-team/lib/libx11,gl/debian-4306,bsd-1-clause,gitlab,True
+xorg-team/lib/libxau,gl/debian-4307,mit-open-group,gitlab,False
+xorg-team/lib/libxdmcp,gl/debian-4313,mit-open-group,gitlab,False
+xorg-team/lib/libxext,gl/debian-4314,mit-open-group,gitlab,False
+xorg-team/lib/libxrender,gl/debian-4328,other,gitlab,
+xorg/proto/xorgproto,gl/freedesktop-788,sgi-b-1.1,gitlab,False
 xtuc/webassemblyjs,gh/113006071,mit,registry,True
 yahoo/serialize-javascript,gh/24106944,bsd-3-clause,registry,True
 yaml/libyaml,gh/2699072,mit,registry,True

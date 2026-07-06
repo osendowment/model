@@ -82,7 +82,7 @@ Value
     │                                (github/gitlab/codeberg/bitbucket
     │                                 /sourcehut/custom, empty for orphans)
     ├── repo_id                   ← `gh/<numeric>` (GitHub Repos API) or  [most recent]
-    │                                `gl/<host>-<id>` (GitLab project API;
+    │                                `gl/<nickname>-<id>` (GitLab project API;
     │                                 bare `gl/<id>` for gitlab.com);
     │                                 empty for other platforms
     ├── git_url                   ← per-eco git.csv union                  [most recent]
@@ -288,7 +288,7 @@ subgraphs.
 |--------|-------------|
 | `repo` | Lowercase repo slug on its `platform` — GitHub `owner/repo`, GitLab's arbitrarily-nested `owner/…/repo`, Sourcehut `~user/repo`, custom best-effort path. Empty only for orphans (no upstream repo at all). |
 | `platform` | Host class of `git_url`: `github` / `gitlab` / `bitbucket` / `sourcehut` / `codeberg` / `custom`. Empty for orphan rows with no URL. Downstream consumers (risk, eligibility) filter on the platforms configured in `settings.json → top_repos.platforms` (currently `github` + `gitlab`). |
-| `repo_id` | Stable repo id namespaced by platform: `gh/<numeric>` (GitHub Repos API id) for a resolved GitHub repo; `gl/<host>-<id>` (bare `gl/<id>` for gitlab.com) for a project resolved via the GitLab project API on any GitLab host; empty for other platforms (no API id) and unresolved/404 repos. |
+| `repo_id` | Stable repo id namespaced by platform: `gh/<numeric>` (GitHub Repos API id) for a resolved GitHub repo; `gl/<nickname>-<id>` (bare `gl/<id>` for gitlab.com; host nicknames per `HOST_NICKNAMES` in `src/sources/gitlab/gitlab_client.py`) for a project resolved via the GitLab project API on any GitLab host; empty for other platforms (no API id) and unresolved/404 repos. |
 | `git_url` | Canonical git clone URL — `https://github.com/<repo>.git` for GitHub repos (so a valid repo always carries both `repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by the shared git-URL helpers (`src/value/git_urls.py`). Empty only for orphan packages with no upstream repo at all. |
 | `mirror_url` | For a **GitHub mirror repo**, the non-GitHub upstream it syncs from (e.g. `gcc-mirror/gcc` → `https://gcc.gnu.org/git/gcc.git`). Two sources: GitHub's own `mirror_url` field from `data/sources/github/repos.csv` (stamped by the rollup's `resolve` step), and override-declared live upstreams — a `data/value/overrides.csv` repo override carrying a non-GitHub `git_url` (e.g. `bminor/glibc` → `https://sourceware.org/git/glibc.git`) is preserved here. Empty for ordinary and non-GitHub rows. Authoritative mirror→upstream link when present. |
 | `git_valid` | `True`/`False` — whether the repo's upstream is reachable. Host-agnostic: GitHub rows are checked via the Repos API cache, non-GitHub rows via `git ls-remote`; a GitLab `gl/` `repo_id` counts as proof on its own. `False` covers orphans and unreachable/404 targets. Set by `build_validation`; audit trail in [`data/value/validation.csv`](components/validation.md). |

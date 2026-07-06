@@ -20,6 +20,10 @@ Checks:
   5. Completeness rule: a component score / the overall risk score is present
      only if ALL of its scored inputs are present (no partial scores on disk).
   6. Long-format git files have no duplicate (repo, sha, metric) keys.
+  7. Every GitLab host in the data has a repo_id nickname registered in
+     `HOST_NICKNAMES` (src/sources/gitlab/gitlab_client.py).
+  8. Every gl/ repo_id on disk matches the one unified shape —
+     `gl/{digits}` (gitlab.com) or `gl/{nickname}-{digits}`.
 
 Usage:
     uv run python scripts/pipeline_health.py
@@ -30,6 +34,7 @@ from __future__ import annotations
 import argparse
 import csv
 import glob
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -438,11 +443,98 @@ def check_source_schema_contract() -> list[Result]:
     return out
 
 
+def check_gitlab_host_nicknames() -> list[Result]:
+    """Every GitLab host present in the data has a repo_id nickname.
+
+    `make_repo_id` builds ids as `gl/{nickname}-{project_id}` from
+    `HOST_NICKNAMES` (src/sources/gitlab/gitlab_client.py) and raises on an
+    unmapped host — so a host that reaches the data without a nickname means
+    the map must be extended BY HAND (never auto-derive a nickname: an
+    invented id would change once the real nickname lands). Hosts are
+    collected from every `host` column under data/sources/gitlab/ and from
+    every GitLab git_url in value.csv (covers projects that never resolved
+    to a repos.csv row). Also guards the map itself: nicknames must be
+    unique, lowercase alphanumeric, and non-numeric (a numeric nickname
+    would collide with bare gitlab.com ids).
+    """
+    from src.sources.gitlab.gitlab_client import HOST_NICKNAMES, parse_git_url
+
+    out: list[Result] = []
+    nicks = [n for n in HOST_NICKNAMES.values() if n]
+    bad_nicks = [n for n in nicks if not re.fullmatch(r"[a-z][a-z0-9]*", n)]
+    dup_nicks = [n for n, c in Counter(nicks).items() if c > 1]
+    map_problems = []
+    if bad_nicks:
+        map_problems.append(f"malformed nickname(s): {', '.join(bad_nicks)}")
+    if dup_nicks:
+        map_problems.append(f"duplicate nickname(s): {', '.join(dup_nicks)}")
+    out.append(("gitlab:HOST_NICKNAMES", not map_problems,
+                "; ".join(map_problems) if map_problems
+                else f"{len(HOST_NICKNAMES)} hosts mapped, nicknames well-formed"))
+
+    hosts: set[str] = set()
+    for path in sorted(glob.glob(str(ROOT / "data" / "sources" / "gitlab" / "*.csv"))):
+        with open(path, encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            if "host" not in (reader.fieldnames or []):
+                continue
+            hosts.update(h for r in reader if (h := (r.get("host") or "").strip().lower()))
+    with open(ROOT / "data" / "value" / "value.csv", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            parsed = parse_git_url(r.get("git_url") or "")
+            if parsed:
+                hosts.add(parsed[0])
+    missing = sorted(hosts - set(HOST_NICKNAMES))
+    out.append(("gitlab:host nicknames", not missing,
+                f"{len(missing)} host(s) without a nickname — add manually to "
+                f"HOST_NICKNAMES in src/sources/gitlab/gitlab_client.py: "
+                f"{', '.join(missing)}" if missing
+                else f"{len(hosts)} host(s) in data, all nicknamed"))
+    return out
+
+
+def check_gitlab_id_shape() -> list[Result]:
+    """Every gl/ repo_id on disk matches the one unified shape.
+
+    Shape: bare `gl/{digits}` (gitlab.com) or `gl/{nickname}-{digits}` with
+    a nickname registered in `HOST_NICKNAMES`. Scans the repo_id column of
+    every CSV under data/ that has one (header sniff first, so vendor dumps
+    and non-id files cost nothing). Catches any residue of a different id
+    form — e.g. an id written by a fetcher predating the current map.
+    """
+    from src.sources.gitlab.gitlab_client import HOST_NICKNAMES
+
+    nicks = sorted(n for n in HOST_NICKNAMES.values() if n)
+    valid = re.compile(rf"gl/(?:(?:{'|'.join(map(re.escape, nicks))})-)?\d+")
+    out: list[Result] = []
+    scanned = 0
+    for path in sorted((ROOT / "data").rglob("*.csv")):
+        if "repo_id" not in _header(path):
+            continue
+        scanned += 1
+        bad: set[str] = set()
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                rid = (row.get("repo_id") or "").strip()
+                if rid.startswith("gl/") and not valid.fullmatch(rid):
+                    bad.add(rid)
+        if bad:
+            sample = ", ".join(sorted(bad)[:3]) + (" …" if len(bad) > 3 else "")
+            out.append((f"{path.relative_to(ROOT)}:gl-id-shape", False,
+                        f"{len(bad)} non-canonical gl/ id(s): {sample}"))
+    out.append(("gitlab:id shape", not out or all(ok for _, ok, _ in out),
+                f"all gl/ ids canonical across {scanned} repo_id-keyed files"
+                if not [1 for _, ok, _ in out if not ok] else
+                "non-canonical gl/ ids found (see rows above)"))
+    return out
+
+
 CHECKS = [check_dimension_csvs, check_risk_data, check_eligibility_data,
           check_value_data, check_value_criticality,
           check_source_repo_id_integrity, check_source_schema_contract,
           check_score_component_coverage,
-          check_score_input_completeness, check_long_format_keys]
+          check_score_input_completeness, check_long_format_keys,
+          check_gitlab_host_nicknames, check_gitlab_id_shape]
 
 
 def main() -> int:

@@ -9,7 +9,7 @@ ineligible/incomplete repos stay in the table with their `eligible` flag
 visible — filter on it downstream if you want only fundable candidates.
 
 Columns:
-    repo_id           stable platform-qualified id (`gh/<n>` / `gl/<host>-<n>`)
+    repo_id           stable platform-qualified id (`gh/<n>` / `gl/<nickname>-<n>`)
     repo              canonical slug
     language          primary language, lowercased. GitHub repos from
                       `data/sources/github/repos.csv`; GitLab repos fall back

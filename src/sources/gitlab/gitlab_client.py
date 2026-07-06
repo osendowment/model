@@ -19,11 +19,32 @@ from dotenv import load_dotenv
 
 log = logging.getLogger(__name__)
 
-# Curated seed of GitLab instances present in value.csv. `is_gitlab_host` also
-# treats any `gitlab.*` host as an instance, so this list need not be exhaustive.
-KNOWN_GITLAB_HOSTS: set[str] = {
-    "gitlab.com", "salsa.debian.org", "invent.kde.org", "code.videolan.org",
+# Host → repo_id nickname. Every GitLab instance that appears in the data MUST
+# have an entry here — `make_repo_id` refuses to invent an id for an unmapped
+# host, and scripts/pipeline_health.py (check_gitlab_host_nicknames) fails when
+# a host shows up without one; add new hosts here manually. gitlab.com is the
+# canonical instance and maps to the empty nickname (bare `gl/{project_id}`).
+HOST_NICKNAMES: dict[str, str] = {
+    "gitlab.com": "",
+    "salsa.debian.org": "debian",
+    "gitlab.freedesktop.org": "freedesktop",
+    "gitlab.gnome.org": "gnome",
+    "gitlab.redox-os.org": "redox",
+    "invent.kde.org": "kde",
+    "gitlab.xiph.org": "xiph",
+    "gitlab.isc.org": "isc",
+    "gitlab.inria.fr": "inria",
+    "gitlab.dkrz.de": "dkrz",
+    "code.videolan.org": "videolan",
+    "gitlab.linss.com": "linss",
+    "gitlab.cern.ch": "cern",
+    "gitlab.exherbo.org": "exherbo",
+    "gitlab.kitware.com": "kitware",
 }
+
+# GitLab instances known to appear in the data. `is_gitlab_host` also treats
+# any `gitlab.*` host as an instance, so this set need not be exhaustive.
+KNOWN_GITLAB_HOSTS: set[str] = set(HOST_NICKNAMES)
 
 # Floor for per-host backoff. A host can report `RateLimit-Remaining: 0` with
 # no `RateLimit-Reset` header — without a floor, `wait` would compute to 0 and
@@ -79,13 +100,22 @@ def clone_url(host: str, path: str) -> str:
 
 def make_repo_id(host: str, project_id: int | str) -> str:
     """Unified GitLab id. gitlab.com is the canonical instance and gets a bare
-    `gl/{project_id}`; every self-hosted instance is namespaced by its lowercased
-    host as `gl/{host}-{project_id}` (hyphen, so the id carries no path separator).
+    `gl/{project_id}`; every self-hosted instance is namespaced by its host's
+    nickname as `gl/{nickname}-{project_id}` (see `HOST_NICKNAMES`).
+
+    Raises ValueError for a host with no nickname — an id must never be
+    invented on the fly, or it would change once the nickname is registered.
     """
     h = (host or "").strip().lower()
-    if h in ("gitlab.com", "www.gitlab.com"):
-        return f"gl/{project_id}"
-    return f"gl/{h}-{project_id}"
+    if h == "www.gitlab.com":
+        h = "gitlab.com"
+    if h not in HOST_NICKNAMES:
+        raise ValueError(
+            f"GitLab host {h!r} has no nickname — add it to HOST_NICKNAMES "
+            "in src/sources/gitlab/gitlab_client.py before fetching it"
+        )
+    nick = HOST_NICKNAMES[h]
+    return f"gl/{project_id}" if nick == "" else f"gl/{nick}-{project_id}"
 
 
 def load_token_map() -> dict[str, str]:
