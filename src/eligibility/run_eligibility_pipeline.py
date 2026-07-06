@@ -7,8 +7,11 @@ for funding? Four checks — OSI-approved license (`oss`), funding intent
 
 By default fetches any MISSING raw data first (incremental — each fetcher
 skips data already present / within its TTL, so only gaps are fetched),
-then runs the three dimension builders -> aggregate. Pass --skip-fetch to
-skip all fetchers and only re-run the builders/aggregate from existing data.
+then runs the three dimension builders -> aggregate -> the terminal preview
+outputs: results.csv (eligible repos + value_score + risk_score), people.csv
+(owners/key-contributors of that repo scope), and preview.xlsx (both as one
+styled, filterable workbook). Pass --skip-fetch to skip all fetchers and
+only re-run the builders/aggregate/preview steps from existing data.
 
 Usage:
     uv run python -m src.eligibility.run_eligibility_pipeline                # fetch + build
@@ -67,6 +70,10 @@ BUILDERS = [
     Step("aggregate",     "src.eligibility.build_eligibility"),
     # Terminal cross-stage rollup: eligible repos + value_score + risk_score.
     Step("results",       "src.build_results"),
+    # Owners/key-contributors of the results.csv repo scope, for outreach.
+    Step("people",        "src.build_people"),
+    # Both preview CSVs as one styled, filterable workbook.
+    Step("preview-xlsx",  "src.build_preview_workbook"),
 ]
 
 
