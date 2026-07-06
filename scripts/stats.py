@@ -138,6 +138,16 @@ def value_stats() -> dict:
         return {"A": by_class["A"], "B": by_class["B"], "C": by_class["C"],
                 "total": len(sub)}
 
+    def _eco_url_bucket(eco: str) -> dict:
+        """URL-carrying repos that belong to `eco`, classed by their class IN
+        that ecosystem (class_npm/…). Multi-eco repos count once per ecosystem
+        they belong to — hence the grand total is labelled (unique)."""
+        sub = [r for r in with_url
+               if eco in (r.get("ecosystems") or "").split(",")]
+        by_class = Counter((r.get(CLASS_COL[eco]) or "").strip() for r in sub)
+        return {"A": by_class["A"], "B": by_class["B"], "C": by_class["C"],
+                "total": len(sub)}
+
     git_urls = {
         "github": _url_bucket([r for r in with_url if (r.get("platform") or "") == "github"]),
         "gitlab": _url_bucket([r for r in with_url if (r.get("platform") or "") == "gitlab"]),
@@ -146,6 +156,7 @@ def value_stats() -> dict:
         "valid": _url_bucket([r for r in with_url if _truthy(r.get("git_valid"))]),
         "invalid": _url_bucket([r for r in with_url if not _truthy(r.get("git_valid"))]),
         "all": _url_bucket(with_url),
+        "by_eco": {eco: _eco_url_bucket(eco) for eco in ECOSYSTEMS},
     }
 
     def _is_active(r: dict) -> bool:
@@ -610,7 +621,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
               "incl. archived mirrors", bold=True))
 
     a("\n### Git URLs\n")
-    a("| Git URL | A | B | C | Total | % Total |")
+    a("| Git URLs | A | B | C | Total | % Total |")
     a("|---|--:|--:|--:|--:|--:|")
     gu = v["git_urls"]
     grand = gu["all"]["total"]
@@ -629,22 +640,14 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a(_gu_row("GitHub repos", "github"))
     a(_gu_row("GitLab repos", "gitlab"))
     a(_gu_row("Other repos", "others"))
-    a(_gu_row("^Valid (upstream resolves)", "valid"))
+    a(_gu_row("^Valid (resolved)", "valid"))
     a(_gu_row("Invalid (unreachable)", "invalid"))
-    a(_gu_row("^Total git URLs", "all", bold=True))
-
-    a("\n### Repo class distribution\n")
-    a("| Metric | A | B | C |")
-    a("|---|--:|--:|--:|")
-    cl = v["classes"]
-    for eco in ECOSYSTEMS:
-        a(f"| {eco} | {cl['A'][eco]:,} | {cl['B'][eco]:,} | {cl['C'][eco]:,} |")
-    a(f"| **Repos** | **{cl['A']['strongest']:,}** | "
-      f"**{cl['B']['strongest']:,}** | **{cl['C']['strongest']:,}** |")
-    bc = v["by_class"]
-    for label, key in (("GitHub %", "github"), ("Git %", "git"), ("Valid %", "valid")):
-        a(f"| {label} | " + " | ".join(
-            _pct(bc[c][key], bc[c]["repos"]) for c in ("A", "B", "C")) + " |")
+    for i, eco in enumerate(ECOSYSTEMS):
+        b = gu["by_eco"][eco]
+        cells = [f"{b['A']:,}", f"{b['B']:,}", f"{b['C']:,}", f"{b['total']:,}",
+                 _pct(b["total"], grand)]
+        a(f"| {'^' if i == 0 else ''}{eco} | " + " | ".join(cells) + " |")
+    a(_gu_row("^Total git URLs (unique)", "all", bold=True))
 
     n = r["scope"]
     a(f"\n### Score distribution by component (scope {n})\n")
