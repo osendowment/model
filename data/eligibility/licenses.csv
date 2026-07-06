@@ -2,7 +2,6 @@ repo,repo_id,license,license_source,oss
 7rulnik/source-map-js,gh/330043541,bsd-3-clause,registry,True
 acornjs/acorn,gh/5932749,mit,registry,True
 acornjs/acorn-jsx,gh/22187098,mit,registry,True
-adobe/react-spectrum,gh/208362715,apache-2.0,registry,True
 agronholm/anyio,gh/145337588,mit,registry,True
 agronholm/exceptiongroup,gh/447694800,mit,registry,True
 ai/nanoid,gh/99401299,mit,registry,True
@@ -50,7 +49,6 @@ azure/msrest-for-python,gh/71186468,mit,registry,True
 azuread/microsoft-authentication-library-for-python,gh/67243113,mit,registry,True
 babel/babel,gh/24560307,mit,registry,True
 babel/babel-polyfills,gh/190579283,mit,registry,True
-babel/minify,gh/55723051,mit,registry,True
 bdwgc/bdwgc,gh/2109456,mit,override,True
 beatgammit/base64-js,gh/2853282,mit,registry,True
 benjaminp/six,gh/77868600,mit,registry,True
@@ -492,6 +490,7 @@ ljharb/side-channel-weakmap,gh/901188921,mit,registry,True
 lodash/lodash,gh/3955647,mit,registry,True
 loganfsmyth/gensync,gh/132383032,mit,registry,True
 lokathor/bytemuck,gh/209673558,zlib or apache-2.0 or mit,registry,True
+lovell/detect-libc,gh/96149091,apache-2.0,registry,True
 lukeed/dequal,gh/174421655,mit,registry,True
 lukeed/escalade,gh/273568715,mit,registry,True
 lukeed/kleur,gh/140393403,mit,registry,True
@@ -549,6 +548,7 @@ mpfr/mpfr,gl/inria-33626,gpl-3.0+,gitlab,True
 mrabarnett/mrab-regex,gh/309446978,apache-2.0 and cnri-python,registry,True
 mrmlnc/fast-glob,gh/77467076,mit,registry,True
 msgpack/msgpack-python,gh/2242705,apache-2.0,registry,True
+mui/material-ui,gh/23083156,mit,registry,True
 multimedia-team/aom,gl/debian-29534,bsd-2-clause,gitlab,True
 myrne/performance-now,gh/10219264,mit,registry,True
 mysticatea/abort-controller,gh/105228556,mit,registry,True

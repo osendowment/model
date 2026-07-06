@@ -2,7 +2,6 @@ repo,repo_id,eol,archived,mirror,active
 7rulnik/source-map-js,gh/330043541,False,False,False,True
 acornjs/acorn,gh/5932749,False,False,False,True
 acornjs/acorn-jsx,gh/22187098,False,False,False,True
-adobe/react-spectrum,gh/208362715,False,False,False,True
 agronholm/anyio,gh/145337588,False,False,False,True
 agronholm/exceptiongroup,gh/447694800,False,False,False,True
 ai/nanoid,gh/99401299,False,False,False,True
@@ -50,7 +49,6 @@ azure/msrest-for-python,gh/71186468,False,True,False,False
 azuread/microsoft-authentication-library-for-python,gh/67243113,False,False,False,True
 babel/babel,gh/24560307,False,False,False,True
 babel/babel-polyfills,gh/190579283,False,False,False,True
-babel/minify,gh/55723051,False,False,False,True
 bdwgc/bdwgc,gh/2109456,False,False,False,True
 beatgammit/base64-js,gh/2853282,False,False,False,True
 benjaminp/six,gh/77868600,False,False,False,True
@@ -492,6 +490,7 @@ ljharb/side-channel-weakmap,gh/901188921,False,False,False,True
 lodash/lodash,gh/3955647,False,False,False,True
 loganfsmyth/gensync,gh/132383032,False,False,False,True
 lokathor/bytemuck,gh/209673558,False,False,False,True
+lovell/detect-libc,gh/96149091,False,False,False,True
 lukeed/dequal,gh/174421655,False,False,False,True
 lukeed/escalade,gh/273568715,False,False,False,True
 lukeed/kleur,gh/140393403,False,False,False,True
@@ -549,6 +548,7 @@ mpfr/mpfr,gl/inria-33626,False,False,False,True
 mrabarnett/mrab-regex,gh/309446978,False,False,False,True
 mrmlnc/fast-glob,gh/77467076,False,False,False,True
 msgpack/msgpack-python,gh/2242705,False,False,False,True
+mui/material-ui,gh/23083156,False,False,False,True
 multimedia-team/aom,gl/debian-29534,False,False,False,True
 myrne/performance-now,gh/10219264,False,False,False,True
 mysticatea/abort-controller,gh/105228556,False,False,False,True

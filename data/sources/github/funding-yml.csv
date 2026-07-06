@@ -511,6 +511,7 @@ ljharb/side-channel-weakmap,gh/901188921,True,True,"github,tidelift",ljharb,,,,s
 lodash/lodash,gh/3955647,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:52+00:00
 loganfsmyth/gensync,gh/132383032,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:52+00:00
 lokathor/bytemuck,gh/209673558,True,True,github,lokathor,,,,,,,,,,,,,,2026-06-30T14:18:52+00:00
+lovell/detect-libc,gh/96149091,False,False,,,,,,,,,,,,,,,,2026-07-06T15:53:41+00:00
 lukeed/dequal,gh/174421655,True,True,github,lukeed,,,,,,,,,,,,,,2026-06-30T14:18:52+00:00
 lukeed/escalade,gh/273568715,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:52+00:00
 lukeed/kleur,gh/140393403,True,True,github,lukeed,,,,,,,,,,,,,,2026-06-30T14:18:52+00:00
@@ -569,6 +570,7 @@ mpfr/mpfr,,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:39+00:00
 mrabarnett/mrab-regex,gh/309446978,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 mrmlnc/fast-glob,gh/77467076,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 msgpack/msgpack-python,gh/2242705,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
+mui/material-ui,gh/23083156,True,True,"open_collective,tidelift",,,mui-org,,material,,,,,,,,,,2026-07-06T15:53:41+00:00
 multimedia-team/aom,,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:39+00:00
 myrne/performance-now,gh/10219264,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 mysticatea/abort-controller,gh/105228556,True,True,github,mysticatea,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00

@@ -629,12 +629,15 @@ package,license,fetched_at
 @fortawesome/react-fontawesome,mit,2026-04-27T15:10:36Z
 @gar/promise-retry,mit,2026-04-27T15:10:36Z
 @gerrit0/mini-shiki,mit,2026-04-27T15:10:36Z
+@google-cloud/common,apache-2.0,2026-07-06T15:52:25Z
 @google-cloud/firestore,apache-2.0,2026-04-27T15:10:36Z
+@google-cloud/logging,apache-2.0,2026-07-06T15:52:25Z
 @google-cloud/paginator,apache-2.0,2026-04-27T15:10:36Z
 @google-cloud/precise-date,apache-2.0,2026-04-27T15:10:36Z
 @google-cloud/projectify,apache-2.0,2026-04-27T15:10:36Z
 @google-cloud/promisify,apache-2.0,2026-04-27T15:10:36Z
 @google-cloud/pubsub,apache-2.0,2026-04-27T15:10:36Z
+@google/genai,apache-2.0,2026-07-06T15:52:25Z
 @googlemaps/js-api-loader,apache-2.0,2026-04-27T15:10:36Z
 @graphql-codegen/add,mit,2026-04-27T15:10:36Z
 @graphql-codegen/core,mit,2026-04-27T15:10:36Z
@@ -862,6 +865,12 @@ package,license,fetched_at
 @module-federation/sdk,mit,2026-04-27T15:10:36Z
 @module-federation/webpack-bundler-runtime,mit,2026-04-27T15:10:36Z
 @mongodb-js/saslprep,mit,2026-04-27T15:10:36Z
+@motionone/animation,mit,2026-07-06T15:52:25Z
+@motionone/dom,mit,2026-07-06T15:52:25Z
+@motionone/easing,mit,2026-07-06T15:52:25Z
+@motionone/generators,mit,2026-07-06T15:52:25Z
+@motionone/types,mit,2026-07-06T15:52:25Z
+@motionone/utils,mit,2026-07-06T15:52:25Z
 @mswjs/cookies,mit,2026-04-27T15:10:36Z
 @mswjs/interceptors,mit,2026-04-27T15:10:36Z
 @mui/core-downloads-tracker,mit,2026-04-27T15:10:36Z
@@ -1319,6 +1328,7 @@ package,license,fetched_at
 @sinonjs/commons,bsd-3-clause,2026-04-27T15:10:36Z
 @sinonjs/fake-timers,bsd-3-clause,2026-04-27T15:10:36Z
 @sinonjs/samsam,bsd-3-clause,2026-04-27T15:10:36Z
+@sinonjs/text-encoding,(unlicense or apache-2.0),2026-07-06T15:52:25Z
 @slack/logger,mit,2026-04-27T15:10:36Z
 @slack/types,mit,2026-04-27T15:10:36Z
 @slack/web-api,mit,2026-04-27T15:10:36Z
@@ -1385,16 +1395,27 @@ package,license,fetched_at
 @storybook/api,mit,2026-04-27T15:10:36Z
 @storybook/client-logger,mit,2026-04-27T15:10:36Z
 @storybook/components,mit,2026-04-27T15:10:36Z
+@storybook/core,mit,2026-07-06T15:52:25Z
 @storybook/core-events,mit,2026-04-27T15:10:36Z
 @storybook/global,mit,2026-04-27T15:10:36Z
 @storybook/icons,mit,2026-04-27T15:10:36Z
 @storybook/manager-api,mit,2026-04-27T15:10:36Z
 @storybook/preview-api,mit,2026-04-27T15:10:36Z
+@storybook/react,mit,2026-07-06T15:52:25Z
+@storybook/react-docgen-typescript-plugin,mit,2026-07-06T15:52:25Z
+@storybook/react-dom-shim,mit,2026-07-06T15:52:25Z
 @storybook/theming,mit,2026-04-27T15:10:36Z
 @storybook/types,mit,2026-04-27T15:10:36Z
 @streamparser/json,mit,2026-04-27T15:10:36Z
 @stylelint/postcss-css-in-js,mit,2026-04-27T15:10:36Z
 @stylistic/eslint-plugin,mit,2026-04-27T15:10:36Z
+@supabase/auth-js,mit,2026-07-06T15:52:25Z
+@supabase/functions-js,mit,2026-07-06T15:52:25Z
+@supabase/phoenix,mit,2026-07-06T15:52:25Z
+@supabase/postgrest-js,mit,2026-07-06T15:52:25Z
+@supabase/realtime-js,mit,2026-07-06T15:52:25Z
+@supabase/storage-js,mit,2026-07-06T15:52:25Z
+@supabase/supabase-js,mit,2026-07-06T15:52:25Z
 @surma/rollup-plugin-off-main-thread,apache-2.0,2026-04-27T15:10:36Z
 @sveltejs/acorn-typescript,mit,2026-04-27T15:10:36Z
 @svgr/babel-plugin-add-jsx-attribute,mit,2026-04-27T15:10:36Z
@@ -1418,6 +1439,9 @@ package,license,fetched_at
 @svta/cml-id3,apache-2.0,2026-04-27T15:10:36Z
 @svta/cml-request,apache-2.0,2026-04-27T15:10:36Z
 @svta/cml-xml,apache-2.0,2026-04-27T15:10:36Z
+@swc-node/core,mit,2026-07-06T15:52:25Z
+@swc-node/register,mit,2026-07-06T15:52:25Z
+@swc-node/sourcemap-support,mit,2026-07-06T15:52:25Z
 @swc/core,apache-2.0,2026-04-27T15:10:36Z
 @swc/counter,apache-2.0,2026-04-27T15:10:36Z
 @swc/helpers,apache-2.0,2026-04-27T15:10:36Z
@@ -1427,6 +1451,7 @@ package,license,fetched_at
 @tailwindcss/node,mit,2026-04-27T15:10:36Z
 @tailwindcss/oxide,mit,2026-04-27T15:10:36Z
 @tailwindcss/postcss,mit,2026-04-27T15:10:36Z
+@tailwindcss/vite,mit,2026-07-06T15:52:25Z
 @tanstack/match-sorter-utils,mit,2026-04-27T15:10:36Z
 @tanstack/query-core,mit,2026-04-27T15:10:36Z
 @tanstack/react-query,mit,2026-04-27T15:10:36Z
@@ -1438,6 +1463,7 @@ package,license,fetched_at
 @testing-library/jest-dom,mit,2026-04-27T15:10:36Z
 @testing-library/user-event,mit,2026-04-27T15:10:36Z
 @tiptap/core,mit,2026-04-27T15:10:36Z
+@tiptap/pm,mit,2026-07-06T15:52:25Z
 @tokenizer/inflate,mit,2026-04-27T15:10:36Z
 @tokenizer/token,mit,2026-04-27T15:10:36Z
 @tootallnate/once,mit,2026-04-27T15:10:36Z
@@ -1470,6 +1496,7 @@ package,license,fetched_at
 @types/bn.js,mit,2026-04-27T15:10:36Z
 @types/body-parser,mit,2026-04-27T15:10:36Z
 @types/bonjour,mit,2026-04-27T15:10:36Z
+@types/braces,mit,2026-07-06T15:52:25Z
 @types/buffer-from,mit,2026-04-27T15:10:36Z
 @types/bunyan,mit,2026-04-27T15:10:36Z
 @types/caseless,mit,2026-04-27T15:10:36Z
@@ -1527,12 +1554,14 @@ package,license,fetched_at
 @types/duplexify,mit,2026-04-27T15:10:36Z
 @types/ejs,mit,2026-04-27T15:10:36Z
 @types/emscripten,mit,2026-04-27T15:10:36Z
+@types/enzyme,mit,2026-07-06T15:52:25Z
 @types/eslint,mit,2026-04-27T15:10:36Z
 @types/eslint-scope,mit,2026-04-27T15:10:36Z
 @types/esquery,mit,2026-04-27T15:10:36Z
 @types/esrecurse,mit,2026-04-27T15:10:36Z
 @types/estree,mit,2026-04-27T15:10:36Z
 @types/estree-jsx,mit,2026-04-27T15:10:36Z
+@types/events,mit,2026-07-06T15:52:25Z
 @types/expect,mit,2026-04-27T15:10:36Z
 @types/express,mit,2026-04-27T15:10:36Z
 @types/express-serve-static-core,mit,2026-04-27T15:10:36Z
@@ -1581,6 +1610,7 @@ package,license,fetched_at
 @types/mdurl,mit,2026-04-27T15:10:36Z
 @types/mdx,mit,2026-04-27T15:10:36Z
 @types/methods,mit,2026-04-27T15:10:36Z
+@types/micromatch,mit,2026-07-06T15:52:25Z
 @types/mime-types,mit,2026-04-27T15:10:36Z
 @types/minimatch,mit,2026-04-27T15:10:36Z
 @types/minimist,mit,2026-04-27T15:10:36Z
@@ -1591,6 +1621,7 @@ package,license,fetched_at
 @types/mysql,mit,2026-04-27T15:10:36Z
 @types/node,mit,2026-04-27T15:10:36Z
 @types/node-fetch,mit,2026-04-27T15:10:36Z
+@types/nodemailer,mit,2026-07-06T15:52:25Z
 @types/normalize-package-data,mit,2026-04-27T15:10:36Z
 @types/offscreencanvas,mit,2026-04-27T15:10:36Z
 @types/pako,mit,2026-04-27T15:10:36Z
@@ -1671,6 +1702,7 @@ package,license,fetched_at
 @types/whatwg-url,mit,2026-04-27T15:10:36Z
 @types/which,mit,2026-04-27T15:10:36Z
 @types/ws,mit,2026-04-27T15:10:36Z
+@types/xml2js,mit,2026-07-06T15:52:25Z
 @types/yargs,mit,2026-04-27T15:10:36Z
 @types/yargs-parser,mit,2026-04-27T15:10:36Z
 @types/yauzl,mit,2026-04-27T15:10:36Z
@@ -3546,6 +3578,7 @@ hyphenate-style-name,bsd-3-clause,2026-04-27T15:10:36Z
 i18next,mit,2026-04-27T15:10:36Z
 i18next-browser-languagedetector,mit,2026-04-27T15:10:36Z
 i18next-http-backend,mit,2026-04-27T15:10:36Z
+iceberg-js,mit,2026-07-06T15:52:25Z
 iconv-lite,mit,2026-04-27T15:10:36Z
 icss-replace-symbols,isc,2026-04-27T15:10:36Z
 icss-utils,isc,2026-04-27T15:10:36Z
@@ -4968,6 +5001,7 @@ propagate,mit,2026-04-27T15:10:36Z
 proper-lockfile,mit,2026-04-27T15:10:36Z
 property-expr,mit,2026-04-27T15:10:36Z
 property-information,mit,2026-04-27T15:10:36Z
+prosemirror-changeset,mit,2026-07-06T15:52:25Z
 prosemirror-commands,mit,2026-04-27T15:10:36Z
 prosemirror-dropcursor,mit,2026-04-27T15:10:36Z
 prosemirror-gapcursor,mit,2026-04-27T15:10:36Z

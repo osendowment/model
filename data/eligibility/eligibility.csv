@@ -2,7 +2,6 @@ repo,repo_id,oss,intent,nonprofit,active,eligible,value_comps,risk_comps,complet
 7rulnik/source-map-js,gh/330043541,True,True,True,True,True,3,4,True
 acornjs/acorn,gh/5932749,True,True,True,True,True,3,4,True
 acornjs/acorn-jsx,gh/22187098,True,True,True,True,True,3,4,True
-adobe/react-spectrum,gh/208362715,True,True,False,True,False,2,4,True
 agronholm/anyio,gh/145337588,True,True,True,True,True,3,4,True
 agronholm/exceptiongroup,gh/447694800,True,True,True,True,True,3,4,True
 ai/nanoid,gh/99401299,True,True,True,True,True,3,4,True
@@ -50,7 +49,6 @@ azure/msrest-for-python,gh/71186468,True,False,True,False,False,3,4,True
 azuread/microsoft-authentication-library-for-python,gh/67243113,True,True,False,True,False,3,4,True
 babel/babel,gh/24560307,True,True,True,True,True,3,4,True
 babel/babel-polyfills,gh/190579283,True,True,True,True,True,3,4,True
-babel/minify,gh/55723051,True,True,True,True,True,2,4,True
 bdwgc/bdwgc,gh/2109456,True,False,True,True,False,2,4,True
 beatgammit/base64-js,gh/2853282,True,True,True,True,True,3,4,True
 benjaminp/six,gh/77868600,True,False,True,True,False,3,4,True
@@ -492,6 +490,7 @@ ljharb/side-channel-weakmap,gh/901188921,True,True,True,True,True,2,4,True
 lodash/lodash,gh/3955647,True,True,True,True,True,3,4,True
 loganfsmyth/gensync,gh/132383032,True,False,True,True,False,3,4,True
 lokathor/bytemuck,gh/209673558,True,True,True,True,True,3,4,True
+lovell/detect-libc,gh/96149091,True,False,True,True,False,1,4,False
 lukeed/dequal,gh/174421655,True,True,True,True,True,3,4,True
 lukeed/escalade,gh/273568715,True,True,True,True,True,3,4,True
 lukeed/kleur,gh/140393403,True,True,True,True,True,3,4,True
@@ -549,6 +548,7 @@ mpfr/mpfr,gl/inria-33626,True,False,True,True,False,1,4,False
 mrabarnett/mrab-regex,gh/309446978,True,False,True,True,False,3,4,True
 mrmlnc/fast-glob,gh/77467076,True,False,True,True,False,3,4,True
 msgpack/msgpack-python,gh/2242705,True,True,True,True,True,3,4,True
+mui/material-ui,gh/23083156,True,True,False,True,False,2,4,True
 multimedia-team/aom,gl/debian-29534,True,False,True,True,False,1,4,False
 myrne/performance-now,gh/10219264,True,False,True,True,False,3,4,True
 mysticatea/abort-controller,gh/105228556,True,True,True,True,True,3,4,True
