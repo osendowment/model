@@ -41,11 +41,11 @@ pydantic/pydantic,gh/90194616,https://github.com/pydantic/pydantic.git,2025,4395
 matplotlib/matplotlib,gh/1385122,https://github.com/matplotlib/matplotlib.git,2025,9794,290396,257645,548041,1930,lib/matplotlib/widgets.py,8970,156.1,2026-05-03T22:57:48Z
 scikit-learn/scikit-learn,gh/843222,https://github.com/scikit-learn/scikit-learn.git,2025,6875,343499,196690,540189,1094,sklearn/utils/estimator_checks.py,6569,94.0,2026-05-03T17:22:01Z
 prettier/prettier,gh/75104123,https://github.com/prettier/prettier.git,2025,5530,291360,239088,530448,11363,vendors/tempy.js,20414,66.5,2026-05-03T17:22:01Z
-gnome/glib,gh/4537082,https://github.com/gnome/glib.git,2025,6585,291599,236909,528508,1725,glib/gunibreak.h,54834,51.8,2026-05-03T17:22:01Z
+gnome/glib,gl/gnome-658,https://github.com/gnome/glib.git,2025,6585,291599,236909,528508,1725,glib/gunibreak.h,54834,51.8,2026-05-03T17:22:01Z
 clap-rs/clap,gh/31315121,https://github.com/clap-rs/clap.git,2025,3901,280377,245897,526274,928,src/build/arg/mod.rs,16871,12.6,2026-05-03T17:22:01Z
 sqlite/sqlite,gh/176278485,https://github.com/sqlite/sqlite.git,2025,8104,295834,214133,509967,617,ext/jni/src/c/sqlite3-jni.c,25050,271.7,2026-05-18T00:11:16Z
 facebook/regenerator,gh/13346571,https://github.com/facebook/regenerator.git,2025,132,255748,250174,505922,30,docs/bundle.js,499249,7.7,2026-05-03T17:22:01Z
-gnutls/gnutls,gh/58873704,https://github.com/gnutls/gnutls.git,2025,1219,260592,232654,493246,1275,lib/nettle/gost/kuztable.h,82542,95.4,2026-05-03T17:22:01Z
+gnutls/gnutls,gl/179611,https://github.com/gnutls/gnutls.git,2025,1219,260592,232654,493246,1275,lib/nettle/gost/kuztable.h,82542,95.4,2026-05-03T17:22:01Z
 libjxl/libjxl,gh/340219494,https://github.com/libjxl/libjxl.git,2025,3141,278830,201681,480511,970,lib/jxl/decode_test.cc,12667,18.7,2026-05-03T17:22:01Z
 pypa/pip,gh/1446467,https://github.com/pypa/pip.git,2025,3230,245438,215189,460627,854,src/pip/_vendor/idna/uts46data.py,29824,40.4,2026-05-03T17:22:01Z
 vitest-dev/vitest,gh/434708679,https://github.com/vitest-dev/vitest.git,2025,5286,299561,154455,454016,3407,packages/vitest/src/node/core.ts,6536,30.2,2026-05-03T17:22:01Z
@@ -56,7 +56,7 @@ ardatan/graphql-tools,gh/54432168,https://github.com/ardatan/graphql-tools.git,2
 c-ares/c-ares,gh/571708,https://github.com/c-ares/c-ares.git,2025,880,189494,213317,402811,305,src/lib/ares_platform.c,76582,6.6,2026-05-03T17:22:01Z
 pypa/setuptools,gh/54980593,https://github.com/pypa/setuptools.git,2025,4547,211605,185845,397450,680,pkg_resources/_vendor/more_itertools/more.py,18812,48.1,2026-05-03T17:22:01Z
 zloirock/core-js,gh/11481338,https://github.com/zloirock/core-js.git,2025,4266,223658,168600,392258,5651,deno/corejs/index.js,138700,31.1,2026-05-03T17:22:01Z
-gnome/libxml2,gh/4537118,https://github.com/gnome/libxml2.git,2025,2718,130569,252998,383567,329,testapi.c,66626,17.2,2026-05-03T17:22:01Z
+gnome/libxml2,gl/gnome-1665,https://github.com/gnome/libxml2.git,2025,2718,130569,252998,383567,329,testapi.c,66626,17.2,2026-05-03T17:22:01Z
 snowflakedb/snowflake-connector-python,gh/62262074,https://github.com/snowflakedb/snowflake-connector-python.git,2025,961,247900,127828,375728,680,src/snowflake/connector/nanoarrow_cpp/ArrowIterator/nanoarrow_ipc.c,63269,17.8,2026-05-03T17:22:01Z
 ethers-io/ethers.js,gh/63465664,https://github.com/ethers-io/ethers.js.git,2025,781,286340,88266,374606,1126,dist/ethers.js,92708,165.6,2026-05-03T17:22:01Z
 git/git,gh/36502,https://github.com/git/git.git,2025,12822,230050,136236,366286,1032,object-file.c,7978,102.4,2026-05-03T17:22:01Z
@@ -196,7 +196,7 @@ pnggroup/libpng,gh/3768025,https://github.com/pnggroup/libpng.git,2025,507,19997
 emotion-js/emotion,gh/92570536,https://github.com/emotion-js/emotion.git,2025,271,18607,16644,35251,529,flow-typed/npm/jest_v25.x.x.js,2938,14.8,2026-05-03T17:22:01Z
 rollup/plugins,gh/203607977,https://github.com/rollup/plugins.git,2025,719,22568,12222,34790,970,packages/typescript/test/test.js,1554,3.3,2026-05-03T17:22:01Z
 webpack/enhanced-resolve,gh/5400204,https://github.com/webpack/enhanced-resolve.git,2025,243,20173,14591,34764,143,test/exportsField.test.js,5322,1.8,2026-05-03T17:22:01Z
-fontconfig/fontconfig,gh/926884194,https://github.com/fontconfig/fontconfig.git,2025,456,19642,14918,34560,122,src/fcfreetype.c,3099,3.4,2026-05-03T17:22:01Z
+fontconfig/fontconfig,gl/freedesktop-890,https://github.com/fontconfig/fontconfig.git,2025,456,19642,14918,34560,122,src/fcfreetype.c,3099,3.4,2026-05-03T17:22:01Z
 gyscos/zstd-rs,gh/52115335,https://github.com/gyscos/zstd-rs.git,2025,241,15458,18490,33948,58,zstd-safe/zstd-sys/src/bindings_zstd_experimental.rs,4701,1.2,2026-05-03T17:22:01Z
 python/typing_extensions,gh/494077289,https://github.com/python/typing_extensions.git,2025,450,21439,12192,33631,12,src/typing_extensions.py,11715,1.0,2026-05-18T00:11:16Z
 7rulnik/source-map-js,gh/330043541,https://github.com/7rulnik/source-map-js.git,2025,39,1069,32553,33622,34,dist/test/test_source_map_consumer.js,4461,9.9,2026-05-03T17:22:01Z
@@ -317,7 +317,7 @@ uuidjs/uuid,gh/1203139,https://github.com/uuidjs/uuid.git,2025,146,4962,3893,885
 xtuc/webassemblyjs,gh/113006071,https://github.com/xtuc/webassemblyjs.git,2025,90,5741,3095,8836,152,types/lib/core.js,2132,7.0,2026-05-03T17:22:01Z
 yargs/yargs-parser,gh/50258379,https://github.com/yargs/yargs-parser.git,2025,61,4500,4222,8722,17,test/yargs-parser.mjs,4205,1.1,2026-05-03T17:22:01Z
 python-poetry/tomlkit,gh/140365570,https://github.com/python-poetry/tomlkit.git,2025,237,5717,2960,8677,27,tomlkit/items.py,2857,1.0,2026-05-03T17:22:01Z
-gnome/gdk-pixbuf,gh/4533539,https://github.com/gnome/gdk-pixbuf.git,2025,363,6452,2179,8631,85,gdk-pixbuf/io-glycin-utils.c,1638,36.8,2026-05-03T17:22:01Z
+gnome/gdk-pixbuf,gl/gnome-1548,https://github.com/gnome/gdk-pixbuf.git,2025,363,6452,2179,8631,85,gdk-pixbuf/io-glycin-utils.c,1638,36.8,2026-05-03T17:22:01Z
 proptest-rs/proptest,gh/94702898,https://github.com/proptest-rs/proptest.git,2025,257,6210,2293,8503,113,proptest-state-machine/src/strategy.rs,1316,4.3,2026-05-03T17:22:01Z
 executablebooks/markdown-it-py,gh/249956697,https://github.com/executablebooks/markdown-it-py.git,2025,176,4206,4182,8388,113,markdown_it/tree.py,593,2.3,2026-05-03T17:22:01Z
 ljharb/qs,gh/22266795,https://github.com/ljharb/qs.git,2025,210,5234,3143,8377,11,dist/qs.js,4548,5.5,2026-05-03T17:22:01Z
@@ -326,7 +326,7 @@ dtolnay/proc-macro2,gh/91860126,https://github.com/dtolnay/proc-macro2.git,2025,
 tkem/cachetools,gh/18006791,https://github.com/tkem/cachetools.git,2025,182,4769,3446,8215,43,src/cachetools/__init__.py,1761,0.7,2026-05-03T17:22:01Z
 peternator7/strum,gh/80964373,https://github.com/peternator7/strum.git,2025,196,5596,2286,7882,59,strum_macros/src/lib.rs,856,1.5,2026-05-03T17:22:01Z
 npm/hosted-git-info,gh/25002984,https://github.com/npm/hosted-git-info.git,2025,136,4014,3805,7819,29,test/github.js,1063,0.7,2026-05-03T17:22:01Z
-libidn/libidn2,gh/87378214,https://github.com/libidn/libidn2.git,2025,287,3964,3725,7689,50,tests/test-lookup.c,1496,2.1,2026-05-03T17:22:01Z
+libidn/libidn2,gl/2882658,https://github.com/libidn/libidn2.git,2025,287,3964,3725,7689,50,tests/test-lookup.c,1496,2.1,2026-05-03T17:22:01Z
 python/importlib_metadata,gh/306448340,https://github.com/python/importlib_metadata.git,2025,738,4893,2784,7677,39,importlib_metadata/__init__.py,3239,1.5,2026-05-03T17:22:01Z
 tokio-rs/bytes,gh/30062547,https://github.com/tokio-rs/bytes.git,2025,160,6429,1246,7675,30,src/buf/buf_impl.rs,2294,1.7,2026-05-03T17:22:01Z
 broofa/mime,gh/534940,https://github.com/broofa/mime.git,2025,120,4466,3183,7649,35,types/standard.js,1004,1.0,2026-05-03T17:22:01Z
@@ -364,7 +364,7 @@ crate-py/rpds,gh/608018848,https://github.com/crate-py/rpds.git,2025,384,4546,13
 jsdom/whatwg-url,gh/34761352,https://github.com/jsdom/whatwg-url.git,2025,87,2950,2833,5783,27,lib/url-state-machine.js,1439,2.0,2026-05-03T17:22:01Z
 jpadilla/pyjwt,gh/1408162,https://github.com/jpadilla/pyjwt.git,2025,294,4364,1391,5755,24,jwt/algorithms.py,1248,1.7,2026-05-03T17:22:01Z
 node-fetch/node-fetch,gh/29849956,https://github.com/node-fetch/node-fetch.git,2025,97,3819,1915,5734,24,test/main.js,2711,3.6,2026-05-03T17:22:01Z
-gnutls/libtasn1,gh/59017205,https://github.com/gnutls/libtasn1.git,2025,83,3027,2689,5716,59,fuzz/libtasn1_pkix_der_fuzzer.c,1050,3.4,2026-05-03T17:22:01Z
+gnutls/libtasn1,gl/919981,https://github.com/gnutls/libtasn1.git,2025,83,3027,2689,5716,59,fuzz/libtasn1_pkix_der_fuzzer.c,1050,3.4,2026-05-03T17:22:01Z
 dtolnay/trybuild,gh/184941159,https://github.com/dtolnay/trybuild.git,2025,345,3824,1853,5677,45,src/tests.rs,1296,1.0,2026-05-03T17:22:01Z
 jshttp/cookie,gh/4475810,https://github.com/jshttp/cookie.git,2025,137,3300,2354,5654,19,test/serialize.js,984,0.9,2026-05-03T17:22:01Z
 jaraco/zipp,gh/157774633,https://github.com/jaraco/zipp.git,2025,404,3300,2313,5613,29,tests/test_zipp.py,1342,1.2,2026-05-03T17:22:01Z
