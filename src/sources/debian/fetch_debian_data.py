@@ -36,11 +36,17 @@ from tqdm import tqdm
 
 # ── config ────────────────────────────────────────────────────────────────────
 
+from src.common.freshness import file_is_fresh
+
 RAW_PACKAGES = "data/sources/debian/raw/cpp-packages.csv"
 RAW_DOWNLOADS = "data/sources/debian/raw/downloads.csv"
 RAW_DEPS = "data/sources/debian/raw/dependencies.csv"
 RAW_METADATA = "data/sources/debian/raw/package-metadata.csv"
 RAW_ALIASES = "data/sources/debian/raw/aliases.csv"
+
+# Registry indexes / popcon stats move slowly; a warm pipeline run should not
+# re-download them. --refresh (propagated by the pipeline runner) overrides.
+TTL_DAYS = 7
 
 UDD_DSN = "host=udd-mirror.debian.net port=5432 user=udd-mirror password=udd-mirror dbname=udd"
 
@@ -450,6 +456,10 @@ def main() -> None:
     p.add_argument("--years", type=int, nargs="+", default=YEARS)
     p.add_argument("--limit", type=int, default=None,
                    help="Cap per-year popcon rows (keeps top-installs) / cap index packages")
+    p.add_argument("--refresh", action="store_true",
+                   help=f"Force refetch, ignoring the {TTL_DAYS}-day output TTL")
+    p.add_argument("--offline", action="store_true",
+                   help="Skip all network fetches (keep whatever is cached)")
     args = p.parse_args()
 
     console.rule("[bold]debian — fetch_debian_data")
@@ -461,19 +471,29 @@ def main() -> None:
 
     t_total = time.perf_counter()
 
-    if args.step in ("packages", "all"):
+    def _skip(label: str, *outputs: str) -> bool:
+        """True when this step's outputs are all within TTL (or --offline)."""
+        if args.offline:
+            console.print(f"  [dim]{label}: skipped (--offline)[/dim]")
+            return True
+        if not args.refresh and all(file_is_fresh(o, TTL_DAYS) for o in outputs):
+            console.print(f"  [dim]{label}: outputs fresh (< {TTL_DAYS}d) — skipping; --refresh to force[/dim]")
+            return True
+        return False
+
+    if args.step in ("packages", "all") and not _skip("packages", RAW_PACKAGES, RAW_METADATA):
         step_packages()
 
     cpp_pkgs = load_cpp_packages()
 
     # Run index BEFORE popcon so aliases.csv exists and popcon can widen its
     # filter to include pre-t64 names that debtags doesn't tag.
-    if args.step in ("index", "all"):
+    if args.step in ("index", "all") and not _skip("index", RAW_DEPS, RAW_ALIASES):
         if not cpp_pkgs:
             console.print("[yellow]WARNING:[/yellow] no package list — index step will include all packages")
         step_index(cpp_pkgs, args.limit)
 
-    if args.step in ("popcon", "all"):
+    if args.step in ("popcon", "all") and not _skip("popcon", RAW_DOWNLOADS):
         if not cpp_pkgs:
             console.print("[yellow]WARNING:[/yellow] no package list — popcon will include all packages")
         alias_map = load_aliases()
