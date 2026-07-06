@@ -146,7 +146,9 @@ def value_stats() -> dict:
                if eco in (r.get("ecosystems") or "").split(",")]
         by_class = Counter((r.get(CLASS_COL[eco]) or "").strip() for r in sub)
         return {"A": by_class["A"], "B": by_class["B"], "C": by_class["C"],
-                "total": len(sub)}
+                "total": len(sub),
+                "ghgl": sum(1 for r in sub
+                            if (r.get("platform") or "") in ("github", "gitlab"))}
 
     git_urls = {
         "github": _url_bucket([r for r in with_url if (r.get("platform") or "") == "github"]),
@@ -580,24 +582,27 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a("| Metric | npm | pypi | crates | cpp | Total |")
     a("|---|--:|--:|--:|--:|--:|")
     fu = v["funnel"]
+    gu = v["git_urls"]
 
     def _eco_row(label: str, key: str) -> str:
         vals = [fu[eco][key] for eco in ECOSYSTEMS]
         return (f"| {label} | " + " | ".join(f"{x:,}" for x in vals)
                 + f" | {sum(vals):,} |")
 
-    def _eco_pct_row(label: str, num_key: str, den_key: str) -> str:
-        cells = [_pct(fu[eco][num_key], fu[eco][den_key]) for eco in ECOSYSTEMS]
-        tot_n = sum(fu[eco][num_key] for eco in ECOSYSTEMS)
-        tot_d = sum(fu[eco][den_key] for eco in ECOSYSTEMS)
-        return f"| {label} | " + " | ".join(cells) + f" | {_pct(tot_n, tot_d)} |"
-
-    a(_eco_row("top packages — 95% of downloads", "top"))
-    a(_eco_row("after dep tree — + transitive deps", "deps"))
-    a(_eco_row("with git URL — any host", "git"))
-    a(_eco_row("with GitHub repo", "github"))
-    a(_eco_pct_row("^git URL % — of dep-tree packages", "git", "results"))
-    a(_eco_pct_row("GitHub % — of dep-tree packages", "github", "results"))
+    # package-level rows (per-eco results.csv)
+    a(_eco_row("Top packages representing 95% of downloads", "top"))
+    a(_eco_row("Target packages (top + their dependency tree)", "deps"))
+    a(_eco_row("Targets with a git URL", "git"))
+    # repo-level rows (value.csv) — the bridge to the Repo URLs table below:
+    # per eco a repo counts once per ecosystem, the Total is deduped, so the
+    # Total cells equal that table's unique totals.
+    uniq = [gu["by_eco"][eco]["total"] for eco in ECOSYSTEMS]
+    a("| ^Unique git URLs (Total deduped — see Repo URLs) | "
+      + " | ".join(f"{x:,}" for x in uniq) + f" | {gu['all']['total']:,} |")
+    ghgl = [gu["by_eco"][eco]["ghgl"] for eco in ECOSYSTEMS]
+    ghgl_total = gu["github"]["total"] + gu["gitlab"]["total"]
+    a("| Unique GitHub + GitLab repos | "
+      + " | ".join(f"{x:,}" for x in ghgl) + f" | {ghgl_total:,} |")
     a("")
 
     a("### Repo identity coverage\n")
@@ -620,8 +625,8 @@ def markdown(v: dict, r: dict, e: dict) -> str:
               "upstream resolves — github/gitlab API or non-github ls-remote; "
               "incl. archived mirrors", bold=True))
 
-    a("\n### Git URLs\n")
-    a("| Git URLs | A | B | C | Total | % Total |")
+    a("\n### Repo URLs\n")
+    a("| Repo URLs | A | B | C | Total | % Total |")
     a("|---|--:|--:|--:|--:|--:|")
     gu = v["git_urls"]
     grand = gu["all"]["total"]
@@ -640,14 +645,14 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a(_gu_row("GitHub repos", "github"))
     a(_gu_row("GitLab repos", "gitlab"))
     a(_gu_row("Other repos", "others"))
-    a(_gu_row("^Valid (resolved)", "valid"))
-    a(_gu_row("Invalid (unreachable)", "invalid"))
+    a(_gu_row("^Valid git URL (resolved)", "valid"))
+    a(_gu_row("Invalid git URL (unreachable)", "invalid"))
     for i, eco in enumerate(ECOSYSTEMS):
         b = gu["by_eco"][eco]
         cells = [f"{b['A']:,}", f"{b['B']:,}", f"{b['C']:,}", f"{b['total']:,}",
                  _pct(b["total"], grand)]
         a(f"| {'^' if i == 0 else ''}{eco} | " + " | ".join(cells) + " |")
-    a(_gu_row("^Total git URLs (unique)", "all", bold=True))
+    a(_gu_row("^Total repo URLs (unique)", "all", bold=True))
 
     n = r["scope"]
     a(f"\n### Score distribution by component (scope {n})\n")
