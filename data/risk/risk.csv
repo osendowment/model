@@ -2,7 +2,7 @@ repo,repo_id,concentration,complexity,security,workload,risk_score
 estools/escodegen,gh/3611422,100,91,96,92,95
 retep998/winapi-rs,gh/23853482,100,72,97,92,90
 ethers-io/ethers.js,gh/63465664,100,90,77,92,89
-gnome/libxml2,gl/gitlab.gnome.org-1665,90,95,98,76,89
+gnome/libxml2,gl/gnome-1665,90,95,98,76,89
 evanw/esbuild,gh/61137153,95,94,75,88,88
 freedesktop-unofficial-mirror/cairo,gh/34372735,100,93,98,66,88
 mirror/ncurses,gh/22324756,100,90,94,72,88
@@ -13,7 +13,7 @@ libpixman/pixman,gh/81675971,100,84,96,71,87
 tjguk/wmi,gh/23124645,100,63,99,90,87
 zertosh/loose-envify,gh/41947687,100,73,92,84,87
 ronaldoussoren/pyobjc,gh/243933900,99,96,65,90,86
-holmgren/nettle,gl/salsa.debian.org-50952,85,90,88,79,85
+holmgren/nettle,gl/debian-50952,85,90,88,79,85
 nlnetlabs/unbound,gh/94195301,64,93,97,92,85
 babel/minify,gh/55723051,75,78,96,90,84
 nodeca/argparse,gh/4325614,100,67,81,90,84
@@ -55,7 +55,7 @@ pyca/cryptography,gh/11939484,65,88,95,65,77
 taiki-e/portable-atomic,gh/448365131,98,83,50,85,77
 bdwgc/bdwgc,gh/2109456,93,89,50,80,76
 chaijs/type-detect,gh/12107007,100,49,86,79,76
-debian/bzip2,gl/salsa.debian.org-9696,80,75,73,76,76
+debian/bzip2,gl/debian-9696,80,75,73,76,76
 dougwilson/nodejs-depd,gh/20848667,100,46,84,87,76
 facebook/regenerator,gh/13346571,76,80,65,86,76
 gkz/type-check,gh/13182168,100,43,96,81,76
@@ -97,7 +97,7 @@ isaacs/sax-js,gh/508894,59,72,82,80,73
 lddubeau/xmlchars,gh/139881982,96,48,84,72,73
 lz4/lz4,gh/18106269,64,84,85,63,73
 mathiasbynens/cssesc,gh/12001360,100,40,92,78,73
-mpfr/mpfr,gl/gitlab.inria.fr-33626,84,91,50,73,73
+mpfr/mpfr,gl/inria-33626,84,91,50,73,73
 petkaantonov/bluebird,gh/12670444,39,81,99,89,73
 primus/eventemitter3,gh/13100677,94,48,82,75,73
 pydantic/typing-inspection,gh/930576948,88,52,77,79,73
@@ -128,7 +128,7 @@ ajv-validator/ajv,gh/35914020,61,79,73,71,71
 assert-rs/snapbox,gh/424722460,95,67,50,80,71
 babel/babel-polyfills,gh/190579283,72,90,50,77,71
 burntsushi/ucd-generate,gh/123997498,78,74,86,50,71
-debian/gdbm,gl/salsa.debian.org-32157,83,84,50,72,71
+debian/gdbm,gl/debian-32157,83,84,50,72,71
 follow-redirects/follow-redirects,gh/6697086,83,55,88,65,71
 gmp-mirror/gmp,gh/681340775,42,92,92,71,71
 isaacs/node-tar,gh/1534331,79,77,91,47,71
@@ -170,7 +170,7 @@ mm2/little-cms,gh/507969,81,84,50,65,69
 prettier/prettier,gh/75104123,64,92,50,78,69
 pyparsing/pyparsing,gh/91262163,85,81,50,64,69
 tapjs/signal-exit,gh/35711072,92,41,92,66,69
-xorg-team/lib/libxext,gl/salsa.debian.org-4314,100,62,50,72,69
+xorg-team/lib/libxext,gl/debian-4314,100,62,50,72,69
 azuread/microsoft-authentication-library-for-python,gh/67243113,89,67,50,72,68
 burntsushi/aho-corasick,gh/37290678,89,71,50,68,68
 chalker/safer-buffer,gh/125825141,100,30,92,79,68
@@ -186,7 +186,7 @@ kevinbeaty/any-promise,gh/26247715,100,37,96,59,68
 libffi/libffi,gh/321154,71,85,50,72,68
 libtiff/libtiff,gl/4720790,32,92,99,75,68
 madler/zlib,gh/2359378,41,87,91,66,68
-mpc/mpc,gl/gitlab.inria.fr-22470,74,81,50,72,68
+mpc/mpc,gl/inria-22470,74,81,50,72,68
 nodelib/nodelib,gh/129310478,69,59,82,65,68
 pcre2project/pcre2,gh/398251321,34,93,88,79,68
 tukaani-project/xz,gh/553665726,74,84,50,69,68
@@ -205,7 +205,7 @@ inikulin/parse5,gh/8862593,72,80,50,69,67
 istanbuljs/test-exclude,gh/60489570,100,35,72,82,67
 ljharb/define-data-property,gh/689109338,100,43,65,73,67
 ljharb/es-abstract,gh/28995155,99,81,50,49,67
-md/tcp-wrappers,gl/salsa.debian.org-28852,96,59,50,71,67
+md/tcp-wrappers,gl/debian-28852,96,59,50,71,67
 nvzqz/static-assertions,gh/100129252,100,27,84,88,67
 python-jsonschema/referencing,gh/569027868,99,48,50,83,67
 remusao/tldts,gh/97631656,74,66,50,81,67
@@ -213,10 +213,10 @@ util-linux/util-linux,gh/2339555,31,93,93,73,67
 yuzujs/setimmediate,gh/1981208,100,29,92,74,67
 aws/aws-sdk-js-v3,gh/87228090,78,96,50,50,66
 dchest/tweetnacl-js,gh/15649752,78,60,99,40,66
-debian/giflib,gl/salsa.debian.org-12522,36,76,92,75,66
+debian/giflib,gl/debian-12522,36,76,92,75,66
 douglasdwyer/wasm_sync,gh/668034655,100,31,99,62,66
 floating-ui/floating-ui,gh/54994103,80,77,50,61,66
-fontconfig/fontconfig,gl/gitlab.freedesktop.org-890,64,88,50,66,66
+fontconfig/fontconfig,gl/freedesktop-890,64,88,50,66,66
 isaacs/node-mkdirp,gh/2718248,88,44,81,59,66
 la10736/rstest,gh/124802455,84,60,50,75,66
 medikoo/d,gh/10817569,100,30,86,74,66
@@ -250,7 +250,7 @@ rich-harris/magic-string,gh/26143240,59,63,86,55,65
 rustcrypto/utils,gh/77307442,72,53,82,56,65
 samn/json-stable-stringify,gh/76598131,100,34,98,54,65
 tritondatacenter/node-assert-plus,gh/4767976,100,27,82,81,65
-xorg-team/lib/libx11,gl/salsa.debian.org-4306,28,91,94,76,65
+xorg-team/lib/libx11,gl/debian-4306,28,91,94,76,65
 beatgammit/base64-js,gh/2853282,100,25,92,72,64
 burntsushi/same-file,gh/78375612,85,27,92,78,64
 css-modules/icss-utils,gh/42766912,100,29,96,59,64
@@ -258,7 +258,7 @@ curl/curl,gh/569041,36,95,100,48,64
 eliben/pycparser,gh/10589864,55,79,50,78,64
 evanw/node-source-map-support,gh/7682781,38,65,92,76,64
 fb55/entities,gh/3172629,93,59,50,61,64
-gnome/gdk-pixbuf,gl/gitlab.gnome.org-1548,32,82,93,68,64
+gnome/gdk-pixbuf,gl/gnome-1548,32,82,93,68,64
 inspect-js/object-inspect,gh/11683441,97,48,53,69,64
 justmoon/node-extend,gh/3967764,93,42,77,55,64
 kaelzhang/node-ignore,gh/12519245,87,41,88,55,64
@@ -472,12 +472,12 @@ smithy-lang/smithy-rs,gh/308027791,17,82,73,86,54
 syntax-tree/unist-util-is,gh/41795086,91,39,72,33,54
 teambition/merge2,gh/25396227,71,29,82,50,54
 typeshed-internal/stub_uploader,gh/331669593,94,38,50,46,54
-xorg-team/lib/libxdmcp,gl/salsa.debian.org-4313,57,42,50,70,54
-xorg/proto/xorgproto,gl/gitlab.freedesktop.org-788,31,77,50,70,54
+xorg-team/lib/libxdmcp,gl/debian-4313,57,42,50,70,54
+xorg/proto/xorgproto,gl/freedesktop-788,31,77,50,70,54
 agronholm/exceptiongroup,gh/447694800,88,60,53,29,53
 aio-libs/yarl,gh/64756820,42,68,50,54,53
 babel/babel,gh/24560307,24,94,82,43,53
-cpython-team/python3-defaults,gl/salsa.debian.org-27547,66,48,50,48,53
+cpython-team/python3-defaults,gl/debian-27547,66,48,50,48,53
 feross/ieee754,gh/15489525,100,23,77,45,53
 feross/safe-buffer,gh/49538897,100,16,79,64,53
 hapijs/hoek,gh/5831189,24,67,75,63,53
@@ -536,7 +536,7 @@ vorner/signal-hook,gh/137260008,59,39,53,57,51
 watson/ci-info,gh/71475907,57,33,86,41,51
 webpack/enhanced-resolve,gh/5400204,32,70,50,61,51
 webpack/watchpack,gh/24119524,37,62,50,60,51
-xorg-team/lib/libxrender,gl/salsa.debian.org-4328,36,60,50,64,51
+xorg-team/lib/libxrender,gl/debian-4328,36,60,50,64,51
 astral-sh/ruff,gh/523043277,16,97,50,83,50
 boto/s3transfer,gh/49535299,35,52,50,70,50
 chronotope/humantime,gh/59320323,60,39,50,54,50
@@ -547,7 +547,7 @@ dtolnay/automod,gh/173074854,96,29,54,43,50
 ehmicky/human-signals,gh/214467546,100,14,88,51,50
 encode/httpcore,gh/237210639,55,58,50,40,50
 es-shims/string.prototype.trimstart,gh/114682105,100,19,57,60,50
-gnome/glib,gl/gitlab.gnome.org-658,18,98,50,69,50
+gnome/glib,gl/gnome-658,18,98,50,69,50
 inspect-js/is-regex,gh/15930063,100,20,50,62,50
 inspect-js/which-typed-array,gh/43708371,99,23,54,49,50
 isaacs/node-lru-cache,gh/679662,92,58,50,24,50
@@ -555,7 +555,7 @@ istanbuljs/istanbuljs,gh/81482340,21,63,65,73,50
 jaraco/jaraco.develop,gh/48289082,89,31,50,47,50
 jonschlinkert/is-plain-object,gh/24306940,100,13,92,53,50
 libjxl/libjxl,gh/340219494,17,90,50,84,50
-multimedia-team/aom,gl/salsa.debian.org-29534,9,98,95,76,50
+multimedia-team/aom,gl/debian-29534,9,98,95,76,50
 node-fetch/fetch-blob,gh/186960326,79,41,53,35,50
 openssl/openssl,gh/7634677,9,98,99,69,50
 pypa/pip,gh/1446467,12,83,92,68,50
@@ -670,7 +670,7 @@ thlorenz/deep-is,gh/9345558,100,26,98,17,46
 tootallnate/util-deprecate,gh/19321056,100,11,88,47,46
 uuidjs/uuid,gh/1203139,64,48,50,28,46
 websocket-client/websocket-client,gh/1202362,79,62,65,14,46
-xorg-team/lib/libxau,gl/salsa.debian.org-4307,35,50,50,49,46
+xorg-team/lib/libxau,gl/debian-4307,35,50,50,49,46
 yargs/set-blocking,gh/58830287,100,10,96,46,46
 aio-libs/frozenlist,gh/204197530,67,29,50,43,45
 azure/azure-sdk-for-js,gh/108311273,13,94,73,46,45
@@ -909,7 +909,7 @@ sindresorhus/p-try,gh/71534796,79,4,75,24,27
 calvinmetcalf/minimalistic-assert,gh/29144257,100,2,96,22,25
 chicoxyzzy/node-releases,gh/73765596,77,5,57,19,25
 colorjs/color-name,gh/27038309,42,3,86,36,25
-debian/ca-certificates,gl/salsa.debian.org-2995,66,3,73,29,25
+debian/ca-certificates,gl/debian-2995,66,3,73,29,25
 npm/mute-stream,gh/5159166,61,11,50,11,25
 sindresorhus/callsites,gh/18938743,77,4,75,16,25
 sindresorhus/escape-string-regexp,gh/21169121,71,5,72,15,25
