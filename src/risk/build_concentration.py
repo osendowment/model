@@ -42,7 +42,7 @@ Writes:
         hhi_commits_git_5y,                (HHI 0-10000, git method, _5y window)
         score,                             (0-100 concentration risk = geometric mean of the
                                             absolute _5y scales 100/bf and hhi/100,
-                                            i.e. round(sqrt(hhi/bf)); the *_p percentile
+                                            i.e. sqrt(hhi/bf), 2 decimals; the *_p percentile
                                             columns are cross-check audit references only)
         github_fetched_at, git_fetched_at
 
@@ -168,7 +168,7 @@ def _bus_factor_hhi(commit_counts: list[int]) -> tuple[int | str, int | str]:
     return bf, round(hhi * 10000)
 
 
-def _concentration_score(bf: object, hhi: object) -> int | str:
+def _concentration_score(bf: object, hhi: object) -> str:
     """Concentration score = geometric mean of two ABSOLUTE 0-100 scales:
 
         100 / bf     — bus factor 1 → 100, 2 → 50, 4 → 25, ...
@@ -190,7 +190,7 @@ def _concentration_score(bf: object, hhi: object) -> int | str:
         return ""
     if bf_f < 1 or hhi_f <= 0:
         return ""
-    return max(1, int(round(math.sqrt(hhi_f / bf_f))))
+    return f"{max(1.0, math.sqrt(hhi_f / bf_f)):.2f}"
 
 
 def github_metrics(rows: list[dict]) -> dict:

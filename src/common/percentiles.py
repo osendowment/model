@@ -58,8 +58,8 @@ def add_percentiles(
                 r[pcol] = fill
     comp_rows = [[_cell(r.get(c, "")) for c in composite_cols] for r in rows]
     for r, c in zip(rows, composite_fn(comp_rows)):
-        # Composite score: integer 0-100, higher = riskier. Floored at 1 — the
-        # worst-pinned percentile is always > 0, so a rounded-down 0 is just the
-        # lowest-risk tier, not "no risk"; this also keeps the overall risk
-        # geometric mean (over component scores) from collapsing to 0.
-        r[dim_col] = "" if c is None else max(1, int(round(c)))
+        # Composite score: 0-100 with 2 decimals, higher = riskier. Floored at
+        # 1 — the worst-pinned percentile is always > 0, so a clamped 1.00 is
+        # just the lowest-risk tier, not "no risk"; this also keeps the overall
+        # risk geometric mean (over component scores) from collapsing to 0.
+        r[dim_col] = "" if c is None else f"{max(1.0, c):.2f}"

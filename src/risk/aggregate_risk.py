@@ -2,9 +2,9 @@
 """Stage 3 of the risk pipeline — the overall risk table.
 
 Each dimension builder writes a per-component CSV whose `score` column is that
-dimension's risk score (integer 0-100, higher = riskier). This aggregator joins
-the four component scores per repo and computes the overall `risk_score` =
-geometric mean of the four component scores (floored to 1).
+dimension's risk score (0-100, two decimals, higher = riskier). This aggregator
+joins the four component scores per repo and computes the overall `risk_score` =
+geometric mean of the four component scores (floored to 1, two decimals).
 
 **Completeness rule:** the overall `risk_score` is calculable only if *every*
 one of the four component scores is present. A partial geometric mean is not
@@ -51,9 +51,9 @@ COMPONENTS = {
 OUTPUT_FILE = DATA_DIR / "risk" / "risk.csv"
 FIELDS = ["repo", "repo_id", *COMPONENTS, "risk_score"]
 
-def _scores_by_repo(path: Path) -> dict[str, int]:
-    """{repo_lowercased: int(score)} from a component CSV; blanks skipped."""
-    out: dict[str, int] = {}
+def _scores_by_repo(path: Path) -> dict[str, float]:
+    """{repo_id: float(score)} from a component CSV; blanks skipped."""
+    out: dict[str, float] = {}
     if not path.exists():
         return out
     with open(path, encoding="utf-8") as f:
@@ -62,17 +62,17 @@ def _scores_by_repo(path: Path) -> dict[str, int]:
             s = (row.get("score") or "").strip()
             if rid and s:
                 try:
-                    out[rid] = int(float(s))
+                    out[rid] = float(s)
                 except ValueError:
                     continue
     return out
 
 
-def overall_score(component_scores: list[int]) -> str:
-    """Overall risk score = geometric mean of present component scores (int)."""
+def overall_score(component_scores: list[float]) -> str:
+    """Overall risk score = geometric mean of present component scores, xx.xx."""
     if not component_scores:
         return ""
-    return str(max(1, int(round(geometric_mean([float(s) for s in component_scores])))))
+    return f"{max(1.0, geometric_mean(component_scores)):.2f}"
 
 
 def aggregate(sample: set[str] | None = None) -> list[dict]:
@@ -86,11 +86,11 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
             continue
         rid = str(entry.repo_id)
         row = {"repo": repo, "repo_id": entry.repo_id}
-        present: list[int] = []
+        present: list[float] = []
         complete = True
         for name, scores in by_component.items():
             s = scores.get(rid)
-            row[name] = "" if s is None else s
+            row[name] = "" if s is None else f"{s:.2f}"
             if s is None:
                 complete = False
             else:
@@ -102,7 +102,7 @@ def aggregate(sample: set[str] | None = None) -> list[dict]:
     # Ranked by overall risk score, highest first; unscored (incomplete) repos
     # sink to the end, ordered by repo for a stable, deterministic file.
     rows.sort(key=lambda r: (r["risk_score"] == "",
-                             -int(r["risk_score"]) if r["risk_score"] else 0,
+                             -float(r["risk_score"]) if r["risk_score"] else 0.0,
                              (r["repo"] or "").lower()))
     return rows
 
