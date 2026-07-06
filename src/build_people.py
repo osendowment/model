@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build data/preview/people.csv — owners and key contributors of the
-pipeline's final eligible-repo list, for outreach review.
+pipeline's top-repo list (data/preview/repos.csv), for outreach review.
 
 Reads only already-fetched data (see docs/superpowers/specs/
 2026-07-06-people-preview-design.md for the full design). One row per
@@ -42,7 +42,9 @@ log = logging.getLogger(__name__)
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-RESULTS_FILE = DATA_DIR / "results.csv"
+# The terminal preview table (src.build_results). Drives the target repo scope:
+# every top repo it lists is a repo whose owners/contributors we surface here.
+PREVIEW_REPOS_FILE = DATA_DIR / "preview" / "repos.csv"
 REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 USERS_FILE = DATA_DIR / "sources" / "github" / "users.csv"
 FUNDING_YML_FILE = DATA_DIR / "sources" / "github" / "funding-yml.csv"
@@ -281,7 +283,7 @@ def _read_csv(path: Path) -> list[dict[str, str]]:
 
 
 def build() -> list[dict[str, str]]:
-    target_repo_ids = _target_repo_ids(_read_csv(RESULTS_FILE))
+    target_repo_ids = _target_repo_ids(_read_csv(PREVIEW_REPOS_FILE))
     repos_rows = _read_csv(REPOS_FILE)
     users_by_login = _users_by_login(_read_csv(USERS_FILE))
     org_logins = _org_logins(repos_rows)

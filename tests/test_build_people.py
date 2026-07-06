@@ -129,7 +129,7 @@ def _write(path, header, rows):
 
 
 def test_build_end_to_end(tmp_path, monkeypatch):
-    monkeypatch.setattr(bp, "RESULTS_FILE", tmp_path / "results.csv")
+    monkeypatch.setattr(bp, "PREVIEW_REPOS_FILE", tmp_path / "preview-repos.csv")
     monkeypatch.setattr(bp, "REPOS_FILE", tmp_path / "repos.csv")
     monkeypatch.setattr(bp, "USERS_FILE", tmp_path / "users.csv")
     monkeypatch.setattr(bp, "FUNDING_YML_FILE", tmp_path / "funding-yml.csv")
@@ -138,7 +138,7 @@ def test_build_end_to_end(tmp_path, monkeypatch):
     monkeypatch.setattr(bp, "ECOSYSTEM_MAINTAINERS_FILE", tmp_path / "eco-maintainers.csv")
     monkeypatch.setattr(bp, "MAINTAINER_OVERRIDES_FILE", tmp_path / "overrides.csv")
 
-    _write(tmp_path / "results.csv", ["repo_id", "repo"], [["gh/1", "acme/widget"]])
+    _write(tmp_path / "preview-repos.csv", ["repo_id", "repo"], [["gh/1", "acme/widget"]])
     _write(tmp_path / "repos.csv", ["repo_id", "owner_login", "owner_type"],
            [["gh/1", "alice", "User"]])
     _write(tmp_path / "users.csv",
