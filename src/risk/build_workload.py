@@ -51,6 +51,13 @@ Notes:
     build_workload must run after build_complexity, build_security,
     and build_concentration.
 
+    Issue figures require EVERY window year present for BOTH opened_issues
+    and closed_issues (`issues_fetched` in build()) — a repo missing even one
+    year (fetch failure or not-yet-attempted) gets every issue-derived column
+    blank rather than treating the missing year as a confirmed 0. This keeps
+    a fetch gap from silently corrupting net_new_issues_5y (feeds the SCORED
+    nni_per_ac), issue_close_ratio, and the OLS slopes.
+
 Periods (the window + EOY anchor come from settings.json `years`):
     repo_age_years: years between created_at and EOY of LAST_COMPLETE_YEAR.
     push_cadence_years, issues_*: the settings `years` window.
@@ -146,10 +153,16 @@ def _load_openssf_maintained() -> dict[str, str]:
 def _load_issues_long(path: Path) -> dict[str, dict[str, dict[int, int]]]:
     """Project long-format issues.csv → wide-by-metric for the build's use.
 
-    Returns {metric: {repo: {year: count}}} where metric ∈ {opened_issues,
-    closed_issues}. Years missing from the file default to 0 in the inner
-    dict (matches the previous wide-loader behaviour where blank cells
-    became 0). Unknown metrics are ignored.
+    Returns {metric: {repo_id: {year: count}}} where metric ∈ {opened_issues,
+    closed_issues}. A year is present ONLY if it was actually fetched — no
+    backfilling missing years to 0. `fetch_issue_metrics.py` only ever writes
+    a row for a cell it successfully fetched; a cell that failed (network
+    error, after retries) is simply absent, identical in shape to a cell that
+    was never attempted. Treating "absent" as "genuinely 0" would silently
+    let a fetch failure masquerade as a confirmed-zero year — `build()`'s
+    `issues_fetched` gate below requires every window year to be present
+    before trusting any issue figure derived from this data. Unknown metrics
+    are ignored.
     """
     METRICS = ("opened_issues", "closed_issues")
     out: dict[str, dict[str, dict[int, int]]] = {m: {} for m in METRICS}
@@ -169,14 +182,6 @@ def _load_issues_long(path: Path) -> dict[str, dict[str, dict[int, int]]]:
             except ValueError:
                 continue
             out[metric].setdefault(slug, {})[y] = v
-    # Backfill missing years with 0 to mirror the old wide-loader's behaviour:
-    # `int(row.get(str(y)) or 0)` made blank-or-missing cells equal to 0, and
-    # downstream sums/slopes treat 0 the same way. Doing this here keeps the
-    # build code below identical to the original.
-    for metric in METRICS:
-        for repo, year_map in out[metric].items():
-            for y in YEARS:
-                year_map.setdefault(y, 0)
     return out
 
 
@@ -258,22 +263,19 @@ def build() -> list[dict]:
         # OpenSSF maintained
         openssf_maintained = maintained.get(rid, "")
 
-        # Issues. A repo present in issues.csv (even with all-zero counts) was
-        # genuinely fetched — a real 0. A repo absent from issues.csv was never
-        # fetched: every issue figure must stay blank, never 0, so a fetch gap
-        # can't masquerade as "zero issues" and skew the per-AC percentiles.
+        # Issues. `issues_fetched` requires EVERY window year to be present for
+        # BOTH opened and closed — a repo with even one missing year (a fetch
+        # that failed, or was never attempted) stays entirely blank rather than
+        # having that one year treated as a confirmed 0. Partial coverage
+        # silently corrupts net_new_issues_5y (feeds the SCORED nni_per_ac
+        # metric), issue_close_ratio, and both OLS slopes if a missing year is
+        # ever mistaken for a real zero — so this is an all-or-nothing gate.
         op = opened.get(rid, {})
         cl = closed.get(rid, {})
-        issues_fetched = (rid in opened) or (rid in closed)
+        issues_fetched = all(y in op for y in YEARS) and all(y in cl for y in YEARS)
         if issues_fetched:
-            # Window every issue figure to YEARS. _load_issues_long can carry
-            # year keys outside the settings window (e.g. a wider `--years`
-            # fetch); summing op.values()/cl.values() directly would let those
-            # leak into the *_5y totals while the OLS slopes (which iterate
-            # `for y in YEARS`) silently ignore them. Derive the sums from the
-            # same windowed series the slopes use so the two can never diverge.
-            op_vals = [op.get(y, 0) for y in YEARS]
-            cl_vals = [cl.get(y, 0) for y in YEARS]
+            op_vals = [op[y] for y in YEARS]
+            cl_vals = [cl[y] for y in YEARS]
             op_5y = sum(op_vals)
             cl_5y = sum(cl_vals)
             ratio = round(cl_5y / op_5y, 3) if op_5y > 0 else ""
