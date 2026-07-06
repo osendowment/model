@@ -31,7 +31,7 @@ row; the post-scope stages are each expressed against `top repos`.
 | value_score present | 917 | 97.6% | top repos | ≥2 value components (openssf_crit / eco_crit / top_eco_pct) |
 | risk_score present | 940 | 100% | top repos | all four risk dimensions scored |
 | fully scored | 917 | 97.6% | top repos | value_score × risk_score → preview `score` |
-| **eligible** | **660** | **70.2%** | top repos | oss AND intent AND nonprofit AND active |
+| **eligible** | **666** | **70.9%** | top repos | oss AND intent AND nonprofit AND active |
 | priority-ranked | 646 | 68.7% | top repos | eligible AND fully scored → preview `priority` |
 
 
@@ -254,14 +254,14 @@ Unknown (no license signal) is tracked separately from known non-OSS.
 | Step | Repos | % |
 |---|---:|---:|
 | input top repos (incl. archived) | 940 | 100% |
-| license resolved | 937 | 99.7% |
-| · from override | 16 | 1.7% |
+| license resolved | 940 | 100% |
+| · from override | 23 | 2.4% |
 | · from registry | 893 | 95.0% |
-| · from GitHub | 10 | 1.1% |
-| · from GitLab | 18 | 1.9% |
-| **oss=True (OSS-approved)** | **929** | **98.8%** |
+| · from GitHub | 9 | 1.0% |
+| · from GitLab | 15 | 1.6% |
+| **oss=True (OSS-approved)** | **936** | **99.6%** |
 | oss=False (known non-OSS) | 4 | 0.4% |
-| oss unknown (no signal) | 7 | 0.7% |
+| oss unknown (no signal) | 0 | 0.0% |
 
 All 4 known non-OSS are content-licensed data repos (CC0/CC-BY — free for
 documents, not software OSS by this model's strict policy).
@@ -307,8 +307,8 @@ unlock. Missing intent is by far the binding constraint.
 
 | Check | True | % | sole blocker |
 |---|---:|---:|---:|
-| oss | 929 | 98.8% | 7 |
-| intent | 737 | 78.4% | 188 |
+| oss | 936 | 99.6% | 1 |
+| intent | 737 | 78.4% | 189 |
 | nonprofit | 881 | 93.7% | 59 |
 | active | 918 | 97.7% | 11 |
-| **eligible** | **660** | **70.2%** | |
+| **eligible** | **666** | **70.9%** | |

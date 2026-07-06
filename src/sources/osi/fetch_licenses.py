@@ -173,6 +173,23 @@ EXTRAS: dict[str, str] = {
     "mit-open-group": "MIT/X11-family permissive; X.Org core libs "
                       "(The Open Group)",
 
+    # ── tcp-wrappers ────────────────────────────────────────────────
+    # Wietse Venema's TCP Wrappers (tcpd/libwrap), the host-based ACL
+    # layer that guarded Unix network daemons for three decades and
+    # still ships in Debian/Ubuntu (tcpd in main) and the BSDs. The
+    # license is a short BSD-style permissive notice ("may be
+    # distributed freely" + attribution + no-warranty); neither body
+    # lists it — Venema never filed with OSI and FSF's list omits it —
+    # but Debian has carried it in main since 1999 (DFSG-free) and
+    # Fedora classifies `TCP-wrappers` as allowed.
+    # Sources:
+    #   SPDX:    https://spdx.org/licenses/TCP-wrappers.html
+    #   Debian:  https://salsa.debian.org/md/tcp-wrappers (debian/copyright)
+    #   Fedora:  https://gitlab.com/fedora/legal/fedora-license-data
+    #            (TCP-wrappers: allowed)
+    "tcp-wrappers": "BSD-style permissive; TCP Wrappers "
+                    "(Wietse Venema)",
+
     # ── libpng-2.0 ──────────────────────────────────────────────────
     # The libpng reference library, the canonical PNG codec used by
     # every major browser (Chromium, Firefox, Safari, Edge), every

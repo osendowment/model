@@ -291,7 +291,7 @@ def main() -> None:
     summary.add_column("", style="bold")
     summary.add_column("Repos", justify="right")
     summary.add_column("%", justify="right")
-    for label, n, style in (("oss=True (OSI-approved)", len(oss_true), "green"),
+    for label, n, style in (("oss=True (OSS-approved)", len(oss_true), "green"),
                             ("oss=False (known non-OSS)", len(oss_false), "red"),
                             ("oss='' (no license signal)", len(unknown), "yellow")):
         summary.add_row(f"[{style}]{label}[/{style}]", f"{n:,}",
