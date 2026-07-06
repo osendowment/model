@@ -1,11 +1,12 @@
 # ecosyste.ms
 
 [ecosyste.ms](https://ecosyste.ms) is a cross-registry index of open-source packages and
-repositories. The model uses two connectors against it, both under `src/sources/ecosystems/`.
+repositories. The model uses four connectors/extractors against it, all under
+`src/sources/ecosystems/`.
 
 > **Status:** the criticality connector's `critical` flag now feeds the **Value** stage as
-> `value.csv`'s `eco_crit` column — the 0.2-weight component of `score`, and the only importance
-> signal GitLab class-A repos carry (see [value.md](../value.md), applied by
+> `value.csv`'s `eco_crit` column — the 0.2-weight component of `value_score`, and the only
+> importance signal GitLab class-A repos carry (see [value.md](../value.md), applied by
 > `src.value.apply_criticality`). Coverage counts live in [stats.md](../stats.md#value); this page
 > describes **how** the data is fetched, not **how many**.
 
@@ -15,6 +16,27 @@ repositories. The model uses two connectors against it, both under `src/sources/
 repo URL, queries `packages.ecosyste.ms/api/v1/registries/{registry}/packages/{name}` and writes
 `data/sources/{eco}/raw/ecosystems.csv` (`package, registry_hit, repository_url, homepage,
 fetched_at`). Used by the Value stage to fill missing `github_repo` / `git_url`.
+
+## Candidates connector (class-A audit fetch)
+
+`src/sources/ecosystems/candidates.py` — unlike `packages.py` (which only backfills packages
+missing both a `github_repo` and a `git` URL), this fetches ecosyste.ms data for **every
+class-A candidate** package, to obtain an *independent* repository identity that
+`src/value/audit_ecosystems.py` compares against ours (that audit writes
+`data/sources/ecosystems/audit.csv`). It shares the raw-JSON cache with `packages.py`
+(`data/sources/{eco}/raw/ecosystems/{package}.json`) and writes the consolidated
+cross-ecosystem index `data/sources/ecosystems/packages.csv` (`ecosystem, package, purl,
+registry_hit, repository_url, homepage, repo_host, repo_full_name, repo_archived, repo_fork,
+repo_stars, last_synced_at, fetched_at`). Incremental with a 1-year TTL.
+
+## Maintainers extractor
+
+`src/sources/ecosystems/fetch_maintainers.py` — re-reads the raw-JSON cache (no network
+calls) and extracts the registry-native `maintainers` arrays into
+`data/sources/ecosystems/maintainers.csv` (`ecosystem, package, repo_id, login, name, email,
+role, uuid, html_url, fetched_at`; `repo_id` resolved from `packages.csv`'s
+`repo_full_name`). Only npm/pypi/crates.io expose maintainers on ecosyste.ms — cpp's
+registries do not, so cpp packages are skipped.
 
 ## Criticality connector
 
@@ -62,10 +84,11 @@ next run). A network blip is therefore never silently recorded as a genuine miss
 ### Scope
 
 Scoped on **value class alone** (default A), *not* via `src.common.repos.load_top_repos`: that
-loader's gate requires a GitHub `platform`, which would exclude every GitLab-hosted repo — but
-GitLab repos are exactly what this signal is meant to cover. Criticality is a package-importance
+loader now spans GitHub + GitLab, but it gates on `git_valid == True`, which would drop
+not-yet-valid class-A repos. Criticality is a package-importance
 factor, not a risk-completeness gate, so a not-yet-`valid` or archived class-A repo still has a
-meaningful criticality. Each row carries `valid` so a consumer can re-apply the gate.
+meaningful criticality. Each row carries `valid` (value.csv's `git_valid`) so a consumer can
+re-apply the gate.
 
 ### Package-name overrides
 
@@ -92,7 +115,11 @@ a `repository_url` to the correct registry name, e.g. `bdwgc/bdwgc → bdw-gc`, 
 90-day TTL on `fetched_at`; a re-run inside the window is a no-op, `--ttl 0` forces refresh. Scoped
 to value class A by default (`--classes A B …`, or `all`); criticality is an importance signal for
 the head of the distribution. Raw package JSON is cached per `(ecosystem, package)` under
-`data/sources/ecosystems/raw/criticality/` for audit.
+`data/sources/ecosystems/raw/criticality/` for audit. This cache is deliberately **separate**
+from `packages.py`'s (`data/sources/{eco}/raw/ecosystems/`) and the two cannot be merged: the
+fetchers query cpp registries in different orders (debian-first for URL coverage vs spack-first
+for a real ranking), and debian reports `rank_average=100` for every package — sharing the cache
+would silently regress cpp rankings to 100 (see `_cache_path` in `criticality.py`).
 
 ### Scripts
 
