@@ -228,10 +228,21 @@ def value_stats() -> dict:
     def _col_set(path: str, col: str) -> set[str]:
         return {r[col] for r in _load(path) if (r.get(col) or "").strip()}
 
+    def _row_count(path: str) -> int:
+        """Data-row count via buffered newline count (fast on multi-100MB files;
+        safe here — these CSVs never carry embedded newlines)."""
+        n = 0
+        with open(ROOT / path, "rb") as fh:
+            while chunk := fh.read(1 << 20):
+                n += chunk.count(b"\n")
+        return max(0, n - 1)  # header
+
     deb_names = _col_set("data/sources/debian/raw/cpp-packages.csv", "package")
     brew_names = _col_set("data/sources/homebrew/raw/formulas.csv", "name")
     tracked = {
-        "npm": len(_col_set("data/sources/npm/raw/downloads.csv", "package")),
+        # the nice-registry package→repo universe (~2.6M), not just the
+        # packages we fetched download counts for
+        "npm": _row_count("data/sources/npm/nice-registry/packages.csv"),
         "pypi": len(_col_set("data/sources/pypi/bigquery/bq-package-downloads.csv",
                              "package")),
         "crates": len(_col_set("data/sources/crates/db-dump/crates.csv", "name")),

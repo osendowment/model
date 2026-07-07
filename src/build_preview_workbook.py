@@ -260,6 +260,15 @@ def _render_table(ws: Worksheet, block: list[list[str]],
 
 BANNER_FONT = Font(bold=True, color="FFFFFF", size=12)
 
+# Stage banner fills (matched to the reviewed sheet): value blue, risk
+# orange, eligibility purple; anything else falls back to the header navy.
+BANNER_FILLS = {
+    "Stage 1": _fill("5B9BD5"),
+    "Stage 2": _fill("ED7D31"),
+    "Stage 3": _fill("8064A2"),
+}
+BANNER_SPAN_COLS = 13  # fill A..M so the banner reads as a full-width bar
+
 
 def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
     """Render the generator's markdown as the stats sheet.
@@ -289,10 +298,13 @@ def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
             heading_level = len(line) - len(line.lstrip("#"))
             heading = line.lstrip("#").strip()
             if heading_level == 2:
-                # Stage banner — standalone, emitted immediately.
+                # Stage banner — standalone, emitted immediately, full-width.
+                fill = next((f for k, f in BANNER_FILLS.items()
+                             if heading.startswith(k)), HEADER_FILL)
+                for col in range(1, BANNER_SPAN_COLS + 1):
+                    ws.cell(row=cursor, column=col).fill = fill
                 cell = ws.cell(row=cursor, column=2, value=heading)
                 cell.font = BANNER_FONT
-                cell.fill = HEADER_FILL
                 cursor += 3  # banner + two blank rows
                 heading_emitted = True
             else:
