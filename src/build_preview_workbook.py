@@ -78,18 +78,27 @@ REPOS_SCORE_COL = "score"
 REPOS_BOOL_COLS = ["oss", "intent", "nonprofit", "active", "eligible"]
 REPOS_PRIORITY_COL = "priority"
 REPOS_BOLD_COLS = ["value_score", "risk_score"]
+# Score cells DISPLAY as whole numbers but keep their full 2-decimal value
+# (visible in the formula bar / on export) — pure number formatting.
+REPOS_ROUNDED_COLS = (REPOS_VALUE_SCALE_COLS + REPOS_RISK_SCALE_COLS
+                      + [REPOS_SCORE_COL])
+ROUNDED_FORMAT = "0"
 REPOS_CENTERED_COLS = (REPOS_VALUE_SCALE_COLS + REPOS_RISK_SCALE_COLS
                        + [REPOS_SCORE_COL] + REPOS_BOOL_COLS
                        + [REPOS_PRIORITY_COL])
 
 REPOS_COLUMN_WIDTHS = {
-    "repo": 24, "language": 11, "ecosystem": 10, "top_eco_pkg": 16,
+    "repo": 24, "language": 11, "platform": 9, "ecosystem": 10, "top_eco_pkg": 16,
     "top_eco_pct": 10, "pr_score": 10,
     "openssf_crit": 10, "eco_crit": 8, "value_score": 10,
     "concentration": 10, "complexity": 10, "security": 10, "workload": 10,
     "risk_score": 10, "score": 9, "oss": 7, "intent": 8, "nonprofit": 9,
-    "active": 8, "eligible": 9, "priority": 8, "repo_id": 13,
+    "active": 8, "eligible": 9, "priority": 8,
 }
+
+# repos.csv keeps repo_id as its join/trace key, but the sheet is for human
+# readers: the column fuels the repo hyperlinks, then leaves the sheet.
+REPOS_DROP_COLS = ["repo_id"]
 
 # 3-color scale anchors (Excel's classic red/yellow/green) + the score blue.
 SCALE_RED, SCALE_YELLOW, SCALE_GREEN = "F8696B", "FFEB84", "63BE7B"
@@ -167,13 +176,16 @@ def _repo_url(repo: str, repo_id: str) -> str | None:
 def _decorate_repos_sheet(ws: Worksheet) -> None:
     """repos-only dressing (the reviewed design): hyperlink each `repo` cell
     to the repo's home page (host from `repo_id`), apply the static fills,
-    center/bold the metric cells, add the conditional formats per column
-    group, and set the fixed column widths."""
+    center/bold the metric cells and display scores rounded (full 2-decimal
+    values stay stored), drop the REPOS_DROP_COLS join keys from the sheet,
+    add the conditional formats per column group, and set the fixed column
+    widths."""
     headers = {c.value: c.column for c in ws[1]}  # name -> 1-based col index
     repo_col, id_col = headers.get("repo"), headers.get("repo_id")
     fill_cols = {headers[n]: f for n, f in REPOS_STATIC_FILLS.items() if n in headers}
     center_cols = {headers[n] for n in REPOS_CENTERED_COLS if n in headers}
     bold_cols = {headers[n] for n in REPOS_BOLD_COLS if n in headers}
+    rounded_cols = {headers[n] for n in REPOS_ROUNDED_COLS if n in headers}
     for row in ws.iter_rows(min_row=2):
         if repo_col and id_col:
             cell = row[repo_col - 1]
@@ -187,6 +199,14 @@ def _decorate_repos_sheet(ws: Worksheet) -> None:
             row[col - 1].alignment = CENTER
         for col in bold_cols:
             row[col - 1].font = BOLD
+        for col in rounded_cols:
+            row[col - 1].number_format = ROUNDED_FORMAT
+    # Highest index first so earlier deletions don't shift later ones.
+    for col in sorted((headers[n] for n in REPOS_DROP_COLS if n in headers),
+                      reverse=True):
+        ws.delete_cols(col)
+    headers = {c.value: c.column for c in ws[1]}
+    ws.auto_filter.ref = ws.dimensions
     _add_repos_conditional_formats(ws, headers)
     for name, width in REPOS_COLUMN_WIDTHS.items():
         if name in headers:

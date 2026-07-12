@@ -52,8 +52,8 @@ def test_build_writes_two_named_sheets_with_styled_filtered_headers(tmp_path, mo
     repos_csv = tmp_path / "repos.csv"
     people_csv = tmp_path / "people.csv"
     out = tmp_path / "preview.xlsx"
-    _write_csv(repos_csv, ["repo_id", "repo", "risk_score"],
-               [["gh/1", "a/keep", "88.00"], ["gh/2", "b/drop", "77.00"]])
+    _write_csv(repos_csv, ["repo", "risk_score", "repo_id"],
+               [["a/keep", "88.00", "gh/1"], ["b/drop", "77.00", "gh/2"]])
     _write_csv(people_csv, ["person_id", "platform", "login"],
                [["github/1", "github", "octocat"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv), ("people", people_csv)])
@@ -67,7 +67,7 @@ def test_build_writes_two_named_sheets_with_styled_filtered_headers(tmp_path, mo
 
     ws = wb["repos"]
     assert ws.max_row == 3          # header + 2 data rows
-    assert ws.max_column == 3
+    assert ws.max_column == 2       # repo_id dropped from the repos sheet
     # header styling: bold white font on a filled (non-default) background.
     header_cell = ws.cell(row=1, column=1)
     assert header_cell.font.bold is True
@@ -76,23 +76,23 @@ def test_build_writes_two_named_sheets_with_styled_filtered_headers(tmp_path, mo
     data_cell = ws.cell(row=2, column=1)
     assert data_cell.font.bold is not True
     # numeric column written as a real number, not text.
-    assert ws.cell(row=2, column=3).value == 88.0
-    # id column stays text.
-    assert ws.cell(row=2, column=1).value == "gh/1"
-    # AutoFilter covers the full used range, and the header row is frozen.
-    assert ws.auto_filter.ref == "A1:C3"
+    assert ws.cell(row=2, column=2).value == 88.0
+    # AutoFilter covers the used range after the drop; header row is frozen.
+    assert ws.auto_filter.ref == "A1:B3"
     assert ws.freeze_panes == "A2"
 
     ws_people = wb["people"]
     assert ws_people.max_row == 2
     assert ws_people.cell(row=2, column=3).value == "octocat"
+    # id column stays text (people sheet keeps its ids).
+    assert ws_people.cell(row=2, column=1).value == "github/1"
 
 
 def test_build_skips_missing_csv_without_error(tmp_path, monkeypatch):
     repos_csv = tmp_path / "repos.csv"
     missing_csv = tmp_path / "does-not-exist.csv"
     out = tmp_path / "preview.xlsx"
-    _write_csv(repos_csv, ["repo_id"], [["gh/1"]])
+    _write_csv(repos_csv, ["repo"], [["a/b"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv), ("people", missing_csv)])
     _patch_stats_md(monkeypatch)
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
@@ -123,7 +123,7 @@ def test_repos_sheet_hyperlinks_and_reviewed_decoration(tmp_path, monkeypatch):
               "oss", "eligible", "priority", "repo_id"]
     #          A       B              C             D        E      F           G           H
     _write_csv(repos_csv, header,
-               [["a/keep", "70.00", "80.00", "90.00", "True", "True", "P1", "gh/1"],
+               [["a/keep", "70.25", "80.00", "90.00", "True", "True", "P1", "gh/1"],
                 ["c/lab", "60.00", "70.00", "80.00", "False", "False", "", "gl/debian-9"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv)])
     _patch_stats_md(monkeypatch)
@@ -148,6 +148,16 @@ def test_repos_sheet_hyperlinks_and_reviewed_decoration(tmp_path, monkeypatch):
         assert ws.cell(row=2, column=col).font.bold is True
         assert ws.cell(row=2, column=col).alignment.horizontal == "center"
     assert ws.cell(row=2, column=1).alignment.horizontal != "center"    # repo
+
+    # score cells display rounded ("0" format) but STORE the 2-decimal value.
+    assert ws.cell(row=2, column=2).number_format == "0"
+    assert ws.cell(row=2, column=2).value == 70.25
+    assert ws.cell(row=2, column=1).number_format != "0"                # repo untouched
+
+    # repo_id fuels the hyperlinks above, then leaves the sheet.
+    final_headers = [c.value for c in ws[1]]
+    assert "repo_id" not in final_headers
+    assert ws.auto_filter.ref == ws.dimensions
 
     # conditional formats, one entry per column data range.
     cfs = {str(cf.sqref): list(cf.rules) for cf in ws.conditional_formatting}
@@ -181,7 +191,6 @@ def test_repos_sheet_hyperlinks_and_reviewed_decoration(tmp_path, monkeypatch):
     # fixed column widths by header name.
     assert ws.column_dimensions["A"].width == 24   # repo
     assert ws.column_dimensions["G"].width == 8    # priority
-    assert ws.column_dimensions["H"].width == 13   # repo_id
 
 
 def test_stats_sheet_renders_markdown_tables(tmp_path, monkeypatch):
