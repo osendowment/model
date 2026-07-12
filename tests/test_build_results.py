@@ -64,9 +64,9 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
     assert br.FIELDS.index("score") == br.FIELDS.index("risk_score") + 1
 
 
-def test_score_rescaled_and_priority_dense_rank_over_eligible(tmp_path, monkeypatch):
-    """score = value_score*risk_score rescaled so the max row = 100 (over ALL
-    rows with both inputs); priority = dense rank by score desc, eligible only."""
+def test_score_geometric_mean_and_priority_dense_rank_over_eligible(tmp_path, monkeypatch):
+    """score = sqrt(value_score*risk_score), unnormalized (same 0-100 scale as
+    its inputs); priority = dense rank by score desc, eligible only."""
     elig = tmp_path / "eligibility.csv"
     val = tmp_path / "value.csv"
     risk = tmp_path / "risk.csv"
@@ -83,11 +83,11 @@ def test_score_rescaled_and_priority_dense_rank_over_eligible(tmp_path, monkeypa
 
     rows = br.build()
     by = {r["repo"]: r for r in rows}
-    # raw products: a=100, b=50, c=200 → max=200 → scores 50.00 / 25.00 / 100.00
-    assert by["c/inelig"]["score"] == "100.00"
-    assert by["a/top"]["score"] == "50.00"
-    assert by["b/mid"]["score"] == "25.00"
-    # priority only over eligible rows: a (50) rank1, b (25) rank2; c blank.
+    # raw products: a=100, b=50, c=200 → sqrt → 10.00 / 7.07 / 14.14 (no rescale)
+    assert by["c/inelig"]["score"] == "14.14"
+    assert by["a/top"]["score"] == "10.00"
+    assert by["b/mid"]["score"] == "7.07"
+    # priority only over eligible rows: a (10) rank1, b (7.07) rank2; c blank.
     assert by["a/top"]["priority"] == "1"
     assert by["b/mid"]["priority"] == "2"
     assert by["c/inelig"]["priority"] == ""
@@ -144,7 +144,7 @@ def test_score_columns_rounded_to_two_decimals(tmp_path, monkeypatch):
     assert row["security"] == "76.00"
     assert row["workload"] == "88.00"
     assert row["risk_score"] == "88.43"
-    assert row["score"] == "100.00"  # only row -> always scales to 100
+    assert row["score"] == "75.32"  # sqrt of the FULL-precision product, then 2dp
 
 
 def test_missing_language_row_leaves_blank(tmp_path, monkeypatch):

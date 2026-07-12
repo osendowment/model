@@ -29,9 +29,12 @@ Columns:
                       components                         (value.csv `value_score`)
     concentration, complexity, security, workload        (risk.csv components)
     risk_score        overall risk score, 0-100          (risk.csv `risk_score`)
-    score             value_score * risk_score, scaled so the highest row = 100.
-                      Computed for every row with both value_score and
-                      risk_score present, regardless of eligibility.
+    score             sqrt(value_score * risk_score) — the geometric mean of
+                      the two 0-100 scores, itself 0-100 and deliberately
+                      UNNORMALIZED (absolute, comparable across runs; the
+                      current top row lands ≈76). Computed for every row with
+                      both value_score and risk_score present, regardless of
+                      eligibility.
     oss, intent, nonprofit, active                        (eligibility.csv components)
     eligible          oss AND intent AND nonprofit AND active
     priority          dense rank (1, 2, 3, …) by score desc, among eligible
@@ -63,6 +66,7 @@ Usage:
 """
 
 import csv
+import math
 from pathlib import Path
 
 from rich.console import Console
@@ -160,15 +164,13 @@ def build() -> list[dict]:
         }
         rows.append(row)
 
-    # score: value_score * risk_score, rescaled so the highest raw product in
-    # the table maps to 100. Computed for every row with both inputs present,
-    # regardless of eligibility.
-    max_raw = max(raw_by_id.values()) if raw_by_id else None
-    if max_raw:
-        for row in rows:
-            raw = raw_by_id.get(row["repo_id"])
-            if raw is not None:
-                row["score"] = f"{raw / max_raw * 100:.2f}"
+    # score: sqrt(value_score * risk_score) — geometric mean on the same
+    # absolute 0-100 scale as its inputs, no per-run normalization. Computed
+    # for every row with both inputs present, regardless of eligibility.
+    for row in rows:
+        raw = raw_by_id.get(row["repo_id"])
+        if raw is not None:
+            row["score"] = f"{math.sqrt(raw):.2f}"
 
     # priority: dense 1,2,3… rank by score desc, eligible + scored rows only.
     ranked = sorted(
