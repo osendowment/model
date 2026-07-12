@@ -6,9 +6,12 @@ this project" sidebar widget) via GraphQL, rather than parsing a raw
 GraphQL response into a funding-yml.csv row.
 """
 
+import csv
+
 import pytest
 
 from src.common.funding_platforms import FUNDING_PLATFORMS
+from src.sources.github import fetch_funding_yml
 from src.sources.github.fetch_funding_yml import (
     build_query,
     build_row,
@@ -186,3 +189,26 @@ class TestRowsFromResponse:
         body = {"data": {"r0": {"fundingLinks": []}, "g0": None}}
         rows = rows_from_response(["o/r"], body)
         assert rows["o/r"]["has_funding_yml"] == "False"
+
+
+class TestLoadRepoIdMap:
+    """_load_repo_id_map must resolve a GitHub-renamed repo under BOTH its
+    stale looked-up slug (`repo`) and its current canonical slug (`full_name`),
+    so the id-keyed downstream join keeps the FUNDING.yml signal across the
+    post-rename window (the fetcher looks up by current canonical slug)."""
+
+    def test_renamed_repo_resolves_under_both_slugs(self, tmp_path, monkeypatch):
+        repos_csv = tmp_path / "repos.csv"
+        with open(repos_csv, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=["repo", "full_name", "repo_id"])
+            w.writeheader()
+            # Renamed on GitHub: cached row keyed on old slug, now canonical `new/name`.
+            w.writerow({"repo": "old/name", "full_name": "new/name", "repo_id": "gh/1"})
+
+        monkeypatch.setattr(fetch_funding_yml, "GH_REPOS_FILE", repos_csv)
+
+        m = fetch_funding_yml._load_repo_id_map()
+        # Canonical slug (the one the fetcher actually looks up) — the rename bug.
+        assert m["new/name"] == "gh/1"
+        # Stale looked-up slug still resolves too.
+        assert m["old/name"] == "gh/1"

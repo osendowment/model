@@ -61,7 +61,7 @@ from rich.progress import (
 
 from src.common.freshness import funding_ttl_for, row_is_fresh
 from src.common.funding_platforms import FUNDING_PLATFORMS
-from src.common.repos import load_top_repos
+from src.common.repos import load_repo_ids, load_top_repos
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
 
 console = Console()
@@ -239,15 +239,11 @@ def _load_existing() -> dict[str, dict]:
 
 
 def _load_repo_id_map() -> dict[str, str]:
-    out: dict[str, str] = {}
-    if GH_REPOS_FILE.exists():
-        with open(GH_REPOS_FILE, encoding="utf-8") as f:
-            for row in csv.DictReader(f):
-                slug = (row.get("repo") or "").strip().lower()
-                rid = (row.get("repo_id") or "").strip()
-                if slug and rid:
-                    out[slug] = rid
-    return out
+    """Slug -> repo_id from github/repos.csv, keyed on BOTH the looked-up
+    `repo` slug and the rename-resolved `full_name` (via load_repo_ids), so a
+    repo renamed since its row was cached still resolves under its current
+    canonical slug."""
+    return load_repo_ids(GH_REPOS_FILE)
 
 
 def _write(rows: dict[str, dict]) -> None:
