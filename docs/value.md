@@ -292,7 +292,7 @@ subgraphs.
 | `platform` | Host class of `git_url`: `github` / `gitlab` / `bitbucket` / `sourcehut` / `codeberg` / `custom`. Empty for orphan rows with no URL. Downstream consumers (risk, eligibility) filter on the platforms configured in `settings.json → top_repos.platforms` (currently `github` + `gitlab`). |
 | `repo_id` | Stable repo id namespaced by platform: `gh/<numeric>` (GitHub Repos API id) for a resolved GitHub repo; `gl/<nickname>-<id>` (bare `gl/<id>` for gitlab.com; host nicknames per `HOST_NICKNAMES` in `src/sources/gitlab/gitlab_client.py`) for a project resolved via the GitLab project API on any GitLab host; empty for other platforms (no API id) and unresolved/404 repos. |
 | `git_url` | Canonical git clone URL — `https://github.com/<repo>.git` for GitHub repos (so a valid repo always carries both `repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by the shared git-URL helpers (`src/value/git_urls.py`). Empty only for orphan packages with no upstream repo at all. |
-| `mirror_url` | For a **GitHub mirror repo**, the non-GitHub upstream it syncs from (e.g. `gcc-mirror/gcc` → `https://gcc.gnu.org/git/gcc.git`). Two sources: GitHub's own `mirror_url` field from `data/sources/github/repos.csv` (stamped by the rollup's `resolve` step), and override-declared live upstreams — a `data/value/overrides.csv` repo override carrying a non-GitHub `git_url` (e.g. `bminor/glibc` → `https://sourceware.org/git/glibc.git`) is preserved here. Empty for ordinary and non-GitHub rows. Authoritative mirror→upstream link when present. |
+| `mirror_url` | For a **GitHub mirror repo**, the non-GitHub upstream it syncs from (e.g. `gcc-mirror/gcc` → `https://gcc.gnu.org/git/gcc.git`). Two sources: GitHub's own `mirror_url` field from `data/sources/github/repos.csv` (stamped by the rollup's `resolve` step), and override-declared live upstreams — a `data/value/overrides.csv` repo override carrying a non-GitHub `git_url` (e.g. `torvalds/linux` → `https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git`) is preserved here. Empty for ordinary and non-GitHub rows. Authoritative mirror→upstream link when present. |
 | `git_valid` | `True`/`False` — whether the repo's upstream is reachable. Host-agnostic: GitHub rows are checked via the Repos API cache, non-GitHub rows via `git ls-remote`; a GitLab `gl/` `repo_id` counts as proof on its own. `False` covers orphans and unreachable/404 targets. Set by `build_validation`; audit trail in [`data/value/validation.csv`](components/validation.md). |
 | `ecosystems` | Comma-separated list of ecosystems where the repo has packages (e.g. `crates,npm`) |
 | `packages` | Total package count in the repo |
@@ -359,9 +359,12 @@ the hosts configured in `settings.json → top_repos.platforms` — currently
 resolved via the GitLab project API (on any GitLab host — gitlab.com,
 gitlab.gnome.org, gitlab.inria.fr, salsa.debian.org, …) and are scored by
 risk and eligibility alongside GitHub repos. Formerly-excluded projects now
-in scope this way include glib (gitlab.gnome.org) and mpfr (gitlab.inria.fr);
-glibc and gcc are covered via their GitHub mirrors (`bminor/glibc`,
-`gcc-mirror/gcc`) with the live upstream recorded in `mirror_url`.
+in scope this way include glib (gitlab.gnome.org), mpfr (gitlab.inria.fr) and
+pixman (gitlab.freedesktop.org). gcc is covered via its GitHub mirror
+(`gcc-mirror/gcc`) with the live upstream recorded in `mirror_url`. glibc is
+not in scope: its upstream is sourceware.org (a `custom` host, so no
+`repo_id`), its GitHub mirror `bminor/glibc` is archived, and the Debian salsa
+repo carries only packaging files, not glibc's source.
 
 `value.csv` models every repo as a `(platform, repo, repo_id)` triple
 alongside `git_url`, so upstreams on the remaining hosts (codeberg /

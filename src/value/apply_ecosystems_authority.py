@@ -113,7 +113,14 @@ def resolve(prior_git: str, prior_github: str, strong: list[str], weak: list[str
                 merged["github"] = canon
                 srcs["github"] = "override"
         elif ov.get("git_url"):
-            merged["github"] = ""  # a git_url-only override drops any (dead) github slug
+            # A git_url-only override is absolute: it names the canonical clone
+            # URL, so drop every eco/prior-derived host and keep only it.
+            # Otherwise a low-priority override host (e.g. sourceware, host
+            # class 'custom') loses under GIT_HOST_PRIORITY to an eco-provided
+            # higher-priority host — e.g. glibc's Debian salsa GitLab packaging
+            # mirror would beat the sourceware upstream the override names.
+            merged.clear()
+            srcs.clear()
             plat, canon = classify(ov["git_url"])
             if plat:
                 merged[plat] = canon
@@ -182,6 +189,15 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None,
     """
     if repos_file is None:
         repos_file = _REPOS_FILE_DEFAULT
+
+    # Step 0: clear every prior-run repo_id up front. repo_id is re-derived from
+    # the current git URL each resolve, so a stale id from a previous identity
+    # (an override just repointed the row to a different GitHub/GitLab repo, or a
+    # slug went 404) must not survive — otherwise _resolve_gitlab sees a
+    # non-empty repo_id and skips the row, silently keeping the wrong id. Valid
+    # rows are re-stamped from the live caches in step 5 (GitHub) / _resolve_gitlab.
+    for r in rows:
+        r["repo_id"] = ""
 
     # Step 1: canonicalize git URLs.  GitHub URLs are cleared (→ ""); non-GitHub
     # URLs are normalised (scheme, gitweb paths, …).  The github_repo column is the

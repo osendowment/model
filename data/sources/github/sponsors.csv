@@ -638,6 +638,7 @@ pillarjs/iconv-lite,gh/2743221,0,False,ok,2026-06-30T10:25:17+00:00
 pillarjs/parseurl,gh/17533192,0,False,ok,2026-06-30T10:25:17+00:00
 pillarjs/path-to-regexp,gh/5265803,0,False,ok,2026-06-30T10:25:17+00:00
 pillarjs/send,gh/4879977,0,False,ok,2026-06-30T10:25:17+00:00
+pixman/pixman,,0,False,ok,2026-07-12T19:59:10+00:00
 pkgconf/pkgconf,gh/4180110,0,False,ok,2026-06-30T10:25:17+00:00
 pnggroup/libpng,gh/3768025,0,False,ok,2026-06-30T10:25:18+00:00
 postcss/postcss,gh/13078968,0,False,ok,2026-06-30T10:25:18+00:00

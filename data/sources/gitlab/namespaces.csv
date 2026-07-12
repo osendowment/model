@@ -87,6 +87,7 @@ gitlab.freedesktop.org/mesa,,gitlab.freedesktop.org,,,,,,fetch failed: http_401,
 gitlab.freedesktop.org/mobile-broadband,,gitlab.freedesktop.org,,,,,,fetch failed: http_401,2026-07-06T18:13:39Z
 gitlab.freedesktop.org/networkmanager,,gitlab.freedesktop.org,,,,,,fetch failed: http_401,2026-07-06T18:13:39Z
 gitlab.freedesktop.org/pipewire,,gitlab.freedesktop.org,,,,,,fetch failed: http_401,2026-07-06T18:13:39Z
+gitlab.freedesktop.org/pixman,,gitlab.freedesktop.org,,,,,,fetch failed: http_401,2026-07-12T19:58:55Z
 gitlab.freedesktop.org/pwithnall,,gitlab.freedesktop.org,,,,,,fetch failed: http_401,2026-07-06T18:13:39Z
 gitlab.freedesktop.org/slirp,,gitlab.freedesktop.org,,,,,,fetch failed: http_401,2026-07-06T18:13:39Z
 gitlab.freedesktop.org/spice,,gitlab.freedesktop.org,,,,,,fetch failed: http_401,2026-07-06T18:13:39Z
@@ -149,6 +150,7 @@ salsa.debian.org/fonts-team,,salsa.debian.org,,,,,,fetch failed: http_401,2026-0
 salsa.debian.org/freedesktop-team,,salsa.debian.org,,,,,,fetch failed: http_401,2026-07-06T18:13:41Z
 salsa.debian.org/games-team,,salsa.debian.org,,,,,,fetch failed: http_401,2026-07-06T18:13:41Z
 salsa.debian.org/gdb-team,,salsa.debian.org,,,,,,fetch failed: http_401,2026-07-06T18:13:41Z
+salsa.debian.org/glibc-team,,salsa.debian.org,,,,,,fetch failed: http_401,2026-07-12T19:58:56Z
 salsa.debian.org/gnome-team,,salsa.debian.org,,,,,,fetch failed: http_401,2026-07-06T18:13:41Z
 salsa.debian.org/gnome-team/extras,,salsa.debian.org,,,,,,fetch failed: http_401,2026-07-06T18:13:41Z
 salsa.debian.org/gnutls-team,,salsa.debian.org,,,,,,fetch failed: http_401,2026-07-06T18:13:41Z

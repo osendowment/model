@@ -58,7 +58,6 @@ bitflags/bitflags,gh/29287955,True,False,True,True,False,3,4,True
 blakeembrey/array-flatten,gh/17789771,True,True,True,True,True,3,4,True
 blakeembrey/change-case,gh/9440238,True,True,True,True,True,3,4,True
 bluss/bencher,gh/65987276,True,True,True,True,True,2,4,True
-bminor/glibc,gh/13868694,True,True,True,True,True,2,4,True
 boto/boto3,gh/24774658,True,True,False,True,False,3,4,True
 boto/botocore,gh/6670942,True,True,False,True,False,3,4,True
 boto/s3transfer,gh/49535299,True,True,False,True,False,3,4,True
@@ -456,7 +455,6 @@ libffi/libffi,gh/321154,True,True,True,True,True,3,4,True
 libidn/libidn2,gl/2882658,True,False,True,True,False,1,4,False
 libjpeg-turbo/libjpeg-turbo,gh/39760454,True,True,True,True,True,2,4,True
 libjxl/libjxl,gh/340219494,True,True,False,True,False,2,4,True
-libpixman/pixman,gh/81675971,True,True,True,True,True,2,4,True
 libtiff/libtiff,gl/4720790,True,False,True,True,False,1,4,False
 libuv/libuv,gh/14812739,True,True,True,True,True,3,4,True
 linusu/buffer-from,gh/66025821,True,True,True,True,True,3,4,True
@@ -613,6 +611,7 @@ pillarjs/iconv-lite,gh/2743221,True,True,True,True,True,3,4,True
 pillarjs/parseurl,gh/17533192,True,True,True,True,True,3,4,True
 pillarjs/path-to-regexp,gh/5265803,True,True,True,True,True,3,4,True
 pillarjs/send,gh/4879977,True,True,True,True,True,3,4,True
+pixman/pixman,gl/freedesktop-158,True,True,True,True,True,1,4,False
 pkgconf/pkgconf,gh/4180110,True,True,True,True,True,2,4,True
 pnggroup/libpng,gh/3768025,True,False,True,True,False,2,4,True
 postcss/postcss,gh/13078968,True,True,True,True,True,3,4,True

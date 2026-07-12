@@ -285,10 +285,17 @@ def main() -> None:  # pragma: no cover
 
     # Refresh the non-GitHub ls-remote reachability cache before rolling up.
     # Gate behind --offline (skip) and --refresh (force=True).
+    # Verify the CANONICALIZED urls — the exact keys `_row_target` /
+    # `collect_targets` look the verdicts up under. Verifying the raw git_url
+    # instead caches the verdict under a key nothing reads (e.g. it checks
+    # https://sourceware.org/git/glibc.git while the rollup asks for
+    # git://sourceware.org/git/glibc.git), leaving the target with no verdict
+    # and failing the run.
     nongithub_urls = sorted({
-        (r.get("git_url") or "").strip()
+        _canonicalize_git_url(gu) or gu
         for r in value_rows
-        if (r.get("platform") or "") != "github" and (r.get("git_url") or "").strip()
+        if (r.get("platform") or "") != "github"
+        and (gu := (r.get("git_url") or "").strip())
     })
     if not args.offline:
         _verify_non_github(nongithub_urls, force=args.refresh)

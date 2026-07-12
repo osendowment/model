@@ -600,12 +600,12 @@ COMPONENT_TABLES: list[tuple[str, str, list[tuple[str, object]]]] = [
          "overrides.csv). Company-backed projects are already resourced — "
          "ineligible but kept visible."),
         ("active",
-         "active = NOT eol AND (NOT archived OR mirror). eol is a manual "
-         "per-repo verdict in overrides.csv informed by registry "
+         "active = NOT eol AND NOT archived. eol is a manual per-repo "
+         "verdict in overrides.csv informed by registry "
          "deprecation/yank/endoflife.date advisories; archived is the "
-         "GitHub flag, with an exemption for archived GitHub mirrors whose "
-         "live upstream is elsewhere (e.g. bminor/glibc → "
-         "sourceware.org)."),
+         "GitHub flag, with no exemption — a project whose canonical "
+         "upstream is off GitHub is repointed there in value/overrides.csv "
+         "(e.g. glibc → sourceware, pixman → gitlab.freedesktop.org)."),
     ]),
     ("Preview Results", "4F81BD", [
         ("score",

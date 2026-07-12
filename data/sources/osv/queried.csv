@@ -274,6 +274,7 @@ gkz/levn,gh/13287279,npm:levn,2026-07-05T16:33:57+00:00
 gkz/optionator,gh/13435927,npm:optionator,2026-07-05T16:33:56+00:00
 gkz/prelude-ls,gh/4457759,npm:prelude-ls,2026-07-05T16:33:57+00:00
 gkz/type-check,gh/13182168,npm:type-check,2026-07-05T16:33:58+00:00
+glibc-team/glibc,gl/debian-11260,Debian:glibc,2026-07-12T19:36:40+00:00
 gmp-mirror/gmp,gh/681340775,Debian:gmp,2026-07-05T16:33:58+00:00
 gnome/gdk-pixbuf,gl/gnome-1548,Debian:gdk-pixbuf,2026-07-05T23:08:03+00:00
 gnome/glib,gl/gnome-658,Debian:glib,2026-07-05T23:08:01+00:00
@@ -650,6 +651,7 @@ pillarjs/iconv-lite,gh/2743221,npm:iconv-lite,2026-07-05T16:35:46+00:00
 pillarjs/parseurl,gh/17533192,npm:parseurl,2026-07-05T16:35:46+00:00
 pillarjs/path-to-regexp,gh/5265803,npm:path-to-regexp,2026-07-05T16:35:47+00:00
 pillarjs/send,gh/4879977,npm:send,2026-07-05T16:35:47+00:00
+pixman/pixman,gl/freedesktop-158,Debian:pixman,2026-07-12T19:36:38+00:00
 pkgconf/pkgconf,gh/4180110,Debian:pkgconf,2026-07-05T16:35:47+00:00
 pnggroup/libpng,gh/3768025,Debian:libpng,2026-07-05T16:35:48+00:00
 postcss/postcss,gh/13078968,npm:postcss,2026-07-05T16:35:48+00:00

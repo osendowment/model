@@ -35,7 +35,6 @@ log = logging.getLogger(__name__)
 VALUE_FILE = "data/value/value.csv"
 REPOS_FILE = "data/sources/github/repos.csv"
 GITLAB_PROJECTS_FILE = "data/sources/gitlab/repos.csv"
-OVERRIDES_FILE = "data/value/overrides.csv"
 
 # Class precedence — highest class wins if a repo has multiple rows.
 _RANK = {"A": 3, "B": 2, "C": 1}
@@ -148,35 +147,9 @@ def _read_gitlab_projects(path: str = GITLAB_PROJECTS_FILE) -> dict[str, RepoEnt
     return meta
 
 
-def _read_live_upstream_mirror_slugs(path: str) -> set[str]:
-    """Read data/value/overrides.csv → set of lowercased `repo` slugs
-    that are GitHub *mirrors* of a live non-GitHub upstream.
-
-    A mirror row carries BOTH a non-empty `repo` (a GitHub slug) AND a
-    non-empty `git_url` whose host is not github.com (e.g. glibc: `bminor/glibc`
-    mirrors `https://sourceware.org/git/glibc.git`; pixman: `libpixman/pixman`
-    mirrors `https://gitlab.freedesktop.org/pixman/pixman.git`). GitHub often
-    flags the mirror `archived=True` even though the real upstream is alive
-    and updated daily, so load_top_repos exempts these slugs from the
-    `skip_archived` drop. Slugs are returned in raw (pre-canonicalised) form;
-    the caller resolves them through `canon`.
-    """
-    slugs: set[str] = set()
-    if not os.path.exists(path):
-        return slugs
-    with open(path, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            gh = (row.get("repo") or "").strip().lower()
-            git_url = (row.get("git_url") or "").strip()
-            if gh and git_url and not git_url.lower().startswith("https://github.com/"):
-                slugs.add(gh)
-    return slugs
-
-
 def load_top_repos(
     value_file: str = VALUE_FILE,
     repos_file: str = REPOS_FILE,
-    overrides_file: str = OVERRIDES_FILE,
     skip_archived: bool = False,
     skip_invalid: bool = True,
 ) -> list[RepoEntry]:
@@ -204,21 +177,16 @@ def load_top_repos(
       (`browserify/events`) — the form the Search API and downstream joins need.
     - Deduped by canonical slug; highest class wins (A > B > C).
     - repo_id / archived / size_kb / stars enriched from `data/sources/github/repos.csv`.
-      When `skip_archived=True` (opt-in), archived repos are dropped — EXCEPT
-      live-upstream GitHub mirrors (from `overrides.csv`, see
-      `_read_live_upstream_mirror_slugs`), whose archived flag is on the mirror
-      while the real upstream is alive; those are kept so they still get scored.
-      Dropped archived slugs are logged at INFO for auditability.
+      When `skip_archived=True` (opt-in), archived repos are dropped with no
+      exemption — an archived GitHub repo is out. A project whose canonical
+      upstream is off GitHub is repointed there via `data/value/overrides.csv`
+      (git_url-only), so it enters scope as that upstream, not the archived
+      mirror. Dropped archived slugs are logged at INFO for auditability.
     - Repos missing from github/repos.csv are returned with `enriched=False`
       and default metadata; those still get processed.
     """
     canon, gh_meta = _read_github_repos(repos_file)
     gl_meta = _read_gitlab_projects()
-    # Live-upstream GitHub mirrors (archived mirror flag, live non-github
-    # upstream) — resolved to canonical slugs, exempt from skip_archived.
-    mirror_exempt = {
-        canon.get(s, s) for s in _read_live_upstream_mirror_slugs(overrides_file)
-    }
     # chosen: dedup key -> (class, platform, repo_id, slug, git_url). The key
     # is the canonical github slug for github repos and the stable gl/ repo_id
     # for gitlab repos, so a same-named repo on both hosts never collapses.
@@ -274,10 +242,7 @@ def load_top_repos(
             e.git_url = git_url
         elif platform == "github" and not e.git_url:
             e.git_url = f"https://github.com/{slug}.git"
-        # The mirror-exemption is a GitHub concept (archived mirror of a live
-        # non-github upstream); it never applies to a gitlab/other row.
-        exempt = platform == "github" and slug in mirror_exempt
-        if skip_archived and e.archived and not exempt:
+        if skip_archived and e.archived:
             dropped_archived.append(slug)
             continue
         entries.append(e)
@@ -310,23 +275,6 @@ def load_github_top_slugs(*args, **kwargs) -> list[str]:
         e.repo for e in load_top_repos(*args, **kwargs)
         if not str(e.repo_id or "").startswith("gl/")
     ]
-
-
-def load_live_upstream_mirrors(
-    overrides_file: str = OVERRIDES_FILE,
-    repos_file: str = REPOS_FILE,
-) -> set[str]:
-    """Canonical slugs of live-upstream GitHub mirrors (archived-exempt).
-
-    The same exemption set `load_top_repos` applies internally to its
-    `skip_archived=True` drop, exposed for callers that load the (default)
-    archived-inclusive scope and apply the exemption themselves — the
-    eligibility stage's `build_active` marks archived repos `active=False`
-    EXCEPT these mirrors (archived flag on the GitHub mirror, live upstream
-    elsewhere).
-    """
-    canon, _ = _read_github_repos(repos_file)
-    return {canon.get(s, s) for s in _read_live_upstream_mirror_slugs(overrides_file)}
 
 
 def load_git_urls(value_file: str = VALUE_FILE) -> dict[str, str]:
