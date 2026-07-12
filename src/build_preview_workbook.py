@@ -69,7 +69,9 @@ def _fill(rgb: str) -> PatternFill:
 # simply skipped.
 REPOS_STATIC_FILLS = {"eligible": _fill("E4DFEC")}  # light purple
 
-REPOS_VALUE_SCALE_COLS = ["openssf_crit", "eco_crit", "top_eco_pct", "value_score"]
+# All four value_score components + the blend itself share the value scale.
+REPOS_VALUE_SCALE_COLS = ["top_eco_pct", "pr_score", "openssf_crit", "eco_crit",
+                          "value_score"]
 REPOS_RISK_SCALE_COLS = ["concentration", "complexity", "security", "workload",
                          "risk_score"]
 REPOS_SCORE_COL = "score"
@@ -82,7 +84,8 @@ REPOS_CENTERED_COLS = (REPOS_VALUE_SCALE_COLS + REPOS_RISK_SCALE_COLS
 
 REPOS_COLUMN_WIDTHS = {
     "repo": 24, "language": 11, "ecosystem": 10, "top_eco_pkg": 16,
-    "openssf_crit": 10, "eco_crit": 8, "top_eco_pct": 10, "value_score": 10,
+    "top_eco_pct": 10, "pr_score": 10,
+    "openssf_crit": 10, "eco_crit": 8, "value_score": 10,
     "concentration": 10, "complexity": 10, "security": 10, "workload": 10,
     "risk_score": 10, "score": 9, "oss": 7, "intent": 8, "nonprofit": 9,
     "active": 8, "eligible": 9, "priority": 8, "repo_id": 13,

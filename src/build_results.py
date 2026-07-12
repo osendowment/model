@@ -18,10 +18,12 @@ Columns:
                       Blank for any repo not fetched on either host.
     ecosystem         top ecosystem                     (value.csv `top_eco`)
     top_eco_pkg       top package of the repo in `top_eco` (value.csv `top_eco_pkg`)
+    top_eco_pct       PageRank percentile in top_eco     (value.csv)
+    pr_score          cross-ecosystem dependency mass, 0-100 (value.csv)
     openssf_crit      OpenSSF criticality score, 0-100   (value.csv)
     eco_crit          ecosyste.ms critical flag, 0/100   (value.csv)
-    top_eco_pct       PageRank percentile in top_eco     (value.csv)
-    value_score       0-100 value blend                  (value.csv `value_score`)
+    value_score       0-100 value blend of the four preceding
+                      components                         (value.csv `value_score`)
     concentration, complexity, security, workload        (risk.csv components)
     risk_score        overall risk score, 0-100          (risk.csv `risk_score`)
     score             value_score * risk_score, scaled so the highest row = 100.
@@ -36,7 +38,7 @@ Columns:
                       — last column; every join key, kept out of the way of
                       human readers.
 
-All score-like numeric columns (`openssf_crit`, `top_eco_pct`, `value_score`,
+All score-like numeric columns (`top_eco_pct`, `pr_score`, `openssf_crit`, `value_score`,
 the four risk components, `risk_score`) are rounded to 2 decimal places for
 this preview output — `eco_crit` is a 0/100 flag, not a score, and is left as
 its raw upstream value. `score` itself is always computed from the
@@ -78,8 +80,8 @@ RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
 ELIGIBILITY_COMPONENTS = ["oss", "intent", "nonprofit", "active"]
 
 FIELDS = (
-    ["repo", "language", "ecosystem", "top_eco_pkg", "openssf_crit", "eco_crit",
-     "top_eco_pct", "value_score"]
+    ["repo", "language", "ecosystem", "top_eco_pkg", "top_eco_pct", "pr_score",
+     "openssf_crit", "eco_crit", "value_score"]
     + RISK_COMPONENTS
     + ["risk_score", "score"]
     + ELIGIBILITY_COMPONENTS
@@ -134,9 +136,10 @@ def build() -> list[dict]:
             "language": language.lower(),
             "ecosystem": (v.get("top_eco") or "").strip(),
             "top_eco_pkg": (v.get("top_eco_pkg") or "").strip(),
+            "top_eco_pct": _round2(v.get("top_eco_pct") or ""),
+            "pr_score": _round2(v.get("pr_score") or ""),
             "openssf_crit": _round2(v.get("openssf_crit") or ""),
             "eco_crit": (v.get("eco_crit") or "").strip(),
-            "top_eco_pct": _round2(v.get("top_eco_pct") or ""),
             "value_score": _round2(value_score),
             **{col: _round2(r.get(col) or "") for col in RISK_COMPONENTS},
             "risk_score": _round2(risk_score),

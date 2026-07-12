@@ -30,9 +30,9 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
            [["a/keep", "gh/1", "True", "True", "True", "True", "True"],
             ["b/drop", "gh/2", "True", "False", "True", "True", "False"]])
     _write(val, ["repo", "repo_id", "top_eco", "top_eco_pkg", "openssf_crit",
-                 "eco_crit", "top_eco_pct", "value_score"],
-           [["a/keep", "gh/1", "npm", "left-pad", "0.71", "100", "55.5", "72.3"],
-            ["b/drop", "gh/2", "pypi", "requests", "0.2", "0", "10.0", "8.1"]])
+                 "eco_crit", "top_eco_pct", "pr_score", "value_score"],
+           [["a/keep", "gh/1", "npm", "left-pad", "0.71", "100", "55.5", "41.379", "72.3"],
+            ["b/drop", "gh/2", "pypi", "requests", "0.2", "0", "10.0", "5.0", "8.1"]])
     _write(risk, ["repo", "repo_id", "concentration", "complexity", "security",
                   "workload", "risk_score"],
            [["a/keep", "gh/1", "10", "20", "30", "40", "80"],
@@ -50,12 +50,15 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
     assert keep["eco_crit"] == "100"        # a 0/100 flag, not a score -- left raw
     assert keep["openssf_crit"] == "0.71"
     assert keep["top_eco_pct"] == "55.50"   # rounded to 2dp
+    assert keep["pr_score"] == "41.38"      # rounded to 2dp
     assert keep["value_score"] == "72.30"
     assert keep["concentration"] == "10.00" and keep["workload"] == "40.00"
     assert keep["risk_score"] == "80.00"
     assert keep["eligible"] == "True"
     assert list(keep.keys()) == br.FIELDS
     assert br.FIELDS.index("top_eco_pkg") == br.FIELDS.index("ecosystem") + 1
+    assert br.FIELDS.index("top_eco_pct") == br.FIELDS.index("top_eco_pkg") + 1
+    assert br.FIELDS.index("pr_score") == br.FIELDS.index("top_eco_pct") + 1
     assert br.FIELDS.index("score") == br.FIELDS.index("risk_score") + 1
 
 
