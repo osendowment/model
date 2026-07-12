@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
-"""Build data/preview/preview.xlsx — repos.csv + people.csv + stats as one workbook.
+"""Build data/preview/preview.xlsx — repos.csv + methodology + stats as one workbook.
 
-The terminal step of the pipeline: combines the two preview CSVs
-(src.build_results -> repos.csv, src.build_people -> people.csv) into a
-single spreadsheet for non-technical review, one sheet per CSV ('repos',
-'people'). Numeric-looking cells (scores, counts, ids) are written as real
-Excel numbers, not text, so sorting/filtering behaves numerically rather
-than alphabetically.
+The terminal step of the pipeline, a spreadsheet for non-technical review.
+Sheet 1, 'repos', is src.build_results -> repos.csv; numeric-looking cells
+(scores, counts) are written as real Excel numbers, not text, so
+sorting/filtering behaves numerically rather than alphabetically.
+(people.csv stays a standalone CSV deliverable — it is not shipped in the
+workbook.)
 
-A third sheet, 'components', documents the methodology: one banner-headed
+Sheet 2, 'components', documents the methodology: one banner-headed
 table per stage (Value / Risk / Eligibility / Preview Results), one row
 per score or component — name + a prose description of its data sources
 and formula. The value-component weights are formatted at build time from
 `settings.json` (via src.common.params) so the text cannot drift from the
 config.
 
-A fourth sheet, 'stats', renders every pipeline count/funnel/coverage table
+Sheet 3, 'stats', renders every pipeline count/funnel/coverage table
 as stacked blocks — each under its section heading, with the same styled
 header row. The tables come straight from the generator
 (`scripts/stats.py`, its markdown renderer), computed from the live CSVs at
@@ -68,11 +68,10 @@ console = Console()
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 REPOS_CSV = DATA_DIR / "preview" / "repos.csv"
-PEOPLE_CSV = DATA_DIR / "preview" / "people.csv"
 STATS_SCRIPT = ROOT / "scripts" / "stats.py"
 OUTPUT_FILE = DATA_DIR / "preview" / "preview.xlsx"
 
-SHEETS = [("repos", REPOS_CSV), ("people", PEOPLE_CSV)]
+SHEETS = [("repos", REPOS_CSV)]
 
 HEADER_FILL = PatternFill(start_color="1F3864", end_color="1F3864", fill_type="solid")
 HEADER_FONT = Font(bold=True, color="FFFFFF")
@@ -104,12 +103,13 @@ REPOS_CENTERED_COLS = (REPOS_VALUE_SCALE_COLS + REPOS_RISK_SCALE_COLS
                        + [REPOS_SCORE_COL] + REPOS_BOOL_COLS
                        + [REPOS_PRIORITY_COL])
 
+# Reviewed widths (from the hand-tuned workbook). Columns not listed —
+# pr_score, openssf_crit, the four risk dimensions, risk_score — stay at
+# Excel's default width.
 REPOS_COLUMN_WIDTHS = {
     "repo": 24, "language": 11, "platform": 9, "ecosystem": 10, "top_eco_pkg": 16,
-    "top_eco_pct": 10, "pr_score": 10,
-    "openssf_crit": 10, "eco_crit": 8, "value_score": 10,
-    "concentration": 10, "complexity": 10, "security": 10, "workload": 10,
-    "risk_score": 10, "score": 9, "oss": 7, "intent": 8, "nonprofit": 9,
+    "top_eco_pct": 10, "eco_crit": 8, "value_score": 10,
+    "score": 9, "oss": 7, "intent": 8, "nonprofit": 9,
     "active": 8, "eligible": 9, "priority": 8,
 }
 
@@ -619,7 +619,7 @@ COMPONENT_TABLES: list[tuple[str, str, list[tuple[str, object]]]] = [
     ]),
 ]
 
-COMPONENTS_DESC_WIDTH = 150          # col C width ≈ chars per line
+COMPONENTS_DESC_WIDTH = 116          # col C width ≈ chars per line (reviewed)
 COMPONENTS_BOX = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
 
 
@@ -638,6 +638,7 @@ def _write_components_sheet(ws: Worksheet) -> int:
             cell = ws.cell(row=row, column=col)
             cell.fill = _fill(rgb)
             cell.border = COMPONENTS_BOX
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=3)
         row += 1
         for name, desc in entries:
             ncell = ws.cell(row=row, column=2, value=name)

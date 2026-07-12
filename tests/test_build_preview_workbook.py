@@ -100,13 +100,17 @@ def test_components_sheet_renders_methodology_tables(tmp_path, monkeypatch):
 
     bpw.build()
 
+    # people.csv is a standalone CSV deliverable — not shipped in the workbook.
+    assert [n for n, _ in bpw.SHEETS] == ["repos"]
+
     ws = load_workbook(out, rich_text=True)["components"]
     assert ws.sheet_view.showGridLines is False
-    # value banner at B2: bold white on the stage green, boxed.
+    # value banner at B2: bold white on the stage green, boxed, merged B:C.
     banner = ws.cell(row=2, column=2)
     assert banner.value == "Value Components"
     assert banner.font.bold is True and banner.font.color.rgb == "00FFFFFF"
     assert banner.fill.start_color.rgb == "009BBB59"
+    assert "B2:C2" in {str(r) for r in ws.merged_cells.ranges}
     # first row under it: bold name + wrapped description.
     name = ws.cell(row=3, column=2)
     assert name.value == "value_score" and name.font.bold is True
