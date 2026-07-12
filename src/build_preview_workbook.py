@@ -22,10 +22,15 @@ The CSV sheets get:
     - a frozen header row (`freeze_panes`), so the header (and its filter
       dropdowns) stays visible while scrolling a long sheet
 
-The repos sheet is additionally decorated: each `repo` cell hyperlinks to
-the repo's home page (host derived from `repo_id`), and the four decision
-columns (`value_score` / `risk_score` / `eligible` / `score`) carry light
-background fills (blue / orange / purple / green).
+The repos sheet is additionally decorated (matching the reviewed design):
+each `repo` cell hyperlinks to the repo's home page (host derived from
+`repo_id`); the value columns carry a red→yellow→green 3-color scale
+anchored at 0/50/100 and the risk columns the reversed scale (higher risk
+= red); `score` fades white→blue; the boolean columns render True/False as
+dark-green/dark-red text, with `eligible` also on a static light-purple
+column fill; non-empty `priority` cells fill light blue. Numeric, boolean
+and priority data cells are centered, `value_score`/`risk_score` are bold,
+and every known column gets a fixed width.
 
 Usage:
     uv run python -m src.build_preview_workbook
@@ -35,7 +40,9 @@ import csv
 from pathlib import Path
 
 from openpyxl import Workbook
+from openpyxl.formatting.rule import CellIsRule, ColorScaleRule, FormulaRule
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 from rich.console import Console
 
@@ -54,18 +61,41 @@ HEADER_FILL = PatternFill(start_color="1F3864", end_color="1F3864", fill_type="s
 HEADER_FONT = Font(bold=True, color="FFFFFF")
 SECTION_FONT = Font(bold=True, size=13)
 
-# repos sheet: light column fills on the four decision columns so they pop
-# against the raw metrics. Consistent hues: value=blue, risk=orange,
-# eligible=purple, score=green.
 def _fill(rgb: str) -> PatternFill:
     return PatternFill(start_color=rgb, end_color=rgb, fill_type="solid")
 
-REPOS_COLUMN_FILLS = {
-    "value_score": _fill("D9E1F2"),   # light blue
-    "risk_score": _fill("FCE4D6"),    # light orange
-    "eligible": _fill("E4DFEC"),      # light purple
-    "score": _fill("E2EFDA"),         # light green
+# repos sheet decoration (the reviewed design). Column groups are keyed by
+# header NAME so the layout survives column reorders; unknown headers are
+# simply skipped.
+REPOS_STATIC_FILLS = {"eligible": _fill("E4DFEC")}  # light purple
+
+REPOS_VALUE_SCALE_COLS = ["openssf_crit", "eco_crit", "top_eco_pct", "value_score"]
+REPOS_RISK_SCALE_COLS = ["concentration", "complexity", "security", "workload",
+                         "risk_score"]
+REPOS_SCORE_COL = "score"
+REPOS_BOOL_COLS = ["oss", "intent", "nonprofit", "active", "eligible"]
+REPOS_PRIORITY_COL = "priority"
+REPOS_BOLD_COLS = ["value_score", "risk_score"]
+REPOS_CENTERED_COLS = (REPOS_VALUE_SCALE_COLS + REPOS_RISK_SCALE_COLS
+                       + [REPOS_SCORE_COL] + REPOS_BOOL_COLS
+                       + [REPOS_PRIORITY_COL])
+
+REPOS_COLUMN_WIDTHS = {
+    "repo": 24, "language": 11, "ecosystem": 10, "top_eco_pkg": 16,
+    "openssf_crit": 10, "eco_crit": 8, "top_eco_pct": 10, "value_score": 10,
+    "concentration": 10, "complexity": 10, "security": 10, "workload": 10,
+    "risk_score": 10, "score": 9, "oss": 7, "intent": 8, "nonprofit": 9,
+    "active": 8, "eligible": 9, "priority": 8, "repo_id": 13,
 }
+
+# 3-color scale anchors (Excel's classic red/yellow/green) + the score blue.
+SCALE_RED, SCALE_YELLOW, SCALE_GREEN = "F8696B", "FFEB84", "63BE7B"
+SCORE_BLUE = "2C96DE"
+BOOL_TRUE_FONT = Font(color="006100")    # dark green
+BOOL_FALSE_FONT = Font(color="9C0006")   # dark red
+PRIORITY_FILL = _fill("DDEBF7")          # light blue
+CENTER = Alignment(horizontal="center")
+BOLD = Font(bold=True)
 
 
 def _cell_value(raw: str) -> int | float | str | None:
@@ -132,11 +162,15 @@ def _repo_url(repo: str, repo_id: str) -> str | None:
 
 
 def _decorate_repos_sheet(ws: Worksheet) -> None:
-    """repos-only dressing: link each `repo` cell to the repo's home page
-    (host from `repo_id`) and fill the decision columns per REPOS_COLUMN_FILLS."""
+    """repos-only dressing (the reviewed design): hyperlink each `repo` cell
+    to the repo's home page (host from `repo_id`), apply the static fills,
+    center/bold the metric cells, add the conditional formats per column
+    group, and set the fixed column widths."""
     headers = {c.value: c.column for c in ws[1]}  # name -> 1-based col index
     repo_col, id_col = headers.get("repo"), headers.get("repo_id")
-    fill_cols = {headers[n]: f for n, f in REPOS_COLUMN_FILLS.items() if n in headers}
+    fill_cols = {headers[n]: f for n, f in REPOS_STATIC_FILLS.items() if n in headers}
+    center_cols = {headers[n] for n in REPOS_CENTERED_COLS if n in headers}
+    bold_cols = {headers[n] for n in REPOS_BOLD_COLS if n in headers}
     for row in ws.iter_rows(min_row=2):
         if repo_col and id_col:
             cell = row[repo_col - 1]
@@ -146,6 +180,64 @@ def _decorate_repos_sheet(ws: Worksheet) -> None:
                 cell.style = "Hyperlink"
         for col, fill in fill_cols.items():
             row[col - 1].fill = fill
+        for col in center_cols:
+            row[col - 1].alignment = CENTER
+        for col in bold_cols:
+            row[col - 1].font = BOLD
+    _add_repos_conditional_formats(ws, headers)
+    for name, width in REPOS_COLUMN_WIDTHS.items():
+        if name in headers:
+            ws.column_dimensions[get_column_letter(headers[name])].width = width
+
+
+def _add_repos_conditional_formats(ws: Worksheet, headers: dict) -> None:
+    """Conditional formats on the repos sheet, one per column group, each
+    over the column's data range (row 2..max_row):
+
+      - value columns: 3-color scale, 0=red → 50=yellow → 100=green;
+      - risk columns: the same scale reversed — higher risk reads red;
+      - `score`: 2-color scale, 0=white → 100=blue;
+      - boolean columns: "True" in dark-green text, "False" in dark-red
+        (font only, so `eligible`'s static purple fill shows through);
+      - `priority`: light-blue fill on non-empty cells.
+    """
+    def data_range(name: str) -> tuple[str, str] | tuple[None, None]:
+        col = headers.get(name)
+        if not col or ws.max_row < 2:
+            return None, None
+        letter = get_column_letter(col)
+        return letter, f"{letter}2:{letter}{ws.max_row}"
+
+    for name in REPOS_VALUE_SCALE_COLS:
+        _, rng = data_range(name)
+        if rng:
+            ws.conditional_formatting.add(rng, ColorScaleRule(
+                start_type="num", start_value=0, start_color=SCALE_RED,
+                mid_type="num", mid_value=50, mid_color=SCALE_YELLOW,
+                end_type="num", end_value=100, end_color=SCALE_GREEN))
+    for name in REPOS_RISK_SCALE_COLS:
+        _, rng = data_range(name)
+        if rng:
+            ws.conditional_formatting.add(rng, ColorScaleRule(
+                start_type="num", start_value=0, start_color=SCALE_GREEN,
+                mid_type="num", mid_value=50, mid_color=SCALE_YELLOW,
+                end_type="num", end_value=100, end_color=SCALE_RED))
+    _, rng = data_range(REPOS_SCORE_COL)
+    if rng:
+        ws.conditional_formatting.add(rng, ColorScaleRule(
+            start_type="num", start_value=0, start_color="FFFFFF",
+            end_type="num", end_value=100, end_color=SCORE_BLUE))
+    for name in REPOS_BOOL_COLS:
+        _, rng = data_range(name)
+        if rng:
+            ws.conditional_formatting.add(rng, CellIsRule(
+                operator="equal", formula=['"True"'], font=BOOL_TRUE_FONT))
+            ws.conditional_formatting.add(rng, CellIsRule(
+                operator="equal", formula=['"False"'], font=BOOL_FALSE_FONT))
+    letter, rng = data_range(REPOS_PRIORITY_COL)
+    if rng:
+        ws.conditional_formatting.add(rng, FormulaRule(
+            formula=[f"NOT(ISBLANK({letter}2))"], fill=PRIORITY_FILL))
 
 
 def _md_cell(raw: str) -> tuple[int | float | str | None, str | None]:

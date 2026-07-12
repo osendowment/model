@@ -113,13 +113,18 @@ def test_repo_url_per_platform():
     assert bpw._repo_url("a/b", "") is None
 
 
-def test_repos_sheet_hyperlinks_and_decision_column_fills(tmp_path, monkeypatch):
+def test_repos_sheet_hyperlinks_and_reviewed_decoration(tmp_path, monkeypatch):
+    """Pins the reviewed repos-sheet design: hyperlinks, the single static
+    fill (eligible purple), bold+centered score cells, the per-column-group
+    conditional formats, and the fixed column widths."""
     repos_csv = tmp_path / "repos.csv"
     out = tmp_path / "preview.xlsx"
-    _write_csv(repos_csv,
-               ["repo", "value_score", "risk_score", "eligible", "score", "repo_id"],
-               [["a/keep", "70.00", "80.00", "True", "90.00", "gh/1"],
-                ["c/lab", "60.00", "70.00", "False", "80.00", "gl/debian-9"]])
+    header = ["repo", "value_score", "risk_score", "score",
+              "oss", "eligible", "priority", "repo_id"]
+    #          A       B              C             D        E      F           G           H
+    _write_csv(repos_csv, header,
+               [["a/keep", "70.00", "80.00", "90.00", "True", "True", "P1", "gh/1"],
+                ["c/lab", "60.00", "70.00", "80.00", "False", "False", "", "gl/debian-9"]])
     monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv)])
     _patch_stats_md(monkeypatch)
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
@@ -127,14 +132,56 @@ def test_repos_sheet_hyperlinks_and_decision_column_fills(tmp_path, monkeypatch)
     bpw.build()
 
     ws = load_workbook(out)["repos"]
+    # repo hyperlinks still work, host derived from repo_id.
     assert ws.cell(row=2, column=1).hyperlink.target == "https://github.com/a/keep"
     assert ws.cell(row=3, column=1).hyperlink.target == "https://salsa.debian.org/c/lab"
-    # decision columns carry their light fills; plain columns don't.
-    assert ws.cell(row=2, column=2).fill.start_color.rgb == "00D9E1F2"  # value_score
-    assert ws.cell(row=2, column=3).fill.start_color.rgb == "00FCE4D6"  # risk_score
-    assert ws.cell(row=2, column=4).fill.start_color.rgb == "00E4DFEC"  # eligible
-    assert ws.cell(row=2, column=5).fill.start_color.rgb == "00E2EFDA"  # score
-    assert ws.cell(row=2, column=6).fill.fill_type is None              # repo_id plain
+
+    # eligible keeps its static purple fill; the score columns carry NO
+    # static fill (their color comes from conditional scales).
+    assert ws.cell(row=2, column=6).fill.start_color.rgb == "00E4DFEC"  # eligible
+    assert ws.cell(row=2, column=2).fill.fill_type is None              # value_score
+    assert ws.cell(row=2, column=3).fill.fill_type is None              # risk_score
+    assert ws.cell(row=2, column=4).fill.fill_type is None              # score
+
+    # value_score/risk_score data cells are bold and centered; repo is not.
+    for col in (2, 3):
+        assert ws.cell(row=2, column=col).font.bold is True
+        assert ws.cell(row=2, column=col).alignment.horizontal == "center"
+    assert ws.cell(row=2, column=1).alignment.horizontal != "center"    # repo
+
+    # conditional formats, one entry per column data range.
+    cfs = {str(cf.sqref): list(cf.rules) for cf in ws.conditional_formatting}
+
+    value_scale = cfs["B2:B3"][0].colorScale       # value_score: 3-color
+    assert [c.rgb for c in value_scale.color] == \
+        ["00F8696B", "00FFEB84", "0063BE7B"]       # red → yellow → GREEN max
+    assert [(v.type, v.val) for v in value_scale.cfvo] == \
+        [("num", 0.0), ("num", 50.0), ("num", 100.0)]
+
+    risk_scale = cfs["C2:C3"][0].colorScale        # risk_score: reversed
+    assert [c.rgb for c in risk_scale.color] == \
+        ["0063BE7B", "00FFEB84", "00F8696B"]       # green → yellow → RED max
+
+    score_scale = cfs["D2:D3"][0].colorScale       # score: 2-color to blue
+    assert [c.rgb for c in score_scale.color] == ["00FFFFFF", "002C96DE"]
+
+    for rng in ("E2:E3", "F2:F3"):                 # oss + eligible booleans
+        rules = {r.formula[0]: r for r in cfs[rng]}
+        assert all(r.type == "cellIs" and r.operator == "equal"
+                   for r in rules.values())
+        assert rules['"True"'].dxf.font.color.rgb == "00006100"   # dark green
+        assert rules['"False"'].dxf.font.color.rgb == "009C0006"  # dark red
+        assert rules['"True"'].dxf.fill is None                   # font-only
+
+    priority_rule = cfs["G2:G3"][0]                # priority: non-blank fill
+    assert priority_rule.type == "expression"
+    assert priority_rule.formula == ["NOT(ISBLANK(G2))"]
+    assert priority_rule.dxf.fill.start_color.rgb == "00DDEBF7"
+
+    # fixed column widths by header name.
+    assert ws.column_dimensions["A"].width == 24   # repo
+    assert ws.column_dimensions["G"].width == 8    # priority
+    assert ws.column_dimensions["H"].width == 13   # repo_id
 
 
 def test_stats_sheet_renders_markdown_tables(tmp_path, monkeypatch):
