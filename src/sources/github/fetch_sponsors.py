@@ -46,7 +46,7 @@ from rich.progress import (
 )
 
 from src.common.freshness import funding_ttl_for, row_is_fresh
-from src.common.repos import load_top_repos
+from src.common.repos import load_repo_ids, load_top_repos
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
 
 console = Console()
@@ -134,15 +134,12 @@ async def fetch_one(session, limiter, repo: str) -> dict:
     }
 
 
-def _load_map(path: Path, key: str, val: str) -> dict[str, str]:
-    out: dict[str, str] = {}
-    if path.exists():
-        with open(path, encoding="utf-8") as f:
-            for row in csv.DictReader(f):
-                k = (row.get(key) or "").strip().lower()
-                if k:
-                    out[k] = (row.get(val) or "").strip()
-    return out
+def _repo_id_map() -> dict[str, str]:
+    """Slug -> repo_id from github/repos.csv, keyed on BOTH the looked-up
+    `repo` slug and the rename-resolved `full_name` (via load_repo_ids), so a
+    repo renamed since its row was cached still resolves under its current
+    canonical slug."""
+    return load_repo_ids(GH_REPOS_FILE)
 
 
 def _load_existing() -> dict[str, dict]:
@@ -165,7 +162,7 @@ def _write(rows: dict[str, dict]) -> None:
 
 async def batch(repos: list[str], force: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
-    repo_ids = _load_map(GH_REPOS_FILE, "repo", "repo_id")
+    repo_ids = _repo_id_map()
     # A re-run is a no-op within the TTL (idempotent); an "error" sponsors_status
     # is never fresh, so failed fetches are always retried. A repo with no sponsor
     # signal yet (0 sponsors AND no owner listing) is rechecked on the shorter
