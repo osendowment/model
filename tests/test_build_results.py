@@ -29,10 +29,10 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
     _write(elig, ["repo", "repo_id", "oss", "intent", "nonprofit", "active", "eligible"],
            [["a/keep", "gh/1", "True", "True", "True", "True", "True"],
             ["b/drop", "gh/2", "True", "False", "True", "True", "False"]])
-    _write(val, ["repo", "repo_id", "top_eco", "top_eco_pkg", "openssf_crit",
+    _write(val, ["repo", "repo_id", "platform", "top_eco", "top_eco_pkg", "openssf_crit",
                  "eco_crit", "top_eco_pct", "pr_score", "value_score"],
-           [["a/keep", "gh/1", "npm", "left-pad", "0.71", "100", "55.5", "41.379", "72.3"],
-            ["b/drop", "gh/2", "pypi", "requests", "0.2", "0", "10.0", "5.0", "8.1"]])
+           [["a/keep", "gh/1", "github", "npm", "left-pad", "0.71", "100", "55.5", "41.379", "72.3"],
+            ["b/drop", "gh/2", "github", "pypi", "requests", "0.2", "0", "10.0", "5.0", "8.1"]])
     _write(risk, ["repo", "repo_id", "concentration", "complexity", "security",
                   "workload", "risk_score"],
            [["a/keep", "gh/1", "10", "20", "30", "40", "80"],
@@ -45,6 +45,7 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
     keep = next(r for r in rows if r["repo"] == "a/keep")
     assert keep["repo_id"] == "gh/1"
     assert keep["language"] == "typescript"        # lowercased
+    assert keep["platform"] == "github"
     assert keep["ecosystem"] == "npm"
     assert keep["top_eco_pkg"] == "left-pad"   # verbatim pass-through
     assert keep["eco_crit"] == "100"        # a 0/100 flag, not a score -- left raw
@@ -56,6 +57,7 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
     assert keep["risk_score"] == "80.00"
     assert keep["eligible"] == "True"
     assert list(keep.keys()) == br.FIELDS
+    assert br.FIELDS.index("platform") == br.FIELDS.index("language") + 1
     assert br.FIELDS.index("top_eco_pkg") == br.FIELDS.index("ecosystem") + 1
     assert br.FIELDS.index("top_eco_pct") == br.FIELDS.index("top_eco_pkg") + 1
     assert br.FIELDS.index("pr_score") == br.FIELDS.index("top_eco_pct") + 1

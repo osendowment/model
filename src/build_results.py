@@ -16,6 +16,9 @@ Columns:
                       `data/sources/github/repos.csv`; GitLab repos fall back
                       to `data/sources/gitlab/repos.csv` (GitLab Languages API).
                       Blank for any repo not fetched on either host.
+    platform          repo host, `github` / `gitlab`    (value.csv `platform`;
+                      falls back to the repo_id prefix when the value row is
+                      missing)
     ecosystem         top ecosystem                     (value.csv `top_eco`)
     top_eco_pkg       top package of the repo in `top_eco` (value.csv `top_eco_pkg`)
     top_eco_pct       PageRank percentile in top_eco     (value.csv)
@@ -35,8 +38,9 @@ Columns:
                       rows only — blank for ineligible rows and any row
                       missing a score.
     repo_id           stable platform-qualified id (`gh/<n>` / `gl/<nickname>-<n>`)
-                      — last column; every join key, kept out of the way of
-                      human readers.
+                      — last column; every join key. Kept in this CSV for
+                      traceability, but the preview workbook drops the column
+                      from the repos sheet after deriving the hyperlinks.
 
 All score-like numeric columns (`top_eco_pct`, `pr_score`, `openssf_crit`, `value_score`,
 the four risk components, `risk_score`) are rounded to 2 decimal places for
@@ -80,8 +84,8 @@ RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
 ELIGIBILITY_COMPONENTS = ["oss", "intent", "nonprofit", "active"]
 
 FIELDS = (
-    ["repo", "language", "ecosystem", "top_eco_pkg", "top_eco_pct", "pr_score",
-     "openssf_crit", "eco_crit", "value_score"]
+    ["repo", "language", "platform", "ecosystem", "top_eco_pkg", "top_eco_pct",
+     "pr_score", "openssf_crit", "eco_crit", "value_score"]
     + RISK_COMPONENTS
     + ["risk_score", "score"]
     + ELIGIBILITY_COMPONENTS
@@ -131,9 +135,14 @@ def build() -> list[dict]:
         if vs_num is not None and rs_num is not None:
             raw_by_id[rid] = vs_num * rs_num
 
+        platform = (v.get("platform") or "").strip().lower()
+        if not platform:
+            platform = {"gh": "github", "gl": "gitlab"}.get(rid.split("/", 1)[0], "")
+
         row = {
             "repo": repo,
             "language": language.lower(),
+            "platform": platform,
             "ecosystem": (v.get("top_eco") or "").strip(),
             "top_eco_pkg": (v.get("top_eco_pkg") or "").strip(),
             "top_eco_pct": _round2(v.get("top_eco_pct") or ""),
