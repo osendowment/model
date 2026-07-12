@@ -1,5 +1,33 @@
 # Project Guidelines
 
+## Running the Pipeline
+
+**Use `scripts/run-pipeline.sh` — it is the entry point for running the model.**
+It chains all four stages in order (Value → Risk → Eligibility → Preview) and
+finishes with `scripts/pipeline_health.py`. Warm run ≈2 min.
+
+```bash
+scripts/run-pipeline.sh              # normal run (TTL-cached)
+scripts/run-pipeline.sh --refresh    # force refetch past every TTL
+scripts/run-pipeline.sh --offline    # pure-cache run, no network
+```
+
+Args pass through to every stage runner. **Never hand-chain the stage runners
+instead** — the Preview stage (`src.run_preview_pipeline`: results → people →
+preview-xlsx) is the one people forget, which silently leaves
+`data/preview/preview.xlsx` stale.
+
+The per-stage runners are for *targeted* work only:
+
+| Command | Use for |
+|---|---|
+| `uv run python -m src.<stage>.run_<stage>_pipeline` | one stage (`--list`, `--from STEP`, `--only STEP`) |
+| `uv run python -m src.value.run_value_pipeline --rollup` | rebuild `value.csv` from existing per-eco `results.csv` (skips ecosystem sub-pipelines) |
+| `uv run python -m scripts.pipeline_health` | consistency check — **all checks must pass** before a change is done |
+
+A red `pipeline_health` check is a bug, not noise: it catches stale builds and
+override rows orphaned by a repo-identity change.
+
 ## Code Organization
 
 `src/` is organized by **role**, mirroring the three-stage Value → Risk →
