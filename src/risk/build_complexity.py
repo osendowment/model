@@ -6,7 +6,6 @@ Reads (long-format, sha-pinned):
     data/sources/git/commits-years.csv       — per (repo, year) last_sha + commits
     data/sources/git/scc.csv                        — long: scc metrics per (repo, sha)
     data/sources/git/lizard.csv                     — long: lizard metrics per (repo, sha)
-    data/sources/git/churn.csv               — for `churn_5y_total` (hotspot inputs)
 
 Writes:
     data/risk/complexity.csv  with columns:
@@ -16,15 +15,10 @@ Writes:
         cognitive_total, cognitive_avg, cognitive_max,
         cyclomatic_total, cyclomatic_avg, cyclomatic_max,
         loc_year   (year of snapshot used: a year in the settings window, or "" if missing)
-        churn_5y_total,
-        hotspot_raw,           # churn × complexity (linear)
-        hotspot_log,           # log10(churn+1) × log10(complexity+1)
-        hotspot_log_p,         # risk percentile of hotspot_log (higher = riskier)
         loc_eoy_p,        # risk percentile of loc_eoy
         scc_complexity_eoy_p,
         cognitive_max_p,
         cyclomatic_max_p,
-        churn_5y_total_p,
         complexity_p           # geometric mean of loc_eoy_p + cyclomatic_max_p
 
 Percentile system (0-100, higher = riskier):
@@ -60,14 +54,6 @@ Metric mapping:
     lizard.cyclomatic_avg        → cyclomatic_avg
     lizard.cyclomatic_max        → cyclomatic_max  (per-function McCabe)
 
-Hotspot folding (Adam Tornhill, "Code as a Crime Scene"):
-bug-prone code = high churn ∩ high complexity. We translate that to
-repo-level by joining 5y churn (added+deleted) with the `_eoy` scc
-complexity snapshot. `hotspot_log` is the canonical Tornhill score —
-log-scaling tames the extreme right tail (apache/airflow vs
-hukkin/tomli are 4-5 orders of magnitude apart on the linear scale).
-Empty when either input is missing.
-
 Usage:
     uv run python -m src.risk.build_complexity
 """
@@ -75,7 +61,6 @@ Usage:
 from __future__ import annotations
 
 import csv
-import math
 from collections import Counter
 from pathlib import Path
 
@@ -85,7 +70,6 @@ from rich.table import Table
 from src.common.params import YEARS
 from src.common.percentiles import add_percentiles
 from src.common.repos import load_top_repos
-from src.common.tables import load_rows_by_id
 from src.sources.git.long_format import read as read_long
 
 console = Console()
@@ -95,7 +79,6 @@ GIT_LONG_DIR = DATA_DIR / "sources" / "git"
 COMMITS_YEARS_FILE = DATA_DIR / "sources" / "git" / "commits-years.csv"
 SCC_FILE = GIT_LONG_DIR / "scc.csv"
 LIZARD_FILE = GIT_LONG_DIR / "lizard.csv"
-CHURN_FILE = DATA_DIR / "sources" / "git" / "churn.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "complexity.csv"
 
 SCC_METRICS = ["loc", "sloc", "complexity", "complexity_density"]
@@ -122,10 +105,8 @@ FIELDS = [
     "cognitive_total", "cognitive_avg", "cognitive_max",
     "cyclomatic_total", "cyclomatic_avg", "cyclomatic_max",
     "loc_year",
-    "churn_5y_total",
-    "hotspot_raw", "hotspot_log", "hotspot_log_p",
     "loc_eoy_p", "scc_complexity_eoy_p", "cognitive_max_p",
-    "cyclomatic_max_p", "churn_5y_total_p",
+    "cyclomatic_max_p",
     "score",
 ]
 
@@ -190,13 +171,6 @@ def _to_int(s: str) -> int:
         return 0
 
 
-def _hotspot_log(churn: int, complexity: int) -> float:
-    """Tornhill log-scaled hotspot: log10(churn+1) * log10(complexity+1)."""
-    if churn <= 0 or complexity <= 0:
-        return 0.0
-    return math.log10(churn + 1) * math.log10(complexity + 1)
-
-
 def _is_lizard_false_zero(scc_vals: dict, lz_vals: dict) -> bool:
     """True when lizard reports zero functions for a repo whose code scc
     measured real branching for — i.e. lizard analysed an off-mainline
@@ -239,9 +213,6 @@ def build() -> list[dict]:
     for (_r, s, m), row in lizard_rows.items():
         if m in LIZARD_METRICS:
             lizard_idx.setdefault((row["repo_id"], s), {})[m] = row["value"]
-
-    # 3. Load 5y churn (hotspot input), keyed by stable repo_id.
-    churn_by_id = load_rows_by_id(CHURN_FILE)
 
     rows: list[dict] = []
 
@@ -300,22 +271,6 @@ def build() -> list[dict]:
         if not rid.startswith("gl/") and _is_lizard_false_zero(scc_vals, lz_vals):
             lz_vals = {}
 
-        # Hotspot: combine churn × scc_complexity_eoy.
-        churn_row = churn_by_id.get(rid, {})
-        churn_total = _to_int(churn_row.get("churn_5y_total"))
-        cx_value = _to_int(scc_vals.get("complexity"))
-        churn_known = bool(churn_row)
-        cx_known = bool(scc_vals.get("complexity"))
-
-        churn_out = str(churn_total) if churn_known else ""
-        hotspot_raw_val = ""
-        hotspot_log_val = ""
-        if churn_known and cx_known:
-            raw = churn_total * cx_value
-            log_val = _hotspot_log(churn_total, cx_value)
-            hotspot_raw_val = str(raw)
-            hotspot_log_val = f"{log_val:.4f}"
-
         rows.append({
             "repo": repo,
             "repo_id": entry.repo_id,
@@ -330,9 +285,6 @@ def build() -> list[dict]:
             "cyclomatic_avg": lz_vals.get("cyclomatic_avg", ""),
             "cyclomatic_max": lz_vals.get("cyclomatic_max", ""),
             "loc_year": year_label,
-            "churn_5y_total": churn_out,
-            "hotspot_raw": hotspot_raw_val,
-            "hotspot_log": hotspot_log_val,
         })
 
     # Percentile CDFs rank the whole top-repo population (github + gitlab
@@ -340,9 +292,8 @@ def build() -> list[dict]:
     add_percentiles(
         rows,
         pctl_specs=[
-            ("hotspot_log", True), ("loc_eoy", True),
-            ("scc_complexity_eoy", True), ("cognitive_max", True),
-            ("cyclomatic_max", True), ("churn_5y_total", True),
+            ("loc_eoy", True), ("scc_complexity_eoy", True),
+            ("cognitive_max", True), ("cyclomatic_max", True),
         ],
         composite_cols=["loc_eoy_p", "cyclomatic_max_p"],
         dim_col="score",
@@ -371,8 +322,6 @@ def main() -> None:
                 "scc_complexity_eoy", "scc_density_eoy",
                 "cognitive_total", "cognitive_avg", "cognitive_max",
                 "cyclomatic_total", "cyclomatic_avg", "cyclomatic_max",
-                "churn_5y_total",
-                "hotspot_raw", "hotspot_log", "hotspot_log_p",
                 "score"):
         n = sum(1 for r in rows if r[col])
         pct = 100 * n / total if total else 0

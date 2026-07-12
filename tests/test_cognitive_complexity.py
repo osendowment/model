@@ -290,7 +290,6 @@ def test_build_complexity_reads_cognitive_from_lizard(tmp_path, monkeypatch):
                         tmp_path / "commits-years.csv")
     monkeypatch.setattr(build_complexity, "SCC_FILE", tmp_path / "scc.csv")
     monkeypatch.setattr(build_complexity, "LIZARD_FILE", tmp_path / "lizard.csv")
-    monkeypatch.setattr(build_complexity, "CHURN_FILE", tmp_path / "absent.csv")
     monkeypatch.setattr(build_complexity, "load_top_repos",
                         lambda: [RepoEntry(repo="foo/bar", repo_id="1")])
 

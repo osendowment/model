@@ -36,6 +36,17 @@ FETCHERS = [
     Step("git-contributors", "src.sources.git.contributors",              fetch=True, pgroup="git-fetch"),  # concentration score + workload divisor
     Step("issues",        "src.sources.github.fetch_issue_metrics",       fetch=True, pgroup="git-fetch"),  # workload score
     Step("gitlab-issues",  "src.sources.gitlab.fetch_issue_metrics",       fetch=True, pgroup="git-fetch"),  # workload score for gl/ repos
+    # The GitHub-API commits_years cannot anchor a GitLab repo, so gl/ rows get
+    # their own per-year SHA pass. Without it a GitLab repo entering scope has no
+    # anchor at all, and sha-metrics leaves its complexity + workload blank — the
+    # whole scc/lizard chain hangs off these SHAs.
+    #
+    # Deliberately NOT in the `git-fetch` pgroup: it merge-writes the very same
+    # commits-years.csv that `commits-years` / `resolve-head` write, and a pgroup
+    # runs its members CONCURRENTLY — sharing one would race the file and drop
+    # rows. Its own (sequential) slot sits after that group's barrier and before
+    # `metrics`, so the anchors are complete when sha-metrics reads them.
+    Step("gitlab-commits-years", "src.sources.gitlab.commits_years",      fetch=True),  # per-year last_sha anchor for gl/ repos
     # One clone per repo yields BOTH scc (loc/complexity → scc.csv) and lizard
     # (cyclomatic + cognitive → lizard.csv). cyclomatic_max is half the
     # complexity score, so a newly-scoped repo cannot be scored without this
@@ -47,18 +58,17 @@ FETCHERS = [
     Step("depsdev",       "src.sources.depsdev.fetch",                    fetch=True, pgroup="metrics"),  # security score: openssf fallback (deps.dev-mirrored)
 ]
 
-# Audit-only fetchers — their output populates informational columns in the
-# per-dimension CSVs but NEVER feeds a `risk.csv` score, so the pipeline does
-# not run them. The scripts remain runnable by hand to refresh those columns:
-#   uv run python -m src.sources.github.fetch_churn        # complexity.csv hotspot cols (churn_5y_total, top_file)
-#   uv run python -m src.sources.github.fetch_contributors_metrics  # concentration.csv GitHub-method bf/hhi (alltime, audit)
-# (cognitive_max is now produced by the unified sha-metrics/lizard pass, and
-# semgrep SAST was removed from the model entirely — neither has a standalone
-# fetcher any more.)
-AUDIT_FETCHERS = [
-    Step("churn",         "src.sources.github.fetch_churn",               fetch=True),
-    Step("contributors",  "src.sources.github.fetch_contributors_metrics", fetch=True),
-]
+# The model scores ONLY what the pipeline fetches. Two GitHub-API fetchers used
+# to populate informational columns that no `risk.csv` score reads — churn /
+# hotspot in complexity.csv, and the GitHub-method `_gh_alltime` bus-factor /
+# HHI in concentration.csv. The pipeline never ran them, so those columns were
+# derived from stale caches and were GitHub-only (blank for most GitLab repos).
+# Both column sets are gone; the builders no longer compute them.
+#
+# The scripts themselves are still on disk and runnable by hand if you ever want
+# that data back:
+#   uv run python -m src.sources.github.fetch_churn
+#   uv run python -m src.sources.github.fetch_contributors_metrics
 BUILDERS = [
     Step("concentration", "src.risk.build_concentration"),
     Step("complexity",    "src.risk.build_complexity"),

@@ -371,12 +371,11 @@ def check_value_criticality() -> list[Result]:
 # contributor file were all clobbered by schema-unaware rewrites in one run).
 ID_JOINED_SOURCES = [
     "sources/git/contributor-commits.csv",
+    "sources/github/contributor-commits.csv",
     "sources/git/scc.csv",
     "sources/git/lizard.csv",
     "sources/git/openssf.csv",
-    "sources/github/contributor-commits.csv",
     "sources/git/commits-years.csv",
-    "sources/git/churn.csv",
     "sources/git/depsdev.csv",
     "sources/github/issues.csv",
     "sources/osv/cves.csv",
@@ -490,7 +489,6 @@ SOURCE_SCHEMA_CONTRACT: dict[str, object] = {
         ("sidecar", "sources/github/contributor-commits.status.csv", "fetched_at"),
     "sources/osv/cves.csv": ("sidecar", "sources/osv/queried.csv", "fetched_at"),
     "sources/git/commits-years.csv": "fetched_at",
-    "sources/git/churn.csv": "fetched_at",
     "sources/github/issues.csv": "fetched_at",
     "sources/git/scc.csv": "checked_at",
     "sources/git/lizard.csv": "checked_at",

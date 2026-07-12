@@ -105,14 +105,10 @@ def test_build_scores_empty_tree_repos_as_measured_zeros(tmp_path, monkeypatch):
         w.writerow(["repo", "repo_id", "commit_sha", "metric", "value", "checked_at"])
         w.writerow(["own/grew", "gh/1", "g25", "cyclomatic_max", "7", "t"])
 
-    churn = tmp_path / "churn.csv"
-    with open(churn, "w", newline="", encoding="utf-8") as f:
-        csv.writer(f).writerow(["repo", "repo_id", "churn_5y_total"])
 
     monkeypatch.setattr(bc, "COMMITS_YEARS_FILE", cy)
     monkeypatch.setattr(bc, "SCC_FILE", scc)
     monkeypatch.setattr(bc, "LIZARD_FILE", lizard)
-    monkeypatch.setattr(bc, "CHURN_FILE", churn)
     monkeypatch.setattr(bc, "load_top_repos", lambda: [
         RepoEntry(repo="own/grew", repo_id="gh/1"),
         RepoEntry(repo="own/stub", repo_id="gh/2"),
@@ -124,3 +120,14 @@ def test_build_scores_empty_tree_repos_as_measured_zeros(tmp_path, monkeypatch):
     assert stub["loc_eoy"] == "0" and stub["loc_year"] == "2025"
     assert stub["cyclomatic_max"] == "0"
     assert stub["score"] != ""
+
+
+def test_complexity_has_no_churn_or_hotspot_columns():
+    """churn / hotspot are gone from complexity.csv. They fed no score
+    (composite is loc_eoy_p + cyclomatic_max_p), were GitHub-only — so blank
+    for most GitLab repos — and were derived from a churn.csv the pipeline
+    never refreshed, making them stale as well as unused."""
+    from src.risk.build_complexity import FIELDS
+    assert not [c for c in FIELDS if "churn" in c or "hotspot" in c]
+    # the axes that DO feed the score are still there
+    assert {"loc_eoy_p", "cyclomatic_max_p"} <= set(FIELDS)

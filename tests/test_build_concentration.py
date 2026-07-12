@@ -39,20 +39,15 @@ def test_bus_factor_hhi_blank_when_no_contributors():
     assert bf == 1 and hhi != ""  # a real population still computes
 
 
-def test_github_metrics_blank_bf_for_bot_only_repo():
-    """A repo whose only /contributors rows are bots -> bf/hhi blank, not 0.
-
-    The raw commit count stays real; only the (undefined) concentration
-    metrics blank out. GitHub columns are `_gh_alltime` (uncapped API lifetime).
-    """
-    from src.risk.build_concentration import github_metrics
-    m = github_metrics([
-        {"login": "dependabot[bot]", "contributions": "7", "account_type": "Bot"},
-    ])
-    assert m["bf_commits_gh_alltime"] == ""
-    assert m["hhi_commits_gh_alltime"] == ""
-    assert m["active_contributors_gh_alltime"] == 0
-    assert m["total_commits_gh_alltime"] == 7
+def test_concentration_has_no_github_method_columns():
+    """The GitHub-method `_gh_alltime` bus factor / HHI columns are gone: they
+    fed no score, were GitHub-only (blank for GitLab repos), and came from an
+    audit fetcher the pipeline never ran, so they went stale. concentration.csv
+    is now git-clone-derived end to end."""
+    from src.risk.build_concentration import FIELDS
+    assert not [c for c in FIELDS if "gh_alltime" in c]
+    assert "github_fetched_at" not in FIELDS
+    assert "bf_commits_git_5y" in FIELDS      # the axis that DOES feed score
 
 
 def test_git_metrics_dormant_window_imputes_max_concentration():

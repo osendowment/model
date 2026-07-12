@@ -309,12 +309,11 @@ RISK_COMPONENTS = [
 # kind: "present" = non-blank; "gt0" = numeric > 0; "eq" = numeric == 0/1; "bool".
 RISK_FUNNELS = {
     "concentration": [("bus factor / HHI (git 5y) computed", "present", "bf_commits_git_5y_p"),
-                      ("bus factor / HHI (GitHub) computed", "present", "bf_commits_gh_alltime_p"),
+                      ("bus factor / HHI (git full) computed", "present", "bf_commits_git_full_p"),
                       ("Concentration score", "present", "score")],
     "complexity": [("lines of code (scc)", "present", "loc_eoy"),
                    ("cyclomatic max (lizard)", "present", "cyclomatic_max"),
                    ("cognitive max (lizard)", "present", "cognitive_max"),
-                   ("churn 5y", "present", "churn_5y_total"),
                    ("Complexity score", "present", "score")],
     "security": [("OpenSSF score present", "present", "openssf_score"),
                  ("CVE count 5y > 0", "gt0", "cve_count_5y"),

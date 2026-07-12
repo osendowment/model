@@ -35,7 +35,6 @@ SOURCES = [
     ("lizard",        "data/sources/git/lizard.csv",                 "repo", 4),  # min: cognitive set
     ("openssf",       "data/sources/git/openssf.csv",                "repo", 19), # score+18 checks
     ("depsdev",       "data/sources/git/depsdev.csv",                "repo", 1),
-    ("churn",         "data/sources/git/churn.csv",           "repo", 1),
     ("issues",        "data/sources/github/issues.csv",              "repo", 1),
     ("cves-queried",  "data/sources/osv/queried.csv",                "repo", 1),
     ("repos",         "data/sources/github/repos.csv",               "repo", 1),

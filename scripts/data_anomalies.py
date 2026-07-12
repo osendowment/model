@@ -63,7 +63,6 @@ DIMENSION_RANGES: dict[str, dict[str, tuple[float, float]]] = {
     "concentration": {
         "hhi_commits_git_5y": (0, 10_000),
         "hhi_commits_git_full": (0, 10_000),
-        "hhi_commits_gh_alltime": (0, 10_000),
     },
     "security": {
         "openssf_score": (0, 10),
@@ -197,7 +196,7 @@ def main():
     # 5. Sentinel detection — a repo with 0 across many complexity numeric fields.
     numeric_fields = [
         "loc_eoy", "sloc_eoy", "scc_complexity_eoy",
-        "cognitive_total", "cyclomatic_total", "churn_5y_total",
+        "cognitive_total", "cyclomatic_total",
     ]
     for r in _read(RISK_DIR / "complexity.csv"):
         zero_count = sum(1 for f in numeric_fields if (r.get(f) or "").strip() == "0")

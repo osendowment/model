@@ -105,10 +105,6 @@ def main():
         if depsdev_missing:
             plan.append(("depsdev", ["uv", "run", "python", "-m", "src.sources.depsdev.fetch", "--concurrency", "20"], len(depsdev_missing)))
 
-        churn_missing = eligible - _covered(ROOT / "data/sources/git/churn.csv")
-        if churn_missing:
-            plan.append(("churn", ["uv", "run", "python", "-m", "src.sources.github.fetch_churn", "--concurrency", "4"], len(churn_missing)))
-
         issues_missing = eligible - _covered(ROOT / "data/sources/github/issues.csv")
         if issues_missing:
             plan.append(("issues", ["uv", "run", "python", "-m", "src.sources.github.fetch_issue_metrics"], len(issues_missing)))

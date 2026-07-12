@@ -1,37 +1,27 @@
 #!/usr/bin/env python3
 """Build data/risk/concentration.csv — contributor-concentration metrics per risk-scope repo.
 
-Two independent methods measure contributor concentration, each with its own
-raw long-format source. This builder merges identities, drops bots, and
-computes bus factor / HHI / contributor counts from both:
+Contributor concentration is measured from the git-clone commit log. This
+builder merges identities, drops bots, and computes bus factor / HHI /
+contributor counts.
 
 Reads:
     data/value/value.csv                          — A/B value-class set (load_top_repos)
     data/sources/git/contributor-commits.csv             — git-clone method, long raw:
                                                    repo, repo_id, author_name, author_email, year, commits
     data/sources/git/contributor-commits.status.csv      — per-repo git fetch status / fetched_at
-    data/sources/github/contributor-commits.csv          — GitHub /contributors method, long raw:
-                                                   repo, repo_id, login, contributions, account_type
-    data/sources/github/contributor-commits.status.csv   — per-repo GitHub fetch status / fetched_at
 
-Every join onto a repo's GitHub identity is keyed by the stable `repo_id`, not
-the repo name, so a renamed/moved repo (facebook/react → react/react) keeps the
+Every join onto a repo's identity is keyed by the stable `repo_id`, not the
+repo name, so a renamed/moved repo (facebook/react → react/react) keeps the
 contributor data collected under its old name.
 
-The git method walks `git log` on a local clone — it sees every contributor
-and carries author dates, so it yields both a lifetime figure and a windowed
-2021-2025 figure. The GitHub `/contributors` method is lifetime-only and caps
-the contributor list near 500, so it under-counts big repos; it is kept for
-cross-checking.
+Walking `git log` on a local clone sees every contributor and carries author
+dates, so it yields both a lifetime figure and a windowed 2021-2025 figure. It
+is host-agnostic: GitHub and GitLab repos are measured identically.
 
 Writes:
     data/risk/concentration.csv  with columns:
         repo, repo_id,
-        total_commits_gh_alltime,          (sum of /contributors `contributions`)
-        total_contributors_gh_alltime,     (all /contributors rows, incl. bots)
-        active_contributors_gh_alltime,    (non-bot /contributors rows)
-        bf_commits_gh_alltime,             (bus factor over non-bot, GitHub method)
-        hhi_commits_gh_alltime,            (HHI 0-10000 over non-bot, GitHub method)
         total_commits_git_full,            (non-merge commits through last complete year)
         contributors_git_full,             (merged non-bot identities, _full)
         bf_commits_git_full,               (bus factor, git method, _full)
@@ -44,16 +34,12 @@ Writes:
                                             absolute _5y scales 100/bf and hhi/100,
                                             i.e. sqrt(hhi/bf), 2 decimals; the *_p percentile
                                             columns are cross-check audit references only)
-        github_fetched_at, git_fetched_at
+        git_fetched_at
 
 Periods (year-agnostic column names; the boundary lives in settings.json):
     _full    = all commits through the last complete year = max(settings `years`).
     _5y      = the last `concentration.window_years` complete years, anchored to
                that same last complete year (currently 2021-2025).
-    The GitHub `/contributors` API exposes only a cumulative lifetime count with
-    no per-year breakdown, so its columns are `_gh_alltime` — an uncapped
-    all-time figure as of `github_fetched_at` (may include the partial current
-    year), deliberately NOT labelled `_full`/`_5y` which it cannot honour.
     Only the git `_5y` axis feeds `score`.
 
 Identity merging (git method): the repo's own `.mailmap` is already applied at
@@ -89,8 +75,6 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 GIT_LONG_FILE = DATA_DIR / "sources" / "git" / "contributor-commits.csv"
 GIT_STATUS_FILE = DATA_DIR / "sources" / "git" / "contributor-commits.status.csv"
-GH_LONG_FILE = DATA_DIR / "sources" / "github" / "contributor-commits.csv"
-GH_STATUS_FILE = DATA_DIR / "sources" / "github" / "contributor-commits.status.csv"
 OUTPUT_FILE = DATA_DIR / "risk" / "concentration.csv"
 
 # _full caps at LAST_COMPLETE_YEAR (settings `max(years)`); the _5y window is the
@@ -100,9 +84,6 @@ WINDOW = range(LAST_COMPLETE_YEAR - CONCENTRATION_WINDOW_YEARS + 1, LAST_COMPLET
 
 FIELDS = [
     "repo", "repo_id",
-    "total_commits_gh_alltime", "total_contributors_gh_alltime", "active_contributors_gh_alltime",
-    "bf_commits_gh_alltime", "bf_commits_gh_alltime_p",
-    "hhi_commits_gh_alltime", "hhi_commits_gh_alltime_p",
     "total_commits_git_full", "contributors_git_full",
     "bf_commits_git_full", "bf_commits_git_full_p",
     "hhi_commits_git_full", "hhi_commits_git_full_p",
@@ -111,7 +92,7 @@ FIELDS = [
     "hhi_commits_git_5y", "hhi_commits_git_5y_p",
     "score",
     "comment",
-    "github_fetched_at", "git_fetched_at",
+    "git_fetched_at",
 ]
 
 
@@ -191,25 +172,6 @@ def _concentration_score(bf: object, hhi: object) -> str:
     if bf_f < 1 or hhi_f <= 0:
         return ""
     return f"{max(1.0, math.sqrt(hhi_f / bf_f)):.2f}"
-
-
-def github_metrics(rows: list[dict]) -> dict:
-    """Concentration metrics for one repo from the GitHub /contributors rows."""
-    parsed = []
-    for r in rows:
-        login = (r.get("login") or "").strip().lower()
-        parsed.append((login, _int(r.get("contributions")),
-                       (r.get("account_type") or "").strip()))
-    nonbot = [(login, c) for login, c, atype in parsed
-              if atype != "Bot" and not is_bot(login)]
-    bf, hhi = _bus_factor_hhi([c for _login, c in nonbot])
-    return {
-        "total_commits_gh_alltime": sum(c for _l, c, _t in parsed),
-        "total_contributors_gh_alltime": len(parsed),
-        "active_contributors_gh_alltime": len(nonbot),
-        "bf_commits_gh_alltime": bf,
-        "hhi_commits_gh_alltime": hhi,
-    }
 
 
 def git_metrics(rows: list[dict]) -> dict:
@@ -295,9 +257,7 @@ def git_metrics(rows: list[dict]) -> dict:
 def build() -> list[dict]:
     eligible = load_top_repos()
     git_long = _load_long_grouped(GIT_LONG_FILE)
-    gh_long = _load_long_grouped(GH_LONG_FILE)
     git_status = load_rows_by_id(GIT_STATUS_FILE)
-    gh_status = load_rows_by_id(GH_STATUS_FILE)
 
     rows: list[dict] = []
     for entry in eligible:
@@ -306,12 +266,6 @@ def build() -> list[dict]:
         row = {f: "" for f in FIELDS}
         row["repo"] = repo
         row["repo_id"] = entry.repo_id
-
-        if rid in gh_long:
-            row.update(github_metrics(gh_long[rid]))
-        row["github_fetched_at"] = (
-            gh_status.get(rid, {}).get("fetched_at") or ""
-        ).strip()
 
         if rid in git_long:
             row.update(git_metrics(git_long[rid]))
@@ -325,14 +279,13 @@ def build() -> list[dict]:
         ).strip()
 
         rows.append(row)
-    # The six *_p columns are audit/cross-check references (where does a repo
+    # The four *_p columns are audit/cross-check references (where does a repo
     # sit within the current risk set?) — none of them feed `score` (which is
     # the population-independent absolute formula below). The CDFs rank the whole
     # top-repo population (github + gitlab together); platform does not matter.
     add_percentiles(
         rows,
         pctl_specs=[
-            ("bf_commits_gh_alltime", False), ("hhi_commits_gh_alltime", True),
             ("bf_commits_git_full", False), ("hhi_commits_git_full", True),
             ("bf_commits_git_5y", False), ("hhi_commits_git_5y", True),
         ],
@@ -362,7 +315,6 @@ def main() -> None:
     table.add_column("Populated", justify="right")
     table.add_column("Coverage", justify="right")
     for col in (
-        "bf_commits_gh_alltime", "hhi_commits_gh_alltime", "active_contributors_gh_alltime",
         "bf_commits_git_full", "hhi_commits_git_full", "contributors_git_full",
         "active_contributors_git_5y", "bf_commits_git_5y",
         "score",
