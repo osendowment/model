@@ -11,14 +11,14 @@ value.csv and blends them into a single 0–100 `score`:
     id (value.csv `gh/<id>` ↔ criticality.csv id) with a canonical-slug
     fallback.
   - `eco_crit` — the ecosyste.ms critical flag, fetched by
-    `src.sources.ecosystems.criticality`: `1` = on the critical list, `0` =
+    `src.sources.ecosystems.criticality`: `100` = on the critical list, `0` =
     explicitly not on it (`critical=False`), blank = unknown — the fetch didn't
     resolve, the registry omitted the flag (common for spack/debian cpp
     packages), or the repo wasn't checked. Covers GitHub AND GitLab, so a GitLab
     class-A repo with an explicit flag gets an importance signal even though it
     has no `openssf_crit`. Joined by repo id, then by normalized git URL.
   - `value_score` — a 0–100 pro-rata blend of whichever of the three components
-    (`openssf_crit`, `eco_crit·100`, `top_eco_pct`) are present, renormalized
+    (`openssf_crit`, `eco_crit`, `top_eco_pct`) are present, renormalized
     by their weight total (settings.json → value_score). A row needs at least
     `min_components` present or `value_score` stays blank. See docs/value.md.
 
@@ -97,9 +97,9 @@ def _norm_url(git_url: str) -> str:
 
 
 def _eco_crit_value(row: dict) -> str:
-    """value.csv `eco_crit` for one ecosyste.ms criticality row: "1" / "0" / "".
+    """value.csv `eco_crit` for one ecosyste.ms criticality row: "100" / "0" / "".
 
-    Only an EXPLICIT flag becomes 0/1: `1` = on the critical list, `0` =
+    Only an EXPLICIT flag becomes 0/100: `100` = on the critical list, `0` =
     explicitly not on it (`critical=False`). Blank whenever the signal is
     unknown — the fetch didn't resolve (`ok != True`), or it resolved but the
     registry omitted the `critical` field (common for spack/debian cpp packages).
@@ -108,7 +108,7 @@ def _eco_crit_value(row: dict) -> str:
         return ""
     crit = (row.get("critical") or "").strip()
     if crit == "True":
-        return "1"
+        return "100"
     if crit == "False":
         return "0"
     return ""  # resolved but the registry gave no critical flag → unknown
@@ -142,7 +142,7 @@ def compute_score(openssf_crit: float | None, eco_crit: float | None,
     Each argument is the raw component value, or ``None`` when absent for this
     repo:
       - ``openssf_crit`` — OpenSSF criticality, already ·100 (0–100, as stored).
-      - ``eco_crit``     — ecosyste.ms critical flag, 0/1, scaled ·100 here.
+      - ``eco_crit``     — ecosyste.ms critical flag, already 0/100.
       - ``top_eco_pct``  — PageRank percentile in the top ecosystem, already 0–100.
       - ``pr_score``     — cross-ecosystem dependency-mass score, already 0–100.
 
@@ -155,7 +155,7 @@ def compute_score(openssf_crit: float | None, eco_crit: float | None,
     if openssf_crit is not None:
         parts.append((VALUE_SCORE_CRIT_WEIGHT, openssf_crit))
     if eco_crit is not None:
-        parts.append((VALUE_SCORE_ECO_CRIT_WEIGHT, eco_crit * 100.0))
+        parts.append((VALUE_SCORE_ECO_CRIT_WEIGHT, eco_crit))
     if top_eco_pct is not None:
         parts.append((VALUE_SCORE_CENTRALITY_WEIGHT, top_eco_pct))
     if pr_score is not None:
@@ -219,7 +219,7 @@ def apply(value_file: Path = OUTPUT_FILE,
         elif url and url in eco_by_url:
             ec_str = eco_by_url[url]
         row["eco_crit"] = ec_str or ""
-        eco: float | None = float(ec_str) if ec_str in ("0", "1") else None
+        eco: float | None = float(ec_str) if ec_str in ("0", "100") else None
 
         # top_eco_pct — already a 0–100 percentile.
         top_eco_pct = _as_float(row.get("top_eco_pct"))

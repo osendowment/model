@@ -37,13 +37,13 @@ def test_shipped_weights_and_pro_rata_blend():
             VALUE_SCORE_CENTRALITY_WEIGHT, VALUE_SCORE_PR_WEIGHT) == (0.6, 0.2, 0.1, 0.1)
     assert VALUE_SCORE_MIN_COMPONENTS == 2
     # all four present: 0.6*50 + 0.2*100 + 0.1*40 + 0.1*60 = 60.0
-    assert compute_score(50.0, 1.0, 40.0, 60.0) == 60.0
+    assert compute_score(50.0, 100.0, 40.0, 60.0) == 60.0
     # pr_score absent → renormalize over 0.9: (30 + 20 + 4)/0.9 = 60.0
-    assert compute_score(50.0, 1.0, 40.0) == 60.0
+    assert compute_score(50.0, 100.0, 40.0) == 60.0
     # eco_crit + pr absent → openssf + position over 0.7 → 48.57…
     assert round(compute_score(50.0, None, 40.0), 2) == 48.57
     # openssf absent (a GitLab repo) → eco + position + mass over 0.4 → 75.0
-    assert compute_score(None, 1.0, 40.0, 60.0) == 75.0
+    assert compute_score(None, 100.0, 40.0, 60.0) == 75.0
     # both crits unknown (GitLab tail) → position + mass over 0.2 → 50.0
     assert compute_score(None, None, 40.0, 60.0) == 50.0
     # eco_crit=0 is a PRESENT component (contributes 0), not absent:
@@ -88,15 +88,15 @@ def test_apply_joins_openssf_eco_crit_and_scores_gitlab(tmp_path):
     rows = {r["repo"]: r for r in apply(value, crit, eco)}
     # a/a (pr_score blank): (0.6*50 + 0.2*100 + 0.1*40)/0.9 = 60.00
     assert rows["a/a"]["openssf_crit"] == "50.00"
-    assert rows["a/a"]["eco_crit"] == "1"
+    assert rows["a/a"]["eco_crit"] == "100"
     assert rows["a/a"]["value_score"] == "60.00"
     # b/b: openssf matched by slug, no eco row → (30 + 4)/0.7 = 48.57
     assert rows["b/b"]["openssf_crit"] == "50.00"
     assert rows["b/b"]["eco_crit"] == ""
     assert rows["b/b"]["value_score"] == "48.57"
-    # g/g: gitlab (no openssf), eco=1 + top 40 → (20 + 4)/0.3 = 80.00
+    # g/g: gitlab (no openssf), eco=100 + top 40 → (20 + 4)/0.3 = 80.00
     assert rows["g/g"]["openssf_crit"] == ""
-    assert rows["g/g"]["eco_crit"] == "1"
+    assert rows["g/g"]["eco_crit"] == "100"
     assert rows["g/g"]["value_score"] == "80.00"
     # d/d: openssf error (blank) + no eco → only top_eco_pct → 1 comp → blank
     assert rows["d/d"]["openssf_crit"] == ""
@@ -127,7 +127,7 @@ def test_eco_crit_url_fallback_and_zero_flag(tmp_path):
     from src.value.apply_criticality import apply
     row = apply(value, crit, eco)[0]
     assert row["eco_crit"] == "0"                      # URL fallback hit
-    # (0.6*(0.5*100) + 0.2*(0*100) + 0.1*40)/0.9 = 37.78
+    # (0.6*(0.5*100) + 0.2*0 + 0.1*40)/0.9 = 37.78
     assert row["value_score"] == "37.78"
 
 
@@ -197,11 +197,11 @@ def test_apply_is_idempotent_and_written_file_round_trips(tmp_path):
     rows = apply(value, crit, eco)  # second run reads its own output
     # source 0.7 stored ·100; (0.6*70 + 0.2*100 + 0.1*50)/0.9 = 74.44
     assert rows[0]["openssf_crit"] == "70.00"
-    assert rows[0]["eco_crit"] == "1"
+    assert rows[0]["eco_crit"] == "100"
     assert rows[0]["value_score"] == "74.44"
     on_disk = list(csv.DictReader(open(value, encoding="utf-8")))
     assert on_disk[0]["openssf_crit"] == "70.00"
-    assert on_disk[0]["eco_crit"] == "1"
+    assert on_disk[0]["eco_crit"] == "100"
     assert on_disk[0]["value_score"] == "74.44"
 
 
