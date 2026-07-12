@@ -37,6 +37,7 @@ from rich.table import Table
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+from src.common.lfs import is_lfs_pointer  # noqa: E402
 from src.common.params import VALUE_CLASS_A, VALUE_CLASS_B  # noqa: E402
 from src.common.repos import load_top_repos  # noqa: E402
 
@@ -231,6 +232,11 @@ def value_stats() -> dict:
     def _row_count(path: str) -> int:
         """Data-row count via buffered newline count (fast on multi-100MB files;
         safe here — these CSVs never carry embedded newlines)."""
+        if is_lfs_pointer(ROOT / path):
+            raise SystemExit(
+                f"{path} is an unmaterialised git-LFS pointer — the count would "
+                f"silently be ~0. Run: git lfs checkout {path}"
+            )
         n = 0
         with open(ROOT / path, "rb") as fh:
             while chunk := fh.read(1 << 20):
