@@ -222,7 +222,8 @@ def fetch_all(headers: dict, limit: int | None = None) -> list[dict]:
     return rows
 
 
-def load_index(path: Path = OUTPUT_FILE) -> tuple[dict[str, str], dict[str, str]]:
+def load_index(path: Path = OUTPUT_FILE,
+               renames_path: Path | None = None) -> tuple[dict[str, str], dict[str, str]]:
     """Return ``({owner/repo: slug}, {owner: slug})`` from collectives.csv.
 
     The two maps are **kept distinct** — a repo-level collective (its OC link
@@ -230,6 +231,12 @@ def load_index(path: Path = OUTPUT_FILE) -> tuple[dict[str, str], dict[str, str]
     (link names just the `owner`) only seeds ``by_org``. The attribution differs:
     a repo-level budget goes fully to that repo, an org-level budget is split
     across the org's top repos (see build_funding). First slug wins on collision.
+
+    ``by_repo`` is then overlaid with GitHub rename redirects from renames.csv
+    (built by resolve_renames.py): a collective that declares a repo's OLD slug
+    (byron/gitoxide) must still match the pipeline's CURRENT slug
+    (GitoxideLabs/gitoxide). ``setdefault`` keeps an explicit current-slug
+    declaration authoritative over a redirected one.
     """
     by_repo: dict[str, str] = {}
     by_org: dict[str, str] = {}
@@ -251,6 +258,16 @@ def load_index(path: Path = OUTPUT_FILE) -> tuple[dict[str, str], dict[str, str]
                 by_repo.setdefault(repo, slug)
             elif owner:
                 by_org.setdefault(owner, slug)
+    rp = (path.parent / "renames.csv") if renames_path is None else renames_path
+    if rp.exists():
+        with open(rp, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                if (r.get("status") or "").strip() != "renamed":
+                    continue
+                slug = by_repo.get((r.get("declared_repo") or "").strip().lower())
+                resolved = (r.get("resolved_repo") or "").strip().lower()
+                if slug and resolved:
+                    by_repo.setdefault(resolved, slug)
     return by_repo, by_org
 
 

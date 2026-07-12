@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
-"""Build data/preview/preview.xlsx — repos.csv + people.csv + stats as one workbook.
+"""Build data/preview/preview.xlsx — repos.csv + methodology + stats as one workbook.
 
-The terminal step of the pipeline: combines the two preview CSVs
-(src.build_results -> repos.csv, src.build_people -> people.csv) into a
-single spreadsheet for non-technical review, one sheet per CSV ('repos',
-'people'). Numeric-looking cells (scores, counts, ids) are written as real
-Excel numbers, not text, so sorting/filtering behaves numerically rather
-than alphabetically.
+The terminal step of the pipeline, a spreadsheet for non-technical review.
+Sheet 1, 'repos', is src.build_results -> repos.csv; numeric-looking cells
+(scores, counts) are written as real Excel numbers, not text, so
+sorting/filtering behaves numerically rather than alphabetically.
+(people.csv stays a standalone CSV deliverable — it is not shipped in the
+workbook.)
 
-A third sheet, 'stats', renders every pipeline count/funnel/coverage table
+Sheet 2, 'components', documents the methodology: one banner-headed
+table per stage (Value / Risk / Eligibility / Preview Results), one row
+per score or component — name + a prose description of its data sources
+and formula. The value-component weights are formatted at build time from
+`settings.json` (via src.common.params) so the text cannot drift from the
+config.
+
+Sheet 3, 'stats', renders every pipeline count/funnel/coverage table
 as stacked blocks — each under its section heading, with the same styled
 header row. The tables come straight from the generator
 (`scripts/stats.py`, its markdown renderer), computed from the live CSVs at
@@ -22,50 +29,102 @@ The CSV sheets get:
     - a frozen header row (`freeze_panes`), so the header (and its filter
       dropdowns) stays visible while scrolling a long sheet
 
-The repos sheet is additionally decorated: each `repo` cell hyperlinks to
-the repo's home page (host derived from `repo_id`), and the four decision
-columns (`value_score` / `risk_score` / `eligible` / `score`) carry light
-background fills (blue / orange / purple / green).
+The repos sheet is additionally decorated (matching the reviewed design):
+each `repo` cell hyperlinks to the repo's home page (host derived from
+`repo_id`); the value columns carry a red→yellow→green 3-color scale
+anchored at 0/50/100 and the risk columns the reversed scale (higher risk
+= red); `score` fades white→blue; the boolean columns render True/False as
+dark-green/dark-red text, with `eligible` also on a static light-purple
+column fill; non-empty `priority` cells fill light blue. Numeric, boolean
+and priority data cells are centered, `value_score`/`risk_score` are bold,
+and every known column gets a fixed width.
 
 Usage:
     uv run python -m src.build_preview_workbook
 """
 
 import csv
+import math
 from pathlib import Path
 
 from openpyxl import Workbook
+from openpyxl.cell.rich_text import CellRichText, TextBlock
+from openpyxl.cell.text import InlineFont
+from openpyxl.formatting.rule import CellIsRule, ColorScaleRule, FormulaRule
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 from rich.console import Console
+
+from src.common.params import (
+    VALUE_SCORE_CENTRALITY_WEIGHT,
+    VALUE_SCORE_CRIT_WEIGHT,
+    VALUE_SCORE_ECO_CRIT_WEIGHT,
+    VALUE_SCORE_PR_WEIGHT,
+)
 
 console = Console()
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 REPOS_CSV = DATA_DIR / "preview" / "repos.csv"
-PEOPLE_CSV = DATA_DIR / "preview" / "people.csv"
 STATS_SCRIPT = ROOT / "scripts" / "stats.py"
 OUTPUT_FILE = DATA_DIR / "preview" / "preview.xlsx"
 
-SHEETS = [("repos", REPOS_CSV), ("people", PEOPLE_CSV)]
+SHEETS = [("repos", REPOS_CSV)]
 
 HEADER_FILL = PatternFill(start_color="1F3864", end_color="1F3864", fill_type="solid")
 HEADER_FONT = Font(bold=True, color="FFFFFF")
 SECTION_FONT = Font(bold=True, size=13)
 
-# repos sheet: light column fills on the four decision columns so they pop
-# against the raw metrics. Consistent hues: value=blue, risk=orange,
-# eligible=purple, score=green.
 def _fill(rgb: str) -> PatternFill:
     return PatternFill(start_color=rgb, end_color=rgb, fill_type="solid")
 
-REPOS_COLUMN_FILLS = {
-    "value_score": _fill("D9E1F2"),   # light blue
-    "risk_score": _fill("FCE4D6"),    # light orange
-    "eligible": _fill("E4DFEC"),      # light purple
-    "score": _fill("E2EFDA"),         # light green
+# repos sheet decoration (the reviewed design). Column groups are keyed by
+# header NAME so the layout survives column reorders; unknown headers are
+# simply skipped.
+REPOS_STATIC_FILLS = {"eligible": _fill("E4DFEC")}  # light purple
+
+# All four value_score components + the blend itself share the value scale.
+REPOS_VALUE_SCALE_COLS = ["top_eco_pct", "pr_score", "openssf_crit", "eco_crit",
+                          "value_score"]
+REPOS_RISK_SCALE_COLS = ["concentration", "complexity", "security", "workload",
+                         "risk_score"]
+REPOS_SCORE_COL = "score"
+REPOS_BOOL_COLS = ["oss", "intent", "nonprofit", "active", "eligible"]
+REPOS_PRIORITY_COL = "priority"
+REPOS_BOLD_COLS = ["value_score", "risk_score"]
+# Score cells DISPLAY as whole numbers but keep their full 2-decimal value
+# (visible in the formula bar / on export) — pure number formatting.
+REPOS_ROUNDED_COLS = (REPOS_VALUE_SCALE_COLS + REPOS_RISK_SCALE_COLS
+                      + [REPOS_SCORE_COL])
+ROUNDED_FORMAT = "0"
+REPOS_CENTERED_COLS = (REPOS_VALUE_SCALE_COLS + REPOS_RISK_SCALE_COLS
+                       + [REPOS_SCORE_COL] + REPOS_BOOL_COLS
+                       + [REPOS_PRIORITY_COL])
+
+# Reviewed widths (from the hand-tuned workbook). Columns not listed —
+# pr_score, openssf_crit, the four risk dimensions, risk_score — stay at
+# Excel's default width.
+REPOS_COLUMN_WIDTHS = {
+    "repo": 24, "language": 11, "platform": 9, "ecosystem": 10, "top_eco_pkg": 16,
+    "top_eco_pct": 10, "eco_crit": 8, "value_score": 10,
+    "score": 9, "oss": 7, "intent": 8, "nonprofit": 9,
+    "active": 8, "eligible": 9, "priority": 8,
 }
+
+# repos.csv keeps repo_id as its join/trace key, but the sheet is for human
+# readers: the column fuels the repo hyperlinks, then leaves the sheet.
+REPOS_DROP_COLS = ["repo_id"]
+
+# 3-color scale anchors (Excel's classic red/yellow/green) + the score blue.
+SCALE_RED, SCALE_YELLOW, SCALE_GREEN = "F8696B", "FFEB84", "63BE7B"
+SCORE_BLUE = "2C96DE"
+BOOL_TRUE_FONT = Font(color="006100")    # dark green
+BOOL_FALSE_FONT = Font(color="9C0006")   # dark red
+PRIORITY_FILL = _fill("DDEBF7")          # light blue
+CENTER = Alignment(horizontal="center")
+BOLD = Font(bold=True)
 
 
 def _cell_value(raw: str) -> int | float | str | None:
@@ -132,11 +191,18 @@ def _repo_url(repo: str, repo_id: str) -> str | None:
 
 
 def _decorate_repos_sheet(ws: Worksheet) -> None:
-    """repos-only dressing: link each `repo` cell to the repo's home page
-    (host from `repo_id`) and fill the decision columns per REPOS_COLUMN_FILLS."""
+    """repos-only dressing (the reviewed design): hyperlink each `repo` cell
+    to the repo's home page (host from `repo_id`), apply the static fills,
+    center/bold the metric cells and display scores rounded (full 2-decimal
+    values stay stored), drop the REPOS_DROP_COLS join keys from the sheet,
+    add the conditional formats per column group, and set the fixed column
+    widths."""
     headers = {c.value: c.column for c in ws[1]}  # name -> 1-based col index
     repo_col, id_col = headers.get("repo"), headers.get("repo_id")
-    fill_cols = {headers[n]: f for n, f in REPOS_COLUMN_FILLS.items() if n in headers}
+    fill_cols = {headers[n]: f for n, f in REPOS_STATIC_FILLS.items() if n in headers}
+    center_cols = {headers[n] for n in REPOS_CENTERED_COLS if n in headers}
+    bold_cols = {headers[n] for n in REPOS_BOLD_COLS if n in headers}
+    rounded_cols = {headers[n] for n in REPOS_ROUNDED_COLS if n in headers}
     for row in ws.iter_rows(min_row=2):
         if repo_col and id_col:
             cell = row[repo_col - 1]
@@ -146,6 +212,72 @@ def _decorate_repos_sheet(ws: Worksheet) -> None:
                 cell.style = "Hyperlink"
         for col, fill in fill_cols.items():
             row[col - 1].fill = fill
+        for col in center_cols:
+            row[col - 1].alignment = CENTER
+        for col in bold_cols:
+            row[col - 1].font = BOLD
+        for col in rounded_cols:
+            row[col - 1].number_format = ROUNDED_FORMAT
+    # Highest index first so earlier deletions don't shift later ones.
+    for col in sorted((headers[n] for n in REPOS_DROP_COLS if n in headers),
+                      reverse=True):
+        ws.delete_cols(col)
+    headers = {c.value: c.column for c in ws[1]}
+    ws.auto_filter.ref = ws.dimensions
+    _add_repos_conditional_formats(ws, headers)
+    for name, width in REPOS_COLUMN_WIDTHS.items():
+        if name in headers:
+            ws.column_dimensions[get_column_letter(headers[name])].width = width
+
+
+def _add_repos_conditional_formats(ws: Worksheet, headers: dict) -> None:
+    """Conditional formats on the repos sheet, one per column group, each
+    over the column's data range (row 2..max_row):
+
+      - value columns: 3-color scale, 0=red → 50=yellow → 100=green;
+      - risk columns: the same scale reversed — higher risk reads red;
+      - `score`: 2-color scale, 0=white → 100=blue;
+      - boolean columns: "True" in dark-green text, "False" in dark-red
+        (font only, so `eligible`'s static purple fill shows through);
+      - `priority`: light-blue fill on non-empty cells.
+    """
+    def data_range(name: str) -> tuple[str, str] | tuple[None, None]:
+        col = headers.get(name)
+        if not col or ws.max_row < 2:
+            return None, None
+        letter = get_column_letter(col)
+        return letter, f"{letter}2:{letter}{ws.max_row}"
+
+    for name in REPOS_VALUE_SCALE_COLS:
+        _, rng = data_range(name)
+        if rng:
+            ws.conditional_formatting.add(rng, ColorScaleRule(
+                start_type="num", start_value=0, start_color=SCALE_RED,
+                mid_type="num", mid_value=50, mid_color=SCALE_YELLOW,
+                end_type="num", end_value=100, end_color=SCALE_GREEN))
+    for name in REPOS_RISK_SCALE_COLS:
+        _, rng = data_range(name)
+        if rng:
+            ws.conditional_formatting.add(rng, ColorScaleRule(
+                start_type="num", start_value=0, start_color=SCALE_GREEN,
+                mid_type="num", mid_value=50, mid_color=SCALE_YELLOW,
+                end_type="num", end_value=100, end_color=SCALE_RED))
+    _, rng = data_range(REPOS_SCORE_COL)
+    if rng:
+        ws.conditional_formatting.add(rng, ColorScaleRule(
+            start_type="num", start_value=0, start_color="FFFFFF",
+            end_type="num", end_value=100, end_color=SCORE_BLUE))
+    for name in REPOS_BOOL_COLS:
+        _, rng = data_range(name)
+        if rng:
+            ws.conditional_formatting.add(rng, CellIsRule(
+                operator="equal", formula=['"True"'], font=BOOL_TRUE_FONT))
+            ws.conditional_formatting.add(rng, CellIsRule(
+                operator="equal", formula=['"False"'], font=BOOL_FALSE_FONT))
+    letter, rng = data_range(REPOS_PRIORITY_COL)
+    if rng:
+        ws.conditional_formatting.add(rng, FormulaRule(
+            formula=[f"NOT(ISBLANK({letter}2))"], fill=PRIORITY_FILL))
 
 
 def _md_cell(raw: str) -> tuple[int | float | str | None, str | None]:
@@ -356,6 +488,174 @@ def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
     return tables
 
 
+# ---------------------------------------------------------------------------
+# components sheet — methodology tables, one row per score/component.
+# Format: a colored full-width banner per table (matching the stage hues used
+# across the workbook), then `name | description` rows. Weights are formatted
+# from settings.json so this text cannot drift from the config.
+
+def _w(desc: str, weight: float) -> CellRichText:
+    """Description + a bold 'Weight = N%' tail (rich text, single cell)."""
+    return CellRichText(desc + " ", TextBlock(InlineFont(b=True),
+                                              f"Weight = {weight:.0%}"))
+
+
+COMPONENT_TABLES: list[tuple[str, str, list[tuple[str, object]]]] = [
+    ("Value Components", "9BBB59", [
+        ("value_score",
+         "A 0-100 pro-rata weighted blend of the four components below "
+         "(weights from settings.json). Only the components present for a "
+         "repo are summed and renormalized by their weight total, so a repo "
+         "missing one still lands on the same scale; at least 2 present "
+         "components are required, else blank. Criticality-dominant by "
+         "design so a foundational-but-quiet micro-dep can't outrank a "
+         "genuinely critical project."),
+        ("openssf_crit",
+         _w("The OpenSSF Criticality Score tool run per repo (GitHub-only): "
+            "blends activity signals — commit cadence, contributor count, "
+            "org diversity, dependents, issue activity — into a 0-1 score, "
+            "stored ×100. Source: data/sources/openssf/criticality.csv; "
+            "non-empty for every valid class-A GitHub repo.",
+            VALUE_SCORE_CRIT_WEIGHT)),
+        ("eco_crit",
+         _w("Whether ecosyste.ms lists the repo's package on its curated "
+            "critical-infrastructure list: 100 = on the list, 0 = explicitly "
+            "not, blank = unknown (never a fake 0). Covers GitHub AND "
+            "GitLab, so it is the importance signal GitLab repos still get. "
+            "Source: data/sources/ecosystems/criticality.csv.",
+            VALUE_SCORE_ECO_CRIT_WEIGHT)),
+        ("top_eco_pct",
+         _w("The repo's PageRank position inside its strongest ecosystem "
+            "(top_eco). Per registry (npm / PyPI / crates / cpp = Debian + "
+            "Homebrew): download stats pick the top packages (95% of "
+            "cumulative downloads), their dependency tree is fetched, and a "
+            "download-personalized PageRank (α = 0.85) ranks every node; "
+            "top_eco_pct = 100 − cumulative-PR percentile, higher = better.",
+            VALUE_SCORE_CENTRALITY_WEIGHT)),
+        ("pr_score",
+         _w("Cross-ecosystem dependency MASS, complementing top_eco_pct's "
+            "position. The repo's summed package PageRank per ecosystem is "
+            "ln-scaled and min-max normalized; the per-eco values combine "
+            "as a p = 2 norm (a real second-ecosystem footprint adds ~41%, "
+            "a token listing ~nothing), rescaled so the top repo = 100.",
+            VALUE_SCORE_PR_WEIGHT)),
+    ]),
+    ("Risk Components", "C0504D", [
+        ("risk_score",
+         "Geometric mean of the four dimension scores below, each 0-100 "
+         "with higher = riskier. Percentile-based dimensions use "
+         "worst-pinned CDF ranks over the risk scope (valid class-A repos, "
+         "archived included), direction-oriented so 'worse' always ranks "
+         "high."),
+        ("concentration",
+         "Contributor concentration from a treeless git clone's commit log "
+         "(git log --no-merges, mailmap applied, identities merged, bots "
+         "dropped), windowed to the last 5 complete years. Bus factor "
+         "(contributors covering 50% of commits) and HHI (sum of squared "
+         "commit shares) combine as sqrt((100/bf) × (hhi/100)) — absolute "
+         "scales, not percentiles, so a one-person repo pins 100."),
+        ("complexity",
+         "Code size and complexity at the end-of-year-pinned SHA from one "
+         "sparse checkout: scc measures lines of code, lizard the "
+         "per-function McCabe cyclomatic maximum. Both are "
+         "percentile-ranked and the score is their geometric mean — big "
+         "AND gnarly ranks worse than either alone."),
+        ("security",
+         "Worst-of two axes: the OpenSSF Scorecard score (API, deps.dev "
+         "fallback) percentile-ranked INVERTED, and a neutral-anchored CVE "
+         "score from OSV — 0 known CVEs = 50 ('none known' is not proof of "
+         "safety), ≥1 CVE ranked among non-zero repos into (50, 100]. "
+         "Taking the max means real CVEs are never masked by a good "
+         "Scorecard, and vice versa."),
+        ("workload",
+         "Maintenance burden per maintainer: LOC per active contributor, "
+         "CVEs per active contributor, and net-new issues per active "
+         "contributor (GitHub Issues Search, per-year opened − closed) — "
+         "each percentile-ranked, combined by geometric mean. The divisor "
+         "is the same 5-year active-contributor count concentration uses "
+         "(AC = 0 scored as AC = 1)."),
+    ]),
+    ("Eligibility Components", "8064A2", [
+        ("eligible",
+         "Plain AND of the four boolean checks below — no weights. "
+         "Ineligible repos stay in the table with the failing flag "
+         "visible."),
+        ("oss",
+         "One SPDX license resolved per repo — manual override → registry "
+         "license of the repo's packages → GitHub Licensee → GitLab API — "
+         "then checked against the OSI-approved set (SPDX isOsiApproved ∪ "
+         "curated extras). Expression-aware: 'mit OR apache-2.0' counts if "
+         "any component is approved. Ternary: True / False / blank "
+         "(unknown ≠ known-non-OSS)."),
+        ("intent",
+         "True when the repo shows ANY funding signal: GitHub Sponsors "
+         "enabled, FUNDING.yml, funding.json, npm/PyPI funding field, a "
+         "real Open Collective, a bus-factor maintainer with personal "
+         "Sponsors, an institutional host/owner, or a curated PayPal. "
+         "Propagates at the owner level: one repo declaring a channel "
+         "flips intent = True for all that owner's repos."),
+        ("nonprofit",
+         "Defaults True; flips False only when a curated/scraped COMPANY "
+         "host or owner backs the repo (foundation rosters + "
+         "overrides.csv). Company-backed projects are already resourced — "
+         "ineligible but kept visible."),
+        ("active",
+         "active = NOT eol AND (NOT archived OR mirror). eol is a manual "
+         "per-repo verdict in overrides.csv informed by registry "
+         "deprecation/yank/endoflife.date advisories; archived is the "
+         "GitHub flag, with an exemption for archived GitHub mirrors whose "
+         "live upstream is elsewhere (e.g. bminor/glibc → "
+         "sourceware.org)."),
+    ]),
+    ("Preview Results", "4F81BD", [
+        ("score",
+         "sqrt(value_score × risk_score) — unnormalized geometric mean on "
+         "the same 0-100 scale as its inputs (top row ≈ 76). Both "
+         "dimensions must be high; computed for every row with both scores "
+         "present, regardless of eligibility."),
+        ("priority",
+         "Dense rank (1, 2, 3, …) by score descending over eligible rows "
+         "only — blank for ineligible or unscored rows."),
+    ]),
+]
+
+COMPONENTS_DESC_WIDTH = 116          # col C width ≈ chars per line (reviewed)
+COMPONENTS_BOX = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
+
+
+def _write_components_sheet(ws: Worksheet) -> int:
+    """Render COMPONENT_TABLES as stacked `name | description` tables, each
+    under its colored banner. Returns the number of tables written."""
+    ws.sheet_view.showGridLines = False
+    ws.column_dimensions["A"].width = 2
+    ws.column_dimensions["B"].width = 16
+    ws.column_dimensions["C"].width = COMPONENTS_DESC_WIDTH
+    row = 2
+    for title, rgb, entries in COMPONENT_TABLES:
+        banner = ws.cell(row=row, column=2, value=title)
+        banner.font = BANNER_FONT
+        for col in (2, 3):
+            cell = ws.cell(row=row, column=col)
+            cell.fill = _fill(rgb)
+            cell.border = COMPONENTS_BOX
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=3)
+        row += 1
+        for name, desc in entries:
+            ncell = ws.cell(row=row, column=2, value=name)
+            ncell.font = Font(bold=True)
+            ncell.alignment = Alignment(vertical="center")
+            ncell.border = COMPONENTS_BOX
+            dcell = ws.cell(row=row, column=3, value=desc)
+            dcell.alignment = Alignment(vertical="center", wrap_text=True)
+            dcell.border = COMPONENTS_BOX
+            # openpyxl can't auto-fit wrapped rows — estimate from length.
+            lines = math.ceil(len(str(desc)) / (COMPONENTS_DESC_WIDTH - 10))
+            ws.row_dimensions[row].height = max(15, lines * 14 + 6)
+            row += 1
+        row += 2  # two blank rows between tables
+    return len(COMPONENT_TABLES)
+
+
 def build() -> None:
     wb = Workbook()
     wb.remove(wb.active)  # drop the default blank sheet; we name our own
@@ -366,6 +666,10 @@ def build() -> None:
         if name == "repos" and n:
             _decorate_repos_sheet(ws)
         console.print(f"  [cyan]{name}[/cyan]: {n:,} rows ← {path}")
+
+    ws = wb.create_sheet("components")
+    n = _write_components_sheet(ws)
+    console.print(f"  [cyan]components[/cyan]: {n} methodology tables (static)")
 
     ws = wb.create_sheet("stats")
     n = _write_stats_sheet(ws, _stats_markdown())

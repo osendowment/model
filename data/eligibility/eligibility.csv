@@ -207,7 +207,7 @@ exodusoss/bytes,gh/885154008,True,False,True,True,False,2,4,True
 expressjs/body-parser,gh/15669006,True,True,True,True,True,3,4,True
 expressjs/serve-static,gh/17464338,True,True,True,True,True,3,4,True
 facebook/prop-types,gh/87597642,True,True,True,False,False,3,4,True
-facebook/regenerator,gh/13346571,True,True,True,False,False,3,4,True
+facebook/regenerator,gh/13346571,True,True,False,False,False,3,4,True
 facebook/watchman,gh/6930489,True,True,False,True,False,3,4,True
 facebook/zstd,gh/29759715,True,True,False,True,False,2,4,True
 facelessuser/soupsieve,gh/160789418,True,True,True,True,True,3,4,True

@@ -16,28 +16,38 @@ Columns:
                       `data/sources/github/repos.csv`; GitLab repos fall back
                       to `data/sources/gitlab/repos.csv` (GitLab Languages API).
                       Blank for any repo not fetched on either host.
+    platform          repo host, `github` / `gitlab`    (value.csv `platform`;
+                      falls back to the repo_id prefix when the value row is
+                      missing)
     ecosystem         top ecosystem                     (value.csv `top_eco`)
-    openssf_crit      OpenSSF criticality score, 0-100   (value.csv)
-    eco_crit          ecosyste.ms critical flag, 0/1     (value.csv)
+    top_eco_pkg       top package of the repo in `top_eco` (value.csv `top_eco_pkg`)
     top_eco_pct       PageRank percentile in top_eco     (value.csv)
-    value_score       0-100 value blend                  (value.csv `value_score`)
+    pr_score          cross-ecosystem dependency mass, 0-100 (value.csv)
+    openssf_crit      OpenSSF criticality score, 0-100   (value.csv)
+    eco_crit          ecosyste.ms critical flag, 0/100   (value.csv)
+    value_score       0-100 value blend of the four preceding
+                      components                         (value.csv `value_score`)
     concentration, complexity, security, workload        (risk.csv components)
     risk_score        overall risk score, 0-100          (risk.csv `risk_score`)
+    score             sqrt(value_score * risk_score) — the geometric mean of
+                      the two 0-100 scores, itself 0-100 and deliberately
+                      UNNORMALIZED (absolute, comparable across runs; the
+                      current top row lands ≈76). Computed for every row with
+                      both value_score and risk_score present, regardless of
+                      eligibility.
     oss, intent, nonprofit, active                        (eligibility.csv components)
     eligible          oss AND intent AND nonprofit AND active
     priority          dense rank (1, 2, 3, …) by score desc, among eligible
                       rows only — blank for ineligible rows and any row
                       missing a score.
-    score             value_score * risk_score, scaled so the highest row = 100.
-                      Computed for every row with both value_score and
-                      risk_score present, regardless of eligibility.
     repo_id           stable platform-qualified id (`gh/<n>` / `gl/<nickname>-<n>`)
-                      — last column; every join key, kept out of the way of
-                      human readers.
+                      — last column; every join key. Kept in this CSV for
+                      traceability, but the preview workbook drops the column
+                      from the repos sheet after deriving the hyperlinks.
 
-All score-like numeric columns (`openssf_crit`, `top_eco_pct`, `value_score`,
+All score-like numeric columns (`top_eco_pct`, `pr_score`, `openssf_crit`, `value_score`,
 the four risk components, `risk_score`) are rounded to 2 decimal places for
-this preview output — `eco_crit` is a 0/1 flag, not a score, and is left as
+this preview output — `eco_crit` is a 0/100 flag, not a score, and is left as
 its raw upstream value. `score` itself is always computed from the
 FULL-PRECISION upstream `value_score`/`risk_score`, before rounding, so
 rounding the displayed columns never shifts the ranking.
@@ -56,6 +66,7 @@ Usage:
 """
 
 import csv
+import math
 from pathlib import Path
 
 from rich.console import Console
@@ -77,12 +88,12 @@ RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
 ELIGIBILITY_COMPONENTS = ["oss", "intent", "nonprofit", "active"]
 
 FIELDS = (
-    ["repo", "language", "ecosystem", "openssf_crit", "eco_crit",
-     "top_eco_pct", "value_score"]
+    ["repo", "language", "platform", "ecosystem", "top_eco_pkg", "top_eco_pct",
+     "pr_score", "openssf_crit", "eco_crit", "value_score"]
     + RISK_COMPONENTS
-    + ["risk_score"]
+    + ["risk_score", "score"]
     + ELIGIBILITY_COMPONENTS
-    + ["eligible", "priority", "score", "repo_id"]
+    + ["eligible", "priority", "repo_id"]
 )
 
 
@@ -128,33 +139,38 @@ def build() -> list[dict]:
         if vs_num is not None and rs_num is not None:
             raw_by_id[rid] = vs_num * rs_num
 
+        platform = (v.get("platform") or "").strip().lower()
+        if not platform:
+            platform = {"gh": "github", "gl": "gitlab"}.get(rid.split("/", 1)[0], "")
+
         row = {
             "repo": repo,
             "language": language.lower(),
+            "platform": platform,
             "ecosystem": (v.get("top_eco") or "").strip(),
+            "top_eco_pkg": (v.get("top_eco_pkg") or "").strip(),
+            "top_eco_pct": _round2(v.get("top_eco_pct") or ""),
+            "pr_score": _round2(v.get("pr_score") or ""),
             "openssf_crit": _round2(v.get("openssf_crit") or ""),
             "eco_crit": (v.get("eco_crit") or "").strip(),
-            "top_eco_pct": _round2(v.get("top_eco_pct") or ""),
             "value_score": _round2(value_score),
             **{col: _round2(r.get(col) or "") for col in RISK_COMPONENTS},
             "risk_score": _round2(risk_score),
+            "score": "",
             **{col: (e.get(col) or "").strip() for col in ELIGIBILITY_COMPONENTS},
             "eligible": (e.get("eligible") or "").strip(),
             "priority": "",
-            "score": "",
             "repo_id": rid,
         }
         rows.append(row)
 
-    # score: value_score * risk_score, rescaled so the highest raw product in
-    # the table maps to 100. Computed for every row with both inputs present,
-    # regardless of eligibility.
-    max_raw = max(raw_by_id.values()) if raw_by_id else None
-    if max_raw:
-        for row in rows:
-            raw = raw_by_id.get(row["repo_id"])
-            if raw is not None:
-                row["score"] = f"{raw / max_raw * 100:.2f}"
+    # score: sqrt(value_score * risk_score) — geometric mean on the same
+    # absolute 0-100 scale as its inputs, no per-run normalization. Computed
+    # for every row with both inputs present, regardless of eligibility.
+    for row in rows:
+        raw = raw_by_id.get(row["repo_id"])
+        if raw is not None:
+            row["score"] = f"{math.sqrt(raw):.2f}"
 
     # priority: dense 1,2,3… rank by score desc, eligible + scored rows only.
     ranked = sorted(

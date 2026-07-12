@@ -37,6 +37,7 @@ from rich.table import Table
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+from src.common.lfs import is_lfs_pointer  # noqa: E402
 from src.common.params import VALUE_CLASS_A, VALUE_CLASS_B  # noqa: E402
 from src.common.repos import load_top_repos  # noqa: E402
 
@@ -99,6 +100,20 @@ def _fmt(val: float | None, kind: str) -> str:
 def scope_set() -> set[str]:
     """The top repos the risk pipeline scores — the Risk-table denominator."""
     return {e.repo for e in load_top_repos() if e.repo}
+
+
+def platform_split(scope: set[str]) -> dict[str, int]:
+    """{github, gitlab} repo counts within `scope`, from value.csv `platform`.
+
+    The Risk/Eligibility 'Inputs' tables break the shared class-A scope down
+    by host. Every scope repo comes from value.csv, so the join is total."""
+    out = {"github": 0, "gitlab": 0}
+    for r in _load("data/value/value.csv"):
+        if r["repo"] in scope:
+            p = (r.get("platform") or "").strip().lower()
+            if p in out:
+                out[p] += 1
+    return out
 
 
 # ── value ────────────────────────────────────────────────────────────────────
@@ -231,6 +246,11 @@ def value_stats() -> dict:
     def _row_count(path: str) -> int:
         """Data-row count via buffered newline count (fast on multi-100MB files;
         safe here — these CSVs never carry embedded newlines)."""
+        if is_lfs_pointer(ROOT / path):
+            raise SystemExit(
+                f"{path} is an unmaterialised git-LFS pointer — the count would "
+                f"silently be ~0. Run: git lfs checkout {path}"
+            )
         n = 0
         with open(ROOT / path, "rb") as fh:
             while chunk := fh.read(1 << 20):
@@ -271,18 +291,18 @@ def value_stats() -> dict:
 # nothing. fmt: "int" comma-grouped, "f1"/"f2" fixed decimals.
 RISK_COMPONENTS = [
     ("Concentration", "concentration", "score", [
-        ("bus factor", "bf_commits_git_5y", "int"),
-        ("HHI", "hhi_commits_git_5y", "int")]),
+        ("Bus Factor (5 years, git contributors)", "bf_commits_git_5y", "int"),
+        ("HHI (5 years, git contributors)", "hhi_commits_git_5y", "int")]),
     ("Complexity", "complexity", "score", [
-        ("lines of code", "loc_eoy", "int"),
-        ("cyclomatic max", "cyclomatic_max", "int")]),
+        ("Lines of Code (last year snapshot)", "loc_eoy", "int"),
+        ("Cyclomatic Complexity (last year snapshot)", "cyclomatic_max", "int")]),
     ("Security", "security", "score", [
-        ("OpenSSF score (0–10)", "openssf_score", "f1"),
-        ("CVE count 5y", "cve_count_5y", "int")]),
+        ("OpenSSF Security Score (most recent data)", "openssf_score", "f1"),
+        ("CVE count (5 years)", "cve_count_5y", "int")]),
     ("Workload", "workload", "score", [
-        ("LOC / contributor", "loc_per_ac", "int"),
-        ("CVE / contributor", "cve_per_ac", "f2"),
-        ("net-new-issues / contributor", "nni_per_ac", "f2")]),
+        ("LOCs / active contributors (5 years)", "loc_per_ac", "int"),
+        ("CVE / active contributors (5 years)", "cve_per_ac", "f2"),
+        ("Net new issues / active contributors (5 years)", "nni_per_ac", "f2")]),
 ]
 
 # (dimension CSV, [(label, kind, column/expr)]) for each per-dimension funnel.
@@ -346,7 +366,7 @@ def risk_stats() -> dict:
                                  "is_component": False, "fmt": fmt,
                                  "scored": scored, "q": q})
     o_scored, o_q = col_dist(risk, "risk_score")
-    distribution.append({"label": "Overall", "column": "risk_score",
+    distribution.append({"label": "Risk Score", "column": "risk_score",
                          "is_component": True, "fmt": "int",
                          "scored": o_scored, "q": o_q})
 
@@ -363,6 +383,7 @@ def risk_stats() -> dict:
 
     return {
         "scope": n, "distribution": distribution, "funnels": funnels,
+        "platform": platform_split(scope),
         "overall_scored": o_scored, "overall_gap": n - o_scored,
         "bf1_pct": 100 * bf1 / len(bf_computed) if bf_computed else 0,
     }
@@ -410,6 +431,29 @@ def eligibility_stats() -> dict:
     intent_count = _count(fund, scope, "bool", "intent")
     nonprofit_count = _count(fund, scope, "bool", "nonprofit")
 
+    # intent signal breakdown — how many scope repos carry each funding signal
+    # (a repo can carry several; these are NOT mutually exclusive, so they do
+    # not sum to the intent total). oc_slug / host are presence, not booleans.
+    fund_scope = [r for r in fund if r["repo"] in scope]
+
+    def _sig(col: str) -> int:
+        return sum(1 for r in fund_scope if _truthy(r.get(col)))
+
+    def _present_sig(col: str) -> int:
+        return sum(1 for r in fund_scope if _present(r.get(col)))
+
+    intent_signals = {
+        "gh_sponsors": _sig("gh_sponsors_enabled"),
+        "funding_yml": _sig("has_funding_yml"),
+        "funding_json": _sig("has_funding_json"),
+        "pkg_funding": sum(1 for r in fund_scope
+                           if _truthy(r.get("has_npm_funding"))
+                           or _truthy(r.get("has_pypi_funding"))),
+        "maintainer_sponsors": _sig("bf_maintainer_fundable"),
+        "open_collective": _present_sig("oc_slug"),
+        "institutional_host": _present_sig("host"),
+    }
+
     rollup = {f: sum(1 for r in elig if _truthy(r.get(f)))
               for f in ELIGIBILITY_FLAGS}
     rollup["eligible"] = sum(1 for r in elig if _truthy(r.get("eligible")))
@@ -419,9 +463,97 @@ def eligibility_stats() -> dict:
                    and all(_truthy(r.get(g)) for g in ELIGIBILITY_FLAGS if g != f))
             for f in ELIGIBILITY_FLAGS}
 
+    # ── Distribution sub-rows: split each source/signal/reason on its parent
+    # check into (solo, no, yes, count). Semantics per row type:
+    #   yes/no  — how the sub-population lands on the check (pass vs fail);
+    #   solo    — repos where THIS attribute alone decides the verdict: sole
+    #             ENABLER for a granting attribute (license source, funding
+    #             signal, community) → dropping it flips the check to False;
+    #             sole BLOCKER for a failing reason (EOL, archived, company) →
+    #             removing it flips the check to True.
+    elig_by_repo = {r["repo"]: r for r in elig}
+
+    def _oss(repo: str) -> bool:
+        return elig_by_repo.get(repo, {}).get("oss") == "True"
+
+    def _lic_source(src: str) -> dict:
+        sub = [r for r in lic if r.get("license_source") == src]
+        yes = sum(1 for r in sub if _oss(r["repo"]))
+        # a repo has ONE license source, so that source solely decides its oss.
+        return {"count": len(sub), "yes": yes, "no": len(sub) - yes, "solo": yes}
+
+    def _active_reason(pred, blocker: bool) -> dict:
+        sub = [r for r in act if pred(r)]
+        yes = sum(1 for r in sub if _truthy(r.get("active")))
+        no = len(sub) - yes
+        # eol is the only other active-blocker; with eol=0 an archived repo's
+        # sole blocker is `archived`. A blocker's solo = its fails; a
+        # non-blocker (mirror-exempt) never blocks → solo 0.
+        return {"count": len(sub), "yes": yes, "no": no,
+                "solo": no if blocker else 0}
+
+    SIGNAL_PREDS = {
+        "gh_sponsors": lambda r: _truthy(r.get("gh_sponsors_enabled")),
+        "funding_yml": lambda r: _truthy(r.get("has_funding_yml")),
+        "funding_json": lambda r: _truthy(r.get("has_funding_json")),
+        "pkg_funding": lambda r: (_truthy(r.get("has_npm_funding"))
+                                  or _truthy(r.get("has_pypi_funding"))),
+        "maintainer": lambda r: _truthy(r.get("bf_maintainer_fundable")),
+        "open_collective": lambda r: _present(r.get("oc_slug")),
+        "institutional_host": lambda r: _present(r.get("host")),
+    }
+
+    def _sig_set(r: dict) -> set:
+        return {k for k, p in SIGNAL_PREDS.items() if p(r)}
+
+    def _intent_signal_row(key: str) -> dict:
+        sub = [r for r in fund_scope if SIGNAL_PREDS[key](r)]
+        yes = sum(1 for r in sub
+                  if _truthy(elig_by_repo.get(r["repo"], {}).get("intent")))
+        # solo = repos carrying ONLY this funding signal (dropping it would
+        # remove their sole declared channel).
+        solo = sum(1 for r in sub if _sig_set(r) == {key})
+        return {"count": len(sub), "yes": yes, "no": len(sub) - yes, "solo": solo}
+
+    company = sum(1 for r in elig if not _truthy(r.get("nonprofit")))
+    community = rollup["nonprofit"]
+    dist_subs = {
+        "oss": [
+            ("License from manual override", _lic_source("override")),
+            ("License from package registry", _lic_source("registry")),
+            ("License from GitHub repo", _lic_source("github")),
+            ("License from GitLab repo", _lic_source("gitlab")),
+        ],
+        "active": [
+            ("EOL (manual override)", _active_reason(
+                lambda r: _truthy(r.get("eol")), blocker=True)),
+            ("Archived (repo)", _active_reason(
+                lambda r: _truthy(r.get("archived")), blocker=True)),
+            ("Archived but mirror-exempt", _active_reason(
+                lambda r: _truthy(r.get("archived")) and _truthy(r.get("mirror")),
+                blocker=False)),
+        ],
+        "intent": [
+            ("GitHub Sponsors (owner or repo)", _intent_signal_row("gh_sponsors")),
+            ("FUNDING.yml", _intent_signal_row("funding_yml")),
+            ("funding.json", _intent_signal_row("funding_json")),
+            ("npm / PyPI funding field", _intent_signal_row("pkg_funding")),
+            ("GitHub Sponsors (maintainer)", _intent_signal_row("maintainer")),
+            ("Open Collective", _intent_signal_row("open_collective")),
+            ("Institutional host / owner", _intent_signal_row("institutional_host")),
+        ],
+        "nonprofit": [
+            ("Company-backed",
+             {"count": company, "yes": 0, "no": company, "solo": company}),
+            ("Community / independent",
+             {"count": community, "yes": community, "no": 0, "solo": community}),
+        ],
+    }
+
     return {"scope": n, "licenses": licenses, "active": active,
             "intent_count": intent_count, "nonprofit_count": nonprofit_count,
-            "rollup": rollup, "sole": sole}
+            "intent_signals": intent_signals, "platform": platform_split(scope),
+            "rollup": rollup, "sole": sole, "dist_subs": dist_subs}
 
 
 # ── end-to-end funnel ────────────────────────────────────────────────────────
@@ -656,7 +788,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a(f"| Class C - long tail of packages/repos | {VALUE_CLASS_B} | 1 |")
     a("")
 
-    a("| Repo URLs | A | B | C | Total | % Total |")
+    a("| Outputs | Class A | Class B | Class C | Total | % Total |")
     a("|---|--:|--:|--:|--:|--:|")
     grand = gu["all"]["total"]
 
@@ -683,76 +815,90 @@ def markdown(v: dict, r: dict, e: dict) -> str:
         a(f"| {'^' if i == 0 else ''}{eco} | " + " | ".join(cells) + " |")
     a(_gu_row("^Unique repo URLs", "all", bold=True))
 
-    a("\n## Stage 2: Risk")
+    a("\n## Stage 2: Risk\n")
 
     n = r["scope"]
-    a(f"\n### Score distribution by component (scope {n})\n")
-    a("| Component / subcomponent | Column | Min | P25 | P50 | P75 | Max |")
-    a("|---|---|--:|--:|--:|--:|--:|")
-    for row in r["distribution"]:
-        vals = [_fmt(x, row["fmt"]) for x in row["q"]] if row["q"] else [""] * 5
-        if row["is_component"]:
-            a(f"| **{row['label']}** | `{row['column']}` | " +
-              " | ".join(f"**{x}**" for x in vals) + " |")
-        else:
-            a(f"| · {row['label']} | `{row['column']}` | " + " | ".join(vals) + " |")
+    rp = r["platform"]
 
-    for name, steps in r["funnels"].items():
-        a(f"\n### {name.capitalize()} funnel\n")
-        a("| Step | Repos | % |")
-        a("|---|---:|---:|")
-        a(f"| input top repos | {n} | 100% |")
-        for label, cnt in steps:
-            mark = "**" if label.endswith(" score") else ""
-            a(f"| {mark}{label}{mark} | {mark}{cnt}{mark} | {mark}{_pct(cnt, n)}{mark} |")
+    # Inputs — the shared class-A scope, split by host.
+    a("| Inputs | Count |")
+    a("|---|--:|")
+    a(f"| GitHub repos (Class A) | {rp['github']:,} |")
+    a(f"| GitLab repos (Class A) | {rp['gitlab']:,} |")
+    a(f"| ^**Total repos** | **{n:,}** |")
+    a("")
+
+    # Outputs — how many scope repos have each score / raw metric computed.
+    # The last distribution row is the overall Risk Score (a summary → `^`).
+    last = len(r["distribution"]) - 1
+    a("| Outputs | Count |")
+    a("|---|--:|")
+    for i, row in enumerate(r["distribution"]):
+        mark = "^" if i == last else ""
+        if row["is_component"]:
+            a(f"| {mark}**{row['label']}** | **{row['scored']:,}** |")
+        else:
+            a(f"| · {row['label']} | {row['scored']:,} |")
+    a("")
+
+    # Distribution — the score (0–100) and raw-metric quantiles.
+    a("| Distribution | Min | P25 | P50 | P75 | Max |")
+    a("|---|--:|--:|--:|--:|--:|")
+    for i, row in enumerate(r["distribution"]):
+        vals = [_fmt(x, row["fmt"]) for x in row["q"]] if row["q"] else [""] * 5
+        mark = "^" if i == last else ""
+        if row["is_component"]:
+            a(f"| {mark}**{row['label']}** | " + " | ".join(f"**{x}**" for x in vals) + " |")
+        else:
+            a(f"| · {row['label']} | " + " | ".join(vals) + " |")
 
     # ── Eligibility sections ──
     a("\n## Stage 3: Eligibility\n")
     ne = e["scope"]
-    lic, act = e["licenses"], e["active"]
-    a(f"\n### Licenses (scope {ne})\n")
-    a("| Step | Repos | % |")
-    a("|---|---:|---:|")
-    a(f"| input top repos (incl. archived) | {ne} | 100% |")
-    for label, cnt in (("license resolved", lic["resolved"]),
-                       ("· from override", lic["override"]),
-                       ("· from registry", lic["registry"]),
-                       ("· from GitHub", lic["github"]),
-                       ("· from GitLab", lic["gitlab"]),
-                       ("**oss=True (OSS-approved)**", lic["oss_true"]),
-                       ("oss=False (known non-OSS)", lic["oss_false"]),
-                       ("oss unknown (no signal)", lic["oss_unknown"])):
-        mark = "**" if label.startswith("**") else ""
-        clean = label.strip("*")
-        a(f"| {mark}{clean}{mark} | {mark}{cnt}{mark} | {mark}{_pct(cnt, ne)}{mark} |")
+    ep = e["platform"]
+    roll, sole = e["rollup"], e["sole"]
 
-    a("\n### Activity\n")
-    a("| Category | Repos | % |")
-    a("|---|---:|---:|")
-    for label, cnt in (("eol (override)", act["eol"]),
-                       ("archived", act["archived"]),
-                       ("archived but mirror-exempt", act["mirror"]),
-                       ("**active**", act["active"])):
-        mark = "**" if label.startswith("**") else ""
-        clean = label.strip("*")
-        a(f"| {mark}{clean}{mark} | {mark}{cnt}{mark} | {mark}{_pct(cnt, ne)}{mark} |")
+    # Inputs — the shared class-A scope, split by host.
+    a("| Inputs | Count |")
+    a("|---|--:|")
+    a(f"| GitHub repos (Class A) | {ep['github']:,} |")
+    a(f"| GitLab repos (Class A) | {ep['gitlab']:,} |")
+    a(f"| ^**Total repos** | **{ne:,}** |")
+    a("")
 
-    it, npt = e["intent_count"], e["nonprofit_count"]
-    a("\n### Intent and nonprofit\n")
-    a("| Category | Repos | % |")
-    a("|---|---:|---:|")
-    a(f"| intent — any funding signal | {it} | {_pct(it, ne)} |")
-    a(f"| intent — no funding signal | {ne - it} | {_pct(ne - it, ne)} |")
-    a(f"| ^nonprofit — community / independent | {npt} | {_pct(npt, ne)} |")
-    a(f"| nonprofit — company-backed | {ne - npt} | {_pct(ne - npt, ne)} |")
+    # Outputs — how many scope repos pass each check.
+    a("| Outputs | Count |")
+    a("|---|--:|")
+    a(f"| Open Source | {roll['oss']:,} |")
+    a(f"| Active | {roll['active']:,} |")
+    a(f"| Intent | {roll['intent']:,} |")
+    a(f"| Nonprofit | {roll['nonprofit']:,} |")
+    a(f"| ^**Eligibility checked** | **{ne:,}** |")
+    a("")
 
-    a("\n### Eligibility rollup\n")
-    a("| Check | True | % | sole blocker |")
-    a("|---|---:|---:|---:|")
-    for f in ELIGIBILITY_FLAGS:
-        a(f"| {f} | {e['rollup'][f]} | {_pct(e['rollup'][f], ne)} | {e['sole'][f]} |")
-    a(f"| ^**eligible** | **{e['rollup']['eligible']}** | "
-      f"**{_pct(e['rollup']['eligible'], ne)}** | |")
+    # Distribution — per check: sole blocker / fail (No) / pass (Yes) / total,
+    # with the source/signal/reason breakdown beneath each. Sub-rows split
+    # their own population: yes/no on the parent check, solo = repos where
+    # that attribute alone decides the verdict (see eligibility_stats).
+    subs = e["dist_subs"]
+    a("| Distribution | Solo blocker | No | Yes | Count |")
+    a("|---|--:|--:|--:|--:|")
+
+    def _check(label: str, flag: str) -> None:
+        yes = roll[flag]
+        a(f"| ^**{label}** | {sole[flag]:,} | {ne - yes:,} | {yes:,} | {ne:,} |")
+
+    def _subrow(label: str, d: dict) -> None:
+        a(f"| · {label} | {d['solo']:,} | {d['no']:,} | {d['yes']:,} | {d['count']:,} |")
+
+    for flag, label in (("oss", "Open Source"), ("active", "Active"),
+                        ("intent", "Intent"), ("nonprofit", "Nonprofit")):
+        _check(label, flag)
+        for sub_label, d in subs[flag]:
+            _subrow(sub_label, d)
+
+    a(f"| ^**Eligible** |  | {ne - roll['eligible']:,} | "
+      f"**{roll['eligible']:,}** | {ne:,} |")
     return "\n".join(out)
 
 

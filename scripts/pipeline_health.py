@@ -794,7 +794,12 @@ def check_preview_data() -> list[Result]:
     from openpyxl import load_workbook
 
     from src.build_people import build as build_people_rows
-    from src.build_preview_workbook import OUTPUT_FILE, SHEETS, _cell_value
+    from src.build_preview_workbook import (
+        OUTPUT_FILE,
+        REPOS_DROP_COLS,
+        SHEETS,
+        _cell_value,
+    )
     from src.build_results import build as build_repos_rows
 
     out: list[Result] = []
@@ -837,6 +842,12 @@ def check_preview_data() -> list[Result]:
     for sheet, csv_path in SHEETS:
         with open(csv_path, encoding="utf-8", newline="") as f:
             expected = [[_cell_value(c) for c in row] for row in csv.reader(f)]
+        # The repos sheet drops its join keys (REPOS_DROP_COLS) for humans —
+        # strip the same columns from the CSV rows before comparing.
+        if sheet == "repos" and expected:
+            drop = {i for i, name in enumerate(expected[0]) if name in REPOS_DROP_COLS}
+            expected = [[c for i, c in enumerate(row) if i not in drop]
+                        for row in expected]
         if sheet not in wb.sheetnames:
             stale.append(f"{sheet}: sheet missing")
             continue

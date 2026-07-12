@@ -32,10 +32,12 @@ reverse map) — details in funding.md.
 
 ## Raw Data
 
-Both files are keyed by **OC slug, not GitHub repo** — a documented
-exemption from the repo_id schema contract (non-repo-keyed; absent from
-`SOURCE_SCHEMA_CONTRACT` in `scripts/pipeline_health.py`). The repo join
-happens downstream in `build_funding`.
+`collectives.csv` and `budgets.csv` are keyed by **OC slug, not GitHub
+repo** — a documented exemption from the repo_id schema contract
+(non-repo-keyed; absent from `SOURCE_SCHEMA_CONTRACT` in
+`scripts/pipeline_health.py`). The repo join happens downstream in
+`build_funding`. `renames.csv` is repo-keyed and carries `repo_id` +
+`checked_at` per the contract.
 
 `data/sources/opencollective/collectives.csv`:
 
@@ -50,6 +52,23 @@ happens downstream in `build_funding`.
 
 Repo-level and org-only rows stay distinct because attribution differs:
 full budget to the repo vs. split across the org's class-A repos.
+
+`data/sources/opencollective/renames.csv` — GitHub rename resolution for
+declared repos. A collective's link is free text on the OC side, so it can
+name a repo's old slug (`byron/gitoxide` → `GitoxideLabs/gitoxide`);
+`resolve_renames.py` follows GitHub's redirects for candidate rows only
+(declared slug not currently in the pipeline but sharing a bare repo name or
+owner with one) and `load_index()` overlays `{resolved_repo → slug}` onto the
+reverse map. An explicit current-slug declaration always beats a redirected
+one.
+
+| Column | Description | Example |
+|--------|-------------|---------|
+| `declared_repo` | `owner/repo` as the collective declares it | `byron/gitoxide` |
+| `resolved_repo` | current slug when GitHub redirects; empty otherwise | `gitoxidelabs/gitoxide` |
+| `repo_id` | stable numeric id (`gh/NNN`); empty when `missing`/`error` | `gh/136510559` |
+| `status` | `renamed` / `same` / `missing` (404) / `error` (retried next run) | `renamed` |
+| `checked_at` | UTC check timestamp, per row | `2026-07-12T16:37:31+00:00` |
 
 `data/sources/opencollective/budgets.csv`:
 
@@ -76,10 +95,12 @@ full budget to the repo vs. split across the org's class-A repos.
 |--------|---------|
 | `src/sources/opencollective/fetch_collectives.py` | Download the OC ↔ GitHub reverse map |
 | `src/sources/opencollective/fetch_budgets.py` | Fetch 5-year gross budgets per discovered slug |
+| `src/sources/opencollective/resolve_renames.py` | Follow GitHub rename redirects for declared repos |
 
 ```bash
 uv run python -m src.sources.opencollective.fetch_collectives [--force]
 uv run python -m src.sources.opencollective.fetch_budgets [--limit N] [--force] [--concurrency 2]
+uv run python -m src.sources.opencollective.resolve_renames [--limit N] [--force]
 ```
 
 ## Caveats

@@ -3247,7 +3247,7 @@
 "fuse.js","https://github.com/krisk/fuse.git","","","","","",""
 "fuzzy","https://github.com/mattyork/fuzzy.git","","","","","",""
 "gauge","https://github.com/npm/gauge.git","","","","","",""
-"gaxios","https://github.com/googleapis/google-cloud-node-core.git","","","","","",""
+"gaxios","https://github.com/googleapis/google-cloud-node.git","","","","","",""
 "gaze","https://github.com/shama/gaze.git","","","","","",""
 "gcp-metadata","https://github.com/googleapis/google-cloud-node-core.git","","","","","",""
 "geckodriver","https://github.com/webdriverio-community/node-geckodriver.git","","","","","",""
