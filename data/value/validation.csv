@@ -6860,6 +6860,7 @@
 "mozilla/hawk","github_repo","npm","2026-05-17T23:13:02Z","True"
 "mozilla/mozjpeg","github_repo","cpp","2026-05-17T23:13:02Z","True"
 "mozilla/mp4parse-rust","github_repo","crates","2026-05-17T23:13:02Z","True"
+"mozilla/nss","github_repo","cpp","2026-07-12T22:16:00Z","True"
 "mozilla/pdf.js","github_repo","npm","2026-05-17T23:13:03Z","True"
 "mozilla/pe-unwind-info","github_repo","crates","2026-05-17T23:13:03Z","True"
 "mozilla/source-map","github_repo","npm","2026-04-27T13:18:27Z","True"
