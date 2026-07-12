@@ -814,11 +814,11 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     _sub("Archived but mirror-exempt", act["mirror"])
 
     _check("Intent", "intent")
-    _sub("GitHub Sponsors", sig["gh_sponsors"])
+    _sub("GitHub Sponsors (owner or repo)", sig["gh_sponsors"])
     _sub("FUNDING.yml", sig["funding_yml"])
     _sub("funding.json", sig["funding_json"])
     _sub("npm / PyPI funding field", sig["pkg_funding"])
-    _sub("Maintainer Sponsors", sig["maintainer_sponsors"])
+    _sub("GitHub Sponsors (maintainer)", sig["maintainer_sponsors"])
     _sub("Open Collective", sig["open_collective"])
     _sub("Institutional host / owner", sig["institutional_host"])
 
