@@ -463,10 +463,97 @@ def eligibility_stats() -> dict:
                    and all(_truthy(r.get(g)) for g in ELIGIBILITY_FLAGS if g != f))
             for f in ELIGIBILITY_FLAGS}
 
+    # ── Distribution sub-rows: split each source/signal/reason on its parent
+    # check into (solo, no, yes, count). Semantics per row type:
+    #   yes/no  — how the sub-population lands on the check (pass vs fail);
+    #   solo    — repos where THIS attribute alone decides the verdict: sole
+    #             ENABLER for a granting attribute (license source, funding
+    #             signal, community) → dropping it flips the check to False;
+    #             sole BLOCKER for a failing reason (EOL, archived, company) →
+    #             removing it flips the check to True.
+    elig_by_repo = {r["repo"]: r for r in elig}
+
+    def _oss(repo: str) -> bool:
+        return elig_by_repo.get(repo, {}).get("oss") == "True"
+
+    def _lic_source(src: str) -> dict:
+        sub = [r for r in lic if r.get("license_source") == src]
+        yes = sum(1 for r in sub if _oss(r["repo"]))
+        # a repo has ONE license source, so that source solely decides its oss.
+        return {"count": len(sub), "yes": yes, "no": len(sub) - yes, "solo": yes}
+
+    def _active_reason(pred, blocker: bool) -> dict:
+        sub = [r for r in act if pred(r)]
+        yes = sum(1 for r in sub if _truthy(r.get("active")))
+        no = len(sub) - yes
+        # eol is the only other active-blocker; with eol=0 an archived repo's
+        # sole blocker is `archived`. A blocker's solo = its fails; a
+        # non-blocker (mirror-exempt) never blocks → solo 0.
+        return {"count": len(sub), "yes": yes, "no": no,
+                "solo": no if blocker else 0}
+
+    SIGNAL_PREDS = {
+        "gh_sponsors": lambda r: _truthy(r.get("gh_sponsors_enabled")),
+        "funding_yml": lambda r: _truthy(r.get("has_funding_yml")),
+        "funding_json": lambda r: _truthy(r.get("has_funding_json")),
+        "pkg_funding": lambda r: (_truthy(r.get("has_npm_funding"))
+                                  or _truthy(r.get("has_pypi_funding"))),
+        "maintainer": lambda r: _truthy(r.get("bf_maintainer_fundable")),
+        "open_collective": lambda r: _present(r.get("oc_slug")),
+        "institutional_host": lambda r: _present(r.get("host")),
+    }
+
+    def _sig_set(r: dict) -> set:
+        return {k for k, p in SIGNAL_PREDS.items() if p(r)}
+
+    def _intent_signal_row(key: str) -> dict:
+        sub = [r for r in fund_scope if SIGNAL_PREDS[key](r)]
+        yes = sum(1 for r in sub
+                  if _truthy(elig_by_repo.get(r["repo"], {}).get("intent")))
+        # solo = repos carrying ONLY this funding signal (dropping it would
+        # remove their sole declared channel).
+        solo = sum(1 for r in sub if _sig_set(r) == {key})
+        return {"count": len(sub), "yes": yes, "no": len(sub) - yes, "solo": solo}
+
+    company = sum(1 for r in elig if not _truthy(r.get("nonprofit")))
+    community = rollup["nonprofit"]
+    dist_subs = {
+        "oss": [
+            ("License from manual override", _lic_source("override")),
+            ("License from package registry", _lic_source("registry")),
+            ("License from GitHub repo", _lic_source("github")),
+            ("License from GitLab repo", _lic_source("gitlab")),
+        ],
+        "active": [
+            ("EOL (manual override)", _active_reason(
+                lambda r: _truthy(r.get("eol")), blocker=True)),
+            ("Archived (repo)", _active_reason(
+                lambda r: _truthy(r.get("archived")), blocker=True)),
+            ("Archived but mirror-exempt", _active_reason(
+                lambda r: _truthy(r.get("archived")) and _truthy(r.get("mirror")),
+                blocker=False)),
+        ],
+        "intent": [
+            ("GitHub Sponsors (owner or repo)", _intent_signal_row("gh_sponsors")),
+            ("FUNDING.yml", _intent_signal_row("funding_yml")),
+            ("funding.json", _intent_signal_row("funding_json")),
+            ("npm / PyPI funding field", _intent_signal_row("pkg_funding")),
+            ("GitHub Sponsors (maintainer)", _intent_signal_row("maintainer")),
+            ("Open Collective", _intent_signal_row("open_collective")),
+            ("Institutional host / owner", _intent_signal_row("institutional_host")),
+        ],
+        "nonprofit": [
+            ("Company-backed",
+             {"count": company, "yes": 0, "no": company, "solo": company}),
+            ("Community / independent",
+             {"count": community, "yes": community, "no": 0, "solo": community}),
+        ],
+    }
+
     return {"scope": n, "licenses": licenses, "active": active,
             "intent_count": intent_count, "nonprofit_count": nonprofit_count,
             "intent_signals": intent_signals, "platform": platform_split(scope),
-            "rollup": rollup, "sole": sole}
+            "rollup": rollup, "sole": sole, "dist_subs": dist_subs}
 
 
 # ── end-to-end funnel ────────────────────────────────────────────────────────
@@ -769,8 +856,7 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a("\n## Stage 3: Eligibility\n")
     ne = e["scope"]
     ep = e["platform"]
-    lic, act = e["licenses"], e["active"]
-    roll, sole, sig = e["rollup"], e["sole"], e["intent_signals"]
+    roll, sole = e["rollup"], e["sole"]
 
     # Inputs — the shared class-A scope, split by host.
     a("| Inputs | Count |")
@@ -791,7 +877,10 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     a("")
 
     # Distribution — per check: sole blocker / fail (No) / pass (Yes) / total,
-    # with the source/reason breakdown beneath each (counts in the Count column).
+    # with the source/signal/reason breakdown beneath each. Sub-rows split
+    # their own population: yes/no on the parent check, solo = repos where
+    # that attribute alone decides the verdict (see eligibility_stats).
+    subs = e["dist_subs"]
     a("| Distribution | Solo blocker | No | Yes | Count |")
     a("|---|--:|--:|--:|--:|")
 
@@ -799,32 +888,14 @@ def markdown(v: dict, r: dict, e: dict) -> str:
         yes = roll[flag]
         a(f"| ^**{label}** | {sole[flag]:,} | {ne - yes:,} | {yes:,} | {ne:,} |")
 
-    def _sub(label: str, cnt: int) -> None:
-        a(f"| · {label} |  |  |  | {cnt:,} |")
+    def _subrow(label: str, d: dict) -> None:
+        a(f"| · {label} | {d['solo']:,} | {d['no']:,} | {d['yes']:,} | {d['count']:,} |")
 
-    _check("Open Source", "oss")
-    _sub("License from manual override", lic["override"])
-    _sub("License from package registry", lic["registry"])
-    _sub("License from GitHub repo", lic["github"])
-    _sub("License from GitLab repo", lic["gitlab"])
-
-    _check("Active", "active")
-    _sub("EOL (manual override)", act["eol"])
-    _sub("Archived (repo)", act["archived"])
-    _sub("Archived but mirror-exempt", act["mirror"])
-
-    _check("Intent", "intent")
-    _sub("GitHub Sponsors (owner or repo)", sig["gh_sponsors"])
-    _sub("FUNDING.yml", sig["funding_yml"])
-    _sub("funding.json", sig["funding_json"])
-    _sub("npm / PyPI funding field", sig["pkg_funding"])
-    _sub("GitHub Sponsors (maintainer)", sig["maintainer_sponsors"])
-    _sub("Open Collective", sig["open_collective"])
-    _sub("Institutional host / owner", sig["institutional_host"])
-
-    _check("Nonprofit", "nonprofit")
-    _sub("Company-backed", ne - roll["nonprofit"])
-    _sub("Community / independent", roll["nonprofit"])
+    for flag, label in (("oss", "Open Source"), ("active", "Active"),
+                        ("intent", "Intent"), ("nonprofit", "Nonprofit")):
+        _check(label, flag)
+        for sub_label, d in subs[flag]:
+            _subrow(sub_label, d)
 
     a(f"| ^**Eligible** |  | {ne - roll['eligible']:,} | "
       f"**{roll['eligible']:,}** | {ne:,} |")
