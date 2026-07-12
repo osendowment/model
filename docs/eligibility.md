@@ -74,10 +74,11 @@ Eligibility
 │   │                                 (manual per-repo verdict; the per-eco
 │   │                                  check_eol registry signals are its
 │   │                                  advisory inputs)
-│   ├── archived                    ← data/sources/github/repos.csv
-│   └── mirror exemption            ← live-upstream GitHub mirrors
-│                                     (data/value/overrides.csv rows with a
-│                                      non-github git_url, e.g. bminor/glibc)
+│   └── archived                    ← data/sources/github/repos.csv
+│                                     (no exemption — an archived repo is
+│                                      inactive; a project whose canonical
+│                                      upstream is off GitHub is repointed
+│                                      there in data/value/overrides.csv)
 │
 └── Final rollup (→ eligibility.csv)
     └── eligible = oss AND intent AND nonprofit AND active
@@ -137,12 +138,15 @@ the table.
   `src.sources.<eco>.check_eol`) flag *packages* (deprecations, yanks,
   endoflife.date dates) and inform that per-repo manual call.
 - **`archived`** — the GitHub `archived` flag from
-  `data/sources/github/repos.csv`, EXCEPT live-upstream mirrors (the
-  archived flag sits on the GitHub mirror while the real upstream — e.g.
-  sourceware.org for `bminor/glibc` — is alive; same exemption set
-  `load_top_repos` uses, exposed as `repos.load_live_upstream_mirrors`).
+  `data/sources/github/repos.csv`. There is no exemption: an archived repo
+  is inactive, full stop. A project whose canonical upstream lives off
+  GitHub is repointed at that upstream in `data/value/overrides.csv` (a
+  `git_url`-only row, blank `repo` slug) so it enters the pipeline as the
+  live upstream rather than as the archived GitHub mirror — e.g. glibc
+  resolves to its Debian salsa GitLab repo and pixman to
+  gitlab.freedesktop.org, not to `bminor/glibc` / `libpixman/pixman`.
 
-`active = NOT eol AND (NOT archived OR mirror)`.
+`active = NOT eol AND NOT archived`.
 
 ## Stage overrides — `data/eligibility/overrides.csv`
 

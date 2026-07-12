@@ -793,24 +793,28 @@ class TestRepoOverrides:
 
     def test_override_repo_plus_nongithub_git_url_sets_mirror_url(self):
         # An override with both `repo` (GitHub slug) AND a non-GitHub `git_url`
-        # declares a live upstream mirror.  The git_url should be stored as
-        # mirror_url while the aggregate's git_url points at the GitHub mirror.
+        # keeps the GitHub mirror as the canonical identity and stores the
+        # upstream as `mirror_url` metadata (e.g. gcc-mirror/gcc → gcc.gnu.org,
+        # torvalds/linux → git.kernel.org). This is distinct from the retired
+        # archived-mirror exemption. Uses a package absent from the shipped
+        # overrides.csv so aggregate_by_repo's internal override is a no-op and
+        # the explicit override under test is the only one applied.
         rows = [
-            _pkg_row("glibc", "cpp", github_repo="bminor/glibc",
-                     git_url="https://github.com/bminor/glibc.git",
+            _pkg_row("faux-mirror-pkg", "cpp", github_repo="acme/gcc-mirror",
+                     git_url="https://github.com/acme/gcc-mirror.git",
                      repo_id="gh/12345", pagerank="1.0"),
         ]
         aggs = aggregate_by_repo(rows, drop_d_class=False)
-        overrides = {("glibc", "cpp"): {
-            "repo": "bminor/glibc",
-            "git_url": "https://sourceware.org/git/glibc.git",
+        overrides = {("faux-mirror-pkg", "cpp"): {
+            "repo": "acme/gcc-mirror",
+            "git_url": "https://gcc.gnu.org/git/gcc.git",
             "valid": "",
         }}
         fixed = apply_repo_overrides(aggs, rows, overrides)
-        assert fixed[0]["repo"] == "bminor/glibc"
+        assert fixed[0]["repo"] == "acme/gcc-mirror"
         assert fixed[0]["platform"] == "github"
-        assert fixed[0]["git_url"] == "https://github.com/bminor/glibc.git"
-        assert fixed[0]["mirror_url"] == "https://sourceware.org/git/glibc.git"
+        assert fixed[0]["git_url"] == "https://github.com/acme/gcc-mirror.git"
+        assert fixed[0]["mirror_url"] == "https://gcc.gnu.org/git/gcc.git"
 
     def test_shipped_overrides_file_includes_typebox(self):
         # The committed override file must carry the typebox correction.

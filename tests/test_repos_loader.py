@@ -84,14 +84,17 @@ def test_load_top_repos_keeps_archived_when_flag_off(tmp_path, monkeypatch):
     assert {e.repo for e in out} == {"owner/b"}
 
 
-def test_load_top_repos_keeps_archived_live_upstream_mirror(tmp_path, monkeypatch):
-    """An archived GitHub mirror of a live non-github upstream (per
-    overrides.csv) is KEPT; a plain archived repo (no mirror override) is
-    DROPPED."""
+def test_load_top_repos_drops_all_archived_no_mirror_exemption(tmp_path, monkeypatch):
+    """skip_archived=True drops EVERY archived repo — there is no mirror
+    exemption. A former mirror (glibc, whose live upstream is off GitHub) is
+    dropped exactly like a plain archived repo; the way to keep such a project
+    is to repoint it to its upstream in value/overrides.csv (git_url-only), not
+    to exempt the archived GitHub mirror."""
     value = tmp_path / "value.csv"
     _write(value, ["repo", "git_valid", "class", "platform"], [
         {"repo": "bminor/glibc", "git_valid": "True", "class": "A", "platform": "github"},
         {"repo": "owner/plainarchived", "git_valid": "True", "class": "A", "platform": "github"},
+        {"repo": "owner/alive", "git_valid": "True", "class": "A", "platform": "github"},
     ])
     gh = tmp_path / "repos.csv"
     _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
@@ -99,25 +102,15 @@ def test_load_top_repos_keeps_archived_live_upstream_mirror(tmp_path, monkeypatc
          "archived": "True", "size": "5", "stars": "9"},
         {"repo": "owner/plainarchived", "valid": "True", "repo_id": "20",
          "archived": "True", "size": "1", "stars": "1"},
-    ])
-    overrides = tmp_path / "overrides.csv"
-    _write(overrides, ["package", "ecosystem", "repo", "git_url", "valid", "reason"], [
-        # mirror: non-github git_url -> exempt from skip_archived
-        {"package": "glibc", "ecosystem": "cpp", "repo": "bminor/glibc",
-         "git_url": "https://sourceware.org/git/glibc.git", "valid": "", "reason": "mirror"},
-        # not a mirror: github git_url -> NOT exempt (but it's not archived here anyway)
-        {"package": "x", "ecosystem": "cpp", "repo": "owner/plainarchived",
-         "git_url": "https://github.com/owner/plainarchived.git", "valid": "", "reason": "x"},
+        {"repo": "owner/alive", "valid": "True", "repo_id": "30",
+         "archived": "False", "size": "1", "stars": "1"},
     ])
     monkeypatch.setattr(repos, "TOP_REPO_CLASSES", {"A", "B"})
-    # The mirror exemption only bites on the drop path (skip_archived=True):
-    # glibc's archived mirror flag is exempt, a plain archived repo is not.
     out = repos.load_top_repos(
-        value_file=str(value), repos_file=str(gh), overrides_file=str(overrides),
-        skip_archived=True,
+        value_file=str(value), repos_file=str(gh), skip_archived=True,
     )
-    # glibc mirror kept despite archived; plain archived repo dropped.
-    assert {e.repo for e in out} == {"bminor/glibc"}
+    # both archived repos dropped (no exemption); only the live repo survives.
+    assert {e.repo for e in out} == {"owner/alive"}
 
 
 def test_load_top_repos_dedup_highest_class_wins(tmp_path, monkeypatch):

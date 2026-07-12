@@ -22,23 +22,23 @@ def test_load_eol_overrides_parses_tristate(tmp_path):
 
 
 def test_active_truth_table(monkeypatch):
-    """active = NOT eol AND (NOT archived OR mirror-exempt)."""
+    """active = NOT eol AND NOT archived. No mirror exemption: an archived
+    GitHub repo is inactive even if it mirrors a live off-GitHub upstream —
+    such projects are repointed to that upstream in value/overrides.csv."""
     entries = [
         RepoEntry(repo="ok/alive", repo_id="1"),
         RepoEntry(repo="ok/archived", repo_id="2", archived=True),
-        RepoEntry(repo="bminor/glibc", repo_id="3", archived=True),  # mirror-exempt
+        RepoEntry(repo="bminor/glibc", repo_id="3", archived=True),  # was mirror-exempt
         RepoEntry(repo="dead/eol", repo_id="4"),
     ]
     monkeypatch.setattr(ba, "load_top_repos",
                         lambda *a, **k: entries)
     # eol override joined by repo_id — the slug may drift after a rename
     monkeypatch.setattr(ba, "load_eol_overrides", lambda: ({"4": True}, {}))
-    monkeypatch.setattr(ba, "load_live_upstream_mirrors",
-                        lambda: {"bminor/glibc"})
 
     rows = {r["repo"]: r for r in ba.build()}
     assert rows["ok/alive"]["active"] is True
     assert rows["ok/archived"]["active"] is False       # archived → inactive
-    assert rows["bminor/glibc"]["active"] is True       # archived mirror kept
-    assert rows["bminor/glibc"]["mirror"] is True
+    assert rows["bminor/glibc"]["active"] is False      # archived → inactive, no exemption
+    assert "mirror" not in rows["bminor/glibc"]         # column dropped entirely
     assert rows["dead/eol"]["active"] is False          # eol override wins

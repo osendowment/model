@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Build data/eligibility/active.csv — is each top repo still alive?
 
-active = NOT eol AND NOT archived (with the live-upstream-mirror exemption).
+active = NOT eol AND NOT archived. There is no mirror exemption: an archived
+GitHub repo is inactive, full stop. A project whose canonical upstream lives
+off GitHub (e.g. glibc on sourceware, pixman on gitlab.freedesktop.org) is
+pointed at that upstream in data/value/overrides.csv rather than exempted here.
 
 - **`eol`** — the manual end-of-life call from data/eligibility/overrides.csv
   (`eol` column, True = project is end-of-life; empty/absent = alive). The
@@ -10,10 +13,6 @@ active = NOT eol AND NOT archived (with the live-upstream-mirror exemption).
   flag *packages* (deprecations, yanks), while `eol` is a per-repo verdict.
 - **`archived`** — the GitHub `archived` flag from
   data/sources/github/repos.csv (src.sources.github.fetch_repo_owner_data).
-- **`mirror`** — live-upstream GitHub mirrors (e.g. bminor/glibc mirrors
-  sourceware.org) carry the archived flag on the mirror while the real
-  upstream is alive; they are exempt from the archived drop (same set
-  load_top_repos uses — see src.common.repos.load_live_upstream_mirrors).
 
 Usage:
     uv run python -m src.eligibility.build_active
@@ -25,7 +24,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from src.common.repos import load_live_upstream_mirrors, load_top_repos
+from src.common.repos import load_top_repos
 
 console = Console()
 
@@ -33,7 +32,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 OVERRIDES_FILE = DATA_DIR / "eligibility" / "overrides.csv"
 OUTPUT_FILE = DATA_DIR / "eligibility" / "active.csv"
 
-FIELDS = ["repo", "repo_id", "eol", "archived", "mirror", "active"]
+FIELDS = ["repo", "repo_id", "eol", "archived", "active"]
 
 
 def load_eol_overrides(
@@ -72,21 +71,18 @@ def build() -> list[dict]:
     # active=False instead of being silently dropped from the stage output.
     eligible = load_top_repos()
     eol_by_id, eol_by_slug = load_eol_overrides()
-    mirrors = load_live_upstream_mirrors()
 
     rows: list[dict] = []
     for entry in eligible:
         repo = entry.repo
         eol = eol_by_id.get(str(entry.repo_id),
                             eol_by_slug.get(repo.lower(), False))
-        mirror = repo in mirrors
-        active = (not eol) and (not entry.archived or mirror)
+        active = (not eol) and (not entry.archived)
         rows.append({
             "repo": repo,
             "repo_id": entry.repo_id,
             "eol": eol,
             "archived": entry.archived,
-            "mirror": mirror,
             "active": active,
         })
     return rows
@@ -110,8 +106,7 @@ def main() -> None:
     for label, pred, style in (
             ("active", lambda r: r["active"], "green"),
             ("eol (override)", lambda r: r["eol"], "red"),
-            ("archived", lambda r: r["archived"], "red"),
-            ("archived but mirror-exempt", lambda r: r["archived"] and r["mirror"], "yellow")):
+            ("archived", lambda r: r["archived"], "red")):
         n = sum(1 for r in rows if pred(r))
         table.add_row(f"[{style}]{label}[/{style}]", f"{n:,}", f"{100 * n / total:.1f}%")
     table.add_section()

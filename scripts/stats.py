@@ -424,8 +424,6 @@ def eligibility_stats() -> dict:
     active = {
         "eol": sum(1 for r in act if _truthy(r.get("eol"))),
         "archived": sum(1 for r in act if _truthy(r.get("archived"))),
-        "mirror": sum(1 for r in act
-                      if _truthy(r.get("archived")) and _truthy(r.get("mirror"))),
         "active": sum(1 for r in act if _truthy(r.get("active"))),
     }
     intent_count = _count(fund, scope, "bool", "intent")
@@ -500,13 +498,10 @@ def eligibility_stats() -> dict:
         if cause == "eol":
             solo = sum(1 for repo in sole_repos["active"]
                        if _truthy(act_by_repo.get(repo, {}).get("eol")))
-        elif cause == "archived":  # archived, not mirror-exempt, and not eol
+        else:  # archived (no exemption): archived and not eol blocks
             solo = sum(1 for repo in sole_repos["active"]
                        if not _truthy(act_by_repo.get(repo, {}).get("eol"))
-                       and _truthy(act_by_repo.get(repo, {}).get("archived"))
-                       and not _truthy(act_by_repo.get(repo, {}).get("mirror")))
-        else:  # mirror-exempt never blocks
-            solo = 0
+                       and _truthy(act_by_repo.get(repo, {}).get("archived")))
         return {"count": len(sub), "yes": yes, "no": len(sub) - yes, "solo": solo}
 
     SIGNAL_PREDS = {
@@ -541,9 +536,6 @@ def eligibility_stats() -> dict:
                 lambda r: _truthy(r.get("eol")), cause="eol")),
             ("Archived GitHub repo", _active_reason(
                 lambda r: _truthy(r.get("archived")), cause="archived")),
-            ("Archived GitHub repo but mirror-exempt", _active_reason(
-                lambda r: _truthy(r.get("archived")) and _truthy(r.get("mirror")),
-                cause="mirror")),
         ],
         "intent": [
             ("GitHub Sponsors (owner or repo)", _intent_signal_row("gh_sponsors")),
@@ -718,7 +710,6 @@ def dashboard(v: dict, r: dict, e: dict) -> None:
     t.add_column("%", justify="right")
     for label, cnt in (("eol (override)", act["eol"]),
                        ("archived", act["archived"]),
-                       ("archived but mirror-exempt", act["mirror"]),
                        ("active", act["active"])):
         t.add_row(label, str(cnt), _pct(cnt, ne))
     console.print(t)
