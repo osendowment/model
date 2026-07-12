@@ -8,7 +8,14 @@ single spreadsheet for non-technical review, one sheet per CSV ('repos',
 Excel numbers, not text, so sorting/filtering behaves numerically rather
 than alphabetically.
 
-A third sheet, 'stats', renders every pipeline count/funnel/coverage table
+A third sheet, 'components', documents the methodology: one banner-headed
+table per stage (Value / Risk / Eligibility / Preview Results), one row
+per score or component — name + a prose description of its data sources
+and formula. The value-component weights are formatted at build time from
+`settings.json` (via src.common.params) so the text cannot drift from the
+config.
+
+A fourth sheet, 'stats', renders every pipeline count/funnel/coverage table
 as stacked blocks — each under its section heading, with the same styled
 header row. The tables come straight from the generator
 (`scripts/stats.py`, its markdown renderer), computed from the live CSVs at
@@ -37,14 +44,24 @@ Usage:
 """
 
 import csv
+import math
 from pathlib import Path
 
 from openpyxl import Workbook
+from openpyxl.cell.rich_text import CellRichText, TextBlock
+from openpyxl.cell.text import InlineFont
 from openpyxl.formatting.rule import CellIsRule, ColorScaleRule, FormulaRule
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 from rich.console import Console
+
+from src.common.params import (
+    VALUE_SCORE_CENTRALITY_WEIGHT,
+    VALUE_SCORE_CRIT_WEIGHT,
+    VALUE_SCORE_ECO_CRIT_WEIGHT,
+    VALUE_SCORE_PR_WEIGHT,
+)
 
 console = Console()
 
@@ -471,6 +488,173 @@ def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
     return tables
 
 
+# ---------------------------------------------------------------------------
+# components sheet — methodology tables, one row per score/component.
+# Format: a colored full-width banner per table (matching the stage hues used
+# across the workbook), then `name | description` rows. Weights are formatted
+# from settings.json so this text cannot drift from the config.
+
+def _w(desc: str, weight: float) -> CellRichText:
+    """Description + a bold 'Weight = N%' tail (rich text, single cell)."""
+    return CellRichText(desc + " ", TextBlock(InlineFont(b=True),
+                                              f"Weight = {weight:.0%}"))
+
+
+COMPONENT_TABLES: list[tuple[str, str, list[tuple[str, object]]]] = [
+    ("Value Components", "9BBB59", [
+        ("value_score",
+         "A 0-100 pro-rata weighted blend of the four components below "
+         "(weights from settings.json). Only the components present for a "
+         "repo are summed and renormalized by their weight total, so a repo "
+         "missing one still lands on the same scale; at least 2 present "
+         "components are required, else blank. Criticality-dominant by "
+         "design so a foundational-but-quiet micro-dep can't outrank a "
+         "genuinely critical project."),
+        ("openssf_crit",
+         _w("The OpenSSF Criticality Score tool run per repo (GitHub-only): "
+            "blends activity signals — commit cadence, contributor count, "
+            "org diversity, dependents, issue activity — into a 0-1 score, "
+            "stored ×100. Source: data/sources/openssf/criticality.csv; "
+            "non-empty for every valid class-A GitHub repo.",
+            VALUE_SCORE_CRIT_WEIGHT)),
+        ("eco_crit",
+         _w("Whether ecosyste.ms lists the repo's package on its curated "
+            "critical-infrastructure list: 100 = on the list, 0 = explicitly "
+            "not, blank = unknown (never a fake 0). Covers GitHub AND "
+            "GitLab, so it is the importance signal GitLab repos still get. "
+            "Source: data/sources/ecosystems/criticality.csv.",
+            VALUE_SCORE_ECO_CRIT_WEIGHT)),
+        ("top_eco_pct",
+         _w("The repo's PageRank position inside its strongest ecosystem "
+            "(top_eco). Per registry (npm / PyPI / crates / cpp = Debian + "
+            "Homebrew): download stats pick the top packages (95% of "
+            "cumulative downloads), their dependency tree is fetched, and a "
+            "download-personalized PageRank (α = 0.85) ranks every node; "
+            "top_eco_pct = 100 − cumulative-PR percentile, higher = better.",
+            VALUE_SCORE_CENTRALITY_WEIGHT)),
+        ("pr_score",
+         _w("Cross-ecosystem dependency MASS, complementing top_eco_pct's "
+            "position. The repo's summed package PageRank per ecosystem is "
+            "ln-scaled and min-max normalized; the per-eco values combine "
+            "as a p = 2 norm (a real second-ecosystem footprint adds ~41%, "
+            "a token listing ~nothing), rescaled so the top repo = 100.",
+            VALUE_SCORE_PR_WEIGHT)),
+    ]),
+    ("Risk Components", "C0504D", [
+        ("risk_score",
+         "Geometric mean of the four dimension scores below, each 0-100 "
+         "with higher = riskier. Percentile-based dimensions use "
+         "worst-pinned CDF ranks over the risk scope (valid class-A repos, "
+         "archived included), direction-oriented so 'worse' always ranks "
+         "high."),
+        ("concentration",
+         "Contributor concentration from a treeless git clone's commit log "
+         "(git log --no-merges, mailmap applied, identities merged, bots "
+         "dropped), windowed to the last 5 complete years. Bus factor "
+         "(contributors covering 50% of commits) and HHI (sum of squared "
+         "commit shares) combine as sqrt((100/bf) × (hhi/100)) — absolute "
+         "scales, not percentiles, so a one-person repo pins 100."),
+        ("complexity",
+         "Code size and complexity at the end-of-year-pinned SHA from one "
+         "sparse checkout: scc measures lines of code, lizard the "
+         "per-function McCabe cyclomatic maximum. Both are "
+         "percentile-ranked and the score is their geometric mean — big "
+         "AND gnarly ranks worse than either alone."),
+        ("security",
+         "Worst-of two axes: the OpenSSF Scorecard score (API, deps.dev "
+         "fallback) percentile-ranked INVERTED, and a neutral-anchored CVE "
+         "score from OSV — 0 known CVEs = 50 ('none known' is not proof of "
+         "safety), ≥1 CVE ranked among non-zero repos into (50, 100]. "
+         "Taking the max means real CVEs are never masked by a good "
+         "Scorecard, and vice versa."),
+        ("workload",
+         "Maintenance burden per maintainer: LOC per active contributor, "
+         "CVEs per active contributor, and net-new issues per active "
+         "contributor (GitHub Issues Search, per-year opened − closed) — "
+         "each percentile-ranked, combined by geometric mean. The divisor "
+         "is the same 5-year active-contributor count concentration uses "
+         "(AC = 0 scored as AC = 1)."),
+    ]),
+    ("Eligibility Components", "8064A2", [
+        ("eligible",
+         "Plain AND of the four boolean checks below — no weights. "
+         "Ineligible repos stay in the table with the failing flag "
+         "visible."),
+        ("oss",
+         "One SPDX license resolved per repo — manual override → registry "
+         "license of the repo's packages → GitHub Licensee → GitLab API — "
+         "then checked against the OSI-approved set (SPDX isOsiApproved ∪ "
+         "curated extras). Expression-aware: 'mit OR apache-2.0' counts if "
+         "any component is approved. Ternary: True / False / blank "
+         "(unknown ≠ known-non-OSS)."),
+        ("intent",
+         "True when the repo shows ANY funding signal: GitHub Sponsors "
+         "enabled, FUNDING.yml, funding.json, npm/PyPI funding field, a "
+         "real Open Collective, a bus-factor maintainer with personal "
+         "Sponsors, an institutional host/owner, or a curated PayPal. "
+         "Propagates at the owner level: one repo declaring a channel "
+         "flips intent = True for all that owner's repos."),
+        ("nonprofit",
+         "Defaults True; flips False only when a curated/scraped COMPANY "
+         "host or owner backs the repo (foundation rosters + "
+         "overrides.csv). Company-backed projects are already resourced — "
+         "ineligible but kept visible."),
+        ("active",
+         "active = NOT eol AND (NOT archived OR mirror). eol is a manual "
+         "per-repo verdict in overrides.csv informed by registry "
+         "deprecation/yank/endoflife.date advisories; archived is the "
+         "GitHub flag, with an exemption for archived GitHub mirrors whose "
+         "live upstream is elsewhere (e.g. bminor/glibc → "
+         "sourceware.org)."),
+    ]),
+    ("Preview Results", "4F81BD", [
+        ("score",
+         "sqrt(value_score × risk_score) — unnormalized geometric mean on "
+         "the same 0-100 scale as its inputs (top row ≈ 76). Both "
+         "dimensions must be high; computed for every row with both scores "
+         "present, regardless of eligibility."),
+        ("priority",
+         "Dense rank (1, 2, 3, …) by score descending over eligible rows "
+         "only — blank for ineligible or unscored rows."),
+    ]),
+]
+
+COMPONENTS_DESC_WIDTH = 150          # col C width ≈ chars per line
+COMPONENTS_BOX = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
+
+
+def _write_components_sheet(ws: Worksheet) -> int:
+    """Render COMPONENT_TABLES as stacked `name | description` tables, each
+    under its colored banner. Returns the number of tables written."""
+    ws.sheet_view.showGridLines = False
+    ws.column_dimensions["A"].width = 2
+    ws.column_dimensions["B"].width = 16
+    ws.column_dimensions["C"].width = COMPONENTS_DESC_WIDTH
+    row = 2
+    for title, rgb, entries in COMPONENT_TABLES:
+        banner = ws.cell(row=row, column=2, value=title)
+        banner.font = BANNER_FONT
+        for col in (2, 3):
+            cell = ws.cell(row=row, column=col)
+            cell.fill = _fill(rgb)
+            cell.border = COMPONENTS_BOX
+        row += 1
+        for name, desc in entries:
+            ncell = ws.cell(row=row, column=2, value=name)
+            ncell.font = Font(bold=True)
+            ncell.alignment = Alignment(vertical="center")
+            ncell.border = COMPONENTS_BOX
+            dcell = ws.cell(row=row, column=3, value=desc)
+            dcell.alignment = Alignment(vertical="center", wrap_text=True)
+            dcell.border = COMPONENTS_BOX
+            # openpyxl can't auto-fit wrapped rows — estimate from length.
+            lines = math.ceil(len(str(desc)) / (COMPONENTS_DESC_WIDTH - 10))
+            ws.row_dimensions[row].height = max(15, lines * 14 + 6)
+            row += 1
+        row += 2  # two blank rows between tables
+    return len(COMPONENT_TABLES)
+
+
 def build() -> None:
     wb = Workbook()
     wb.remove(wb.active)  # drop the default blank sheet; we name our own
@@ -481,6 +665,10 @@ def build() -> None:
         if name == "repos" and n:
             _decorate_repos_sheet(ws)
         console.print(f"  [cyan]{name}[/cyan]: {n:,} rows ← {path}")
+
+    ws = wb.create_sheet("components")
+    n = _write_components_sheet(ws)
+    console.print(f"  [cyan]components[/cyan]: {n} methodology tables (static)")
 
     ws = wb.create_sheet("stats")
     n = _write_stats_sheet(ws, _stats_markdown())

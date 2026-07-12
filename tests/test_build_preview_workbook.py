@@ -63,7 +63,7 @@ def test_build_writes_two_named_sheets_with_styled_filtered_headers(tmp_path, mo
     bpw.build()
 
     wb = load_workbook(out)
-    assert wb.sheetnames == ["repos", "people", "stats"]
+    assert wb.sheetnames == ["repos", "people", "components", "stats"]
 
     ws = wb["repos"]
     assert ws.max_row == 3          # header + 2 data rows
@@ -88,6 +88,42 @@ def test_build_writes_two_named_sheets_with_styled_filtered_headers(tmp_path, mo
     assert ws_people.cell(row=2, column=1).value == "github/1"
 
 
+def test_components_sheet_renders_methodology_tables(tmp_path, monkeypatch):
+    """The components sheet: one colored banner per stage table, bold name
+    cells, wrapped descriptions, and the weight tail formatted from params."""
+    repos_csv = tmp_path / "repos.csv"
+    out = tmp_path / "preview.xlsx"
+    _write_csv(repos_csv, ["repo"], [["a/b"]])
+    monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv)])
+    _patch_stats_md(monkeypatch)
+    monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
+
+    bpw.build()
+
+    ws = load_workbook(out, rich_text=True)["components"]
+    assert ws.sheet_view.showGridLines is False
+    # value banner at B2: bold white on the stage green, boxed.
+    banner = ws.cell(row=2, column=2)
+    assert banner.value == "Value Components"
+    assert banner.font.bold is True and banner.font.color.rgb == "00FFFFFF"
+    assert banner.fill.start_color.rgb == "009BBB59"
+    # first row under it: bold name + wrapped description.
+    name = ws.cell(row=3, column=2)
+    assert name.value == "value_score" and name.font.bold is True
+    desc = ws.cell(row=3, column=3)
+    assert desc.alignment.wrap_text is True
+    assert "pro-rata weighted blend" in str(desc.value)
+    assert ws.row_dimensions[3].height > 15   # sized for the wrapped prose
+    # weighted component carries the settings.json weight as a bold tail.
+    openssf_desc = str(ws.cell(row=4, column=3).value)
+    assert openssf_desc.endswith("Weight = 60%")
+    # all four banners present, in stage order.
+    banners = [c.value for c in ws["B"] if c.font and c.font.color
+               and c.font.color.rgb == "00FFFFFF" and c.value]
+    assert banners == ["Value Components", "Risk Components",
+                       "Eligibility Components", "Preview Results"]
+
+
 def test_build_skips_missing_csv_without_error(tmp_path, monkeypatch):
     repos_csv = tmp_path / "repos.csv"
     missing_csv = tmp_path / "does-not-exist.csv"
@@ -100,7 +136,7 @@ def test_build_skips_missing_csv_without_error(tmp_path, monkeypatch):
     bpw.build()
 
     wb = load_workbook(out)
-    assert wb.sheetnames == ["repos", "people", "stats"]
+    assert wb.sheetnames == ["repos", "people", "components", "stats"]
     assert wb["people"].max_row == 1   # empty sheet, no header written
 
 
