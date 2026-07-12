@@ -12,6 +12,21 @@ from src.sources.opencollective.fetch_collectives import (
     _is_search_url,
     load_index,
 )
+from src.sources.opencollective.resolve_renames import find_candidates
+
+
+def _write_collectives(path, rows):
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["slug", "name", "github_owner", "github_repo", "github_url", "fetched_at"])
+        w.writerows(rows)
+
+
+def _write_renames(path, rows):
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["declared_repo", "resolved_repo", "repo_id", "status", "checked_at"])
+        w.writerows(rows)
 
 
 def test_is_search_url():
@@ -51,3 +66,55 @@ def test_load_index_skips_search_url_rows(tmp_path):
     assert "apache" not in by_org           # search URL did NOT claim the org
     assert by_org.get("oozcitak") == "imagelistview"
     assert by_repo.get("tokio-rs/bytes") == "tokio"
+
+
+def test_load_index_overlays_renames(tmp_path):
+    """A collective declaring a repo's OLD slug maps onto the CURRENT slug via
+    renames.csv — the byron/gitoxide → GitoxideLabs/gitoxide shape."""
+    p = tmp_path / "collectives.csv"
+    _write_collectives(p, [
+        ["gitoxide", "Gitoxide", "byron", "byron/gitoxide",
+         "https://github.com/Byron/gitoxide", "2026-06-29T00:00:00+00:00"],
+    ])
+    _write_renames(tmp_path / "renames.csv", [
+        ["byron/gitoxide", "gitoxidelabs/gitoxide", "gh/136510559", "renamed",
+         "2026-07-12T00:00:00+00:00"],
+        # Non-renamed rows must not add mappings.
+        ["someone/dead-repo", "", "", "missing", "2026-07-12T00:00:00+00:00"],
+    ])
+    by_repo, _ = load_index(p)
+    assert by_repo.get("gitoxidelabs/gitoxide") == "gitoxide"  # overlay
+    assert by_repo.get("byron/gitoxide") == "gitoxide"         # declared kept
+    assert "someone/dead-repo" not in by_repo
+
+
+def test_load_index_rename_never_overrides_explicit_declaration(tmp_path):
+    """If another collective already declares the CURRENT slug, the redirected
+    mapping must not displace it."""
+    p = tmp_path / "collectives.csv"
+    _write_collectives(p, [
+        ["old-collective", "Old", "byron", "byron/gitoxide",
+         "https://github.com/Byron/gitoxide", "2026-06-29T00:00:00+00:00"],
+        ["new-collective", "New", "gitoxidelabs", "gitoxidelabs/gitoxide",
+         "https://github.com/GitoxideLabs/gitoxide", "2026-06-29T00:00:00+00:00"],
+    ])
+    _write_renames(tmp_path / "renames.csv", [
+        ["byron/gitoxide", "gitoxidelabs/gitoxide", "gh/136510559", "renamed",
+         "2026-07-12T00:00:00+00:00"],
+    ])
+    by_repo, _ = load_index(p)
+    assert by_repo.get("gitoxidelabs/gitoxide") == "new-collective"
+
+
+def test_find_candidates():
+    """Only unmatched declared repos that share a bare name or an owner with a
+    pipeline repo are worth a resolution call."""
+    pipeline = {"gitoxidelabs/gitoxide", "pallets/jinja"}
+    declared = {
+        "gitoxidelabs/gitoxide",   # exact match — nothing to fix
+        "byron/gitoxide",          # name matches a pipeline repo → candidate
+        "pallets/click",           # owner matches a pipeline owner → candidate
+        "acme/unrelated",          # no overlap — never a candidate
+        "orgonly",                 # not owner/repo shaped
+    }
+    assert find_candidates(declared, pipeline) == ["byron/gitoxide", "pallets/click"]
