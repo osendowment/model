@@ -48,6 +48,7 @@ from rich.table import Table
 
 from src.common.repos import load_github_top_slugs
 from src.common.repos import load_repo_ids as load_repo_id_map
+from src.common.repos import load_value_repo_ids
 from src.sources.git.long_format import _file_lock, upsert_snapshot
 from src.sources.git.long_format import read as read_long
 
@@ -63,6 +64,14 @@ GITLAB_PROJECTS = ROOT / "data" / "sources" / "gitlab" / "repos.csv"
 # ---------------------------------------------------------------------------
 # Repo list loading
 # ---------------------------------------------------------------------------
+
+
+def _repo_id_map() -> dict[str, str]:
+    """Slug -> repo_id for stamping scorecard rows. github/repos.csv (keyed on
+    both `repo` and the rename-resolved `full_name`) overlaid on value.csv ids
+    (value.csv leads repos.csv on a fresh rename) so a repo renamed since either
+    file was written still resolves; repos.csv wins on conflict."""
+    return {**load_value_repo_ids(), **load_repo_id_map()}
 
 
 def load_repos_from_file(path: Path) -> list[str]:
@@ -686,7 +695,7 @@ async def main() -> None:
             console.print("[green]All GitHub repos already scored.[/green]")
 
     if repos:
-        repo_ids = load_repo_id_map()
+        repo_ids = _repo_id_map()
         console.print(f"[bold]Fetching OpenSSF Scorecards for {len(repos)} risk repo(s)...[/bold]\n")
         results = await fetch_all(repos, concurrency=args.concurrency, repo_ids=repo_ids)
         display_summary(results)
