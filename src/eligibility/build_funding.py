@@ -77,6 +77,7 @@ from src.sources.floss_fund.directory import (
 )
 from src.sources.github.bf_contributors import load_bf_contributors
 from src.sources.opencollective.fetch_collectives import load_index as _load_oc_index
+from src.sources.opencollective.fetch_collectives import load_url_index as _load_oc_url_index
 
 console = Console()
 
@@ -591,8 +592,10 @@ def build() -> list[dict]:
 
     # Open Collective attribution is driven by the reverse-map (collectives.csv),
     # which records whether each collective's GitHub link names a specific repo or
-    # just an org — the authoritative connection.
+    # just an org — the authoritative connection. `oc_by_url` is the GitLab twin:
+    # collectives whose link is a GitLab project, joined by normalized clone URL.
     oc_by_repo, oc_by_org = _load_oc_index()
+    oc_by_url = _load_oc_url_index()
 
     def _avg(slug: str) -> float:
         try:
@@ -616,6 +619,9 @@ def build() -> list[dict]:
     for entry in eligible:
         repo = entry.repo
         owner_login = repo.split("/", 1)[0].lower()
+        # Normalized clone URL — the join key for a GitLab-linked OC collective
+        # (empty for a GitHub repo, whose slug/owner joins carry the match).
+        oc_url_key = normalize_repo_url(entry.git_url) if entry.git_url else ""
         # Per-repo override (matched by stable repo_id) wins; else an org-level
         # (owner/*) row keyed by owner name.
         ov = overrides_by_id.get(str(entry.repo_id)) or org_overrides.get(owner_login) or {}
@@ -654,6 +660,12 @@ def build() -> list[dict]:
             oc_slug, oc_amt = (s, _avg(s)) if s else ("", 0.0)
         elif oc_by_repo.get(repo.lower()) and _real_oc(oc_by_repo[repo.lower()]):
             oc_slug = oc_by_repo[repo.lower()]
+            oc_amt = _avg(oc_slug)
+        elif (oc_url_key and oc_by_url.get(oc_url_key)
+              and _real_oc(oc_by_url[oc_url_key])):
+            # GitLab repo-level match: the collective's declared GitLab project is
+            # this repo's clone URL. Same repo-level precedence as oc_by_repo.
+            oc_slug = oc_by_url[oc_url_key]
             oc_amt = _avg(oc_slug)
         elif (oc_by_org.get(owner_login) and entry.value_class == "A"
               and _real_oc(oc_by_org[owner_login])):

@@ -48,7 +48,7 @@ from rich.progress import (
 from src.common.freshness import row_is_fresh
 from src.common.funding_platforms import normalize_oc_slug
 from src.common.repos import load_top_repos
-from src.sources.floss_fund.directory import export_repo_slug
+from src.sources.floss_fund.directory import export_repo_slug, normalize_repo_url
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -146,28 +146,36 @@ def _slugs_from_overrides(path: Path) -> set[str]:
     return out
 
 
-def _slugs_from_collectives(scope_repos: set[str], scope_orgs: set[str]) -> set[str]:
-    """OC slugs whose GitHub link (repo or org) matches a risk-scope repo.
+def _slugs_from_collectives(scope_repos: set[str], scope_orgs: set[str],
+                            scope_gitlab_urls: set[str] = frozenset()) -> set[str]:
+    """OC slugs whose GitHub link (repo or org) — or GitLab project URL — matches
+    a risk-scope repo.
 
     The reverse map (data/sources/opencollective/collectives.csv) — OC declares
     which repo/org each collective funds, so this catches OC-funded projects that
-    never declared a FUNDING.yml (socketio, …) without any guessing.
+    never declared a FUNDING.yml (socketio, …) without any guessing. GitLab-linked
+    collectives join by normalized clone URL (`scope_gitlab_urls`).
     """
     from src.sources.opencollective import fetch_collectives
     by_repo, by_org = fetch_collectives.load_index()
     out = {slug for repo, slug in by_repo.items() if repo in scope_repos}
     out |= {slug for org, slug in by_org.items() if org in scope_orgs}
+    out |= {slug for url, slug in fetch_collectives.load_url_index().items()
+            if url in scope_gitlab_urls}
     return out
 
 
 def collect_slugs() -> list[str]:
     """Distinct Open Collective slugs referenced by risk-scope repos."""
-    scope = {e.repo.lower() for e in load_top_repos()}
+    entries = load_top_repos()
+    scope = {e.repo.lower() for e in entries}
     orgs = {r.split("/", 1)[0] for r in scope}
+    gitlab_urls = {normalize_repo_url(e.git_url) for e in entries
+                   if str(e.repo_id).startswith("gl/") and e.git_url}
     return sorted(_slugs_from_yml(FUNDING_YML_FILE)
                   | _slugs_from_export(FLOSS_FUND_FILE, scope)
                   | _slugs_from_overrides(OVERRIDES_FILE)
-                  | _slugs_from_collectives(scope, orgs))
+                  | _slugs_from_collectives(scope, orgs, gitlab_urls))
 
 
 # ── CSV I/O ──────────────────────────────────────────────────────────────────

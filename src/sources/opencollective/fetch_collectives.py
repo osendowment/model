@@ -2,16 +2,20 @@
 
 Paginates every OC `COLLECTIVE` account and keeps those that publish a GitHub
 link (`repositoryUrl` or a `GITHUB` social link), normalised to a GitHub owner
-[+ repo]. This is the **reverse map**: OC itself declares which repo/org a
-collective funds, so we can attribute OC budgets to risk-scope repos that never
-declared a `.github/FUNDING.yml` (e.g. socketio) — no guessing.
+[+ repo], OR a GitLab project link (normalised clone URL). This is the **reverse
+map**: OC itself declares which repo/org a collective funds, so we can attribute
+OC budgets to risk-scope repos that never declared a `.github/FUNDING.yml` (e.g.
+socketio) — no guessing.
 
 Consumed by `fetch_budgets` (slug discovery) and `build_funding` (per-repo OC
-slug resolution) via `load_index()`.
+slug resolution): GitHub links via `load_index()` (owner/repo + owner maps),
+GitLab links via `load_url_index()` (normalised-URL map).
 
 Writes data/sources/opencollective/collectives.csv:
-    slug, name, github_owner, github_repo, github_url, fetched_at
-(`github_repo` is `owner/repo` for repo-level links, empty for org-only links.)
+    slug, name, github_owner, github_repo, github_url, repo_url, fetched_at
+(`github_repo` is `owner/repo` for repo-level links, empty for org-only links.
+`repo_url` is a normalized GitLab repo URL for a collective that links a GitLab
+project instead of GitHub — empty for GitHub-linked rows.)
 
 Usage:
     uv run python -m src.sources.opencollective.fetch_collectives
@@ -23,6 +27,7 @@ import datetime
 import os
 import re
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 from dotenv import load_dotenv
@@ -30,6 +35,8 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
 
 from src.common.freshness import FUNDING_TTL_DAYS, file_is_fresh
+from src.sources.floss_fund.directory import normalize_repo_url
+from src.sources.gitlab.gitlab_client import is_gitlab_host
 
 console = Console()
 
@@ -37,7 +44,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "opencollective" / "collectives.csv"
 API_URL = "https://api.opencollective.com/graphql/v2"
 USER_AGENT = "Mozilla/5.0 (research; endowment.dev funding model)"
-FIELDS = ["slug", "name", "github_owner", "github_repo", "github_url", "fetched_at"]
+FIELDS = ["slug", "name", "github_owner", "github_repo", "github_url", "repo_url", "fetched_at"]
 PAGE = 1000
 
 QUERY = """
@@ -99,8 +106,50 @@ def _github_link(node: dict) -> tuple[str, str, str]:
     return "", "", ""
 
 
+# GitLab top-level paths that are not a `group/project` (so not a repo).
+_GL_RESERVED = {"users", "groups", "explore", "help", "dashboard", "projects",
+                "admin", "search", "public", "-"}
+
+
+def _gitlab_repo(url: str | None) -> str:
+    """A normalized GitLab repo URL (`gitlab.com/group/project`) or '' if `url`
+    does not name a GitLab project.
+
+    Accepts gitlab.com and self-hosted instances (`is_gitlab_host`); requires a
+    `group/project` path (subgroups allowed); strips any GitLab web suffix
+    (`/-/tree/...`). Normalized via `normalize_repo_url` so it joins to a pipeline
+    GitLab repo by the same key `build_funding` derives from `entry.git_url`."""
+    u = (url or "").strip()
+    if not u:
+        return ""
+    parsed = urlparse(u if "://" in u else "https://" + u)
+    host = (parsed.netloc or "").lower().removeprefix("www.")
+    if not host or not is_gitlab_host(host):
+        return ""
+    path = parsed.path.split("/-/", 1)[0].strip("/")
+    segments = [s for s in path.split("/") if s]
+    if len(segments) < 2 or segments[0].lower() in _GL_RESERVED:
+        return ""
+    return normalize_repo_url(f"https://{host}/{path}")
+
+
+def _gitlab_link(node: dict) -> str:
+    """Best normalized GitLab repo URL for a node, or '' — the GitLab twin of
+    `_github_link`, scanning the same candidate links (repositoryUrl, social
+    links, website)."""
+    socials = node.get("socialLinks") or []
+    candidates = [node.get("repositoryUrl")]
+    candidates += [s.get("url") for s in socials]
+    candidates.append(node.get("website"))
+    for url in candidates:
+        norm = _gitlab_repo(url)
+        if norm:
+            return norm
+    return ""
+
+
 def fetch_all(headers: dict) -> list[dict]:
-    """Paginate all collectives, returning rows for the GitHub-linked ones."""
+    """Paginate all collectives, returning rows for the GitHub- or GitLab-linked ones."""
     rows: list[dict] = []
     offset, total = 0, None
     with Progress(TextColumn("[bold]OC collectives"), BarColumn(),
@@ -119,12 +168,16 @@ def fetch_all(headers: dict) -> list[dict]:
                 break
             for n in nodes:
                 owner, repo, url = _github_link(n)
-                if owner:
+                # GitHub wins; only look for a GitLab repo link when there's no
+                # GitHub one, so GitHub attribution is byte-for-byte unchanged.
+                repo_url = "" if owner else _gitlab_link(n)
+                if owner or repo_url:
                     rows.append({
                         "slug": n["slug"], "name": (n.get("name") or "").strip(),
                         "github_owner": owner,
                         "github_repo": f"{owner}/{repo}" if repo else "",
-                        "github_url": url})
+                        "github_url": url,
+                        "repo_url": repo_url})
             offset += len(nodes)
             prog.update(task, completed=min(offset, total))
             if offset >= total:
@@ -164,6 +217,26 @@ def load_index(path: Path = OUTPUT_FILE) -> tuple[dict[str, str], dict[str, str]
     return by_repo, by_org
 
 
+def load_url_index(path: Path = OUTPUT_FILE) -> dict[str, str]:
+    """Return ``{normalized_repo_url: slug}`` for collectives that link a GitLab
+    project instead of GitHub (the `repo_url` column).
+
+    The GitLab twin of `load_index`'s ``by_repo``: build_funding joins it by
+    ``normalize_repo_url(entry.git_url)`` — the same key the FLOSS by-URL map
+    uses. First slug wins on collision; a legacy file with no `repo_url` column
+    yields an empty map (so the join is simply inert until the next refresh)."""
+    by_url: dict[str, str] = {}
+    if not path.exists():
+        return by_url
+    with open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            slug = (r.get("slug") or "").strip()
+            url = (r.get("repo_url") or "").strip().lower()
+            if slug and url:
+                by_url.setdefault(url, slug)
+    return by_url
+
+
 def main() -> None:
     import argparse
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
@@ -199,8 +272,10 @@ def main() -> None:
         for r in sorted(rows, key=lambda x: x["slug"]):
             w.writerow(r)
     n_repo = sum(1 for r in rows if r["github_repo"])
-    console.print(f"[green]wrote {len(rows):,} GitHub-linked collectives "
-                  f"({n_repo:,} repo-level, {len(rows) - n_repo:,} org-only) → {OUTPUT_FILE}[/green]")
+    n_gitlab = sum(1 for r in rows if r.get("repo_url"))
+    console.print(f"[green]wrote {len(rows):,} linked collectives "
+                  f"({n_repo:,} GitHub repo-level, {len(rows) - n_repo - n_gitlab:,} "
+                  f"GitHub org-only, {n_gitlab:,} GitLab) → {OUTPUT_FILE}[/green]")
 
 
 if __name__ == "__main__":

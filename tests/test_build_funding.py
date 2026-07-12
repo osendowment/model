@@ -21,6 +21,9 @@ def _isolate_bf_sources(monkeypatch):
     overrides these two explicitly."""
     monkeypatch.setattr(bf, "load_bf_contributors", lambda *a, **k: {})
     monkeypatch.setattr(bf, "_load_maintainer_fundable", lambda *a, **k: set())
+    # OC GitLab reverse-map reads collectives.csv off disk — default it empty so
+    # build() tests stay isolated; the GitLab-match test overrides it explicitly.
+    monkeypatch.setattr(bf, "_load_oc_url_index", lambda *a, **k: {})
 
 
 def _row(**kw):
@@ -446,6 +449,33 @@ def test_build_funding_real_zero_oc_counts_as_intent(monkeypatch):
     assert rows["live/zero"]["intent"] == "True"           # real channel → intent
     assert rows["dead/none"]["oc_slug"] == ""              # not_found → not attributed
     assert rows["dead/none"]["intent"] == "False"
+
+
+def test_build_funding_gitlab_collective_matches_by_url(monkeypatch):
+    """A collective whose OC link is a GitLab project attributes to the matching
+    GitLab repo, joined by the normalized clone URL (the GitHub slug/owner joins
+    can't see a GitLab repo). A GitHub repo is unaffected by the by-url map."""
+    repos = [E("inkscape/inkscape", repo_id="gl/inkscape-1", value_class="A",
+               git_url="https://gitlab.com/inkscape/inkscape"),
+             E("gh/plain", value_class="A")]
+    monkeypatch.setattr(bf, "load_top_repos", lambda **kw: repos)
+    monkeypatch.setattr(bf, "load_rows_by_id", lambda p: {})
+    monkeypatch.setattr(bf, "load_column_by_id", lambda p, c: {})
+    monkeypatch.setattr(bf, "_load_funding_overrides", lambda p: ({}, {}))
+    monkeypatch.setattr(bf, "_export_by_repo", lambda p: ({}, {}, {}))
+    monkeypatch.setattr(bf, "_fundable_orgs", lambda p: {})
+    monkeypatch.setattr(bf, "_load_sponsoring", lambda p: {})
+    monkeypatch.setattr(bf, "_load_oc", lambda p: {
+        "inkscape": {"raised_2024": "1200", "oc_status": "ok"}})
+    monkeypatch.setattr(bf, "_load_oc_index", lambda *a, **k: ({}, {}))
+    monkeypatch.setattr(bf, "_load_oc_url_index",
+                        lambda *a, **k: {"gitlab.com/inkscape/inkscape": "inkscape"})
+
+    rows = {r["repo"]: r for r in bf.build()}
+    assert rows["inkscape/inkscape"]["oc_slug"] == "inkscape"
+    assert rows["inkscape/inkscape"]["oc_avg_funding"] == "1200"
+    assert rows["inkscape/inkscape"]["intent"] == "True"       # real OC channel → intent
+    assert rows["gh/plain"]["oc_slug"] == ""                   # by-url map doesn't touch GitHub
 
 
 def test_build_funding_override_oc_slug_authoritative(monkeypatch):
