@@ -288,7 +288,7 @@ github:dcommander,github,dcommander,,,,,,,,gh/39760454,,,,gh/39760454,1,False
 github/84792,github,defunctzombie,84792,Roman Shtylman,,https://github.com/defunctzombie,,,gh/7580644,gh/1649251|gh/7580644,,,,gh/1649251|gh/7580644,2,False
 github:deyaaeldeen,github,deyaaeldeen,,,,,,,,gh/108311273,,,,gh/108311273,1,False
 github:dhardy,github,dhardy,,,,,,,,gh/1086593277|gh/209510094|gh/30227790,gh/1086593277|gh/209510094|gh/30227790,,,gh/1086593277|gh/209510094|gh/30227790,3,True
-github:dhermes,github,dhermes,,,,,,,,gh/159736041|gh/16316451|gh/226992462,,,,gh/159736041|gh/16316451|gh/226992462,3,False
+github:dhermes,github,dhermes,,,,,,,,gh/159736041|gh/16316451,,,,gh/159736041|gh/16316451,2,False
 github:dholth,github,dholth,,,,,,,,gh/98346885,,,,gh/98346885,1,False
 github:dhruvmanila,github,dhruvmanila,,,,,,,,gh/523043277,,,,gh/523043277,1,False
 github:digitalbrainjs,github,digitalbrainjs,,,,,,,,gh/23088740,,,,gh/23088740,1,False
@@ -922,7 +922,7 @@ github:trivikr,github,trivikr,,,,,,,,gh/149673986|gh/208319207|gh/87228090,,,,gh
 github:trott,github,trott,,,,,,,,gh/27193779,,,,gh/27193779,1,False
 github/72844,github,troygoode,72844,Troy Goode,,https://github.com/troygoode,Founder @trycourier,,gh/3053807,gh/3053807,,,,gh/3053807,1,False
 github/5635476,github,trysound,5635476,Bogdan Chadkin,opensource@trysound.io,https://github.com/TrySound,@webstudio-is,Building open source web apps full time. Available for hire.,,gh/24306940|gh/40920306|gh/42766912,,,,gh/24306940|gh/40920306|gh/42766912,3,False
-github:tseaver,github,tseaver,,,,,,,,gh/159736041|gh/16316451|gh/226992462,,,,gh/159736041|gh/16316451|gh/226992462,3,False
+github:tseaver,github,tseaver,,,,,,,,gh/159736041|gh/16316451,,,,gh/159736041|gh/16316451,2,False
 github:tustvold,github,tustvold,,,,,,,,gh/358917250,,,,gh/358917250,1,False
 github:tylerjereddy,github,tylerjereddy,,,,,,,,gh/1460385,,,,gh/1460385,1,False
 github:typescript-bot,github,typescript-bot,,,,,,,,gh/6093316,,,,gh/6093316,1,False
@@ -1635,12 +1635,12 @@ pypi/fzzzy,pypi,fzzzy,fzzzy,,,https://pypi.org/user/fzzzy/,,,,,,gh/3003137,,gh/3
 pypi/gaborbernat,pypi,gaborbernat,gaborbernat,,,https://pypi.org/user/gaborbernat/,,,,,,gh/1446474,,gh/1446474,1,
 pypi/garnaat,pypi,garnaat,garnaat,,,https://pypi.org/user/garnaat/,,,,,,gh/6670942|gh/6780767,,gh/6670942|gh/6780767,2,
 pypi/gbrandl,pypi,gbrandl,gbrandl,,,https://pypi.org/user/gbrandl/,,,,,,gh/205564111,,gh/205564111,1,
-pypi/gcloudpypi,pypi,gcloudpypi,gcloudpypi,,,https://pypi.org/user/gcloudpypi/,,,,,,gh/159736041|gh/16316451|gh/226992462,,gh/159736041|gh/16316451|gh/226992462,3,
+pypi/gcloudpypi,pypi,gcloudpypi,gcloudpypi,,,https://pypi.org/user/gcloudpypi/,,,,,,gh/159736041|gh/16316451,,gh/159736041|gh/16316451,2,
 pypi/giampaolo.rodola,pypi,giampaolo.rodola,giampaolo.rodola,,,https://pypi.org/user/giampaolo.rodola/,,,,,,gh/20101515,,gh/20101515,1,
 pypi/glemaitre,pypi,glemaitre,glemaitre,,,https://pypi.org/user/glemaitre/,,,,,,gh/843222,,gh/843222,1,
 pypi/glyph,pypi,glyph,glyph,,,https://pypi.org/user/glyph/,,,,,,gh/108187130|gh/696427398,,gh/108187130|gh/696427398,2,
 pypi/goodboy,pypi,goodboy,goodboy,,,https://pypi.org/user/goodboy/,,,,,,gh/34739117,,gh/34739117,1,
-pypi/google_opensource,pypi,google_opensource,google_opensource,,,https://pypi.org/user/google_opensource/,,,,,,gh/159736041|gh/16316451|gh/226992462|gh/24993138|gh/27729880,,gh/159736041|gh/16316451|gh/226992462|gh/24993138|gh/27729880,5,
+pypi/google_opensource,pypi,google_opensource,google_opensource,,,https://pypi.org/user/google_opensource/,,,,,,gh/159736041|gh/16316451|gh/24993138|gh/27729880,,gh/159736041|gh/16316451|gh/24993138|gh/27729880,4,
 pypi/graffatcolmingov,pypi,graffatcolmingov,graffatcolmingov,,,https://pypi.org/user/graffatcolmingov/,,,,,,gh/1362490|gh/15515181|gh/5196969|gh/53002916|gh/6825724,,gh/1362490|gh/15515181|gh/5196969|gh/53002916|gh/6825724,5,
 pypi/grpc-packages,pypi,grpc-packages,grpc-packages,,,https://pypi.org/user/grpc-packages/,,,,,,gh/27729880,,gh/27729880,1,
 pypi/gsnedders,pypi,gsnedders,gsnedders,,,https://pypi.org/user/gsnedders/,,,,,,gh/7043404,,gh/7043404,1,

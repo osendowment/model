@@ -269,7 +269,6 @@ google/brotli,gh/24993138,False,False,True
 google/highway,gh/206791328,False,False,True
 google/zerocopy,gh/534354967,False,False,True
 googleapis/google-cloud-python,gh/16316451,False,False,True
-googleapis/python-cloud-core,gh/226992462,False,True,False
 googleapis/python-crc32c,gh/159736041,False,True,False
 googlechrome/workbox,gh/55424670,False,False,True
 grahamdumpleton/wrapt,gh/10357291,False,False,True
@@ -334,7 +333,7 @@ isaacs/cliui,gh/634056857,False,False,True
 isaacs/core-util-is,gh/12391440,False,False,True
 isaacs/fs-minipass,gh/102982143,False,False,True
 isaacs/fs.realpath,gh/61231712,False,False,True
-isaacs/inflight-deprecated-do-not-use,gh/19442260,False,True,False
+isaacs/inflight-deprecated-do-not-use,gh/19442260,True,True,False
 isaacs/inherits,gh/1580001,False,False,True
 isaacs/isexe,gh/49804297,False,False,True
 isaacs/minimatch,gh/2056549,False,False,True

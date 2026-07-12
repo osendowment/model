@@ -269,7 +269,6 @@ google/brotli,gh/24993138,mit,registry,True
 google/highway,gh/206791328,apache-2.0 or bsd-3-clause,override,True
 google/zerocopy,gh/534354967,bsd-2-clause or apache-2.0 or mit,registry,True
 googleapis/google-cloud-python,gh/16316451,apache-2.0,registry,True
-googleapis/python-cloud-core,gh/226992462,apache-2.0,registry,True
 googleapis/python-crc32c,gh/159736041,apache-2.0,github,True
 googlechrome/workbox,gh/55424670,mit,registry,True
 grahamdumpleton/wrapt,gh/10357291,bsd-2-clause,registry,True

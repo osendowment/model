@@ -269,7 +269,6 @@ google/brotli,gh/24993138,True,True,False,True,False,2,4,True
 google/highway,gh/206791328,True,False,True,True,False,2,4,True
 google/zerocopy,gh/534354967,True,True,False,True,False,3,4,True
 googleapis/google-cloud-python,gh/16316451,True,True,False,True,False,3,4,True
-googleapis/python-cloud-core,gh/226992462,True,False,True,False,False,3,4,True
 googleapis/python-crc32c,gh/159736041,True,False,True,False,False,3,4,True
 googlechrome/workbox,gh/55424670,True,True,False,True,False,2,4,True
 grahamdumpleton/wrapt,gh/10357291,True,True,True,True,True,3,4,True

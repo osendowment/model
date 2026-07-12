@@ -85,3 +85,4 @@ debian/ca-certificates,gl/debian-2995,,,,,,,gpl-2.0-or-later and mpl-2.0,,,no LI
 cpython-team/python3-defaults,gl/debian-27547,,,,,,,psf-2.0,,,"no LICENSE file for Licensee; debian/copyright verified: Debian packaging of Python, distributed under the PSF licence"
 google/highway,gh/206791328,,,,,,,apache-2.0 or bsd-3-clause,,,GitHub Licensee noassertion on the combined LICENSE file; it opens 'dual-licensed under your choice of either the Apache License 2.0 or the BSD 3-Clause License' (verified)
 md/tcp-wrappers,gl/debian-28852,,,,,,,tcp-wrappers,,,no LICENSE file for Licensee; debian/copyright verified: License: TCP-wrappers (Venema BSD-style; admitted via EXTRAS)
+isaacs/inflight-deprecated-do-not-use,gh/19442260,,,isaacs,,,,,,True,"repo renamed to inflight-deprecated-do-not-use — upstream self-declares dead; npm package deprecated"

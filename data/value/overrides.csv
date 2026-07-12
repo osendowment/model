@@ -63,3 +63,4 @@ googleapis-common-protos,pypi,googleapis/google-cloud-python,,,google split goog
 pg8000,pypi,,https://codeberg.org/tlocke/pg8000.git,,github slug tlocke/pg8000 is 404; project moved to Codeberg codeberg.org/tlocke/pg8000 (verified git ls-remote OK). Non-GitHub upstream.
 gethostname,crates,,https://codeberg.org/swsnr/gethostname.rs.git,,github slug swsnr/gethostname.rs is 404; swsnr migrated to Codeberg codeberg.org/swsnr/gethostname.rs (verified ls-remote OK). Non-GitHub upstream.
 bevy_state_macros,crates,bevyengine/bevy,,,fork slug martintrumann/bevy_state_macros is 404; the crate is a subcrate of the bevyengine/bevy monorepo (verified).
+google-cloud-core,pypi,googleapis/google-cloud-python,,,"repo googleapis/python-cloud-core archived Feb 2026 — code lives in the googleapis/google-cloud-python monorepo"
