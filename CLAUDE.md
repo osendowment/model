@@ -2,31 +2,54 @@
 
 ## Running the Pipeline
 
-**Use `scripts/run-pipeline.sh` — it is the entry point for running the model.**
-It chains all four stages in order (Value → Risk → Eligibility → Preview) and
-finishes with `scripts/pipeline_health.py`. Warm run ≈2 min.
+**`scripts/run-pipeline.sh` is the ONLY way to run the model — whether you want
+the whole thing, one stage, or a resume from the middle.** Never invoke the
+stage runners by hand: the Preview stage is the one everyone forgets, which
+silently leaves `data/preview/preview.xlsx` stale.
 
-```bash
-scripts/run-pipeline.sh              # normal run (TTL-cached)
-scripts/run-pipeline.sh --refresh    # force refetch past every TTL
-scripts/run-pipeline.sh --offline    # pure-cache run, no network
+Stages run in this order, and `health` is the last one, on by default — a red
+check is a bug, so it aborts the run:
+
+```
+value → risk → eligibility → preview → health
 ```
 
-Args pass through to every stage runner. **Never hand-chain the stage runners
-instead** — the Preview stage (`src.run_preview_pipeline`: results → people →
-preview-xlsx) is the one people forget, which silently leaves
-`data/preview/preview.xlsx` stale.
+```bash
+scripts/run-pipeline.sh                     # every stage (TTL-cached, ~2 min warm)
+scripts/run-pipeline.sh --refresh           # force refetch past every TTL
+scripts/run-pipeline.sh --offline           # pure-cache run, no network
 
-The per-stage runners are for *targeted* work only:
+scripts/run-pipeline.sh --stage risk        # ONE stage
+scripts/run-pipeline.sh --from-stage risk   # that stage through to the end (incl. health)
+scripts/run-pipeline.sh --list-stages
+scripts/run-pipeline.sh --no-health         # drop the health stage
+```
 
-| Command | Use for |
+`--stage` / `--from-stage` / `--no-health` are consumed by the script; **every
+other argument passes through to the stage runners**, so a stage's own per-step
+flags compose with stage selection:
+
+| Command | Runs |
 |---|---|
-| `uv run python -m src.<stage>.run_<stage>_pipeline` | one stage (`--list`, `--from STEP`, `--only STEP`) |
-| `uv run python -m src.value.run_value_pipeline --rollup` | rebuild `value.csv` from existing per-eco `results.csv` (skips ecosystem sub-pipelines) |
-| `uv run python -m scripts.pipeline_health` | consistency check — **all checks must pass** before a change is done |
+| `--stage risk --list` | the steps of the risk stage |
+| `--stage risk --from scorecard` | risk, starting at the `scorecard` step |
+| `--stage value --only unify` | just the `unify` step of value |
+| `--from-stage eligibility --offline` | eligibility → preview → health, no network |
 
-A red `pipeline_health` check is a bug, not noise: it catches stale builds and
-override rows orphaned by a repo-identity change.
+Stage selection uses its *own* flag names (`--from-stage`, not `--from`)
+because `--from STEP` already means "from this step" to a stage runner.
+
+`--stage <x>` runs that stage alone and therefore skips `health` — one stage
+leaves the later ones stale, and health would rightly complain. Use
+`--from-stage <x>` when you want to run to the end and be told the truth.
+
+Two things the script does not cover:
+
+- `uv run python -m src.value.run_value_pipeline --rollup` — rebuild `value.csv`
+  from the existing per-eco `results.csv` (skips the ecosystem sub-pipelines).
+  The fast path after an `overrides.csv` edit.
+- A red `pipeline_health` check is never noise: it catches stale builds and
+  override rows orphaned by a repo-identity change.
 
 ## Code Organization
 
