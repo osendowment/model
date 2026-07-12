@@ -38,7 +38,7 @@ namespaces, so that column is blank for individual owners.)
 
 **Commits API**: `GET /projects/{id}/repository/commits?ref_name={branch}&since={yr}-01-01&until={yr}-12-31&per_page=1`
 — the newest commit in a calendar year (item `[0]` = the year's `last_sha`) plus the in-year
-commit count (`X-Total` header). This is the SHA anchor sha-pinned analyses (scc/lizard/churn)
+commit count (`X-Total` header). This is the SHA anchor sha-pinned analyses (scc/lizard)
 key off. (GitLab omits `X-Total` for result sets > 10,000, so `commits` may under-report in
 that rare case; `last_sha` — the anchor — is unaffected.)
 
@@ -113,6 +113,9 @@ A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honour th
   `data/sources/git/commits-years.csv`. Scope: the GitLab members of `load_top_repos()`
   (risk scope). CLI: `--limit`, `--force`. Selection is per-`(repo_id, year)`, so a
   newly-added year is picked up for already-anchored projects.
+- `src/sources/gitlab/fetch_issue_metrics.py` — per (repo, year) opened / closed issue counts →
+  `data/sources/gitlab/issues.csv` (the GitLab twin of `github/issues.csv`; `build_workload`
+  reads both). CLI: `--limit`, `--force`.
 - `src/sources/gitlab/fetch_funding_files.py` — in-repo funding declarations →
   `data/sources/gitlab/funding-files.csv`. Probes each GitLab top repo's default branch
   (public raw endpoint, no token) for FUNDING.yml / `.github/FUNDING.yml` /

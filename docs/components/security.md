@@ -75,8 +75,8 @@ yields a score, `openssf_score` and `openssf_score_source` are empty.
 Pipeline order (`src/risk/run_risk_pipeline.py`). The risk runner fetches these
 sources by default (incremental — each fetcher skips data already present, so a
 re-run only fills gaps); pass `--skip-fetch` to rebuild from existing data without
-fetching. The runner is trimmed to **score-forming fetchers only** — audit-only
-fetchers (churn, GitHub-method contributors) are run by hand:
+fetching. The runner holds **score-forming fetchers only** — the model scores
+nothing it does not fetch:
 
 ```
 commits-years → … → cves → scorecard → depsdev → … → security → workload → aggregate

@@ -37,21 +37,19 @@ source and the time period it represents.
 Risk
 │
 ├── Concentration  →  data/risk/concentration.csv
-│   ├── total_commits        ← git-clone log · GitHub /contributors      [lifetime]
+│   ├── total_commits        ← git-clone log                             [lifetime · 2021–2025]
 │   ├── active_contributors  ← derived (merged non-bot identities)       [lifetime · 2021–2025]
 │   ├── bf_commits           ← derived (bus factor)                      [lifetime · 2021–2025]
 │   └── hhi_commits          ← derived (HHI, 0–10000)                    [lifetime · 2021–2025]
-│       (every metric resolved by two methods — git-clone log and the
-│        GitHub /contributors API — kept as parallel *_git_full / *_git_5y /
-│        *_gh_alltime columns; only the git method carries a 2021–2025 window)
+│       (every metric derived from the git-clone commit log over two
+│        windows — full history and the last 5 complete years — kept as
+│        parallel *_git_full / *_git_5y columns)
 │
 ├── Complexity  →  data/risk/complexity.csv
 │   ├── loc, sloc                     ← scc (sparse checkout)            [2025 EOY]
 │   ├── scc_complexity, scc_density   ← scc cyclomatic total + per-line  [2025 EOY]
 │   ├── cyclomatic_{total,avg,max}    ← lizard (sparse checkout)         [2025 EOY]
-│   ├── cognitive_{total,avg,max}     ← lizard cognitive complexity      [2025 EOY]
-│   ├── churn_5y_total                ← git churn (bare clone)           [2021–2025]
-│   └── hotspot_{raw,log,log_p}       ← derived (churn × complexity)     [2025 EOY]
+│   └── cognitive_{total,avg,max}     ← lizard cognitive complexity      [2025 EOY]
 │
 ├── Security  →  data/risk/security.csv
 │   ├── openssf_score                 ← OpenSSF Scorecard (deps.dev fb)  [2025 EOY]
@@ -144,8 +142,9 @@ component doc; every `*_p` column and raw metric lives in the per-dimension
 
 ### Concentration
 
-Built from two metrics, each resolved by two methods (git-clone log + GitHub
-`/contributors`):
+Built from the git-clone commit log, over two windows — full history
+(`*_git_full`) and the last `concentration.window_years` complete years
+(`*_git_5y`):
 
 - **bus factor** (`bf_commits_*`) — the fewest contributors whose combined
   commits reach `bus_factor_threshold` (0.5 = the people covering 50% of
@@ -153,7 +152,7 @@ Built from two metrics, each resolved by two methods (git-clone log + GitHub
 - **HHI** (`hhi_commits_*`, 0–10000) — Herfindahl-Hirschman concentration of
   commit shares. High HHI → higher risk.
 
-The `_5y` git axis (last `concentration.window_years` complete years) feeds the
+The `_5y` axis feeds the
 dimension `score`: the geometric mean of the absolute scales `100 /
 bf_commits_git_5y` and `hhi_commits_git_5y / 100` (concentration is the one
 dimension scored on absolute scales, not percentiles — see
@@ -168,8 +167,9 @@ How large and hard to audit is the codebase? Percentile-ranked metrics
 - `loc_eoy` — lines of code (scc, EOY snapshot).
 - `scc_complexity_eoy` — scc cyclomatic total; `cyclomatic_max` /
   `cognitive_max` — lizard per-function maxima.
-- `churn_5y_total` — added + deleted lines over 2021–2025 (git churn).
-- `hotspot_log` — Tornhill `churn × complexity` hotspot, log-scaled.
+
+The dimension `score` is the geometric mean of `loc_eoy_p` and
+`cyclomatic_max_p`.
 
 ### Issue debt
 
@@ -246,7 +246,6 @@ the preview stats sheet → Risk → Security.)
 | Source | Fields extracted for Risk |
 |---|---|
 | **git-clone commit log** (`src/sources/git/contributors.py`, bare treeless clone, `git log --no-merges`) | per-contributor per-year commits → bus factor, HHI, active contributors (the concentration score source + workload divisor) |
-| **GitHub Contributors API** (`api.github.com/repos/.../contributors`) | lifetime per-account contributions → `_gh_alltime` bus factor / HHI (audit cross-check only) |
 | **GitHub git tree** (one sparse checkout of the EOY-pinned sha, `fetch_sha_metrics.py`) → [scc](https://github.com/boyter/scc) | lines of code, complexity per language → `data/sources/git/scc.csv` |
 | **Lizard** (same single checkout) | per-function McCabe cyclomatic + Sonar cognitive → `data/sources/git/lizard.csv` |
 | **GitHub Issues Search API** (`api.github.com/search/issues`) | per-year issue open / close counts |
@@ -285,7 +284,7 @@ Each repo has per-year `last_sha` resolved by `src/sources/git/commits_years.py`
 
 The pipeline stages project the long files into per-repo wide rows for downstream consumers:
 
-- `data/risk/complexity.csv` ← `src.risk.build_complexity` projects `data/sources/git/scc.csv` + `data/sources/git/lizard.csv` using `commits-years.last_sha` (2025 → 2021 walk; first sha with `loc > 0`). Also folds in the **hotspot** score (Tornhill `churn × complexity`): joins `data/sources/git/churn.csv` (`churn_5y_total`) with the EOY-2025 scc complexity snapshot to emit `churn_5y_total`, `hotspot_raw`, `hotspot_log`, `hotspot_log_p`.
+- `data/risk/complexity.csv` ← `src.risk.build_complexity` projects `data/sources/git/scc.csv` + `data/sources/git/lizard.csv` using `commits-years.last_sha` (2025 → 2021 walk; first sha with `loc > 0`).
 - `data/risk/security.csv` ← `src.risk.build_security` projects `data/sources/git/openssf.csv`, `data/sources/git/depsdev.csv` using the same per-year sha priority.
 - `data/risk/risk.csv` ← `src.risk.aggregate_risk` (the pipeline's final step) joins the four scored dimensions (concentration · complexity · security · workload) and computes the final `risk_score` as their geometric mean — blank unless all four are present.
 
@@ -293,11 +292,11 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 
 | Script | Purpose |
 |--------|---------|
-| `src/sources/github/fetch_contributors_metrics.py` | Contributor analysis (bus factor, HHI) |
+| `src/sources/git/contributors.py` | Per-contributor per-year commits from the bare clone log (feeds bus factor, HHI, active contributors) |
 | `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (standalone `scc` fetcher; helpers reused by `fetch_sha_metrics.py`) |
 | `src/sources/git/fetch_sha_metrics.py` | Unified SHA-pinned metrics — one sparse checkout → scc + both lizard passes (cyclomatic + cognitive) → `scc.csv` + `lizard.csv` |
 | `src/sources/github/fetch_issue_metrics.py` | Issue counts per year (Search API) |
-| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall `risk_score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload; blank unless all four are present). **Input scope is `load_top_repos` over `data/value/value.csv` — valid repos with `class ∈ settings.json top_repos.classes` (`["A"]`) and `platform ∈ top_repos.platforms` (`["github", "gitlab"]`), archived included**. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. The pipeline runs **only the score-forming fetchers** (`FETCHERS`); the audit-only fetchers that populate purely informational columns — `fetch_churn` (hotspot) and `fetch_contributors_metrics` (GitHub-method BF/HHI) — live in `AUDIT_FETCHERS` and are run by hand when those columns need refreshing. (Semgrep SAST was removed from the model entirely, and cognitive complexity is now produced by the unified sha-metrics/lizard pass — neither has a standalone fetcher any more.) |
+| `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall `risk_score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload; blank unless all four are present). **Input scope is `load_top_repos` over `data/value/value.csv` — valid repos with `class ∈ settings.json top_repos.classes` (`["A"]`) and `platform ∈ top_repos.platforms` (`["github", "gitlab"]`), archived included**. `uv run python -m src.risk.run_risk_pipeline`. The runner **fetches missing data by default** (incremental — fetchers skip data already in files), then runs the dimension builders + aggregate; pass `--skip-fetch` to rebuild from existing data only. The runner's fetcher list (`FETCHERS`) is exactly the score-forming sources — the pipeline scores only what it fetches. Cognitive complexity comes from the unified sha-metrics/lizard pass, so it has no standalone fetcher. |
 
 ## Source-file coverage
 
@@ -315,8 +314,7 @@ repo, not a data-collection bug:
 
 - **depsdev** — repos that publish only via Debian / Homebrew / vcpkg / source tarballs are absent from deps.dev's index. Not fillable.
 - **Scorecard files (~99%)** — a mix of brand-new risk-scope additions and scorecard `Contributors`-check internal errors on a handful of repos (`isaacs/node-mkdirp`, `gnome/glib`, `rust-lang/rust`).
-- **concentration** — two independent methods, each a long raw per-contributor file under `data/sources/git/` and `data/sources/github/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The git-clone method times out on Linux-kernel-scale mirrors (`archlinux/linux`); the GitHub `/contributors` API caps the contributor list near 500 and rate-limits a few mega-repos.
-- **churn** — bare-clone timeout on the largest repos (gcc-mirror/gcc, ffmpeg/ffmpeg, microsoft/typescript, etc.). Re-runs with longer timeouts can recover most of these.
+- **concentration** — a long raw per-contributor file under `data/sources/git/`; `build_concentration` merges identities, drops bots, and computes BF/HHI/AC into the single wide `data/risk/concentration.csv`. The bare clone times out on Linux-kernel-scale mirrors (`archlinux/linux`).
 - **Structurally-sparse columns** — `bestpractices_badge_id` (only CII-enrolled repos), `cognitive_*` (only languages with a Lizard cognitive parser), and `issue_trend_score` (only repos with `mean_opened_per_year ≥ 1`) are sparse by definition. Their coverage is in the preview stats sheet.
 
 ## Output

@@ -179,8 +179,7 @@ invisible.
 
 `fetch_maintainer_sponsors.py` closes the gap. For every top repo it takes the
 **bus-factor set** — the fewest top contributors whose commits cumulatively
-reach 50% of the repo (`src/sources/github/bf_contributors.py`, the same
-population `build_concentration` counts as `bf_commits_gh_alltime`) — and checks
+reach 50% of the repo (`src/sources/github/bf_contributors.py`) — and checks
 whether *any of them personally* has a GitHub Sponsors listing
 (GraphQL `hasSponsorsListing`). If so, the repo is `bf_maintainer_fundable` — a
 funding-intent signal in its own right (someone who carries this repo can be

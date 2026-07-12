@@ -4,21 +4,20 @@ How dependent is a project on a handful of people? The concentration component
 measures the **distribution of authorship** across a repo's contributors and
 distills it into one **concentration-risk score (`score`, 0–100, higher = more
 concentrated = more at-risk)** that feeds `data/risk/risk.csv` as the column
-`concentration`. Two independent methods — a git-clone commit log and the GitHub
-`/contributors` API — each produce a bus factor, an HHI, and contributor counts;
-only the git `_5y` axis drives the score.
+`concentration`. It is measured from one source: the **git-clone commit log**,
+which yields a bus factor, an HHI, and contributor counts over both a lifetime
+and a windowed period; only the `_5y` axis drives the score.
 
 Scope: the valid class-A top repos in the risk pipeline — GitHub + GitLab,
-archived included (see [value.md](../value.md)). The git-clone method is
-host-agnostic and covers GitLab repos too; the GitHub `/contributors` method
-covers GitHub repos only. Build step: `src/risk/build_concentration.py`.
+archived included (see [value.md](../value.md)). The method is host-agnostic:
+GitHub and GitLab repos are measured identically. Build step:
+`src/risk/build_concentration.py`.
 
 ## Scored components: Bus Factor + HHI
 
-`concentration.csv` carries 25 columns, but the **`score` uses exactly two** —
-both from the git-clone log over the `_5y` window (2021–2025), each read on an
-**absolute** 0–100 scale (`100 / bf` and `hhi / 100`) and combined as their
-geometric mean:
+`concentration.csv` carries 17 columns, but the **`score` uses exactly two** —
+both over the `_5y` window (2021–2025), each read on an **absolute** 0–100
+scale (`100 / bf` and `hhi / 100`) and combined as their geometric mean:
 
 - **Bus factor** (`bf_commits_git_5y`) — sort the merged, non-bot contributors by
   commits descending and count how many it takes for their cumulative commit
@@ -39,39 +38,36 @@ geometric mean:
   measurement. As a result the score is **fully populated** across the risk set.
 
 ```
-score = max(1, round( √( (100 / bf_commits_git_5y) × (hhi_commits_git_5y / 100) ) ))
-      = max(1, round( √( hhi_commits_git_5y / bf_commits_git_5y ) ))
+score = max(1, √( (100 / bf_commits_git_5y) × (hhi_commits_git_5y / 100) ))
+      = max(1, √( hhi_commits_git_5y / bf_commits_git_5y ))      → 2 decimals
 ```
 
 Both factors are absolute scales, **not within-table percentiles**: `100 / bf`
 maps bus factor 1 → 100, 2 → 50, 4 → 25; `hhi / 100` maps the one-author
-monoculture (HHI 10000) → 100. Percentiles were dropped because the risk set
-is dominated by bus-factor-1 repos, which pinned three quarters of the table
-into one tie block and compressed everything else — a 99%-single-author repo
-(HHI 9868) landed at only p80 because 20% of the population sits even higher.
-The absolute score reads the same inputs at face value, and a repo's score no
-longer shifts when the surrounding population changes. The six `*_p` percentile
-columns remain in the CSV as cross-method audit references.
+monoculture (HHI 10000) → 100. The risk set is dominated by bus-factor-1 repos,
+so a percentile basis would collapse most of the table into a single tie block
+and compress everything else — a 99%-single-author repo (HHI 9868) would rank
+far below its true concentration simply because so much of the population sits
+even higher. The absolute score reads the same inputs at face value, and a
+repo's score does not shift when the surrounding population changes.
 
-Every other column — the GitHub `/contributors` `_gh_alltime` figures, the git
-`_full` lifetime figures, all contributor/commit counts, and the `*_p`
-percentiles — is emitted for inspection and cross-checking only. **None of
-them feed `score`.**
+Every other column — the `_full` lifetime figures, the contributor/commit
+counts, and the `*_p` percentiles — is emitted for inspection and cross-checking
+only. **None of them feed `score`.**
 
 ## Metrics Roadmap
 
 Each leaf is one column with its source and the period it represents. `_full` =
 all commits through the last complete year (`max(settings.years)` = 2025);
-`_5y` = the last `concentration.window_years` (5) complete years, 2021–2025;
-`_gh_alltime` = the GitHub API's uncapped lifetime count as of fetch (no
-per-year breakdown, list capped near 500). Raw long-format signals are fetched
-per-source under `data/sources/`; all derived columns are computed by
-`build_concentration.py`. Only the git `_5y` bus factor + HHI feed `score`.
+`_5y` = the last `concentration.window_years` (5) complete years, 2021–2025. The
+raw long-format signal is fetched under `data/sources/git/`; all derived columns
+are computed by `build_concentration.py`. Only the `_5y` bus factor + HHI feed
+`score`.
 
 ```
 Concentration  → data/risk/concentration.csv  (one row per risk-scope repo)
 │
-├── git-clone method  (data/sources/git/contributor-commits.csv)
+├── git-clone commit log  (data/sources/git/contributor-commits.csv)
 │   ├── _full  (all commits through 2025)
 │   │   ├── total_commits_git_full   ← Σ non-merge commits ≤ last complete year   [→2025]
 │   │   ├── contributors_git_full    ← derived (merged non-bot identities)        [→2025]
@@ -80,22 +76,12 @@ Concentration  → data/risk/concentration.csv  (one row per risk-scope repo)
 │   │   ├── hhi_commits_git_full     ← derived (HHI, 0–10000)                     [→2025]
 │   │   └── hhi_commits_git_full_p   ← derived (risk percentile, high HHI → high) [→2025]
 │   └── _5y  (2021–2025 window — the scoring axis)
-│       ├── commits_git_5y               ← Σ non-merge commits in window          [2021–2025]
+│       ├── commits_git_5y               ← Σ non-merge commits in window           [2021–2025]
 │       ├── active_contributors_git_5y   ← derived (merged non-bot, active in win) [2021–2025]
 │       ├── bf_commits_git_5y            ← derived (bus factor)       ★ scores     [2021–2025]
 │       ├── bf_commits_git_5y_p          ← derived (risk percentile, audit only)   [2021–2025]
 │       ├── hhi_commits_git_5y           ← derived (HHI, 0–10000)     ★ scores     [2021–2025]
 │       └── hhi_commits_git_5y_p         ← derived (risk percentile, audit only)   [2021–2025]
-│
-├── GitHub /contributors method  (data/sources/github/contributor-commits.csv)
-│   └── _gh_alltime  (lifetime, list capped ~500 — cross-check only)
-│       ├── total_commits_gh_alltime        ← Σ /contributors `contributions`     [lifetime]
-│       ├── total_contributors_gh_alltime   ← all /contributors rows (incl. bots) [lifetime]
-│       ├── active_contributors_gh_alltime  ← derived (non-bot rows)              [lifetime]
-│       ├── bf_commits_gh_alltime           ← derived (bus factor)                [lifetime]
-│       ├── bf_commits_gh_alltime_p         ← derived (risk percentile)           [lifetime]
-│       ├── hhi_commits_gh_alltime          ← derived (HHI, 0–10000)              [lifetime]
-│       └── hhi_commits_gh_alltime_p        ← derived (risk percentile)           [lifetime]
 │
 └── score  (the component score)  ← geometric mean of 100/bf_commits_git_5y
     │                                and hhi_commits_git_5y/100 (0–100, absolute)
@@ -104,79 +90,60 @@ Concentration  → data/risk/concentration.csv  (one row per risk-scope repo)
 
 ## How It Works
 
-1. **Collect** — two fetchers dump raw long-format per-contributor data into
-   `data/sources/`: the git fetcher walks `git log` on a bare clone, the GitHub
-   fetcher hits the `/contributors` API. Each writes a `.status.csv` sidecar
-   carrying `fetched_at` per repo, so a missing metric is distinguishable from a
-   failed fetch.
-2. **Join** — `build_concentration.py` joins both sources onto the risk
-   repos by the stable `repo_id` (rename-proof — a renamed/moved repo keeps
-   the data collected under its old name) and reads `data/value/value.csv`
-   via `load_top_repos` for the valid class-A scope.
-3. **Derive** — for each method: merge contributor identities, drop bots, then
-   compute bus factor, HHI (0–10000), and contributor counts. The git method
-   yields both a lifetime (`_full`) and a windowed (`_5y`) figure; the GitHub
-   method yields lifetime only (`_gh_alltime`).
-4. **Score** — `score = max(1, round(√(hhi/bf)))` over the `_5y` bus factor and
-   HHI — the geometric mean of the absolute scales `100/bf` and `hhi/100`, an
-   integer 0–100 (higher = more concentrated = more risk). `add_percentiles`
-   emits the six `*_p` percentile columns as audit references.
+1. **Collect** — the git fetcher walks `git log` on a bare treeless clone and
+   dumps raw long-format per-contributor data into `data/sources/git/`. It writes
+   a `.status.csv` sidecar carrying `fetched_at` per repo, so a missing metric is
+   distinguishable from a failed fetch.
+2. **Join** — `build_concentration.py` joins the source onto the risk repos by
+   the stable `repo_id` (rename-proof — a renamed/moved repo keeps the data
+   collected under its old name) and reads `data/value/value.csv` via
+   `load_top_repos` for the valid class-A scope.
+3. **Derive** — merge contributor identities, drop bots, then compute bus factor,
+   HHI (0–10000), and contributor counts. Because the log carries author dates,
+   it yields both a lifetime (`_full`) and a windowed (`_5y`) figure.
+4. **Score** — `score = max(1, √(hhi/bf))` over the `_5y` bus factor and HHI —
+   the geometric mean of the absolute scales `100/bf` and `hhi/100`, a 2-decimal
+   0–100 value (higher = more concentrated = more risk). `add_percentiles` emits
+   the four `*_p` percentile columns as audit references.
 5. **Aggregate** — `aggregate_risk.py` carries **only** `score` into `risk.csv`
    as the `concentration` column.
 
 Pipeline order. The git-clone contributor fetcher runs **inside** the risk
-pipeline (it is the only source of the score and of workload's per-contributor
-divisor); the GitHub `/contributors` fetcher is audit-only (`AUDIT_FETCHERS`)
-and is run by hand when the `_gh_alltime` cross-check columns need refreshing:
+pipeline — it is the only source of the concentration score and of workload's
+per-contributor divisor:
 
 ```
-src.sources.github.fetch_contributors_metrics  (audit-only, run by hand)
-                              ↘
 src.risk.run_risk_pipeline:  … → git-contributors (clone) → … → concentration (build) → … → aggregate
 ```
 
 ## Collection
 
-Both methods read a long-format raw file plus its status sidecar. Each row of
-the raw file is one `(repo, contributor[, year])` tuple; the builder aggregates
-over them. Join key into the risk-repo set is the stable `repo_id` for both
-(rows with a blank `repo_id` are skipped).
+The builder reads one long-format raw file plus its status sidecar. Each row of
+the raw file is one `(repo, contributor, year)` tuple; the builder aggregates
+over them. Join key into the risk-repo set is the stable `repo_id` (rows with a
+blank `repo_id` are skipped).
 
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
 |---|---|---|---|
 | `git/contributor-commits.csv` | `src/sources/git/contributors.py` | long raw: `repo, repo_id, git_url, author_name, author_email, year, commits` from `git log --no-merges` on a bare treeless clone (mailmap-resolved `%aN`/`%aE`) | `repo_id` |
 | `git/contributor-commits.status.csv` | `src/sources/git/contributors.py` | per-repo git-fetch status + `fetched_at` | `repo_id` |
-| `github/contributor-commits.csv` | `src/sources/github/fetch_contributors_metrics.py` | long raw: `repo, repo_id, git_url, login, contributions, account_type` from the `/repos/{repo}/contributors` endpoint | `repo_id` |
-| `github/contributor-commits.status.csv` | `src/sources/github/fetch_contributors_metrics.py` | per-repo GitHub-fetch status + `fetched_at` | `repo_id` |
 | `value/value.csv` | value pipeline | valid class-A top-repo scope (`load_top_repos`) | `repo_id` |
 
-### Two methods, two different lenses
-
-| | git-clone log | GitHub `/contributors` |
-|---|---|---|
-| Sees | every committer, with author dates | accounts only, lifetime cumulative |
-| Periods | `_full` **and** `_5y` (windowed) | `_gh_alltime` (lifetime only) |
-| Identity | raw name+email pairs → union-find merge | already keyed by GitHub login |
-| Limit | times out on kernel-scale mirrors | list capped near 500 → under-counts big repos |
-| Role | **drives `score`** (the `_5y` axis) | parallel cross-check, never scored |
-
-The git method is authoritative because it carries author dates (so it can
-honour a 2021–2025 window) and sees every contributor. The GitHub method has no
-per-year breakdown and truncates the contributor list near 500 entries, so its
-columns are deliberately labelled `_gh_alltime` — an uncapped lifetime figure as
-of `github_fetched_at` (may include the partial current year), never `_full`/`_5y`.
+The commit log is authoritative because it sees **every** contributor (no API
+list cap) and carries **author dates**, so it can honour a 2021–2025 window
+rather than only a lifetime cumulative total. It reads a clone, not a host API,
+so GitHub and GitLab repos go through the identical code path.
 
 ## Processing & scoring
 
 ### Identity merge + bot drop
 
-The git method's raw rows are keyed by mailmap-resolved `(author_name,
-author_email)` pairs. The builder additionally union-finds identities that share
-a normalised email **or** a full name (`merge_identity_groups`), so a person who
-committed under several addresses counts once. Bot identities are then dropped
-(`_is_bot_identity` for git, `account_type == "Bot"` / `is_bot(login)` for
-GitHub) before any metric is computed. The GitHub method needs no merging —
-`/contributors` is already keyed by account.
+The raw rows are keyed by mailmap-resolved `(author_name, author_email)` pairs
+(the repo's own `.mailmap` is applied at fetch time). The builder additionally
+union-finds identities that share a normalised email **or** a full name
+(`merge_identity_groups`), so a person who committed under several addresses
+counts once. Bot identities are then dropped (`_is_bot_identity`) before any
+metric is computed.
 
 ### Bus factor and HHI
 
@@ -203,49 +170,39 @@ direction chosen per metric so that *more concentrated always ranks higher*:
 | `hhi_commits_git_5y_p` | `hhi_commits_git_5y` | `True` | high HHI → high percentile |
 | `bf_commits_git_full_p` | `bf_commits_git_full` | `False` | (audit only) |
 | `hhi_commits_git_full_p` | `hhi_commits_git_full` | `True` | (audit only) |
-| `bf_commits_gh_alltime_p` | `bf_commits_gh_alltime` | `False` | (audit only) |
-| `hhi_commits_gh_alltime_p` | `hhi_commits_gh_alltime` | `True` | (audit only) |
 
-**None of the six percentiles feed `score`** (`composite_cols = []` in the
-builder — the absolute formula `max(1, round(√(hhi/bf)))` over the `_5y` axis
-fills it instead; see *Scored components*). All six `_p` columns are emitted
-for inspection and cross-method audit only. The **geometric mean** inside the
-score means a repo only scores as low-risk when *both* axes agree it is
-well-distributed — one concentrated axis pulls the product up. The percentile
-CDFs rank the whole top-repo population (GitHub + GitLab together).
+**None of the four percentiles feed `score`** (`composite_cols = []` in the
+builder — the absolute formula `max(1, √(hhi/bf))` over the `_5y` axis fills it
+instead; see *Scored components*). All four `_p` columns are emitted for
+inspection and audit only. The **geometric mean** inside the score means a repo
+only scores as low-risk when *both* axes agree it is well-distributed — one
+concentrated axis pulls the product up. The percentile CDFs rank the whole
+top-repo population (GitHub + GitLab together).
 
 ## Output
 
 ### `data/risk/concentration.csv` (per-dimension build)
 
-25 columns, one row per risk repo. No `fetched_at` *value* columns — per-method
-timestamps live in `github_fetched_at` / `git_fetched_at`.
+17 columns, one row per risk repo. No `fetched_at` *value* columns — the fetch
+timestamp lives in `git_fetched_at`.
 
 | Column | Description |
 |---|---|
 | `repo`, `repo_id` | identity |
-| `total_commits_gh_alltime` | Σ of `/contributors` contributions (incl. bots) |
-| `total_contributors_gh_alltime` | all `/contributors` rows (incl. bots) |
-| `active_contributors_gh_alltime` | non-bot `/contributors` rows |
-| `bf_commits_gh_alltime` | bus factor — GitHub method, lifetime |
-| `bf_commits_gh_alltime_p` | risk percentile of `bf_commits_gh_alltime` |
-| `hhi_commits_gh_alltime` | HHI (0–10000) — GitHub method, lifetime |
-| `hhi_commits_gh_alltime_p` | risk percentile of `hhi_commits_gh_alltime` |
 | `total_commits_git_full` | Σ non-merge commits through 2025 |
 | `contributors_git_full` | merged non-bot identities, `_full` |
-| `bf_commits_git_full` | bus factor — git method, `_full` |
+| `bf_commits_git_full` | bus factor — `_full` |
 | `bf_commits_git_full_p` | risk percentile of `bf_commits_git_full` |
-| `hhi_commits_git_full` | HHI (0–10000) — git method, `_full` |
+| `hhi_commits_git_full` | HHI (0–10000) — `_full` |
 | `hhi_commits_git_full_p` | risk percentile of `hhi_commits_git_full` |
 | `commits_git_5y` | Σ non-merge commits in 2021–2025 |
 | `active_contributors_git_5y` | merged non-bot identities active in window |
-| `bf_commits_git_5y` | bus factor — git method, `_5y` **(scores)** |
+| `bf_commits_git_5y` | bus factor — `_5y` **(scores)** |
 | `bf_commits_git_5y_p` | risk percentile of `bf_commits_git_5y` (audit only) |
-| `hhi_commits_git_5y` | HHI (0–10000) — git method, `_5y` **(scores)** |
+| `hhi_commits_git_5y` | HHI (0–10000) — `_5y` **(scores)** |
 | `hhi_commits_git_5y_p` | risk percentile of `hhi_commits_git_5y` (audit only) |
-| `score` | **concentration-risk score** — `max(1, round(√(hhi_commits_git_5y / bf_commits_git_5y)))`, the geom-mean of the absolute scales `100/bf` and `hhi/100` (0–100) |
+| `score` | **concentration-risk score** — `max(1, √(hhi_commits_git_5y / bf_commits_git_5y))`, the geom-mean of the absolute scales `100/bf` and `hhi/100` (0–100, 2 decimals) |
 | `comment` | edge-case note on the `_5y` axis (auditability), else empty. All but the last are imputed `bf=1`/`HHI=10000`: `no commits in 5y` (dormant), `no human commits in 5y` (bot-only window), `no commits through last complete year` (only in-progress-year activity). `git fetch <status>` / `no git data` (fetch failed → **blank**, the only unscored case) |
-| `github_fetched_at` | when the GitHub `/contributors` data was fetched |
 | `git_fetched_at` | when the git-clone log was fetched |
 
 ### `data/risk/risk.csv` (aggregate)
@@ -271,13 +228,11 @@ See the preview stats sheet → Risk → Concentration for current per-signal co
   the imputation lives in `git_metrics`, which only runs after a successful
   fetch — and `scripts/pipeline_health.py` asserts the score is fully populated,
   so any blank surfaces as a fetch gap to fix rather than passing silently.
-- **Commits ≠ effort.** Both methods count authored commits, not lines, reviews,
-  triage, or maintenance burden. A reviewer or release manager who rarely commits
-  is invisible, so a repo can read as more concentrated than it truly is.
-- **GitHub method under-counts big repos.** `/contributors` caps the list near
-  500 entries and exposes no per-year breakdown, so its `_gh_alltime` columns
-  are kept only as a cross-check and never feed `score`.
-- **git method can time out.** A bare treeless clone of kernel-scale mirrors
+- **Commits ≠ effort.** The commit log counts authored commits, not lines,
+  reviews, triage, or maintenance burden. A reviewer or release manager who
+  rarely commits is invisible, so a repo can read as more concentrated than it
+  truly is.
+- **The clone can time out.** A bare treeless clone of kernel-scale mirrors
   (e.g. `archlinux/linux`) can exceed the fetch budget; the status sidecar
   records the failure and the repo's git columns stay blank.
 - **Identity merge is heuristic.** Union-find over shared email/name catches most

@@ -60,12 +60,11 @@ the risk builders use.
 | `lizard.csv` | `fetch_sha_metrics.py` | long: `files`, `cyclomatic_{total,avg,max}`, `cognitive_{total,avg,max}` (the file also carries `halstead_*` / `maintainability_index` rows the fetcher does not emit) |
 | `contributor-commits.csv` | `contributors.py` | long raw: `repo, repo_id, git_url, author_name, author_email, year, commits` — one row per mailmap-resolved author-year, merges excluded; identity merging happens in `build_concentration` |
 | `contributor-commits.status.csv` | `contributors.py` | per-repo sidecar: `status` ∈ {ok, no_commits, clone_failed, timeout, error}, `distinct_authors, commits_total, clone_seconds, error, fetched_at` |
-| `churn.csv` | `src/sources/github/fetch_churn.py` | wide, per repo: 5y added/deleted lines (bare clone + `git log --numstat`, source files only) |
 | `openssf.csv` | `src/sources/openssf/scorecard.py` | long: Scorecard `score` + per-check scores, pinned to the commit Scorecard scanned |
 | `depsdev.csv` | `src/sources/depsdev/fetch.py` | long: deps.dev-mirrored Scorecard rows (fallback when no local scan) |
 | `urls.csv` | `src/value/git_urls.py` (value stage) | non-GitHub clone-URL validity cache keyed by **URL**: `url, valid, method, checked_at` (`git ls-remote`) |
 
-Consumers: `src/risk/build_complexity.py` (scc, lizard, churn),
+Consumers: `src/risk/build_complexity.py` (scc, lizard),
 `build_concentration.py` (contributor-commits), `build_security.py` (openssf,
 depsdev), `build_workload.py` (commits-years) — see
 [complexity](../components/complexity.md), [concentration](../components/concentration.md),

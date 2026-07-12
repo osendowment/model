@@ -1,6 +1,6 @@
 # GitHub
 
-Repository metadata, contributor metrics, and code complexity for open-source projects.
+Repository metadata, issue metrics, and code complexity for open-source projects.
 
 ## Data Sources
 
@@ -8,7 +8,7 @@ Repository metadata, contributor metrics, and code complexity for open-source pr
 
 **Repos API**: `api.github.com/repos/{owner}/{repo}` -- fetch metadata for individual repos (used for ecosystem backfill).
 
-**Contributors API**: `api.github.com/repos/{owner}/{repo}/contributors` -- lifetime per-contributor commit totals, keyed by login. (The `/stats/contributors` weekly-history endpoint is intentionally not used -- it returns HTTP 202 "computing" indefinitely for most repos.)
+**Commits API**: `api.github.com/repos/{owner}/{repo}/commits` -- per (repo, year) first/last commit SHA + in-year commit count, the anchor every sha-pinned analysis keys off.
 
 **Git metrics**: sparse checkout or tarball download + [scc](https://github.com/boyter/scc) for code analysis (LOC/SLOC/ULOC, file counts, complexity).
 
@@ -20,25 +20,18 @@ In `data/sources/github/search/`:
 - `top-repos.csv` -- searched repos with metadata (stars, forks, license, language, etc.; counts in the preview stats sheet)
 - `repo-counts.csv` -- cached search API counts (skip repeat queries)
 
-Contributor raw data (long format; bus factor / HHI are computed downstream by
-`src/risk/build_concentration.py` from these rows):
-- `data/sources/github/contributor-commits.csv` -- one row per (repo, contributor) from the
-  `/contributors` API: `repo, repo_id, git_url, login, contributions, account_type`
-- `data/sources/github/contributor-commits.status.csv` -- per-repo fetch status sidecar:
-  `repo, repo_id, git_url, status, n_contributors, fetched_at`
-
 All git-clone / git-analysis raw data lives under `data/sources/git/` (host-agnostic:
 every row carries both `repo_id` — `gh/` or `gl/` — and the `git_url` it was cloned
 from, so a fetcher clones the real host rather than assuming `github.com/{repo}`):
 - `commits-years.csv` -- per (repo, year) `last_sha` + `commits` (foundation for sha-pinned snapshots)
-- `churn.csv` -- 5y added/deleted lines per repo (range-based)
 - long-format sha-pinned (schema: `repo, repo_id, git_url, commit_sha, metric, value, checked_at`):
   - `scc.csv` -- scc metrics: `loc`, `sloc`, `files`, `uloc`, `complexity`, `complexity_density`
   - `lizard.csv` -- lizard cyclomatic + cognitive + Halstead + maintainability index + files
   - `openssf.csv` -- OpenSSF Scorecard `score` + 18 per-check scores
   - `depsdev.csv` -- deps.dev-mirrored Scorecard score + checks (fall-back when local row missing)
 - `contributor-commits.csv` -- git-clone contributor method, long raw: `repo, repo_id, git_url,
-  author_name, author_email, year, commits` (+ `contributor-commits.status.csv` per-repo status sidecar)
+  author_name, author_email, year, commits` (+ `contributor-commits.status.csv` per-repo status
+  sidecar). Bus factor / HHI are computed downstream by `src/risk/build_concentration.py` from these rows
 - `urls.csv` -- non-GitHub clone-URL validation cache (`url, valid, method, checked_at`;
   written by the value stage's `build_git_urls` / `build_validation`)
 
@@ -47,12 +40,11 @@ from, so a fetcher clones the real host rather than assuming `github.com/{repo}`
 | Script | Purpose |
 |--------|---------|
 | `src/sources/github/fetch_top_repos.py` | Search repos by language/stars; backfill ecosystem repos |
-| `src/sources/github/fetch_contributors_metrics.py` | Fetch per-contributor commit totals (raw rows for bus factor / HHI) |
-| `src/sources/github/bf_contributors.py` | Bus-factor contributor membership (which logins make up `bf_commits_gh_alltime`) |
+| `src/sources/github/bf_contributors.py` | Bus-factor contributor membership (the maintainer set that cumulatively wrote ≥50% of a repo) |
 | `src/sources/github/fetch_maintainer_sponsors.py` | Personal GitHub Sponsors listing per bus-factor maintainer (→ funding-intent `bf_maintainer_fundable`) |
+| `src/sources/github/fetch_issue_metrics.py` | Per (repo, year) opened / closed issue counts (→ workload) |
 | `src/sources/git/commits_years.py` | Resolve per (repo, year) `last_sha` + `commits` |
 | `src/sources/git/contributors.py` | git-clone contributor commits (long raw + status sidecar) |
-| `src/sources/github/fetch_churn.py` | 5y line churn per repo (clone-based) → `data/sources/git/churn.csv` |
 | `src/sources/git/fetch_scc.py` | scc code analysis via sparse checkout (writes long format; helpers reused by the unified SHA-metrics fetcher) |
 | `src/sources/git/fetch_sha_metrics.py` | Unified SHA-pinned metrics: one sparse checkout → scc + both lizard passes (cyclomatic McCabe + Sonar cognitive) → `scc.csv` + `lizard.csv` |
 | `src/sources/github/github_client.py` | API client with token rotation + rate limiting |
@@ -76,12 +68,11 @@ uv run python -m src.sources.github.fetch_top_repos --backfill-only
 uv run python -m src.sources.github.fetch_top_repos --backfill-only --limit 20
 ```
 
-### Contributor metrics
+### Contributor commits (git clone — long format)
 
 ```bash
-uv run python -m src.sources.github.fetch_contributors_metrics                  # batch all
-uv run python -m src.sources.github.fetch_contributors_metrics curl/curl        # single repo
-uv run python -m src.sources.github.fetch_contributors_metrics --limit 10       # sample
+uv run python -m src.sources.git.contributors --limit 20
+uv run python -m src.sources.git.contributors --inspect curl/curl
 ```
 
 ### Git metrics (scc — long format)

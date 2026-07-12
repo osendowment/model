@@ -2,10 +2,9 @@
 
 How large and hard-to-audit is a project's codebase? The complexity component
 analyses a pinned end-of-year snapshot of each repo's default branch — lines of
-code (scc), per-function McCabe and cognitive complexity (lizard), and 5-year
-churn-weighted hotspots (Tornhill) — and distils them into one **complexity-risk
-score (`score`)** that feeds `data/risk/risk.csv`. Higher = larger / harder to
-maintain.
+code (scc) plus per-function McCabe and cognitive complexity (lizard) — and
+distils them into one **complexity-risk score (`score`)** that feeds
+`data/risk/risk.csv`. Higher = larger / harder to maintain.
 
 Scope: the valid class-A top repos in the risk pipeline — GitHub + GitLab,
 archived included (counts in the preview stats sheet → Risk; see
@@ -16,9 +15,8 @@ archived included (counts in the preview stats sheet → Risk; see
 Each leaf is one column with its data source and the period it represents.
 `[EOY]` = the scc/lizard analysis of the last commit on the default branch at
 the end of the chosen **snapshot year** (a year in the settings window, recorded
-per-repo in `loc_year`); `[2021–2025]` = a 5-year window. Raw signals are fetched
-per-source under `data/sources/`; derived columns are computed by
-`build_complexity.py`.
+per-repo in `loc_year`). Raw signals are fetched per-source under
+`data/sources/`; derived columns are computed by `build_complexity.py`.
 
 ```
 Complexity  → data/risk/complexity.csv  (one row per risk-scope repo)
@@ -33,16 +31,10 @@ Complexity  → data/risk/complexity.csv  (one row per risk-scope repo)
 │   ├── cyclomatic_total/avg/max ← lizard cyclomatic (per-function McCabe)         [EOY]
 │   └── cognitive_total/avg/max  ← lizard cognitive complexity                     [EOY]
 │
-├── churn / hotspot  (Tornhill: bug-prone = high churn ∩ high complexity)
-│   ├── churn_5y_total          ← git churn (added+deleted, bare clone)            [2021–2025]
-│   ├── hotspot_raw             ← derived (churn × scc_complexity_eoy, linear)     [EOY×5y]
-│   ├── hotspot_log             ← derived (log10(churn+1) × log10(complexity+1))   [EOY×5y]
-│   └── hotspot_log_p           ← derived (risk percentile of hotspot_log)         [EOY×5y]
-│
 ├── loc_year                    ← snapshot year used (real year; dated fallback)   [EOY]
 │
 ├── informational percentiles   ← derived (risk percentiles, higher = riskier)
-│   ├── scc_complexity_eoy_p · cognitive_max_p · churn_5y_total_p · hotspot_log_p
+│   └── scc_complexity_eoy_p · cognitive_max_p
 │
 └── score  (the score)          ← geometric mean of loc_eoy_p, cyclomatic_max_p   [EOY]
     └─ carried into risk.csv as the column `complexity`
@@ -53,9 +45,8 @@ Complexity  → data/risk/complexity.csv  (one row per risk-scope repo)
 1. **Collect** — one unified fetcher (`fetch_sha_metrics.py`) resolves the
    end-of-year sha, sparse-clones **once**, and runs scc + both lizard passes on
    that single checkout, writing scc (loc + complexity) and lizard (cyclomatic +
-   cognitive); a separate churn fetcher (audit-only — run by hand, not by the
-   pipeline, since churn feeds no score) adds 5-year churn. Each is keyed on a
-   sha taken from `commits-years.csv` (per-year `last_sha`).
+   cognitive). Both are keyed on a sha taken from `commits-years.csv` (per-year
+   `last_sha`).
 2. **Pick the snapshot sha** — for each repo `build_complexity.py` walks **every
    available snapshot year newest→oldest** and picks the most-recent whose
    `last_sha` has scc `loc > 0`. This spans the settings window (2025→2021) and,
@@ -64,8 +55,8 @@ Complexity  → data/risk/complexity.csv  (one row per risk-scope repo)
    year, so every repo with code resolves a dated snapshot. The chosen year is
    recorded in `loc_year`. The row is empty only when **no** sha has analysable
    code (an empty repo with `loc = 0`).
-3. **Derive** — map scc/lizard long rows for the chosen `(repo, sha)` into the
-   `_eoy` columns, join 5-year churn, and fold the hotspot scores.
+3. **Derive** — map the scc/lizard long rows for the chosen `(repo, sha)` into
+   the `_eoy` columns and percentile-rank them.
 4. **Score** — `score` = geometric mean of the LOC and per-function
    cyclomatic-max risk percentiles (`loc_eoy_p`, `cyclomatic_max_p`).
 5. **Aggregate** — `aggregate_risk.py` carries **only** this component's `score`
@@ -83,17 +74,15 @@ complexity would be measured on a template tree.
 
 ## Collection
 
-A unified SHA-metrics fetcher (scc + lizard) and a churn fetcher (plus
-`commits-years.csv` for the sha) feed the build. Every fetcher records the
-analysed sha + a `fetched_at`, so a `0`/empty value is distinguishable from a
-failed fetch.
+A unified SHA-metrics fetcher (scc + lizard), plus `commits-years.csv` for the
+sha, feeds the build. Every fetcher records the analysed sha + a `fetched_at`,
+so a `0`/empty value is distinguishable from a failed fetch.
 
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
 |---|---|---|---|
 | `git/commits-years.csv` | `src/sources/git/commits_years.py` | per-(repo, year) `last_sha` + `commits` | `repo_id`, `year` |
 | `git/scc.csv` | `src/sources/git/fetch_sha_metrics.py` (scc via `fetch_scc.py` helpers) | scc loc, sloc, complexity, complexity_density | `repo_id`, `sha` |
 | `git/lizard.csv` | `src/sources/git/fetch_sha_metrics.py` | lizard cyclomatic_{total,avg,max} + cognitive_{total,avg,max} | `repo_id`, `sha` |
-| `git/churn.csv` | `src/sources/github/fetch_churn.py` (audit-only, run by hand) | 5-year added+deleted lines (git churn, bare clone) | `repo_id` |
 
 scc and lizard are stored long-format (one row per `(repo, sha, metric)`) and
 read via `src.sources.git.long_format.read`; the build indexes them by
@@ -105,8 +94,8 @@ skipped to the next-oldest year).
 
 The unified fetcher applies the first-parent **mainline-sha correction**
 (`resolve_mainline_sha` / `corrected_clone_sha`) described above once, before its
-single checkout, so scc and lizard analyse the same corrected tree (historically
-the separate lizard fetchers did not). To defend against any residual mismatch,
+single checkout, so scc and lizard analyse the same corrected tree. To defend
+against any residual mismatch,
 `build_complexity._is_lizard_false_zero` guards the join: when scc found real
 branching (`scc_complexity_eoy ≥ LIZARD_FALSE_ZERO_MIN_SCC_CX`, currently **5**)
 but lizard reports `cyclomatic_total == 0`, lizard analysed the wrong (off-mainline,
@@ -141,25 +130,11 @@ repos, never an undated `HEAD`.
 | `lizard.cyclomatic_{total,avg,max}` | `cyclomatic_{total,avg,max}` (per-function McCabe) |
 | `lizard.cognitive_{total,avg,max}` | `cognitive_{total,avg,max}` |
 
-### Hotspot folding (Tornhill)
-
-Bug-prone code = high churn ∩ high complexity. The 5-year churn is joined with
-the `_eoy` scc complexity snapshot:
-
-| Column | Formula |
-|---|---|
-| `hotspot_raw` | `churn_5y_total × scc_complexity_eoy` (linear) |
-| `hotspot_log` | `log10(churn+1) × log10(complexity+1)` |
-
-`hotspot_log` is the canonical score — log-scaling tames the extreme right tail
-(apache/airflow vs hukkin/tomli are 4–5 orders of magnitude apart on the linear
-scale). Both are empty when either input is missing.
-
 ### The percentiles (`_p`)
 
 `add_percentiles` turns each metric into a worst-pinned CDF **risk percentile**
 within the repos that have a non-missing value — worst value → 100, higher =
-riskier (`True` direction for all six specs):
+riskier (`True` direction for all four specs):
 
 | Column | Basis | In `score`? |
 |---|---|---|
@@ -167,8 +142,6 @@ riskier (`True` direction for all six specs):
 | `cyclomatic_max_p` | `cyclomatic_max` | **yes** |
 | `scc_complexity_eoy_p` | `scc_complexity_eoy` | informational |
 | `cognitive_max_p` | `cognitive_max` | informational |
-| `churn_5y_total_p` | `churn_5y_total` | informational |
-| `hotspot_log_p` | `hotspot_log` | informational |
 
 ### How `score` composes
 
@@ -183,7 +156,7 @@ while a repo that is small **and** simple scores low on both and stays low. Rang
 
 ### `data/risk/complexity.csv` (per-dimension build)
 
-23 columns, one row per risk repo. No `fetched_at` — per-snapshot timestamps stay
+18 columns, one row per risk repo. No `fetched_at` — per-snapshot timestamps stay
 in the source files (`scc.csv`, `lizard.csv`).
 
 | Column | Description |
@@ -196,15 +169,10 @@ in the source files (`scc.csv`, `lizard.csv`).
 | `cognitive_total` / `cognitive_avg` / `cognitive_max` | lizard cognitive complexity |
 | `cyclomatic_total` / `cyclomatic_avg` / `cyclomatic_max` | lizard McCabe (per-function) |
 | `loc_year` | snapshot year used (a real year — `2025`…`2021`, or a pre-window fallback year for dormant repos; `""` when no sha has analysable code) |
-| `churn_5y_total` | 5-year added+deleted lines |
-| `hotspot_raw` | `churn × complexity` (linear) |
-| `hotspot_log` | `log10(churn+1) × log10(complexity+1)` |
-| `hotspot_log_p` | risk percentile of `hotspot_log` (informational) |
 | `loc_eoy_p` | risk percentile of `loc_eoy` (**score input**) |
 | `scc_complexity_eoy_p` | risk percentile of `scc_complexity_eoy` (informational) |
 | `cognitive_max_p` | risk percentile of `cognitive_max` (informational) |
 | `cyclomatic_max_p` | risk percentile of `cyclomatic_max` (**score input**) |
-| `churn_5y_total_p` | risk percentile of `churn_5y_total` (informational) |
 | `score` | **complexity-risk score** (geom-mean of `loc_eoy_p` + `cyclomatic_max_p`) |
 
 ### `data/risk/risk.csv` (aggregate)
@@ -233,11 +201,10 @@ is missing while `cyclomatic_max` (and thus `score`) is still present.
 
 - **One snapshot, not a trajectory.** Each repo contributes a single EOY snapshot
   (the most-recent usable year), so `score` is a point-in-time size/complexity
-  reading, not a growth signal — the trend lives only in `churn_5y_total` and the
-  hotspot columns.
-- **`score` ignores cognitive + hotspot.** Only `loc_eoy_p` and
-  `cyclomatic_max_p` compose the score; `cognitive_max_p`, `churn_5y_total_p`,
-  and `hotspot_log_p` are informational. Cognitive complexity is the more
+  reading, not a growth signal.
+- **`score` ignores cognitive complexity.** Only `loc_eoy_p` and
+  `cyclomatic_max_p` compose the score; `scc_complexity_eoy_p` and
+  `cognitive_max_p` are informational. Cognitive complexity is the more
   human-readability-aligned metric but isn't yet a scoring input.
 - **`cyclomatic_max` is a single worst function.** Per-function *max* McCabe is
   sensitive to one pathological function; a repo with one 200-branch parser and
