@@ -17,27 +17,28 @@ Columns:
                       to `data/sources/gitlab/repos.csv` (GitLab Languages API).
                       Blank for any repo not fetched on either host.
     ecosystem         top ecosystem                     (value.csv `top_eco`)
+    top_eco_pkg       top package of the repo in `top_eco` (value.csv `top_eco_pkg`)
     openssf_crit      OpenSSF criticality score, 0-100   (value.csv)
-    eco_crit          ecosyste.ms critical flag, 0/1     (value.csv)
+    eco_crit          ecosyste.ms critical flag, 0/100   (value.csv)
     top_eco_pct       PageRank percentile in top_eco     (value.csv)
     value_score       0-100 value blend                  (value.csv `value_score`)
     concentration, complexity, security, workload        (risk.csv components)
     risk_score        overall risk score, 0-100          (risk.csv `risk_score`)
+    score             value_score * risk_score, scaled so the highest row = 100.
+                      Computed for every row with both value_score and
+                      risk_score present, regardless of eligibility.
     oss, intent, nonprofit, active                        (eligibility.csv components)
     eligible          oss AND intent AND nonprofit AND active
     priority          dense rank (1, 2, 3, …) by score desc, among eligible
                       rows only — blank for ineligible rows and any row
                       missing a score.
-    score             value_score * risk_score, scaled so the highest row = 100.
-                      Computed for every row with both value_score and
-                      risk_score present, regardless of eligibility.
     repo_id           stable platform-qualified id (`gh/<n>` / `gl/<nickname>-<n>`)
                       — last column; every join key, kept out of the way of
                       human readers.
 
 All score-like numeric columns (`openssf_crit`, `top_eco_pct`, `value_score`,
 the four risk components, `risk_score`) are rounded to 2 decimal places for
-this preview output — `eco_crit` is a 0/1 flag, not a score, and is left as
+this preview output — `eco_crit` is a 0/100 flag, not a score, and is left as
 its raw upstream value. `score` itself is always computed from the
 FULL-PRECISION upstream `value_score`/`risk_score`, before rounding, so
 rounding the displayed columns never shifts the ranking.
@@ -77,12 +78,12 @@ RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
 ELIGIBILITY_COMPONENTS = ["oss", "intent", "nonprofit", "active"]
 
 FIELDS = (
-    ["repo", "language", "ecosystem", "openssf_crit", "eco_crit",
+    ["repo", "language", "ecosystem", "top_eco_pkg", "openssf_crit", "eco_crit",
      "top_eco_pct", "value_score"]
     + RISK_COMPONENTS
-    + ["risk_score"]
+    + ["risk_score", "score"]
     + ELIGIBILITY_COMPONENTS
-    + ["eligible", "priority", "score", "repo_id"]
+    + ["eligible", "priority", "repo_id"]
 )
 
 
@@ -132,16 +133,17 @@ def build() -> list[dict]:
             "repo": repo,
             "language": language.lower(),
             "ecosystem": (v.get("top_eco") or "").strip(),
+            "top_eco_pkg": (v.get("top_eco_pkg") or "").strip(),
             "openssf_crit": _round2(v.get("openssf_crit") or ""),
             "eco_crit": (v.get("eco_crit") or "").strip(),
             "top_eco_pct": _round2(v.get("top_eco_pct") or ""),
             "value_score": _round2(value_score),
             **{col: _round2(r.get(col) or "") for col in RISK_COMPONENTS},
             "risk_score": _round2(risk_score),
+            "score": "",
             **{col: (e.get(col) or "").strip() for col in ELIGIBILITY_COMPONENTS},
             "eligible": (e.get("eligible") or "").strip(),
             "priority": "",
-            "score": "",
             "repo_id": rid,
         }
         rows.append(row)

@@ -29,10 +29,10 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
     _write(elig, ["repo", "repo_id", "oss", "intent", "nonprofit", "active", "eligible"],
            [["a/keep", "gh/1", "True", "True", "True", "True", "True"],
             ["b/drop", "gh/2", "True", "False", "True", "True", "False"]])
-    _write(val, ["repo", "repo_id", "top_eco", "openssf_crit", "eco_crit",
-                 "top_eco_pct", "value_score"],
-           [["a/keep", "gh/1", "npm", "0.71", "1", "55.5", "72.3"],
-            ["b/drop", "gh/2", "pypi", "0.2", "0", "10.0", "8.1"]])
+    _write(val, ["repo", "repo_id", "top_eco", "top_eco_pkg", "openssf_crit",
+                 "eco_crit", "top_eco_pct", "value_score"],
+           [["a/keep", "gh/1", "npm", "left-pad", "0.71", "100", "55.5", "72.3"],
+            ["b/drop", "gh/2", "pypi", "requests", "0.2", "0", "10.0", "8.1"]])
     _write(risk, ["repo", "repo_id", "concentration", "complexity", "security",
                   "workload", "risk_score"],
            [["a/keep", "gh/1", "10", "20", "30", "40", "80"],
@@ -46,14 +46,17 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
     assert keep["repo_id"] == "gh/1"
     assert keep["language"] == "typescript"        # lowercased
     assert keep["ecosystem"] == "npm"
+    assert keep["top_eco_pkg"] == "left-pad"   # verbatim pass-through
+    assert keep["eco_crit"] == "100"        # a 0/100 flag, not a score -- left raw
     assert keep["openssf_crit"] == "0.71"
-    assert keep["eco_crit"] == "1"          # a 0/1 flag, not a score -- left raw
     assert keep["top_eco_pct"] == "55.50"   # rounded to 2dp
     assert keep["value_score"] == "72.30"
     assert keep["concentration"] == "10.00" and keep["workload"] == "40.00"
     assert keep["risk_score"] == "80.00"
     assert keep["eligible"] == "True"
     assert list(keep.keys()) == br.FIELDS
+    assert br.FIELDS.index("top_eco_pkg") == br.FIELDS.index("ecosystem") + 1
+    assert br.FIELDS.index("score") == br.FIELDS.index("risk_score") + 1
 
 
 def test_score_rescaled_and_priority_dense_rank_over_eligible(tmp_path, monkeypatch):
@@ -109,7 +112,7 @@ def test_missing_risk_leaves_score_blank(tmp_path, monkeypatch):
 
 def test_score_columns_rounded_to_two_decimals(tmp_path, monkeypatch):
     """openssf_crit / top_eco_pct / value_score / risk components / risk_score
-    all round to 2dp regardless of upstream precision; eco_crit (a 0/1 flag,
+    all round to 2dp regardless of upstream precision; eco_crit (a 0/100 flag,
     not a score) is left as its raw upstream value; score itself is computed
     from the FULL-PRECISION upstream values, unaffected by the display
     rounding of value_score/risk_score."""
@@ -119,7 +122,7 @@ def test_score_columns_rounded_to_two_decimals(tmp_path, monkeypatch):
     _write(elig, ["repo", "repo_id", "eligible"], [["o/r", "gh/1", "True"]])
     _write(val, ["repo", "repo_id", "top_eco", "openssf_crit", "eco_crit",
                  "top_eco_pct", "value_score"],
-           [["o/r", "gh/1", "npm", "0.604553", "1", "39.35893", "64.145678"]])
+           [["o/r", "gh/1", "npm", "0.604553", "100", "39.35893", "64.145678"]])
     _write(risk, ["repo", "repo_id", "concentration", "complexity", "security",
                   "workload", "risk_score"],
            [["o/r", "gh/1", "95.001", "94", "75.999", "88", "88.4321"]])
@@ -128,7 +131,7 @@ def test_score_columns_rounded_to_two_decimals(tmp_path, monkeypatch):
     rows = br.build()
     row = rows[0]
     assert row["openssf_crit"] == "0.60"
-    assert row["eco_crit"] == "1"
+    assert row["eco_crit"] == "100"
     assert row["top_eco_pct"] == "39.36"
     assert row["value_score"] == "64.15"
     assert row["concentration"] == "95.00"
