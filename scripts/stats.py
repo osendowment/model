@@ -463,15 +463,25 @@ def eligibility_stats() -> dict:
                    and all(_truthy(r.get(g)) for g in ELIGIBILITY_FLAGS if g != f))
             for f in ELIGIBILITY_FLAGS}
 
-    # ── Distribution sub-rows: split each source/signal/reason on its parent
-    # check into (solo, no, yes, count). Semantics per row type:
-    #   yes/no  — how the sub-population lands on the check (pass vs fail);
-    #   solo    — repos where THIS attribute alone decides the verdict: sole
-    #             ENABLER for a granting attribute (license source, funding
-    #             signal, community) → dropping it flips the check to False;
-    #             sole BLOCKER for a failing reason (EOL, archived, company) →
-    #             removing it flips the check to True.
+    # ── Distribution sub-rows: how each source / signal / reason splits its
+    # own population on the parent check (yes = pass, no = fail), plus a
+    # `solo` = the count's contribution to the check's SOLE-blocker total —
+    # repos this sub-reason makes ineligible where its check is the only
+    # failing one. So the sub-row `solo`s PARTITION the check's solo blocker
+    # (sum of subs == component). Intent's sub-rows are the signals that GRANT
+    # intent; a present signal never blocks, so they read 0 — an intent block
+    # is the absence of every signal, attributable to no single one.
     elig_by_repo = {r["repo"]: r for r in elig}
+    lic_by_repo = {r["repo"]: r for r in lic}
+    act_by_repo = {r["repo"]: r for r in act}
+
+    # sole-blocker repos per check: this check fails and every other passes.
+    sole_repos = {
+        f: {r["repo"] for r in elig
+            if not _truthy(r.get(f))
+            and all(_truthy(r.get(g)) for g in ELIGIBILITY_FLAGS if g != f)}
+        for f in ELIGIBILITY_FLAGS
+    }
 
     def _oss(repo: str) -> bool:
         return elig_by_repo.get(repo, {}).get("oss") == "True"
@@ -479,18 +489,25 @@ def eligibility_stats() -> dict:
     def _lic_source(src: str) -> dict:
         sub = [r for r in lic if r.get("license_source") == src]
         yes = sum(1 for r in sub if _oss(r["repo"]))
-        # a repo has ONE license source, so that source solely decides its oss.
-        return {"count": len(sub), "yes": yes, "no": len(sub) - yes, "solo": yes}
+        # solo: sole-oss-blockers whose (non-OSS) license came from this source.
+        solo = sum(1 for repo in sole_repos["oss"]
+                   if lic_by_repo.get(repo, {}).get("license_source") == src)
+        return {"count": len(sub), "yes": yes, "no": len(sub) - yes, "solo": solo}
 
-    def _active_reason(pred, blocker: bool) -> dict:
+    def _active_reason(pred, cause: str) -> dict:
         sub = [r for r in act if pred(r)]
         yes = sum(1 for r in sub if _truthy(r.get("active")))
-        no = len(sub) - yes
-        # eol is the only other active-blocker; with eol=0 an archived repo's
-        # sole blocker is `archived`. A blocker's solo = its fails; a
-        # non-blocker (mirror-exempt) never blocks → solo 0.
-        return {"count": len(sub), "yes": yes, "no": no,
-                "solo": no if blocker else 0}
+        if cause == "eol":
+            solo = sum(1 for repo in sole_repos["active"]
+                       if _truthy(act_by_repo.get(repo, {}).get("eol")))
+        elif cause == "archived":  # archived, not mirror-exempt, and not eol
+            solo = sum(1 for repo in sole_repos["active"]
+                       if not _truthy(act_by_repo.get(repo, {}).get("eol"))
+                       and _truthy(act_by_repo.get(repo, {}).get("archived"))
+                       and not _truthy(act_by_repo.get(repo, {}).get("mirror")))
+        else:  # mirror-exempt never blocks
+            solo = 0
+        return {"count": len(sub), "yes": yes, "no": len(sub) - yes, "solo": solo}
 
     SIGNAL_PREDS = {
         "gh_sponsors": lambda r: _truthy(r.get("gh_sponsors_enabled")),
@@ -503,17 +520,12 @@ def eligibility_stats() -> dict:
         "institutional_host": lambda r: _present(r.get("host")),
     }
 
-    def _sig_set(r: dict) -> set:
-        return {k for k, p in SIGNAL_PREDS.items() if p(r)}
-
     def _intent_signal_row(key: str) -> dict:
         sub = [r for r in fund_scope if SIGNAL_PREDS[key](r)]
         yes = sum(1 for r in sub
                   if _truthy(elig_by_repo.get(r["repo"], {}).get("intent")))
-        # solo = repos carrying ONLY this funding signal (dropping it would
-        # remove their sole declared channel).
-        solo = sum(1 for r in sub if _sig_set(r) == {key})
-        return {"count": len(sub), "yes": yes, "no": len(sub) - yes, "solo": solo}
+        # a present funding signal grants intent; it never blocks eligibility.
+        return {"count": len(sub), "yes": yes, "no": len(sub) - yes, "solo": 0}
 
     company = sum(1 for r in elig if not _truthy(r.get("nonprofit")))
     community = rollup["nonprofit"]
@@ -526,12 +538,12 @@ def eligibility_stats() -> dict:
         ],
         "active": [
             ("EOL (manual override)", _active_reason(
-                lambda r: _truthy(r.get("eol")), blocker=True)),
-            ("Archived (repo)", _active_reason(
-                lambda r: _truthy(r.get("archived")), blocker=True)),
-            ("Archived but mirror-exempt", _active_reason(
+                lambda r: _truthy(r.get("eol")), cause="eol")),
+            ("Archived GitHub repo", _active_reason(
+                lambda r: _truthy(r.get("archived")), cause="archived")),
+            ("Archived GitHub repo but mirror-exempt", _active_reason(
                 lambda r: _truthy(r.get("archived")) and _truthy(r.get("mirror")),
-                blocker=False)),
+                cause="mirror")),
         ],
         "intent": [
             ("GitHub Sponsors (owner or repo)", _intent_signal_row("gh_sponsors")),
@@ -544,11 +556,15 @@ def eligibility_stats() -> dict:
         ],
         "nonprofit": [
             ("Company-backed",
-             {"count": company, "yes": 0, "no": company, "solo": company}),
+             {"count": company, "yes": 0, "no": company,
+              "solo": len(sole_repos["nonprofit"])}),
             ("Community / independent",
-             {"count": community, "yes": community, "no": 0, "solo": community}),
+             {"count": community, "yes": community, "no": 0, "solo": 0}),
         ],
     }
+    # sort each component's sub-rows by count descending.
+    dist_subs = {flag: sorted(rows, key=lambda lr: -lr[1]["count"])
+                 for flag, rows in dist_subs.items()}
 
     return {"scope": n, "licenses": licenses, "active": active,
             "intent_count": intent_count, "nonprofit_count": nonprofit_count,
