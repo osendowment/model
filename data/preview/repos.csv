@@ -25,7 +25,7 @@ yaml/libyaml,c,cpp,50.44,1,25.59,58.34,86.90,82.50,79.57,90.51,84.77,True,True,T
 rust-lang/regex,rust,crates,60.96,1,58.31,70.22,80.86,84.72,72.60,48.96,70.25,True,True,True,True,True,17,84.84,gh/27890669
 bytecodealliance/rustix,rust,crates,54.69,1,32.62,63.10,84.47,84.51,72.60,71.09,77.91,True,True,True,True,True,18,84.55,gh/295544240
 aws/aws-sdk-js-v3,typescript,npm,64.52,1,80.08,74.29,78.25,96.28,50.00,50.04,65.89,True,True,False,True,False,,84.19,gh/87228090
-nodeca/js-yaml,javascript,npm,56.53,1,50.84,65.51,60.61,75.26,72.60,94.14,74.72,True,True,True,True,True,19,84.19,gh/2504175
+nodeca/js-yaml,typescript,npm,56.53,1,50.84,65.51,60.61,75.26,72.60,94.14,74.72,True,True,True,True,True,19,84.19,gh/2504175
 vuejs/core,typescript,npm,65.04,1,41.39,69.40,52.29,91.06,72.60,71.19,70.43,True,True,True,True,True,20,84.07,gh/137078487
 prettier/prettier,javascript,npm,68.38,1,33.26,70.30,63.77,91.91,50.00,78.08,69.16,True,True,True,True,True,21,83.62,gh/75104123
 zloirock/core-js,javascript,npm,61.35,1,54.17,68.85,95.33,92.93,64.57,42.59,70.26,True,True,True,True,True,22,83.20,gh/11481338
@@ -34,7 +34,7 @@ rust-lang/futures-rs,rust,crates,54.56,1,67.46,67.73,55.79,73.84,87.50,71.44,71.
 time-rs/time,rust,crates,54.65,1,34.72,63.37,91.35,75.40,72.60,66.94,76.06,True,True,True,True,True,25,82.90,gh/26459635
 jonschlinkert/kind-of,javascript,npm,44.17,1,66.61,60.26,100.00,52.05,92.66,82.13,79.33,True,True,True,True,True,26,82.22,gh/24491562
 chardet/chardet,python,pypi,55.96,1,29.44,63.39,83.49,89.75,50.00,86.04,75.35,True,False,True,True,False,,82.15,gh/5196969
-facebook/regenerator,javascript,npm,52.21,1,48.69,62.65,75.80,79.61,64.57,86.61,76.22,True,True,True,False,False,,82.13,gh/13346571
+facebook/regenerator,javascript,npm,52.21,1,48.69,62.65,75.80,79.61,64.57,86.61,76.22,True,True,False,False,False,,82.13,gh/13346571
 jridgewell/sourcemaps,typescript,npm,52.02,1,78.46,66.55,94.02,62.42,71.70,62.95,71.74,True,False,True,True,False,,82.11,gh/897142826
 giampaolo/psutil,python,pypi,60.06,1,32.95,66.40,80.67,82.55,50.00,79.06,71.63,True,True,True,True,True,27,81.80,gh/20101515
 libexpat/libexpat,c,cpp,59.05,1,29.44,64.13,74.22,82.16,97.60,50.28,73.96,True,True,True,True,True,28,81.58,gh/80314213
