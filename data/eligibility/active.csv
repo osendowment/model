@@ -83,6 +83,7 @@ burntsushi/winapi-util,gh/146040682,False,False,True
 businho/pytest-ruff,gh/599731435,False,False,True
 bytecodealliance/rustix,gh/295544240,False,False,True
 bytecodealliance/wasi-rs,gh/196445196,False,False,True
+bzip2/bzip2,gl/12551088,False,True,False
 c-ares/c-ares,gh/571708,False,False,True
 calvinmetcalf/minimalistic-assert,gh/29144257,False,False,True
 calvinmetcalf/process-nextick-args,gh/36039131,False,False,True
@@ -134,7 +135,6 @@ davidhalter/parso,gh/90668463,False,False,True
 davisjam/safe-regex,gh/90781457,False,False,True
 dchest/tweetnacl-js,gh/15649752,False,False,True
 dcodeio/long.js,gh/8678904,False,False,True
-debian/bzip2,gl/debian-9696,False,False,True
 debian/ca-certificates,gl/debian-2995,False,False,True
 debian/gdbm,gl/debian-32157,False,False,True
 debian/giflib,gl/debian-12522,False,False,True
@@ -918,11 +918,11 @@ websockets/ws,gh/2744972,False,False,True
 wesleytodd/setprototypeof,gh/30301031,False,False,True
 whitequark/ipaddr.js,gh/2110585,False,False,True
 withoutboats/heck,gh/86326466,False,False,True
-xorg-team/lib/libx11,gl/debian-4306,False,False,True
-xorg-team/lib/libxau,gl/debian-4307,False,False,True
-xorg-team/lib/libxdmcp,gl/debian-4313,False,False,True
-xorg-team/lib/libxext,gl/debian-4314,False,False,True
-xorg-team/lib/libxrender,gl/debian-4328,False,False,True
+xorg/lib/libx11,gl/freedesktop-701,False,False,True
+xorg/lib/libxau,gl/freedesktop-706,False,False,True
+xorg/lib/libxdmcp,gl/freedesktop-712,False,False,True
+xorg/lib/libxext,gl/freedesktop-714,False,False,True
+xorg/lib/libxrender,gl/freedesktop-730,False,False,True
 xorg/proto/xorgproto,gl/freedesktop-788,False,False,True
 xtuc/webassemblyjs,gh/113006071,False,False,True
 yahoo/serialize-javascript,gh/24106944,False,False,True

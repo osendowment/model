@@ -92,6 +92,7 @@ burntsushi/winapi-util,gh/146040682,110,True,ok,2026-06-30T10:25:31+00:00
 businho/pytest-ruff,gh/599731435,0,False,ok,2026-06-30T10:25:31+00:00
 bytecodealliance/rustix,gh/295544240,0,False,ok,2026-06-30T10:25:32+00:00
 bytecodealliance/wasi-rs,gh/196445196,0,False,ok,2026-06-30T10:25:32+00:00
+bzip2/bzip2,,0,False,ok,2026-07-12T21:33:38+00:00
 c-ares/c-ares,gh/571708,0,False,ok,2026-06-30T10:25:32+00:00
 calvinmetcalf/minimalistic-assert,gh/29144257,0,False,ok,2026-06-30T10:25:33+00:00
 calvinmetcalf/process-nextick-args,gh/36039131,0,False,ok,2026-06-30T10:25:33+00:00
@@ -964,6 +965,11 @@ xorg-team/lib/libxau,,0,False,ok,2026-07-06T11:10:42+00:00
 xorg-team/lib/libxdmcp,,0,False,ok,2026-07-06T11:10:40+00:00
 xorg-team/lib/libxext,,0,False,ok,2026-07-06T11:10:40+00:00
 xorg-team/lib/libxrender,,0,False,ok,2026-07-06T11:10:40+00:00
+xorg/lib/libx11,,0,False,ok,2026-07-12T21:33:38+00:00
+xorg/lib/libxau,,0,False,ok,2026-07-12T21:33:38+00:00
+xorg/lib/libxdmcp,,0,False,ok,2026-07-12T21:33:38+00:00
+xorg/lib/libxext,,0,False,ok,2026-07-12T21:33:38+00:00
+xorg/lib/libxrender,,0,False,ok,2026-07-12T21:33:38+00:00
 xorg/proto/xorgproto,,0,False,ok,2026-07-06T11:10:41+00:00
 xtuc/webassemblyjs,gh/113006071,0,False,ok,2026-06-30T10:25:29+00:00
 yahoo/serialize-javascript,gh/24106944,0,False,ok,2026-06-30T10:25:27+00:00

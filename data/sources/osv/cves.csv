@@ -186,6 +186,7 @@ bminor/glibc,gh/13868694,2025-06-05,DEBIAN-CVE-2025-5745
 bminor/glibc,gh/13868694,2025-07-23,DEBIAN-CVE-2025-8058
 browserslist/browserslist,gh/27971466,2021-05-24,CVE-2021-23364
 bytecodealliance/rustix,gh/295544240,2023-10-18,CVE-2024-43806
+bzip2/bzip2,gl/12551088,2022-09-16,DLA-3112-1
 c-ares/c-ares,gh/571708,2021-05-13,DEBIAN-CVE-2020-14354
 c-ares/c-ares,gh/571708,2021-08-10,DLA-2738-1
 c-ares/c-ares,gh/571708,2021-08-10,DSA-4954-1
@@ -12258,6 +12259,17 @@ xorg-team/lib/libx11,gl/debian-4306,2023-10-05,DSA-5517-1
 xorg-team/lib/libx11,gl/debian-4306,2023-10-10,DEBIAN-CVE-2023-43785
 xorg-team/lib/libx11,gl/debian-4306,2023-10-10,DEBIAN-CVE-2023-43786
 xorg-team/lib/libx11,gl/debian-4306,2023-10-10,DEBIAN-CVE-2023-43787
+xorg/lib/libx11,gl/freedesktop-701,2021-05-24,DLA-2666-1
+xorg/lib/libx11,gl/freedesktop-701,2021-05-24,DSA-4920-1
+xorg/lib/libx11,gl/freedesktop-701,2021-05-27,DEBIAN-CVE-2021-31535
+xorg/lib/libx11,gl/freedesktop-701,2023-06-21,DSA-5433-1
+xorg/lib/libx11,gl/freedesktop-701,2023-06-26,DLA-3472-1
+xorg/lib/libx11,gl/freedesktop-701,2023-06-28,DEBIAN-CVE-2023-3138
+xorg/lib/libx11,gl/freedesktop-701,2023-10-05,DLA-3602-1
+xorg/lib/libx11,gl/freedesktop-701,2023-10-05,DSA-5517-1
+xorg/lib/libx11,gl/freedesktop-701,2023-10-10,DEBIAN-CVE-2023-43785
+xorg/lib/libx11,gl/freedesktop-701,2023-10-10,DEBIAN-CVE-2023-43786
+xorg/lib/libx11,gl/freedesktop-701,2023-10-10,DEBIAN-CVE-2023-43787
 yahoo/serialize-javascript,gh/24106944,2025-02-10,CVE-2024-11831
 yaml/pyyaml,gh/2700147,2021-02-09,CVE-2020-14343
 yaml/pyyaml,gh/2700147,2021-04-20,CVE-2019-20477

@@ -185,6 +185,7 @@ https://gitlab.com/boiethios/radix_fmt_rs.git,True,ls-remote,2026-05-17T23:15:11
 https://gitlab.com/bronsonbdevost/next_afterf.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/bzim/lockfree.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/bzim/owned-alloc.git,True,ls-remote,2026-05-17T23:15:11Z
+https://gitlab.com/bzip2/bzip2.git,True,ls-remote,2026-07-12T21:32:51Z
 https://gitlab.com/cardoe/enum-primitive-derive.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/catamphetamine/libphonenumber-js.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.com/chris-morgan/symlink.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -325,8 +326,12 @@ https://gitlab.freedesktop.org/xorg/lib/libapplewm.git,True,ls-remote,2026-05-17
 https://gitlab.freedesktop.org/xorg/lib/libice.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.freedesktop.org/xorg/lib/libpciaccess.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.freedesktop.org/xorg/lib/libsm.git,True,ls-remote,2026-04-27T20:41:04Z
+https://gitlab.freedesktop.org/xorg/lib/libx11.git,True,ls-remote,2026-07-12T21:32:51Z
+https://gitlab.freedesktop.org/xorg/lib/libxau.git,True,ls-remote,2026-07-12T21:32:51Z
 https://gitlab.freedesktop.org/xorg/lib/libxaw.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.freedesktop.org/xorg/lib/libxcursor.git,True,ls-remote,2026-04-27T20:41:04Z
+https://gitlab.freedesktop.org/xorg/lib/libxdmcp.git,True,ls-remote,2026-07-12T21:32:51Z
+https://gitlab.freedesktop.org/xorg/lib/libxext.git,True,ls-remote,2026-07-12T21:32:51Z
 https://gitlab.freedesktop.org/xorg/lib/libxfixes.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.freedesktop.org/xorg/lib/libxfont.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.freedesktop.org/xorg/lib/libxft.git,True,ls-remote,2026-04-27T20:41:04Z
@@ -336,6 +341,7 @@ https://gitlab.freedesktop.org/xorg/lib/libxmu.git,True,ls-remote,2026-04-27T20:
 https://gitlab.freedesktop.org/xorg/lib/libxpm.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.freedesktop.org/xorg/lib/libxpresent.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.freedesktop.org/xorg/lib/libxrandr.git,True,ls-remote,2026-04-27T20:41:04Z
+https://gitlab.freedesktop.org/xorg/lib/libxrender.git,True,ls-remote,2026-07-12T21:32:51Z
 https://gitlab.freedesktop.org/xorg/lib/libxshmfence.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.freedesktop.org/xorg/lib/libxt.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.freedesktop.org/xorg/lib/libxtst.git,True,ls-remote,2026-04-27T20:41:04Z

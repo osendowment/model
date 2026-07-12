@@ -92,6 +92,7 @@ burntsushi/winapi-util,gh/146040682,True,True,github,burntsushi,,,,,,,,,,,,,,202
 businho/pytest-ruff,gh/599731435,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 bytecodealliance/rustix,gh/295544240,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 bytecodealliance/wasi-rs,gh/196445196,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
+bzip2/bzip2,,False,False,,,,,,,,,,,,,,,,2026-07-12T21:33:38+00:00
 c-ares/c-ares,gh/571708,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 calvinmetcalf/minimalistic-assert,gh/29144257,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 calvinmetcalf/process-nextick-args,gh/36039131,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
@@ -964,6 +965,11 @@ xorg-team/lib/libxau,,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:33+00:00
 xorg-team/lib/libxdmcp,,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:33+00:00
 xorg-team/lib/libxext,,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:33+00:00
 xorg-team/lib/libxrender,,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:33+00:00
+xorg/lib/libx11,,False,False,,,,,,,,,,,,,,,,2026-07-12T21:33:38+00:00
+xorg/lib/libxau,,False,False,,,,,,,,,,,,,,,,2026-07-12T21:33:38+00:00
+xorg/lib/libxdmcp,,False,False,,,,,,,,,,,,,,,,2026-07-12T21:33:38+00:00
+xorg/lib/libxext,,False,False,,,,,,,,,,,,,,,,2026-07-12T21:33:38+00:00
+xorg/lib/libxrender,,False,False,,,,,,,,,,,,,,,,2026-07-12T21:33:38+00:00
 xorg/proto/xorgproto,,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:33+00:00
 xtuc/webassemblyjs,gh/113006071,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:51+00:00
 yahoo/serialize-javascript,gh/24106944,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:51+00:00

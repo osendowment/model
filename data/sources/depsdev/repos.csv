@@ -92,6 +92,7 @@ burntsushi/winapi-util,gh/146040682,4,2026-04-20,non-standard,6,,,2026-05-03T19:
 businho/pytest-ruff,gh/599731435,,,MIT,3,,,2026-05-03T19:10:08+00:00
 bytecodealliance/rustix,gh/295544240,5.1,2026-04-20,non-standard,110,,,2026-05-03T19:10:08+00:00
 bytecodealliance/wasi-rs,gh/196445196,,,Apache-2.0,6,,,2026-05-03T19:10:09+00:00
+bzip2/bzip2,gl/12551088,,,,,,,2026-07-12T21:32:59+00:00
 c-ares/c-ares,gh/571708,7.2,2026-04-20,MIT,62,passing,115,2026-05-03T19:10:09+00:00
 calvinmetcalf/minimalistic-assert,gh/29144257,2.5,2026-04-20,non-standard,1,,,2026-05-03T19:10:09+00:00
 calvinmetcalf/process-nextick-args,gh/36039131,2.3,2026-04-20,MIT,2,,,2026-05-03T19:10:09+00:00
@@ -986,6 +987,11 @@ xorg-team/lib/libxau,gl/debian-4307,,,,,,,2026-07-06T11:07:56+00:00
 xorg-team/lib/libxdmcp,gl/debian-4313,,,,,,,2026-07-06T11:07:56+00:00
 xorg-team/lib/libxext,gl/debian-4314,,,,,,,2026-07-06T11:07:55+00:00
 xorg-team/lib/libxrender,gl/debian-4328,,,,,,,2026-07-06T11:07:57+00:00
+xorg/lib/libx11,gl/freedesktop-701,,,,,,,2026-07-12T21:32:59+00:00
+xorg/lib/libxau,gl/freedesktop-706,,,,,,,2026-07-12T21:32:58+00:00
+xorg/lib/libxdmcp,gl/freedesktop-712,,,,,,,2026-07-12T21:32:58+00:00
+xorg/lib/libxext,gl/freedesktop-714,,,,,,,2026-07-12T21:32:58+00:00
+xorg/lib/libxrender,gl/freedesktop-730,,,,,,,2026-07-12T21:32:58+00:00
 xorg/proto/xorgproto,gl/freedesktop-788,,,,,,,2026-07-06T11:07:58+00:00
 xtuc/webassemblyjs,gh/113006071,1.7,2026-04-20,MIT,82,,,2026-05-03T19:18:07+00:00
 yahoo/serialize-javascript,gh/24106944,4.7,2026-04-20,non-standard,44,,,2026-05-03T19:17:51+00:00

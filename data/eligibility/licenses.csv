@@ -83,6 +83,7 @@ burntsushi/winapi-util,gh/146040682,unlicense or mit,registry,True
 businho/pytest-ruff,gh/599731435,mit,github,True
 bytecodealliance/rustix,gh/295544240,apache-2.0 with llvm-exception or apache-2.0 or mit,registry,True
 bytecodealliance/wasi-rs,gh/196445196,apache-2.0 with llvm-exception or apache-2.0 or mit,registry,True
+bzip2/bzip2,gl/12551088,bzip2-1.0.6,gitlab,True
 c-ares/c-ares,gh/571708,mit,registry,True
 calvinmetcalf/minimalistic-assert,gh/29144257,isc,registry,True
 calvinmetcalf/process-nextick-args,gh/36039131,mit,registry,True
@@ -134,7 +135,6 @@ davidhalter/parso,gh/90668463,mit,registry,True
 davisjam/safe-regex,gh/90781457,mit,registry,True
 dchest/tweetnacl-js,gh/15649752,unlicense,registry,True
 dcodeio/long.js,gh/8678904,apache-2.0,registry,True
-debian/bzip2,gl/debian-9696,bzip2-1.0.6,gitlab,True
 debian/ca-certificates,gl/debian-2995,gpl-2.0-or-later and mpl-2.0,override,True
 debian/gdbm,gl/debian-32157,gpl-3.0,gitlab,True
 debian/giflib,gl/debian-12522,mit,gitlab,True
@@ -918,11 +918,11 @@ websockets/ws,gh/2744972,mit,registry,True
 wesleytodd/setprototypeof,gh/30301031,isc,registry,True
 whitequark/ipaddr.js,gh/2110585,mit,registry,True
 withoutboats/heck,gh/86326466,mit or apache-2.0,registry,True
-xorg-team/lib/libx11,gl/debian-4306,bsd-1-clause,gitlab,True
-xorg-team/lib/libxau,gl/debian-4307,mit-open-group,gitlab,True
-xorg-team/lib/libxdmcp,gl/debian-4313,mit-open-group,gitlab,True
-xorg-team/lib/libxext,gl/debian-4314,mit-open-group,gitlab,True
-xorg-team/lib/libxrender,gl/debian-4328,mit,override,True
+xorg/lib/libx11,gl/freedesktop-701,bsd-1-clause,gitlab,True
+xorg/lib/libxau,gl/freedesktop-706,mit-open-group,gitlab,True
+xorg/lib/libxdmcp,gl/freedesktop-712,mit-open-group,gitlab,True
+xorg/lib/libxext,gl/freedesktop-714,mit-open-group,gitlab,True
+xorg/lib/libxrender,gl/freedesktop-730,mit,override,True
 xorg/proto/xorgproto,gl/freedesktop-788,mit and sgi-b-1.1,override,True
 xtuc/webassemblyjs,gh/113006071,mit,registry,True
 yahoo/serialize-javascript,gh/24106944,bsd-3-clause,registry,True

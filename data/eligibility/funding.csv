@@ -83,6 +83,7 @@ burntsushi/winapi-util,gh/146040682,True,110,2,112,13.11,75,20,True,True,github,
 businho/pytest-ruff,gh/599731435,False,0,0,0,100.0,35,9,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 bytecodealliance/rustix,gh/295544240,False,0,0,0,100.0,1973,260,False,False,,False,False,,False,,,False,0,,0,100.0,bytecodealliance.org,nonprofit,,,0.5,79,True,True
 bytecodealliance/wasi-rs,gh/196445196,False,0,0,0,100.0,351,63,False,False,,False,False,,False,,,False,0,,0,100.0,bytecodealliance.org,nonprofit,,,0.5,79,True,True
+bzip2/bzip2,gl/12551088,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 c-ares/c-ares,gh/571708,False,0,0,0,100.0,2132,658,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 calvinmetcalf/minimalistic-assert,gh/29144257,False,0,0,0,100.0,19,4,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 calvinmetcalf/process-nextick-args,gh/36039131,False,0,0,0,100.0,33,16,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
@@ -134,7 +135,6 @@ davidhalter/parso,gh/90668463,True,4,0,4,36.46,672,116,False,False,,False,False,
 davisjam/safe-regex,gh/90781457,False,0,0,0,100.0,192,11,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 dchest/tweetnacl-js,gh/15649752,False,0,0,0,100.0,1922,295,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 dcodeio/long.js,gh/8678904,True,1,0,1,42.0,921,207,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,75,True,True
-debian/bzip2,gl/debian-9696,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,debian.org,nonprofit,,,0.5,79,True,True
 debian/ca-certificates,gl/debian-2995,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,debian.org,nonprofit,,,0.5,79,True,True
 debian/gdbm,gl/debian-32157,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,debian.org,nonprofit,,,0.5,79,True,True
 debian/giflib,gl/debian-12522,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,debian.org,nonprofit,,,0.5,79,True,True
@@ -918,11 +918,11 @@ websockets/ws,gh/2744972,False,0,0,0,100.0,22742,2514,True,True,github,False,Fal
 wesleytodd/setprototypeof,gh/30301031,True,1,3,4,36.46,53,12,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,71,True,True
 whitequark/ipaddr.js,gh/2110585,True,3,4,7,31.13,631,102,False,False,,False,False,,False,,,True,0,,0,100.0,,,,,1,68,True,True
 withoutboats/heck,gh/86326466,False,0,0,0,100.0,588,47,False,False,,False,False,,False,,,True,0,,0,100.0,,,,,1,100,True,True
-xorg-team/lib/libx11,gl/debian-4306,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,debian.org,nonprofit,,,0.5,79,True,True
-xorg-team/lib/libxau,gl/debian-4307,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,debian.org,nonprofit,,,0.5,79,True,True
-xorg-team/lib/libxdmcp,gl/debian-4313,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,debian.org,nonprofit,,,0.5,79,True,True
-xorg-team/lib/libxext,gl/debian-4314,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,debian.org,nonprofit,,,0.5,79,True,True
-xorg-team/lib/libxrender,gl/debian-4328,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,debian.org,nonprofit,,,0.5,79,True,True
+xorg/lib/libx11,gl/freedesktop-701,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,freedesktop.org,nonprofit,,,0.5,79,True,True
+xorg/lib/libxau,gl/freedesktop-706,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,freedesktop.org,nonprofit,,,0.5,79,True,True
+xorg/lib/libxdmcp,gl/freedesktop-712,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,freedesktop.org,nonprofit,,,0.5,79,True,True
+xorg/lib/libxext,gl/freedesktop-714,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,freedesktop.org,nonprofit,,,0.5,79,True,True
+xorg/lib/libxrender,gl/freedesktop-730,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,freedesktop.org,nonprofit,,,0.5,79,True,True
 xorg/proto/xorgproto,gl/freedesktop-788,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,freedesktop.org,nonprofit,,,0.5,79,True,True
 xtuc/webassemblyjs,gh/113006071,False,0,0,0,100.0,831,96,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 yahoo/serialize-javascript,gh/24106944,False,0,0,0,100.0,2921,210,False,False,,False,False,,False,,,True,0,,0,100.0,,,yahooinc.com,company,0,1,True,False

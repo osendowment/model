@@ -92,6 +92,7 @@ burntsushi/winapi-util,gh/146040682,crates.io:winapi-util,2026-07-05T16:32:49+00
 businho/pytest-ruff,gh/599731435,PyPI:pytest-ruff,2026-07-05T16:32:50+00:00
 bytecodealliance/rustix,gh/295544240,crates.io:rustix,2026-07-05T16:32:50+00:00
 bytecodealliance/wasi-rs,gh/196445196,"crates.io:wasip2,crates.io:wasi,crates.io:wasip3,crates.io:wasip1",2026-07-05T16:32:53+00:00
+bzip2/bzip2,gl/12551088,Debian:bzip2,2026-07-12T21:32:59+00:00
 c-ares/c-ares,gh/571708,Debian:c-ares,2026-07-05T16:32:52+00:00
 calvinmetcalf/minimalistic-assert,gh/29144257,npm:minimalistic-assert,2026-07-05T16:32:51+00:00
 calvinmetcalf/process-nextick-args,gh/36039131,npm:process-nextick-args,2026-07-05T16:32:51+00:00
@@ -989,6 +990,11 @@ xorg-team/lib/libxau,gl/debian-4307,Debian:libxau,2026-07-05T23:08:03+00:00
 xorg-team/lib/libxdmcp,gl/debian-4313,Debian:libxdmcp,2026-07-05T23:08:03+00:00
 xorg-team/lib/libxext,gl/debian-4314,Debian:libxext,2026-07-05T23:08:03+00:00
 xorg-team/lib/libxrender,gl/debian-4328,Debian:libxrender,2026-07-05T23:08:03+00:00
+xorg/lib/libx11,gl/freedesktop-701,Debian:libx11,2026-07-12T21:33:00+00:00
+xorg/lib/libxau,gl/freedesktop-706,Debian:libxau,2026-07-12T21:32:58+00:00
+xorg/lib/libxdmcp,gl/freedesktop-712,Debian:libxdmcp,2026-07-12T21:32:58+00:00
+xorg/lib/libxext,gl/freedesktop-714,Debian:libxext,2026-07-12T21:32:58+00:00
+xorg/lib/libxrender,gl/freedesktop-730,Debian:libxrender,2026-07-12T21:32:58+00:00
 xorg/proto/xorgproto,gl/freedesktop-788,Debian:xorgproto,2026-07-05T23:08:04+00:00
 xtuc/webassemblyjs,gh/113006071,"npm:@webassemblyjs/helper-wasm-bytecode,npm:@webassemblyjs/ast,npm:@webassemblyjs/helper-numbers,npm:@webassemblyjs/helper-api-error,npm:@webassemblyjs/wasm-gen,npm:@webassemblyjs/helper-buffer,npm:@webassemblyjs/floating-point-hex-parser,npm:@webassemblyjs/wast-printer,npm:@webassemblyjs/ieee754,npm:@webassemblyjs/leb128,npm:@webassemblyjs/utf8,npm:@webassemblyjs/wasm-parser,npm:@webassemblyjs/helper-wasm-section,npm:@webassemblyjs/wasm-opt,npm:@webassemblyjs/wasm-edit,npm:@webassemblyjs/helper-code-frame,npm:@webassemblyjs/helper-fsm,npm:@webassemblyjs/wast-parser",2026-07-05T16:37:57+00:00
 yahoo/serialize-javascript,gh/24106944,npm:serialize-javascript,2026-07-05T16:37:39+00:00

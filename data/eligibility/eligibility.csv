@@ -83,6 +83,7 @@ burntsushi/winapi-util,gh/146040682,True,True,True,True,True,3,4,True
 businho/pytest-ruff,gh/599731435,True,False,True,True,False,2,4,True
 bytecodealliance/rustix,gh/295544240,True,True,True,True,True,3,4,True
 bytecodealliance/wasi-rs,gh/196445196,True,True,True,True,True,3,4,True
+bzip2/bzip2,gl/12551088,True,False,True,False,False,1,4,False
 c-ares/c-ares,gh/571708,True,False,True,True,False,2,4,True
 calvinmetcalf/minimalistic-assert,gh/29144257,True,False,True,True,False,3,4,True
 calvinmetcalf/process-nextick-args,gh/36039131,True,False,True,True,False,3,4,True
@@ -134,7 +135,6 @@ davidhalter/parso,gh/90668463,True,True,True,True,True,3,4,True
 davisjam/safe-regex,gh/90781457,True,False,True,True,False,3,4,True
 dchest/tweetnacl-js,gh/15649752,True,False,True,True,False,3,4,True
 dcodeio/long.js,gh/8678904,True,True,True,True,True,3,4,True
-debian/bzip2,gl/debian-9696,True,True,True,True,True,1,4,False
 debian/ca-certificates,gl/debian-2995,True,True,True,True,True,1,4,False
 debian/gdbm,gl/debian-32157,True,True,True,True,True,1,4,False
 debian/giflib,gl/debian-12522,True,True,True,True,True,1,4,False
@@ -918,11 +918,11 @@ websockets/ws,gh/2744972,True,True,True,True,True,3,4,True
 wesleytodd/setprototypeof,gh/30301031,True,True,True,True,True,3,4,True
 whitequark/ipaddr.js,gh/2110585,True,True,True,True,True,3,4,True
 withoutboats/heck,gh/86326466,True,True,True,True,True,3,4,True
-xorg-team/lib/libx11,gl/debian-4306,True,True,True,True,True,1,4,False
-xorg-team/lib/libxau,gl/debian-4307,True,True,True,True,True,1,4,False
-xorg-team/lib/libxdmcp,gl/debian-4313,True,True,True,True,True,1,4,False
-xorg-team/lib/libxext,gl/debian-4314,True,True,True,True,True,1,4,False
-xorg-team/lib/libxrender,gl/debian-4328,True,True,True,True,True,1,4,False
+xorg/lib/libx11,gl/freedesktop-701,True,True,True,True,True,1,4,False
+xorg/lib/libxau,gl/freedesktop-706,True,True,True,True,True,1,4,False
+xorg/lib/libxdmcp,gl/freedesktop-712,True,True,True,True,True,1,4,False
+xorg/lib/libxext,gl/freedesktop-714,True,True,True,True,True,1,4,False
+xorg/lib/libxrender,gl/freedesktop-730,True,True,True,True,True,1,4,False
 xorg/proto/xorgproto,gl/freedesktop-788,True,True,True,True,True,1,4,False
 xtuc/webassemblyjs,gh/113006071,True,False,True,True,False,3,4,True
 yahoo/serialize-javascript,gh/24106944,True,True,False,True,False,3,4,True

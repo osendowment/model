@@ -1,4 +1,5 @@
 repo,repo_id,project,has_funding_yml,funding_yml_path,has_funding_links,funding_link_platforms,has_funding_json_file,status,fetched_at
+bzip2/bzip2,gl/12551088,gitlab.com/bzip2/bzip2,False,,False,,False,ok,2026-07-12T21:33:39Z
 cpython-team/python3-defaults,gl/debian-27547,salsa.debian.org/cpython-team/python3-defaults,False,,False,,False,ok,2026-07-06T15:18:51Z
 debian/bzip2,gl/debian-9696,salsa.debian.org/debian/bzip2,False,,False,,False,ok,2026-07-06T15:18:51Z
 debian/ca-certificates,gl/debian-2995,salsa.debian.org/debian/ca-certificates,False,,False,,False,ok,2026-07-06T15:18:51Z
@@ -24,4 +25,9 @@ xorg-team/lib/libxau,gl/debian-4307,salsa.debian.org/xorg-team/lib/libxau,False,
 xorg-team/lib/libxdmcp,gl/debian-4313,salsa.debian.org/xorg-team/lib/libxdmcp,False,,False,,False,ok,2026-07-06T15:18:53Z
 xorg-team/lib/libxext,gl/debian-4314,salsa.debian.org/xorg-team/lib/libxext,False,,False,,False,ok,2026-07-06T15:18:54Z
 xorg-team/lib/libxrender,gl/debian-4328,salsa.debian.org/xorg-team/lib/libxrender,False,,False,,False,ok,2026-07-06T15:18:55Z
+xorg/lib/libx11,gl/freedesktop-701,gitlab.freedesktop.org/xorg/lib/libx11,False,,False,,False,ok,2026-07-12T21:33:38Z
+xorg/lib/libxau,gl/freedesktop-706,gitlab.freedesktop.org/xorg/lib/libxau,False,,False,,False,ok,2026-07-12T21:33:39Z
+xorg/lib/libxdmcp,gl/freedesktop-712,gitlab.freedesktop.org/xorg/lib/libxdmcp,False,,False,,False,ok,2026-07-12T21:33:39Z
+xorg/lib/libxext,gl/freedesktop-714,gitlab.freedesktop.org/xorg/lib/libxext,False,,False,,False,ok,2026-07-12T21:33:39Z
+xorg/lib/libxrender,gl/freedesktop-730,gitlab.freedesktop.org/xorg/lib/libxrender,False,,False,,False,ok,2026-07-12T21:33:39Z
 xorg/proto/xorgproto,gl/freedesktop-788,gitlab.freedesktop.org/xorg/proto/xorgproto,False,,False,,False,ok,2026-07-06T15:18:54Z
