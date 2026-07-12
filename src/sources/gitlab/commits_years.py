@@ -46,6 +46,14 @@ COMMITS_OUT = REPO / "data" / "sources" / "git" / "commits-years.csv"
 YEARS = list(range(2021, dt.datetime.now(dt.UTC).year + 1))
 MAX_CONCURRENT = 8
 
+# Statuses worth retrying. Some instances (notably gitlab.gnome.org) throttle
+# unauthenticated API traffic and answer a tripped throttle with **500**, not
+# 429 — so a single-shot GET silently loses whole repo-years. The limiter only
+# backs off on RateLimit-* headers; these are the ones it cannot see.
+TRANSIENT_STATUSES = {429, 500, 502, 503, 504}
+MAX_RETRIES = 5
+RETRY_BASE_DELAY = 2.0
+
 # Unified schema, byte-compatible with src/sources/git/commits_years.py's
 # SHA_FIELDS so GitHub and GitLab rows coexist in one file.
 COMMITS_FIELDS = ["repo", "repo_id", "git_url", "year", "first_sha",
@@ -56,34 +64,77 @@ def _now_iso() -> str:
     return dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-async def _fetch_year(limiter, session, host: str, path: str, branch: str,
-                      year: int) -> tuple[str, int]:
-    """Return (last_sha, commits) for `year` on `branch`. Blank/0 if no commits.
+async def _get_page(limiter, session, host: str,
+                    url: str) -> tuple[list, int] | None:
+    """GET one page, retrying transient throttle/5xx answers.
 
-    One call: commits in [year-01-01, year-12-31], newest-first, per_page=1.
-    Item [0] is the year's last commit; the `X-Total` header is the count.
+    Returns `(commits, next_page)` — `next_page` is 0 on the last page. `None`
+    means the page could not be fetched after `MAX_RETRIES`, so the caller must
+    not persist a count built from a truncated walk: a wrong commit count is
+    worse than a missing row.
+    """
+    delay = RETRY_BASE_DELAY
+    for attempt in range(MAX_RETRIES):
+        try:
+            resp = await limiter.get(session, host, url)
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            resp = None
+        if resp is not None:
+            async with resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if not isinstance(data, list):
+                        return None
+                    nxt = (resp.headers.get("X-Next-Page") or "").strip()
+                    return data, int(nxt) if nxt.isdigit() else 0
+                if resp.status not in TRANSIENT_STATUSES:
+                    return None          # 404 / 403 / … — a real, final answer
+                log.info("%s → %d, retry %d/%d", host, resp.status,
+                         attempt + 1, MAX_RETRIES)
+        if attempt < MAX_RETRIES - 1:
+            await asyncio.sleep(delay)
+            delay *= 2
+    return None
+
+
+async def _fetch_year(limiter, session, host: str, path: str, branch: str,
+                      year: int) -> tuple[str, str, int, bool]:
+    """Return (first_sha, last_sha, commits, ok) for `year` on `branch`.
+
+    GitLab's commits endpoint serves **no `X-Total` header** — only
+    `X-Page` / `X-Next-Page` — so the year's commit count can only be had by
+    walking the pages and summing them. We request commits in
+    [year-01-01, year-12-31] newest-first at 100/page and follow `X-Next-Page`
+    to the end: page 1 item 0 is the year's newest commit (`last_sha`), the
+    final page's last item its oldest (`first_sha`), and the count is the total
+    rows seen.
+
+    `ok` is False when a page errored (network / non-200). The caller then
+    writes no row at all rather than persisting a truncated count — a wrong
+    count is worse than a missing one, and the pair is simply refetched next
+    run. A genuinely commit-less year returns ([], 0, ok=True) and IS written,
+    so it is not refetched forever.
     """
     since = f"{year}-01-01T00:00:00Z"
     until = f"{year}-12-31T23:59:59Z"
     ref = branch or "HEAD"
-    url = (f"{api_base(host)}/projects/{encode_project_path(path)}/repository/commits"
-           f"?ref_name={ref}&since={since}&until={until}&per_page=1")
-    try:
-        resp = await limiter.get(session, host, url)
-    except (aiohttp.ClientError, asyncio.TimeoutError):
-        return "", 0
-    async with resp:
-        if resp.status != 200:
-            return "", 0
-        data = await resp.json()
-        total = resp.headers.get("X-Total")
-        # GitLab omits X-Total on result sets >10,000 commits — in that rare
-        # case we fall back to len(data) (== 1, since per_page=1), which
-        # under-reports the true commit count for that year. `last_sha` (the
-        # anchor SHAs downstream fetchers pin to) is unaffected either way.
-        commits = int(total) if total and total.isdigit() else (len(data) if isinstance(data, list) else 0)
-        last_sha = data[0]["id"] if isinstance(data, list) and data else ""
-        return last_sha, commits
+    base = (f"{api_base(host)}/projects/{encode_project_path(path)}/repository/commits"
+            f"?ref_name={ref}&since={since}&until={until}&per_page=100")
+    first_sha = last_sha = ""
+    commits = 0
+    page = 1
+    while page:
+        got = await _get_page(limiter, session, host, f"{base}&page={page}")
+        if got is None:
+            return "", "", 0, False      # gave up — persist nothing
+        data, page = got
+        if not data:
+            break
+        if commits == 0:
+            last_sha = data[0]["id"]     # first page's newest commit
+        first_sha = data[-1]["id"]       # oldest seen so far; final page wins
+        commits += len(data)
+    return first_sha, last_sha, commits, True
 
 
 def _load_scope() -> dict[str, dict]:
@@ -172,11 +223,13 @@ async def _fetch_all(pairs: list[tuple[dict, int]]) -> list[dict]:
     async with aiohttp.ClientSession() as session:
         async def _one(proj: dict, year: int):
             async with sem:
-                sha, commits = await _fetch_year(
+                first_sha, last_sha, commits, ok = await _fetch_year(
                     limiter, session, proj["host"], proj["path"], proj["branch"], year)
+                if not ok:
+                    return   # errored: write nothing, refetch next run
                 rows.append({"repo": proj["repo"], "repo_id": proj["repo_id"],
                              "git_url": proj["git_url"], "year": year,
-                             "first_sha": "", "last_sha": sha,
+                             "first_sha": first_sha, "last_sha": last_sha,
                              "commits": commits, "fetched_at": _now_iso()})
         await asyncio.gather(*[_one(p, y) for p, y in pairs])
     return rows
