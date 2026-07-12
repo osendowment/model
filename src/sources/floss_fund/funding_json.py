@@ -92,18 +92,27 @@ def parse_channels(channels: list) -> tuple[dict[str, str], str]:
     return cols, ",".join(seen_platforms)
 
 
-def _redirect_candidate_urls(rows: list[dict]) -> set[str]:
+def _redirect_candidate_urls(rows: list[dict],
+                             known_github_slugs: set[str] | None = None) -> set[str]:
     """Distinct `project_repository` URLs worth a redirect probe.
 
-    A non-empty http(s) URL that does NOT already name a GitHub repo — these are
-    the only ones that could resolve to a GitHub repo via a redirect (e.g.
-    `tukaani.org/xz/redirect-to-github-xz`). Already-GitHub and non-URL values
-    are skipped.
+    A non-GitHub http(s) URL that could redirect to a GitHub repo (e.g.
+    `tukaani.org/xz/redirect-to-github-xz`), PLUS a GitHub URL whose owner/repo
+    the pipeline cannot already resolve (`known_github_slugs`) — a slug the model
+    knows only under the repo's NEW name won't match a manifest still declaring
+    the OLD one, so following GitHub's rename redirect recovers it. When
+    `known_github_slugs` is None, GitHub URLs are all treated as known (legacy
+    behaviour: skip them). Non-URL values are always skipped.
     """
     out: set[str] = set()
     for r in rows:
         u = (r.get("project_repository") or "").strip()
-        if u.lower().startswith(("http://", "https://")) and not normalize_github_repo(u):
+        if not u.lower().startswith(("http://", "https://")):
+            continue
+        gh = normalize_github_repo(u)
+        if gh is None:
+            out.add(u)
+        elif known_github_slugs is not None and gh.lower() not in known_github_slugs:
             out.add(u)
     return out
 
@@ -153,13 +162,21 @@ def _load_last_good_resolved(filepath: str) -> dict[str, str]:
 
 def resolve_repo_redirects(rows: list[dict], resolver=_resolve_url,
                            max_workers: int = 16,
-                           last_good: dict[str, str] | None = None) -> int:
+                           last_good: dict[str, str] | None = None,
+                           known_github_slugs: set[str] | None = None) -> int:
     """Populate `project_repository_resolved` on every row; return count resolved.
 
-    Probes only the non-GitHub repo URLs (`_redirect_candidate_urls`), in
-    parallel, and records the final GitHub URL when one redirects there. Rows
-    that already name a GitHub repo (or don't redirect to one) get an empty
-    resolved value — consumers fall back to the raw URL via `export_repo_slug`.
+    Probes the redirect candidates (`_redirect_candidate_urls`), in parallel, and
+    records the final GitHub URL when one redirects there. That set is every
+    non-GitHub repo URL PLUS any GitHub URL whose owner/repo the pipeline can't
+    already resolve — `known_github_slugs`, defaulting to the union of the
+    canonical-repo-map keys (which already include both the old `repo` slug and
+    the new `full_name`) and value.csv's slugs (fresh renames repos.csv hasn't
+    caught up on). A manifest declaring a repo's OLD slug that the model knows
+    only under its NEW name thus gets its rename redirect followed instead of
+    landing with a blank repo_id and being dropped. Rows that already resolve (or
+    don't redirect to GitHub) get an empty resolved value — consumers fall back
+    to the raw URL via `export_repo_slug`.
 
     `last_good` (raw URL → previously-resolved value) makes resolution
     deterministic across runs: a URL that resolved on an earlier run is NEVER
@@ -168,7 +185,9 @@ def resolve_repo_redirects(rows: list[dict], resolver=_resolve_url,
     last-good, else "".
     """
     last_good = last_good or {}
-    candidates = sorted(_redirect_candidate_urls(rows))
+    if known_github_slugs is None:
+        known_github_slugs = set(canonical_repo_map()) | set(load_value_repo_ids())
+    candidates = sorted(_redirect_candidate_urls(rows, known_github_slugs))
     mapping: dict[str, str] = {}
     if candidates:
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as ex:

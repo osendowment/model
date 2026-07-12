@@ -55,6 +55,40 @@ def test_redirect_candidate_urls_only_non_github_http():
         "https://tukaani.org/xz/redir", "https://gitlab.com/a/b"}
 
 
+def test_redirect_candidate_urls_probes_unknown_github_slug():
+    """A GitHub URL whose owner/repo the pipeline can't resolve (an unfollowed
+    rename / out-of-scope slug) IS probed so GitHub's 301 recovers the current
+    name; a slug already known to the model is skipped; `known_github_slugs=None`
+    keeps the legacy skip-all-GitHub behaviour. Non-GitHub URLs are always
+    candidates, whatever the known set."""
+    old = [{"project_repository": "https://github.com/old/name"}]
+    # old slug unknown → probe it (follow the rename redirect)
+    assert _redirect_candidate_urls(old, known_github_slugs={"new/name"}) == {
+        "https://github.com/old/name"}
+    # slug already resolvable → skip (don't probe the thousands of matching manifests)
+    assert _redirect_candidate_urls(old, known_github_slugs={"old/name"}) == set()
+    # legacy: None → all GitHub URLs skipped
+    assert _redirect_candidate_urls(old, known_github_slugs=None) == set()
+    assert _redirect_candidate_urls(old) == set()
+    # a non-GitHub URL is always a candidate, regardless of the known set
+    non_gh = [{"project_repository": "https://tukaani.org/xz/redir"}]
+    assert _redirect_candidate_urls(non_gh, known_github_slugs={"a/b"}) == {
+        "https://tukaani.org/xz/redir"}
+
+
+def test_resolve_repo_redirects_follows_unknown_github_rename():
+    """A manifest declaring an OLD GitHub slug the model knows only under its NEW
+    name has its rename redirect followed, recovering the current URL — the raw
+    old slug alone would leave repo_id blank and get the row dropped."""
+    rows = [{"project_repository": "https://github.com/old/name"}]
+    # fake resolver stands in for GitHub's 301 old → new.
+    fake = {"https://github.com/old/name": "https://github.com/new/name"}
+    n = resolve_repo_redirects(rows, resolver=lambda u: fake.get(u),
+                               known_github_slugs={"new/name"})
+    assert n == 1
+    assert rows[0]["project_repository_resolved"] == "https://github.com/new/name"
+
+
 def test_resolve_repo_redirects_populates_resolved_column():
     rows = [
         {"project_repository": "https://github.com/o/r"},
