@@ -207,7 +207,7 @@ exodusoss/bytes,gh/885154008,False,0,0,0,100.0,14,5,False,False,,False,False,,Fa
 expressjs/body-parser,gh/15669006,False,0,0,0,100.0,5501,753,True,True,open_collective,False,True,https://opencollective.com/express,False,,,False,2,,0,100.0,,,,,1,79,True,True
 expressjs/serve-static,gh/17464338,False,0,0,0,100.0,1424,240,True,True,open_collective,False,True,https://opencollective.com/express,False,,,False,2,,0,100.0,,,,,1,79,True,True
 facebook/prop-types,gh/87597642,False,0,0,0,100.0,4455,348,False,False,,False,False,,False,,,True,0,for-the-mage,0,100.0,,,,,1,100,True,True
-facebook/regenerator,gh/13346571,False,0,0,0,100.0,3831,1140,False,False,,False,False,,False,,,False,0,for-the-mage,0,100.0,,,,,1,100,True,True
+facebook/regenerator,gh/13346571,False,0,0,0,100.0,3831,1140,False,False,,False,False,,False,,,False,0,,0,100.0,,,meta.com,company,0,1,True,False
 facebook/watchman,gh/6930489,False,0,0,0,100.0,13570,1060,False,False,,False,False,,False,,,True,0,,0,100.0,,,meta.com,company,0,1,True,False
 facebook/zstd,gh/29759715,False,0,0,0,100.0,27026,2465,False,False,,False,False,,False,,,False,0,,0,100.0,,,meta.com,company,0,1,True,False
 facelessuser/soupsieve,gh/160789418,True,12,0,12,27.34,266,48,True,True,"github,custom",False,False,,False,,,True,2,,0,100.0,,,,,1,65,True,True
@@ -559,7 +559,7 @@ nlnetlabs/unbound,gh/94195301,True,16,0,16,25.11,4471,437,True,True,"github,cust
 node-fetch/fetch-blob,gh/186960326,True,4,0,4,36.38,64,36,False,False,,False,True,https://github.com/sponsors/jimmywarting,False,,,True,1,,0,100.0,,,,,1,71,True,True
 node-fetch/node-fetch,gh/29849956,True,4,0,4,36.38,8857,1052,True,True,"github,open_collective",False,True,https://opencollective.com/node-fetch,False,,,True,3,node-fetch,930.27,6.81,,,,,1,29,True,True
 nodeca/argparse,gh/4325614,True,4,0,4,36.38,508,75,True,True,"open_collective,patreon,tidelift",False,False,,False,,,False,3,nodeca,190.70,16.49,,,,,1,39,True,True
-nodeca/js-yaml,gh/2504175,True,4,0,4,36.38,6564,807,True,True,github,True,True,https://github.com/sponsors/puzrin,False,,,False,3,nodeca,190.70,16.49,,,,,1,39,True,True
+nodeca/js-yaml,gh/2504175,True,4,0,4,36.38,6604,821,True,True,github,True,True,https://github.com/sponsors/puzrin,False,,,False,3,nodeca,190.70,16.49,,,,,1,39,True,True
 nodeca/pako,gh/16231859,True,4,0,4,36.38,6065,802,True,True,github,False,True,https://github.com/sponsors/puzrin,False,,,False,2,nodeca,190.70,16.49,,,,,1,39,True,True
 nodejs/node,gh/27193779,True,55,0,55,16.91,116940,35445,True,True,"github,open_collective",False,False,,False,,,True,2,,0,100.0,lf/openjs,nonprofit,,,0.5,44,True,True
 nodejs/readable-stream,gh/5187096,True,55,0,55,16.91,1045,237,True,True,"github,open_collective",False,False,,False,,,True,2,nodejs-google-summer-of-code,0,100.0,lf/openjs,nonprofit,,,0.5,44,True,True
