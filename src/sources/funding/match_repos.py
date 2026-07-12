@@ -34,6 +34,7 @@ from urllib.parse import urlparse
 from rich.console import Console
 from rich.table import Table
 
+from src.common.repos import canonical_repo_map
 from src.sources.funding._common import DATA_DIR, out_path
 
 console = Console()
@@ -247,18 +248,30 @@ def _host_from_domain(host_url: str, domain_idx: dict[str, str]) -> str:
 
 def classify(slug_idx: dict[str, str], org_idx: dict[str, str],
              domain_idx: dict[str, str], fetched_at_by_host: dict[str, str]) -> list[dict]:
+    # Canonicalize BOTH sides of the slug match through the repos.csv rename map
+    # so a repo renamed on GitHub (roster lists the current name while repos.csv
+    # cached the old slug — or vice-versa) still resolves. `canon` maps any known
+    # slug → its current lowercased full_name; unknown → itself. Pass the module's
+    # REPOS_FILE so a test that monkeypatches match_repos.REPOS_FILE canonicalizes
+    # against the SAME file classify() reads.
+    canon = canonical_repo_map(REPOS_FILE)
+    slug_idx_canon: dict[str, str] = {}
+    for k, v in slug_idx.items():
+        slug_idx_canon.setdefault(canon.get(k, k), v)
+
     rows: list[dict] = []
     with open(REPOS_FILE, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             repo = r["repo"].strip()
             repo_id = (r.get("repo_id") or "").strip()
-            key = repo.lower()
-            org = key.split("/", 1)[0] if "/" in key else ""
+            # Match on the rename-resolved canonical slug, not the raw repos.csv slug.
+            cslug = canon.get(repo.lower(), repo.lower())
+            org = cslug.split("/", 1)[0] if "/" in cslug else ""
             homepage = (r.get("homepage") or "").strip()
 
             host, source = "", ""
-            if key in slug_idx:
-                host, source = slug_idx[key], "project_list"
+            if cslug in slug_idx_canon:
+                host, source = slug_idx_canon[cslug], "project_list"
             elif org in org_idx:
                 host, source = org_idx[org], "org_prefix"
             else:
