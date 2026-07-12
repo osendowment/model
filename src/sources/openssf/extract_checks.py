@@ -15,7 +15,7 @@ Reads:
 
 Writes:
     data/sources/openssf/checks.csv  with columns:
-        repo, score, <Check-Name-1>, <Check-Name-2>, ..., date
+        repo, repo_id, score, <Check-Name-1>, <Check-Name-2>, ..., date
 
 Where each check column is the integer score 0..10, or `-1` (the upstream
 sentinel for "not applicable / unable to evaluate"), or empty if the check
@@ -31,6 +31,8 @@ from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
+
+from src.common.repos import load_repo_ids, load_value_repo_ids
 
 console = Console()
 
@@ -68,6 +70,11 @@ def build() -> list[dict]:
     with open(INPUT_FILE, encoding="utf-8") as f:
         data = json.load(f)
 
+    # repos.csv (keyed on both `repo` and rename-resolved `full_name`) overlaid on
+    # value.csv ids so a repo renamed since either file was written still resolves;
+    # repos.csv wins on conflict.
+    repo_ids = {**load_value_repo_ids(), **load_repo_ids()}
+
     rows: list[dict] = []
     for repo_key, payload in data.items():
         if not isinstance(payload, dict):
@@ -77,6 +84,7 @@ def build() -> list[dict]:
         per_check = {c.get("name"): c.get("score") for c in payload.get("checks", [])}
         row = {
             "repo": slug,
+            "repo_id": repo_ids.get(slug, ""),
             "score": payload.get("score", ""),
             "date": payload.get("date", ""),
         }
@@ -93,7 +101,7 @@ def main() -> None:
     rows = build()
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    fields = ["repo", "score", *CHECK_NAMES, "date"]
+    fields = ["repo", "repo_id", "score", *CHECK_NAMES, "date"]
     with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
