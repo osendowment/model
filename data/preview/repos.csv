@@ -25,7 +25,7 @@ yaml/libyaml,c,github,cpp,libyaml,25.59,55.14,50.44,100,58.34,86.90,82.50,79.57,
 rust-lang/regex,rust,github,crates,regex,58.31,78.17,60.96,100,70.22,80.86,84.72,72.60,48.96,70.25,84.84,True,True,True,True,True,17,gh/27890669
 bytecodealliance/rustix,rust,github,crates,rustix,32.62,70.24,54.69,100,63.10,84.47,84.51,72.60,71.09,77.91,84.55,True,True,True,True,True,18,gh/295544240
 aws/aws-sdk-js-v3,typescript,github,npm,@aws-sdk/types,80.08,75.70,64.52,100,74.29,78.25,96.28,50.00,50.04,65.89,84.19,True,True,False,True,False,,gh/87228090
-nodeca/js-yaml,javascript,github,npm,js-yaml,50.84,65.09,56.53,100,65.51,60.61,75.26,72.60,94.14,74.72,84.19,True,True,True,True,True,19,gh/2504175
+nodeca/js-yaml,typescript,github,npm,js-yaml,50.84,65.09,56.53,100,65.51,60.61,75.26,72.60,94.14,74.72,84.19,True,True,True,True,True,19,gh/2504175
 vuejs/core,typescript,github,npm,@vue/shared,41.39,62.40,65.04,100,69.40,52.29,91.06,72.60,71.19,70.43,84.07,True,True,True,True,True,20,gh/137078487
 prettier/prettier,javascript,github,npm,prettier,33.26,59.48,68.38,100,70.30,63.77,91.91,50.00,78.08,69.16,83.62,True,True,True,True,True,21,gh/75104123
 zloirock/core-js,javascript,github,npm,core-js,54.17,66.28,61.35,100,68.85,95.33,92.93,64.57,42.59,70.26,83.20,True,True,True,True,True,22,gh/11481338
@@ -34,7 +34,7 @@ rust-lang/futures-rs,rust,github,crates,futures,67.46,82.47,54.56,100,67.73,55.7
 time-rs/time,rust,github,crates,time,34.72,71.07,54.65,100,63.37,91.35,75.40,72.60,66.94,76.06,82.90,True,True,True,True,True,25,gh/26459635
 jonschlinkert/kind-of,javascript,github,npm,kind-of,66.61,70.94,44.17,100,60.26,100.00,52.05,92.66,82.13,79.33,82.22,True,True,True,True,True,26,gh/24491562
 chardet/chardet,python,github,pypi,chardet,29.44,68.66,55.96,100,63.39,83.49,89.75,50.00,86.04,75.35,82.15,True,False,True,True,False,,gh/5196969
-facebook/regenerator,javascript,github,npm,regenerator-runtime,48.69,64.58,52.21,100,62.65,75.80,79.61,64.57,86.61,76.22,82.13,True,True,True,False,False,,gh/13346571
+facebook/regenerator,javascript,github,npm,regenerator-runtime,48.69,64.58,52.21,100,62.65,75.80,79.61,64.57,86.61,76.22,82.13,True,True,False,False,False,,gh/13346571
 jridgewell/sourcemaps,typescript,github,npm,@jridgewell/sourcemap-codec,78.46,74.89,52.02,100,66.55,94.02,62.42,71.70,62.95,71.74,82.11,True,False,True,True,False,,gh/897142826
 giampaolo/psutil,python,github,pypi,psutil,32.95,70.69,60.06,100,66.40,80.67,82.55,50.00,79.06,71.63,81.80,True,True,True,True,True,27,gh/20101515
 libexpat/libexpat,c,github,cpp,expat,29.44,57.51,59.05,100,64.13,74.22,82.16,97.60,50.28,73.96,81.58,True,True,True,True,True,28,gh/80314213

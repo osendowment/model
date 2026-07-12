@@ -23,7 +23,10 @@ data/sources/ecosystems/raw/criticality/
 tmp/
 
 # crates db-dump slim extracts — regenerable via fetch_db_dump (~560 MB); never commit
-data/sources/crates/db-dump/
+data/sources/crates/db-dump
 
 # Excel lock files (workbook open in Excel)
 data/preview/~$*.xlsx
+
+# Ad-hoc review notes over the preview table; not a pipeline output
+data/preview/board-review.md
