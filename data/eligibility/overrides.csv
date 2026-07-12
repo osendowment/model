@@ -52,14 +52,13 @@ auth0/*,,,,auth0,auth0.com,company,,,,,
 salesforce/*,,,,salesforce,salesforce.com,company,,,,,
 rust-lang/*,,rustfoundation.org,nonprofit,rust-lang,,,,,,,
 gcc-mirror/gcc,gh/22711503,fsf/gnu,nonprofit,gcc-mirror,,,,,,,
-bminor/glibc,gh/13868694,fsf/gnu,nonprofit,bminor,,,,,,,
 bytecodealliance/*,,bytecodealliance.org,nonprofit,bytecodealliance,,,,,,,
 azuread/*,,,,azuread,microsoft.com,company,,,,,
 webmproject/libwebp,gh/23368445,,,webmproject,google.com,company,,,,,
 mozilla/*,,mozilla.org,nonprofit,mozilla,,,,,,,
 tower-rs/tower,gh/98244646,,,tower-rs,,,tokio,,,,
 gmp-mirror/gmp,gh/681340775,fsf/gnu,nonprofit,gmp-mirror,,,,,,,GNU MP is an official GNU package; copyright assigned to FSF (501c3)
-libpixman/pixman,gh/81675971,xorg,nonprofit,libpixman,,,,,,,X.Org Foundation 501c3 steward; fiscally hosted by Software Freedom Conservancy
+pixman/pixman,gl/freedesktop-158,xorg,nonprofit,,,,,,,,X.Org Foundation 501c3 steward; fiscally hosted by Software Freedom Conservancy
 chaijs/type-detect,gh/12107007,,,chaijs,,,chaijs,,,,"chaijs Open Collective (active, Open Source Collective fiscal host)"
 mirror/ncurses,gh/22324756,fsf/gnu,nonprofit,mirror,,,,,,,Official GNU package under FSF/GNU (501c3) stewardship; oss via X11 SPDX added to OSI extras
 freedesktop-unofficial-mirror/cairo,gh/34372735,freedesktop.org,nonprofit,freedesktop-unofficial-mirror,,,,lgpl-2.1-only or mpl-1.1,,,"X.Org Foundation / SFC 501c3 steward; Licensee noassertion on dual-license COPYING (LGPL-2.1 OR MPL-1.1, OSI)"
