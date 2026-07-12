@@ -163,3 +163,33 @@ def test_missing_language_row_leaves_blank(tmp_path, monkeypatch):
 
     rows = br.build()
     assert rows[0]["language"] == ""
+
+
+def test_priority_breaks_2dp_score_ties_on_full_precision(tmp_path, monkeypatch):
+    """Two repos whose scores round to the same 2dp value must rank by the
+    full-precision value*risk product, not by the repo-name tie-break.
+    z/higher has the (slightly) larger raw product but sorts LAST by name —
+    it must still take the better priority."""
+    elig = tmp_path / "eligibility.csv"
+    val = tmp_path / "value.csv"
+    risk = tmp_path / "risk.csv"
+    _write(elig, ["repo", "repo_id", "oss", "intent", "nonprofit", "active", "eligible"],
+           [["a/lower", "gh/1", "True", "True", "True", "True", "True"],
+            ["z/higher", "gh/2", "True", "True", "True", "True", "True"]])
+    # sqrt(50.0 * 72.0) = 60.0000, sqrt(50.005 * 72.0) = 60.0030 — both display
+    # as 60.00, but z/higher's raw product is larger.
+    _write(val, ["repo", "repo_id", "platform", "top_eco", "top_eco_pkg", "openssf_crit",
+                 "eco_crit", "top_eco_pct", "pr_score", "value_score"],
+           [["a/lower", "gh/1", "github", "npm", "a", "1", "1", "1", "1", "50.0"],
+            ["z/higher", "gh/2", "github", "npm", "z", "1", "1", "1", "1", "50.005"]])
+    _write(risk, ["repo", "repo_id", "concentration", "complexity", "security",
+                  "workload", "risk_score"],
+           [["a/lower", "gh/1", "1", "1", "1", "1", "72.0"],
+            ["z/higher", "gh/2", "1", "1", "1", "1", "72.0"]])
+    _patch(monkeypatch, elig, val, risk)
+
+    rows = br.build()
+    by = {r["repo"]: r for r in rows}
+    assert by["a/lower"]["score"] == by["z/higher"]["score"] == "60.00"  # 2dp tie
+    assert by["z/higher"]["priority"] == "1"                             # raw product wins
+    assert by["a/lower"]["priority"] == "2"

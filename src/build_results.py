@@ -173,9 +173,12 @@ def build() -> list[dict]:
             row["score"] = f"{math.sqrt(raw):.2f}"
 
     # priority: dense 1,2,3… rank by score desc, eligible + scored rows only.
+    # Ranked on the full-precision value*risk product, NOT the displayed 2dp
+    # score — rounding creates dozens of ties whose order would then hinge on
+    # the repo-name tie-break, so a rename could silently reorder neighbors.
     ranked = sorted(
         (row for row in rows if row["eligible"] == "True" and row["score"]),
-        key=lambda row: (-float(row["score"]), row["repo"]),
+        key=lambda row: (-raw_by_id[row["repo_id"]], row["repo"]),
     )
     for i, row in enumerate(ranked, start=1):
         row["priority"] = str(i)
