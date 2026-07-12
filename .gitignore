@@ -27,3 +27,6 @@ data/sources/crates/db-dump
 
 # Excel lock files (workbook open in Excel)
 data/preview/~$*.xlsx
+
+# Ad-hoc review notes over the preview table; not a pipeline output
+data/preview/board-review.md
