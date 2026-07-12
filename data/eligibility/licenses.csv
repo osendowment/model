@@ -58,7 +58,6 @@ bitflags/bitflags,gh/29287955,mit or apache-2.0,registry,True
 blakeembrey/array-flatten,gh/17789771,mit,registry,True
 blakeembrey/change-case,gh/9440238,mit,registry,True
 bluss/bencher,gh/65987276,mit/apache-2.0,registry,True
-bminor/glibc,gh/13868694,gpl-2.0-or-later and lgpl-2.1-or-later,registry,True
 boto/boto3,gh/24774658,apache-2.0,registry,True
 boto/botocore,gh/6670942,apache-2.0,registry,True
 boto/s3transfer,gh/49535299,apache-2.0,registry,True
@@ -456,7 +455,6 @@ libffi/libffi,gh/321154,mit,registry,True
 libidn/libidn2,gl/2882658,gpl-3.0,github,True
 libjpeg-turbo/libjpeg-turbo,gh/39760454,bsd-3-clause,override,True
 libjxl/libjxl,gh/340219494,bsd-3-clause,github,True
-libpixman/pixman,gh/81675971,mit,registry,True
 libtiff/libtiff,gl/4720790,libtiff,gitlab,True
 libuv/libuv,gh/14812739,mit,registry,True
 linusu/buffer-from,gh/66025821,mit,registry,True
@@ -613,6 +611,7 @@ pillarjs/iconv-lite,gh/2743221,mit,registry,True
 pillarjs/parseurl,gh/17533192,mit,registry,True
 pillarjs/path-to-regexp,gh/5265803,mit,registry,True
 pillarjs/send,gh/4879977,mit,registry,True
+pixman/pixman,gl/freedesktop-158,mit,gitlab,True
 pkgconf/pkgconf,gh/4180110,isc,registry,True
 pnggroup/libpng,gh/3768025,libpng-2.0,registry,True
 postcss/postcss,gh/13078968,mit,registry,True

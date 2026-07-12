@@ -102,6 +102,7 @@ git://sourceware.org/git/binutils-gdb.git,True,ls-remote,2026-05-31T23:17:28Z
 git://sourceware.org/git/bzip2.git,True,ls-remote,2026-04-27T20:41:04Z
 git://sourceware.org/git/debugedit.git,True,ls-remote,2026-05-17T23:15:11Z
 git://sourceware.org/git/elfutils.git,True,ls-remote,2026-04-27T20:41:04Z
+git://sourceware.org/git/glibc.git,True,ls-remote,2026-07-12T19:51:14Z
 git://sourceware.org/git/lvm2.git,True,ls-remote,2026-04-27T20:41:04Z
 git://thekelleys.org.uk/dnsmasq.git,True,ls-remote,2026-05-17T23:15:11Z
 git://w1.fi/cgit/hostap/,False,ls-remote,2026-07-06T17:11:51Z
@@ -301,6 +302,7 @@ https://gitlab.freedesktop.org/mobile-broadband/libqrtr-glib.git,True,ls-remote,
 https://gitlab.freedesktop.org/networkmanager/networkmanager.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.freedesktop.org/pipewire/pipewire-rs.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.freedesktop.org/pipewire/wireplumber.git,True,ls-remote,2026-05-17T23:15:11Z
+https://gitlab.freedesktop.org/pixman/pixman.git,True,ls-remote,2026-07-12T19:35:50Z
 https://gitlab.freedesktop.org/poppler/poppler.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.freedesktop.org/pulseaudio/pulseaudio.git,True,ls-remote,2026-04-27T20:41:04Z
 https://gitlab.freedesktop.org/pwithnall/malcontent.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -780,6 +782,7 @@ https://salsa.debian.org/games-team/box2d.git,True,ls-remote,2026-05-17T23:15:11
 https://salsa.debian.org/games-team/qqwing.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/games-team/wildmidi.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/gdb-team/gdb.git,True,ls-remote,2026-05-17T23:15:11Z
+https://salsa.debian.org/glibc-team/glibc.git,True,ls-remote,2026-07-12T19:35:50Z
 https://salsa.debian.org/gnome-team/adwaita-icon-theme.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/gnome-team/babl.git,True,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/gnome-team/brasero.git,True,ls-remote,2026-05-17T23:15:11Z
@@ -1160,3 +1163,4 @@ https://salsa.debian.org/xorg-team/lib/xcb-util-wm.git,True,ls-remote,2026-05-17
 https://salsa.debian.org/xorg-team/lib/xcb-util.git,False,ls-remote,2026-05-17T23:15:11Z
 https://salsa.debian.org/yangfl-guest/libwmf.git,True,ls-remote,2026-05-17T23:15:11Z
 https://sourceware.org/git/binutils-gdb.git,True,ls-remote,2026-07-06T10:53:22Z
+https://sourceware.org/git/glibc.git,False,ls-remote,2026-07-12T19:41:58Z

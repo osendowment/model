@@ -714,7 +714,7 @@
 "@babel/plugin-syntax-typescript","babel/babel","https://github.com/babel/babel.git","eco","1102710497","445858981","830072454","1090902888","1343139533","1803578629","True","0.00030504","A","gh/24560307","","mit"
 "next-tick","medikoo/next-tick","https://github.com/medikoo/next-tick.git","eco","546530367","596870872","603194817","535410988","486284996","510890164","True","0.00030451","A","gh/5605834","","isc"
 "jws","auth0/node-jws","https://github.com/auth0/node-jws.git","eco","1009488873","485679841","716852771","931668750","1186791328","1726451677","True","0.00030396","A","gh/7632329","","mit"
-"atob","","git://git.coolaj86.com/coolaj86/atob.js.git","eco","837863160","876230815","983910174","869918501","708770793","750485520","True","0.00030385","A","","","(mit or apache-2.0)"
+"atob","","git://git.coolaj86.com/coolaj86/atob.js.git","native","837863160","876230815","983910174","869918501","708770793","750485520","True","0.00030385","A","","","(mit or apache-2.0)"
 "@typescript-eslint/eslint-plugin","typescript-eslint/typescript-eslint","https://github.com/typescript-eslint/typescript-eslint.git","eco","1296792051","530468576","863854445","1141031053","1521720006","2426886175","True","0.00030281","A","gh/165536154","","mit"
 "parse-passwd","doowb/parse-passwd","https://github.com/doowb/parse-passwd.git","eco","422025103","356982363","378457870","401236903","421536111","551912269","True","0.00030244","A","gh/71384120","","mit"
 "tinyglobby","superchupudev/tinyglobby","https://github.com/superchupudev/tinyglobby.git","eco","601086536","0","0","0","33660961","1168512112","True","0.00030232","A","gh/832295123","","mit"

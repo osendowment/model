@@ -638,6 +638,7 @@ pillarjs/iconv-lite,gh/2743221,True,True,open_collective,,,express,,,,,,,,,,,,20
 pillarjs/parseurl,gh/17533192,True,True,open_collective,,,express,,,,,,,,,,,,2026-06-30T14:18:51+00:00
 pillarjs/path-to-regexp,gh/5265803,True,True,open_collective,,,express,,,,,,,,,,,,2026-06-30T14:18:51+00:00
 pillarjs/send,gh/4879977,True,True,open_collective,,,express,,,,,,,,,,,,2026-06-30T14:18:51+00:00
+pixman/pixman,,False,False,,,,,,,,,,,,,,,,2026-07-12T19:59:10+00:00
 pkgconf/pkgconf,gh/4180110,True,True,open_collective,,,pkgconf,,,,,,,,,,,,2026-06-30T14:18:51+00:00
 pnggroup/libpng,gh/3768025,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:51+00:00
 postcss/postcss,gh/13078968,True,True,"github,open_collective,tidelift",ai,,postcss,,postcss,,,,,,,,,,2026-06-30T14:18:51+00:00

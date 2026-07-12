@@ -272,6 +272,7 @@ gkz/levn,gh/13287279,https://github.com/gkz/levn.git,ok,4,41,0.9,,2026-05-19T11:
 gkz/optionator,gh/13435927,https://github.com/gkz/optionator.git,ok,8,86,0.6,,2026-05-19T11:24:03+00:00
 gkz/prelude-ls,gh/4457759,https://github.com/gkz/prelude-ls.git,ok,15,198,0.7,,2026-05-19T11:24:04+00:00
 gkz/type-check,gh/13182168,https://github.com/gkz/type-check.git,ok,5,40,1.2,,2026-05-19T11:24:04+00:00
+glibc-team/glibc,gl/debian-11260,https://salsa.debian.org/glibc-team/glibc.git,ok,40,6557,2.0,,2026-07-12T19:36:33+00:00
 gmp-mirror/gmp,gh/681340775,https://github.com/gmp-mirror/gmp.git,ok,30,18260,4.8,,2026-05-19T11:24:05+00:00
 gnome/gdk-pixbuf,gl/gnome-1548,https://gitlab.gnome.org/gnome/gdk-pixbuf.git,ok,875,6356,1.8,,2026-07-05T23:07:14+00:00
 gnome/glib,gl/gnome-658,https://gitlab.gnome.org/gnome/glib.git,ok,1939,28911,3.2,,2026-07-05T23:07:15+00:00
@@ -633,6 +634,7 @@ pillarjs/iconv-lite,gh/2743221,https://github.com/pillarjs/iconv-lite.git,ok,46,
 pillarjs/parseurl,gh/17533192,https://github.com/pillarjs/parseurl.git,ok,9,186,0.5,,2026-05-19T11:25:41+00:00
 pillarjs/path-to-regexp,gh/5265803,https://github.com/pillarjs/path-to-regexp.git,ok,41,353,0.6,,2026-05-19T11:25:42+00:00
 pillarjs/send,gh/4879977,https://github.com/pillarjs/send.git,ok,38,602,0.6,,2026-05-19T11:25:42+00:00
+pixman/pixman,gl/freedesktop-158,https://gitlab.freedesktop.org/pixman/pixman.git,ok,193,2624,0.6,,2026-07-12T19:36:33+00:00
 pkgconf/pkgconf,gh/4180110,https://github.com/pkgconf/pkgconf.git,ok,100,2112,0.8,,2026-05-19T11:25:43+00:00
 pnggroup/libpng,gh/3768025,https://github.com/pnggroup/libpng.git,ok,119,4609,0.9,,2026-05-19T11:25:43+00:00
 postcss/postcss,gh/13078968,https://github.com/postcss/postcss.git,ok,466,3727,1.1,,2026-05-19T11:25:44+00:00

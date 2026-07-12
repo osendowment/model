@@ -6293,7 +6293,7 @@ unbash,False,npm_deprecated,,registry,2026-07-06T17:13:40+00:00
 @rc-component/textarea,False,npm_deprecated,,registry,2026-07-06T17:13:40+00:00
 @rc-component/form,False,npm_deprecated,,registry,2026-07-06T17:13:40+00:00
 @rc-component/segmented,False,npm_deprecated,,registry,2026-07-06T17:13:40+00:00
-path-to-regexp-updated,False,npm_deprecated,no latest tag,error,2026-07-12T14:22:09+00:00
+path-to-regexp-updated,False,npm_deprecated,no latest tag,error,2026-07-12T20:03:06+00:00
 @rc-component/mentions,False,npm_deprecated,,registry,2026-07-06T17:13:40+00:00
 @rc-component/tree-select,False,npm_deprecated,,registry,2026-07-06T17:13:40+00:00
 @rc-component/tabs,False,npm_deprecated,,registry,2026-07-06T17:13:40+00:00

@@ -17,6 +17,7 @@ md/tcp-wrappers,gl/debian-28852,salsa.debian.org/md/tcp-wrappers,False,,False,,F
 mpc/mpc,gl/inria-22470,gitlab.inria.fr/mpc/mpc,False,,False,,False,ok,2026-07-06T15:18:52Z
 mpfr/mpfr,gl/inria-33626,gitlab.inria.fr/mpfr/mpfr,False,,False,,False,ok,2026-07-06T15:18:52Z
 multimedia-team/aom,gl/debian-29534,salsa.debian.org/multimedia-team/aom,False,,False,,False,ok,2026-07-06T15:18:53Z
+pixman/pixman,gl/freedesktop-158,gitlab.freedesktop.org/pixman/pixman,False,,False,,False,ok,2026-07-12T19:59:11Z
 takluyver/jeepney,gl/2780772,gitlab.com/takluyver/jeepney,False,,False,,False,ok,2026-07-06T15:18:53Z
 xorg-team/lib/libx11,gl/debian-4306,salsa.debian.org/xorg-team/lib/libx11,False,,False,,False,ok,2026-07-06T15:18:53Z
 xorg-team/lib/libxau,gl/debian-4307,salsa.debian.org/xorg-team/lib/libxau,False,,False,,False,ok,2026-07-06T15:18:53Z

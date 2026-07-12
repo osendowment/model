@@ -2177,6 +2177,13 @@ gkz/type-check,gh/13182168,https://github.com/gkz/type-check.git,0c880b05cc868c1
 gkz/type-check,gh/13182168,https://github.com/gkz/type-check.git,0c880b05cc868c1d6bd554d07315a95955a8ca48,cyclomatic_max,12,2026-05-18T17:46:44Z
 gkz/type-check,gh/13182168,https://github.com/gkz/type-check.git,0c880b05cc868c1d6bd554d07315a95955a8ca48,cyclomatic_total,501,2026-05-18T17:46:44Z
 gkz/type-check,gh/13182168,https://github.com/gkz/type-check.git,0c880b05cc868c1d6bd554d07315a95955a8ca48,files,4,2026-07-05T16:27:36Z
+glibc-team/glibc,gl/debian-11260,https://salsa.debian.org/glibc-team/glibc.git,1e9263f71cc9e8e11a1962b20210b096ec17e61f,cognitive_avg,0,2026-07-12T19:39:44Z
+glibc-team/glibc,gl/debian-11260,https://salsa.debian.org/glibc-team/glibc.git,1e9263f71cc9e8e11a1962b20210b096ec17e61f,cognitive_max,0,2026-07-12T19:39:44Z
+glibc-team/glibc,gl/debian-11260,https://salsa.debian.org/glibc-team/glibc.git,1e9263f71cc9e8e11a1962b20210b096ec17e61f,cognitive_total,0,2026-07-12T19:39:44Z
+glibc-team/glibc,gl/debian-11260,https://salsa.debian.org/glibc-team/glibc.git,1e9263f71cc9e8e11a1962b20210b096ec17e61f,cyclomatic_avg,1,2026-07-12T19:39:44Z
+glibc-team/glibc,gl/debian-11260,https://salsa.debian.org/glibc-team/glibc.git,1e9263f71cc9e8e11a1962b20210b096ec17e61f,cyclomatic_max,1,2026-07-12T19:39:44Z
+glibc-team/glibc,gl/debian-11260,https://salsa.debian.org/glibc-team/glibc.git,1e9263f71cc9e8e11a1962b20210b096ec17e61f,cyclomatic_total,1,2026-07-12T19:39:44Z
+glibc-team/glibc,gl/debian-11260,https://salsa.debian.org/glibc-team/glibc.git,1e9263f71cc9e8e11a1962b20210b096ec17e61f,files,2,2026-07-12T19:39:44Z
 gmp-mirror/gmp,gh/681340775,https://github.com/gmp-mirror/gmp.git,4b3b66d3328e390af894b97e0438aed90c3305be,cognitive_avg,4.89,2026-07-05T16:27:36Z
 gmp-mirror/gmp,gh/681340775,https://github.com/gmp-mirror/gmp.git,4b3b66d3328e390af894b97e0438aed90c3305be,cognitive_max,228,2026-07-05T16:27:36Z
 gmp-mirror/gmp,gh/681340775,https://github.com/gmp-mirror/gmp.git,4b3b66d3328e390af894b97e0438aed90c3305be,cognitive_total,17265,2026-07-05T16:27:36Z
@@ -5152,6 +5159,13 @@ pillarjs/send,gh/4879977,https://github.com/pillarjs/send.git,121dda811bae6420ce
 pillarjs/send,gh/4879977,https://github.com/pillarjs/send.git,121dda811bae6420ce08171b10685d19c4e53059,cyclomatic_max,17,2026-05-18T17:46:44Z
 pillarjs/send,gh/4879977,https://github.com/pillarjs/send.git,121dda811bae6420ce08171b10685d19c4e53059,cyclomatic_total,266,2026-05-18T17:46:44Z
 pillarjs/send,gh/4879977,https://github.com/pillarjs/send.git,121dda811bae6420ce08171b10685d19c4e53059,files,3,2026-07-05T16:27:36Z
+pixman/pixman,gl/freedesktop-158,https://gitlab.freedesktop.org/pixman/pixman.git,f824cac6478971c0f71e4dfe8a60ebf70224076a,cognitive_avg,4.37,2026-07-12T19:39:45Z
+pixman/pixman,gl/freedesktop-158,https://gitlab.freedesktop.org/pixman/pixman.git,f824cac6478971c0f71e4dfe8a60ebf70224076a,cognitive_max,88,2026-07-12T19:39:45Z
+pixman/pixman,gl/freedesktop-158,https://gitlab.freedesktop.org/pixman/pixman.git,f824cac6478971c0f71e4dfe8a60ebf70224076a,cognitive_total,5779,2026-07-12T19:39:45Z
+pixman/pixman,gl/freedesktop-158,https://gitlab.freedesktop.org/pixman/pixman.git,f824cac6478971c0f71e4dfe8a60ebf70224076a,cyclomatic_avg,4.16,2026-07-12T19:39:45Z
+pixman/pixman,gl/freedesktop-158,https://gitlab.freedesktop.org/pixman/pixman.git,f824cac6478971c0f71e4dfe8a60ebf70224076a,cyclomatic_max,78,2026-07-12T19:39:45Z
+pixman/pixman,gl/freedesktop-158,https://gitlab.freedesktop.org/pixman/pixman.git,f824cac6478971c0f71e4dfe8a60ebf70224076a,cyclomatic_total,5491,2026-07-12T19:39:45Z
+pixman/pixman,gl/freedesktop-158,https://gitlab.freedesktop.org/pixman/pixman.git,f824cac6478971c0f71e4dfe8a60ebf70224076a,files,140,2026-07-12T19:39:45Z
 pkgconf/pkgconf,gh/4180110,https://github.com/pkgconf/pkgconf.git,93e085d1443685e797c505b3990e1cad5b79be8b,cognitive_avg,3.25,2026-07-05T16:27:36Z
 pkgconf/pkgconf,gh/4180110,https://github.com/pkgconf/pkgconf.git,93e085d1443685e797c505b3990e1cad5b79be8b,cognitive_max,127,2026-07-05T16:27:36Z
 pkgconf/pkgconf,gh/4180110,https://github.com/pkgconf/pkgconf.git,93e085d1443685e797c505b3990e1cad5b79be8b,cognitive_total,1714,2026-07-05T16:27:36Z
