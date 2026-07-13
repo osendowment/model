@@ -16,19 +16,84 @@ We aim to focus our support on the core of open-source ecosystems — roughly th
 
 It is important to trace dependencies across ecosystem boundaries, not just within them. For instance, Pandas [Python] depends on NumPy [Python], which depends on OpenBLAS [C] ([details](https://codeberg.org/vladh/bindep)). This cross-ecosystem view naturally elevates low-level infrastructure libraries in C/C++, Fortran, and similar languages.
 
-### Model Development
+Four registries are covered: **npm** (JS/TS), **PyPI** (Python), **crates** (Rust), and **C/C++** (Debian + Homebrew, which have no single registry). Repos are resolved on both **GitHub and GitLab** (gitlab.com, salsa.debian.org, gitlab.gnome.org, gitlab.freedesktop.org, invent.kde.org, and other instances).
 
-Beyond dividing grants between ecosystems, we need to prioritize individual OSS projects within each one. Our goal is to make this process transparent and quantifiable, combining automated scoring with human judgment, especially in the early stages. The model is under active development; its final form will emerge from discussions with OSE donors.
+## The Pipeline
 
-Our approach is a two-stage automated pipeline — **Value → Risk** — followed by a manual **Eligibility** review of the top candidates. Each step narrows the set the next operates on:
+Three scoring stages, then a preview build and a health gate. Each stage narrows the set the next operates on:
 
-| Step | Goal | Implemented | Roadmap |
-|------|------|-------------|---------|
-| **[Value](docs/value.md)** | Find most important packages in ecosystems | Download-weighted PageRank for Python (PyPI), Rust (crates), JS/TS (npm), C/C++ (Debian, Homebrew) based on dependency trees, covering 95% downloads in each ecosystem | Community nominations, critical software lists, cross-ecosystem dependencies |
-| **[Risk](docs/risk.md)** | Prioritize risky projects among most valuable | Bus factor and Herfindahl--Hirschman index for contributors, complexity metrics (LOC, etc) using [scc](https://github.com/boyter/scc) | [OpenSSF scorecard](https://scorecard.dev), active maintainers, issue activity, GitHub Sponsors |
-| **Eligibility** *(manual)* | Filter to fundable projects | Checked manually for the top candidates — OSS license, EOL, and independence (no corporate trademarks, no associated startups, community-led) | Automate the license / EOL / independence checks |
+```
+value → risk → eligibility → preview → health
+```
 
-Detailed methodology lives in [`docs/`](docs/): one page per automated stage — [value](docs/value.md), [risk](docs/risk.md) — plus [`docs/sources/`](docs/sources/) (one page per data source) and [`docs/components/`](docs/components/) (cross-cutting components — the per-language value pipelines [python](docs/components/python.md) / [javascript](docs/components/javascript.md) / [cpp](docs/components/cpp.md) / [rust](docs/components/rust.md), plus the [funding](docs/components/funding.md) and [validation](docs/components/validation.md) tables). The code mirrors this: `src/sources/<source>/` for fetch/process scripts, `src/{value,risk}/` for the stage pipelines, and `src/common/` for shared infrastructure.
+| Stage | Question | Output |
+|---|---|---|
+| **[Value](docs/value.md)** | How important is this project? | `value_score` (0–100) |
+| **[Risk](docs/risk.md)** | How likely is it to fail? | `risk_score` (0–100, higher = riskier) |
+| **[Eligibility](docs/eligibility.md)** | Can we actually fund it? | `eligible` (boolean) |
+| **Preview** | Publish the result | `data/preview/preview.xlsx` |
+| **Health** | Is the build self-consistent? | red check ⇒ the run aborts |
+
+**All three scoring stages are automated.** Eligibility used to be a manual review; it is now a full stage, with the residual human judgment confined to curated override files (`data/*/overrides.csv`), never to LLM-generated data.
+
+The final `score` is `sqrt(value_score × risk_score)` — an unnormalized geometric mean on the same 0–100 scale as its inputs, so **both** dimensions must be high. `priority` is a dense rank by `score` descending over eligible rows only.
+
+### Running it
+
+`scripts/run-pipeline.sh` is the **only** supported entry point — for the whole pipeline, one stage, or a resume from the middle. Never invoke the stage runners by hand: the preview stage is the one everyone forgets, which silently leaves `preview.xlsx` stale.
+
+```bash
+scripts/run-pipeline.sh                    # every stage (TTL-cached, ~90s warm)
+scripts/run-pipeline.sh --offline          # pure-cache run, no network
+scripts/run-pipeline.sh --stage risk       # one stage
+scripts/run-pipeline.sh --from-stage risk  # that stage through to the end
+scripts/run-pipeline.sh --list-stages
+```
+
+`health` runs last and aborts on failure — a red check is a bug, never noise.
+
+### What each score is made of
+
+**Value** — a pro-rata weighted blend; only the components present for a repo are summed and renormalized, so a repo missing one still lands on the same scale.
+
+| Component | Weight | What it measures |
+|---|---|---|
+| `openssf_crit` | 60% | OpenSSF Criticality Score: commit cadence, contributor count, org diversity, dependents, issue activity. GitHub-only. |
+| `eco_crit` | 20% | Whether ecosyste.ms lists the package as critical infrastructure. Covers GitHub **and** GitLab, so it is the importance signal GitLab repos still get. |
+| `top_eco_pct` | 10% | PageRank *position* within the repo's strongest ecosystem. Downloads pick the top packages (95% of cumulative downloads), their dependency tree is fetched, and a download-personalized PageRank (α = 0.85) ranks every node. |
+| `pr_score` | 10% | Cross-ecosystem dependency *mass*, complementing `top_eco_pct`'s position. |
+
+**Risk** — geometric mean of four dimensions, each 0–100 with higher = riskier.
+
+| Dimension | What it measures |
+|---|---|
+| `concentration` | Bus factor + HHI over the last 5 years, from a git clone's commit log (mailmap applied, bots dropped). Absolute scales, so a one-person repo pins 100. |
+| `complexity` | `scc` lines of code + `lizard` max cyclomatic complexity at a year-pinned SHA. Big **and** gnarly ranks worse than either alone. |
+| `security` | Worst-of the OpenSSF Scorecard (inverted) and a CVE score from OSV. Real CVEs are never masked by a good Scorecard. |
+| `workload` | LOC, CVEs, and net-new issues **per active contributor**. |
+
+**Eligibility** — a plain AND of four booleans, no weights. Ineligible repos stay in the table with the failing flag visible.
+
+| Check | True when |
+|---|---|
+| `oss` | The repo's SPDX license is OSI-approved. |
+| `intent` | The repo shows *any* funding signal (Sponsors, FUNDING.yml, funding.json, Open Collective, institutional host…). Propagates at the owner level. |
+| `nonprofit` | No company host/owner backs it — company-backed projects are already resourced. |
+| `active` | `NOT eol AND NOT archived`. No exemptions: a project whose canonical upstream is off GitHub is *repointed* there (glibc → sourceware, pixman → gitlab.freedesktop.org), never exempted. |
+
+## Layout
+
+`src/`, `data/`, and `docs/` all mirror the pipeline:
+
+- `src/sources/<source>/` — everything that fetches or processes one external source; `src/{value,risk,eligibility}/` — the stage builders and their runners; `src/common/` — shared infrastructure.
+- `data/sources/<source>/` — raw + intermediate fetched data; `data/{value,risk,eligibility}/` — stage outputs; `data/preview/` — the published workbook.
+- `docs/` — one page per stage ([value](docs/value.md), [risk](docs/risk.md), [eligibility](docs/eligibility.md)) plus [`docs/data-sources.md`](docs/data-sources.md), with [`docs/sources/`](docs/sources/) (one page per data source) and [`docs/components/`](docs/components/) (cross-cutting components) beneath.
+
+**Every count lives in one place.** Funnel, coverage, and distribution figures are on the `stats` sheet of `preview.xlsx`, regenerated from the live CSVs on every build. The methodology pages describe *how* a metric is built and never restate *how many* — so there is no stats document to drift.
+
+## Auditability
+
+The model must be traceable end to end: every metric in an output CSV traces back to the fetch that produced it. Every fetch records a date and a success flag, so a `False`/`0` can never silently stand in for a network error. Repo-keyed source files carry a stable `repo_id` (`gh/<numeric>` or `gl/<nickname>-<id>`), because slugs drift on renames and every downstream join is by id. `scripts/pipeline_health.py` enforces this, and it is the last stage of every run.
 
 Work is currently happening in this repo and the following places:
 

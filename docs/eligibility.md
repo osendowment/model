@@ -2,7 +2,12 @@
 
 Stage 3 of the pipeline (Value → Risk → **Eligibility**). Takes the top
 repos and answers one question per repo: **is it eligible for funding?**
-Four independent checks, one AND-rollup:
+
+It is a **fully automated pipeline stage**, not a manual review: every check is
+computed by a builder from fetched sources plus the curated override files in
+`data/eligibility/`. Four independent checks, one AND-rollup — a plain AND of
+four booleans, no weights. Ineligible repos stay in the table with the failing
+flag visible:
 
 ```
 eligible = oss AND intent AND nonprofit AND active
@@ -10,7 +15,7 @@ eligible = oss AND intent AND nonprofit AND active
 
 | Check | Meaning | Built by | Output |
 |---|---|---|---|
-| `oss` | OSI-approved license | `src.eligibility.build_licenses` | `data/eligibility/licenses.csv` |
+| `oss` | OSS-approved license | `src.eligibility.build_licenses` | `data/eligibility/licenses.csv` |
 | `intent` | shows any funding signal | `src.eligibility.build_funding` | `data/eligibility/funding.csv` |
 | `nonprofit` | not company-backed | `src.eligibility.build_funding` | `data/eligibility/funding.csv` |
 | `active` | not EOL, not archived | `src.eligibility.build_active` | `data/eligibility/active.csv` |
@@ -34,11 +39,10 @@ zeros (floor percentiles) rather than staying blank.
 Input is the top-repo set — valid class-A repos from `data/value/value.csv`
 (`settings.json top_repos`: `classes = ["A"]`, `platforms = ["github",
 "gitlab"]`, `git_valid == True`; `risk_input.value_classes` documents the
-same scope), loaded via `load_top_repos()`, which
-now **includes archived repos by default** (every stage shares this scope).
-Archived repos must appear in the stage output as `active=False` so the reason
-for their ineligibility is visible, rather than being silently dropped before
-the stage runs.
+same scope), loaded via `load_top_repos()`, which **includes archived repos by
+default** — every stage shares this one scope. Archived repos appear in the
+stage output as `active=False`, so the reason for their ineligibility is
+visible rather than silently dropped before the stage runs.
 
 ## Metrics Roadmap
 
@@ -57,8 +61,11 @@ Eligibility
 │   ├── github license (fallback)   ← data/sources/github/repos.csv (Licensee)
 │   ├── gitlab license (fallback)   ← data/sources/gitlab/repos.csv
 │   │                                 (GitLab-hosted repos, keyed gl/ repo_id)
-│   ├── osi approved set            ← data/sources/osi/oss-licenses.csv
-│   │                                 (SPDX isOsiApproved ∪ curated extras,
+│   ├── oss-approved set            ← data/sources/osi/oss-licenses.csv
+│   │                                 (derived from the SPDX License List,
+│   │                                  data/sources/spdx/licenses.csv:
+│   │                                  isOsiApproved ∪ (isFsfLibre − content
+│   │                                  licenses) ∪ curated extras;
 │   │                                  90-day TTL, self-bootstrapping)
 │   └── oss                         ← ternary True / False / "" (unknown);
 │                                     SPDX-expression-aware
@@ -66,8 +73,14 @@ Eligibility
 ├── intent + nonprofit — Funding (→ funding.csv, see components/funding.md)
 │   ├── GitHub Sponsors in/out, FUNDING.yml, funding.json, npm/PyPI
 │   │   funding fields, bus-factor-maintainer Sponsors, Open Collective budgets
+│   ├── GitLab funding files        ← data/sources/gitlab/funding-files.csv
+│   │                                 (FUNDING.yml / funding.json probed in-repo —
+│   │                                  the GitLab twin of github/funding-yml.csv)
 │   ├── FOSS-foundation hosts       ← data/sources/funding/host-by-repo.csv
+│   ├── GitLab-instance hosts       ← data/eligibility/gitlab-hosts.csv
+│   │                                 (salsa.debian.org → debian.org, …)
 │   └── curated host/owner backing  ← data/eligibility/overrides.csv
+│                                     (+ maintainer-overrides.csv)
 │
 ├── active — Activity (→ active.csv)
 │   ├── eol                         ← data/eligibility/overrides.csv `eol`
@@ -86,7 +99,7 @@ Eligibility
 
 ## The four checks
 
-### `oss` — OSI-approved license
+### `oss` — OSS-approved license
 
 `build_licenses` resolves one SPDX string per repo — a manual `license`
 assertion from `overrides.csv` first (highest priority, for repos whose
@@ -95,21 +108,34 @@ ecosystem's `results.csv` `license` column, most common value across the
 repo's packages, ties alphabetical), the GitHub API license as
 fallback (with the GitLab project license as the equivalent fallback for
 GitLab-hosted repos) — and classifies it against the OSS-approved set in
-`data/sources/osi/oss-licenses.csv` (SPDX `isOsiApproved` ∪ a small curated
-extras list — curl, ftl, libpng-2.0, mit-cmu, psf-2.0, blessing; content
-licenses like CC-BY/CC0 are deliberately **not** OSS). SPDX expressions
-(`mit or apache-2.0`, `mit/apache-2.0`, `apache-2.0 with llvm-exception`,
-`gpl-3.0-or-later`) count as OSS when ANY component is approved.
+`data/sources/osi/oss-licenses.csv`. A source only claims the slot with a
+**meaningful** license: an unknown sentinel (`noassertion` / `other` /
+`none`) never shadows a real detection from a later source.
+
+The approved set is derived by `src.sources.osi.fetch_licenses` from the raw
+SPDX License List (`data/sources/spdx/licenses.csv`, fetched by
+`src.sources.spdx.fetch_licenses` — the Linux Foundation registry carrying
+both approval flags):
+
+```
+approved = isOsiApproved ∪ (isFsfLibre − content licenses) ∪ curated extras
+```
+
+FSF-libre adds genuine software licenses OSI never reviewed; its **content**
+licenses (CC-BY-*, CC0, GFDL) are excluded — free for documents, not software
+OSS. The curated extras are the handful neither body reviewed (curl, blessing,
+…). SPDX expressions (`mit or apache-2.0`, `mit/apache-2.0`, `apache-2.0 with
+llvm-exception`, `gpl-3.0-or-later`) count as OSS when ANY component is
+approved.
 
 In `licenses.csv` the flag is ternary — `True` / `False` / empty (no
 license signal at all: empty, `noassertion`, `other`, `none`) — so unknown
 stays distinguishable from known-non-OSS. The rollup treats only
-`oss=True` as eligible.
+`oss=True` as eligible (unknown counts as not-OSS there).
 
 ### `intent` and `nonprofit` — funding signals
 
-Built by `build_funding` (moved unchanged from the risk stage — full
-methodology, score formula and worked examples in
+Built by `build_funding` (full methodology, score formula and worked examples in
 [components/funding.md](components/funding.md)). `intent` is True when the
 repo shows at least one funding signal: the owner's GitHub Sponsors
 listing being enabled (any inbound sponsor count implies it; outbound
@@ -170,10 +196,17 @@ a per-repo row always wins) — shared by three builders:
 (Repo-identity/validity corrections stay in `data/value/overrides.csv` —
 this file is only for eligibility-stage judgments.)
 
+Two more curated files live in `data/eligibility/`:
+
+| File | Used by | Meaning |
+|---|---|---|
+| `maintainer-overrides.csv` | build_funding | `login,reason` — bus-factor maintainers fundable through a channel the Sponsors fetch can't see; unioned into the fundable-maintainer set |
+| `gitlab-hosts.csv` | build_funding | `gitlab_host,host,host_type,reason` — a repo on an institution's OWN GitLab (salsa.debian.org → debian.org, invent.kde.org → kde.org, …) is host-backed by that institution. `gitlab.com` is deliberately absent: commercial shared hosting backs nothing |
+
 ## Outputs
 
 - `licenses.csv` — `repo, repo_id, license, license_source (override/registry/github/gitlab/""), oss`
-- `active.csv` — `repo, repo_id, eol, archived, mirror, active`
+- `active.csv` — `repo, repo_id, eol, archived, active`
 - `funding.csv` — funding signals + score per repo
   (schema in [components/funding.md](components/funding.md))
 - `eligibility.csv` — `repo, repo_id, oss, intent, nonprofit, active, eligible,
@@ -181,23 +214,50 @@ this file is only for eligibility-stage judgments.)
 
 ## Running
 
+`scripts/run-pipeline.sh` is the only supported entry point — it runs
+value → risk → eligibility → preview → health in order, so the preview
+workbook and the health check never go stale behind a stage rebuild:
+
+```bash
+scripts/run-pipeline.sh --stage eligibility            # this stage alone
+scripts/run-pipeline.sh --from-stage eligibility       # eligibility → preview → health
+scripts/run-pipeline.sh --stage eligibility --list     # show this stage's steps
+scripts/run-pipeline.sh --stage eligibility --skip-fetch   # build only, no fetchers
 ```
-uv run python -m src.eligibility.run_eligibility_pipeline                # fetch + build
-uv run python -m src.eligibility.run_eligibility_pipeline --skip-fetch   # build only
-uv run python -m src.eligibility.run_eligibility_pipeline --list         # show steps
-```
+
+Per-step flags pass through to the stage runner
+(`src.eligibility.run_eligibility_pipeline`), so `--list`, `--from <step>`
+and `--skip-fetch` compose with stage selection.
 
 Fetchers (all incremental / TTL-gated): the GitHub repo-owner refresh
-(archived flag + license fallback), the OSI license list, the per-eco
-license and EOL fetchers, the funding-intent fetchers (FUNDING.yml,
-npm/PyPI funding, Sponsors, bus-factor maintainer Sponsors, FLOSS Fund,
-the Open Collective reverse-map + budgets) and the FOSS-foundation roster
-scrapers + host matcher. Builders: `licenses` → `active` → `funding-build`
-→ `aggregate`. The `data/preview/` deliverables (`results`, `people`,
-`preview-xlsx`) live in their own runner — `src.run_preview_pipeline`,
-run after this stage — since they roll up all three stages, not just
-eligibility.
+(archived flag + license fallback), the GitLab project refresh (GitLab
+license fallback), the SPDX license list + the derived OSS-approved set,
+the per-eco license and EOL fetchers, the funding-intent fetchers
+(FUNDING.yml, the GitLab funding-file probe, npm/PyPI funding, Sponsors,
+bus-factor maintainer Sponsors, FLOSS Fund, the Open Collective reverse-map
++ budgets) and the FOSS-foundation roster scrapers + host matcher. Builders:
+`licenses` → `active` → `funding-build` → `aggregate`. The `data/preview/`
+deliverables (`results`, `people`, `preview-xlsx`) live in their own runner —
+`src.run_preview_pipeline`, the stage after this one — since they roll up all
+three stages, not just eligibility.
 
-`scripts/pipeline_health.py` verifies every stage CSV matches its
-builder's current output; `scripts/stats.py` recomputes the
-the preview stats sheet coverage tables.
+`scripts/pipeline_health.py` (the `health` stage) verifies every stage CSV
+matches its builder's current output; `scripts/stats.py` recomputes the
+preview stats sheet coverage tables.
+
+## Known gap — the bus-factor maintainer cache
+
+`bf_maintainer_fundable` (an `intent` signal) is keyed off each repo's
+bus-factor set, read from `data/sources/github/contributor-commits.csv`. That
+file is written **only** by `src.sources.github.fetch_contributors_metrics`,
+which **no pipeline stage runs** — it is a hand-run script. So the bus-factor
+membership behind this one signal is a cache the pipeline never refreshes: a
+repo that entered scope after the last manual run has no bus-factor rows and
+silently reads `bf_maintainer_fundable = False` (indistinguishable from a
+genuine "no fundable maintainer"), and `fetch_maintainer_sponsors` — which
+*is* a pipeline step — only queries the logins that stale cache already knows.
+Refresh it by hand with
+`uv run python -m src.sources.github.fetch_contributors_metrics`. The
+git-clone contributor log (`data/sources/git/contributor-commits.csv`) that
+feeds the risk stage's concentration score is a *different* file and **is**
+pipeline-refreshed.

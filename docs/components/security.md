@@ -72,15 +72,19 @@ back to the **deps.dev-mirrored** Scorecard score
 (`data/sources/git/depsdev.csv`, `openssf_score_source = "depsdev"`). If neither
 yields a score, `openssf_score` and `openssf_score_source` are empty.
 
-Pipeline order (`src/risk/run_risk_pipeline.py`). The risk runner fetches these
-sources by default (incremental — each fetcher skips data already present, so a
-re-run only fills gaps); pass `--skip-fetch` to rebuild from existing data without
-fetching. The runner holds **score-forming fetchers only** — the model scores
-nothing it does not fetch:
+Pipeline order (`src/risk/run_risk_pipeline.py`, run via `scripts/run-pipeline.sh
+--from-stage risk`). The risk runner fetches these sources by default
+(incremental — each fetcher skips data already present, so a re-run only fills
+gaps); pass `--offline` to rebuild from existing data without fetching. The
+runner holds **score-forming fetchers only** — the model scores nothing it does
+not fetch:
 
 ```
-commits-years → … → cves → scorecard → depsdev → … → security → workload → aggregate
+commits-years → … → cves ∥ scorecard ∥ depsdev → … → security → workload → aggregate
 ```
+
+`cves`, `scorecard` and `depsdev` share the `metrics` pgroup, so they run
+concurrently after the SHA anchors are complete.
 
 ## Collection
 
@@ -94,7 +98,7 @@ canonical-slug matching.
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
 |---|---|---|---|
 | `value/value.csv` | (value stage) | valid class-A top-repo scope (GitHub + GitLab, archived included) | `repo_id` |
-| `git/commits-years.csv` | `src.sources.git.commits_years` | per-(repo, year) `last_sha` — the snapshot pin | `repo_id`, `year` |
+| `git/commits-years.csv` | `src.sources.git.commits_years` (`gh/…`) · `src.sources.gitlab.commits_years` (`gl/…`) | per-(repo, year) `last_sha` — the snapshot pin | `repo_id`, `year` |
 | `git/openssf.csv` | `src/sources/openssf/scorecard.py` | OpenSSF Scorecard `score` + 18 checks per `(repo, sha)` — see [openssf.md](../sources/openssf.md) | `repo_id`, `sha` |
 | `git/depsdev.csv` | `src/sources/depsdev/fetch.py` | deps.dev-mirrored Scorecard `score` + checks (**fallback** when local row missing) | `repo_id`, `sha` |
 | `osv/cves.csv` | `src/sources/osv/fetch_cves.py` | per-CVE rows `(repo, repo_id, date, cve)` | `repo_id` |
@@ -202,6 +206,6 @@ See the preview stats sheet → Risk → Security for current per-signal coverag
 - **Snapshot pinning, not live.** The Scorecard signals are pinned to
   the repo's latest in-window commit (2025→2021), not re-run live, so they
   reflect the snapshot sha rather than `HEAD`.
-- **`score` is not a class.** It's a 0–100 risk percentile — the risk pipeline
-  has no A–D class tier; `security` enters `risk.csv` as a 0–100 score, not a
-  `security_class` column.
+- **`score` is not a class.** It's a 0–100 risk score (the worst-of a percentile
+  and a neutral-anchored CVE score) — the risk pipeline has no A–D class tier;
+  `security` enters `risk.csv` as a 0–100 score, not a `security_class` column.

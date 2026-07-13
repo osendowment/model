@@ -5,7 +5,19 @@ download volume with dependency graph analysis (PageRank).
 
 ## Pipeline overview
 
-Three automated stages (run in order, each feeds the next):
+The model runs **only** via `scripts/run-pipeline.sh`, whose stages execute in
+order — **value → risk → eligibility → preview → health**. Stage runners are
+never invoked by hand (the Preview stage is the one that gets forgotten, which
+leaves `data/preview/preview.xlsx` stale; `health` aborts on a red check).
+
+```bash
+scripts/run-pipeline.sh                     # every stage
+scripts/run-pipeline.sh --stage value       # the value stage alone
+scripts/run-pipeline.sh --stage value --only unify   # one step of it
+scripts/run-pipeline.sh --from-stage value  # value → … → health
+```
+
+The three scoring stages (each feeds the next):
 
 ```
 1. **Value** (`src.value.run_value_pipeline`) → `data/value/value.csv` — picks the
@@ -87,12 +99,14 @@ Value
     │                                 empty for other platforms
     ├── git_url                   ← per-eco git.csv union                  [most recent]
     │                                (GitLab/Codeberg/Sourcehut/Bitbucket
-    │                                 /custom hosts when no GH match)
-    ├── mirror_url                ← GitHub Repos API `mirror_url`          [most recent]
-    │                                + override-declared live upstreams
-    │                                (upstream a github mirror syncs from;
-    │                                 e.g. gcc-mirror/gcc → gcc.gnu.org)
-    ├── git_valid                 ← build_validation (True/False)          [most recent]
+    │                                 /custom hosts when no GH match);
+    │                                 git clone URLs only — never a tarball/hg/svn
+    ├── mirror_url                ← two meanings (see the column table):   [most recent]
+    │                                (a) upstream a github MIRROR syncs from
+    │                                    (GitHub Repos API + repo overrides)
+    │                                (b) source location of a project with NO git
+    │                                    upstream (mirror_url-only override)
+    ├── git_valid                 ← build_validation (strictly True/False) [most recent]
     │                                (rollup of GitHub API + git ls-remote
     │                                 caches → value/validation.csv)
     ├── ecosystems                ← derived (eco set per repo)             [2021–2025]
@@ -138,7 +152,8 @@ Packages sorted by PageRank descending. Cumulative PageRank share determines cla
 | **C** | 95--100% | Long tail |
 
 > See [Current Limitations](#current-limitations) for known scope gaps
-> (cpp runtime-only deps, GitHub-only project identity, etc.).
+> (cpp runtime-only deps, GitHub/GitLab-only project identity, projects with no
+> git upstream, etc.).
 
 ### Funnel
 
@@ -197,7 +212,9 @@ Compact source → extracted-fields reference for the Value stage; per-language 
 
 ## Output Files
 
-Each ecosystem produces four files in `data/sources/{ecosystem}/`:
+Each ecosystem's own pipeline produces four files in `data/sources/{ecosystem}/`
+(the cross-ecosystem steps add `git.csv` — the per-platform URL table built by
+`build_git_urls` — and `check_eol.py` adds `eol.csv`, an Eligibility input):
 
 ### top-packages.csv
 
@@ -249,7 +266,7 @@ All dep-tree packages with downloads, PageRank, and value class.
 | `pagerank` | Download-weighted PageRank score |
 | `value_class` | A/B/C (see [Value Classes](#value-classes)) |
 | `repo_id` | Stable namespaced repo id (`gh/<id>` / `gl/…`), stamped by the `resolve` step |
-| `mirror_url` | GitHub mirror's non-GitHub upstream, when known |
+| `mirror_url` | A GitHub mirror's non-GitHub upstream, when known — or, for a `mirror_url`-only override, the source location of a project with no git upstream at all (see [Manual overrides](#manual-overrides)) |
 | `license` | Registry-reported license (stamped by the per-eco `fetch_licenses.py`) |
 
 cpp differs: `debian_avg_downloads`, `homebrew_avg_downloads`, and the blended
@@ -260,7 +277,7 @@ cpp differs: `debian_avg_downloads`, `homebrew_avg_downloads`, and the blended
 `data/value/value.csv` is the canonical per-repo table — one row per repo
 (on any host), plus one row per orphan package (no `repo`) so nothing is
 dropped. **All classes A/B/C are included** — the complete long-tail table
-is kept. Produced by the rollup steps of `uv run python -m src.value.run_value_pipeline`
+is kept. Produced by the rollup steps of the value stage
 (`eco-fetch` → `resolve` → `unify` → `validation` → `criticality`): the
 `resolve` step (`apply_ecosystems_authority`) re-resolves each package's repo
 identity (override > ecosyste.ms > prior registry data) onto the per-eco
@@ -272,9 +289,14 @@ all per-ecosystem and cross-ecosystem aggregates in one pass (sorted by
 `criticality` step (`src.value.apply_criticality`) stamps `openssf_crit` /
 `eco_crit` / `value_score` and re-sorts the shipped file by `value_score`
 desc — unscored rows (below the 2-component floor, mostly class B/C) sink to
-the end in `top_eco_pct`-desc order. Manual repo / `git_url` corrections are
-applied from `data/value/overrides.csv` (by the `resolve` + `unify` steps);
-its `valid` pins are applied by `build_validation.py`.
+the end in `top_eco_pct`-desc order. Manual corrections come from
+[`data/value/overrides.csv`](#manual-overrides).
+
+After editing `overrides.csv`, `uv run python -m src.value.run_value_pipeline
+--rollup` rebuilds `value.csv` from the existing per-eco `results.csv` without
+re-running the ecosystem sub-pipelines — the one value-stage entry point that
+`scripts/run-pipeline.sh` does not wrap. It leaves the later stages stale, so
+follow it with `scripts/run-pipeline.sh --from-stage risk`.
 
 Per-ecosystem class is computed by summing the group's package PR within
 the ecosystem, ranking groups by that sum desc, and applying the same
@@ -289,22 +311,59 @@ subgraphs.
 | Column | Description |
 |--------|-------------|
 | `repo` | Lowercase repo slug on its `platform` — GitHub `owner/repo`, GitLab's arbitrarily-nested `owner/…/repo`, Sourcehut `~user/repo`, custom best-effort path. Empty only for orphans (no upstream repo at all). |
-| `platform` | Host class of `git_url`: `github` / `gitlab` / `bitbucket` / `sourcehut` / `codeberg` / `custom`. Empty for orphan rows with no URL. Downstream consumers (risk, eligibility) filter on the platforms configured in `settings.json → top_repos.platforms` (currently `github` + `gitlab`). |
+| `platform` | Host class of `git_url`, from `classify()` in `src/value/build_git_urls.py`: `github` / `gitlab` / `bitbucket` / `sourcehut` / `codeberg` / `custom`. `gitlab` means **any** GitLab instance — `classify()` derives its host set from `HOST_NICKNAMES` in `src/sources/gitlab/gitlab_client.py` (gitlab.com, salsa.debian.org, gitlab.gnome.org, gitlab.freedesktop.org, invent.kde.org, code.videolan.org, gitlab.inria.fr, …), plus a `gitlab.*` heuristic for self-hosted instances not yet registered. A registered host missing from that set would fall through to `custom`, get no `repo_id`, and silently drop out of the top-repo scope. Empty for orphan rows with no URL. Downstream consumers (risk, eligibility) filter on the platforms configured in `settings.json → top_repos.platforms` (currently `github` + `gitlab`). |
 | `repo_id` | Stable repo id namespaced by platform: `gh/<numeric>` (GitHub Repos API id) for a resolved GitHub repo; `gl/<nickname>-<id>` (bare `gl/<id>` for gitlab.com; host nicknames per `HOST_NICKNAMES` in `src/sources/gitlab/gitlab_client.py`) for a project resolved via the GitLab project API on any GitLab host; empty for other platforms (no API id) and unresolved/404 repos. |
-| `git_url` | Canonical git clone URL — `https://github.com/<repo>.git` for GitHub repos (so a valid repo always carries both `repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by the shared git-URL helpers (`src/value/git_urls.py`). Empty only for orphan packages with no upstream repo at all. |
-| `mirror_url` | For a **GitHub mirror repo**, the non-GitHub upstream it syncs from (e.g. `gcc-mirror/gcc` → `https://gcc.gnu.org/git/gcc.git`). Two sources: GitHub's own `mirror_url` field from `data/sources/github/repos.csv` (stamped by the rollup's `resolve` step), and override-declared live upstreams — a `data/value/overrides.csv` repo override carrying a non-GitHub `git_url` (e.g. `torvalds/linux` → `https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git`) is preserved here. Empty for ordinary and non-GitHub rows. Authoritative mirror→upstream link when present. |
-| `git_valid` | `True`/`False` — whether the repo's upstream is reachable. Host-agnostic: GitHub rows are checked via the Repos API cache, non-GitHub rows via `git ls-remote`; a GitLab `gl/` `repo_id` counts as proof on its own. `False` covers orphans and unreachable/404 targets. Set by `build_validation`; audit trail in [`data/value/validation.csv`](components/validation.md). |
+| `git_url` | Canonical **git clone URL** — `https://github.com/<repo>.git` for GitHub repos (so a valid repo always carries both `repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by the shared git-URL helpers (`src/value/git_urls.py`). A **non-git** source (tarball / hg / svn) never belongs here — it goes in `mirror_url` (see [Manual overrides](#manual-overrides)). Empty for orphan packages and for projects with no git upstream at all. |
+| `mirror_url` | **Two distinct meanings**, distinguished by whether the row has a repo. (1) *Mirror upstream* — on a **GitHub mirror repo** row, the non-GitHub upstream it syncs from (`gcc-mirror/gcc` → `https://gcc.gnu.org/git/gcc.git`). Two sources: GitHub's own `mirror_url` field from `data/sources/github/repos.csv` (stamped by the rollup's `resolve` step), and override-declared live upstreams — a repo override carrying a non-GitHub `git_url` (`torvalds/linux` → `https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git`) is preserved here. Authoritative mirror→upstream link when present. (2) *No-git source* — on a row with **no `repo`, no `repo_id` and no `git_url`**, the place the code actually lives for a project that has no git upstream at all (tarball / hg / svn: IJG libjpeg, Info-ZIP unzip, GraphicsMagick, Berkeley DB, R). Set by a `mirror_url`-only row in `overrides.csv`. Empty for ordinary rows. |
+| `git_valid` | Strictly `True` / `False` — never blank. `True` iff the repo's upstream is reachable. Host-agnostic: GitHub rows are checked via the Repos API cache, non-GitHub rows via `git ls-remote`; a GitLab `gl/` `repo_id` counts as proof on its own (the GitLab project API confirmed the project exists, which is more authoritative than `ls-remote` on hosts whose `git://` endpoint can fail for a live project). `False` means **either** of two legitimate outcomes: *no `git_url` at all* — an orphan package, or a project with no git upstream (nothing to validate) — **or** *a `git_url` that failed validation* (unreachable / 404). Set by `build_validation`; audit trail in [`data/value/validation.csv`](components/validation.md). |
 | `ecosystems` | Comma-separated list of ecosystems where the repo has packages (e.g. `crates,npm`) |
 | `packages` | Total package count in the repo |
 | `top_eco` | Ecosystem where the repo is highest-ranked (max PR percentile). `npm` / `pypi` / `crates` / `cpp`. |
 | `top_eco_pkg` | Highest-PR package in `top_eco` (e.g. `@babel/helper-plugin-utils` for babel/babel) |
-| `top_eco_pct` | PR percentile in `top_eco` (`100 − pr_cum_pct`). 0–100, **higher = better**. babel/babel ≈ 92.24; tail near 0. |
-| `pr_score` | Cross-ecosystem dependency-mass score, 0–100 (two decimals), **higher = better**. Per ecosystem the repo's PR mass (Σ package PageRank) is `ln`-scaled and min-max normalized over that ecosystem's repos; the per-eco normals combine as a **p-norm with p = 2** (`PR_SCORE_P` in `unify_value_data.py`) — a real second-ecosystem footprint adds up to ~41% (√2), a token registry listing ~nothing, and an extra ecosystem never lowers the score — then the column is rescaled so the top repo = 100 (currently protocolbuffers/protobuf; the four single-eco champions glibc/babel/serde/typing_extensions sit at ~93). Complements `top_eco_pct`: cumulative *position* in one ecosystem vs actual dependency *mass* across all of them. Blank only for groups with no PageRank signal at all. A `value_score` component (weight `pr_score_weight`). |
+| `top_eco_pct` | The repo's PageRank **position** inside its strongest ecosystem (`top_eco`). Per registry (npm / PyPI / crates / cpp = Debian + Homebrew): download stats pick the top packages (95% of cumulative downloads), their dependency tree is fetched, and a download-personalized PageRank (α = 0.85) ranks every node; `top_eco_pct = 100 − cumulative-PR percentile`. 0–100, **higher = better**; the tail sits near 0. A `value_score` component (weight `centrality_weight`). |
+| `pr_score` | Cross-ecosystem dependency **mass**, complementing `top_eco_pct`'s position. 0–100 (two decimals), **higher = better**. Per ecosystem the repo's summed package PageRank is `ln`-scaled and min-max normalized over that ecosystem's repos; the per-eco values combine as a **p = 2 norm** (`PR_SCORE_P` in `unify_value_data.py`) — a real second-ecosystem footprint adds ~41% (√2), a token listing ~nothing, and an extra ecosystem never lowers the score — then the column is rescaled so the top repo = 100. Blank only for groups with no PageRank signal at all. A `value_score` component (weight `pr_score_weight`). |
 | `class` | Strongest of the per-ecosystem classes (A < B < C) |
 | `class_npm`, `class_pypi`, `class_crates`, `class_cpp` | A/B/C from per-ecosystem cumulative PR share; empty if no package in that ecosystem |
 | `openssf_crit` | OpenSSF criticality score ·100 (0–100, two decimals, higher = more critical; the source CSV keeps the raw 0–1 value), joined from `data/sources/openssf/criticality.csv` by `src.value.apply_criticality` (the last value.csv-writing pipeline step). **Non-empty for every valid class-A GitHub repo, archived included** — that is the fetch scope, and `scripts/pipeline_health.py` gates on it. Empty for non-GitHub rows (the tool is GitHub-only), B/C rows outside the fetch scope, and unresolved/invalid repos. |
 | `eco_crit` | ecosyste.ms critical flag: `100` = the repo's canonical package is on ecosyste.ms's critical list, `0` = **explicitly** not on it (`critical=false`), blank = unknown — the fetch didn't resolve, the registry omitted the flag (common for spack/debian cpp packages), or the repo was outside the class-A scope. A checked-but-blank flag is never a real 0. Joined from `data/sources/ecosystems/criticality.csv` by `src.value.apply_criticality`. Unlike `openssf_crit` it covers **GitHub and GitLab**. |
-| `value_score` | Value score, a 0–100 **pro-rata blend** of up to four components — `openssf_crit` (weight 0.6), `eco_crit` (0.2), `top_eco_pct` (0.1), and `pr_score` (0.1). Only the components present for a repo are summed and the total is renormalized by their weight sum, so a repo missing some still lands on the same 0–100 scale. Blank unless at least `min_components` (2) are present. Weights in `settings.json → value_score`, criticality-dominant so a foundational-but-quiet micro-dep can't outrank a genuinely critical project; the two PageRank-family factors (position vs mass) share the former 0.2 centrality weight. Stamped by `src.value.apply_criticality`. GitLab class-A repos (no `openssf_crit`) score from the remaining components — `top_eco_pct` + `pr_score` alone clear the 2-component floor. |
+| `value_score` | Value score, a 0–100 **pro-rata blend** of up to four components — `openssf_crit` (weight 0.6), `eco_crit` (0.2), `top_eco_pct` (0.1), and `pr_score` (0.1). Only the components present for a repo are summed and the total is renormalized by their weight sum, so a repo missing some still lands on the same 0–100 scale. Blank unless at least `min_components` (2) are present. Weights in `settings.json → value_score`, criticality-dominant so a foundational-but-quiet micro-dep can't outrank a genuinely critical project; the two PageRank-family factors (position vs mass) split the 0.2 centrality weight. Stamped by `src.value.apply_criticality`. GitLab class-A repos (no `openssf_crit`) score from the remaining components — `top_eco_pct` + `pr_score` alone clear the 2-component floor. |
+
+### Manual overrides
+
+`data/value/overrides.csv` is the single hand-maintained list of corrections for
+packages whose **upstream registry metadata is wrong** — a gap-correcting layer
+for bad source data, not a patch for a parsing bug. Rows key on
+`(package, ecosystem)`; a row with a blank `reason` is rejected.
+
+| Column | Meaning |
+|---|---|
+| `package`, `ecosystem` | The key. |
+| `repo` | Force the correct GitHub `owner/repo`. Sets `platform` = `github` and derives the matching `git_url`. |
+| `git_url` | Force a corrected non-GitHub **git clone URL**. Absolute: every eco-/registry-derived host is dropped, and `(platform, repo)` are re-derived from it. |
+| `mirror_url` | The project has **no git upstream** (tarball / hg / svn only) — this is where its source actually lives. |
+| `valid` | Pin the git target's validity (`True`/`False`); consumed by `build_validation`, not applied at resolve time. |
+| `reason` | Required free-text justification. |
+
+Two encodings matter.
+
+**Repo / URL correction** — set `repo` (GitHub) or `git_url` (any other host).
+A non-GitHub `git_url` on a `repo` row is the live upstream a GitHub mirror
+syncs from, and is preserved as `mirror_url` (`torvalds/linux` →
+`git.kernel.org`).
+
+**No git upstream** — `git_url` **blank**, the real source URL in `mirror_url`,
+`valid` **blank**. The package resolves to no repo at all, and validity is
+*derived*: no `git_url` ⇒ nothing to validate ⇒ `git_valid` = `False`. A non-git
+URL must never go in `git_url`. The point is that the alternative — mapping the
+package to a fork or a personal mirror — credits the wrong maintainers: IJG's
+libjpeg was crediting `mozilla/mozjpeg`, Info-ZIP's unzip was crediting zlib's
+author. Info-ZIP unzip, GraphicsMagick (hg), Berkeley DB (Oracle tarball) and R
+(svn) are encoded this way.
+
+Overrides are applied by the `resolve` step (`apply_ecosystems_authority` —
+rewrites each `results.csv`'s `git` / `github_repo`, stamps `mirror_url`) and by
+the `unify` step (forces the group's identity); the `valid` pin is applied by
+`build_validation`.
 
 ### Repo class distribution
 
@@ -375,8 +434,26 @@ downstream analyses (e.g. libunistring on savannah). Per-ecosystem GitHub vs
 Git coverage (and the load-bearing class-A subset) is in
 the preview stats sheet → Value.
 
+A GitLab host is only recognised as such if it is registered in `HOST_NICKNAMES`
+(`src/sources/gitlab/gitlab_client.py`) or matches the `gitlab.*` heuristic —
+that registry is what `classify()` derives its GitLab host set from, and it also
+assigns the `gl/<nickname>-<id>` prefix. An unregistered host classifies as
+`custom`, gets no `repo_id`, and silently drops out of the top-repo scope, so a
+new GitLab instance must be added there before its repos can be scored.
+
 To fully fix: per-host adapters for license/EOL/contributor checks against
 codeberg, savannah, sourceware, etc.
+
+### Some projects have no git upstream at all
+
+A handful of load-bearing C/C++ projects publish only tarballs, Mercurial, or
+Subversion — IJG libjpeg, Info-ZIP unzip, GraphicsMagick, Berkeley DB, R. They
+carry no `repo` / `repo_id` / `git_url`, so `git_valid` is `False` and they are
+out of the top-repo scope: **unfundable via a repo**, which is the honest
+answer. Their source location is recorded in `mirror_url` via a
+`mirror_url`-only row in [`overrides.csv`](#manual-overrides), deliberately in
+preference to mapping them onto a fork or a personal GitHub mirror, which would
+credit the wrong maintainers.
 
 ### No package-level quality gate before results.csv
 

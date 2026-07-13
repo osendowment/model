@@ -31,7 +31,7 @@ Workload  → data/risk/workload.csv  (the top risk repos)
 │   ├── has_issues              ← repos.csv (GH /repos)                            [most recent]
 │   └── pushed_at               ← repos.csv (GH /repos)                            [most recent]
 │
-├── Issue backlog
+├── Issue backlog  (github/issues.csv + gitlab/issues.csv, merged)
 │   ├── issues_opened_5y        ← issues.csv (metric=opened_issues, summed)        [2021–2025]
 │   ├── issues_closed_5y        ← issues.csv (metric=closed_issues, summed)        [2021–2025]
 │   ├── net_new_issues_5y       ← derived (opened_5y − closed_5y)                  [2021–2025]
@@ -55,8 +55,9 @@ Workload  → data/risk/workload.csv  (the top risk repos)
 
 ## How It Works
 
-1. **Collect** — `build_workload.py` reads the raw GitHub/Git/OpenSSF source
-   CSVs (`repos.csv`, `commits-years.csv`, `openssf/checks.csv`, `issues.csv`).
+1. **Collect** — `build_workload.py` reads the raw GitHub/GitLab/Git/OpenSSF
+   source CSVs (`repos.csv`, `commits-years.csv`, `openssf/checks.csv`, and both
+   `github/issues.csv` + `gitlab/issues.csv`).
 2. **Join other components** — it joins the three sibling risk CSVs by `repo` to
    pull `loc_eoy` (complexity), `cve_count_5y` (security), and
    `active_contributors_git_5y` (concentration, the AC denominator).
@@ -66,8 +67,9 @@ Workload  → data/risk/workload.csv  (the top risk repos)
 5. **Aggregate** — `aggregate_risk.py` carries **only** this component's `score`
    into `risk.csv` as the `workload` column.
 
-Pipeline order (`src/risk/run_risk_pipeline.py`) — workload is the last
-dimension build because it consumes the three earlier builds:
+Pipeline order (`src/risk/run_risk_pipeline.py`, run via `scripts/run-pipeline.sh
+--from-stage risk`) — workload is the last dimension build because it consumes
+the three earlier builds:
 
 ```
 concentration → complexity → security → workload → aggregate
@@ -75,7 +77,7 @@ concentration → complexity → security → workload → aggregate
 
 ## Collection
 
-Workload reads eight inputs: the top-repo scope file, four raw source CSVs, and
+Workload reads nine inputs: the top-repo scope file, five raw source CSVs, and
 three sibling risk-component CSVs. The three component CSVs are not external
 fetches — they are the upstream build outputs this component depends on. Every
 join is on the stable `repo_id` (rename-proof).
@@ -84,23 +86,26 @@ join is on the stable `repo_id` (rename-proof).
 |---|---|---|---|
 | `data/value/value.csv` | value pipeline | valid class-A top-repo scope (GitHub + GitLab, archived included) | `repo_id` |
 | `data/sources/github/repos.csv` | `src/sources/github/fetch_repo_owner_data.py` (GH /repos) | `created_at`, `has_issues`, `pushed_at` | `repo_id` |
-| `data/sources/git/commits-years.csv` | `src/sources/git/commits_years.py` (git-clone commit analysis) | per `(repo, year)` commit counts → `push_cadence_years` | `repo_id` |
-| `data/sources/openssf/checks.csv` | `src/sources/openssf/extract_checks.py` (from the Scorecard raw `data.json`) | "Maintained" sub-check (0–10) | `repo_id` |
-| `data/sources/github/issues.csv` | `src/sources/github/fetch_issue_metrics.py` | long: `repo, repo_id, year, metric, value` (metric ∈ opened_issues, closed_issues) | `repo_id` |
+| `data/sources/git/commits-years.csv` | `src/sources/git/commits_years.py` (`gh/…`) · `src/sources/gitlab/commits_years.py` (`gl/…`) | per `(repo, year)` commit counts → `push_cadence_years` | `repo_id` |
+| `data/sources/openssf/checks.csv` | `src/sources/openssf/extract_checks.py` (from the Scorecard raw `data.json`) | "Maintained" sub-check (0–10) — info-only, so not a pipeline fetch step | `repo_id` |
+| `data/sources/github/issues.csv` | `src/sources/github/fetch_issue_metrics.py` (GH Search API) | long: `repo, repo_id, year, metric, value` (metric ∈ opened_issues, closed_issues) | `repo_id` |
+| `data/sources/gitlab/issues.csv` | `src/sources/gitlab/fetch_issue_metrics.py` (one exact GitLab-API scan per project) | the same long schema, for `gl/…` repos | `repo_id` |
 | `data/risk/complexity.csv` | `src/risk/build_complexity.py` | `loc_eoy` (codebase size) | `repo_id` |
 | `data/risk/security.csv` | `src/risk/build_security.py` | `cve_count_5y` (security debt) | `repo_id` |
 | `data/risk/concentration.csv` | `src/risk/build_concentration.py` | `active_contributors_git_5y` (AC denominator) | `repo_id` |
 
-### Issues are long-format
+### Issues are long-format, and host-agnostic
 
-`issues.csv` is long (`repo, repo_id, year, metric, value`), one row per
-`(repo, year, metric)`. The build pivots it to `{metric: {repo_id: {year: count}}}` with no
-zero-backfill: a year counts as fetched only if its row exists. Issue
-figures require **every** window year present for **both** metrics
-(the `issues_fetched` gate) — a repo missing even one year (fetch
-failure or never attempted) gets all issue-derived columns blank
-rather than 0, preventing a fetch gap from masquerading as "zero
-issues" and skewing the per-AC percentiles.
+Both issue files share one long schema (`repo, repo_id, year, metric, value`),
+one row per `(repo, year, metric)`, written by two host-specific fetchers over
+disjoint repo sets. The build reads them as a single merged source — GitHub Search
+supplies `gh/…` rows, the GitLab issues API supplies `gl/…` rows — and pivots to
+`{metric: {repo_id: {year: count}}}` with no zero-backfill: a year counts as
+fetched only if its row exists. Issue figures require **every** window year
+present for **both** metrics (the `issues_fetched` gate) — a repo missing even
+one year (fetch failure or never attempted) gets all issue-derived columns blank
+rather than 0, preventing a fetch gap from masquerading as "zero issues" and
+skewing the per-AC percentiles.
 
 ## Processing & scoring
 
@@ -112,8 +117,9 @@ divided by AC. A repo with **zero active contributors** in the window (dormant /
 bot-only) has no real maintainer to spread the burden across; rather than leave
 it unscored, the whole burden is attributed to a single notional maintainer
 (**AC = 1**) and the row is flagged **`dormant = 1`**. Every top repo therefore
-gets a workload score. (`AC` is genuinely missing only if the concentration
-fetch failed — never in the risk scope, where concentration is 100%.)
+gets a workload score. `AC` is genuinely missing only when the concentration
+clone failed — the one case that blanks the per-AC ratios (see the preview stats
+sheet → Risk → Concentration for coverage).
 
 | Column | Formula |
 |---|---|
@@ -152,7 +158,7 @@ A constant axis carries no signal and yields blank.
 score = geometric_mean(loc_per_ac_p, cve_per_ac_p, nni_per_ac_p)
 ```
 
-An integer 0–100, **higher = more workload risk**, floored at 1. A repo with no
+A 0–100 score, **higher = more workload risk**, floored at 1. A repo with no
 fetched issues has a blank `nni_per_ac`; **when its LOC and CVE burdens are both
 present**, `nni_per_ac_p` is neutral-filled to 50 so the row still scores. The
 score is therefore blank only when LOC or CVE (or AC > 0) is missing —
@@ -217,14 +223,13 @@ neither blanks the score on its own).
   windowed contributors (mirror-only, long-dormant — archived repos stay in
   scope) is scored with the whole burden on AC=1 and flagged `dormant = 1`
   rather than dropped; only a genuinely missing AC (a failed concentration
-  fetch — never in the risk scope) blanks the per-AC values and the `score`.
-- **Issues only when enabled.** `issues.csv` is fetched only for repos that have
-  issues enabled and were reachable; an absent repo's `nni_per_ac` stays blank
-  (never 0). When LOC and CVE are both present, its `nni_per_ac_p` is neutral-
-  filled to 50 so the repo keeps a `score` rather than dropping out — the unknown
-  issue burden is treated as median, neither optimistic nor punitive. GitLab
-  repos have no GitHub-issue fetch, so this fill is what lets them score once
-  LOC + CVE are present. If LOC or CVE is also missing the row stays unscored
+  clone) blanks the per-AC values and the `score`.
+- **Issues only when enabled.** Issues are fetched only for repos that have
+  issues enabled and were reachable — on either host; an absent repo's
+  `nni_per_ac` stays blank (never 0). When LOC and CVE are both present, its
+  `nni_per_ac_p` is neutral-filled to 50 so the repo keeps a `score` rather than
+  dropping out — the unknown issue burden is treated as median, neither
+  optimistic nor punitive. If LOC or CVE is also missing the row stays unscored
   (no lone 50).
 - **Upstream-dependent coverage.** Because it reads `complexity.csv`,
   `security.csv`, and `concentration.csv`, any repo those builders couldn't

@@ -53,8 +53,9 @@ Complexity  → data/risk/complexity.csv  (one row per risk-scope repo)
    for dormant repos, a **dated pre-window fallback** (e.g. 2020) recorded by
    `resolve_head` — the latest default-branch commit capped at the last complete
    year, so every repo with code resolves a dated snapshot. The chosen year is
-   recorded in `loc_year`. The row is empty only when **no** sha has analysable
-   code (an empty repo with `loc = 0`).
+   recorded in `loc_year`. If **every** measured snapshot reports `loc = 0`, the
+   empty-tree fallback below scores the repo as a real zero; the row is empty
+   only when no snapshot was measured at all.
 3. **Derive** — map the scc/lizard long rows for the chosen `(repo, sha)` into
    the `_eoy` columns and percentile-rank them.
 4. **Score** — `score` = geometric mean of the LOC and per-function
@@ -80,7 +81,7 @@ so a `0`/empty value is distinguishable from a failed fetch.
 
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
 |---|---|---|---|
-| `git/commits-years.csv` | `src/sources/git/commits_years.py` | per-(repo, year) `last_sha` + `commits` | `repo_id`, `year` |
+| `git/commits-years.csv` | `src/sources/git/commits_years.py` (+ `resolve_head.py`) for `gh/…`; `src/sources/gitlab/commits_years.py` for `gl/…` | per-(repo, year) `last_sha` + `commits` — both hosts merge-write this one file | `repo_id`, `year` |
 | `git/scc.csv` | `src/sources/git/fetch_sha_metrics.py` (scc via `fetch_scc.py` helpers) | scc loc, sloc, complexity, complexity_density | `repo_id`, `sha` |
 | `git/lizard.csv` | `src/sources/git/fetch_sha_metrics.py` | lizard cyclomatic_{total,avg,max} + cognitive_{total,avg,max} | `repo_id`, `sha` |
 
@@ -115,9 +116,22 @@ The snapshot is the last commit on the default branch at the end of the chosen
 year. The walk picks the most-recent year with a usable sha (scc `loc > 0`)
 across the window **and any dated pre-window fallback**; `loc_year` records the
 real year (`"2025"`…`"2021"`, or an earlier year like `"2020"` for a dormant
-repo), or `""` only when no sha has analysable code. Snapshots are always
+repo), or `""` only when no snapshot was measured. Snapshots are always
 dated — `resolve_head` records a dated end-of-year sha for dormant
 repos, never an undated `HEAD`.
+
+### The empty-tree fallback
+
+A snapshot whose scc row reports `loc = 0` is normally skipped as "not
+measured" — historically a failed/shallow checkout wrote an all-zero row. But
+when **every** measured snapshot of a repo reports `loc = 0`, the default branch
+is genuinely code-free: an archived stub stripped to a README
+(`bincode-org/bincode`, `isaacs/inflight-deprecated-do-not-use`). Those repos
+take the newest measured zero snapshot and score as **real zeros** (floor
+percentiles) rather than blanking the dimension, and absent lizard metrics for
+that sha are read as measured zeros too — a tree with zero source files has zero
+functions by definition. A bogus zero from a failed checkout can never reach this
+path for a repo that has any healthy snapshot: the `loc > 0` walk wins first.
 
 ### scc vs lizard metric mapping
 
@@ -168,7 +182,7 @@ in the source files (`scc.csv`, `lizard.csv`).
 | `scc_density_eoy` | scc complexity per line |
 | `cognitive_total` / `cognitive_avg` / `cognitive_max` | lizard cognitive complexity |
 | `cyclomatic_total` / `cyclomatic_avg` / `cyclomatic_max` | lizard McCabe (per-function) |
-| `loc_year` | snapshot year used (a real year — `2025`…`2021`, or a pre-window fallback year for dormant repos; `""` when no sha has analysable code) |
+| `loc_year` | snapshot year used (a real year — `2025`…`2021`, or a pre-window fallback year for dormant repos; `""` when no snapshot was measured) |
 | `loc_eoy_p` | risk percentile of `loc_eoy` (**score input**) |
 | `scc_complexity_eoy_p` | risk percentile of `scc_complexity_eoy` (informational) |
 | `cognitive_max_p` | risk percentile of `cognitive_max` (informational) |
@@ -188,9 +202,10 @@ blank unless all four are present).
 
 See the preview stats sheet → Risk → Complexity for current per-signal coverage over the top repos and the score distribution.
 
-A row is empty only when **no** sha yields analysable code — a genuinely empty
-repo (GitHub `size = 0`, scc `loc = 0`), not a fetch gap (e.g.
-`braveg1rl/performance-now`).
+A row is empty only when **no snapshot was measured at all** — a repo with no
+usable sha, or one whose checkouts never produced an scc row. A genuinely
+code-free tree (every snapshot `loc = 0`) is *not* a gap: the empty-tree fallback
+scores it as a real zero.
 
 Some repos have scc but no lizard cognitive (e.g. `nodejs/node`,
 `gcc-mirror/gcc`, `scipy/scipy`): they are either dropped by the false-zero

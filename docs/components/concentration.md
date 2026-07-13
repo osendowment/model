@@ -4,9 +4,12 @@ How dependent is a project on a handful of people? The concentration component
 measures the **distribution of authorship** across a repo's contributors and
 distills it into one **concentration-risk score (`score`, 0–100, higher = more
 concentrated = more at-risk)** that feeds `data/risk/risk.csv` as the column
-`concentration`. It is measured from one source: the **git-clone commit log**,
-which yields a bus factor, an HHI, and contributor counts over both a lifetime
-and a windowed period; only the `_5y` axis drives the score.
+`concentration`. It is git-clone-derived end to end, from one source: the
+**git-clone commit log** (`git log --no-merges` on a bare treeless clone,
+mailmap applied, identities merged, bots dropped), which yields a bus factor, an
+HHI, and contributor counts over both a lifetime and a windowed period; only the
+`_5y` axis drives the score. No host contributors API is involved, so there is
+no GitHub-only axis to go blank on a GitLab repo.
 
 Scope: the valid class-A top repos in the risk pipeline — GitHub + GitLab,
 archived included (see [value.md](../value.md)). The method is host-agnostic:
@@ -108,12 +111,14 @@ Concentration  → data/risk/concentration.csv  (one row per risk-scope repo)
 5. **Aggregate** — `aggregate_risk.py` carries **only** `score` into `risk.csv`
    as the `concentration` column.
 
-Pipeline order. The git-clone contributor fetcher runs **inside** the risk
+Pipeline order (`src/risk/run_risk_pipeline.py`, run via `scripts/run-pipeline.sh
+--from-stage risk`). The git-clone contributor fetcher runs **inside** the risk
 pipeline — it is the only source of the concentration score and of workload's
-per-contributor divisor:
+per-contributor divisor, so a repo newly entering scope is measured on the same
+run that scores it:
 
 ```
-src.risk.run_risk_pipeline:  … → git-contributors (clone) → … → concentration (build) → … → aggregate
+… → git-contributors (clone) → … → concentration (build) → … → aggregate
 ```
 
 ## Collection
