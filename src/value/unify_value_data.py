@@ -362,14 +362,18 @@ def load_repo_overrides(path: Path = OVERRIDES_FILE) -> dict[tuple[str, str], di
                      file's `repo` column is always a GitHub `owner/repo`; forcing
                      a non-GitHub identity is done via the `git_url` column.
     - `git_url`    — force a corrected non-GitHub clone URL (lowercased).
-    - `mirror_url` — for a project with NO git upstream at all (tarball / hg /
-                     svn only: IJG libjpeg, Info-ZIP, GraphicsMagick, Berkeley
-                     DB, R). Names where the code actually lives while claiming
-                     NO git identity, so the package resolves to no repo instead
-                     of to a fork or personal mirror that would credit the wrong
-                     maintainers. Set it with `git_url` blank and `valid=False`.
+    - `mirror_url` — the source location when it is NOT a git URL (tarball / hg /
+                     svn: IJG libjpeg, Info-ZIP, GraphicsMagick, Berkeley DB, R).
+                     A non-git URL never belongs in `git_url`. Naming it here
+                     records where the code lives while claiming NO git identity,
+                     so the package resolves to no repo rather than to a fork or
+                     personal mirror that would credit the wrong maintainers.
+                     Leave `valid` blank: with no `git_url` there is no git target
+                     to validate, so `git_valid` falls out False on its own.
     - `valid`      — manually pin the target's validity (`True`/`False`),
-                     consumed later by `build_validation` (NOT applied here).
+                     consumed later by `build_validation` (NOT applied here). Only
+                     for rescuing a false verdict on a real git target; a
+                     `mirror_url` row does not need it.
 
     Each value is `{"repo": str, "git_url": str, "mirror_url": str, "valid": str}`
     (any field may be empty). Rows with a blank `reason` are rejected (these are

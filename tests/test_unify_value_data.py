@@ -1045,14 +1045,15 @@ def test_mirror_url_only_override_claims_no_git_identity():
 
     Regression: IJG libjpeg was credited to mozilla/mozjpeg and Info-ZIP's unzip
     to madler/unzip (zlib's author) — a fork/mirror standing in for a repo-less
-    upstream credits the wrong maintainers. Encoding is: git_url blank,
-    mirror_url = where the code lives, valid=False.
+    upstream credits the wrong maintainers. Encoding is: a non-git URL never goes
+    in git_url; it goes in mirror_url, and `valid` is left blank because with no
+    git_url there is no git target to validate.
     """
     from src.value.apply_ecosystems_authority import resolve
 
     ov = {"repo": "", "git_url": "",
           "mirror_url": "https://www.ijg.org/files/jpegsrc.v10.tar.gz",
-          "valid": "False"}
+          "valid": ""}
     # the eco/prior tiers offer a plausible-but-wrong repo; the override must win
     git, github, guess = resolve(
         prior_git="https://github.com/mozilla/mozjpeg.git",
@@ -1077,15 +1078,45 @@ def test_mirror_url_only_override_is_loaded_and_pins_nothing():
     jpeg = ovs[("jpeg", "cpp")]
     assert jpeg["mirror_url"].startswith("https://www.ijg.org/")
     assert jpeg["git_url"] == "" and jpeg["repo"] == ""
-    assert jpeg["valid"] == "False"
 
     # pinning must not invent a verdict keyed on the mirror_url
     verdicts = apply_overrides({}, {("jpeg", "cpp"): jpeg})
     assert verdicts == {}
 
-    # every no-git-upstream row uses the same encoding
+    # Every no-git-upstream row uses the same encoding: the non-git URL lives in
+    # mirror_url, git_url is empty, and `valid` is left blank — validity is
+    # DERIVED (no git target => git_valid False), never hand-pinned here.
     with open(OVERRIDES_FILE, encoding="utf-8") as f:
         for r in _csv.DictReader(f):
             if (r.get("mirror_url") or "").strip() and not (r.get("repo") or "").strip():
                 assert not (r.get("git_url") or "").strip(), r["package"]
-                assert r["valid"] == "False", r["package"]
+                assert not (r.get("valid") or "").strip(), r["package"]
+
+
+def test_classify_recognises_every_declared_gitlab_host():
+    """`classify` must treat every host in HOST_NICKNAMES as GitLab.
+
+    Regression: the GitLab test was hard-coded to `gitlab.*` / salsa.debian.org,
+    so invent.kde.org and code.videolan.org — both declared in HOST_NICKNAMES,
+    which assigns them a `gl/{nickname}-{id}` prefix — fell through to `custom`,
+    got no repo_id, and silently dropped out of the top-repo scope. The two lists
+    must not drift apart again.
+    """
+    from src.sources.gitlab.gitlab_client import HOST_NICKNAMES
+    from src.value.build_git_urls import classify
+
+    for host in HOST_NICKNAMES:
+        plat, _ = classify(f"https://{host}/group/proj.git")
+        assert plat == "gitlab", f"{host} classified as {plat!r}, not gitlab"
+
+    # the two that were broken, with their real project paths
+    assert classify("https://invent.kde.org/libraries/qca.git")[0] == "gitlab"
+    assert classify("https://code.videolan.org/videolan/vlc.git")[0] == "gitlab"
+
+    # and non-GitLab git hosts must NOT be swept up: anongit.kde.org is KDE's old
+    # cgit, a different host from invent.kde.org.
+    for url in ("https://anongit.kde.org/qca.git",
+                "https://git.savannah.gnu.org/git/make.git",
+                "https://sourceware.org/git/glibc.git"):
+        assert classify(url)[0] == "custom", url
+    assert classify("https://github.com/numpy/numpy.git")[0] == "github"

@@ -28,6 +28,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.common.lfs import is_lfs_pointer
+from src.sources.gitlab.gitlab_client import HOST_NICKNAMES
 
 console = Console()
 
@@ -44,12 +45,21 @@ GIT_HOST_PRIORITY = ("github", "gitlab", "codeberg", "sourcehut", "bitbucket", "
 CUSTOM_HOSTS = {
     "git.savannah.gnu.org", "git.savannah.nongnu.org",
     "sourceware.org", "git.kernel.org", "code.qt.io",
-    "anongit.kde.org", "invent.kde.org",
-    "anongit.freedesktop.org", "gitlab.freedesktop.org",  # FdO is GitLab — special case below
+    "anongit.kde.org",  # KDE's old cgit — NOT GitLab (invent.kde.org is, see GITLAB_HOSTS)
+    "anongit.freedesktop.org",
     "git.gnome.org", "gitweb.gentoo.org",
     "pagure.io", "src.fedoraproject.org",
     "git.eclipse.org", "review.openstack.org",
 }
+
+# The GitLab instances we recognise. `HOST_NICKNAMES` is the single registry of
+# them (it also assigns each host its `gl/{nickname}-{id}` prefix), so derive the
+# set from it rather than re-listing hosts here: a host declared there but not
+# recognised as GitLab by `classify` would fall through to `custom`, get no
+# repo_id, and silently drop out of the top-repo scope — which is exactly what
+# happened to invent.kde.org and code.videolan.org. `gitlab.*` stays as a
+# heuristic for self-hosted instances not (yet) in the registry.
+GITLAB_HOSTS = set(HOST_NICKNAMES)
 
 GIT_INDICATORS = ("git.", "/git/", "/cgit", "/scm/", "/gitweb")
 
@@ -104,8 +114,10 @@ def classify(url: str) -> tuple[str, str]:
     if host == "github.com" and len(parts) >= 2:
         return ("github", _slug(host, parts[0].lower(), parts[1].lower()))
 
-    # GitLab: gitlab.com, gitlab.* self-hosted, salsa.debian.org, gitlab.freedesktop.org, gitlab.gnome.org, ...
-    if (host.startswith("gitlab.") or host == "salsa.debian.org") and len(parts) >= 2:
+    # GitLab: every host in the HOST_NICKNAMES registry (gitlab.com, salsa.debian.org,
+    # gitlab.gnome.org, invent.kde.org, code.videolan.org, …), plus any `gitlab.*`
+    # self-hosted instance not yet registered.
+    if (host.startswith("gitlab.") or host in GITLAB_HOSTS) and len(parts) >= 2:
         # GitLab allows arbitrarily nested groups — `gitlab.freedesktop.org/xorg/lib/libXau`
         # is a 3-segment project path, not a 2-segment one. Strip GitLab's `/-/` UI
         # separator (e.g. `/-/issues`, `/-/blob/main/...`) and keep all path segments
