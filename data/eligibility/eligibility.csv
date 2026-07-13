@@ -83,7 +83,6 @@ burntsushi/winapi-util,gh/146040682,True,True,True,True,True,3,4,True
 businho/pytest-ruff,gh/599731435,True,False,True,True,False,2,4,True
 bytecodealliance/rustix,gh/295544240,True,True,True,True,True,3,4,True
 bytecodealliance/wasi-rs,gh/196445196,True,True,True,True,True,3,4,True
-bzip2/bzip2,gl/12551088,True,False,True,False,False,2,4,True
 c-ares/c-ares,gh/571708,True,False,True,True,False,2,4,True
 calvinmetcalf/minimalistic-assert,gh/29144257,True,False,True,True,False,3,4,True
 calvinmetcalf/process-nextick-args,gh/36039131,True,False,True,True,False,3,4,True

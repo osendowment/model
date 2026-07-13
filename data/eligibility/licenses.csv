@@ -83,7 +83,6 @@ burntsushi/winapi-util,gh/146040682,unlicense or mit,registry,True
 businho/pytest-ruff,gh/599731435,mit,github,True
 bytecodealliance/rustix,gh/295544240,apache-2.0 with llvm-exception or apache-2.0 or mit,registry,True
 bytecodealliance/wasi-rs,gh/196445196,apache-2.0 with llvm-exception or apache-2.0 or mit,registry,True
-bzip2/bzip2,gl/12551088,bzip2-1.0.6,gitlab,True
 c-ares/c-ares,gh/571708,mit,registry,True
 calvinmetcalf/minimalistic-assert,gh/29144257,isc,registry,True
 calvinmetcalf/process-nextick-args,gh/36039131,mit,registry,True

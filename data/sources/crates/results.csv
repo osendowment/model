@@ -2288,7 +2288,7 @@
 "wasmtime-types","bytecodealliance/wasmtime","https://github.com/bytecodealliance/wasmtime.git","eco","2387185","102426","1388910","2741318","4670688","3032586","True","1.622e-05","C","gh/101767772","","apache-2.0 with llvm-exception"
 "cid","multiformats/rust-cid","https://github.com/multiformats/rust-cid.git","eco","2553683","485592","791828","1570334","4135405","5785257","True","1.621e-05","C","gh/79384047","","mit"
 "cranelift-control","bytecodealliance/wasmtime","https://github.com/bytecodealliance/wasmtime.git","eco","1963092","0","0","730401","2657784","6427276","True","1.62e-05","C","gh/101767772","","apache-2.0 with llvm-exception"
-"varint-rs","leonskidev/varint-rs","https://github.com/leonskidev/varint-rs.git","eco","2550349","1073","65468","597671","4022251","8065284","True","1.619e-05","C","","","0bsd"
+"varint-rs","leonskidev/varint-rs","https://github.com/leonskidev/varint-rs.git","native","2550349","1073","65468","597671","4022251","8065284","True","1.619e-05","C","","","0bsd"
 "wasmtime-jit-icache-coherence","bytecodealliance/wasmtime","https://github.com/bytecodealliance/wasmtime.git","eco","2445915","0","32560","2327077","4777084","5092858","True","1.618e-05","C","gh/101767772","","apache-2.0 with llvm-exception"
 "frunk_derives","lloydmeta/frunk","https://github.com/lloydmeta/frunk.git","eco","1540644","136450","952505","1641342","2387355","2585571","True","1.617e-05","C","gh/71159954","","mit"
 "tokio-serde","carllerche/tokio-serde","https://github.com/carllerche/tokio-serde.git","eco","2496441","932847","999073","1868069","3294386","5387834","True","1.614e-05","C","gh/84993006","","mit or apache-2.0"

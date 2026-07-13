@@ -961,4 +961,5 @@ gl/debian-4313,https://salsa.debian.org/xorg-team/lib/libxdmcp,A,True,cpp,libxdm
 gl/debian-4314,https://salsa.debian.org/xorg-team/lib/libxext,A,True,cpp,libxext,spack.io,True,,,,0.47241906349867996,0,67,2026-07-06T17:14:41Z
 gl/debian-4328,https://salsa.debian.org/xorg-team/lib/libxrender,A,True,cpp,libxrender,spack.io,True,,,,1.2852577462831736,0,26,2026-07-06T17:14:41Z
 ,https://sourceware.org/git/binutils-gdb,A,True,cpp,binutils,spack.io,True,,,,1.0143115186883422,0,34,2026-07-06T17:14:41Z
+,https://sourceware.org/git/bzip2,A,True,cpp,bzip2,spack.io,True,,,,0.3751563151313047,0,77,2026-07-06T17:14:41Z
 ,https://sourceware.org/git/glibc,A,True,cpp,glibc,spack.io,True,,,,28.962791331606923,0,0,2026-07-06T17:14:41Z
