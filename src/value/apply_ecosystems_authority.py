@@ -125,6 +125,15 @@ def resolve(prior_git: str, prior_github: str, strong: list[str], weak: list[str
             if plat:
                 merged[plat] = canon
                 srcs[plat] = "override"
+        elif ov.get("mirror_url"):
+            # The project has NO git upstream (tarball / hg / svn only). Drop every
+            # eco/prior-derived URL and claim no identity at all: the alternative is
+            # a fork or a personal mirror, which credits the wrong maintainers — the
+            # exact failure this file exists to correct (IJG libjpeg was crediting
+            # mozilla/mozjpeg; Info-ZIP was crediting zlib's author). Where the code
+            # really lives is recorded in `mirror_url`, stamped by `apply_eco`.
+            merged.clear()
+            srcs.clear()
 
     git_plat = next((p for p in GIT_HOST_PRIORITY if merged.get(p)), None)
     git = merged.get(git_plat, "") if git_plat else ""
@@ -135,7 +144,7 @@ def resolve(prior_git: str, prior_github: str, strong: list[str], weak: list[str
     # (non-GitHub canonical repos may still carry a github mirror downstream).
     if git_plat == "github":
         github = _github_repo_from_url(git)
-    elif ov and ov.get("git_url"):
+    elif ov and (ov.get("git_url") or ov.get("mirror_url")):
         github = ""
     else:
         github = prior_github
@@ -363,6 +372,15 @@ def apply_eco(ecosystem: str, overrides: dict, is_invalid, canonical: dict,
             fields.append(col)
     _resolve_github(rows, offline=offline, force=force)
     _resolve_gitlab(rows, offline=offline, force=force)
+
+    # A curated `mirror_url` override names where a repo-less project's source
+    # actually lives. Stamp it AFTER the identity pass: _resolve_github fills
+    # mirror_url from github/repos.csv (blank for these rows, since they resolve
+    # to no repo), so stamping earlier would be overwritten.
+    for r in rows:
+        ov = overrides.get((r["package"], ecosystem))
+        if ov and ov.get("mirror_url"):
+            r["mirror_url"] = ov["mirror_url"]
 
     tmp = results_path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:

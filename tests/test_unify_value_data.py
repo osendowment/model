@@ -619,7 +619,8 @@ class TestRepoOverrides:
         idx = load_repo_overrides(p)
         # key is (package, ecosystem); slug is lowercased like the rest of the pipeline
         assert idx == {("@sinclair/typebox", "npm"):
-                       {"repo": "sinclairzx81/typebox", "git_url": "", "valid": ""}}
+                       {"repo": "sinclairzx81/typebox", "git_url": "",
+                        "mirror_url": "", "valid": ""}}
 
     def test_load_overrides_skips_blank_reason(self, tmp_path):
         # A curated override MUST carry a reason; a blank-reason row is dropped.
@@ -636,9 +637,10 @@ class TestRepoOverrides:
                     ["pkg-b", "crates", "owner/repo", "", "True", "rescue false-negative"]])
         idx = load_repo_overrides(p)
         assert idx[("pkg-a", "pypi")] == {
-            "repo": "", "git_url": "https://example.com/x.git", "valid": ""}
+            "repo": "", "git_url": "https://example.com/x.git",
+            "mirror_url": "", "valid": ""}
         assert idx[("pkg-b", "crates")] == {
-            "repo": "owner/repo", "git_url": "", "valid": "True"}
+            "repo": "owner/repo", "git_url": "", "mirror_url": "", "valid": "True"}
 
     def test_override_forces_github_repo_over_registry_value(self):
         # A package whose registry-derived github_repo / git_url point at the
@@ -1035,3 +1037,55 @@ class TestPrScore:
         assert blanks[0]["packages"] == 1
         ranked = next(a for a in aggs if a["repo"] == "o/ranked")
         assert ranked["pr_score"] == "100.00"
+
+
+def test_mirror_url_only_override_claims_no_git_identity():
+    """A project with NO git upstream (tarball/hg/svn only) must resolve to no
+    repo, with its real home recorded in mirror_url.
+
+    Regression: IJG libjpeg was credited to mozilla/mozjpeg and Info-ZIP's unzip
+    to madler/unzip (zlib's author) — a fork/mirror standing in for a repo-less
+    upstream credits the wrong maintainers. Encoding is: git_url blank,
+    mirror_url = where the code lives, valid=False.
+    """
+    from src.value.apply_ecosystems_authority import resolve
+
+    ov = {"repo": "", "git_url": "",
+          "mirror_url": "https://www.ijg.org/files/jpegsrc.v10.tar.gz",
+          "valid": "False"}
+    # the eco/prior tiers offer a plausible-but-wrong repo; the override must win
+    git, github, guess = resolve(
+        prior_git="https://github.com/mozilla/mozjpeg.git",
+        prior_github="mozilla/mozjpeg",
+        strong=["https://github.com/mozilla/mozjpeg.git"],
+        weak=[],
+        ov=ov,
+        is_invalid=lambda _u: False,
+    )
+    assert git == ""      # no git identity claimed
+    assert github == ""   # and no GitHub slug survives
+
+
+def test_mirror_url_only_override_is_loaded_and_pins_nothing():
+    """The loader surfaces mirror_url, and a mirror_url-only row is a legitimate
+    no-op for the validity pinner (there is no git target to pin)."""
+    import csv as _csv
+    from src.value.build_validation import apply_overrides
+    from src.value.unify_value_data import load_repo_overrides, OVERRIDES_FILE
+
+    ovs = load_repo_overrides(OVERRIDES_FILE)
+    jpeg = ovs[("jpeg", "cpp")]
+    assert jpeg["mirror_url"].startswith("https://www.ijg.org/")
+    assert jpeg["git_url"] == "" and jpeg["repo"] == ""
+    assert jpeg["valid"] == "False"
+
+    # pinning must not invent a verdict keyed on the mirror_url
+    verdicts = apply_overrides({}, {("jpeg", "cpp"): jpeg})
+    assert verdicts == {}
+
+    # every no-git-upstream row uses the same encoding
+    with open(OVERRIDES_FILE, encoding="utf-8") as f:
+        for r in _csv.DictReader(f):
+            if (r.get("mirror_url") or "").strip() and not (r.get("repo") or "").strip():
+                assert not (r.get("git_url") or "").strip(), r["package"]
+                assert r["valid"] == "False", r["package"]

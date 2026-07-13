@@ -358,17 +358,23 @@ def load_repo_overrides(path: Path = OVERRIDES_FILE) -> dict[tuple[str, str], di
     `(package, ecosystem)` and carries up to three corrections plus a required
     free-text `reason`:
 
-    - `repo`    — force the corrected GitHub slug (lowercased). The overrides
-                  file's `repo` column is always a GitHub `owner/repo`; forcing
-                  a non-GitHub identity is done via the `git_url` column.
-    - `git_url` — force a corrected non-GitHub clone URL (lowercased).
-    - `valid`   — manually pin the target's validity (`True`/`False`),
-                  consumed later by `build_validation` (NOT applied here).
+    - `repo`       — force the corrected GitHub slug (lowercased). The overrides
+                     file's `repo` column is always a GitHub `owner/repo`; forcing
+                     a non-GitHub identity is done via the `git_url` column.
+    - `git_url`    — force a corrected non-GitHub clone URL (lowercased).
+    - `mirror_url` — for a project with NO git upstream at all (tarball / hg /
+                     svn only: IJG libjpeg, Info-ZIP, GraphicsMagick, Berkeley
+                     DB, R). Names where the code actually lives while claiming
+                     NO git identity, so the package resolves to no repo instead
+                     of to a fork or personal mirror that would credit the wrong
+                     maintainers. Set it with `git_url` blank and `valid=False`.
+    - `valid`      — manually pin the target's validity (`True`/`False`),
+                     consumed later by `build_validation` (NOT applied here).
 
-    Each value is `{"repo": str, "git_url": str, "valid": str}` (any field may
-    be empty). Rows with a blank `reason` are rejected (these are curated and
-    must be explained). A row that sets none of the three is skipped (nothing
-    to do). Missing file → no overrides.
+    Each value is `{"repo": str, "git_url": str, "mirror_url": str, "valid": str}`
+    (any field may be empty). Rows with a blank `reason` are rejected (these are
+    curated and must be explained). A row that sets none of them is skipped
+    (nothing to do). Missing file → no overrides.
     """
     if not path.exists():
         return {}
@@ -388,6 +394,7 @@ def load_repo_overrides(path: Path = OVERRIDES_FILE) -> dict[tuple[str, str], di
             override = {
                 "repo": _normalise_repo(r.get("repo") or ""),
                 "git_url": (r.get("git_url") or "").strip().lower(),
+                "mirror_url": (r.get("mirror_url") or "").strip(),
                 "valid": (r.get("valid") or "").strip(),
             }
             if not any(override.values()):
@@ -565,7 +572,12 @@ def aggregate_by_repo(
                 _select_group_github_repo(members, group_git_url), group_git_url,
             )
             agg_git_url = group_git_url
-            agg_mirror_url = ""
+            # Keep a curated mirror_url here. An overrides.csv row may name where
+            # a repo-LESS project's code actually lives (IJG's tarball, Info-ZIP,
+            # GraphicsMagick's hg, R's svn) while claiming no git identity; such a
+            # group lands in this branch with no repo_id and no git_url, so
+            # blanking it would throw away the only pointer we have to the source.
+            agg_mirror_url = group_mirror_url
 
         a: dict = {
             "group_key": key,

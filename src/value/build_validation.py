@@ -148,6 +148,12 @@ def apply_overrides(
             key = (ov["repo"].strip().lower(), "github_repo")
         elif ov.get("git_url"):
             key = (ov["git_url"].strip().lower(), "git_url")
+        elif ov.get("mirror_url"):
+            # A mirror_url-only row declares "this project has no git upstream"
+            # (valid=False). There is deliberately no git target to pin a verdict
+            # on — the row resolves to no repo at all — so this is a legitimate
+            # no-op, not the misconfiguration the warning below is for.
+            continue
         else:
             console.print(
                 f"[yellow]overrides.csv: {pkg}/{eco} pins valid={pin} but has "
