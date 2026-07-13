@@ -30,3 +30,4 @@ data/preview/~$*.xlsx
 
 # Ad-hoc review notes over the preview table; not a pipeline output
 data/preview/board-review.md
+data/preview/board-review.pdf
