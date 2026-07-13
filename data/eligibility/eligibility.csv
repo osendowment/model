@@ -266,7 +266,6 @@ gnome/pango,gh/4537144,True,True,True,True,True,2,4,True
 gnutls/gnutls,gl/179611,True,False,True,True,False,2,4,True
 gnutls/libtasn1,gl/919981,True,False,True,True,False,1,4,False
 google/brotli,gh/24993138,True,True,False,True,False,2,4,True
-google/highway,gh/206791328,True,False,True,True,False,2,4,True
 google/zerocopy,gh/534354967,True,True,False,True,False,3,4,True
 googleapis/google-cloud-python,gh/16316451,True,True,False,True,False,3,4,True
 googleapis/python-crc32c,gh/159736041,True,False,True,False,False,3,4,True
@@ -918,6 +917,7 @@ websockets/ws,gh/2744972,True,True,True,True,True,3,4,True
 wesleytodd/setprototypeof,gh/30301031,True,True,True,True,True,3,4,True
 whitequark/ipaddr.js,gh/2110585,True,True,True,True,True,3,4,True
 withoutboats/heck,gh/86326466,True,True,True,True,True,3,4,True
+xiph/ogg,gh/33956205,True,True,True,True,True,2,4,True
 xorg/lib/libx11,gl/freedesktop-701,True,True,True,True,True,1,4,False
 xorg/lib/libxau,gl/freedesktop-706,True,True,True,True,True,1,4,False
 xorg/lib/libxdmcp,gl/freedesktop-712,True,True,True,True,True,1,4,False

@@ -96,6 +96,7 @@ git://git.vpit.fr/?p=perl%2fmodules%2fvariable-magic.git,False,ls-remote,2026-07
 git://git.woa.com/tencent-cloud-datalake/goosefs-client-rust,False,ls-remote,2026-07-06T10:53:22Z
 git://git.yoctoproject.org/cgit/cgit.cgi/libfakekey/snapshot/libfakekey-0.3.tar.bz2,False,ls-remote,2026-07-06T17:11:51Z
 git://git.zapb.de/libjaylink/libjaylink,False,ls-remote,2026-05-17T23:15:11Z
+git://infozip.sourceforge.net/unzip.html,False,ls-remote,2026-07-13T10:56:31Z
 git://jugit.fz-juelich.de/mlz/libcerf,False,ls-remote,2026-05-17T23:15:11Z
 git://repo.or.cz/socat.git,False,ls-remote,2026-07-06T17:11:51Z
 git://sourceware.org/git/binutils-gdb.git,True,ls-remote,2026-05-31T23:17:28Z
@@ -104,8 +105,11 @@ git://sourceware.org/git/debugedit.git,True,ls-remote,2026-05-17T23:15:11Z
 git://sourceware.org/git/elfutils.git,True,ls-remote,2026-04-27T20:41:04Z
 git://sourceware.org/git/glibc.git,True,ls-remote,2026-07-12T19:51:14Z
 git://sourceware.org/git/lvm2.git,True,ls-remote,2026-04-27T20:41:04Z
+git://svn.r-project.org/r,False,ls-remote,2026-07-13T10:56:31Z
 git://thekelleys.org.uk/dnsmasq.git,True,ls-remote,2026-05-17T23:15:11Z
 git://w1.fi/cgit/hostap/,False,ls-remote,2026-07-06T17:11:51Z
+git://www.ijg.org/files/jpegsrc.v10.tar.gz,False,ls-remote,2026-07-13T10:56:31Z
+git://www.oracle.com/database/technologies/related/berkeleydb.html,False,ls-remote,2026-07-13T10:56:31Z
 git://xenbits.xen.org/git-http/xen.git,False,ls-remote,2026-05-17T23:15:11Z
 https://aomedia.googlesource.com/aom.git,True,ls-remote,2026-04-27T20:41:04Z
 https://bitbucket.org/brandon/backports.ssl_match_hostname.git,False,ls-remote,2026-05-17T23:15:11Z
@@ -159,6 +163,7 @@ https://codeberg.org/wvwwvwwv/synchronous-and-asynchronous.git,True,ls-remote,20
 https://codeberg.org/xfix/array-macro.git,False,ls-remote,2026-05-17T23:15:11Z
 https://codeberg.org/xfix/enum-map.git,True,ls-remote,2026-05-17T23:15:11Z
 https://dev.gnupg.org/source/libgcrypt.git,False,ls-remote,2026-07-06T10:53:22Z
+https://foss.heptapod.net/graphicsmagick/graphicsmagick,False,ls-remote,2026-07-13T10:56:31Z
 https://git.libssh.org/projects/libssh.git,True,ls-remote,2026-04-27T20:41:04Z
 https://git.openldap.org/openldap/openldap.git,True,ls-remote,2026-04-27T20:41:04Z
 https://git.postgresql.org/git/postgresql.git,True,ls-remote,2026-04-27T20:41:04Z
@@ -367,6 +372,7 @@ https://gitlab.gnome.org/gnome/gobject-introspection.git,True,ls-remote,2026-07-
 https://gitlab.gnome.org/gnome/gspell.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.gnome.org/gnome/gtk-mac-integration.git,True,ls-remote,2026-07-06T17:11:51Z
 https://gitlab.gnome.org/gnome/gtk-vnc.git,True,ls-remote,2026-07-06T10:53:22Z
+https://gitlab.gnome.org/gnome/gtk.git,True,ls-remote,2026-07-13T10:56:31Z
 https://gitlab.gnome.org/gnome/gtkmm-documentation.git,True,ls-remote,2026-07-06T17:11:51Z
 https://gitlab.gnome.org/gnome/gtksourceview.git,True,ls-remote,2026-05-17T23:15:11Z
 https://gitlab.gnome.org/gnome/libdazzle.git,True,ls-remote,2026-05-17T23:15:11Z

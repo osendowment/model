@@ -266,7 +266,6 @@ gnome/pango,gh/4537144,False,0,0,0,100.0,182,51,False,False,,False,False,,False,
 gnutls/gnutls,gl/179611,,,0,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 gnutls/libtasn1,gl/919981,,,0,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 google/brotli,gh/24993138,False,0,0,0,100.0,14674,1337,False,False,,False,False,,False,,,False,0,,0,100.0,,,google.com,company,0,1,True,False
-google/highway,gh/206791328,False,0,0,0,100.0,5472,431,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
 google/zerocopy,gh/534354967,False,0,0,0,100.0,2279,151,False,False,,False,False,,False,,,False,0,,0,100.0,,,google.com,company,0,1,True,False
 googleapis/google-cloud-python,gh/16316451,False,0,0,0,100.0,5275,1683,False,False,,False,False,,False,,,False,0,,0,100.0,,,google.com,company,0,1,True,False
 googleapis/python-crc32c,gh/159736041,False,0,0,0,100.0,28,33,False,False,,False,False,,False,,,False,0,,0,100.0,,,,,1,100,False,True
@@ -918,6 +917,7 @@ websockets/ws,gh/2744972,False,0,0,0,100.0,22742,2514,True,True,github,False,Fal
 wesleytodd/setprototypeof,gh/30301031,True,1,3,4,36.46,53,12,True,True,github,False,False,,False,,,True,1,,0,100.0,,,,,1,71,True,True
 whitequark/ipaddr.js,gh/2110585,True,3,4,7,31.13,631,102,False,False,,False,False,,False,,,True,0,,0,100.0,,,,,1,68,True,True
 withoutboats/heck,gh/86326466,False,0,0,0,100.0,588,47,False,False,,False,False,,False,,,True,0,,0,100.0,,,,,1,100,True,True
+xiph/ogg,gh/33956205,False,0,0,0,100.0,418,201,False,False,,False,False,,False,,,False,0,,0,100.0,xiph.org,nonprofit,,,0.5,79,True,True
 xorg/lib/libx11,gl/freedesktop-701,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,freedesktop.org,nonprofit,,,0.5,79,True,True
 xorg/lib/libxau,gl/freedesktop-706,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,freedesktop.org,nonprofit,,,0.5,79,True,True
 xorg/lib/libxdmcp,gl/freedesktop-712,,,,0,100.0,,,False,False,,False,False,,False,,,False,0,,0,100.0,freedesktop.org,nonprofit,,,0.5,79,True,True

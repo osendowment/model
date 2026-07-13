@@ -266,7 +266,6 @@ gnome/pango,gh/4537144,False,False,True
 gnutls/gnutls,gl/179611,False,False,True
 gnutls/libtasn1,gl/919981,False,False,True
 google/brotli,gh/24993138,False,False,True
-google/highway,gh/206791328,False,False,True
 google/zerocopy,gh/534354967,False,False,True
 googleapis/google-cloud-python,gh/16316451,False,False,True
 googleapis/python-crc32c,gh/159736041,False,True,False
@@ -918,6 +917,7 @@ websockets/ws,gh/2744972,False,False,True
 wesleytodd/setprototypeof,gh/30301031,False,False,True
 whitequark/ipaddr.js,gh/2110585,False,False,True
 withoutboats/heck,gh/86326466,False,False,True
+xiph/ogg,gh/33956205,False,False,True
 xorg/lib/libx11,gl/freedesktop-701,False,False,True
 xorg/lib/libxau,gl/freedesktop-706,False,False,True
 xorg/lib/libxdmcp,gl/freedesktop-712,False,False,True
