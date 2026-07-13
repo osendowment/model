@@ -39,7 +39,7 @@ Writes:
         nni_per_ac_p,
         issue_close_ratio_p,
         issue_trend_score_p,
-        workload_p,                      (geometric mean of the three per-AC percentiles)
+        score,                           (geometric mean of the three per-AC percentiles)
         fetched_at
 
 Notes:
@@ -358,9 +358,9 @@ def build() -> list[dict]:
         # A repo whose issues were never fetched has a blank nni_per_ac. When its
         # LOC and CVE burdens are both present, treat the unknown issue-backlog
         # burden as neutral (median percentile 50) so the row still scores; if
-        # LOC or CVE is also missing the row stays blank (no lone 50). GitLab
-        # repos have no GitHub-issue data, so this fill is what lets them score
-        # once LOC + CVE are present.
+        # LOC or CVE is also missing the row stays blank (no lone 50). This
+        # covers ANY repo with unfetched issues — GitLab repos are fetched too,
+        # by src.sources.gitlab.fetch_issue_metrics, and merged in by repo_id.
         neutral_fill={"nni_per_ac_p": 50},
         # Percentiles rank the whole top-repo population (github + gitlab
         # together); platform does not matter.

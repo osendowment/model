@@ -10,10 +10,9 @@ src.eligibility.run_eligibility_pipeline.
 
 Scope: FETCHERS holds ONLY the steps whose output feeds a `risk.csv` score
 column (concentration / complexity / security / workload → overall
-`risk_score`). Fetchers that produce solely audit / informational columns
-(they never enter a score) are listed in AUDIT_FETCHERS and are NOT run by
-the pipeline — run them by hand when you want to refresh those columns. This
-keeps a full risk run lean: it fetches only what the scores need.
+`risk_score`). The model scores nothing it does not fetch: there is no
+audit-only fetcher list, and no step runs whose output no score reads. This
+keeps a full risk run lean — it fetches exactly what the scores need.
 
 Usage:
     uv run python -m src.risk.run_risk_pipeline                # fetch + build + aggregate

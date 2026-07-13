@@ -570,7 +570,8 @@ COMPONENT_TABLES: list[tuple[str, str, list[tuple[str, object]]]] = [
         ("workload",
          "Maintenance burden per maintainer: LOC per active contributor, "
          "CVEs per active contributor, and net-new issues per active "
-         "contributor (GitHub Issues Search, per-year opened − closed) — "
+         "contributor (GitHub Issues Search + GitLab issues API, merged by "
+         "repo_id, per-year opened − closed) — "
          "each percentile-ranked, combined by geometric mean. The divisor "
          "is the same 5-year active-contributor count concentration uses "
          "(AC = 0 scored as AC = 1)."),
@@ -583,10 +584,12 @@ COMPONENT_TABLES: list[tuple[str, str, list[tuple[str, object]]]] = [
         ("oss",
          "One SPDX license resolved per repo — manual override → registry "
          "license of the repo's packages → GitHub Licensee → GitLab API — "
-         "then checked against the OSI-approved set (SPDX isOsiApproved ∪ "
-         "curated extras). Expression-aware: 'mit OR apache-2.0' counts if "
-         "any component is approved. Ternary: True / False / blank "
-         "(unknown ≠ known-non-OSS)."),
+         "then checked against the approved set: SPDX isOsiApproved ∪ "
+         "(isFsfLibre − content licenses) ∪ curated extras, so an "
+         "FSF-libre software licence the OSI never formally reviewed still "
+         "counts, while font/doc licences do not. Expression-aware: 'mit OR "
+         "apache-2.0' counts if any component is approved. Ternary: True / "
+         "False / blank (unknown ≠ known-non-OSS)."),
         ("intent",
          "True when the repo shows ANY funding signal: GitHub Sponsors "
          "enabled, FUNDING.yml, funding.json, npm/PyPI funding field, a "

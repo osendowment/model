@@ -19,12 +19,12 @@ Writes:
         scc_complexity_eoy_p,
         cognitive_max_p,
         cyclomatic_max_p,
-        complexity_p           # geometric mean of loc_eoy_p + cyclomatic_max_p
+        score                  # geometric mean of loc_eoy_p + cyclomatic_max_p
 
 Percentile system (0-100, higher = riskier):
     Each _p column is a worst-pinned CDF percentile within the repos that have
     a non-missing value for that metric. The worst value maps to 100.
-    complexity_p = geometric mean of loc_eoy_p and cyclomatic_max_p,
+    score = geometric mean of loc_eoy_p and cyclomatic_max_p,
     available only when both component _p's are present.
 
 Period: `_eoy` = scc / lizard analysis of the last commit on the default branch

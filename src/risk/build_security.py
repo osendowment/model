@@ -50,17 +50,20 @@ Security score
 --------------
 `score` is the max ("worst-of") of two direction-aware risk axes: `cve_score`
 (0 known CVEs → 50, ≥1 CVE ranked into (50, 100]) and `openssf_score_p`
-(lower Scorecard score → higher risk). It is populated only when both
-`openssf_score` and `cve_count_5y` are present. Max rather than geometric mean
-means the two axes do not compound: either a bad Scorecard alone or a real CVE
-alone is enough to flag the repo, and neither dilutes the other.
+(lower Scorecard score → higher risk). It is composed with `max_composite_any`,
+so it is the max over the axes PRESENT: a repo with a CVE count but no
+Scorecard row still scores on the CVE axis alone, and `score` is blank only
+when both axes are missing. Max rather than geometric mean means the two axes
+do not compound: either a bad Scorecard alone or a real CVE alone is enough to
+flag the repo, and neither dilutes the other.
 
-~78% of risk-scope repos have zero CVEs and all share `cve_score = 50` — a
-neutral baseline ("none known" ≠ "proven secure"), not the worst-pinned CDF's
-78. For those repos `score` = openssf_score_p whenever that axis clears 50 (it
-does for most), so the score tracks the OpenSSF axis; the CVE axis takes over
-only for the minority carrying CVEs whose `cve_score` exceeds the openssf axis —
-a repo with real CVEs is never masked by otherwise-good hygiene.
+Most risk-scope repos have zero CVEs and so share `cve_score = 50` — a neutral
+baseline ("none known" ≠ "proven secure"), not a worst-pinned CDF rank. For
+those repos `score` = openssf_score_p whenever that axis clears 50 (it does for
+most), so the score tracks the OpenSSF axis; the CVE axis takes over only for
+the minority carrying CVEs whose `cve_score` exceeds the openssf axis — a repo
+with real CVEs is never masked by otherwise-good hygiene. (Coverage counts live
+on the preview stats sheet, not here.)
 
 Usage:
     uv run python -m src.risk.build_security
