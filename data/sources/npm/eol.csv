@@ -6292,7 +6292,7 @@ unbash,False,npm_deprecated,,registry,2026-07-13T19:06:00+00:00
 @rc-component/table,False,npm_deprecated,,registry,2026-07-13T19:06:00+00:00
 @rc-component/cascader,False,npm_deprecated,,registry,2026-07-13T19:06:00+00:00
 @rc-component/tabs,False,npm_deprecated,,registry,2026-07-13T19:06:00+00:00
-path-to-regexp-updated,False,npm_deprecated,no latest tag,error,2026-07-13T19:06:00+00:00
+path-to-regexp-updated,False,npm_deprecated,no latest tag,error,2026-07-13T20:21:06+00:00
 @rc-component/segmented,False,npm_deprecated,,registry,2026-07-13T19:06:00+00:00
 @rc-component/dialog,False,npm_deprecated,,registry,2026-07-13T19:06:00+00:00
 @rc-component/tree-select,False,npm_deprecated,,registry,2026-07-13T19:06:00+00:00

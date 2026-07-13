@@ -5,6 +5,7 @@ repo_id,repository_url,class,valid,ecosystem,package,registry_hit,ok,error,criti
 ,https://git.savannah.gnu.org/git/libunistring,A,True,cpp,libunistring,spack.io,True,,,,7.093233291649298,0,3,2026-07-06T17:14:41Z
 ,https://git.savannah.gnu.org/git/readline,A,True,cpp,readline,spack.io,True,,,,0.5488397943587605,0,59,2026-07-06T17:14:41Z
 ,https://git.savannah.nongnu.org/git/acl,A,True,cpp,acl,spack.io,True,,,,9.490065304988189,0,3,2026-07-06T17:14:41Z
+gh/1165671691,https://github.com/1g4-mirror/libunistring,A,True,cpp,libunistring,spack.io,True,,,,7.093233291649298,0,3,2026-07-06T17:14:41Z
 gh/330043541,https://github.com/7rulnik/source-map-js,A,True,npm,source-map-js,npmjs.org,True,,True,npmjs.org,1.9179252312428694,1275432,737,2026-07-06T17:14:41Z
 gh/5932749,https://github.com/acornjs/acorn,A,True,npm,acorn,npmjs.org,True,,True,npmjs.org,0.40150702260816834,1121780,8880,2026-07-06T17:14:41Z
 gh/22187098,https://github.com/acornjs/acorn-jsx,A,True,npm,acorn-jsx,npmjs.org,True,,True,npmjs.org,1.0171471690756815,817417,2621,2026-07-06T17:14:41Z
@@ -44,6 +45,7 @@ gh/205875548,https://github.com/astanin/python-tabulate,A,True,pypi,tabulate,pyp
 gh/523043277,https://github.com/astral-sh/ruff,A,True,pypi,ruff,pypi.org,True,,True,pypi.org,0.4882549196910531,5870,2931,2026-07-06T17:14:41Z
 gh/8116861,https://github.com/auth0/node-jwa,A,True,npm,jwa,npmjs.org,True,,True,npmjs.org,1.6146661946645404,728961,84,2026-07-06T17:14:41Z
 gh/47662429,https://github.com/autotools-mirror/autoconf,A,True,cpp,autoconf,spack.io,True,,,,0.09031540919827706,0,386,2026-07-06T17:14:41Z
+gh/47662595,https://github.com/autotools-mirror/gettext,A,True,cpp,gettext,spack.io,True,,,,0.34041961928581355,0,79,2026-07-06T17:14:41Z
 gh/47662711,https://github.com/autotools-mirror/libtool,A,True,cpp,libtool,spack.io,True,,,,0.08336807002917883,0,401,2026-07-06T17:14:41Z
 gh/66880383,https://github.com/autotools-mirror/m4,A,True,cpp,m4,spack.io,True,,,,0.10421008753647354,0,323,2026-07-06T17:14:41Z
 gh/6780767,https://github.com/aws/aws-cli,A,True,pypi,awscli,pypi.org,True,,True,pypi.org,0.12524432884997153,11361,174,2026-07-06T17:14:41Z
@@ -263,6 +265,8 @@ gh/4457759,https://github.com/gkz/prelude-ls,A,True,npm,prelude-ls,npmjs.org,Tru
 gh/13182168,https://github.com/gkz/type-check,A,True,npm,type-check,npmjs.org,True,,True,npmjs.org,1.6280412928415104,2192557,1486,2026-07-06T17:14:41Z
 gh/681340775,https://github.com/gmp-mirror/gmp,A,True,cpp,gmp,spack.io,True,,,,0.5627344726969571,0,62,2026-07-06T17:14:41Z
 gh/4537144,https://github.com/gnome/pango,A,True,cpp,pango,spack.io,True,,,,1.5631513130471029,0,19,2026-07-06T17:14:41Z
+gh/1178912368,https://github.com/gnutools/binutils-gdb,A,True,cpp,binutils,spack.io,True,,,,1.0143115186883422,0,34,2026-07-06T17:14:41Z
+gh/1178881118,https://github.com/gnutools/glibc,A,True,cpp,glibc,spack.io,True,,,,28.962791331606923,0,0,2026-07-06T17:14:41Z
 gh/24993138,https://github.com/google/brotli,A,True,pypi,brotli,pypi.org,True,,False,pypi.org,0.454628547811504,3514,198,2026-07-06T17:14:41Z
 gh/206791328,https://github.com/google/highway,A,True,cpp,highway-simd-library,,False,not-found-in-any-registry,,,,,,2026-07-06T17:14:41Z
 gh/534354967,https://github.com/google/zerocopy,A,True,crates,zerocopy,crates.io,True,,True,crates.io,2.9310681232090006,963,198,2026-07-06T17:14:41Z
@@ -270,6 +274,7 @@ gh/16316451,https://github.com/googleapis/google-cloud-python,A,True,pypi,google
 gh/226992462,https://github.com/googleapis/python-cloud-core,A,True,pypi,google-cloud-core,pypi.org,True,,True,pypi.org,4.246063116088629,15026,145,2026-07-06T17:14:41Z
 gh/159736041,https://github.com/googleapis/python-crc32c,A,True,pypi,google-crc32c,pypi.org,True,,True,pypi.org,4.487255910751941,8602,78,2026-07-06T17:14:41Z
 gh/55424670,https://github.com/googlechrome/workbox,A,True,npm,workbox-core,npmjs.org,True,,,,0.42538474905884077,1445035,208,2026-07-06T17:14:41Z
+gh/42075984,https://github.com/gpg/libgpg-error,A,True,cpp,libgpg-error,spack.io,True,,,,2.3620953174934,0,12,2026-07-06T17:14:41Z
 gh/10357291,https://github.com/grahamdumpleton/wrapt,A,True,pypi,wrapt,pypi.org,True,,True,pypi.org,1.1517338063035385,123582,693,2026-07-06T17:14:41Z
 gh/17144859,https://github.com/grantjenks/python-sortedcontainers,A,True,pypi,sortedcontainers,pypi.org,True,,True,pypi.org,0.05094395339751691,23703,414,2026-07-06T17:14:41Z
 gh/432630522,https://github.com/graydon/exhaustigen-rs,A,True,crates,exhaustigen,crates.io,True,,,,38.46739799210521,0,1,2026-07-06T17:14:41Z
@@ -660,6 +665,7 @@ gh/242158882,https://github.com/python/tzdata,A,True,pypi,tzdata,pypi.org,True,,
 gh/1874305,https://github.com/qix-/color-convert,A,True,npm,color-convert,npmjs.org,True,,True,npmjs.org,0.9461100638002149,1246711,3135,2026-07-06T17:14:41Z
 gh/41388258,https://github.com/qix-/node-error-ex,A,True,npm,error-ex,npmjs.org,True,,True,npmjs.org,1.9564029971517887,6821,1589,2026-07-06T17:14:41Z
 gh/41376759,https://github.com/qix-/node-is-arrayish,A,True,npm,is-arrayish,npmjs.org,True,,True,npmjs.org,2.443029620213563,5599,1534,2026-07-06T17:14:41Z
+gh/9880318,https://github.com/qt/qt5,A,True,cpp,qt,spack.io,True,,,,0.38210365430040294,0,75,2026-07-06T17:14:41Z
 gh/273499522,https://github.com/radix-ui/primitives,A,True,npm,@radix-ui/react-compose-refs,npmjs.org,True,,True,npmjs.org,0.6099131977100601,54868,72,2026-07-06T17:14:41Z
 gh/2313213,https://github.com/raszi/node-tmp,A,True,npm,tmp,npmjs.org,True,,True,npmjs.org,0.9561446355799759,992625,7547,2026-07-06T17:14:41Z
 gh/6006855,https://github.com/raynos/for-each,A,True,npm,for-each,npmjs.org,True,,True,npmjs.org,2.502731016583614,794514,605,2026-07-06T17:14:41Z
@@ -718,6 +724,9 @@ gh/9151864,https://github.com/rvagg/archived-prr,A,True,npm,prr,npmjs.org,True,,
 gh/10706095,https://github.com/rvagg/bl,A,True,npm,bl,npmjs.org,True,,True,npmjs.org,1.0967447636112935,506109,1595,2026-07-06T17:14:41Z
 gh/11808187,https://github.com/rvagg/through2,A,True,npm,through2,npmjs.org,True,,True,npmjs.org,0.7946492881427459,849057,17943,2026-07-06T17:14:41Z
 gh/87651180,https://github.com/ryanzim/universalify,A,True,npm,universalify,npmjs.org,True,,True,npmjs.org,1.7179201236247617,3543281,1464,2026-07-06T17:14:41Z
+gh/504504895,https://github.com/sailfishos-mirror/acl,A,True,cpp,acl,spack.io,True,,,,9.490065304988189,0,3,2026-07-06T17:14:41Z
+gh/251322671,https://github.com/sailfishos-mirror/bzip2,A,True,cpp,bzip2,spack.io,True,,,,0.3751563151313047,0,77,2026-07-06T17:14:41Z
+gh/251362875,https://github.com/sailfishos-mirror/readline,A,True,cpp,readline,spack.io,True,,,,0.5488397943587605,0,59,2026-07-06T17:14:41Z
 gh/2606873,https://github.com/salesforce/tough-cookie,A,True,npm,tough-cookie,npmjs.org,True,,True,npmjs.org,0.8365495503684777,1773813,2701,2026-07-06T17:14:41Z
 gh/76598131,https://github.com/samn/json-stable-stringify,A,True,npm,json-stable-stringify-without-jsonify,npmjs.org,True,,True,npmjs.org,3.0210681391637166,1575335,1166,2026-07-06T17:14:41Z
 gh/91837954,https://github.com/samverschueren/decode-uri-component,A,True,npm,decode-uri-component,npmjs.org,True,,True,npmjs.org,1.4642959752019078,935386,1114,2026-07-06T17:14:41Z

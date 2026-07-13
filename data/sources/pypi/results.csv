@@ -1,4 +1,4 @@
-"package","github_repo","git","eco_guess","avg_downloads","2021","2022","2023","2024","2025","top","pagerank","value_class","repo_id","mirror_url","license"
+"package","github_repo","git","eco_guess","avg_downloads","2021","2022","2023","2024","2025","top","pagerank","value_class","repo_id","canonical_url","license"
 "typing-extensions","python/typing_extensions","https://github.com/python/typing_extensions.git","eco","4103679283","979594688","2275013355","3191711621","5227839356","8844237395","True","0.04956012","A","gh/494077289","","psf-2.0"
 "botocore","boto/botocore","https://github.com/boto/botocore.git","eco","5144473449","1985684005","2781640538","3924053580","7008582704","10022406419","True","0.02051222","A","gh/6670942","","apache-2.0"
 "six","benjaminp/six","https://github.com/benjaminp/six.git","eco","3353305511","1800532062","1960330694","2337382099","3938212049","6730070649","True","0.01961374","A","gh/77868600","","mit"

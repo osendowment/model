@@ -55,6 +55,7 @@ facebook/watchman,gh/6930489,0.64308,C++,MIT License,13618,2012-11-29T23:35:52Z,
 sqlalchemy/sqlalchemy,gh/159271175,0.64181,Python,MIT License,11951,2005-07-01T02:25:16Z,2026-06-27T20:20:17Z,255,0,849,5,11.48,13,0,0,0,47797,False,2026-06-29T15:04:26+00:00,ok,
 formatjs/formatjs,gh/19117456,0.64173,TypeScript,,14727,2014-04-24T17:28:36Z,2026-06-28T02:05:35Z,148,0,361,9,22.46,447,0,0,0,12502,False,2026-06-29T12:38:47+00:00,ok,
 pydantic/pydantic,gh/90194616,0.64110,Python,MIT License,28151,2017-05-03T21:23:41Z,2026-06-29T12:10:28Z,111,0,775,4,10.63,23,0,0,0,59968,False,2026-06-29T14:27:52+00:00,ok,
+gnutools/binutils-gdb,gh/1178912368,0.63739,C,GNU General Public License v2.0,10,2012-06-03T14:36:30Z,2026-07-13T17:09:35Z,171,0,1580,5,75.88,52,0,0,0,1253,False,2026-07-13T20:06:22+00:00,ok,
 apache/arrow-rs,gh/358917250,0.63697,Rust,Apache License 2.0,3511,2016-02-05T20:08:35Z,2026-06-29T01:21:29Z,126,0,831,10,22.35,14,0,0,0,3469,False,2026-06-29T11:43:12+00:00,ok,
 aws/aws-cli,gh/6780767,0.63569,Python,Other,17084,2012-11-15T23:44:00Z,2026-06-26T18:04:37Z,165,0,506,5,16.79,249,0,0,0,25814,False,2026-06-29T11:48:46+00:00,ok,
 harfbuzz/harfbuzz,gh/5050525,0.63523,C++,Other,5873,2000-12-20T04:41:36Z,2026-06-26T19:09:06Z,310,0,300,3,40.52,28,0,0,0,75742,False,2026-06-29T12:53:39+00:00,ok,
@@ -106,6 +107,7 @@ giampaolo/psutil,gh/20101515,0.60064,Python,"BSD 3-Clause ""New"" or ""Revised""
 serde-rs/json,gh/35894511,0.59890,Rust,Apache License 2.0,5590,2015-05-19T16:30:20Z,2026-06-24T03:02:38Z,135,0,145,8,1.19,10,0,0,0,82094,False,2026-06-29T14:52:22+00:00,ok,
 motdotla/dotenv,gh/11205780,0.59865,JavaScript,"BSD 2-Clause ""Simplified"" License",20482,2013-07-05T18:24:28Z,2026-05-30T17:46:37Z,158,1,111,10,3.54,7,0,0,0,48737,False,2026-06-30T16:03:14+00:00,ok,
 gnome/gdk-pixbuf,gh/4533539,0.59849,C,GNU Lesser General Public License v2.1,34,1997-11-24T22:37:52Z,2026-07-08T22:12:43Z,348,0,848,6,3.1,15,0,0,0,4001,False,2026-07-13T16:57:52+00:00,ok,
+qt/qt5,gh/9880318,0.59826,Shell,,1762,2011-04-27T10:34:00Z,2026-07-10T04:16:05Z,185,0,269,4,8.9,18,0,0,0,21086,False,2026-07-13T20:06:59+00:00,ok,
 acornjs/acorn,gh/5932749,0.59824,JavaScript,,11405,2012-09-24T08:48:45Z,2026-06-11T16:38:24Z,167,0,143,7,0.56,9,0,0,0,167852,False,2026-06-29T11:29:14+00:00,ok,
 lxml/lxml,gh/1353927,0.59736,Python,"BSD 3-Clause ""New"" or ""Revised"" License",3041,2004-07-09T11:25:27Z,2026-06-24T07:23:18Z,267,0,179,6,8.56,9,0,0,0,28860,False,2026-06-29T13:45:47+00:00,ok,
 toml-rs/toml,gh/95902102,0.59649,Rust,Apache License 2.0,1052,2014-06-21T00:01:38Z,2026-06-15T22:04:48Z,146,0,161,5,8.33,20,0,0,0,23835,False,2026-06-29T15:15:57+00:00,ok,
@@ -164,6 +166,7 @@ encode/httpx,gh/179492861,0.55977,Python,"BSD 3-Clause ""New"" or ""Revised"" Li
 google/brotli,gh/24993138,0.55969,TypeScript,MIT License,14772,2013-10-11T08:26:07Z,2026-06-16T08:42:51Z,154,0,131,7,4.31,4,0,0,0,8396,False,2026-06-29T12:51:06+00:00,ok,
 chardet/chardet,gh/5196969,0.55962,Python,BSD Zero Clause License,2646,2011-10-25T23:18:19Z,2026-05-05T15:19:11Z,178,1,55,8,12.77,14,0,0,0,3109,False,2026-06-29T11:57:31+00:00,ok,
 tqdm/tqdm,gh/36804486,0.55896,Python,Other,31223,2013-10-26T18:50:04Z,2026-06-16T16:13:51Z,154,0,122,6,1,6,0,0,0,23213,False,2026-06-29T15:16:43+00:00,ok,
+gnutools/glibc,gh/1178881118,0.55755,C,GNU Lesser General Public License v2.1,6,1989-04-16T23:29:02Z,2026-07-07T18:30:12Z,453,0,967,4,24.62,44,0,0,0,50,False,2026-07-13T20:06:30+00:00,ok,
 petkaantonov/bluebird,gh/12670444,0.55726,JavaScript,MIT License,20514,2013-09-02T13:31:08Z,2024-11-07T20:26:46Z,156,19,238,10,0,20,0,0,0,1759,False,2026-06-29T14:23:13+00:00,ok,
 npm/hosted-git-info,gh/25002984,0.55595,JavaScript,ISC License,237,2014-10-08T12:14:28Z,2026-06-18T16:25:06Z,142,0,40,6,0.69,7,0,0,0,105306,False,2026-06-29T14:12:50+00:00,ok,
 more-itertools/more-itertools,gh/4144530,0.55567,Python,MIT License,4078,2012-04-26T05:15:14Z,2026-06-20T19:57:29Z,172,0,148,7,6.1,5,0,0,0,3344,False,2026-06-29T14:02:27+00:00,ok,
@@ -427,6 +430,7 @@ primus/eventemitter3,gh/13100677,0.47506,JavaScript,MIT License,3534,2013-09-25T
 webpack/webpack-sources,gh/48954523,0.47498,JavaScript,MIT License,273,2016-01-03T17:30:14Z,2026-06-26T13:43:12Z,127,0,33,6,1.21,4,0,0,0,656,False,2026-06-29T15:29:13+00:00,ok,
 crate-py/rpds,gh/608018848,0.47333,Rust,MIT License,63,2023-02-28T11:54:04Z,2026-06-25T22:08:20Z,40,0,20,5,5.02,7,0,0,0,1996,False,2026-06-29T11:59:08+00:00,ok,
 autotools-mirror/libtool,gh/47662711,0.47210,Shell,,52,1997-04-01T18:25:22Z,2026-06-04T18:02:44Z,356,0,354,6,1.52,3,0,0,0,15,False,2026-06-29T11:48:34+00:00,ok,
+autotools-mirror/gettext,gh/47662595,0.47170,C,GNU General Public License v3.0,44,2000-06-16T07:49:23Z,2026-07-07T18:29:05Z,317,0,69,6,3.88,2,0,0,0,134,False,2026-07-13T20:06:06+00:00,ok,
 justmoon/node-extend,gh/3967764,0.47147,JavaScript,MIT License,343,2012-04-08T23:56:11Z,2025-03-06T18:47:36Z,173,15,15,7,0,0,0,0,0,14447,False,2026-06-29T13:35:09+00:00,ok,
 assert-rs/snapbox,gh/424722460,0.47146,Rust,Apache License 2.0,176,2021-11-04T19:17:05Z,2026-06-01T13:21:33Z,56,0,20,5,2.79,38,0,0,0,516,False,2026-06-29T11:48:04+00:00,ok,
 xtuc/webassemblyjs,gh/113006071,0.47044,JavaScript,MIT License,832,2017-12-04T06:49:30Z,2024-11-11T13:28:48Z,104,19,44,6,0,10,0,1,0,354,False,2026-06-29T15:30:56+00:00,ok,
@@ -442,6 +446,7 @@ retep998/winapi-rs,gh/23853482,0.46739,Rust,Apache License 2.0,1926,2014-09-09T2
 browserslist/update-db,gh/505548145,0.46611,JavaScript,MIT License,796,2022-06-20T18:05:58Z,2026-05-20T14:44:03Z,48,1,14,8,0.6,5,0,0,0,2497,False,2026-06-29T11:53:15+00:00,ok,
 ljharb/es-abstract,gh/28995155,0.46607,JavaScript,MIT License,123,2013-03-29T18:47:15Z,2026-05-21T11:05:30Z,161,1,13,5,0.38,7,0,0,0,2107,False,2026-06-29T13:41:44+00:00,ok,
 jsdom/whatwg-url,gh/34761352,0.46566,JavaScript,MIT License,414,2015-04-28T23:29:03Z,2026-06-29T13:07:56Z,135,0,23,6,0.46,5,0,0,0,730,False,2026-06-29T13:26:05+00:00,ok,
+gpg/libgpg-error,gh/42075984,0.46540,C,GNU General Public License v2.0,25,2003-05-15T18:52:35Z,2026-07-10T11:50:40Z,282,0,53,4,1.58,4,0,0,0,360,False,2026-07-13T20:06:36+00:00,ok,
 facelessuser/soupsieve,gh/160789418,0.46455,Python,MIT License,266,2018-12-07T07:41:28Z,2026-05-28T01:24:00Z,92,1,16,5,0.35,5,0,0,0,2743,False,2026-06-29T11:25:36+00:00,ok,
 oozcitak/xmlbuilder-js,gh/1042809,0.46415,CoffeeScript,MIT License,926,2010-11-01T20:01:15Z,2025-12-01T07:52:09Z,190,7,33,11,0.04,6,1,0,0,109,False,2026-06-29T14:18:35+00:00,ok,
 isaacs/sax-js,gh/508894,0.46409,JavaScript,Blue Oak Model License 1.0.0,1157,2010-02-09T01:49:02Z,2026-06-26T01:27:09Z,199,0,46,6,0.4,3,0,0,0,362,False,2026-06-29T13:06:20+00:00,ok,
@@ -701,6 +706,7 @@ sindresorhus/escape-string-regexp,gh/21169121,0.36494,JavaScript,MIT License,598
 terkelg/sisteransi,gh/122441239,0.36469,TypeScript,MIT License,81,2018-02-22T06:47:54Z,2026-06-22T13:32:35Z,101,0,7,2,0.08,1,0,0,0,192,False,2026-06-29T15:12:23+00:00,ok,
 sindresorhus/resolve-from,gh/22022707,0.36464,JavaScript,MIT License,145,2014-07-20T00:29:44Z,2021-01-02T05:53:57Z,145,66,7,4,0,0,1,1,1,26,False,2026-06-29T15:01:23+00:00,ok,
 dtolnay/automod,gh/173074854,0.36379,Rust,Apache License 2.0,187,2019-02-28T07:49:54Z,2026-06-22T01:30:48Z,89,0,6,2,0.33,2,0,1,0,110,False,2026-06-29T12:02:44+00:00,ok,
+sailfishos-mirror/acl,gh/504504895,0.36372,C,,1,2001-01-15T10:28:46Z,2026-06-18T22:45:27Z,310,0,56,4,0.9,0,0,0,0,1,False,2026-07-13T20:07:05+00:00,ok,
 dtolnay/dissimilar,gh/229514821,0.36305,Rust,Apache License 2.0,241,2019-12-22T03:49:10Z,2026-06-24T03:02:26Z,79,0,3,2,0.5,1,1,0,1,75,False,2026-06-29T12:02:50+00:00,ok,
 hiddentao/fast-levenshtein,gh/9490451,0.36290,JavaScript,MIT License,612,2013-04-17T05:57:55Z,2020-07-22T14:29:13Z,160,72,10,5,0,1,0,0,0,45,False,2026-06-29T12:53:46+00:00,ok,
 sindresorhus/find-cache-directory,gh/48783244,0.36182,JavaScript,MIT License,163,2015-12-30T05:17:31Z,2025-04-08T15:24:45Z,127,14,14,8,0,1,0,0,0,2,False,2026-06-29T14:55:09+00:00,ok,
@@ -812,7 +818,9 @@ inspect-js/is-string,gh/30010185,0.30202,JavaScript,MIT License,22,2015-01-29T08
 stream-utils/destroy,gh/15544623,0.30177,JavaScript,MIT License,53,2013-12-31T06:36:39Z,2022-03-20T19:02:23Z,152,52,3,2,0,0,1,0,1,3,False,2026-06-29T15:05:52+00:00,ok,
 pydantic/typing-inspection,gh/930576948,0.30144,Python,MIT License,65,2025-02-10T21:24:03Z,2026-01-25T11:13:42Z,16,5,3,1,0.06,1,0,0,0,272,False,2026-06-29T14:27:59+00:00,ok,
 eventualbuddha/lines-and-columns,gh/47284288,0.30074,TypeScript,MIT License,27,2015-12-02T19:24:25Z,2023-11-07T01:41:08Z,128,32,2,1,0,1,0,0,0,41,False,2026-06-29T12:08:52+00:00,ok,
+sailfishos-mirror/bzip2,gh/251322671,0.30019,C,Other,0,1997-08-07T20:13:13Z,2026-07-11T16:48:43Z,352,0,10,2,0.19,0,0,0,0,1,False,2026-07-13T20:07:11+00:00,ok,
 inspect-js/has-proto,gh/577580747,0.29957,JavaScript,MIT License,6,2022-12-13T03:41:58Z,2026-01-13T19:22:43Z,43,5,1,1,0.02,1,1,0,0,150,False,2026-06-29T12:56:15+00:00,ok,
+1g4-mirror/libunistring,gh/1165671691,0.29888,Perl,GNU General Public License v3.0,0,2009-03-14T16:22:25Z,2026-02-23T23:32:48Z,211,4,5,3,0.33,1,0,0,0,0,False,2026-07-13T20:06:00+00:00,ok,
 isaacs/core-util-is,gh/12391440,0.29793,JavaScript,MIT License,101,2013-08-26T22:44:27Z,2021-08-31T14:36:33Z,156,58,6,1,0,0,0,0,0,29,False,2026-06-29T13:01:26+00:00,ok,
 sindresorhus/detect-newline,gh/21304485,0.29655,JavaScript,MIT License,56,2014-06-28T14:32:48Z,2023-09-22T19:01:18Z,146,33,9,1,0,1,0,0,0,4,False,2026-06-29T14:53:49+00:00,ok,
 ljharb/set-function-length,gh/704249795,0.29541,JavaScript,MIT License,4,2023-10-12T21:29:58Z,2025-12-29T22:51:45Z,33,6,1,1,0.02,2,1,0,0,108,False,2026-06-29T13:43:06+00:00,ok,
@@ -911,6 +919,7 @@ felixge/node-delayed-stream,gh/1783893,0.21805,JavaScript,MIT License,55,2011-05
 micromatch/is-extglob,gh/31788841,0.21794,JavaScript,MIT License,23,2015-03-06T21:00:31Z,2019-05-25T08:53:08Z,137,86,2,1,0,0,0,0,0,0,False,2026-06-29T13:50:20+00:00,ok,
 isaacs/fs.realpath,gh/61231712,0.21783,JavaScript,Blue Oak Model License 1.0.0,25,2016-06-15T18:37:09Z,2025-10-25T18:58:05Z,122,8,2,0,0.02,0,1,0,0,0,False,2026-06-29T13:01:38+00:00,ok,
 component/toidentifier,gh/114743189,0.21564,JavaScript,MIT License,6,2017-12-19T09:06:43Z,2021-11-14T22:18:18Z,103,56,2,0,0,0,0,0,0,2,False,2026-06-29T11:25:18+00:00,ok,
+sailfishos-mirror/readline,gh/251362875,0.21535,C,GNU General Public License v3.0,3,2011-11-23T23:39:33Z,2025-12-10T16:36:18Z,178,7,1,0,0.04,1,0,0,0,0,False,2026-07-13T20:07:17+00:00,ok,
 inspect-js/node-supports-preserve-symlinks-flag,gh/443970899,0.21275,JavaScript,MIT License,1,2022-01-03T06:40:10Z,2022-11-02T16:22:00Z,54,44,1,1,0,0,1,0,0,0,False,2026-06-29T13:00:37+00:00,ok,
 ljharb/side-channel-map,gh/901191461,0.20989,JavaScript,MIT License,1,2024-12-10T07:55:44Z,2025-12-29T22:51:49Z,18,6,1,1,0.02,1,1,0,0,0,False,2026-06-29T13:44:11+00:00,ok,
 ljharb/side-channel-weakmap,gh/901188921,0.20989,JavaScript,MIT License,1,2024-12-10T07:49:41Z,2025-12-29T22:51:51Z,18,6,1,1,0.02,1,1,0,0,0,False,2026-06-29T13:44:16+00:00,ok,
@@ -931,20 +940,20 @@ jonschlinkert/map-cache,gh/32450614,0.15740,JavaScript,MIT License,20,2015-03-18
 andrewrk/node-pend,gh/11836813,0.13827,JavaScript,MIT License,15,2013-08-02T06:40:47Z,2014-11-23T21:52:09Z,157,141,1,1,0,0,0,0,0,0,False,2026-06-29T11:42:28+00:00,ok,
 jensyt/imurmurhash-js,gh/11802843,0.11461,JavaScript,MIT License,104,2013-07-31T22:33:22Z,2013-08-24T20:45:09Z,157,156,1,0,0,0,0,1,0,0,False,2026-06-29T13:17:08+00:00,ok,
 bzip2/bzip2,,,,,,,,,,,,,,,,,,False,2026-07-13T16:57:32+00:00,error,unresolvable-contributor
-cpython-team/python3-defaults,,,,,,,,,,,,,,,,,,False,2026-07-13T19:04:36+00:00,error,unresolvable-contributor
-debian/ca-certificates,,,,,,,,,,,,,,,,,,False,2026-07-13T19:04:39+00:00,error,unresolvable-contributor
-debian/gdbm,,,,,,,,,,,,,,,,,,False,2026-07-13T19:04:42+00:00,error,unresolvable-contributor
-debian/giflib,,,,,,,,,,,,,,,,,,False,2026-07-13T19:04:45+00:00,error,unresolvable-contributor
-holmgren/nettle,,,,,,,,,,,,,,,,,,False,2026-07-13T19:04:47+00:00,error,unresolvable-contributor
-libtiff/libtiff,,,,,,,,,,,,,,,,,,False,2026-07-13T19:04:50+00:00,error,unresolvable-contributor
-md/tcp-wrappers,,,,,,,,,,,,,,,,,,False,2026-07-13T19:04:53+00:00,error,unresolvable-contributor
-mpfr/mpfr,,,,,,,,,,,,,,,,,,False,2026-07-13T19:04:56+00:00,error,unresolvable-contributor
-multimedia-team/aom,,,,,,,,,,,,,,,,,,False,2026-07-13T19:04:58+00:00,error,unresolvable-contributor
-pixman/pixman,,,,,,,,,,,,,,,,,,False,2026-07-13T19:05:01+00:00,error,unresolvable-contributor
-takluyver/jeepney,,,,,,,,,,,,,,,,,,False,2026-07-13T19:05:04+00:00,error,unresolvable-contributor
-xorg/lib/libx11,,,,,,,,,,,,,,,,,,False,2026-07-13T19:05:07+00:00,error,unresolvable-contributor
-xorg/lib/libxau,,,,,,,,,,,,,,,,,,False,2026-07-13T19:05:09+00:00,error,unresolvable-contributor
-xorg/lib/libxdmcp,,,,,,,,,,,,,,,,,,False,2026-07-13T19:05:12+00:00,error,unresolvable-contributor
-xorg/lib/libxext,,,,,,,,,,,,,,,,,,False,2026-07-13T19:05:15+00:00,error,unresolvable-contributor
-xorg/lib/libxrender,,,,,,,,,,,,,,,,,,False,2026-07-13T19:05:18+00:00,error,unresolvable-contributor
-xorg/proto/xorgproto,,,,,,,,,,,,,,,,,,False,2026-07-13T19:05:20+00:00,error,unresolvable-contributor
+cpython-team/python3-defaults,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:11+00:00,error,unresolvable-contributor
+debian/ca-certificates,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:14+00:00,error,unresolvable-contributor
+debian/gdbm,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:17+00:00,error,unresolvable-contributor
+debian/giflib,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:20+00:00,error,unresolvable-contributor
+holmgren/nettle,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:42+00:00,error,unresolvable-contributor
+libtiff/libtiff,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:45+00:00,error,unresolvable-contributor
+md/tcp-wrappers,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:48+00:00,error,unresolvable-contributor
+mpfr/mpfr,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:51+00:00,error,unresolvable-contributor
+multimedia-team/aom,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:53+00:00,error,unresolvable-contributor
+pixman/pixman,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:56+00:00,error,unresolvable-contributor
+takluyver/jeepney,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:22+00:00,error,unresolvable-contributor
+xorg/lib/libx11,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:25+00:00,error,unresolvable-contributor
+xorg/lib/libxau,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:27+00:00,error,unresolvable-contributor
+xorg/lib/libxdmcp,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:30+00:00,error,unresolvable-contributor
+xorg/lib/libxext,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:33+00:00,error,unresolvable-contributor
+xorg/lib/libxrender,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:36+00:00,error,unresolvable-contributor
+xorg/proto/xorgproto,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:38+00:00,error,unresolvable-contributor

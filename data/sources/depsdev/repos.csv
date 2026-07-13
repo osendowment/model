@@ -1,5 +1,6 @@
 repo,repo_id,depsdev_scorecard_overall,depsdev_scorecard_date,depsdev_license,depsdev_open_issues,bestpractices_badge_id,bestpractices_tiered_percentage,fetched_at
 10der/homeassistant-custom_components-awtrix,gh/748539167,,,MIT,10,,,2026-05-03T19:09:22+00:00
+1g4-mirror/libunistring,gh/1165671691,,,,,,,2026-07-13T20:08:18+00:00
 7rulnik/source-map-js,gh/330043541,3.8,2026-04-20,non-standard,15,,,2026-05-03T19:09:24+00:00
 acornjs/acorn,gh/5932749,5,2026-04-20,,16,,,2026-05-03T19:09:26+00:00
 acornjs/acorn-jsx,gh/22187098,2.6,2026-04-20,MIT,18,,,2026-05-03T19:09:25+00:00
@@ -42,6 +43,7 @@ astanin/python-tabulate,gh/205875548,4,2026-06-22,MIT,77,,,2026-07-05T23:23:03+0
 astral-sh/ruff,gh/523043277,,,MIT,1960,,,2026-05-03T19:09:33+00:00
 auth0/node-jwa,gh/8116861,,,MIT,17,,,2026-05-17T23:42:52+00:00
 autotools-mirror/autoconf,gh/47662429,,,GPL-2.0,0,,,2026-05-03T19:09:33+00:00
+autotools-mirror/gettext,gh/47662595,,,GPL-3.0,0,,,2026-07-13T20:08:19+00:00
 autotools-mirror/libtool,gh/47662711,,,,6,,,2026-05-03T19:09:34+00:00
 autotools-mirror/m4,gh/66880383,,,,,,,2026-05-03T19:09:34+00:00
 aws/aws-cli,gh/6780767,5.6,2026-04-20,non-standard,606,,,2026-05-03T19:09:35+00:00
@@ -284,6 +286,8 @@ gnome/pango,gh/4537144,,,non-standard,0,,,2026-05-03T19:11:36+00:00
 gnutls/gnutls,gh/58873704,,,GPL-3.0,0,,,2026-05-03T19:11:52+00:00
 gnutls/libtasn1,gh/59017205,,,,,,,2026-05-03T19:11:52+00:00
 gnutls/nettle,gh/59017402,,,LGPL-3.0,0,,,2026-05-03T19:11:53+00:00
+gnutools/binutils-gdb,gh/1178912368,,,,,,,2026-07-13T20:08:18+00:00
+gnutools/glibc,gh/1178881118,,,,,,,2026-07-13T20:08:19+00:00
 google/brotli,gh/24993138,7.3,2026-04-20,MIT,95,in_progress,57,2026-05-03T19:11:53+00:00
 google/highway,gh/206791328,6.4,2026-06-22,non-standard,79,,,2026-07-06T11:07:57+00:00
 google/zerocopy,gh/534354967,6.4,2026-04-20,Apache-2.0,389,,,2026-05-03T19:11:53+00:00
@@ -773,6 +777,9 @@ rvagg/bl,gh/10706095,4.4,2026-04-20,non-standard,1,,,2026-05-03T19:16:02+00:00
 rvagg/prr,gh/9151864,2.1,2026-04-20,MIT,0,,,2026-05-03T19:16:02+00:00
 rvagg/through2,gh/11808187,2.9,2026-04-20,MIT,6,,,2026-05-03T19:16:03+00:00
 ryanzim/universalify,gh/87651180,2.9,2026-04-20,MIT,1,,,2026-05-03T19:16:03+00:00
+sailfishos-mirror/acl,gh/504504895,,,,0,,,2026-07-13T20:08:19+00:00
+sailfishos-mirror/bzip2,gh/251322671,,,,,,,2026-07-13T20:08:18+00:00
+sailfishos-mirror/readline,gh/251362875,,,,,,,2026-07-13T20:08:18+00:00
 salesforce/tough-cookie,gh/2606873,6.6,2026-04-20,BSD-3-Clause,40,,,2026-05-03T19:16:03+00:00
 samn/json-stable-stringify,gh/76598131,1.9,2026-04-20,non-standard,1,,,2026-05-03T19:16:04+00:00
 samverschueren/decode-uri-component,gh/91837954,3.6,2026-04-20,MIT,7,,,2026-05-03T19:16:04+00:00

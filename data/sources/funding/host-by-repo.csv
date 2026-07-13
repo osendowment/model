@@ -12,6 +12,7 @@ repo,repo_id,host,host_source,host_checked
 197g/static-alloc,gh/196198464,,,
 19h/zuse,gh/253908611,,,
 1aim/rust-regex-cache,gh/96431354,,,
+1g4-mirror/libunistring,gh/1165671691,,,
 1password/arboard,gh/277085996,,,
 1password/password-rules-parser,gh/309716551,,,
 1password/sys-locale,gh/367106577,,,
@@ -677,6 +678,7 @@ automattic/mongoose,gh/597879,,,
 automattic/node-canvas,gh/948957,,,
 autotools-mirror/autoconf,gh/47662429,fsf/gnu,project_list,2026-07-05T16:57:24+00:00
 autotools-mirror/automake,gh/47662468,fsf/gnu,project_list,2026-07-05T16:57:24+00:00
+autotools-mirror/gettext,gh/47662595,fsf/gnu,project_list,2026-07-05T16:57:24+00:00
 autotools-mirror/libtool,gh/47662711,fsf/gnu,project_list,2026-07-05T16:57:24+00:00
 autotools-mirror/m4,gh/66880383,fsf/gnu,project_list,2026-07-05T16:57:24+00:00
 avahi/avahi,gh/27156301,,,
@@ -3243,6 +3245,8 @@ gnuaspell/aspell,gh/76153145,,,
 gnutls/gnutls,gh/58873704,fsf/gnu,project_list,2026-07-05T16:57:24+00:00
 gnutls/libtasn1,gh/59017205,fsf/gnu,domain,2026-07-05T16:57:24+00:00
 gnutls/nettle,gh/59017402,,,
+gnutools/binutils-gdb,gh/1178912368,,,
+gnutools/glibc,gh/1178881118,sfc,domain,2026-07-05T16:53:18+00:00
 gnzlbg/match_cfg,gh/179054987,,,
 gnzlbg/sleef-sys,gh/144581945,,,
 gnzlbg/slice_deque,gh/116691849,,,
@@ -8502,6 +8506,9 @@ sagiegurari/envmnt,gh/185587052,,,
 sagiegurari/fsio,gh/241209414,,,
 sahlberg/libiscsi,gh/1139010,,,
 sahlberg/libnfs,gh/1333552,,,
+sailfishos-mirror/acl,gh/504504895,,,
+sailfishos-mirror/bzip2,gh/251322671,,,
+sailfishos-mirror/readline,gh/251362875,,,
 salamek/cron-descriptor,gh/49784431,,,
 saleemrashid/sha2-const,gh/261057177,,,
 salesforce/buffer-equal-constant-time,gh/15235246,,,

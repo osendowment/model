@@ -1,4 +1,4 @@
-"package","github_repo","git","eco_guess","avg_downloads","2021","2022","2023","2024","2025","top","pagerank","value_class","repo_id","mirror_url","license"
+"package","github_repo","git","eco_guess","avg_downloads","2021","2022","2023","2024","2025","top","pagerank","value_class","repo_id","canonical_url","license"
 "tslib","microsoft/tslib","https://github.com/microsoft/tslib.git","eco","9293397240","3205547007","6587973684","11156680193","12308407203","13208378117","True","0.01550115","A","gh/34414315","","0bsd"
 "@babel/helper-plugin-utils","babel/babel","https://github.com/babel/babel.git","eco","2335528923","1504224577","2272691623","2394127277","2358417529","3148183613","True","0.01431538","A","gh/24560307","","mit"
 "@babel/types","babel/babel","https://github.com/babel/babel.git","eco","3144196272","2086196296","3073122068","2873817679","3146295833","4541549486","True","0.00730475","A","gh/24560307","","mit"

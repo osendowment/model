@@ -1,5 +1,6 @@
 repo,repo_id,git_url,status,distinct_authors,commits_total,clone_seconds,error,fetched_at
 10der/homeassistant-custom_components-awtrix,gh/748539167,https://github.com/10der/homeassistant-custom_components-awtrix.git,ok,6,55,0.7,,2026-05-19T11:22:35+00:00
+1g4-mirror/libunistring,gh/1165671691,https://github.com/1g4-mirror/libunistring.git,ok,5,423,0.6,,2026-07-13T20:07:46+00:00
 7rulnik/source-map-js,gh/330043541,https://github.com/7rulnik/source-map-js.git,ok,76,506,0.8,,2026-05-19T11:22:35+00:00
 acornjs/acorn,gh/5932749,https://github.com/acornjs/acorn.git,ok,154,1528,1.1,,2026-05-19T11:22:35+00:00
 acornjs/acorn-jsx,gh/22187098,https://github.com/acornjs/acorn-jsx.git,ok,55,489,0.8,,2026-05-19T11:22:35+00:00
@@ -44,6 +45,7 @@ astanin/python-tabulate huggingface/huggingface_hub postcss/postcss-value-parser
 astral-sh/ruff,gh/523043277,https://github.com/astral-sh/ruff.git,ok,910,15254,6.2,,2026-05-19T11:22:45+00:00
 auth0/node-jwa,gh/8116861,https://github.com/auth0/node-jwa.git,ok,16,82,1.7,,2026-05-19T11:22:45+00:00
 autotools-mirror/autoconf,gh/47662429,https://github.com/autotools-mirror/autoconf.git,ok,160,7088,1.5,,2026-05-19T11:22:46+00:00
+autotools-mirror/gettext,gh/47662595,https://github.com/autotools-mirror/gettext.git,ok,76,8902,1.0,,2026-07-13T20:07:46+00:00
 autotools-mirror/libtool,gh/47662711,https://github.com/autotools-mirror/libtool.git,ok,371,4516,1.5,,2026-05-19T11:22:46+00:00
 autotools-mirror/m4,gh/66880383,https://github.com/autotools-mirror/m4.git,ok,16,708,0.7,,2026-05-19T11:22:47+00:00
 aws/aws-cli,gh/6780767,https://github.com/aws/aws-cli.git,ok,546,9166,3.3,,2026-05-19T11:22:47+00:00
@@ -93,7 +95,7 @@ burntsushi/winapi-util,gh/146040682,https://github.com/burntsushi/winapi-util.gi
 businho/pytest-ruff,gh/599731435,https://github.com/businho/pytest-ruff.git,ok,7,39,0.7,,2026-05-19T11:23:09+00:00
 bytecodealliance/rustix,gh/295544240,https://github.com/bytecodealliance/rustix.git,ok,132,2207,1.4,,2026-05-19T11:23:09+00:00
 bytecodealliance/wasi-rs,gh/196445196,https://github.com/bytecodealliance/wasi-rs.git,ok,30,148,5.5,,2026-05-19T11:23:09+00:00
-bzip2/bzip2,gl/12551088,https://gitlab.com/bzip2/bzip2.git,ok,25,153,0.9,,2026-07-12T21:32:54+00:00
+bzip2/bzip2,gl/12551088,https://github.com/bzip2/bzip2.git,ok,25,153,0.9,,2026-07-12T21:32:54+00:00
 c-ares/c-ares,gh/571708,https://github.com/c-ares/c-ares.git,ok,192,2947,1.8,,2026-05-19T11:23:10+00:00
 calvinmetcalf/minimalistic-assert,gh/29144257,https://github.com/calvinmetcalf/minimalistic-assert.git,ok,2,3,0.7,,2026-05-19T11:23:10+00:00
 calvinmetcalf/process-nextick-args,gh/36039131,https://github.com/calvinmetcalf/process-nextick-args.git,ok,10,27,1.1,,2026-05-19T11:23:10+00:00
@@ -282,6 +284,8 @@ gnome/pango,gh/4537144,https://github.com/gnome/pango.git,ok,293,6038,3.4,,2026-
 gnutls/gnutls,gl/179611,https://gitlab.com/gnutls/gnutls.git,ok,269,21204,2.5,,2026-07-05T23:07:14+00:00
 gnutls/libtasn1,gl/919981,https://gitlab.com/gnutls/libtasn1.git,ok,32,1732,0.9,,2026-07-05T23:07:14+00:00
 gnutls/nettle,gh/59017402,https://github.com/gnutls/nettle.git,ok,78,4759,1.1,,2026-05-19T11:24:11+00:00
+gnutools/binutils-gdb,gh/1178912368,https://github.com/gnutools/binutils-gdb.git,ok,1653,126729,10.2,,2026-07-13T20:07:46+00:00
+gnutools/glibc,gh/1178881118,https://github.com/gnutools/glibc.git,ok,1034,43741,3.6,,2026-07-13T20:07:46+00:00
 google/brotli,gh/24993138,https://github.com/google/brotli.git,ok,144,1079,0.8,,2026-05-19T11:24:11+00:00
 google/highway,gh/206791328,https://github.com/google/highway.git,ok,144,2957,0.9,,2026-07-06T10:53:55+00:00
 google/zerocopy,gh/534354967,https://github.com/google/zerocopy.git,ok,82,1660,1.8,,2026-05-19T11:24:12+00:00
@@ -752,6 +756,9 @@ rvagg/archived-prr,gh/9151864,https://github.com/rvagg/archived-prr.git,ok,2,9,0
 rvagg/bl,gh/10706095,https://github.com/rvagg/bl.git,ok,42,255,0.5,,2026-05-19T11:26:22+00:00
 rvagg/through2,gh/11808187,https://github.com/rvagg/through2.git,ok,22,114,0.5,,2026-05-19T11:26:23+00:00
 ryanzim/universalify,gh/87651180,https://github.com/ryanzim/universalify.git,ok,8,28,0.6,,2026-05-19T11:26:24+00:00
+sailfishos-mirror/acl,gh/504504895,https://github.com/sailfishos-mirror/acl.git,ok,57,480,0.6,,2026-07-13T20:07:46+00:00
+sailfishos-mirror/bzip2,gh/251322671,https://github.com/sailfishos-mirror/bzip2.git,ok,10,59,0.6,,2026-07-13T20:07:46+00:00
+sailfishos-mirror/readline,gh/251362875,https://github.com/sailfishos-mirror/readline.git,ok,1,70,0.5,,2026-07-13T20:07:46+00:00
 salesforce/tough-cookie,gh/2606873,https://github.com/salesforce/tough-cookie.git,ok,52,561,0.6,,2026-05-19T11:26:25+00:00
 samn/json-stable-stringify,gh/76598131,https://github.com/samn/json-stable-stringify.git,ok,9,32,0.5,,2026-05-19T11:26:25+00:00
 samverschueren/decode-uri-component,gh/91837954,https://github.com/samverschueren/decode-uri-component.git,ok,3,19,0.5,,2026-05-19T11:26:26+00:00

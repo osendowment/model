@@ -1,5 +1,6 @@
 repo,repo_id,has_funding_links,has_funding_yml,funding_link_platforms,github,patreon,open_collective,ko_fi,tidelift,community_bridge,liberapay,issuehunt,lfx_crowdfunding,polar,buy_me_a_coffee,thanks_dev,otechie,custom,fetched_at
 10der/homeassistant-custom_components-awtrix,gh/748539167,,,,,,,,,,,,,,,,,,2026-05-19T11:10:37+00:00
+1g4-mirror/libunistring,gh/1165671691,False,False,,,,,,,,,,,,,,,,2026-07-13T20:12:59+00:00
 7rulnik/source-map-js,gh/330043541,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:42+00:00
 acornjs/acorn,gh/5932749,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:42+00:00
 acornjs/acorn-jsx,gh/22187098,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:42+00:00
@@ -42,6 +43,7 @@ astanin/python-tabulate,gh/205875548,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18
 astral-sh/ruff,gh/523043277,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:42+00:00
 auth0/node-jwa,gh/8116861,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:42+00:00
 autotools-mirror/autoconf,gh/47662429,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:42+00:00
+autotools-mirror/gettext,gh/47662595,False,False,,,,,,,,,,,,,,,,2026-07-13T20:12:59+00:00
 autotools-mirror/libtool,gh/47662711,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:42+00:00
 autotools-mirror/m4,gh/66880383,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:42+00:00
 aws/aws-cli,gh/6780767,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:42+00:00
@@ -280,6 +282,8 @@ gnome/pango,gh/4537144,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:58+00:00
 gnutls/gnutls,gh/58873704,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:39+00:00
 gnutls/libtasn1,gh/59017205,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:39+00:00
 gnutls/nettle,gh/59017402,,,,,,,,,,,,,,,,,,2026-05-19T11:11:11+00:00
+gnutools/binutils-gdb,gh/1178912368,False,False,,,,,,,,,,,,,,,,2026-07-13T20:12:59+00:00
+gnutools/glibc,gh/1178881118,False,False,,,,,,,,,,,,,,,,2026-07-13T20:12:59+00:00
 google/brotli,gh/24993138,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:44+00:00
 google/highway,gh/206791328,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:39+00:00
 google/zerocopy,gh/534354967,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:44+00:00
@@ -292,7 +296,7 @@ googleapis/python-cloud-core,gh/226992462,False,False,,,,,,,,,,,,,,,,2026-07-06T
 googleapis/python-crc32c,gh/159736041,False,False,,,,,,,,,,,,,,,,2026-07-06T11:10:39+00:00
 googleapis/python-storage,gh/226992639,,,,,,,,,,,,,,,,,,2026-04-28T00:16:13+00:00
 googlechrome/workbox,gh/55424670,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:44+00:00
-gpg/libgpg-error,gh/42075984,,,,,,,,,,,,,,,,,,2026-05-19T11:11:15+00:00
+gpg/libgpg-error,gh/42075984,False,False,,,,,,,,,,,,,,,,2026-07-13T20:12:59+00:00
 grahamdumpleton/wrapt,gh/10357291,True,True,github,grahamdumpleton,,,,,,,,,,,,,,2026-06-30T14:18:44+00:00
 grantjenks/python-sortedcontainers,gh/17144859,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:44+00:00
 graydon/exhaustigen-rs,gh/432630522,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:44+00:00
@@ -698,7 +702,7 @@ python/tzdata,gh/242158882,True,True,"github,custom",python,,,,,,,,,,,,,https://
 qix-/color-convert,gh/1874305,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 qix-/node-error-ex,gh/41388258,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 qix-/node-is-arrayish,gh/41376759,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
-qt/qt5,gh/9880318,,,,,,,,,,,,,,,,,,2026-05-19T11:11:16+00:00
+qt/qt5,gh/9880318,False,False,,,,,,,,,,,,,,,,2026-07-13T20:12:59+00:00
 radix-ui/primitives,gh/273499522,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 raszi/node-tmp,gh/2313213,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:43+00:00
 raynos/for-each,gh/6006855,True,True,"github,tidelift",ljharb,,,,for-each,,,,,,,,,,2026-06-30T14:18:43+00:00
@@ -759,6 +763,9 @@ rvagg/bl,gh/10706095,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:50+00:00
 rvagg/prr,gh/9151864,,,,,,,,,,,,,,,,,,2026-04-28T00:15:42+00:00
 rvagg/through2,gh/11808187,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:50+00:00
 ryanzim/universalify,gh/87651180,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:50+00:00
+sailfishos-mirror/acl,gh/504504895,False,False,,,,,,,,,,,,,,,,2026-07-13T20:12:59+00:00
+sailfishos-mirror/bzip2,gh/251322671,False,False,,,,,,,,,,,,,,,,2026-07-13T20:12:59+00:00
+sailfishos-mirror/readline,gh/251362875,False,False,,,,,,,,,,,,,,,,2026-07-13T20:12:59+00:00
 salesforce/tough-cookie,gh/2606873,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:50+00:00
 samn/json-stable-stringify,gh/76598131,False,False,,,,,,,,,,,,,,,,2026-06-30T14:18:50+00:00
 samverschueren/decode-uri-component,gh/91837954,True,False,tidelift,,,,,decode-uri-component,,,,,,,,,,2026-06-30T14:18:50+00:00

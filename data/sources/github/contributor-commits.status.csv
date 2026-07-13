@@ -1,5 +1,6 @@
 repo,repo_id,git_url,status,n_contributors,fetched_at
 10der/homeassistant-custom_components-awtrix,gh/748539167,https://github.com/10der/homeassistant-custom_components-awtrix.git,ok,5,2026-05-19T11:23:38+00:00
+1g4-mirror/libunistring,gh/1165671691,https://github.com/1g4-mirror/libunistring.git,ok,3,2026-07-13T20:12:55+00:00
 7rulnik/source-map-js,gh/330043541,https://github.com/7rulnik/source-map-js.git,ok,63,2026-05-19T11:23:41+00:00
 acornjs/acorn,gh/5932749,https://github.com/acornjs/acorn.git,ok,124,2026-05-19T11:23:42+00:00
 acornjs/acorn-jsx,gh/22187098,https://github.com/acornjs/acorn-jsx.git,ok,45,2026-05-19T11:23:52+00:00
@@ -42,6 +43,7 @@ astanin/python-tabulate,gh/205875548,https://github.com/astanin/python-tabulate.
 astral-sh/ruff,gh/523043277,https://github.com/astral-sh/ruff.git,ok,454,2026-05-19T11:22:39+00:00
 auth0/node-jwa,gh/8116861,https://github.com/auth0/node-jwa.git,ok,14,2026-05-19T11:22:38+00:00
 autotools-mirror/autoconf,gh/47662429,https://github.com/autotools-mirror/autoconf.git,ok,88,2026-05-19T11:22:38+00:00
+autotools-mirror/gettext,gh/47662595,https://github.com/autotools-mirror/gettext.git,ok,49,2026-07-13T20:12:55+00:00
 autotools-mirror/libtool,gh/47662711,https://github.com/autotools-mirror/libtool.git,ok,149,2026-05-19T11:22:39+00:00
 autotools-mirror/m4,gh/66880383,https://github.com/autotools-mirror/m4.git,ok,13,2026-05-19T11:24:30+00:00
 aws/aws-cli,gh/6780767,https://github.com/aws/aws-cli.git,ok,334,2026-05-19T11:22:41+00:00
@@ -271,6 +273,8 @@ gnome/pango,gh/4537144,https://github.com/gnome/pango.git,ok,156,2026-05-19T11:2
 gnutls/gnutls,gh/58873704,https://github.com/gnutls/gnutls.git,ok,216,2026-05-19T11:22:46+00:00
 gnutls/libtasn1,gh/59017205,https://github.com/gnutls/libtasn1.git,ok,17,2026-05-19T11:22:46+00:00
 gnutls/nettle,gh/59017402,https://github.com/gnutls/nettle.git,ok,48,2026-05-19T11:22:47+00:00
+gnutools/binutils-gdb,gh/1178912368,https://github.com/gnutools/binutils-gdb.git,ok,226,2026-07-13T20:12:57+00:00
+gnutools/glibc,gh/1178881118,https://github.com/gnutools/glibc.git,ok,286,2026-07-13T20:12:57+00:00
 google/brotli,gh/24993138,https://github.com/google/brotli.git,ok,121,2026-05-19T11:22:48+00:00
 google/zerocopy,gh/534354967,https://github.com/google/zerocopy.git,ok,72,2026-05-19T11:22:49+00:00
 googleapis/google-cloud-python,gh/16316451,https://github.com/googleapis/google-cloud-python.git,ok,399,2026-05-19T11:22:51+00:00
@@ -733,6 +737,9 @@ rvagg/archived-prr,gh/9151864,https://github.com/rvagg/archived-prr.git,ok,2,202
 rvagg/bl,gh/10706095,https://github.com/rvagg/bl.git,ok,36,2026-05-19T11:23:20+00:00
 rvagg/through2,gh/11808187,https://github.com/rvagg/through2.git,ok,21,2026-05-19T11:23:21+00:00
 ryanzim/universalify,gh/87651180,https://github.com/ryanzim/universalify.git,ok,5,2026-05-19T11:23:23+00:00
+sailfishos-mirror/acl,gh/504504895,https://github.com/sailfishos-mirror/acl.git,ok,33,2026-07-13T20:12:56+00:00
+sailfishos-mirror/bzip2,gh/251322671,https://github.com/sailfishos-mirror/bzip2.git,ok,8,2026-07-13T20:12:55+00:00
+sailfishos-mirror/readline,gh/251362875,https://github.com/sailfishos-mirror/readline.git,empty,0,2026-07-13T20:12:56+00:00
 salesforce/tough-cookie,gh/2606873,https://github.com/salesforce/tough-cookie.git,ok,38,2026-05-19T11:23:24+00:00
 samn/json-stable-stringify,gh/76598131,https://github.com/samn/json-stable-stringify.git,ok,7,2026-05-19T11:23:26+00:00
 samverschueren/decode-uri-component,gh/91837954,https://github.com/samverschueren/decode-uri-component.git,ok,3,2026-05-19T11:23:27+00:00
@@ -886,7 +893,7 @@ tokio-rs/tracing,gh/165289175,https://github.com/tokio-rs/tracing.git,ok,305,202
 toml-rs/toml,gh/95902102,https://github.com/toml-rs/toml.git,ok,150,2026-05-19T11:24:16+00:00
 tootallnate/proxy-agents,gh/11293703,https://github.com/tootallnate/proxy-agents.git,ok,45,2026-05-19T11:24:17+00:00
 tootallnate/util-deprecate,gh/19321056,https://github.com/tootallnate/util-deprecate.git,ok,2,2026-05-19T11:24:18+00:00
-torvalds/linux,gh/2325298,https://github.com/torvalds/linux.git,error,0,2026-07-13T19:06:23+00:00
+torvalds/linux,gh/2325298,https://github.com/torvalds/linux.git,error,0,2026-07-13T20:21:10+00:00
 tower-rs/tower,gh/98244646,https://github.com/tower-rs/tower.git,ok,107,2026-05-19T11:24:21+00:00
 tox-dev/filelock,gh/17098256,https://github.com/tox-dev/filelock.git,ok,59,2026-05-19T11:24:22+00:00
 tox-dev/platformdirs,gh/367032142,https://github.com/tox-dev/platformdirs.git,ok,78,2026-05-19T11:24:23+00:00

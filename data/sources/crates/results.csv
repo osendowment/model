@@ -1,4 +1,4 @@
-"package","github_repo","git","eco_guess","avg_downloads","2021","2022","2023","2024","2025","top","pagerank","value_class","repo_id","mirror_url","license"
+"package","github_repo","git","eco_guess","avg_downloads","2021","2022","2023","2024","2025","top","pagerank","value_class","repo_id","canonical_url","license"
 "serde","serde-rs/serde","https://github.com/serde-rs/serde.git","eco","144991169","34991551","65562547","109357962","182076207","332967578","True","0.04518845","A","gh/14367737","","mit or apache-2.0"
 "serde_derive","serde-rs/serde","https://github.com/serde-rs/serde.git","eco","135029540","30242111","58490250","100004615","173246414","313164313","True","0.03751685","A","gh/14367737","","mit or apache-2.0"
 "trybuild","dtolnay/trybuild","https://github.com/dtolnay/trybuild.git","eco","6421607","1275709","2285451","3983510","6888856","17674513","True","0.03128494","A","gh/184941159","","mit or apache-2.0"

@@ -1,4 +1,5 @@
 repo,repo_id,oss,intent,nonprofit,active,eligible,value_comps,risk_comps,complete
+1g4-mirror/libunistring,gh/1165671691,True,False,True,True,False,2,4,True
 7rulnik/source-map-js,gh/330043541,True,True,True,True,True,3,4,True
 acornjs/acorn,gh/5932749,True,True,True,True,True,3,4,True
 acornjs/acorn-jsx,gh/22187098,True,True,True,True,True,3,4,True
@@ -37,6 +38,7 @@ astanin/python-tabulate,gh/205875548,True,False,True,True,False,3,4,True
 astral-sh/ruff,gh/523043277,True,True,False,True,False,3,4,True
 auth0/node-jwa,gh/8116861,True,True,False,True,False,3,4,True
 autotools-mirror/autoconf,gh/47662429,True,True,True,True,True,2,4,True
+autotools-mirror/gettext,gh/47662595,True,True,True,True,True,2,4,True
 autotools-mirror/libtool,gh/47662711,True,True,True,True,True,2,4,True
 autotools-mirror/m4,gh/66880383,True,True,True,True,True,2,4,True
 aws/aws-cli,gh/6780767,True,True,False,True,False,3,4,True
@@ -264,11 +266,14 @@ gnome/libxml2,gl/gnome-1665,True,True,True,True,True,1,4,False
 gnome/pango,gh/4537144,True,True,True,True,True,2,4,True
 gnutls/gnutls,gl/179611,True,False,True,True,False,2,4,True
 gnutls/libtasn1,gl/919981,True,False,True,True,False,1,4,False
+gnutools/binutils-gdb,gh/1178912368,True,False,True,True,False,2,4,True
+gnutools/glibc,gh/1178881118,True,True,True,True,True,2,4,True
 google/brotli,gh/24993138,True,True,False,True,False,2,4,True
 google/zerocopy,gh/534354967,True,True,False,True,False,3,4,True
 googleapis/google-cloud-python,gh/16316451,True,True,False,True,False,3,4,True
 googleapis/python-crc32c,gh/159736041,True,False,True,False,False,3,4,True
 googlechrome/workbox,gh/55424670,True,True,False,True,False,2,4,True
+gpg/libgpg-error,gh/42075984,True,False,True,True,False,2,4,True
 grahamdumpleton/wrapt,gh/10357291,True,True,True,True,True,3,4,True
 grantjenks/python-sortedcontainers,gh/17144859,True,True,True,True,True,3,4,True
 graydon/exhaustigen-rs,gh/432630522,True,False,True,True,False,2,4,True
@@ -663,6 +668,7 @@ python/tzdata,gh/242158882,True,True,True,True,True,3,4,True
 qix-/color-convert,gh/1874305,True,True,True,True,True,3,4,True
 qix-/node-error-ex,gh/41388258,True,True,True,True,True,3,4,True
 qix-/node-is-arrayish,gh/41376759,True,True,True,True,True,3,4,True
+qt/qt5,gh/9880318,True,False,True,True,False,2,4,True
 radix-ui/primitives,gh/273499522,True,True,False,True,False,3,4,True
 raszi/node-tmp,gh/2313213,True,False,True,True,False,3,4,True
 raynos/for-each,gh/6006855,True,True,True,True,True,3,4,True
@@ -721,6 +727,9 @@ rvagg/archived-prr,gh/9151864,True,False,True,False,False,3,4,True
 rvagg/bl,gh/10706095,True,True,True,True,True,3,4,True
 rvagg/through2,gh/11808187,True,False,True,True,False,3,4,True
 ryanzim/universalify,gh/87651180,True,False,True,True,False,3,4,True
+sailfishos-mirror/acl,gh/504504895,True,False,True,True,False,2,4,True
+sailfishos-mirror/bzip2,gh/251322671,True,False,True,True,False,2,4,True
+sailfishos-mirror/readline,gh/251362875,True,False,True,True,False,2,4,True
 salesforce/tough-cookie,gh/2606873,True,True,False,True,False,3,4,True
 samn/json-stable-stringify,gh/76598131,True,False,True,True,False,3,4,True
 samverschueren/decode-uri-component,gh/91837954,True,True,True,True,True,3,4,True

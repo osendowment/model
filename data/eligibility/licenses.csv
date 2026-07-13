@@ -1,4 +1,5 @@
 repo,repo_id,license,license_source,oss
+1g4-mirror/libunistring,gh/1165671691,gpl-2.0-or-later or lgpl-3.0-or-later,registry,True
 7rulnik/source-map-js,gh/330043541,bsd-3-clause,registry,True
 acornjs/acorn,gh/5932749,mit,registry,True
 acornjs/acorn-jsx,gh/22187098,mit,registry,True
@@ -37,6 +38,7 @@ astanin/python-tabulate,gh/205875548,mit,registry,True
 astral-sh/ruff,gh/523043277,mit,registry,True
 auth0/node-jwa,gh/8116861,mit,registry,True
 autotools-mirror/autoconf,gh/47662429,gpl-3.0-or-later and (gpl-3.0-or-later with autoconf-exception-3.0),registry,True
+autotools-mirror/gettext,gh/47662595,gpl-3.0-or-later and lgpl-2.1-or-later,registry,True
 autotools-mirror/libtool,gh/47662711,gpl-2.0-or-later,registry,True
 autotools-mirror/m4,gh/66880383,gpl-3.0-or-later,registry,True
 aws/aws-cli,gh/6780767,apache-2.0,registry,True
@@ -264,11 +266,14 @@ gnome/libxml2,gl/gnome-1665,mit,gitlab,True
 gnome/pango,gh/4537144,lgpl-2.0-or-later,registry,True
 gnutls/gnutls,gl/179611,gpl-3.0,github,True
 gnutls/libtasn1,gl/919981,gpl-3.0+,gitlab,True
+gnutools/binutils-gdb,gh/1178912368,gpl-2.0-or-later and gpl-3.0-or-later and lgpl-2.0-or-later and lgpl-3.0-only,registry,True
+gnutools/glibc,gh/1178881118,gpl-2.0-or-later and lgpl-2.1-or-later,registry,True
 google/brotli,gh/24993138,mit,registry,True
 google/zerocopy,gh/534354967,bsd-2-clause or apache-2.0 or mit,registry,True
 googleapis/google-cloud-python,gh/16316451,apache-2.0,registry,True
 googleapis/python-crc32c,gh/159736041,apache-2.0,github,True
 googlechrome/workbox,gh/55424670,mit,registry,True
+gpg/libgpg-error,gh/42075984,lgpl-2.1-or-later,registry,True
 grahamdumpleton/wrapt,gh/10357291,bsd-2-clause,registry,True
 grantjenks/python-sortedcontainers,gh/17144859,apache-2.0,registry,True
 graydon/exhaustigen-rs,gh/432630522,mit or apache-2.0,registry,True
@@ -663,6 +668,7 @@ python/tzdata,gh/242158882,apache-2.0,registry,True
 qix-/color-convert,gh/1874305,mit,registry,True
 qix-/node-error-ex,gh/41388258,mit,registry,True
 qix-/node-is-arrayish,gh/41376759,mit,registry,True
+qt/qt5,gh/9880318,bsd-3-clause and gfdl-1.3-no-invariants-only and gpl-2.0-only and (gpl-3.0-only with qt-gpl-exception-1.0) and lgpl-3.0-only,registry,True
 radix-ui/primitives,gh/273499522,mit,registry,True
 raszi/node-tmp,gh/2313213,mit,registry,True
 raynos/for-each,gh/6006855,mit,registry,True
@@ -721,6 +727,9 @@ rvagg/archived-prr,gh/9151864,mit,registry,True
 rvagg/bl,gh/10706095,mit,registry,True
 rvagg/through2,gh/11808187,mit,registry,True
 ryanzim/universalify,gh/87651180,mit,registry,True
+sailfishos-mirror/acl,gh/504504895,gpl-2.0-or-later and lgpl-2.1-or-later,registry,True
+sailfishos-mirror/bzip2,gh/251322671,bzip2-1.0.6,registry,True
+sailfishos-mirror/readline,gh/251362875,gpl-3.0-or-later,registry,True
 salesforce/tough-cookie,gh/2606873,bsd-3-clause,registry,True
 samn/json-stable-stringify,gh/76598131,mit,registry,True
 samverschueren/decode-uri-component,gh/91837954,mit,registry,True

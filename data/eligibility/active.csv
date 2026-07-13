@@ -1,4 +1,5 @@
 repo,repo_id,eol,archived,active
+1g4-mirror/libunistring,gh/1165671691,False,False,True
 7rulnik/source-map-js,gh/330043541,False,False,True
 acornjs/acorn,gh/5932749,False,False,True
 acornjs/acorn-jsx,gh/22187098,False,False,True
@@ -37,6 +38,7 @@ astanin/python-tabulate,gh/205875548,False,False,True
 astral-sh/ruff,gh/523043277,False,False,True
 auth0/node-jwa,gh/8116861,False,False,True
 autotools-mirror/autoconf,gh/47662429,False,False,True
+autotools-mirror/gettext,gh/47662595,False,False,True
 autotools-mirror/libtool,gh/47662711,False,False,True
 autotools-mirror/m4,gh/66880383,False,False,True
 aws/aws-cli,gh/6780767,False,False,True
@@ -264,11 +266,14 @@ gnome/libxml2,gl/gnome-1665,False,False,True
 gnome/pango,gh/4537144,False,False,True
 gnutls/gnutls,gl/179611,False,False,True
 gnutls/libtasn1,gl/919981,False,False,True
+gnutools/binutils-gdb,gh/1178912368,False,False,True
+gnutools/glibc,gh/1178881118,False,False,True
 google/brotli,gh/24993138,False,False,True
 google/zerocopy,gh/534354967,False,False,True
 googleapis/google-cloud-python,gh/16316451,False,False,True
 googleapis/python-crc32c,gh/159736041,False,True,False
 googlechrome/workbox,gh/55424670,False,False,True
+gpg/libgpg-error,gh/42075984,False,False,True
 grahamdumpleton/wrapt,gh/10357291,False,False,True
 grantjenks/python-sortedcontainers,gh/17144859,False,False,True
 graydon/exhaustigen-rs,gh/432630522,False,False,True
@@ -663,6 +668,7 @@ python/tzdata,gh/242158882,False,False,True
 qix-/color-convert,gh/1874305,False,False,True
 qix-/node-error-ex,gh/41388258,False,False,True
 qix-/node-is-arrayish,gh/41376759,False,False,True
+qt/qt5,gh/9880318,False,False,True
 radix-ui/primitives,gh/273499522,False,False,True
 raszi/node-tmp,gh/2313213,False,False,True
 raynos/for-each,gh/6006855,False,False,True
@@ -721,6 +727,9 @@ rvagg/archived-prr,gh/9151864,False,True,False
 rvagg/bl,gh/10706095,False,False,True
 rvagg/through2,gh/11808187,False,False,True
 ryanzim/universalify,gh/87651180,False,False,True
+sailfishos-mirror/acl,gh/504504895,False,False,True
+sailfishos-mirror/bzip2,gh/251322671,False,False,True
+sailfishos-mirror/readline,gh/251362875,False,False,True
 salesforce/tough-cookie,gh/2606873,False,False,True
 samn/json-stable-stringify,gh/76598131,False,False,True
 samverschueren/decode-uri-component,gh/91837954,False,False,True

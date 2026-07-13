@@ -1,5 +1,6 @@
 repo,repo_id,packages_queried,fetched_at
 10der/homeassistant-custom_components-awtrix,gh/748539167,Debian:python,2026-05-18T01:11:34+00:00
+1g4-mirror/libunistring,gh/1165671691,Debian:libunistring,2026-07-13T20:08:18+00:00
 7rulnik/source-map-js,gh/330043541,npm:source-map-js,2026-07-05T16:32:21+00:00
 acornjs/acorn,gh/5932749,"npm:acorn,npm:acorn-walk,npm:acorn-loose",2026-07-05T16:32:23+00:00
 acornjs/acorn-jsx,gh/22187098,npm:acorn-jsx,2026-07-05T16:32:22+00:00
@@ -42,6 +43,7 @@ astanin/python-tabulate,gh/205875548,PyPI:tabulate,2026-06-28T20:20:33+00:00
 astral-sh/ruff,gh/523043277,PyPI:ruff,2026-07-05T16:32:26+00:00
 auth0/node-jwa,gh/8116861,npm:jwa,2026-07-05T16:32:26+00:00
 autotools-mirror/autoconf,gh/47662429,Debian:autoconf,2026-07-05T16:32:27+00:00
+autotools-mirror/gettext,gh/47662595,Debian:gettext,2026-07-13T20:08:18+00:00
 autotools-mirror/libtool,gh/47662711,Debian:libtool,2026-07-05T16:32:27+00:00
 autotools-mirror/m4,gh/66880383,Debian:m4,2026-07-05T16:32:28+00:00
 aws/aws-cli,gh/6780767,"PyPI:awscli,Debian:awscli",2026-07-05T16:32:29+00:00
@@ -284,6 +286,8 @@ gnome/pango,gh/4537144,Debian:pango,2026-07-05T16:33:58+00:00
 gnutls/gnutls,gl/179611,Debian:gnutls,2026-07-05T23:08:01+00:00
 gnutls/libtasn1,gl/919981,Debian:libtasn1,2026-07-05T23:08:02+00:00
 gnutls/nettle,gh/59017402,Debian:nettle,2026-05-18T01:13:30+00:00
+gnutools/binutils-gdb,gh/1178912368,Debian:binutils,2026-07-13T20:08:21+00:00
+gnutools/glibc,gh/1178881118,Debian:glibc,2026-07-13T20:08:21+00:00
 google/brotli,gh/24993138,"PyPI:brotli,Debian:brotli",2026-07-05T16:34:00+00:00
 google/highway,gh/206791328,"Debian:highway-simd-library,Debian:python:numpy",2026-07-06T11:06:58+00:00
 google/zerocopy,gh/534354967,"crates.io:zerocopy,crates.io:zerocopy-derive",2026-07-05T16:34:00+00:00
@@ -773,6 +777,9 @@ rvagg/bl,gh/10706095,npm:bl,2026-07-05T16:36:32+00:00
 rvagg/prr,gh/9151864,npm:prr,2026-05-03T19:00:34+00:00
 rvagg/through2,gh/11808187,npm:through2,2026-07-05T16:36:33+00:00
 ryanzim/universalify,gh/87651180,npm:universalify,2026-07-05T16:36:34+00:00
+sailfishos-mirror/acl,gh/504504895,Debian:acl,2026-07-13T20:08:18+00:00
+sailfishos-mirror/bzip2,gh/251322671,Debian:bzip2,2026-07-13T20:08:18+00:00
+sailfishos-mirror/readline,gh/251362875,Debian:readline,2026-07-13T20:08:18+00:00
 salesforce/tough-cookie,gh/2606873,npm:tough-cookie,2026-07-05T16:36:35+00:00
 samn/json-stable-stringify,gh/76598131,npm:json-stable-stringify-without-jsonify,2026-07-05T16:36:36+00:00
 samverschueren/decode-uri-component,gh/91837954,npm:decode-uri-component,2026-07-05T16:36:37+00:00
