@@ -19,6 +19,11 @@ html {
   -webkit-hyphens: none;
 }
 
+/* The --metadata title sets the PDF's document title, but pandoc's standalone
+   template also prints it as a title block — right above the report's own h1,
+   which reads as a duplicated heading. Keep the metadata, drop the block. */
+#title-block-header { display: none; }
+
 body {
   font: 9.5pt/1.45 "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #1c1c1e;
