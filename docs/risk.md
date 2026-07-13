@@ -38,10 +38,10 @@ run **concurrently**:
 pgroup git-fetch:  commits-years · resolve-head · git-contributors · issues · gitlab-issues
 sequential:        gitlab-commits-years
 pgroup metrics:    sha-metrics · cves · scorecard · depsdev
-builders:          concentration → complexity → security → workload → aggregate
+builders:          openssf-checks → concentration → complexity → security → workload → aggregate
 ```
 
-Two properties of that list:
+Three properties of that list:
 
 - **Score-forming fetchers only.** `FETCHERS` holds exactly the steps whose
   output feeds a `risk.csv` score column — the model scores nothing it does not
@@ -53,6 +53,11 @@ Two properties of that list:
   `resolve-head` write. A pgroup runs its members concurrently, so sharing one
   would race that file; its sequential slot sits after the `git-fetch` barrier
   and before `sha-metrics`, which reads the finished anchors.
+- **`openssf-checks` runs first among the builders.** Pure transform, no
+  fetch: it flattens the `scorecard` step's raw `data.json` into the per-check
+  `data/sources/openssf/checks.csv` (Maintained, Code-Review, CI-Tests, …),
+  which `build_workload` reads for `openssf_maintained`. It reruns whenever
+  `scorecard` does, keeping the per-check table in sync with the raw JSON.
 
 Fetchers are incremental — they skip data already present, so a re-run only
 fills gaps. `--offline` drops every fetcher and rebuilds from what is on disk;
@@ -354,6 +359,7 @@ The pipeline stages project the long files into per-repo wide rows for downstrea
 | `src/sources/gitlab/fetch_issue_metrics.py` | Issue counts per year for `gl/…` repos (one exact GitLab-API scan per project) |
 | `src/sources/osv/fetch_cves.py` | Distinct CVEs per repo (OSV.dev) + the `queried.csv` sidecar |
 | `src/sources/openssf/scorecard.py` | OpenSSF Scorecard score + checks, pinned to the snapshot SHA |
+| `src/sources/openssf/extract_checks.py` | Flattens the Scorecard run's `data.json` into the per-check `checks.csv` (Maintained, Code-Review, CI-Tests, …) that `build_workload` reads for `openssf_maintained` |
 | `src/sources/depsdev/fetch.py` | deps.dev-mirrored Scorecard (Scorecard fallback) + Best Practices badge |
 | `src/risk/aggregate_risk.py` | Aggregate the per-dimension scores into the overall `risk_score` (geometric mean of the four scored dimensions: concentration, complexity, security, workload; blank unless all four are present). **Input scope is `load_top_repos` over `data/value/value.csv` — valid repos with `class ∈ settings.json top_repos.classes` (`["A"]`) and `platform ∈ top_repos.platforms` (`["github", "gitlab"]`), archived included** |
 

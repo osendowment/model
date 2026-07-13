@@ -69,6 +69,45 @@ silently dropped.
 
 Source-specific details live in [`docs/sources/`](sources/) (one `.md` per source).
 
+## Running it
+
+The value stage runs only through the pipeline script; never invoke the
+stage runner or a fetcher by hand.
+
+```bash
+scripts/run-pipeline.sh --from-stage value    # value → risk → eligibility → preview → health
+scripts/run-pipeline.sh --stage value         # value alone (later stages left stale)
+scripts/run-pipeline.sh --stage value --list  # its steps
+scripts/run-pipeline.sh --stage value --offline   # pure-cache run, no network
+```
+
+Steps, in order (`src/value/run_value_pipeline.py`). Steps sharing a `pgroup`
+run **concurrently**:
+
+```
+pgroup dumps:      repology · ossfuzz
+pgroup eco:        npm · crates · pypi · cpp
+sequential:        stats → git-urls
+pgroup identity:   eco-fetch · canonical
+sequential:        resolve → unify → validation
+pgroup crit:       openssf-crit · eco-crit
+sequential:        criticality
+```
+
+`repology` and `ossfuzz` are 30-day whole-file-TTL dumps the ecosystem
+sub-pipelines read (Repology's `packages.csv` is the cpp pipeline's
+distro-version input; OSS-Fuzz's `projects.csv` feeds `build_git_urls` and
+the risk stage's fuzzed flag). `eco-fetch` and `canonical` each read the
+previous run's `value.csv` and write their own file, so they run
+concurrently — the former pulls ecosyste.ms repo candidates, the latter
+resolves every `github_repo` to its current `nameWithOwner` + numeric id
+(90-day per-row TTL). `openssf-crit` and `eco-crit` — the two criticality
+sources — run after `unify` decides the class-A scope they fetch and before
+`criticality` stamps both onto `value.csv`.
+
+`--rollup` skips straight to the cross-ecosystem tail — see [Unified
+output](#unified-output).
+
 ## Metrics Roadmap
 
 Inputs per dimension, current as of the last pipeline run. Each leaf = one metric, with its data
@@ -277,26 +316,34 @@ cpp differs: `debian_avg_downloads`, `homebrew_avg_downloads`, and the blended
 `data/value/value.csv` is the canonical per-repo table — one row per repo
 (on any host), plus one row per orphan package (no `repo`) so nothing is
 dropped. **All classes A/B/C are included** — the complete long-tail table
-is kept. Produced by the rollup steps of the value stage
-(`eco-fetch` → `resolve` → `unify` → `validation` → `criticality`): the
-`resolve` step (`apply_ecosystems_authority`) re-resolves each package's repo
-identity (override > ecosyste.ms > prior registry data) onto the per-eco
-`results.csv`; the `unify` step (`src/value/unify_value_data.py`) reads each
-ecosystem's `results.csv` and `eol.csv`, groups packages by repo, and computes
-all per-ecosystem and cross-ecosystem aggregates in one pass (sorted by
-`top_eco_pct` desc). There is no separate repo-aggregation step —
-`unify_value_data.py` produces the per-repo table directly. The final
-`criticality` step (`src.value.apply_criticality`) stamps `openssf_crit` /
-`eco_crit` / `value_score` and re-sorts the shipped file by `value_score`
-desc — unscored rows (below the 2-component floor, mostly class B/C) sink to
-the end in `top_eco_pct`-desc order. Manual corrections come from
-[`data/value/overrides.csv`](#manual-overrides).
+is kept. Produced by the rollup steps of the value stage (`eco-fetch` →
+`canonical` → `resolve` → `unify` → `validation` → `openssf-crit` →
+`eco-crit` → `criticality`): `eco-fetch` pulls ecosyste.ms repo candidates
+and `canonical` resolves every `github_repo` to its current `nameWithOwner`
++ immutable numeric id (GitHub's own rename authority); the `resolve` step
+(`apply_ecosystems_authority`) applies both onto the per-eco `results.csv`,
+re-resolving each package's repo identity under `override > github-canonical
+> ecosyste.ms > prior registry data`; the `unify` step
+(`src/value/unify_value_data.py`) reads each ecosystem's `results.csv` and
+`eol.csv`, groups packages by repo, and computes all per-ecosystem and
+cross-ecosystem aggregates in one pass (sorted by `top_eco_pct` desc). There
+is no separate repo-aggregation step — `unify_value_data.py` produces the
+per-repo table directly. `openssf-crit` and `eco-crit` then fetch the two
+criticality sources for the class-A scope `unify` just decided, and the
+final `criticality` step (`src.value.apply_criticality`) stamps
+`openssf_crit` / `eco_crit` / `value_score` and re-sorts the shipped file by
+`value_score` desc — unscored rows (below the 2-component floor, mostly
+class B/C) sink to the end in `top_eco_pct`-desc order. Manual corrections
+come from [`data/value/overrides.csv`](#manual-overrides).
 
 After editing `overrides.csv`, `uv run python -m src.value.run_value_pipeline
---rollup` rebuilds `value.csv` from the existing per-eco `results.csv` without
-re-running the ecosystem sub-pipelines — the one value-stage entry point that
-`scripts/run-pipeline.sh` does not wrap. It leaves the later stages stale, so
-follow it with `scripts/run-pipeline.sh --from-stage risk`.
+--rollup` reruns that same rollup chain (`eco-fetch` → `canonical` →
+`resolve` → `unify` → `validation` → `openssf-crit` → `eco-crit` →
+`criticality`) from the existing per-eco `results.csv`, without re-running
+the ecosystem sub-pipelines or the `stats` / `git-urls` steps — the one
+value-stage entry point that `scripts/run-pipeline.sh` does not wrap. It
+leaves the later stages stale, so follow it with `scripts/run-pipeline.sh
+--from-stage risk`.
 
 Per-ecosystem class is computed by summing the group's package PR within
 the ecosystem, ranking groups by that sum desc, and applying the same

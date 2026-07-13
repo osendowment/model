@@ -232,10 +232,12 @@ and `--skip-fetch` compose with stage selection.
 Fetchers (all incremental / TTL-gated): the GitHub repo-owner refresh
 (archived flag + license fallback), the GitLab project refresh (GitLab
 license fallback), the SPDX license list + the derived OSS-approved set,
-the per-eco license and EOL fetchers, the funding-intent fetchers
-(FUNDING.yml, the GitLab funding-file probe, npm/PyPI funding, Sponsors,
-bus-factor maintainer Sponsors, FLOSS Fund, the Open Collective reverse-map
-+ budgets) and the FOSS-foundation roster scrapers + host matcher. Builders:
+the per-eco license and EOL fetchers, the bus-factor contributor-commit
+fetch (`bf-contributors`, serial, ahead of the funding group), the
+funding-intent fetchers (FUNDING.yml, the GitLab funding-file probe,
+npm/PyPI funding, inbound/outbound Sponsors, bus-factor maintainer Sponsors,
+FLOSS Fund, the Open Collective reverse-map + budgets) and the
+FOSS-foundation roster scrapers + host matcher. Builders:
 `licenses` → `active` → `funding-build` → `aggregate`. The `data/preview/`
 deliverables (`results`, `people`, `preview-xlsx`) live in their own runner —
 `src.run_preview_pipeline`, the stage after this one — since they roll up all
@@ -245,19 +247,15 @@ three stages, not just eligibility.
 matches its builder's current output; `scripts/stats.py` recomputes the
 preview stats sheet coverage tables.
 
-## Known gap — the bus-factor maintainer cache
+## The bus-factor maintainer cache
 
 `bf_maintainer_fundable` (an `intent` signal) is keyed off each repo's
 bus-factor set, read from `data/sources/github/contributor-commits.csv`. That
-file is written **only** by `src.sources.github.fetch_contributors_metrics`,
-which **no pipeline stage runs** — it is a hand-run script. So the bus-factor
-membership behind this one signal is a cache the pipeline never refreshes: a
-repo that entered scope after the last manual run has no bus-factor rows and
-silently reads `bf_maintainer_fundable = False` (indistinguishable from a
-genuine "no fundable maintainer"), and `fetch_maintainer_sponsors` — which
-*is* a pipeline step — only queries the logins that stale cache already knows.
-Refresh it by hand with
-`uv run python -m src.sources.github.fetch_contributors_metrics`. The
+file is written by the `bf-contributors` step
+(`src.sources.github.fetch_contributors_metrics`, 90-day per-row TTL), which
+runs serially, before the `funding` pgroup — both `maintainer-sponsors` (which
+picks which logins to query from it) and `funding-build` read its output, so
+every repo in scope has bus-factor rows before either consumer runs. The
 git-clone contributor log (`data/sources/git/contributor-commits.csv`) that
-feeds the risk stage's concentration score is a *different* file and **is**
-pipeline-refreshed.
+feeds the risk stage's concentration score is a *different* file, fetched
+independently.

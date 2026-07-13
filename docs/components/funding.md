@@ -69,8 +69,8 @@ Funding  → data/eligibility/funding.csv  (one row per top repo, archived inclu
 │   └── oc_avg_funding_p      ← derived (worst-pinned CDF risk percentile of oc_avg_funding)          [2021–2025]
 │
 ├── Bus-factor maintainer Sponsors  (github/maintainer-sponsors.csv ∪ eligibility/maintainer-overrides.csv;
-│   │                                bus-factor membership from github/contributor-commits.csv —
-│   │                                a cache the pipeline does NOT refresh, see below)
+│   │                                bus-factor membership from github/contributor-commits.csv,
+│   │                                the `bf-contributors` step's output, see below)
 │   └── bf_maintainer_fundable ← any bus-factor maintainer (wrote ≥50% of the repo) has a personal
 │                                GitHub Sponsors listing (GraphQL hasSponsorsListing, keyed by user id)  [most recent]
 │
@@ -141,7 +141,7 @@ Repo-keyed files carry a `repo_id` column — the actual (rename-proof) join key
 | `github/sponsors.csv` | `src/sources/github/fetch_sponsors.py` | inbound GitHub Sponsors count + `gh_sponsors_enabled` | `repo_id` |
 | `github/sponsorships.csv` | `src/sources/github/fetch_sponsorships.py` | outbound sponsoring count | `login` |
 | `github/maintainer-sponsors.csv` | `src/sources/github/fetch_maintainer_sponsors.py` | personal Sponsors listing per bus-factor maintainer | `user_id` |
-| `github/contributor-commits.csv` | `src/sources/github/fetch_contributors_metrics.py` — **hand-run, no pipeline step** | GitHub `/contributors` rows; the bus-factor membership behind `bf_maintainer_fundable` (see below) | `repo_id` |
+| `github/contributor-commits.csv` | `src/sources/github/fetch_contributors_metrics.py` — **`bf-contributors` step, 90-day TTL** | GitHub `/contributors` rows; the bus-factor membership behind `bf_maintainer_fundable` (see below) | `repo_id` |
 | `data/eligibility/maintainer-overrides.csv` | curated | `login,reason` — maintainers fundable via a channel the fetch can't see; unioned into the fundable set | `login` |
 | `github/funding-yml.csv` | `src/sources/github/fetch_funding_yml.py` | resolved funding links (GraphQL `fundingLinks`) + FUNDING.yml file presence — platforms + handles | `repo_id` |
 | `gitlab/funding-files.csv` | `src/sources/gitlab/fetch_funding_files.py` | the GitLab twin of `funding-yml.csv` — FUNDING.yml variants + an in-repo `funding.json` / `.well-known` pointer probed on the default branch; same columns | `repo_id` |
@@ -209,28 +209,16 @@ maintainers who solicit funding through a channel the automated fetch can't
 see (an external profile funding link, an off-GitHub donation page), so
 `hasSponsorsListing` reads False despite real funding intent.
 
-**Caveat — the bus-factor input is a cache the pipeline does not refresh.**
 The bus-factor set comes from `data/sources/github/contributor-commits.csv`
-(via `src/sources/github/bf_contributors.py`), and that file is written **only**
-by `src.sources.github.fetch_contributors_metrics`, which is **not a step in any
-pipeline stage** — it is a hand-run script. Consequences:
-
-- A repo that entered scope after the last manual run has **no bus-factor rows**,
-  so `bf_maintainer_fundable` defaults to `False` — indistinguishable, in
-  `funding.csv`, from a genuine "no fundable maintainer". There is no
-  `*_status` column marking the difference.
-- `fetch_maintainer_sponsors` *is* a pipeline step and honours its TTL, but its
-  **query set** is bounded by the same stale cache: it only checks logins the
-  cache already lists, so a new repo's maintainers are never looked up.
-- The bus-factor membership itself also drifts as commit histories move; the
-  cache pins it to whenever the script was last run by hand.
-
-Refresh it deliberately with
-`uv run python -m src.sources.github.fetch_contributors_metrics` (incremental,
-TTL-gated per repo) before a run whose `intent` figures matter. Note this is a
-*different* file from the git-clone contributor log
-`data/sources/git/contributor-commits.csv`, which **is** pipeline-refreshed
-(`src.sources.git.contributors`, risk stage) and feeds the concentration score.
+(via `src/sources/github/bf_contributors.py`), written by the
+`bf-contributors` step (`src.sources.github.fetch_contributors_metrics`,
+90-day per-row TTL). It runs serially, ahead of the `funding` pgroup, because
+both `maintainer-sponsors` (which picks which logins to query from it) and
+`funding-build` read its output — so every repo in scope has bus-factor rows
+before either consumer runs. This is a *different* file from the git-clone
+contributor log `data/sources/git/contributor-commits.csv`, which is fetched
+independently (`src.sources.git.contributors`, risk stage) and feeds the
+concentration score instead.
 
 ### funding.json from the FLOSS Fund directory
 
@@ -399,7 +387,7 @@ timestamps stay in each source file.
 | `has_npm_funding`, `npm_funding_url` | npm package.json `funding` field — a declared channel (caps `score` at 79) |
 | `has_pypi_funding`, `pypi_funding_platforms` | PyPI `project_urls` funding link — a declared channel (caps `score` at 79) |
 | `paypal` | curated PayPal.me URL from `overrides.csv` — a declared channel (feeds `intent` + `channels_count`, caps `score` at 79); empty when none |
-| `bf_maintainer_fundable` | a bus-factor maintainer (≥50%-of-commits set) has a personal GitHub Sponsors listing (∪ curated overrides); intent-only — not a channel, no cap. Bus-factor membership comes from a **cache the pipeline does not refresh** (see the caveat above) |
+| `bf_maintainer_fundable` | a bus-factor maintainer (≥50%-of-commits set) has a personal GitHub Sponsors listing (∪ curated overrides); intent-only — not a channel, no cap. Bus-factor membership comes from the `bf-contributors` step (90-day TTL, see above) |
 | `channels_count` | distinct funding platforms (links ∪ funding.json repo+org channels ∪ npm ∪ pypi ∪ paypal) |
 | `oc_slug` | attributed Open Collective slug (override / reverse-map), empty when none |
 | `oc_avg_funding` | mean OC gross annual budget (`0` if none) |
@@ -492,8 +480,3 @@ for current per-channel coverage over the top repos and the score distribution.
   aren't public, so dollar figures exist only for the repos with an attributed
   Open Collective (coverage → the preview stats sheet);
   the sponsorship axis is a *count*, not a *sum*.
-- **`bf_maintainer_fundable` rides on an unrefreshed cache.** Its bus-factor
-  input (`github/contributor-commits.csv`) is produced only by a hand-run script
-  that no pipeline stage triggers, so a newly-scoped repo silently reads `False`
-  and its maintainers are never queried for Sponsors. Full detail in the caveat
-  under [Bus-factor maintainer Sponsors](#bus-factor-maintainer-sponsors-bf_maintainer_fundable).
