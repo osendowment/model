@@ -10,6 +10,11 @@ lives in `data.json`.
 This script flattens the JSON into a wide CSV so downstream pipeline stages
 can join per-check scores by repo without parsing JSON.
 
+Pure transform — no network I/O, so it takes no --offline/--refresh and needs
+no TTL. It runs as a plain pipeline step AFTER the `scorecard` fetcher (which
+writes data.json) and is safe to re-run: the output is deterministic (rows
+sorted by repo, one row per repo) and written atomically.
+
 Reads:
     data/sources/openssf/data.json   {repo: {checks: [{name, score}, ...], ...}}
 
@@ -21,12 +26,19 @@ Where each check column is the integer score 0..10, or `-1` (the upstream
 sentinel for "not applicable / unable to evaluate"), or empty if the check
 wasn't run for that repo.
 
+Missing / unusable input (see main): an absent data.json is a no-op warning
+(the scorecard step has not run yet), while a corrupt one is a hard error. In
+neither case is checks.csv overwritten — `build_workload` treats a missing or
+empty checks.csv as "no Maintained signal for any repo", so a truncated write
+here would silently zero the openssf_maintained dimension.
+
 Usage:
     uv run python -m src.sources.openssf.extract_checks
 """
 
 import csv
 import json
+import os
 from pathlib import Path
 
 from rich.console import Console
@@ -64,24 +76,31 @@ CHECK_NAMES = [
 ]
 
 
-def build() -> list[dict]:
-    if not INPUT_FILE.exists():
-        raise SystemExit(f"missing {INPUT_FILE}")
-    with open(INPUT_FILE, encoding="utf-8") as f:
-        data = json.load(f)
+def build(data: dict) -> tuple[list[dict], int]:
+    """Flatten the scorecard payload into wide rows. Returns (rows, skipped).
 
+    Deterministic and duplicate-free: repo keys are lowercased to a slug, and if
+    two keys collapse to the same slug (`Owner/Repo` vs `owner/repo`) the newest
+    `date` wins, so one repo yields exactly one row no matter the key casing.
+    `skipped` counts malformed payloads — a partial data.json still contributes
+    every well-formed repo it does have.
+    """
     # repos.csv (keyed on both `repo` and rename-resolved `full_name`) overlaid on
     # value.csv ids so a repo renamed since either file was written still resolves;
     # repos.csv wins on conflict.
     repo_ids = {**load_value_repo_ids(), **load_repo_ids()}
 
-    rows: list[dict] = []
-    for repo_key, payload in data.items():
+    by_slug: dict[str, dict] = {}
+    skipped = 0
+    for repo_key, payload in sorted(data.items()):
         if not isinstance(payload, dict):
+            skipped += 1
             continue
         slug = repo_key.strip().lower()
         # The repo key is already in `owner/name` form.
-        per_check = {c.get("name"): c.get("score") for c in payload.get("checks", [])}
+        checks = payload.get("checks")
+        per_check = {c.get("name"): c.get("score")
+                     for c in checks if isinstance(c, dict)} if isinstance(checks, list) else {}
         row = {
             "repo": slug,
             "repo_id": repo_ids.get(slug, ""),
@@ -91,21 +110,59 @@ def build() -> list[dict]:
         for name in CHECK_NAMES:
             v = per_check.get(name)
             row[name] = "" if v is None else v
-        rows.append(row)
-    rows.sort(key=lambda r: r["repo"])
-    return rows
+        prior = by_slug.get(slug)
+        if prior is None or str(row["date"]) >= str(prior["date"]):
+            by_slug[slug] = row
+
+    rows = sorted(by_slug.values(), key=lambda r: r["repo"])
+    return rows, skipped
 
 
 def main() -> None:
     console.print("[bold]Extracting OpenSSF per-check scores...[/bold]\n")
-    rows = build()
+
+    # ── input gates ───────────────────────────────────────────────────────────
+    # checks.csv is never overwritten on a bad input: build_workload reads a
+    # missing/empty checks.csv as "no Maintained signal at all", so a truncated
+    # write would silently zero that dimension for every repo.
+    if not INPUT_FILE.exists():
+        console.print(f"[yellow]WARNING:[/yellow] {INPUT_FILE} not found — the scorecard "
+                      f"fetcher has not run yet. Nothing to extract; leaving "
+                      f"{OUTPUT_FILE.name} untouched.")
+        return  # exit 0 — a not-yet-fetched input is not a pipeline failure
+
+    try:
+        with open(INPUT_FILE, encoding="utf-8") as f:
+            data = json.load(f)
+    except json.JSONDecodeError as e:
+        # A corrupt data.json is a genuine bug (the fetcher writes it atomically),
+        # not a "not yet run" state. Fail loudly rather than let a stale
+        # checks.csv masquerade as freshly rebuilt.
+        raise SystemExit(f"ERROR: {INPUT_FILE} is not valid JSON ({e}); "
+                         f"refusing to rewrite {OUTPUT_FILE.name}. Re-run the scorecard fetcher.")
+    if not isinstance(data, dict):
+        raise SystemExit(f"ERROR: {INPUT_FILE} is not a JSON object (got {type(data).__name__}); "
+                         f"refusing to rewrite {OUTPUT_FILE.name}.")
+
+    rows, skipped = build(data)
+
+    if skipped:
+        console.print(f"[yellow]WARNING:[/yellow] skipped {skipped:,} malformed "
+                      f"repo payload(s) in {INPUT_FILE.name}\n")
+
+    # Zero usable rows would blank the dimension — never overwrite real data with it.
+    if not rows and OUTPUT_FILE.exists() and os.path.getsize(OUTPUT_FILE) > 0:
+        raise SystemExit(f"ERROR: {INPUT_FILE.name} yielded 0 usable repos but "
+                         f"{OUTPUT_FILE.name} holds data; refusing to truncate it.")
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     fields = ["repo", "repo_id", "score", *CHECK_NAMES, "date"]
-    with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as f:
+    tmp = OUTPUT_FILE.with_suffix(".csv.tmp")
+    with open(tmp, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
         w.writerows(rows)
+    os.replace(tmp, OUTPUT_FILE)  # atomic — a crash mid-write can't truncate checks.csv
 
     total = len(rows)
     table = Table(title="[bold]Per-check coverage[/bold]",

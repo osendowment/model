@@ -12,8 +12,19 @@ Output:
     data/sources/ossfuzz/projects.csv    project, language, github_repo, repo_id,
                                          main_repo, homepage, fetched_at
 
+Consumed by `src.value.build_git_urls` (`ossfuzz_main_repos()` — a canonical
+git-URL source) and `src.risk.build_security` (`ossfuzz_enrolled`).
+
+The whole index arrives in ONE tarball download, so the TTL is whole-file
+(`file_is_fresh` on the output, `TTL_DAYS`): a re-run inside the window makes
+zero network calls. The file is only ever replaced by a fully-parsed, non-empty
+result — a failed download raises (non-zero exit) and an empty parse aborts,
+so a good index is never overwritten by a zero-row one.
+
 Run:
     uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data
+    uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data --refresh   # ignore TTL
+    uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data --offline   # cache only, no network
 """
 
 import argparse
@@ -21,6 +32,7 @@ import csv
 import io
 import os
 import re
+import sys
 import tarfile
 import time
 from datetime import datetime, timezone
@@ -30,11 +42,17 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
+from src.common.freshness import file_is_fresh
 from src.common.repos import load_repo_ids, load_value_repo_ids
 
 # ── config ────────────────────────────────────────────────────────────────────
 
 OUT_PATH = "data/sources/ossfuzz/projects.csv"
+
+# Whole-file TTL: one bulk index download, refreshed as a unit. The OSS-Fuzz
+# project roster changes slowly (a handful of projects a month), so a month-old
+# index is still authoritative; `--refresh` ignores this.
+TTL_DAYS = 30
 TARBALL = "https://codeload.github.com/google/oss-fuzz/tar.gz/refs/heads/master"
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"
 TIMEOUT = 300
@@ -135,12 +153,36 @@ def fetch_ossfuzz_projects() -> list[dict]:
 
 
 def main() -> None:
-    argparse.ArgumentParser().parse_args()
+    p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    p.add_argument("--refresh", action="store_true",
+                   help=f"Force refetch, ignoring the {TTL_DAYS}-day output TTL")
+    p.add_argument("--offline", action="store_true",
+                   help="Skip all network fetches (keep whatever is cached)")
+    args = p.parse_args()
 
     console.rule("[bold]ossfuzz — fetch_ossfuzz_data")
     console.print(f"  Started : [cyan]{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}[/cyan]\n")
 
+    # Whole-file TTL gate. --offline never touches the network (an absent cache
+    # is not an error — downstream simply sees no OSS-Fuzz enrollment).
+    if args.offline:
+        state = "cached" if os.path.exists(OUT_PATH) else "[yellow]absent[/yellow]"
+        console.print(f"  [dim]skipped (--offline) — {OUT_PATH}: {state}[/dim]")
+        return
+    if not args.refresh and file_is_fresh(OUT_PATH, TTL_DAYS):
+        console.print(f"  [dim]{OUT_PATH} is fresh (< {TTL_DAYS}d) — skipping; "
+                      f"--refresh to force[/dim]")
+        return
+
     projects = fetch_ossfuzz_projects()
+
+    # A successful download that parses to nothing means the upstream layout
+    # changed — abort rather than overwrite a good index with zero rows (an
+    # empty result must never silently stand in for a failed fetch).
+    if not projects:
+        console.print("[red]ERROR:[/red] no project.yaml files parsed from the tarball — "
+                      f"refusing to overwrite {OUT_PATH}")
+        sys.exit(1)
 
     # Enrich: stable repo_id (blank when the slug is out of model scope) and
     # one UTC fetch timestamp for the whole run.

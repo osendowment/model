@@ -57,18 +57,23 @@ FETCHERS = [
     Step("depsdev",       "src.sources.depsdev.fetch",                    fetch=True, pgroup="metrics"),  # security score: openssf fallback (deps.dev-mirrored)
 ]
 
-# The model scores ONLY what the pipeline fetches. Two GitHub-API fetchers used
+# The model scores ONLY what the pipeline fetches. One GitHub-API fetcher used
 # to populate informational columns that no `risk.csv` score reads — churn /
-# hotspot in complexity.csv, and the GitHub-method `_gh_alltime` bus-factor /
-# HHI in concentration.csv. The pipeline never ran them, so those columns were
-# derived from stale caches and were GitHub-only (blank for most GitLab repos).
-# Both column sets are gone; the builders no longer compute them.
-#
-# The scripts themselves are still on disk and runnable by hand if you ever want
-# that data back:
+# hotspot in complexity.csv. The pipeline never ran it, so those columns were
+# derived from a stale cache and were GitHub-only (blank for most GitLab repos).
+# The column set is gone; build_complexity no longer computes it. The script is
+# still on disk and runnable by hand if you ever want that data back:
 #   uv run python -m src.sources.github.fetch_churn
-#   uv run python -m src.sources.github.fetch_contributors_metrics
+#
+# (src.sources.github.fetch_contributors_metrics — the per-contributor commit
+# log behind `bf_maintainer_fundable` — is NOT audit-only: it is a step of the
+# eligibility pipeline, which is the only stage that reads it.)
 BUILDERS = [
+    # Pure transform, no network: flattens the scorecard run's raw JSON into the
+    # per-check table build_workload reads (Maintained / CI-Tests / Code-Review).
+    # It must re-run whenever `scorecard` does, so it is a step rather than a
+    # by-hand script — checks.csv used to age silently behind the JSON.
+    Step("openssf-checks", "src.sources.openssf.extract_checks"),
     Step("concentration", "src.risk.build_concentration"),
     Step("complexity",    "src.risk.build_complexity"),
     Step("security",      "src.risk.build_security"),

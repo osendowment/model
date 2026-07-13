@@ -9,19 +9,55 @@ lifetime aggregate at fetch time.
 Usage:
     python -m src.sources.github.fetch_contributors_metrics facebook/react   # one repo
     python -m src.sources.github.fetch_contributors_metrics                  # batch: value-data.csv A/B repos
+    python -m src.sources.github.fetch_contributors_metrics --offline        # cache only, no network
+    python -m src.sources.github.fetch_contributors_metrics --refresh        # ignore the TTL, refetch all
+
+Caching: a repo whose status row in contributor-commits.status.csv is younger
+than `TTL_DAYS` is skipped, so a warm re-run makes zero API calls. A repo that
+is missing, stale, or whose last fetch ERRORED is re-fetched — an error row is
+never treated as fresh, so a failed fetch can never masquerade as a genuine
+"no contributors" result.
 """
 
 import argparse
 import asyncio
+import csv
 import logging
+import os
 import re
 
-from src.sources.github.batch_runner import batch_update
+from src.sources.github.batch_runner import GH_CONTRIB_STATUS_FILE, batch_update
+from src.sources.github.display import console
 from src.sources.github.models import (
     Contributor, PerfStats, RunResult,
     THRESHOLD, is_bot,
 )
+from src.common.freshness import row_is_fresh
 from src.common.repos import VALUE_FILE, load_github_top_slugs
+
+# Contributor mixes move slowly, and the /contributors payload is the most
+# expensive fetch in this source (paginated, one round-trip per page per repo),
+# so a repo is re-fetched at most once a quarter. `--refresh` overrides.
+TTL_DAYS = 90
+
+
+def fresh_repos(ttl_days: int = TTL_DAYS) -> set[str]:
+    """Repos in contributor-commits.status.csv fetched within `ttl_days`.
+
+    Gated through the shared `row_is_fresh` helper with the sidecar's `status`
+    column, so a row recording an errored fetch is never fresh and is always
+    retried. A "" / "empty" status IS a real measurement (the repo genuinely
+    has no visible contributors) and stays cached for the full TTL.
+    """
+    if not os.path.exists(GH_CONTRIB_STATUS_FILE):
+        return set()
+    with open(GH_CONTRIB_STATUS_FILE, encoding="utf-8") as f:
+        return {
+            repo
+            for row in csv.DictReader(f)
+            if (repo := (row.get("repo") or "").strip())
+            and row_is_fresh(row, ttl_days, status_key="status")
+        }
 
 
 def parse_repo(url_or_slug: str) -> str:
@@ -133,8 +169,10 @@ def main() -> None:
                         help="Ownership threshold (default 0.5)")
     parser.add_argument("--include-bots", action="store_true", default=False,
                         help="Include bots as regular contributors in bus factor calculation")
-    parser.add_argument("--force", action="store_true",
-                        help="Re-fetch all repos, ignoring the per-repo freshness gate")
+    parser.add_argument("--refresh", "--force", action="store_true", dest="refresh",
+                        help=f"Re-fetch all repos, ignoring the {TTL_DAYS}-day freshness gate")
+    parser.add_argument("--offline", action="store_true",
+                        help="Never hit the network — use only what is already cached")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
@@ -149,6 +187,9 @@ def main() -> None:
     # ad-hoc request should not be skipped by the freshness gate).
     if args.repo:
         repo = parse_repo(args.repo)
+        if args.offline:
+            console.print(f"[dim]offline: {repo} not fetched (cache only)[/dim]")
+            return
         asyncio.run(batch_update(
             [repo], threshold=args.threshold,
             include_bots=args.include_bots, force=True,
@@ -161,9 +202,31 @@ def main() -> None:
     # builder's GitHub columns simply stay blank for them (the git-clone method
     # supplies their score).
     repos = load_github_top_slugs(value_file=args.input)
+
+    # Freshness gate lives here, not in batch_update: this is the layer that
+    # owns the TTL policy, and it is the only caller. `to_fetch` is already
+    # gated, so batch_update is invoked with force=True to stop it re-applying
+    # its own (redundant) filter on top.
+    fresh = set() if args.refresh else fresh_repos(TTL_DAYS)
+    to_fetch = [r for r in repos if r not in fresh]
+    console.print(
+        f"[bold]contributors[/bold]: {len(repos)} repos, {len(to_fetch)} to fetch, "
+        f"{len(repos) - len(to_fetch)} fresh (< {TTL_DAYS}d)"
+    )
+
+    if args.offline:
+        # Cached data only. Missing/stale repos stay missing/stale — that is a
+        # gap the next online run fills, not an error.
+        console.print(f"[dim]offline: {len(to_fetch)} stale/missing repos left unfetched[/dim]")
+        return
+    if not to_fetch:
+        console.print(f"[dim]All repos fresh (< {TTL_DAYS}d) — nothing to fetch; "
+                      f"--refresh to force.[/dim]")
+        return
+
     asyncio.run(batch_update(
-        repos, threshold=args.threshold,
-        include_bots=args.include_bots, limit=args.limit, force=args.force,
+        to_fetch, threshold=args.threshold,
+        include_bots=args.include_bots, limit=args.limit, force=True,
     ))
 
 

@@ -41,14 +41,22 @@ FETCHERS = [
     Step("pypi-eol",      "src.sources.pypi.check_eol",                   fetch=True, pgroup="eol"),
     Step("crates-eol",    "src.sources.crates.check_eol",                 fetch=True, pgroup="eol"),
     Step("cpp-eol",       "src.sources.cpp.check_eol",                    fetch=True, pgroup="eol"),
+    # The per-contributor commit log — the bus-factor maintainer set behind
+    # `bf_maintainer_fundable`. Serial and BEFORE the funding group: both
+    # `maintainer-sponsors` (which picks WHICH logins to query from it) and
+    # `funding-build` read its output, so a repo entering scope with no
+    # contributor rows would silently score as un-fundable. 90-day TTL.
+    Step("bf-contributors", "src.sources.github.fetch_contributors_metrics", fetch=True, net=True),
     # funding-intent signals (moved here from the risk pipeline)
     Step("funding-yml",   "src.sources.github.fetch_funding_yml",         fetch=True, pgroup="funding"),
+    # outbound sponsorships — who each repo's owner funds (90-day TTL)
+    Step("sponsorships",  "src.sources.github.fetch_sponsorships",        fetch=True, net=True, pgroup="funding"),
     Step("gitlab-funding", "src.sources.gitlab.fetch_funding_files",      fetch=True, pgroup="funding"),
     Step("npm-funding",   "src.sources.npm.fetch_funding",                fetch=True, pgroup="funding"),
     Step("pypi-funding",  "src.sources.pypi.fetch_funding",               fetch=True, pgroup="funding"),
     Step("sponsors",      "src.sources.github.fetch_sponsors",            fetch=True, pgroup="funding"),
-    # personal Sponsors of each repo's bus-factor maintainers (needs the risk
-    # pipeline's github/contributor-commits.csv; no-ops if that is absent)
+    # personal Sponsors of each repo's bus-factor maintainers (reads the
+    # `bf-contributors` step's github/contributor-commits.csv)
     Step("maintainer-sponsors", "src.sources.github.fetch_maintainer_sponsors", fetch=True, pgroup="funding"),
     Step("floss-fund",    "src.sources.floss_fund.funding_json",          fetch=True, pgroup="funding"),
     Step("oc-collectives", "src.sources.opencollective.fetch_collectives", fetch=True, pgroup="funding"),

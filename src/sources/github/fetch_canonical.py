@@ -15,12 +15,17 @@ Writes `data/sources/github/canonical-repos.csv`:
 — `canonical_repo` is left equal to `repo` and `repo_id` blank, so a normaliser
 can leave it untouched. `repo_id` is the join key that survives renames.
 
-TTL-gated (`FUNDING_TTL_DAYS`); a re-run inside the window is a no-op. Fetched in
-aliased GraphQL batches, so ~10k repos cost ~200 requests.
+Per-row TTL-gated (`TTL_DAYS`, 90 days — renames are rare): a re-run inside the
+window fetches only repos that are new or whose row is stale, so a fully-fresh
+re-run makes ZERO network calls. A `not_found` row is never fresh — a deleted /
+renamed slug is retried every run rather than cached as a permanent verdict.
+Fetched in aliased GraphQL batches, so ~10k repos cost ~200 requests.
 
 Usage:
     uv run python -m src.sources.github.fetch_canonical
-    uv run python -m src.sources.github.fetch_canonical --limit 50 --force
+    uv run python -m src.sources.github.fetch_canonical --refresh   # ignore TTL
+    uv run python -m src.sources.github.fetch_canonical --offline   # cache only, no network
+    uv run python -m src.sources.github.fetch_canonical --limit 50
 """
 from __future__ import annotations
 
@@ -55,14 +60,26 @@ OUTPUT_FILE = DATA_DIR / "sources" / "github" / "canonical-repos.csv"
 FIELDS = ["repo", "canonical_repo", "repo_id", "status", "fetched_at"]
 BATCH_SIZE = 50
 
+# Per-row TTL. Renames/moves are rare, so a resolved `ok` row stays good for a
+# long window; `--refresh` ignores it. Rows that failed to resolve (`not_found`)
+# are never fresh and are retried every run — see `batch()`.
+TTL_DAYS = 90
+
 
 def load_value_repos() -> list[str]:
-    """Unique `github_repo` slugs from value.csv (lower-cased, `owner/name`)."""
+    """Unique GitHub `owner/name` slugs in value scope (lower-cased).
+
+    value.csv is keyed by `repo` + `platform`; for a `platform == "github"` row
+    the `repo` cell IS the GitHub slug. (The rollup carries no `github_repo`
+    column — that one lives in the per-ecosystem `results.csv`.)
+    """
     out: set[str] = set()
     if VALUE_FILE.exists():
         with open(VALUE_FILE, encoding="utf-8") as f:
             for row in csv.DictReader(f):
-                slug = (row.get("github_repo") or "").strip().lower()
+                if (row.get("platform") or "").strip().lower() != "github":
+                    continue
+                slug = (row.get("repo") or "").strip().lower()
                 if slug and "/" in slug:
                     out.add(slug)
     return sorted(out)
@@ -137,21 +154,22 @@ def _write(rows: dict[str, dict]) -> None:
             w.writerow(rows[repo])
 
 
-async def batch(repos: list[str], force: bool, limit: int | None, concurrency: int) -> None:
+async def batch(repos: list[str], refresh: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
     # A `not_found` row is never fresh (retry deleted/renamed repos); ok rows use the TTL.
-    fresh = set() if force else {
+    fresh = set() if refresh else {
         r for r, row in existing.items()
-        if row_is_fresh(row, status_key="status", error_values=("not_found", "error"))
+        if row_is_fresh(row, ttl_days=TTL_DAYS, status_key="status",
+                        error_values=("not_found", "error"))
     }
     to_fetch = [r for r in repos if r not in fresh]
     if limit and limit < len(to_fetch):
         to_fetch = to_fetch[:limit]
     chunks = [to_fetch[i:i + BATCH_SIZE] for i in range(0, len(to_fetch), BATCH_SIZE)]
-    console.print(f"[bold]canonical[/bold]: {len(repos)} repos, {len(to_fetch)} to fetch "
-                  f"in {len(chunks)} batch(es)")
+    console.print(f"[bold]canonical[/bold]: {len(repos)} repos, {len(fresh)} fresh "
+                  f"(< {TTL_DAYS}d), {len(to_fetch)} to fetch in {len(chunks)} batch(es)")
     if not to_fetch:
-        console.print("[dim]Nothing to fetch.[/dim]")
+        console.print("[dim]Everything fresh — nothing to fetch (--refresh to force).[/dim]")
         return
     limiter = _AsyncRateLimiter()
     sem = asyncio.Semaphore(concurrency)
@@ -186,11 +204,24 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--concurrency", type=int, default=8)
-    p.add_argument("--force", action="store_true")
+    p.add_argument("--refresh", "--force", dest="refresh", action="store_true",
+                   help=f"Force refetch of every repo, ignoring the {TTL_DAYS}-day row TTL")
+    p.add_argument("--offline", action="store_true",
+                   help="Skip all network fetches (use only the cached canonical-repos.csv)")
     p.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args()
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
-    asyncio.run(batch(load_value_repos(), args.force, args.limit, args.concurrency))
+
+    if args.offline:
+        # Pure-cache run: the consumer (apply_ecosystems_authority) reads whatever
+        # is already on disk. Never an error — an absent cache just means no
+        # rename remapping this run.
+        cached = _load_existing()
+        console.print(f"[bold]canonical[/bold]: [dim]--offline — no network; "
+                      f"using {len(cached):,} cached row(s) from {OUTPUT_FILE}[/dim]")
+        return
+
+    asyncio.run(batch(load_value_repos(), args.refresh, args.limit, args.concurrency))
 
 
 if __name__ == "__main__":

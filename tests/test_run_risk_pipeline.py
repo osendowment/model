@@ -24,10 +24,11 @@ def test_pipeline_runs_only_score_forming_fetchers():
 
     The model scores only what it fetches: no fetcher runs whose output no
     score reads. churn (complexity hotspot cols) and fetch_contributors_metrics
-    (concentration `_gh_alltime` bus factor/HHI) fed no score, were GitHub-only,
-    and were computed from caches the pipeline never refreshed — both column
-    sets are gone and neither script is triggered anywhere in the runner. The
-    scripts remain on disk, runnable by hand."""
+    (concentration `_gh_alltime` bus factor/HHI) fed no risk score, were
+    GitHub-only, and were computed from caches the pipeline never refreshed —
+    both column sets are gone, and neither script is triggered anywhere in
+    THIS runner (fetch_contributors_metrics is now a step of the eligibility
+    pipeline, the only stage that reads its output; fetch_churn is by-hand)."""
     import src.risk.run_risk_pipeline as mod
     from src.risk.run_risk_pipeline import FETCHERS
     fetch_modules = {s.module for s in FETCHERS}

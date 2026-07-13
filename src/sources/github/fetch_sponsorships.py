@@ -13,12 +13,15 @@ Writes data/sources/github/sponsorships.csv:
 from a failure is distinguishable from a genuine 0).
 
 Gap-filling: a normal run only fetches owner logins missing from the file or
-older than the TTL; pass --force to refetch all.
+older than the TTL, so a warm re-run makes zero API calls. A login whose last
+fetch ERRORED is never fresh and is always retried — a 0 from a failure can
+never harden into a cached "genuinely sponsors nobody".
 
 Usage:
-    uv run python -m src.github.fetch_sponsorships
-    uv run python -m src.github.fetch_sponsorships --limit 20
-    uv run python -m src.github.fetch_sponsorships --force
+    uv run python -m src.sources.github.fetch_sponsorships
+    uv run python -m src.sources.github.fetch_sponsorships --limit 20
+    uv run python -m src.sources.github.fetch_sponsorships --refresh   # ignore the TTL
+    uv run python -m src.sources.github.fetch_sponsorships --offline   # cache only, no network
 """
 from __future__ import annotations
 
@@ -50,6 +53,12 @@ log = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 OUTPUT_FILE = DATA_DIR / "sources" / "github" / "sponsorships.csv"
 FIELDS = ["login", "sponsoring_count", "sponsoring_status", "fetched_at"]
+
+# An account's outbound sponsoring list changes slowly, so a login is re-queried
+# at most once a quarter. `--refresh` overrides. (Flat window, unlike the
+# inbound-sponsors fetcher: a 0 here means "backs nobody", which is not the kind
+# of empty that self-heals into a signal, so it needs no shorter recheck.)
+TTL_DAYS = 90
 
 SPONSORING_QUERY = """
 query($login: String!) {
@@ -103,24 +112,32 @@ def _write(rows: dict[str, dict]) -> None:
             w.writerow(rows[login])
 
 
-async def batch(logins: list[str], force: bool, limit: int | None, concurrency: int) -> None:
+async def batch(logins: list[str], force: bool, limit: int | None, concurrency: int,
+                offline: bool = False) -> None:
     existing = _load_existing()
+    # An errored row is never fresh (status_key), so failed fetches are retried
+    # rather than cached for the full TTL.
     fresh = (
         set()
         if force
         else {
             login
             for login, row in existing.items()
-            if row_is_fresh(row, status_key="sponsoring_status")
+            if row_is_fresh(row, TTL_DAYS, status_key="sponsoring_status")
         }
     )
     to_fetch = [login for login in logins if login not in fresh]  # gap-fill: only missing/stale
     if limit and limit < len(to_fetch):
         to_fetch = to_fetch[:limit]
     console.print(f"[bold]sponsorships[/bold]: {len(logins)} owner logins, "
-                  f"{len(to_fetch)} to fetch, {len(logins)-len(to_fetch)} already filled")
+                  f"{len(to_fetch)} to fetch, {len(logins)-len(to_fetch)} fresh (< {TTL_DAYS}d)")
+    if offline:
+        # Cached data only. Missing/stale logins stay that way — a gap for the
+        # next online run to fill, not an error.
+        console.print(f"[dim]offline: {len(to_fetch)} stale/missing logins left unfetched[/dim]")
+        return
     if not to_fetch:
-        console.print("[dim]No gaps to fill.[/dim]")
+        console.print("[dim]No gaps to fill; --refresh to force.[/dim]")
         return
 
     limiter = _AsyncRateLimiter()
@@ -153,11 +170,15 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--concurrency", type=int, default=8)
-    p.add_argument("--force", action="store_true")
+    p.add_argument("--refresh", "--force", action="store_true", dest="refresh",
+                   help=f"Force refetch of every login, ignoring the {TTL_DAYS}-day TTL")
+    p.add_argument("--offline", action="store_true",
+                   help="Never hit the network — use only what is already cached")
     p.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args()
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
-    asyncio.run(batch(owner_logins(), args.force, args.limit, args.concurrency))
+    asyncio.run(batch(owner_logins(), args.refresh, args.limit, args.concurrency,
+                      offline=args.offline))
 
 
 if __name__ == "__main__":
