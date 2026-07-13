@@ -1,0 +1,83 @@
+/* Print stylesheet for the board preview report (scripts/render-board-report.sh).
+   Optimised for reading 80 dense entries on paper: each entry stays whole on one
+   page, and nothing is hyphenated (a maintainer's name split across a line break
+   is a misreading waiting to happen). */
+
+@page {
+  size: A4;
+  margin: 18mm 16mm 16mm 16mm;
+  @bottom-center {
+    content: counter(page);
+    font: 8pt/1 "Helvetica Neue", Helvetica, sans-serif;
+    color: #8a8a8a;
+  }
+}
+
+html {
+  /* Never split a word across a line break. */
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+body {
+  font: 9.5pt/1.45 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #1c1c1e;
+  text-align: left;          /* ragged right — justification needs hyphenation */
+  word-spacing: normal;
+}
+
+h1 {
+  font-size: 19pt;
+  letter-spacing: -0.2pt;
+  margin: 0 0 14pt;
+  padding-bottom: 6pt;
+  border-bottom: 1.5pt solid #1c1c1e;
+}
+
+h2 {
+  font-size: 13pt;
+  letter-spacing: 0.3pt;
+  text-transform: uppercase;
+  color: #0b5cad;
+  margin: 18pt 0 8pt;
+  padding-bottom: 3pt;
+  border-bottom: 0.5pt solid #c8d6e5;
+  break-after: avoid;
+  break-inside: avoid;
+}
+
+/* Each ecosystem starts on a fresh page; the intro shares page 1 with the title. */
+h2 + ol { break-before: avoid; }
+h2:not(:first-of-type) { break-before: page; }
+
+ol, ul { padding-left: 16pt; margin: 0 0 8pt; }
+
+/* One entry = one list item (header line + its paragraph). Keep it whole. */
+li {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 7pt;
+}
+
+li > p { margin: 2pt 0 0; }
+
+/* The bold header line of each entry. */
+strong { color: #000; }
+
+a { color: #0b5cad; text-decoration: none; }
+
+code {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 8.6pt;
+  background: #f2f4f7;
+  padding: 0 2pt;
+  border-radius: 2pt;
+}
+
+em { color: #444; }
+
+/* ★ and 🔵 need a font that actually has them. */
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial,
+               "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+}
