@@ -1,4 +1,5 @@
 namespace,namespace_id,host,kind,name,path,full_path,web_url,description,fetched_at
+code.videolan.org/rist,,code.videolan.org,,,,,,fetch failed: http_401,2026-07-13T11:15:39Z
 code.videolan.org/videolan,,code.videolan.org,,,,,,fetch failed: http_401,2026-07-06T18:13:38Z
 gitlab.cern.ch/fts,,gitlab.cern.ch,,,,,,fetch failed: http_401,2026-07-06T18:13:38Z
 gitlab.com/accounts-sso,,gitlab.com,,,,,,fetch failed: 404,2026-07-06T18:13:38Z
@@ -119,6 +120,7 @@ invent.kde.org/multimedia,,invent.kde.org,,,,,,fetch failed: http_401,2026-07-06
 invent.kde.org/network,,invent.kde.org,,,,,,fetch failed: http_401,2026-07-06T18:13:40Z
 invent.kde.org/pim,,invent.kde.org,,,,,,fetch failed: http_401,2026-07-06T18:13:40Z
 invent.kde.org/plasma,,invent.kde.org,,,,,,fetch failed: http_401,2026-07-06T18:13:40Z
+invent.kde.org/qt/qt,,invent.kde.org,,,,,,fetch failed: http_401,2026-07-13T11:15:39Z
 invent.kde.org/system,,invent.kde.org,,,,,,fetch failed: http_401,2026-07-06T18:13:40Z
 salsa.debian.org/a11y-team,,salsa.debian.org,,,,,,fetch failed: http_401,2026-07-06T18:13:40Z
 salsa.debian.org/alsa-team,,salsa.debian.org,,,,,,fetch failed: http_401,2026-07-06T18:13:40Z
