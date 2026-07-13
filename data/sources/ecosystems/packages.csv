@@ -159,6 +159,7 @@ cpp,cron,pkg:deb/debian/cron?arch=source&distro=debian-13&repository_url=https:/
 cpp,crypto++,,,,,,,,,,,2026-06-28T19:48:00Z
 cpp,cryptsetup,,,,,,,,,,,2026-06-28T19:45:51Z
 cpp,cunit,pkg:deb/debian/cunit?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://salsa.debian.org/debian/cunit,http://cunit.sourceforge.net/,,,,,,2026-03-13T16:10:10.654Z,2026-04-27T20:49:35Z
+cpp,cunit-original,,,,,,,,,,,2026-07-13T16:57:24Z
 cpp,cups,pkg:deb/debian/cups?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://github.com/OpenPrinting/cups,https://github.com/OpenPrinting/cups/,,,,,,2026-03-13T16:10:11.463Z,2026-06-28T18:53:59Z
 cpp,cups-filters,,,,,,,,,,,2026-06-28T19:46:11Z
 cpp,curl,pkg:deb/debian/curl?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://salsa.debian.org/debian/curl,https://curl.se/,,,,,,2026-03-13T16:10:16.959Z,2026-06-28T18:53:59Z
@@ -560,6 +561,7 @@ cpp,json-c,pkg:deb/debian/json-c?arch=source&distro=debian-13&repository_url=htt
 cpp,json-glib,,,,,,,,,,,2026-06-28T19:45:34Z
 cpp,jsoncpp,,,,,,,,,,,2026-06-28T19:46:01Z
 cpp,juk,pkg:deb/debian/juk?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://salsa.debian.org/qt-kde-team/kde/juk,https://juk.kde.org/,,,,,,2026-03-13T14:10:25.060Z,2026-04-27T20:49:35Z
+cpp,jxrlib,pkg:deb/debian/jxrlib?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://github.com/4creators/jxrlib,https://github.com/4creators/jxrlib,,,,,,2026-03-14T00:09:41.091Z,2026-07-13T16:57:22Z
 cpp,jxrlib-4creators,,,,,,,,,,,2026-06-28T19:46:32Z
 cpp,kaccounts-integration,,,,,,,,,,,2026-06-28T19:47:56Z
 cpp,kactivities,,,,,,,,,,,2026-06-28T19:47:13Z
@@ -1308,6 +1310,7 @@ cpp,procps,pkg:deb/debian/procps?arch=source&distro=debian-13&repository_url=htt
 cpp,proj,,,,,,,,,,,2026-06-28T19:46:07Z
 cpp,protobuf,pkg:deb/debian/protobuf?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://github.com/google/protobuf,https://github.com/google/protobuf/,,,,,,2026-03-14T12:15:24.391Z,2026-06-28T18:53:59Z
 cpp,protobuf-c,pkg:deb/debian/protobuf-c?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://github.com/protobuf-c/protobuf-c,https://github.com/protobuf-c/protobuf-c,,,,,,2026-03-14T01:09:18.539Z,2026-06-28T18:53:59Z
+cpp,prrte,pkg:spack/prrte,spack.io,https://pmix.org,https://pmix.org,,,,,,2026-06-23T17:01:34.396Z,2026-07-13T16:57:22Z
 cpp,psmisc,,,,,,,,,,,2026-06-28T19:45:36Z
 cpp,pstoedit,,,,,,,,,,,2026-06-28T19:47:28Z
 cpp,psutils-postscript-rrthomas,,,,,,,,,,,2026-06-28T19:46:46Z
@@ -1394,6 +1397,7 @@ cpp,screen,pkg:deb/debian/screen?arch=source&distro=debian-13&repository_url=htt
 cpp,sdl-image,,,,,,,,,,,2026-06-28T19:46:53Z
 cpp,sdl12-compat,,,,,,,,,,,2026-06-28T19:45:49Z
 cpp,sdl2,pkg:spack/sdl2,spack.io,https://wiki.libsdl.org/FrontPage,https://wiki.libsdl.org/FrontPage,,,,,,2026-06-15T13:31:48.055Z,2026-06-28T18:53:59Z
+cpp,sdl2-compat,pkg:deb/debian/sdl2-compat?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://github.com/libsdl-org/sdl2-compat,https://github.com/libsdl-org/sdl2-compat,,,,,,2026-03-12T18:08:37.025Z,2026-07-13T16:57:22Z
 cpp,sdl3,,,,,,,,,,,2026-06-28T19:48:02Z
 cpp,sdl3-ttf,,,,,,,,,,,2026-06-28T19:48:12Z
 cpp,sed,pkg:deb/debian/sed?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://salsa.debian.org/debian/sed,https://www.gnu.org/software/sed/,,,,,,2026-03-12T15:04:10.318Z,2026-06-28T18:53:59Z
@@ -1587,6 +1591,7 @@ cpp,xdrv:vmware,,,,,,,,,,,2026-06-28T19:46:16Z
 cpp,xdrv:wacom,,,,,,,,,,,2026-06-28T19:46:15Z
 cpp,xerces-c,pkg:deb/debian/xerces-c?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://salsa.debian.org/bblough/xerces-c,https://xerces.apache.org/xerces-c/,,,,,,2026-03-12T17:08:26.005Z,2026-04-27T20:49:35Z
 cpp,xfburn,pkg:deb/debian/xfburn?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://salsa.debian.org/xfce-team/apps/xfburn,https://docs.xfce.org/apps/xfburn/start,,,,,,2026-03-12T17:08:30.403Z,2026-04-27T20:49:35Z
+cpp,xfce-exo,,,,,,,,,,,2026-07-13T16:57:24Z
 cpp,xfce4-appfinder,pkg:deb/debian/xfce4-appfinder?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://salsa.debian.org/xfce-team/desktop/xfce4-appfinder,https://docs.xfce.org/xfce/xfce4-appfinder/start,,,,,,2026-03-12T18:04:06.589Z,2026-04-27T20:49:35Z
 cpp,xfce4-battery-plugin,pkg:deb/debian/xfce4-battery-plugin?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://salsa.debian.org/xfce-team/goodies/xfce4-battery-plugin,https://docs.xfce.org/panel-plugins/xfce4-battery-plugin/start,,,,,,2026-03-12T17:06:52.190Z,2026-04-27T20:49:35Z
 cpp,xfce4-clipman-plugin,pkg:deb/debian/xfce4-clipman-plugin?arch=source&distro=debian-13&repository_url=https://packages.debian.org/trixie,debian-13,https://salsa.debian.org/xfce-team/goodies/xfce4-clipman-plugin,https://docs.xfce.org/panel-plugins/xfce4-clipman-plugin,,,,,,2026-03-12T18:04:06.918Z,2026-04-27T20:49:35Z

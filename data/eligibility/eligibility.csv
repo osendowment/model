@@ -83,7 +83,7 @@ burntsushi/winapi-util,gh/146040682,True,True,True,True,True,3,4,True
 businho/pytest-ruff,gh/599731435,True,False,True,True,False,2,4,True
 bytecodealliance/rustix,gh/295544240,True,True,True,True,True,3,4,True
 bytecodealliance/wasi-rs,gh/196445196,True,True,True,True,True,3,4,True
-bzip2/bzip2,gl/12551088,True,False,True,False,False,1,4,False
+bzip2/bzip2,gl/12551088,True,False,True,False,False,2,4,True
 c-ares/c-ares,gh/571708,True,False,True,True,False,2,4,True
 calvinmetcalf/minimalistic-assert,gh/29144257,True,False,True,True,False,3,4,True
 calvinmetcalf/process-nextick-args,gh/36039131,True,False,True,True,False,3,4,True
@@ -144,7 +144,7 @@ defunctzombie/node-process,gh/7580644,True,False,True,True,False,3,4,True
 django/asgiref,gh/48501860,True,True,True,True,True,3,4,True
 djc/rustc-version-rs,gh/41272773,True,True,True,True,True,3,4,True
 dmitrysoshnikov/regexp-tree,gh/85459304,True,False,True,True,False,2,4,True
-docutils/docutils,gh/44840244,True,False,True,True,False,3,4,True
+docutils/docutils,gh/44840244,True,True,True,True,True,3,4,True
 dominictarr/through,gh/4885140,True,False,True,False,False,3,4,True
 doowb/ansi-colors,gh/47135420,True,True,True,True,True,3,4,True
 douglasdwyer/wasm_sync,gh/668034655,True,False,True,True,False,2,4,True
@@ -208,7 +208,7 @@ expressjs/serve-static,gh/17464338,True,True,True,True,True,3,4,True
 facebook/prop-types,gh/87597642,True,True,True,False,False,3,4,True
 facebook/regenerator,gh/13346571,True,True,False,False,False,3,4,True
 facebook/watchman,gh/6930489,True,True,False,True,False,3,4,True
-facebook/zstd,gh/29759715,True,True,False,True,False,2,4,True
+facebook/zstd,gh/29759715,True,True,False,True,False,3,4,True
 facelessuser/soupsieve,gh/160789418,True,True,True,True,True,3,4,True
 fastify/fast-uri,gh/419317518,True,True,True,True,True,3,4,True
 faye/websocket-driver-node,gh/9733816,True,False,True,True,False,3,4,True
@@ -492,7 +492,7 @@ lukeed/escalade,gh/273568715,True,True,True,True,True,3,4,True
 lukeed/kleur,gh/140393403,True,True,True,True,True,3,4,True
 lxml/lxml,gh/1353927,True,True,True,True,True,3,4,True
 lydell/js-tokens,gh/17552490,True,False,True,True,False,3,4,True
-lz4/lz4,gh/18106269,True,False,True,True,False,2,4,True
+lz4/lz4,gh/18106269,True,False,True,True,False,3,4,True
 madler/zlib,gh/2359378,True,False,True,True,False,3,4,True
 mafintosh/end-of-stream,gh/14732255,True,True,True,True,True,3,4,True
 mafintosh/pump,gh/12118126,True,True,True,True,True,3,4,True
@@ -919,8 +919,8 @@ whitequark/ipaddr.js,gh/2110585,True,True,True,True,True,3,4,True
 withoutboats/heck,gh/86326466,True,True,True,True,True,3,4,True
 xiph/ogg,gh/33956205,True,True,True,True,True,2,4,True
 xorg/lib/libx11,gl/freedesktop-701,True,True,True,True,True,1,4,False
-xorg/lib/libxau,gl/freedesktop-706,True,True,True,True,True,1,4,False
-xorg/lib/libxdmcp,gl/freedesktop-712,True,True,True,True,True,1,4,False
+xorg/lib/libxau,gl/freedesktop-706,True,True,True,True,True,2,4,True
+xorg/lib/libxdmcp,gl/freedesktop-712,True,True,True,True,True,2,4,True
 xorg/lib/libxext,gl/freedesktop-714,True,True,True,True,True,1,4,False
 xorg/lib/libxrender,gl/freedesktop-730,True,True,True,True,True,1,4,False
 xorg/proto/xorgproto,gl/freedesktop-788,True,True,True,True,True,1,4,False

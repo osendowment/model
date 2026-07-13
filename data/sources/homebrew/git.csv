@@ -385,7 +385,7 @@
 "htop","https://github.com/htop-dev/htop.git","","","","","",""
 "httpd","","","","","","",""
 "httpie","https://github.com/httpie/cli.git","","","","","",""
-"httrack","","","","","","",""
+"httrack","https://github.com/xroche/httrack.git","","","","","",""
 "hub","https://github.com/mislav/hub.git","","","","","",""
 "hugo","https://github.com/gohugoio/hugo.git","","","","","",""
 "hunspell","https://github.com/hunspell/hunspell.git","","","","","",""

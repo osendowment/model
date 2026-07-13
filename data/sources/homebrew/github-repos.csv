@@ -222,6 +222,7 @@
 "hiredis","redis/hiredis"
 "htop","htop-dev/htop"
 "httpie","httpie/cli"
+"httrack","xroche/httrack"
 "hub","mislav/hub"
 "hugo","gohugoio/hugo"
 "hunspell","hunspell/hunspell"

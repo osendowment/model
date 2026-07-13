@@ -612,7 +612,7 @@ pillarjs/send,gh/4879977,7.2,openssf_local,1,False,,9.38,72.71,72.71,2026-04-27T
 pixman/pixman,gl/freedesktop-158,5.4,openssf_local,4,False,,36.03,87.68,87.68,2026-07-12T20:36:38+01:00
 pkgconf/pkgconf,gh/4180110,5,openssf_local,1,False,,41.47,72.71,72.71,2026-04-27T21:44:37+01:00
 pnggroup/libpng,gh/3768025,4.7,openssf_local,0,True,,46.16,50.0,50.00,2026-04-27T21:44:44+01:00
-postcss/postcss,gh/13078968,6.8,openssf_local,3,False,,13.65,85.51,85.51,2026-04-27T21:44:56+01:00
+postcss/postcss,gh/13078968,6.8,openssf_local,3,True,,13.65,85.51,85.51,2026-04-27T21:44:56+01:00
 postcss/postcss-selector-parser,gh/36500102,3.9,openssf_local,0,False,,72.17,50.0,72.17,2026-04-27T15:05:16+01:00
 postcss/postcss-value-parser,gh/40920306,2.3,openssf_local,0,False,,98.93,50.0,98.93,2026-04-27T14:55:57+01:00
 prettier/prettier,gh/75104123,6.5,openssf_local,0,False,,18.98,50.0,50.00,2026-05-03T23:31:25+01:00

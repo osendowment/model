@@ -4215,7 +4215,7 @@
 "mdurl","https://github.com/markdown-it/mdurl.git","","","","","",""
 "media-typer","https://github.com/jshttp/media-typer.git","","","","","",""
 "mem","https://github.com/sindresorhus/mem.git","","","","","",""
-"mem-fs-editor","https://github.com/sboudrias/mem-fs-editor.git","","","","","",""
+"mem-fs-editor","https://github.com/sboudrias/mem-fs.git","","","","","",""
 "memfs","https://github.com/streamich/memfs.git","","","","","",""
 "memoize-one","https://github.com/alexreardon/memoize-one.git","","","","","",""
 "memoizee","https://github.com/medikoo/memoizee.git","","","","","",""

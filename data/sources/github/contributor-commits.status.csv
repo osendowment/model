@@ -7,6 +7,7 @@ adobe/react-spectrum,gh/208362715,https://github.com/adobe/react-spectrum.git,ok
 agronholm/anyio,gh/145337588,https://github.com/agronholm/anyio.git,ok,78,2026-05-19T11:23:54+00:00
 agronholm/exceptiongroup,gh/447694800,https://github.com/agronholm/exceptiongroup.git,ok,10,2026-05-19T11:23:56+00:00
 ai/nanoid,gh/99401299,https://github.com/ai/nanoid.git,ok,138,2026-05-19T11:23:56+00:00
+aio-libs-abandoned/async-timeout,gh/67703198,https://github.com/aio-libs-abandoned/async-timeout.git,ok,25,2026-07-05T22:54:38+00:00
 aio-libs/aiobotocore,gh/36618494,https://github.com/aio-libs/aiobotocore.git,ok,70,2026-05-19T11:23:57+00:00
 aio-libs/aiohttp,gh/13258039,https://github.com/aio-libs/aiohttp.git,ok,410,2026-05-19T11:24:03+00:00
 aio-libs/aiosignal,gh/205007356,https://github.com/aio-libs/aiosignal.git,ok,13,2026-05-19T11:24:00+00:00
@@ -27,6 +28,7 @@ amanieu/parking_lot,gh/58731560,https://github.com/amanieu/parking_lot.git,ok,11
 andialbrecht/sqlparse,gh/4067434,https://github.com/andialbrecht/sqlparse.git,ok,92,2026-05-19T11:24:18+00:00
 andrewrk/node-pend,gh/11836813,https://github.com/andrewrk/node-pend.git,ok,1,2026-05-19T11:24:21+00:00
 andyperlitch/jsbn,gh/9710533,https://github.com/andyperlitch/jsbn.git,ok,8,2026-05-19T11:24:22+00:00
+angular/angular-cli,gh/36891867,https://github.com/angular/angular-cli.git,ok,414,2026-07-13T16:59:52+00:00
 annotated-types/annotated-types,gh/487934134,https://github.com/annotated-types/annotated-types.git,ok,21,2026-05-19T11:24:24+00:00
 antonk52/lilconfig,gh/238967485,https://github.com/antonk52/lilconfig.git,ok,11,2026-05-19T11:24:24+00:00
 apache/airflow,gh/33884891,https://github.com/apache/airflow.git,ok,415,2026-05-19T11:24:30+00:00
@@ -36,6 +38,7 @@ archlinux/linux,gh/142707813,https://github.com/archlinux/linux.git,error,0,2026
 ardatan/graphql-tools,gh/54432168,https://github.com/ardatan/graphql-tools.git,ok,383,2026-05-19T11:24:34+00:00
 ardatan/whatwg-node,gh/429511342,https://github.com/ardatan/whatwg-node.git,ok,33,2026-05-19T11:22:36+00:00
 assert-rs/snapbox,gh/424722460,https://github.com/assert-rs/snapbox.git,ok,20,2026-05-19T11:22:36+00:00
+astanin/python-tabulate,gh/205875548,https://github.com/astanin/python-tabulate.git,ok,95,2026-07-13T16:59:49+00:00
 astral-sh/ruff,gh/523043277,https://github.com/astral-sh/ruff.git,ok,454,2026-05-19T11:22:39+00:00
 auth0/node-jwa,gh/8116861,https://github.com/auth0/node-jwa.git,ok,14,2026-05-19T11:22:38+00:00
 autotools-mirror/autoconf,gh/47662429,https://github.com/autotools-mirror/autoconf.git,ok,88,2026-05-19T11:22:38+00:00
@@ -47,6 +50,7 @@ aws/aws-sdk-js-v3,gh/87228090,https://github.com/aws/aws-sdk-js-v3.git,ok,161,20
 axios/axios,gh/23088740,https://github.com/axios/axios.git,ok,444,2026-05-19T11:22:44+00:00
 azure/azure-sdk-for-js,gh/108311273,https://github.com/azure/azure-sdk-for-js.git,ok,398,2026-05-19T11:22:45+00:00
 azure/azure-sdk-for-python,gh/4127088,https://github.com/azure/azure-sdk-for-python.git,ok,403,2026-05-19T11:22:46+00:00
+azure/msrest-for-python,gh/71186468,https://github.com/azure/msrest-for-python.git,ok,23,2026-07-05T22:54:34+00:00
 azuread/microsoft-authentication-library-for-python,gh/67243113,https://github.com/azuread/microsoft-authentication-library-for-python.git,ok,43,2026-05-19T11:22:46+00:00
 babel/babel,gh/24560307,https://github.com/babel/babel.git,ok,412,2026-05-19T11:22:48+00:00
 babel/babel-polyfills,gh/190579283,https://github.com/babel/babel-polyfills.git,ok,24,2026-05-19T11:22:47+00:00
@@ -54,16 +58,19 @@ bdwgc/bdwgc,gh/2109456,https://github.com/bdwgc/bdwgc.git,ok,166,2026-05-19T11:2
 beatgammit/base64-js,gh/2853282,https://github.com/beatgammit/base64-js.git,ok,11,2026-05-19T11:22:49+00:00
 benjaminp/six,gh/77868600,https://github.com/benjaminp/six.git,ok,59,2026-05-19T11:22:50+00:00
 besser82/libxcrypt,gh/35503965,https://github.com/besser82/libxcrypt.git,ok,26,2026-05-19T11:22:51+00:00
+bincode-org/bincode,gh/24130045,https://github.com/bincode-org/bincode.git,ok,1,2026-07-05T22:54:37+00:00
 bitflags/bitflags,gh/29287955,https://github.com/bitflags/bitflags.git,ok,87,2026-05-19T11:22:52+00:00
 blakeembrey/array-flatten,gh/17789771,https://github.com/blakeembrey/array-flatten.git,ok,8,2026-05-19T11:22:53+00:00
 blakeembrey/change-case,gh/9440238,https://github.com/blakeembrey/change-case.git,ok,25,2026-05-19T11:22:54+00:00
 bluss/bencher,gh/65987276,https://github.com/bluss/bencher.git,ok,4,2026-05-19T11:22:56+00:00
+bminor/glibc,gh/13868694,https://github.com/bminor/glibc.git,ok,282,2026-07-05T22:54:33+00:00
 boto/boto3,gh/24774658,https://github.com/boto/boto3.git,ok,148,2026-05-19T11:22:57+00:00
 boto/botocore,gh/6670942,https://github.com/boto/botocore.git,ok,177,2026-05-19T11:22:59+00:00
 boto/s3transfer,gh/49535299,https://github.com/boto/s3transfer.git,ok,41,2026-05-19T11:22:59+00:00
 braveg1rl/performance-now,gh/336187529,https://github.com/braveg1rl/performance-now.git,ok,1,2026-05-19T11:23:01+00:00
 brianc/node-postgres,gh/991475,https://github.com/brianc/node-postgres.git,ok,321,2026-05-19T11:23:03+00:00
 broofa/mime,gh/534940,https://github.com/broofa/mime.git,ok,48,2026-05-19T11:23:03+00:00
+broofa/node-int64,gh/1208666,https://github.com/broofa/node-int64.git,ok,6,2026-07-05T22:54:31+00:00
 browserify/events,gh/1649251,https://github.com/browserify/events.git,ok,15,2026-05-19T11:23:04+00:00
 browserify/node-util,gh/14568009,https://github.com/browserify/node-util.git,ok,10,2026-05-19T11:23:05+00:00
 browserify/randombytes,gh/29300004,https://github.com/browserify/randombytes.git,ok,8,2026-05-19T11:23:07+00:00
@@ -110,6 +117,7 @@ colorjs/color-name,gh/27038309,https://github.com/colorjs/color-name.git,ok,8,20
 comex/rust-shlex,gh/37886228,https://github.com/comex/rust-shlex.git,ok,9,2026-05-19T11:23:55+00:00
 component/escape-html,gh/5444800,https://github.com/component/escape-html.git,ok,8,2026-05-19T11:23:57+00:00
 component/toidentifier,gh/114743189,https://github.com/component/toidentifier.git,ok,2,2026-05-19T11:23:58+00:00
+composefs/tar-rs,gh/21946092,https://github.com/composefs/tar-rs.git,ok,82,2026-07-13T16:59:46+00:00
 conventional-changelog/commitlint,gh/51575745,https://github.com/conventional-changelog/commitlint.git,ok,273,2026-05-19T11:24:01+00:00
 conventional-changelog/conventional-changelog,gh/15639771,https://github.com/conventional-changelog/conventional-changelog.git,ok,152,2026-05-19T11:24:00+00:00
 cosmiconfig/cosmiconfig,gh/45750507,https://github.com/cosmiconfig/cosmiconfig.git,ok,34,2026-05-19T11:24:02+00:00
@@ -138,6 +146,8 @@ defunctzombie/node-process,gh/7580644,https://github.com/defunctzombie/node-proc
 django/asgiref,gh/48501860,https://github.com/django/asgiref.git,ok,106,2026-05-19T11:24:31+00:00
 djc/rustc-version-rs,gh/41272773,https://github.com/djc/rustc-version-rs.git,ok,15,2026-05-19T11:24:31+00:00
 dmitrysoshnikov/regexp-tree,gh/85459304,https://github.com/dmitrysoshnikov/regexp-tree.git,ok,25,2026-05-19T11:24:33+00:00
+docutils/docutils,gh/44840244,https://github.com/docutils/docutils.git,ok,1,2026-07-13T16:59:45+00:00
+dominictarr/through,gh/4885140,https://github.com/dominictarr/through.git,ok,10,2026-07-05T22:54:34+00:00
 doowb/ansi-colors,gh/47135420,https://github.com/doowb/ansi-colors.git,ok,11,2026-05-19T11:22:36+00:00
 douglasdwyer/wasm_sync,gh/668034655,https://github.com/douglasdwyer/wasm_sync.git,ok,1,2026-05-19T11:22:36+00:00
 dougwilson/nodejs-depd,gh/20848667,https://github.com/dougwilson/nodejs-depd.git,ok,2,2026-05-19T11:22:37+00:00
@@ -147,6 +157,7 @@ dtolnay/dissimilar,gh/229514821,https://github.com/dtolnay/dissimilar.git,ok,3,2
 dtolnay/indoc,gh/54252316,https://github.com/dtolnay/indoc.git,ok,7,2026-05-19T11:22:40+00:00
 dtolnay/itoa,gh/61962375,https://github.com/dtolnay/itoa.git,ok,14,2026-05-19T11:22:41+00:00
 dtolnay/no-panic,gh/143469762,https://github.com/dtolnay/no-panic.git,ok,2,2026-05-19T11:22:41+00:00
+dtolnay/paste,gh/155652490,https://github.com/dtolnay/paste.git,ok,9,2026-07-05T22:54:35+00:00
 dtolnay/proc-macro2,gh/91860126,https://github.com/dtolnay/proc-macro2.git,ok,30,2026-05-19T11:22:43+00:00
 dtolnay/quote,gh/67273122,https://github.com/dtolnay/quote.git,ok,26,2026-05-19T11:22:44+00:00
 dtolnay/ref-cast,gh/106295902,https://github.com/dtolnay/ref-cast.git,ok,4,2026-05-19T11:22:45+00:00
@@ -162,6 +173,7 @@ eemeli/yaml,gh/119439276,https://github.com/eemeli/yaml.git,ok,33,2026-05-19T11:
 ehmicky/human-signals,gh/214467546,https://github.com/ehmicky/human-signals.git,ok,5,2026-05-19T11:22:54+00:00
 eliben/pycparser,gh/10589864,https://github.com/eliben/pycparser.git,ok,79,2026-05-19T11:22:56+00:00
 emotion-js/emotion,gh/92570536,https://github.com/emotion-js/emotion.git,ok,304,2026-05-19T11:22:58+00:00
+enarx/ciborium,gh/313759241,https://github.com/enarx/ciborium.git,ok,37,2026-07-13T16:59:43+00:00
 encode/httpcore,gh/237210639,https://github.com/encode/httpcore.git,ok,55,2026-05-19T11:22:58+00:00
 encode/httpx,gh/179492861,https://github.com/encode/httpx.git,ok,231,2026-05-19T11:23:01+00:00
 epoberezkin/fast-deep-equal,gh/94483360,https://github.com/epoberezkin/fast-deep-equal.git,ok,12,2026-05-19T11:23:00+00:00
@@ -177,6 +189,7 @@ es-shims/regexp.prototype.flags,gh/26932422,https://github.com/es-shims/regexp.p
 es-shims/string.prototype.trimend,gh/114682758,https://github.com/es-shims/string.prototype.trimend.git,ok,2,2026-05-19T11:23:14+00:00
 es-shims/string.prototype.trimstart,gh/114682105,https://github.com/es-shims/string.prototype.trimstart.git,ok,2,2026-05-19T11:23:15+00:00
 eslint-community/eslint-utils,gh/568240379,https://github.com/eslint-community/eslint-utils.git,ok,10,2026-05-19T11:23:16+00:00
+eslint/doctrine,gh/4286644,https://github.com/eslint/doctrine.git,ok,33,2026-07-05T22:54:37+00:00
 eslint/eslint,gh/11061773,https://github.com/eslint/eslint.git,ok,416,2026-05-19T11:23:20+00:00
 eslint/js,gh/27620277,https://github.com/eslint/js.git,ok,60,2026-05-19T11:23:19+00:00
 eslint/rewrite,gh/791446923,https://github.com/eslint/rewrite.git,ok,21,2026-05-19T11:23:21+00:00
@@ -196,7 +209,9 @@ expressjs/body-parser,gh/15669006,https://github.com/expressjs/body-parser.git,o
 expressjs/serve-static,gh/17464338,https://github.com/expressjs/serve-static.git,ok,20,2026-05-19T11:22:38+00:00
 facebook/create-react-app,gh/63537249,https://github.com/react/create-react-app.git,ok,450,2026-05-19T11:22:41+00:00
 facebook/metro,gh/76504246,https://github.com/react/metro.git,ok,323,2026-05-19T11:22:41+00:00
+facebook/prop-types,gh/87597642,https://github.com/facebook/prop-types.git,ok,45,2026-07-05T22:54:31+00:00
 facebook/react,gh/10270250,https://github.com/react/react.git,ok,410,2026-05-19T11:22:42+00:00
+facebook/regenerator,gh/13346571,https://github.com/facebook/regenerator.git,ok,69,2026-07-05T22:54:32+00:00
 facebook/watchman,gh/6930489,https://github.com/facebook/watchman.git,ok,315,2026-05-19T11:22:43+00:00
 facebook/zstd,gh/29759715,https://github.com/facebook/zstd.git,ok,357,2026-05-19T11:22:45+00:00
 facelessuser/soupsieve,gh/160789418,https://github.com/facelessuser/soupsieve.git,ok,14,2026-05-19T11:22:44+00:00
@@ -221,6 +236,8 @@ feross/run-parallel,gh/18700638,https://github.com/feross/run-parallel.git,ok,5,
 feross/safe-buffer,gh/49538897,https://github.com/feross/safe-buffer.git,ok,8,2026-05-19T11:23:04+00:00
 ffmpeg/ffmpeg,gh/1614410,https://github.com/ffmpeg/ffmpeg.git,ok,312,2026-05-19T11:23:08+00:00
 firebase/firebase-js-sdk,gh/89290483,https://github.com/firebase/firebase-js-sdk.git,ok,213,2026-05-19T11:23:07+00:00
+fitzgen/glob-to-regexp,gh/11461122,https://github.com/fitzgen/glob-to-regexp.git,ok,7,2026-07-05T22:54:32+00:00
+floatdrop/require-from-string,gh/39301848,https://github.com/floatdrop/require-from-string.git,ok,6,2026-07-05T22:54:34+00:00
 floating-ui/floating-ui,gh/54994103,https://github.com/floating-ui/floating-ui.git,ok,120,2026-05-19T11:23:09+00:00
 follow-redirects/follow-redirects,gh/6697086,https://github.com/follow-redirects/follow-redirects.git,ok,33,2026-05-19T11:23:09+00:00
 fontconfig/fontconfig,gh/926884194,https://github.com/fontconfig/fontconfig.git,ok,126,2026-05-19T11:23:12+00:00
@@ -257,9 +274,12 @@ gnutls/nettle,gh/59017402,https://github.com/gnutls/nettle.git,ok,48,2026-05-19T
 google/brotli,gh/24993138,https://github.com/google/brotli.git,ok,121,2026-05-19T11:22:48+00:00
 google/zerocopy,gh/534354967,https://github.com/google/zerocopy.git,ok,72,2026-05-19T11:22:49+00:00
 googleapis/google-cloud-python,gh/16316451,https://github.com/googleapis/google-cloud-python.git,ok,399,2026-05-19T11:22:51+00:00
+googleapis/python-cloud-core,gh/226992462,https://github.com/googleapis/python-cloud-core.git,ok,41,2026-07-05T22:54:36+00:00
+googleapis/python-crc32c,gh/159736041,https://github.com/googleapis/python-crc32c.git,ok,19,2026-07-05T22:54:38+00:00
 googlechrome/workbox,gh/55424670,https://github.com/googlechrome/workbox.git,ok,77,2026-05-19T11:22:51+00:00
 gpg/libgpg-error,gh/42075984,https://github.com/gpg/libgpg-error.git,ok,35,2026-05-19T11:22:52+00:00
 grahamdumpleton/wrapt,gh/10357291,https://github.com/grahamdumpleton/wrapt.git,ok,34,2026-05-19T11:22:53+00:00
+grantjenks/python-sortedcontainers,gh/17144859,https://github.com/grantjenks/python-sortedcontainers.git,ok,22,2026-07-13T16:59:48+00:00
 graydon/exhaustigen-rs,gh/432630522,https://github.com/graydon/exhaustigen-rs.git,ok,1,2026-05-19T11:22:54+00:00
 gregberge/svgr,gh/102155012,https://github.com/gregberge/svgr.git,ok,125,2026-05-19T11:22:55+00:00
 grncdr/merge-stream,gh/10579821,https://github.com/grncdr/merge-stream.git,ok,10,2026-05-19T11:22:56+00:00
@@ -273,6 +293,7 @@ hapijs/hoek,gh/5831189,https://github.com/hapijs/hoek.git,ok,48,2026-05-19T11:23
 harfbuzz/harfbuzz,gh/5050525,https://github.com/harfbuzz/harfbuzz.git,ok,261,2026-05-19T11:23:07+00:00
 hiddentao/fast-levenshtein,gh/9490451,https://github.com/hiddentao/fast-levenshtein.git,ok,9,2026-05-19T11:23:07+00:00
 httplib2/httplib2,gh/53002916,https://github.com/httplib2/httplib2.git,ok,62,2026-05-19T11:23:08+00:00
+huggingface/huggingface_hub,gh/323591830,https://github.com/huggingface/huggingface_hub.git,ok,339,2026-07-13T16:59:55+00:00
 hukkin/tomli,gh/370616797,https://github.com/hukkin/tomli.git,ok,15,2026-05-19T11:23:10+00:00
 hyperium/http,gh/84983058,https://github.com/hyperium/http.git,ok,125,2026-05-19T11:23:11+00:00
 hyperium/http-body,gh/183281612,https://github.com/hyperium/http-body.git,ok,27,2026-05-19T11:23:13+00:00
@@ -318,6 +339,7 @@ isaacs/cliui,gh/634056857,https://github.com/isaacs/cliui.git,ok,14,2026-05-19T1
 isaacs/core-util-is,gh/12391440,https://github.com/isaacs/core-util-is.git,ok,4,2026-05-19T11:22:58+00:00
 isaacs/fs-minipass,gh/102982143,https://github.com/isaacs/fs-minipass.git,ok,10,2026-05-19T11:23:00+00:00
 isaacs/fs.realpath,gh/61231712,https://github.com/isaacs/fs.realpath.git,ok,1,2026-05-19T11:23:01+00:00
+isaacs/inflight-deprecated-do-not-use,gh/19442260,https://github.com/isaacs/inflight-deprecated-do-not-use.git,ok,8,2026-07-05T22:54:32+00:00
 isaacs/inherits,gh/1580001,https://github.com/isaacs/inherits.git,ok,5,2026-05-19T11:23:02+00:00
 isaacs/isexe,gh/49804297,https://github.com/isaacs/isexe.git,ok,1,2026-05-19T11:23:03+00:00
 isaacs/minimatch,gh/2056549,https://github.com/isaacs/minimatch.git,ok,30,2026-05-19T11:23:05+00:00
@@ -350,6 +372,7 @@ jbgutierrez/path-parse,gh/34113780,https://github.com/jbgutierrez/path-parse.git
 jd/tenacity,gh/65468547,https://github.com/jd/tenacity.git,ok,88,2026-05-19T11:22:39+00:00
 jensyt/imurmurhash-js,gh/11802843,https://github.com/jensyt/imurmurhash-js.git,ok,1,2026-05-19T11:22:40+00:00
 jestjs/jest,gh/15062869,https://github.com/jestjs/jest.git,ok,424,2026-05-19T11:22:43+00:00
+jimmywarting/node-domexception,gh/371470141,https://github.com/jimmywarting/node-domexception.git,ok,2,2026-07-05T22:54:34+00:00
 jimp-dev/jimp,gh/24008065,https://github.com/jimp-dev/jimp.git,ok,159,2026-05-19T11:22:42+00:00
 jmespath/jmespath.py,gh/8300763,https://github.com/jmespath/jmespath.py.git,ok,29,2026-05-19T11:22:43+00:00
 joblib/joblib,gh/654608,https://github.com/joblib/joblib.git,ok,130,2026-05-19T11:22:45+00:00
@@ -407,6 +430,7 @@ jslicense/spdx-correct.js,gh/34817196,https://github.com/jslicense/spdx-correct.
 jslicense/spdx-exceptions.json,gh/40062896,https://github.com/jslicense/spdx-exceptions.json.git,ok,2,2026-05-19T11:23:45+00:00
 jslicense/spdx-expression-parse.js,gh/40067336,https://github.com/jslicense/spdx-expression-parse.js.git,ok,5,2026-05-19T11:23:46+00:00
 jslicense/spdx-license-ids,gh/26001547,https://github.com/jslicense/spdx-license-ids.git,ok,4,2026-05-19T11:23:46+00:00
+json-c/json-c,gh/1139119,https://github.com/json-c/json-c.git,ok,151,2026-07-13T16:59:55+00:00
 json5/json5,gh/4463453,https://github.com/json5/json5.git,ok,22,2026-05-19T11:23:47+00:00
 juliangruber/balanced-match,gh/13538817,https://github.com/juliangruber/balanced-match.git,ok,16,2026-05-19T11:23:48+00:00
 juliangruber/brace-expansion,gh/13539234,https://github.com/juliangruber/brace-expansion.git,ok,25,2026-05-19T11:23:49+00:00
@@ -426,8 +450,10 @@ kpdecker/jsdiff,gh/1542219,https://github.com/kpdecker/jsdiff.git,ok,72,2026-05-
 krb5/krb5,gh/4307702,https://github.com/krb5/krb5.git,ok,120,2026-05-19T11:24:08+00:00
 kriskowal/asap,gh/11295071,https://github.com/kriskowal/asap.git,ok,12,2026-05-19T11:24:08+00:00
 kriszyp/json-schema,gh/947175,https://github.com/kriszyp/json-schema.git,ok,15,2026-05-19T11:24:09+00:00
+la10736/rstest,gh/124802455,https://github.com/la10736/rstest.git,ok,42,2026-07-13T16:42:36+00:00
 langchain-ai/langchain,gh/552661142,https://github.com/langchain-ai/langchain.git,ok,469,2026-05-19T11:24:15+00:00
 laurent-laporte-pro/deprecated,gh/111412148,https://github.com/laurent-laporte-pro/deprecated.git,ok,21,2026-05-19T11:24:11+00:00
+lddubeau/xmlchars,gh/139881982,https://github.com/lddubeau/xmlchars.git,ok,5,2026-07-05T22:54:35+00:00
 legrandin/pycryptodome,gh/19378935,https://github.com/legrandin/pycryptodome.git,ok,131,2026-05-19T11:24:14+00:00
 libevent/libevent,gh/1856976,https://github.com/libevent/libevent.git,ok,262,2026-05-19T11:24:15+00:00
 libexpat/libexpat,gh/80314213,https://github.com/libexpat/libexpat.git,ok,102,2026-05-19T11:24:19+00:00
@@ -435,6 +461,7 @@ libffi/libffi,gh/321154,https://github.com/libffi/libffi.git,ok,192,2026-05-19T1
 libidn/libidn2,gh/87378214,https://github.com/libidn/libidn2.git,ok,11,2026-05-19T11:24:18+00:00
 libjpeg-turbo/libjpeg-turbo,gh/39760454,https://github.com/libjpeg-turbo/libjpeg-turbo.git,ok,45,2026-05-19T11:24:19+00:00
 libjxl/libjxl,gh/340219494,https://github.com/libjxl/libjxl.git,ok,130,2026-05-19T11:24:21+00:00
+libpixman/pixman,gh/81675971,https://github.com/libpixman/pixman.git,ok,84,2026-07-05T22:54:36+00:00
 libuv/libuv,gh/14812739,https://github.com/libuv/libuv.git,ok,442,2026-05-19T11:24:26+00:00
 linusu/buffer-from,gh/66025821,https://github.com/linusu/buffer-from.git,ok,2,2026-05-19T11:24:23+00:00
 linux-audit/audit-userspace,gh/52464964,https://github.com/linux-audit/audit-userspace.git,ok,71,2026-05-19T11:24:26+00:00
@@ -468,6 +495,7 @@ ljharb/side-channel-weakmap,gh/901188921,https://github.com/ljharb/side-channel-
 lodash/lodash,gh/3955647,https://github.com/lodash/lodash.git,ok,219,2026-05-19T11:22:56+00:00
 loganfsmyth/gensync,gh/132383032,https://github.com/loganfsmyth/gensync.git,ok,3,2026-05-19T11:22:57+00:00
 lokathor/bytemuck,gh/209673558,https://github.com/lokathor/bytemuck.git,ok,68,2026-05-19T11:22:57+00:00
+lovell/detect-libc,gh/96149091,https://github.com/lovell/detect-libc.git,ok,9,2026-07-13T16:59:41+00:00
 lukeed/dequal,gh/174421655,https://github.com/lukeed/dequal.git,ok,5,2026-05-19T11:22:59+00:00
 lukeed/escalade,gh/273568715,https://github.com/lukeed/escalade.git,ok,4,2026-05-19T11:23:00+00:00
 lukeed/kleur,gh/140393403,https://github.com/lukeed/kleur.git,ok,16,2026-05-19T11:23:01+00:00
@@ -496,6 +524,7 @@ medikoo/d,gh/10817569,https://github.com/medikoo/d.git,ok,2,2026-05-19T11:23:31+
 medikoo/es5-ext,gh/1792941,https://github.com/medikoo/es5-ext.git,ok,10,2026-05-19T11:23:32+00:00
 medikoo/es6-symbol,gh/14423385,https://github.com/medikoo/es6-symbol.git,ok,5,2026-05-19T11:23:35+00:00
 medikoo/type,gh/177198492,https://github.com/medikoo/type.git,ok,2,2026-05-19T11:23:35+00:00
+meinersbur/isl,gh/37677854,https://github.com/meinersbur/isl.git,ok,23,2026-07-13T16:59:46+00:00
 mhammond/pywin32,gh/108187130,https://github.com/mhammond/pywin32.git,ok,102,2026-05-19T11:23:36+00:00
 micheles/decorator,gh/14656555,https://github.com/micheles/decorator.git,ok,27,2026-05-19T11:23:37+00:00
 micromark/micromark,gh/157420458,https://github.com/micromark/micromark.git,ok,20,2026-05-19T11:23:37+00:00
@@ -510,6 +539,7 @@ microsoft/tslib,gh/34414315,https://github.com/microsoft/tslib.git,ok,37,2026-05
 microsoft/typescript,gh/20929025,https://github.com/microsoft/typescript.git,ok,343,2026-05-19T11:23:49+00:00
 microsoft/windows-rs,gh/208102250,https://github.com/microsoft/windows-rs.git,ok,85,2026-05-19T11:23:47+00:00
 minimistjs/minimist,gh/549230701,https://github.com/minimistjs/minimist.git,ok,17,2026-05-19T11:23:47+00:00
+mirror/ncurses,gh/22324756,https://github.com/mirror/ncurses.git,ok,1,2026-07-13T16:59:42+00:00
 mitsuhiko/insta,gh/165561258,https://github.com/mitsuhiko/insta.git,ok,70,2026-05-19T11:23:48+00:00
 mlocati/gettext-iconv-windows,gh/12751919,https://github.com/mlocati/gettext-iconv-windows.git,ok,3,2026-05-19T11:23:51+00:00
 mm2/little-cms,gh/507969,https://github.com/mm2/little-cms.git,ok,71,2026-05-19T11:23:51+00:00
@@ -521,6 +551,8 @@ mozilla/source-map,gh/2014930,https://github.com/mozilla/source-map.git,ok,81,20
 mrabarnett/mrab-regex,gh/309446978,https://github.com/mrabarnett/mrab-regex.git,ok,9,2026-05-19T11:23:58+00:00
 mrmlnc/fast-glob,gh/77467076,https://github.com/mrmlnc/fast-glob.git,ok,28,2026-05-19T11:23:59+00:00
 msgpack/msgpack-python,gh/2242705,https://github.com/msgpack/msgpack-python.git,ok,73,2026-05-19T11:24:01+00:00
+mui/material-ui,gh/23083156,https://github.com/mui/material-ui.git,ok,416,2026-07-13T16:59:53+00:00
+myrne/performance-now,gh/10219264,https://github.com/myrne/performance-now.git,ok,4,2026-07-13T16:59:48+00:00
 mysticatea/abort-controller,gh/105228556,https://github.com/mysticatea/abort-controller.git,ok,5,2026-05-19T11:24:02+00:00
 mysticatea/event-target-shim,gh/31137469,https://github.com/mysticatea/event-target-shim.git,ok,6,2026-05-19T11:24:04+00:00
 netflix/vmaf,gh/51317975,https://github.com/netflix/vmaf.git,ok,101,2026-05-19T11:24:06+00:00
@@ -589,6 +621,7 @@ pkgconf/pkgconf,gh/4180110,https://github.com/pkgconf/pkgconf.git,ok,87,2026-05-
 pnggroup/libpng,gh/3768025,https://github.com/pnggroup/libpng.git,ok,96,2026-05-19T11:23:20+00:00
 postcss/postcss,gh/13078968,https://github.com/postcss/postcss.git,ok,384,2026-05-19T11:23:23+00:00
 postcss/postcss-selector-parser,gh/36500102,https://github.com/postcss/postcss-selector-parser.git,ok,43,2026-05-19T11:23:23+00:00
+postcss/postcss-value-parser,gh/40920306,https://github.com/postcss/postcss-value-parser.git,ok,14,2026-07-13T16:59:51+00:00
 prettier/prettier,gh/75104123,https://github.com/prettier/prettier.git,ok,430,2026-05-19T11:23:27+00:00
 primus/eventemitter3,gh/13100677,https://github.com/primus/eventemitter3.git,ok,28,2026-05-19T11:23:26+00:00
 proptest-rs/proptest,gh/94702898,https://github.com/proptest-rs/proptest.git,ok,91,2026-05-19T11:23:27+00:00
@@ -623,10 +656,13 @@ python-greenlet/greenlet,gh/3003137,https://github.com/python-greenlet/greenlet.
 python-hyper/brotlicffi,gh/43543393,https://github.com/python-hyper/brotlicffi.git,ok,20,2026-05-19T11:22:58+00:00
 python-hyper/h11,gh/57372073,https://github.com/python-hyper/h11.git,ok,33,2026-05-19T11:22:59+00:00
 python-jsonschema/jsonschema,gh/3072629,https://github.com/python-jsonschema/jsonschema.git,ok,106,2026-05-19T11:23:00+00:00
+python-jsonschema/jsonschema-specifications,gh/582755777,https://github.com/python-jsonschema/jsonschema-specifications.git,ok,6,2026-07-13T16:59:52+00:00
+python-jsonschema/referencing,gh/569027868,https://github.com/python-jsonschema/referencing.git,ok,8,2026-07-13T16:59:44+00:00
 python-pillow/pillow,gh/5171600,https://github.com/python-pillow/pillow.git,ok,385,2026-05-19T11:23:03+00:00
 python-poetry/poetry,gh/123303402,https://github.com/python-poetry/poetry.git,ok,441,2026-05-19T11:23:05+00:00
 python-poetry/tomlkit,gh/140365570,https://github.com/python-poetry/tomlkit.git,ok,44,2026-05-19T11:23:04+00:00
 python-trio/sniffio,gh/142657210,https://github.com/python-trio/sniffio.git,ok,17,2026-05-19T11:23:05+00:00
+python/cpython,gh/81598961,https://github.com/python/cpython.git,ok,355,2026-07-13T16:59:51+00:00
 python/importlib_metadata,gh/306448340,https://github.com/python/importlib_metadata.git,ok,67,2026-05-19T11:23:06+00:00
 python/importlib_resources,gh/306147182,https://github.com/python/importlib_resources.git,ok,49,2026-05-19T11:23:07+00:00
 python/mypy,gh/7053637,https://github.com/python/mypy.git,ok,413,2026-05-19T11:23:12+00:00
@@ -643,8 +679,12 @@ radix-ui/primitives,gh/273499522,https://github.com/radix-ui/primitives.git,ok,7
 raszi/node-tmp,gh/2313213,https://github.com/raszi/node-tmp.git,ok,35,2026-05-19T11:23:24+00:00
 raynos/for-each,gh/6006855,https://github.com/raynos/for-each.git,ok,3,2026-05-19T11:23:25+00:00
 raynos/function-bind,gh/10727014,https://github.com/raynos/function-bind.git,ok,6,2026-05-19T11:23:27+00:00
+raynos/xtend,gh/4419184,https://github.com/raynos/xtend.git,ok,19,2026-07-05T22:54:30+00:00
 rayon-rs/either,gh/42479602,https://github.com/rayon-rs/either.git,ok,39,2026-05-19T11:23:28+00:00
 rayon-rs/rayon,gh/24725038,https://github.com/rayon-rs/rayon.git,ok,142,2026-05-19T11:23:30+00:00
+react/create-react-app,gh/63537249,https://github.com/react/create-react-app.git,ok,450,2026-07-13T16:59:50+00:00
+react/metro,gh/76504246,https://github.com/react/metro.git,ok,325,2026-07-13T16:59:54+00:00
+react/react,gh/10270250,https://github.com/react/react.git,ok,412,2026-07-13T16:42:38+00:00
 reactivex/rxjs,gh/32247847,https://github.com/reactivex/rxjs.git,ok,423,2026-05-19T11:23:33+00:00
 realpython/pytest-mypy,gh/69576530,https://github.com/realpython/pytest-mypy.git,ok,14,2026-05-19T11:23:33+00:00
 remix-run/react-router,gh/19872456,https://github.com/remix-run/react-router.git,ok,429,2026-05-19T11:23:37+00:00
@@ -663,6 +703,7 @@ rust-cli/env_logger,gh/96382888,https://github.com/rust-cli/env_logger.git,ok,70
 rust-embedded/critical-section,gh/365854323,https://github.com/rust-embedded/critical-section.git,ok,15,2026-05-19T11:22:46+00:00
 rust-fuzz/arbitrary,gh/90591032,https://github.com/rust-fuzz/arbitrary.git,ok,62,2026-05-19T11:22:47+00:00
 rust-itertools/itertools,gh/22360263,https://github.com/rust-itertools/itertools.git,ok,169,2026-05-19T11:22:49+00:00
+rust-lang-deprecated/tempdir,gh/31728565,https://github.com/rust-lang-deprecated/tempdir.git,ok,14,2026-07-05T22:54:37+00:00
 rust-lang-nursery/lazy-static.rs,gh/21157492,https://github.com/rust-lang-nursery/lazy-static.rs.git,ok,54,2026-05-19T11:22:49+00:00
 rust-lang/cc-rs,gh/26039547,https://github.com/rust-lang/cc-rs.git,ok,310,2026-05-19T11:22:51+00:00
 rust-lang/cfg-if,gh/38723660,https://github.com/rust-lang/cfg-if.git,ok,19,2026-05-19T11:22:51+00:00
@@ -688,6 +729,7 @@ rustcrypto/hashes,gh/74106774,https://github.com/rustcrypto/hashes.git,ok,87,202
 rustcrypto/stream-ciphers,gh/83051505,https://github.com/rustcrypto/stream-ciphers.git,ok,30,2026-05-19T11:23:16+00:00
 rustcrypto/traits,gh/85605821,https://github.com/rustcrypto/traits.git,ok,72,2026-05-19T11:23:17+00:00
 rustcrypto/utils,gh/77307442,https://github.com/rustcrypto/utils.git,ok,77,2026-05-19T11:23:18+00:00
+rvagg/archived-prr,gh/9151864,https://github.com/rvagg/archived-prr.git,ok,2,2026-07-05T22:54:30+00:00
 rvagg/bl,gh/10706095,https://github.com/rvagg/bl.git,ok,36,2026-05-19T11:23:20+00:00
 rvagg/through2,gh/11808187,https://github.com/rvagg/through2.git,ok,21,2026-05-19T11:23:21+00:00
 ryanzim/universalify,gh/87651180,https://github.com/ryanzim/universalify.git,ok,5,2026-05-19T11:23:23+00:00
@@ -766,6 +808,7 @@ sindresorhus/package-directory,gh/41724281,https://github.com/sindresorhus/packa
 sindresorhus/parent-module,gh/50187748,https://github.com/sindresorhus/parent-module.git,ok,6,2026-05-19T11:22:38+00:00
 sindresorhus/parse-json,gh/41367145,https://github.com/sindresorhus/parse-json.git,ok,15,2026-05-19T11:22:43+00:00
 sindresorhus/path-exists,gh/34965664,https://github.com/sindresorhus/path-exists.git,ok,6,2026-05-19T11:22:47+00:00
+sindresorhus/path-is-absolute,gh/30900285,https://github.com/sindresorhus/path-is-absolute.git,ok,2,2026-07-05T22:54:30+00:00
 sindresorhus/path-key,gh/48706449,https://github.com/sindresorhus/path-key.git,ok,6,2026-05-19T11:22:53+00:00
 sindresorhus/path-type,gh/41905436,https://github.com/sindresorhus/path-type.git,ok,7,2026-05-19T11:22:58+00:00
 sindresorhus/pify,gh/41585934,https://github.com/sindresorhus/pify.git,ok,16,2026-05-19T11:23:04+00:00
@@ -808,6 +851,7 @@ stub42/pytz,gh/63155638,https://github.com/stub42/pytz.git,ok,19,2026-05-19T11:2
 suguru03/neo-async,gh/27030361,https://github.com/suguru03/neo-async.git,ok,17,2026-05-19T11:23:38+00:00
 sval-rs/sval,gh/157205610,https://github.com/sval-rs/sval.git,ok,6,2026-05-19T11:23:39+00:00
 swc-project/swc,gh/115110181,https://github.com/swc-project/swc.git,ok,347,2026-05-19T11:23:41+00:00
+sybrenstuvel/python-rsa,gh/50107469,https://github.com/sybrenstuvel/python-rsa.git,ok,36,2026-07-05T22:54:32+00:00
 syntax-tree/unist-util-is,gh/41795086,https://github.com/syntax-tree/unist-util-is.git,ok,6,2026-05-19T11:23:40+00:00
 systemd/systemd,gh/32873313,https://github.com/systemd/systemd.git,ok,379,2026-05-19T11:23:45+00:00
 taiki-e/pin-project,gh/164668916,https://github.com/taiki-e/pin-project.git,ok,13,2026-05-19T11:23:42+00:00
@@ -842,6 +886,7 @@ tokio-rs/tracing,gh/165289175,https://github.com/tokio-rs/tracing.git,ok,305,202
 toml-rs/toml,gh/95902102,https://github.com/toml-rs/toml.git,ok,150,2026-05-19T11:24:16+00:00
 tootallnate/proxy-agents,gh/11293703,https://github.com/tootallnate/proxy-agents.git,ok,45,2026-05-19T11:24:17+00:00
 tootallnate/util-deprecate,gh/19321056,https://github.com/tootallnate/util-deprecate.git,ok,2,2026-05-19T11:24:18+00:00
+torvalds/linux,gh/2325298,https://github.com/torvalds/linux.git,error,0,2026-07-13T17:01:49+00:00
 tower-rs/tower,gh/98244646,https://github.com/tower-rs/tower.git,ok,107,2026-05-19T11:24:21+00:00
 tox-dev/filelock,gh/17098256,https://github.com/tox-dev/filelock.git,ok,59,2026-05-19T11:24:22+00:00
 tox-dev/platformdirs,gh/367032142,https://github.com/tox-dev/platformdirs.git,ok,78,2026-05-19T11:24:23+00:00
@@ -853,6 +898,7 @@ trysound/postcss-value-parser,gh/40920306,https://github.com/postcss/postcss-val
 tsconfig/bases,gh/263697285,https://github.com/tsconfig/bases.git,ok,93,2026-05-19T11:24:31+00:00
 tukaani-project/xz,gh/553665726,https://github.com/tukaani-project/xz.git,ok,56,2026-05-19T11:24:32+00:00
 typescript-eslint/typescript-eslint,gh/165536154,https://github.com/typescript-eslint/typescript-eslint.git,ok,444,2026-05-19T11:24:35+00:00
+typeshed-internal/stub_uploader,gh/331669593,https://github.com/typeshed-internal/stub_uploader.git,ok,23,2026-07-13T16:59:54+00:00
 unicode-org/icu,gh/49244766,https://github.com/unicode-org/icu.git,ok,220,2026-05-19T11:23:33+00:00
 unicode-org/icu4x,gh/243395141,https://github.com/unicode-org/icu4x.git,ok,137,2026-05-19T11:23:38+00:00
 unicode-rs/unicode-xid,gh/34637906,https://github.com/unicode-rs/unicode-xid.git,ok,20,2026-05-19T11:23:42+00:00
@@ -873,6 +919,8 @@ watson/ci-info,gh/71475907,https://github.com/watson/ci-info.git,ok,32,2026-05-1
 wbond/asn1crypto,gh/36823669,https://github.com/wbond/asn1crypto.git,ok,32,2026-05-19T11:23:07+00:00
 webmproject/libwebp,gh/23368445,https://github.com/webmproject/libwebp.git,ok,54,2026-05-19T11:24:24+00:00
 webpack/enhanced-resolve,gh/5400204,https://github.com/webpack/enhanced-resolve.git,ok,71,2026-05-19T11:22:51+00:00
+webpack/loader-utils,gh/6503675,https://github.com/webpack/loader-utils.git,ok,40,2026-07-05T22:54:35+00:00
+webpack/minimizer-webpack-plugin,gh/143057914,https://github.com/webpack/minimizer-webpack-plugin.git,ok,39,2026-07-13T16:59:45+00:00
 webpack/schema-utils,gh/80306715,https://github.com/webpack/schema-utils.git,ok,20,2026-05-19T11:23:23+00:00
 webpack/tapable,gh/7730086,https://github.com/webpack/tapable.git,ok,38,2026-05-19T11:23:35+00:00
 webpack/terser-webpack-plugin,gh/143057914,https://github.com/webpack/minimizer-webpack-plugin.git,ok,39,2026-05-19T11:23:40+00:00
@@ -899,27 +947,3 @@ yuzujs/setimmediate,gh/1981208,https://github.com/yuzujs/setimmediate.git,ok,11,
 zertosh/loose-envify,gh/41947687,https://github.com/zertosh/loose-envify.git,ok,5,2026-05-19T11:23:44+00:00
 zesterer/spin-rs,gh/21686666,https://github.com/zesterer/spin-rs.git,ok,56,2026-05-19T11:23:48+00:00
 zloirock/core-js,gh/11481338,https://github.com/zloirock/core-js.git,ok,133,2026-05-19T11:23:54+00:00
-aio-libs-abandoned/async-timeout,gh/67703198,https://github.com/aio-libs-abandoned/async-timeout.git,ok,25,2026-07-05T22:54:38+00:00
-azure/msrest-for-python,gh/71186468,https://github.com/azure/msrest-for-python.git,ok,23,2026-07-05T22:54:34+00:00
-bincode-org/bincode,gh/24130045,https://github.com/bincode-org/bincode.git,ok,1,2026-07-05T22:54:37+00:00
-bminor/glibc,gh/13868694,https://github.com/bminor/glibc.git,ok,282,2026-07-05T22:54:33+00:00
-broofa/node-int64,gh/1208666,https://github.com/broofa/node-int64.git,ok,6,2026-07-05T22:54:31+00:00
-dominictarr/through,gh/4885140,https://github.com/dominictarr/through.git,ok,10,2026-07-05T22:54:34+00:00
-dtolnay/paste,gh/155652490,https://github.com/dtolnay/paste.git,ok,9,2026-07-05T22:54:35+00:00
-eslint/doctrine,gh/4286644,https://github.com/eslint/doctrine.git,ok,33,2026-07-05T22:54:37+00:00
-facebook/prop-types,gh/87597642,https://github.com/facebook/prop-types.git,ok,45,2026-07-05T22:54:31+00:00
-facebook/regenerator,gh/13346571,https://github.com/facebook/regenerator.git,ok,69,2026-07-05T22:54:32+00:00
-fitzgen/glob-to-regexp,gh/11461122,https://github.com/fitzgen/glob-to-regexp.git,ok,7,2026-07-05T22:54:32+00:00
-floatdrop/require-from-string,gh/39301848,https://github.com/floatdrop/require-from-string.git,ok,6,2026-07-05T22:54:34+00:00
-googleapis/python-cloud-core,gh/226992462,https://github.com/googleapis/python-cloud-core.git,ok,41,2026-07-05T22:54:36+00:00
-googleapis/python-crc32c,gh/159736041,https://github.com/googleapis/python-crc32c.git,ok,19,2026-07-05T22:54:38+00:00
-isaacs/inflight-deprecated-do-not-use,gh/19442260,https://github.com/isaacs/inflight-deprecated-do-not-use.git,ok,8,2026-07-05T22:54:32+00:00
-jimmywarting/node-domexception,gh/371470141,https://github.com/jimmywarting/node-domexception.git,ok,2,2026-07-05T22:54:34+00:00
-lddubeau/xmlchars,gh/139881982,https://github.com/lddubeau/xmlchars.git,ok,5,2026-07-05T22:54:35+00:00
-libpixman/pixman,gh/81675971,https://github.com/libpixman/pixman.git,ok,84,2026-07-05T22:54:36+00:00
-raynos/xtend,gh/4419184,https://github.com/raynos/xtend.git,ok,19,2026-07-05T22:54:30+00:00
-rust-lang-deprecated/tempdir,gh/31728565,https://github.com/rust-lang-deprecated/tempdir.git,ok,14,2026-07-05T22:54:37+00:00
-rvagg/archived-prr,gh/9151864,https://github.com/rvagg/archived-prr.git,ok,2,2026-07-05T22:54:30+00:00
-sindresorhus/path-is-absolute,gh/30900285,https://github.com/sindresorhus/path-is-absolute.git,ok,2,2026-07-05T22:54:30+00:00
-sybrenstuvel/python-rsa,gh/50107469,https://github.com/sybrenstuvel/python-rsa.git,ok,36,2026-07-05T22:54:32+00:00
-webpack/loader-utils,gh/6503675,https://github.com/webpack/loader-utils.git,ok,40,2026-07-05T22:54:35+00:00

@@ -1,10 +1,11 @@
 repo,canonical_repo,repo_id,status,fetched_at
 02strich/pykerberos,02strich/pykerberos,gh/16776709,ok,2026-07-05T12:40:09+00:00
+0crazy-0/gdiff,0crazy-0/gdiff,gh/1254958001,ok,2026-07-13T16:57:25+00:00
 0no-co/graphql.web,0no-co/graphql.web,gh/616240118,ok,2026-07-05T12:40:09+00:00
 0no-co/wonka,0no-co/wonka,gh/122924504,ok,2026-07-05T12:40:09+00:00
 0x20f/paris,0x20f/paris,gh/225930023,ok,2026-07-05T12:40:09+00:00
 101arrowz/fflate,101arrowz/fflate,gh/291210874,ok,2026-07-05T12:40:09+00:00
-10gen/db-contrib-tool,10gen/db-contrib-tool,,not_found,2026-07-05T12:40:09+00:00
+10gen/db-contrib-tool,10gen/db-contrib-tool,,not_found,2026-07-13T17:01:47+00:00
 10xgenomics/lz4-rs,10xgenomics/lz4-rs,gh/238358601,ok,2026-07-05T12:40:09+00:00
 197g/static-alloc,197g/static-alloc,gh/196198464,ok,2026-07-05T12:40:09+00:00
 19h/zuse,19h/zuse,gh/253908611,ok,2026-07-05T12:40:09+00:00
@@ -29,6 +30,7 @@ repo,canonical_repo,repo_id,status,fetched_at
 43081j/fast-wrap-ansi,43081j/fast-wrap-ansi,gh/1031524563,ok,2026-07-05T12:40:09+00:00
 4creators/jxrlib,4creators/jxrlib,gh/92637941,ok,2026-07-05T12:40:09+00:00
 4ldo2/ioslice-rs,4ldo2/ioslice-rs,gh/293820388,ok,2026-07-05T12:40:09+00:00
+4t145/sse-stream,4t145/sse-stream,gh/952464547,ok,2026-07-13T16:57:25+00:00
 567-labs/instructor,567-labs/instructor,gh/653589102,ok,2026-07-05T12:40:09+00:00
 56quarters/cadence,56quarters/cadence,gh/47361876,ok,2026-07-05T12:40:09+00:00
 59naga/babel-plugin-add-module-exports,59naga/babel-plugin-add-module-exports,gh/45929652,ok,2026-07-05T12:40:09+00:00
@@ -81,6 +83,7 @@ abseil/abseil-py,abseil/abseil-py,gh/104132246,ok,2026-07-05T12:40:10+00:00
 absolucy/nanorand-rs,absolucy/nanorand-rs,gh/294486022,ok,2026-07-05T12:40:10+00:00
 absolucy/tracing-oslog,absolucy/tracing-oslog,gh/407903550,ok,2026-07-05T12:40:10+00:00
 abstractumbra/audioop,abstractumbra/audioop,gh/668651524,ok,2026-07-05T12:40:10+00:00
+abumni/inflector,abumni/inflector,gh/453825279,ok,2026-07-13T16:57:25+00:00
 academysoftwarefoundation/imath,academysoftwarefoundation/imath,gh/271841243,ok,2026-07-05T12:40:10+00:00
 academysoftwarefoundation/openexr,academysoftwarefoundation/openexr,gh/3533348,ok,2026-07-05T12:40:10+00:00
 acatton/serde-yaml-ng,acatton/serde-yaml-ng,gh/795720278,ok,2026-07-05T12:40:10+00:00
@@ -159,6 +162,7 @@ ahupp/python-magic,ahupp/python-magic,gh/589189,ok,2026-07-05T12:40:13+00:00
 ai/nanoid,ai/nanoid,gh/99401299,ok,2026-07-05T12:40:13+00:00
 aikoven/assert-never,aikoven/assert-never,gh/86331617,ok,2026-07-05T12:40:13+00:00
 aio-libs-abandoned/aioredis-py,aio-libs-abandoned/aioredis-py,gh/20163574,ok,2026-07-05T12:40:13+00:00
+aio-libs-abandoned/async-timeout,aio-libs-abandoned/async-timeout,gh/67703198,ok,2026-07-13T16:57:25+00:00
 aio-libs/aiobotocore,aio-libs/aiobotocore,gh/36618494,ok,2026-07-05T12:40:13+00:00
 aio-libs/aiocache,aio-libs/aiocache,gh/69653334,ok,2026-07-05T12:40:13+00:00
 aio-libs/aiodns,aio-libs/aiodns,gh/18157561,ok,2026-07-05T12:40:13+00:00
@@ -197,6 +201,7 @@ ajv-validator/ajv-keywords,ajv-validator/ajv-keywords,gh/60477053,ok,2026-07-05T
 akamai/akamaiopen-edgegrid-python,akamai/akamaiopen-edgegrid-python,gh/18449175,ok,2026-07-05T12:40:13+00:00
 akheron/jansson,akheron/jansson,gh/183362,ok,2026-07-05T12:40:13+00:00
 akhilles/crc-catalog,akhilles/crc-catalog,gh/225307650,ok,2026-07-05T12:40:13+00:00
+akimd/bison,akimd/bison,gh/147209438,ok,2026-07-13T16:57:25+00:00
 akiran/can-use-dom,akiran/can-use-dom,gh/30226723,ok,2026-07-05T12:40:13+00:00
 akiran/json2mq,akiran/json2mq,gh/26956965,ok,2026-07-05T12:40:13+00:00
 akiran/react-slick,akiran/react-slick,gh/26704639,ok,2026-07-05T12:40:14+00:00
@@ -307,6 +312,7 @@ almindor/mipidsi,almindor/mipidsi,gh/399583091,ok,2026-07-05T12:40:16+00:00
 alonreznik/dynamodb-json,alonreznik/dynamodb-json,gh/89070642,ok,2026-07-05T12:40:16+00:00
 aloso/lexical-sort,aloso/lexical-sort,gh/272327928,ok,2026-07-05T12:40:16+00:00
 alphagov/notifications-node-client,alphagov/notifications-node-client,gh/50420990,ok,2026-07-05T12:40:16+00:00
+alsa-project/alsa-lib,alsa-project/alsa-lib,gh/154184919,ok,2026-07-13T16:57:25+00:00
 altf02/x11-rs,altf02/x11-rs,gh/30380186,ok,2026-07-05T12:40:16+00:00
 althonos/blanket,althonos/blanket,gh/281270886,ok,2026-07-05T12:40:16+00:00
 altsysrq/rusty-fork,altsysrq/rusty-fork,gh/123205212,ok,2026-07-05T12:40:16+00:00
@@ -425,9 +431,12 @@ anthropics/anthropic-sdk-python,anthropics/anthropic-sdk-python,gh/590187800,ok,
 anthropics/anthropic-sdk-typescript,anthropics/anthropic-sdk-typescript,gh/595176353,ok,2026-07-05T12:40:18+00:00
 anthropics/claude-agent-sdk-python,anthropics/claude-agent-sdk-python,gh/1000486904,ok,2026-07-05T12:40:18+00:00
 antifuchs/nonzero_ext,antifuchs/nonzero_ext,gh/148910462,ok,2026-07-05T12:40:18+00:00
+antithesishq/antithesis-sdk-rust,antithesishq/antithesis-sdk-rust,gh/787077057,ok,2026-07-13T16:57:25+00:00
+antlr4rust/antlr4,antlr4rust/antlr4,gh/986925116,ok,2026-07-13T16:57:25+00:00
 antonk52/lilconfig,antonk52/lilconfig,gh/238967485,ok,2026-07-05T12:40:18+00:00
 anyascii/anyascii,anyascii/anyascii,gh/231583826,ok,2026-07-05T12:40:18+00:00
 anza-xyz/agave,anza-xyz/agave,gh/750164628,ok,2026-07-05T12:40:18+00:00
+anza-xyz/cryptography,anza-xyz/cryptography,gh/1171286827,ok,2026-07-13T16:57:25+00:00
 anza-xyz/mollusk,anza-xyz/mollusk,gh/813334897,ok,2026-07-05T12:40:18+00:00
 anza-xyz/sbpf,anza-xyz/sbpf,gh/902016543,ok,2026-07-05T12:40:18+00:00
 anza-xyz/solana-sdk,anza-xyz/solana-sdk,gh/927110558,ok,2026-07-05T12:40:18+00:00
@@ -435,6 +444,8 @@ anza-xyz/wincode,anza-xyz/wincode,gh/1067250637,ok,2026-07-05T12:40:18+00:00
 aomediacodec/libavif,aomediacodec/libavif,gh/191218735,ok,2026-07-05T12:40:18+00:00
 aous72/openjph,aous72/openjph,gh/209700643,ok,2026-07-05T12:40:18+00:00
 apache/airflow,apache/airflow,gh/33884891,ok,2026-07-05T12:40:18+00:00
+apache/apr,apache/apr,gh/160997,ok,2026-07-13T16:57:25+00:00
+apache/apr-util,apache/apr-util,gh/161004,ok,2026-07-13T16:57:25+00:00
 apache/arrow,apache/arrow,gh/51905353,ok,2026-07-05T12:40:18+00:00
 apache/arrow-rs,apache/arrow-rs,gh/358917250,ok,2026-07-05T12:40:18+00:00
 apache/avro,apache/avro,gh/206459,ok,2026-07-05T12:40:18+00:00
@@ -443,10 +454,12 @@ apache/cassandra-python-driver,apache/cassandra-python-driver,gh/11262602,ok,202
 apache/cordova-node-xcode,apache/cordova-node-xcode,gh/87614951,ok,2026-07-05T12:40:18+00:00
 apache/datafusion,apache/datafusion,gh/358917318,ok,2026-07-05T12:40:18+00:00
 apache/datafusion-sqlparser-rs,apache/datafusion-sqlparser-rs,gh/120538653,ok,2026-07-05T12:40:18+00:00
+apache/httpd,apache/httpd,gh/205423,ok,2026-07-13T16:57:25+00:00
 apache/iceberg-python,apache/iceberg-python,gh/677260606,ok,2026-07-05T12:40:18+00:00
 apache/opendal,apache/opendal,gh/459025965,ok,2026-07-05T12:40:18+00:00
 apache/opendal-reqsign,apache/opendal-reqsign,gh/469069490,ok,2026-07-05T12:40:18+00:00
 apache/sedona,apache/sedona,gh/34533675,ok,2026-07-05T12:40:18+00:00
+apache/serf,apache/serf,gh/70882928,ok,2026-07-13T16:57:25+00:00
 apache/spark,apache/spark,gh/17165658,ok,2026-07-05T12:40:18+00:00
 apache/thrift,apache/thrift,gh/310611,ok,2026-07-05T12:40:18+00:00
 apache/tvm-ffi,apache/tvm-ffi,gh/1056345548,ok,2026-07-05T12:40:20+00:00
@@ -460,6 +473,10 @@ apeworx/hexbytes,apeworx/hexbytes,gh/118841911,ok,2026-07-05T12:40:20+00:00
 apeworx/pyrlp,apeworx/pyrlp,gh/32090358,ok,2026-07-05T12:40:20+00:00
 apeworx/web3.py,apeworx/web3.py,gh/56251096,ok,2026-07-05T12:40:20+00:00
 apgoetz/pl011_qemu,apgoetz/pl011_qemu,gh/323774226,ok,2026-07-05T12:40:20+00:00
+apich-organization/bincode,apich-organization/bincode,gh/1119520157,ok,2026-07-13T16:57:25+00:00
+apich-organization/dtact,apich-organization/dtact,gh/1225482468,ok,2026-07-13T16:57:25+00:00
+apich-organization/unty,apich-organization/unty,gh/1120466781,ok,2026-07-13T16:57:25+00:00
+apich-organization/virtue,apich-organization/virtue,gh/1120466609,ok,2026-07-13T16:57:25+00:00
 apideck-libraries/better-ajv-errors,apideck-libraries/better-ajv-errors,gh/367330191,ok,2026-07-05T12:40:20+00:00
 apidevtools/json-schema-ref-parser,apidevtools/json-schema-ref-parser,gh/39041446,ok,2026-07-05T12:40:20+00:00
 apidevtools/openapi-schemas,apidevtools/openapi-schemas,gh/193236806,ok,2026-07-05T12:40:20+00:00
@@ -517,6 +534,7 @@ ariaminaei/renderkid,ariaminaei/renderkid,gh/14141301,ok,2026-07-05T12:40:21+00:
 ariaminaei/utila,ariaminaei/utila,gh/13833448,ok,2026-07-05T12:40:21+00:00
 ariebovenberg/whenever,ariebovenberg/whenever,gh/717223794,ok,2026-07-05T12:40:21+00:00
 ariperkkio/ast-v8-to-istanbul,ariperkkio/ast-v8-to-istanbul,gh/926170481,ok,2026-07-05T12:40:21+00:00
+aristocratos/btop,aristocratos/btop,gh/365005377,ok,2026-07-13T16:57:25+00:00
 arkworks-rs/algebra,arkworks-rs/algebra,gh/293619764,ok,2026-07-05T12:40:21+00:00
 arkworks-rs/crypto-primitives,arkworks-rs/crypto-primitives,gh/304701408,ok,2026-07-05T12:40:21+00:00
 arkworks-rs/groth16,arkworks-rs/groth16,gh/293620469,ok,2026-07-05T12:40:21+00:00
@@ -550,6 +568,7 @@ asana/python-asana,asana/python-asana,gh/28160576,ok,2026-07-05T12:40:21+00:00
 ash-rs/ash,ash-rs/ash,gh/65640886,ok,2026-07-05T12:40:21+00:00
 ashaffer/cached-path-relative,ashaffer/cached-path-relative,gh/56181805,ok,2026-07-05T12:40:21+00:00
 ashleygwilliams/assert_approx_eq,ashleygwilliams/assert_approx_eq,gh/61317959,ok,2026-07-05T12:39:46+00:00
+ashvardanian/numkong,ashvardanian/numkong,gh/613772664,ok,2026-07-13T16:57:25+00:00
 ashvardanian/stringzilla,ashvardanian/stringzilla,gh/287616631,ok,2026-07-05T12:39:46+00:00
 askama-rs/askama,askama-rs/askama,gh/816314127,ok,2026-07-05T12:39:46+00:00
 askama-rs/askama-old,askama-rs/askama-old,gh/77144276,ok,2026-07-05T12:39:46+00:00
@@ -576,9 +595,10 @@ astonbitecode/java-locator,astonbitecode/java-locator,gh/171263997,ok,2026-07-05
 astral-sh/ruff,astral-sh/ruff,gh/523043277,ok,2026-07-05T12:39:46+00:00
 astral-sh/tokio-tar,astral-sh/tokio-tar,gh/900536420,ok,2026-07-05T12:39:46+00:00
 astral-sh/uv,astral-sh/uv,gh/699532645,ok,2026-07-05T12:39:46+00:00
-astromulti/keep-alive,astromulti/keep-alive,,not_found,2026-07-05T12:39:46+00:00
+astro-xao/sofars,astro-xao/sofars,gh/951217969,ok,2026-07-13T16:57:25+00:00
+astromulti/keep-alive,astromulti/keep-alive,,not_found,2026-07-13T17:01:47+00:00
 astronomer/astronomer-cosmos,astronomer/astronomer-cosmos,gh/577757880,ok,2026-07-05T12:39:46+00:00
-astronomerio/boa,astronomerio/boa,,not_found,2026-07-05T12:39:46+00:00
+astronomerio/boa,astronomerio/boa,,not_found,2026-07-13T17:01:47+00:00
 astropy/astropy,astropy/astropy,gh/2081289,ok,2026-07-05T12:39:46+00:00
 astropy/astropy-iers-data,astropy/astropy-iers-data,gh/644894042,ok,2026-07-05T12:39:46+00:00
 asweigart/pyautogui,asweigart/pyautogui,gh/21961171,ok,2026-07-05T12:39:46+00:00
@@ -601,6 +621,7 @@ atlassian/asap-authentication-python,atlassian/asap-authentication-python,gh/410
 atlassian/react-beautiful-dnd,atlassian/react-beautiful-dnd,gh/99761907,ok,2026-07-05T12:39:46+00:00
 atolab/uhlc-rs,atolab/uhlc-rs,gh/281922299,ok,2026-07-05T12:39:46+00:00
 atomiks/tippyjs,atomiks/tippyjs,gh/86891282,ok,2026-07-05T12:39:46+00:00
+atranitell/tensorkit,atranitell/tensorkit,,not_found,2026-07-13T17:01:47+00:00
 aumetra/asynk-strim,aumetra/asynk-strim,gh/868933192,ok,2026-07-05T12:39:46+00:00
 aurelio-labs/semantic-router,aurelio-labs/semantic-router,gh/711904962,ok,2026-07-05T12:39:46+00:00
 aurora-is-near/aurora-engine,aurora-is-near/aurora-engine,gh/344778618,ok,2026-07-05T12:39:46+00:00
@@ -656,6 +677,7 @@ aws/aws-sdk-js,aws/aws-sdk-js,gh/5694513,ok,2026-07-05T12:39:47+00:00
 aws/aws-sdk-js-crypto-helpers,aws/aws-sdk-js-crypto-helpers,gh/149673986,ok,2026-07-05T12:39:47+00:00
 aws/aws-sdk-js-v3,aws/aws-sdk-js-v3,gh/87228090,ok,2026-07-05T12:39:47+00:00
 aws/aws-sdk-pandas,aws/aws-sdk-pandas,gh/172615836,ok,2026-07-05T12:39:47+00:00
+aws/aws-sdk-python,aws/aws-sdk-python,gh/954213877,ok,2026-07-13T16:57:25+00:00
 aws/aws-xray-sdk-python,aws/aws-xray-sdk-python,gh/103969019,ok,2026-07-05T12:39:47+00:00
 aws/bedrock-agentcore-sdk-python,aws/bedrock-agentcore-sdk-python,gh/1015684263,ok,2026-07-05T12:39:47+00:00
 aws/constructs,aws/constructs,gh/231674050,ok,2026-07-05T12:39:47+00:00
@@ -664,7 +686,7 @@ aws/s2n-tls,aws/s2n-tls,gh/21287076,ok,2026-07-05T12:39:47+00:00
 aws/sagemaker-core,aws/sagemaker-core,gh/808270103,ok,2026-07-05T12:39:47+00:00
 aws/sagemaker-mlflow,aws/sagemaker-mlflow,gh/816873802,ok,2026-07-05T12:39:47+00:00
 aws/sagemaker-python-sdk,aws/sagemaker-python-sdk,gh/110621895,ok,2026-07-05T12:39:47+00:00
-aws/sagemaker-schema-inference-artifacts,aws/sagemaker-schema-inference-artifacts,,not_found,2026-07-05T12:39:47+00:00
+aws/sagemaker-schema-inference-artifacts,aws/sagemaker-schema-inference-artifacts,,not_found,2026-07-13T17:01:47+00:00
 aws/serverless-application-model,aws/serverless-application-model,gh/70530854,ok,2026-07-05T12:39:47+00:00
 awslabs/aws-c-auth,awslabs/aws-c-auth,gh/176365316,ok,2026-07-05T12:39:47+00:00
 awslabs/aws-c-cal,awslabs/aws-c-cal,gh/169459589,ok,2026-07-05T12:39:47+00:00
@@ -684,11 +706,16 @@ awslabs/aws-embedded-metrics-python,awslabs/aws-embedded-metrics-python,gh/21738
 awslabs/aws-lambda-invoke-store,awslabs/aws-lambda-invoke-store,gh/1045169168,ok,2026-07-05T12:39:47+00:00
 awslabs/aws-sdk-python,aws/aws-sdk-python,gh/954213877,ok,2026-07-05T12:39:47+00:00
 awslabs/aws-sdk-rust,awslabs/aws-sdk-rust,gh/357284448,ok,2026-07-05T12:39:47+00:00
+awslabs/metrique,awslabs/metrique,gh/1013726409,ok,2026-07-13T16:57:25+00:00
 awslabs/python-deequ,awslabs/python-deequ,gh/311469500,ok,2026-07-05T12:39:47+00:00
 awslabs/sagemaker-debugger-rulesconfig,awslabs/sagemaker-debugger-rulesconfig,gh/221298639,ok,2026-07-05T12:39:47+00:00
 awslabs/shuttle,awslabs/shuttle,gh/343548793,ok,2026-07-05T12:39:47+00:00
+awxkee/colorutils-rs,awxkee/colorutils-rs,gh/802850216,ok,2026-07-13T16:57:25+00:00
+awxkee/erydanos,awxkee/erydanos,gh/826451505,ok,2026-07-13T16:57:25+00:00
 awxkee/fast_transpose,awxkee/fast_transpose,gh/889656126,ok,2026-07-05T12:39:47+00:00
 awxkee/moxcms,awxkee/moxcms,gh/939675178,ok,2026-07-05T12:39:47+00:00
+awxkee/novtb,awxkee/novtb,gh/997079369,ok,2026-07-13T16:57:25+00:00
+awxkee/pic-scale,awxkee/pic-scale,gh/809434357,ok,2026-07-13T16:57:25+00:00
 awxkee/pxfm,awxkee/pxfm,gh/1006574727,ok,2026-07-05T12:39:47+00:00
 awxkee/yuvutils-rs,awxkee/yuvutils-rs,gh/800998684,ok,2026-07-05T12:39:47+00:00
 axboe/liburing,axboe/liburing,gh/200663555,ok,2026-07-05T12:39:47+00:00
@@ -703,6 +730,7 @@ axodotdev/axoprocess,axodotdev/axoprocess,gh/733681782,ok,2026-07-05T12:39:48+00
 axodotdev/axotag,axodotdev/axotag,gh/719261703,ok,2026-07-05T12:39:48+00:00
 axodotdev/axoupdater,axodotdev/axoupdater,gh/745160054,ok,2026-07-05T12:39:48+00:00
 axodotdev/cargo-dist,axodotdev/cargo-dist,gh/551088529,ok,2026-07-05T12:39:48+00:00
+aya-rs/aya,aya-rs/aya,gh/331227477,ok,2026-07-13T16:57:25+00:00
 ayatanaindicators/ayatana-ido,ayatanaindicators/ayatana-ido,gh/103537296,ok,2026-07-05T12:39:48+00:00
 ayatanaindicators/libayatana-appindicator,ayatanaindicators/libayatana-appindicator,gh/874868051,ok,2026-07-05T12:39:48+00:00
 ayatanaindicators/libayatana-indicator,ayatanaindicators/libayatana-indicator,gh/103536651,ok,2026-07-05T12:39:48+00:00
@@ -840,11 +868,13 @@ bevry/textextensions,bevry/textextensions,gh/15069193,ok,2026-07-05T12:39:51+00:
 bevry/version-range,bevry/version-range,gh/307547809,ok,2026-07-05T12:39:51+00:00
 bevyengine/atomicow,bevyengine/atomicow,gh/847928647,ok,2026-07-05T12:39:51+00:00
 bevyengine/bevy,bevyengine/bevy,gh/234798675,ok,2026-07-05T12:39:51+00:00
+bevyengine/bevy-crate-reservations,bevyengine/bevy-crate-reservations,gh/287400131,ok,2026-07-13T16:57:25+00:00
 bevyengine/bevy_mikktspace,bevyengine/bevy_mikktspace,gh/1007492045,ok,2026-07-05T12:39:51+00:00
 bevyengine/disqualified,bevyengine/disqualified,gh/861806472,ok,2026-07-05T12:39:51+00:00
 bevyengine/dlss_wgpu,bevyengine/dlss_wgpu,gh/1016183643,ok,2026-07-05T12:39:51+00:00
 bevyengine/naga_oil,bevyengine/naga_oil,gh/521886609,ok,2026-07-05T12:39:51+00:00
 bevyengine/variadics_please,bevyengine/variadics_please,gh/880509990,ok,2026-07-05T12:39:51+00:00
+bevyengine/web-task,bevyengine/web-task,gh/1062266949,ok,2026-07-13T16:57:25+00:00
 bgrins/tinycolor,bgrins/tinycolor,gh/1973790,ok,2026-07-05T12:39:51+00:00
 bheisler/criterion.rs,bheisler/criterion.rs,gh/20188259,ok,2026-07-05T12:39:51+00:00
 bheisler/iai,bheisler/iai,gh/326269244,ok,2026-07-05T12:39:51+00:00
@@ -902,7 +932,7 @@ bloomberg/memray,bloomberg/memray,gh/479491550,ok,2026-07-05T12:39:52+00:00
 blosc/c-blosc,blosc/c-blosc,gh/1990838,ok,2026-07-05T12:39:54+00:00
 blosc/python-blosc2,blosc/python-blosc2,gh/352578424,ok,2026-07-05T12:39:54+00:00
 bluealloy/revm,bluealloy/revm,gh/411607920,ok,2026-07-05T12:39:54+00:00
-bluefish43/libunwind-sys,bluefish43/libunwind-sys,,not_found,2026-07-05T12:39:54+00:00
+bluefish43/libunwind-sys,bluefish43/libunwind-sys,,not_found,2026-07-13T17:01:47+00:00
 blueimp/javascript-md5,blueimp/javascript-md5,gh/2955178,ok,2026-07-05T12:39:54+00:00
 bluejekyll/enum-as-inner,bluejekyll/enum-as-inner,gh/160735013,ok,2026-07-05T12:39:54+00:00
 bluelovers/ws-iconv,bluelovers/ws-iconv,gh/260404036,ok,2026-07-05T12:39:54+00:00
@@ -976,7 +1006,9 @@ boto/botocore,boto/botocore,gh/6670942,ok,2026-07-05T12:39:55+00:00
 boto/s3transfer,boto/s3transfer,gh/49535299,ok,2026-07-05T12:39:55+00:00
 bottlepy/bottle,bottlepy/bottle,gh/239940,ok,2026-07-05T12:39:55+00:00
 boujeepossum/k9,boujeepossum/k9,gh/256895746,ok,2026-07-05T12:39:55+00:00
+bourumir-wyngs/granit-parser,bourumir-wyngs/granit-parser,gh/1225636341,ok,2026-07-13T16:57:25+00:00
 bourumir-wyngs/saphyr,bourumir-wyngs/saphyr,gh/1106514693,ok,2026-07-05T12:39:55+00:00
+bourumir-wyngs/serde-saphyr,bourumir-wyngs/serde-saphyr,gh/1065479482,ok,2026-07-13T16:57:25+00:00
 bourumir-wyngs/serde-yaml-bw,bourumir-wyngs/serde-yaml-bw,gh/795883810,ok,2026-07-05T12:39:55+00:00
 bowser-js/bowser,bowser-js/bowser,gh/1673025,ok,2026-07-05T12:39:55+00:00
 box/box-python-sdk,box/box-python-sdk,gh/30386388,ok,2026-07-05T12:39:55+00:00
@@ -1154,6 +1186,7 @@ bytecodealliance/wasmtime,bytecodealliance/wasmtime,gh/101767772,ok,2026-07-05T1
 bytecodealliance/wit-bindgen,bytecodealliance/wit-bindgen,gh/341707514,ok,2026-07-05T12:40:00+00:00
 bytecodealliance/wstd,bytecodealliance/wstd,gh/834154601,ok,2026-07-05T12:40:00+00:00
 bytedance/monoio,monoio-rs/monoio,gh/433350425,ok,2026-07-05T12:40:00+00:00
+bytedream/serde-inline-default,bytedream/serde-inline-default,gh/600448294,ok,2026-07-13T16:57:25+00:00
 bytesize-rs/bytesize,bytesize-rs/bytesize,gh/39176169,ok,2026-07-05T12:40:00+00:00
 c-ares/c-ares,c-ares/c-ares,gh/571708,ok,2026-07-05T12:40:00+00:00
 c-w/ghp-import,c-w/ghp-import,gh/526434,ok,2026-07-05T12:40:00+00:00
@@ -1228,8 +1261,15 @@ cask/cask,cask/cask,gh/6111046,ok,2026-07-05T12:40:01+00:00
 caspervonb/serde_nanos,caspervonb/serde_nanos,gh/433816424,ok,2026-07-05T12:40:01+00:00
 casualjim/rs-nuid,casualjim/rs-nuid,gh/128547268,ok,2026-07-05T12:40:01+00:00
 casualx/align_data,casualx/align_data,gh/290610661,ok,2026-07-05T12:40:01+00:00
+casualx/dataview,casualx/dataview,gh/232897363,ok,2026-07-13T16:57:25+00:00
+casualx/fmtools,casualx/fmtools,gh/504877513,ok,2026-07-13T16:57:25+00:00
+casualx/format_xml,casualx/format_xml,gh/202095590,ok,2026-07-13T16:57:25+00:00
+casualx/lde,casualx/lde,gh/58834424,ok,2026-07-13T16:57:25+00:00
+casualx/obfstr,casualx/obfstr,gh/169165852,ok,2026-07-13T16:57:25+00:00
+casualx/pelite,casualx/pelite,gh/91598302,ok,2026-07-13T16:57:25+00:00
 catboost/catboost,catboost/catboost,gh/97556265,ok,2026-07-05T12:40:01+00:00
 causaly/zod-validation-error,causaly/zod-validation-error,gh/530578345,ok,2026-07-05T12:40:01+00:00
+cavemanloverboy/const-crypto,cavemanloverboy/const-crypto,gh/792906269,ok,2026-07-13T16:57:25+00:00
 cberner/redb,cberner/redb,gh/150013328,ok,2026-07-05T12:40:01+00:00
 cbreeden/fxhash,cbreeden/fxhash,gh/91828880,ok,2026-07-05T12:40:01+00:00
 ccache/ccache,ccache/ccache,gh/461102,ok,2026-07-05T12:40:01+00:00
@@ -1243,6 +1283,7 @@ cdklabs/awscdk-asset-node-proxy-agent,cdklabs/awscdk-asset-node-proxy-agent,gh/5
 cdklabs/cdk-nag,cdklabs/cdk-nag,gh/387903003,ok,2026-07-05T12:40:01+00:00
 cdklabs/cloud-assembly-schema,cdklabs/cloud-assembly-schema,gh/821051730,ok,2026-07-05T12:40:01+00:00
 cedadev/ndg_httpsclient,cedadev/ndg_httpsclient,gh/12539989,ok,2026-07-05T12:40:01+00:00
+cel-rust/cel-rust,cel-rust/cel-rust,gh/633218804,ok,2026-07-13T16:57:25+00:00
 celery/billiard,celery/billiard,gh/374820,ok,2026-07-05T12:40:01+00:00
 celery/celery,celery/celery,gh/184460,ok,2026-07-05T12:40:01+00:00
 celery/django-celery-beat,celery/django-celery-beat,gh/64884021,ok,2026-07-05T12:40:01+00:00
@@ -1296,6 +1337,7 @@ chanced/jsonptr,chanced/jsonptr,gh/495903467,ok,2026-07-05T12:40:02+00:00
 chancejs/chancejs,chancejs/chancejs,gh/10828733,ok,2026-07-05T12:40:02+00:00
 changchang/seq-queue,changchang/seq-queue,gh/3492165,ok,2026-07-05T12:40:02+00:00
 changesets/changesets,changesets/changesets,gh/177033748,ok,2026-07-05T12:40:02+00:00
+chansen/p5-unicode-utf8,chansen/p5-unicode-utf8,gh/2357406,ok,2026-07-13T16:57:25+00:00
 chanzuckerberg/cellxgene-census,chanzuckerberg/cellxgene-census,gh/549834349,ok,2026-07-05T12:40:02+00:00
 chardet/chardet,chardet/chardet,gh/5196969,ok,2026-07-05T12:40:02+00:00
 charlierudolph/node-assertion-error-formatter,charlierudolph/node-assertion-error-formatter,gh/69424392,ok,2026-07-05T12:40:02+00:00
@@ -1309,6 +1351,7 @@ checkpoint-restore/rust-criu,checkpoint-restore/rust-criu,gh/458266127,ok,2026-0
 cheeriojs/cheerio,cheeriojs/cheerio,gh/2541284,ok,2026-07-05T12:40:04+00:00
 cheeriojs/cheerio-select,cheeriojs/cheerio-select,gh/31766729,ok,2026-07-05T12:40:04+00:00
 cheeriojs/dom-serializer,cheeriojs/dom-serializer,gh/18991884,ok,2026-07-05T12:40:04+00:00
+chemicstry/wasm_thread,chemicstry/wasm_thread,gh/301156692,ok,2026-07-13T16:57:25+00:00
 chenglou/tween-functions,chenglou/tween-functions,gh/32362757,ok,2026-07-05T12:40:04+00:00
 cherrypy/cheroot,cherrypy/cheroot,gh/16620627,ok,2026-07-05T12:40:04+00:00
 cherrypy/cherrypy,cherrypy/cherrypy,gh/57436777,ok,2026-07-05T12:40:04+00:00
@@ -1362,7 +1405,7 @@ clarketm/mergedeep,clarketm/mergedeep,gh/169014362,ok,2026-07-05T12:40:05+00:00
 clauderic/dnd-kit,clauderic/dnd-kit,gh/316086701,ok,2026-07-05T12:40:05+00:00
 clbarnes/backports.strenum,clbarnes/backports.strenum,gh/313447799,ok,2026-07-05T12:40:05+00:00
 clean-css/clean-css,clean-css/clean-css,gh/1419138,ok,2026-07-05T12:40:05+00:00
-cleardataeng/requests-sigv4,cleardataeng/requests-sigv4,,not_found,2026-07-05T12:40:05+00:00
+cleardataeng/requests-sigv4,cleardataeng/requests-sigv4,,not_found,2026-07-13T17:01:47+00:00
 cli-table/cli-table3,cli-table/cli-table3,gh/136803521,ok,2026-07-05T12:40:05+00:00
 click-contrib/click-default-group,click-contrib/click-default-group,gh/47115518,ok,2026-07-05T12:40:05+00:00
 click-contrib/click-didyoumean,click-contrib/click-didyoumean,gh/53760811,ok,2026-07-05T12:40:05+00:00
@@ -1384,7 +1427,10 @@ cloudevents/sdk-javascript,cloudevents/sdk-javascript,gh/149662999,ok,2026-07-05
 cloudevents/sdk-python,cloudevents/sdk-python,gh/149825820,ok,2026-07-05T12:40:05+00:00
 cloudflare/boring,cloudflare/boring,gh/311186596,ok,2026-07-05T12:40:05+00:00
 cloudflare/cloudflare-python,cloudflare/cloudflare-python,gh/753271547,ok,2026-07-05T12:40:05+00:00
+cloudflare/foundations,cloudflare/foundations,gh/745004883,ok,2026-07-13T16:57:25+00:00
 cloudflare/quiche,cloudflare/quiche,gh/150891532,ok,2026-07-05T12:40:05+00:00
+cloudflare/rustracing,cloudflare/rustracing,gh/793565269,ok,2026-07-13T16:57:24+00:00
+cloudflare/rustracing_jaeger,cloudflare/rustracing_jaeger,gh/793565978,ok,2026-07-13T16:57:24+00:00
 cloudflare/saffron,cloudflare/saffron,gh/299993700,ok,2026-07-05T12:40:05+00:00
 cloudflare/sliceslice-rs,cloudflare/sliceslice-rs,gh/277662142,ok,2026-07-05T12:40:05+00:00
 cloudflare/wildcard,cloudflare/wildcard,gh/822643176,ok,2026-07-05T12:40:05+00:00
@@ -1439,6 +1485,7 @@ coleifer/peewee,coleifer/peewee,gh/979480,ok,2026-07-05T12:40:06+00:00
 colin-b/pytest_httpx,colin-b/pytest_httpx,gh/238477299,ok,2026-07-05T12:40:06+00:00
 colin-kiegel/rust-derive-builder,colin-kiegel/rust-derive-builder,gh/65087808,ok,2026-07-05T12:40:06+00:00
 colinhacks/zod,colinhacks/zod,gh/245704608,ok,2026-07-05T12:40:06+00:00
+colinmarc/pulseaudio-rs,colinmarc/pulseaudio-rs,gh/735157959,ok,2026-07-13T16:57:24+00:00
 colinmeinke/svg-arc-to-cubic-bezier,colinmeinke/svg-arc-to-cubic-bezier,gh/53702713,ok,2026-07-05T12:40:06+00:00
 collective/icalendar,collective/icalendar,gh/2222138,ok,2026-07-05T12:40:06+00:00
 colored-rs/colored,colored-rs/colored,gh/53757700,ok,2026-07-05T12:40:06+00:00
@@ -1456,7 +1503,9 @@ common-workflow-language/cwltool,common-workflow-language/cwltool,gh/43816051,ok
 common-workflow-language/schema_salad,common-workflow-language/schema_salad,gh/40975824,ok,2026-07-05T12:40:07+00:00
 commonmark/cmark,commonmark/cmark,gh/29804085,ok,2026-07-05T12:40:07+00:00
 compio-rs/compio,compio-rs/compio,gh/684184786,ok,2026-07-05T12:40:07+00:00
+compio-rs/compio-py,compio-rs/compio-py,gh/471718092,ok,2026-07-13T16:57:24+00:00
 compio-rs/see,compio-rs/see,gh/1078381923,ok,2026-07-05T12:40:07+00:00
+compio-rs/send_wrapper,compio-rs/send_wrapper,gh/1185011348,ok,2026-07-13T16:57:24+00:00
 compio-rs/synchrony,compio-rs/synchrony,gh/1128035242,ok,2026-07-05T12:40:07+00:00
 compio-rs/thin-cell,compio-rs/thin-cell,gh/1131107591,ok,2026-07-05T12:40:07+00:00
 component/bind,component/bind,gh/5401362,ok,2026-07-05T12:40:07+00:00
@@ -1465,6 +1514,8 @@ component/has-cors,component/has-cors,gh/12308106,ok,2026-07-05T12:40:07+00:00
 component/inherit,component/inherit,gh/5344893,ok,2026-07-05T12:40:07+00:00
 component/is-module,component/is-module,gh/25913847,ok,2026-07-05T12:40:07+00:00
 component/toidentifier,component/toidentifier,gh/114743189,ok,2026-07-05T12:40:07+00:00
+composefs/tar-rs,composefs/tar-rs,gh/21946092,ok,2026-07-13T16:57:24+00:00
+composer/composer,composer/composer,gh/1864363,ok,2026-07-13T16:57:24+00:00
 conan-io/conan,conan-io/conan,gh/47190624,ok,2026-07-05T12:40:07+00:00
 conan-io/conan-center-index,conan-io/conan-center-index,gh/204671232,ok,2026-07-05T12:40:07+00:00
 conan-io/python-patch-ng,conan-io/python-patch-ng,gh/211330711,ok,2026-07-05T12:40:07+00:00
@@ -1527,6 +1578,7 @@ cpburnz/python-pathspec,cpburnz/python-pathspec,gh/14648551,ok,2026-07-05T12:40:
 cpburnz/python-sqlparams,cpburnz/python-sqlparams,gh/6961092,ok,2026-07-05T12:40:08+00:00
 cpisciotta/xcbeautify,cpisciotta/xcbeautify,gh/148183411,ok,2026-07-05T12:40:08+00:00
 cpjreynolds/sema,cpjreynolds/sema,gh/40264412,ok,2026-07-05T12:40:08+00:00
+cptpiepmatz/kitest,cptpiepmatz/kitest,gh/1076022958,ok,2026-07-13T16:57:24+00:00
 cracklib/cracklib,cracklib/cracklib,gh/40944821,ok,2026-07-05T12:40:08+00:00
 craftspider/gat-std,craftspider/gat-std,gh/584037210,ok,2026-07-05T12:40:08+00:00
 crate-ci/cargo-release,crate-ci/cargo-release,gh/53496711,ok,2026-07-05T12:40:08+00:00
@@ -1569,6 +1621,7 @@ cryptocorrosion/cryptocorrosion,cryptocorrosion/cryptocorrosion,gh/168762932,ok,
 cschwarz/wkx,cschwarz/wkx,gh/14693734,ok,2026-07-05T12:40:10+00:00
 cscott/node-pn,cscott/node-pn,gh/27735650,ok,2026-07-05T12:40:10+00:00
 cscott/seek-bzip,cscott/seek-bzip,gh/7973161,ok,2026-07-05T12:40:10+00:00
+csmoe/tracing-perfetto,csmoe/tracing-perfetto,gh/818567687,ok,2026-07-13T16:57:24+00:00
 cspotcode/node-source-map-support,cspotcode/node-source-map-support,gh/310942201,ok,2026-07-05T12:40:10+00:00
 cspotcode/outdent,cspotcode/outdent,gh/48501019,ok,2026-07-05T12:40:10+00:00
 cspotcode/v8-compile-cache-lib,cspotcode/v8-compile-cache-lib,gh/349568379,ok,2026-07-05T12:40:10+00:00
@@ -1599,7 +1652,7 @@ cucumber-rs/cucumber,cucumber-rs/cucumber,gh/137642202,ok,2026-07-05T12:40:10+00
 cucumber-rs/cucumber-expressions,cucumber-rs/cucumber-expressions,gh/425036332,ok,2026-07-05T12:40:10+00:00
 cucumber-rs/gherkin,cucumber-rs/gherkin,gh/137576362,ok,2026-07-05T12:40:10+00:00
 cucumber/cucumber-expressions,cucumber/cucumber-expressions,gh/408372154,ok,2026-07-05T12:40:10+00:00
-cucumber/cucumber-expressions-javascript,cucumber/cucumber-expressions-javascript,,not_found,2026-07-05T12:40:11+00:00
+cucumber/cucumber-expressions-javascript,cucumber/cucumber-expressions-javascript,,not_found,2026-07-13T17:01:47+00:00
 cucumber/gherkin,cucumber/gherkin,gh/550879823,ok,2026-07-05T12:40:11+00:00
 cucumber/gherkin-javascript,cucumber/gherkin-javascript,gh/33483821,ok,2026-07-05T12:40:11+00:00
 cucumber/html-formatter,cucumber/html-formatter,gh/216580140,ok,2026-07-05T12:40:11+00:00
@@ -1611,12 +1664,15 @@ cunla/fakeredis-py,cunla/fakeredis-py,gh/482005314,ok,2026-07-05T12:40:11+00:00
 cupy/cupy,cupy/cupy,gh/72523920,ok,2026-07-05T12:40:11+00:00
 cure53/dompurify,cure53/dompurify,gh/16927692,ok,2026-07-05T12:40:11+00:00
 curl/curl,curl/curl,gh/569041,ok,2026-07-05T12:40:11+00:00
+curlpipe/lliw,curlpipe/lliw,gh/342335785,ok,2026-07-13T16:57:24+00:00
+curlpipe/synoptic,curlpipe/synoptic,gh/326531209,ok,2026-07-13T16:57:24+00:00
 currysoftware/rust-stemmers,currysoftware/rust-stemmers,gh/81208579,ok,2026-07-05T12:40:11+00:00
 cuu508/cronsim,cuu508/cronsim,gh/362580076,ok,2026-07-05T12:40:11+00:00
 cuviper/autocfg,cuviper/autocfg,gh/135481335,ok,2026-07-05T12:40:11+00:00
 cuviper/probe-rs,cuviper/probe-rs,gh/21631289,ok,2026-07-05T12:40:11+00:00
 cuviper/rayon-cond,cuviper/rayon-cond,gh/138814689,ok,2026-07-05T12:40:11+00:00
 cvxpy/cvxpy,cvxpy/cvxpy,gh/11110385,ok,2026-07-05T12:40:11+00:00
+cwfitzgerald/ddsfile,cwfitzgerald/ddsfile,gh/1200842653,ok,2026-07-13T16:57:24+00:00
 cyan4973/xxhash,cyan4973/xxhash,gh/19330466,ok,2026-07-05T12:40:11+00:00
 cyberagentailab/cmaes,cyberagentailab/cmaes,gh/237296717,ok,2026-07-05T12:40:11+00:00
 cyclonedx/cyclonedx-python-lib,cyclonedx/cyclonedx-python-lib,gh/400417796,ok,2026-07-05T12:40:11+00:00
@@ -1681,6 +1737,7 @@ dagrejs/graphlib,dagrejs/graphlib,gh/12338026,ok,2026-07-05T12:40:12+00:00
 dagster-io/dagster,dagster-io/dagster,gh/131619646,ok,2026-07-05T12:40:12+00:00
 dahosek/finl_unicode,dahosek/finl_unicode,gh/516582776,ok,2026-07-05T12:40:12+00:00
 dajiaji/pyseto,dajiaji/pyseto,gh/403210638,ok,2026-07-05T12:40:12+00:00
+dajobe/raptor,dajobe/raptor,gh/838288,ok,2026-07-13T16:57:24+00:00
 dalek-cryptography/curve25519-dalek,dalek-cryptography/curve25519-dalek,gh/75924987,ok,2026-07-05T12:40:12+00:00
 dalek-cryptography/subtle,dalek-cryptography/subtle,gh/92902083,ok,2026-07-05T12:40:12+00:00
 damonoehlman/detect-browser,damonoehlman/detect-browser,gh/21321647,ok,2026-07-05T12:40:12+00:00
@@ -1692,6 +1749,7 @@ danburkert/memmap-rs,danburkert/memmap-rs,gh/33422338,ok,2026-07-05T12:40:12+00:
 danburkert/procinfo-rs,danburkert/procinfo-rs,gh/41143291,ok,2026-07-05T12:40:12+00:00
 danez/pirates,danez/pirates,gh/47372003,ok,2026-07-05T12:40:12+00:00
 dangmai/escape-latex,dangmai/escape-latex,gh/6418871,ok,2026-07-05T12:40:12+00:00
+daniel-aaron-bloom/const-siphash-rs,daniel-aaron-bloom/const-siphash-rs,gh/936387015,ok,2026-07-13T16:57:24+00:00
 daniel5151/armv4t_emu,daniel5151/armv4t_emu,gh/206834169,ok,2026-07-05T12:40:12+00:00
 daniel5151/gdbstub,daniel5151/gdbstub,gh/225993667,ok,2026-07-05T12:40:12+00:00
 danieldg/async-once-cell,danieldg/async-once-cell,gh/394475221,ok,2026-07-05T12:40:12+00:00
@@ -1703,6 +1761,7 @@ danielhenrymantilla/ext-trait.rs,danielhenrymantilla/ext-trait.rs,gh/420453346,o
 danielhenrymantilla/fix_hidden_lifetime_bug.rs,danielhenrymantilla/fix_hidden_lifetime_bug.rs,gh/368618363,ok,2026-07-05T12:40:13+00:00
 danielhenrymantilla/higher-kinded-types.rs,danielhenrymantilla/higher-kinded-types.rs,gh/638012963,ok,2026-07-05T12:40:13+00:00
 danielhenrymantilla/macro_rules_attribute-rs,danielhenrymantilla/macro_rules_attribute-rs,gh/206613551,ok,2026-07-05T12:40:13+00:00
+danielhenrymantilla/maybe-dangling.rs,danielhenrymantilla/maybe-dangling.rs,gh/668849534,ok,2026-07-13T16:57:24+00:00
 danielhenrymantilla/never-say-never.rs,danielhenrymantilla/never-say-never.rs,gh/449706915,ok,2026-07-05T12:40:13+00:00
 danielhenrymantilla/polonius-the-crab.rs,danielhenrymantilla/polonius-the-crab.rs,gh/486368256,ok,2026-07-05T12:40:13+00:00
 danielhenrymantilla/rust-function_name,danielhenrymantilla/rust-function_name,gh/192770361,ok,2026-07-05T12:40:13+00:00
@@ -1789,7 +1848,8 @@ date-fns/date-fns,date-fns/date-fns,gh/24841635,ok,2026-07-05T12:40:14+00:00
 date-fns/tz,date-fns/tz,gh/787738959,ok,2026-07-05T12:40:14+00:00
 dateutil/dateutil,dateutil/dateutil,gh/26876372,ok,2026-07-05T12:40:14+00:00
 davegamble/cjson,davegamble/cjson,gh/54280778,ok,2026-07-05T12:40:14+00:00
-daveroundy/auto-args,daveroundy/auto-args,,not_found,2026-07-05T12:40:14+00:00
+daveroundy/auto-args,daveroundy/auto-args,,not_found,2026-07-13T17:01:47+00:00
+david-tobi-peter/aegis,david-tobi-peter/aegis,gh/1104171402,ok,2026-07-13T16:57:24+00:00
 davidb/tracing-opentelemetry-instrumentation-sdk,davidb/tracing-opentelemetry-instrumentation-sdk,gh/502390746,ok,2026-07-05T12:40:14+00:00
 davidbarsky/tracing-tree,davidbarsky/tracing-tree,gh/232597281,ok,2026-07-05T12:40:14+00:00
 davidbau/seedrandom,davidbau/seedrandom,gh/9970667,ok,2026-07-05T12:40:14+00:00
@@ -1851,6 +1911,7 @@ deadpool-rs/deadpool,deadpool-rs/deadpool,gh/221692205,ok,2026-07-05T12:40:16+00
 deanm/css-color-parser-js,deanm/css-color-parser-js,gh/7053561,ok,2026-07-05T12:40:16+00:00
 deanm/omggif,deanm/omggif,gh/7722090,ok,2026-07-05T12:40:17+00:00
 debian-tex/texinfo,debian-tex/texinfo,gh/164589213,ok,2026-07-05T12:40:17+00:00
+debian/apt,debian/apt,gh/13793886,ok,2026-07-13T16:57:24+00:00
 debitoor/safe-json-stringify,debitoor/safe-json-stringify,gh/25592733,ok,2026-07-05T12:40:17+00:00
 debris/base58,debris/base58,gh/65903672,ok,2026-07-05T12:40:17+00:00
 debris/rustc-hex,debris/rustc-hex,gh/91805941,ok,2026-07-05T12:40:17+00:00
@@ -1954,11 +2015,13 @@ diggsey/mockalloc,diggsey/mockalloc,gh/312453583,ok,2026-07-05T12:40:19+00:00
 diggsey/rust-field-offset,diggsey/rust-field-offset,gh/57858000,ok,2026-07-05T12:40:19+00:00
 digitalbazaar/forge,digitalbazaar/forge,gh/779570,ok,2026-07-05T12:40:19+00:00
 dignifiedquire/buffer-redux,dignifiedquire/buffer-redux,gh/158537807,ok,2026-07-05T12:40:19+00:00
+dignifiedquire/cx448,dignifiedquire/cx448,gh/963870940,ok,2026-07-13T16:57:24+00:00
 dignifiedquire/num-bigint,dignifiedquire/num-bigint,gh/141343401,ok,2026-07-05T12:40:19+00:00
 dignifiedquire/rust-gperftools,dignifiedquire/rust-gperftools,gh/153264401,ok,2026-07-05T12:40:19+00:00
 dimakudosh/difflib,dimakudosh/difflib,gh/51599908,ok,2026-07-05T12:40:19+00:00
 dimbleby/mio-extras,dimbleby/mio-extras,gh/115018206,ok,2026-07-05T12:40:19+00:00
 dimforge/alga,dimforge/alga,gh/67921151,ok,2026-07-05T12:40:19+00:00
+dimforge/glamx,dimforge/glamx,gh/1127896157,ok,2026-07-13T16:57:24+00:00
 dimforge/nalgebra,dimforge/nalgebra,gh/10062775,ok,2026-07-05T12:40:19+00:00
 dimforge/parry,dimforge/parry,gh/322360701,ok,2026-07-05T12:40:19+00:00
 dimforge/simba,dimforge/simba,gh/249074065,ok,2026-07-05T12:40:19+00:00
@@ -1982,6 +2045,7 @@ discordjs/discord-api-types,discordjs/discord-api-types,gh/284494631,ok,2026-07-
 discordjs/discord.js,discordjs/discord.js,gh/40484398,ok,2026-07-05T12:40:19+00:00
 discoveryjs/json-ext,discoveryjs/json-ext,gh/287218834,ok,2026-07-05T12:40:19+00:00
 distil/diffus,distil/diffus,gh/206350339,ok,2026-07-05T12:40:19+00:00
+distrotech/libodfgen,distrotech/libodfgen,gh/24815111,ok,2026-07-13T16:57:24+00:00
 diwic/alsa-rs,diwic/alsa-rs,gh/37067520,ok,2026-07-05T12:40:19+00:00
 diwic/alsa-sys,diwic/alsa-sys,gh/131940465,ok,2026-07-05T12:40:19+00:00
 diwic/dbus-rs,diwic/dbus-rs,gh/27031345,ok,2026-07-05T12:40:19+00:00
@@ -2005,6 +2069,7 @@ djc/gcp_auth,djc/gcp_auth,gh/266089855,ok,2026-07-05T12:40:21+00:00
 djc/hashlink,djc/hashlink,gh/195436604,ok,2026-07-05T12:40:21+00:00
 djc/hostname,djc/hostname,gh/76356815,ok,2026-07-05T12:40:21+00:00
 djc/rustc-version-rs,djc/rustc-version-rs,gh/41272773,ok,2026-07-05T12:40:21+00:00
+djc/serde-regex,djc/serde-regex,gh/120919225,ok,2026-07-13T16:57:24+00:00
 djc/tokio-retry,djc/tokio-retry,gh/83969944,ok,2026-07-05T12:40:21+00:00
 djkoloski/munge,djkoloski/munge,gh/472547771,ok,2026-07-05T12:40:21+00:00
 djsweet/galois_2p8,djsweet/galois_2p8,gh/159431478,ok,2026-07-05T12:40:21+00:00
@@ -2020,6 +2085,8 @@ dmlls/python-casefy,dmlls/python-casefy,gh/458778813,ok,2026-07-05T12:40:21+00:0
 dmmulroy/better-result,dmmulroy/better-result,gh/1130779351,ok,2026-07-05T12:40:21+00:00
 dmnd/dedent,dmnd/dedent,gh/29183824,ok,2026-07-05T12:40:21+00:00
 dmtrkovalenko/date-io,dmtrkovalenko/date-io,gh/155358782,ok,2026-07-05T12:40:21+00:00
+dmtrkovalenko/zlob,dmtrkovalenko/zlob,gh/1121884020,ok,2026-07-13T16:57:24+00:00
+dmtx/libdmtx,dmtx/libdmtx,gh/6018440,ok,2026-07-13T16:57:24+00:00
 dnsl48/fraction,dnsl48/fraction,gh/50264375,ok,2026-07-05T12:40:21+00:00
 dnsquery/ip-codec,dnsquery/ip-codec,gh/381925422,ok,2026-07-05T12:40:21+00:00
 docbook/docbook,docbook/docbook,gh/1637769,ok,2026-07-05T12:40:21+00:00
@@ -2181,13 +2248,14 @@ dtolnay/unicode-ident,dtolnay/unicode-ident,gh/492639579,ok,2026-07-05T12:39:48+
 dtolnay/unsafe-libyaml,dtolnay/unsafe-libyaml,gh/510103717,ok,2026-07-05T12:39:48+00:00
 dtolnay/zmij,dtolnay/zmij,gh/1120197455,ok,2026-07-05T12:39:48+00:00
 dtudury/discontinuous-range,dtudury/discontinuous-range,gh/24083567,ok,2026-07-05T12:39:48+00:00
+dual-life/scalar-list-utils,dual-life/scalar-list-utils,gh/192099,ok,2026-07-13T16:57:24+00:00
 dubzzz/fast-check,dubzzz/fast-check,gh/108920680,ok,2026-07-05T12:39:48+00:00
 dubzzz/pure-rand,dubzzz/pure-rand,gh/123474692,ok,2026-07-05T12:39:48+00:00
 duckdb/duckdb,duckdb/duckdb,gh/138754790,ok,2026-07-05T12:39:48+00:00
 dudykr/ddbase,dudykr/ddbase,gh/705136539,ok,2026-07-05T12:39:48+00:00
 duesee/abnf,duesee/abnf,gh/150856845,ok,2026-07-05T12:39:48+00:00
 duesee/abnf-core,duesee/abnf-core,gh/248974401,ok,2026-07-05T12:39:48+00:00
-dujuku/polling,dujuku/polling,,not_found,2026-07-05T12:39:48+00:00
+dujuku/polling,dujuku/polling,,not_found,2026-07-13T17:01:47+00:00
 dun/munge,dun/munge,gh/35699486,ok,2026-07-05T12:39:48+00:00
 dunmatt/no-std-net,dunmatt/no-std-net,gh/126382631,ok,2026-07-05T12:39:48+00:00
 durch/block_on,durch/block_on,gh/313102475,ok,2026-07-05T12:39:48+00:00
@@ -2197,6 +2265,7 @@ durch/rust-s3,durch/rust-s3,gh/62385440,ok,2026-07-05T12:39:48+00:00
 durch/simplerr,durch/simplerr,gh/224168188,ok,2026-07-05T12:39:48+00:00
 dusksystems/wayfind,dusksystems/wayfind,gh/836255848,ok,2026-07-05T12:39:48+00:00
 dvarrazzo/py-setproctitle,dvarrazzo/py-setproctitle,gh/3366934,ok,2026-07-05T12:39:48+00:00
+dwango/fibers-rs,dwango/fibers-rs,gh/75369624,ok,2026-07-13T16:57:24+00:00
 dwmkerr/wait-port,dwmkerr/wait-port,gh/91091504,ok,2026-07-05T12:39:48+00:00
 dwyl/decache,dwyl/decache,gh/38996584,ok,2026-07-05T12:39:48+00:00
 dylan-profiler/tangled-up-in-unicode,dylan-profiler/tangled-up-in-unicode,gh/210143820,ok,2026-07-05T12:39:49+00:00
@@ -2224,6 +2293,7 @@ ecederstrand/exchangelib,ecederstrand/exchangelib,gh/53352663,ok,2026-07-05T12:3
 ecki/net-tools,ecki/net-tools,gh/9720310,ok,2026-07-05T12:39:49+00:00
 eclipse-biscuit/biscuit-rust,eclipse-biscuit/biscuit-rust,gh/178894114,ok,2026-07-05T12:39:49+00:00
 eclipse-paho/paho.mqtt.python,eclipse-paho/paho.mqtt.python,gh/48129918,ok,2026-07-05T12:39:49+00:00
+ecliptical/tracing-slog,ecliptical/tracing-slog,gh/428043719,ok,2026-07-13T16:57:24+00:00
 eddyerburgh/dom-event-types,eddyerburgh/dom-event-types,gh/149911336,ok,2026-07-05T12:39:49+00:00
 edelooff/sqlalchemy-json,edelooff/sqlalchemy-json,gh/18728752,ok,2026-07-05T12:39:49+00:00
 edinburgh-genome-foundry/proglog,edinburgh-genome-foundry/proglog,gh/100142030,ok,2026-07-05T12:39:49+00:00
@@ -2274,6 +2344,7 @@ eliben/pyelftools,eliben/pyelftools,gh/10575335,ok,2026-07-05T12:39:50+00:00
 elichai/random-rs,elichai/random-rs,gh/204371887,ok,2026-07-05T12:39:50+00:00
 elierotenberg/typed-assert,elierotenberg/typed-assert,gh/271211676,ok,2026-07-05T12:39:50+00:00
 eligrey/filesaver.js,eligrey/filesaver.js,gh/2051226,ok,2026-07-05T12:39:50+00:00
+elioetibr/rust-yaml,elioetibr/rust-yaml,gh/1040250271,ok,2026-07-13T16:57:24+00:00
 elmarx/nodejs-sys,elmarx/nodejs-sys,gh/185235326,ok,2026-07-05T12:39:50+00:00
 elzair/core_affinity_rs,elzair/core_affinity_rs,gh/103666716,ok,2026-07-05T12:39:50+00:00
 elzair/page_size_rs,elzair/page_size_rs,gh/104397078,ok,2026-07-05T12:39:50+00:00
@@ -2330,9 +2401,11 @@ encode/django-rest-framework,encode/django-rest-framework,gh/1431547,ok,2026-07-
 encode/httpcore,encode/httpcore,gh/237210639,ok,2026-07-05T12:39:52+00:00
 encode/httpx,encode/httpx,gh/179492861,ok,2026-07-05T12:39:52+00:00
 endemolshinegroup/cosmiconfig-typescript-loader,endemolshinegroup/cosmiconfig-typescript-loader,gh/152859669,ok,2026-07-05T12:39:52+00:00
+endlessm/xf86-video-intel,endlessm/xf86-video-intel,gh/32828431,ok,2026-07-13T16:57:24+00:00
 endoli/commands.rs,endoli/commands.rs,gh/58116949,ok,2026-07-05T12:39:52+00:00
 enet4/byteordered,enet4/byteordered,gh/141341960,ok,2026-07-05T12:39:52+00:00
 enisdenjo/graphql-ws,enisdenjo/graphql-ws,gh/283446239,ok,2026-07-05T12:39:52+00:00
+enki/libev,enki/libev,gh/2070263,ok,2026-07-13T16:57:24+00:00
 enquirer/enquirer,enquirer/enquirer,gh/66801791,ok,2026-07-05T12:39:52+00:00
 enricomarino/is,enricomarino/is,gh/2711453,ok,2026-07-05T12:39:52+00:00
 enselic/snapshot-testing,enselic/snapshot-testing,gh/1033386341,ok,2026-07-05T12:39:52+00:00
@@ -2357,6 +2430,7 @@ ericsmekens/jsep,ericsmekens/jsep,gh/4512746,ok,2026-07-05T12:39:53+00:00
 ericvsmith/dataclasses,ericvsmith/dataclasses,gh/91844116,ok,2026-07-05T12:39:53+00:00
 erikrose/blessings,erikrose/blessings,gh/2725322,ok,2026-07-05T12:39:53+00:00
 erikrose/parsimonious,erikrose/parsimonious,gh/3343080,ok,2026-07-05T12:39:53+00:00
+erkanisik1/pisilinux2.4-grub2-themes,erkanisik1/pisilinux2.4-grub2-themes,gh/790435986,ok,2026-07-13T16:57:24+00:00
 erlang/otp,erlang/otp,gh/374927,ok,2026-07-05T12:39:53+00:00
 erocarrera/pefile,erocarrera/pefile,gh/33870982,ok,2026-07-05T12:39:53+00:00
 errwischt/stacktrace-parser,errwischt/stacktrace-parser,gh/16610835,ok,2026-07-05T12:39:53+00:00
@@ -2445,9 +2519,10 @@ estools/esutils,estools/esutils,gh/14677293,ok,2026-07-05T12:39:54+00:00
 etcdv3/etcd-client,etcdv3/etcd-client,gh/242479774,ok,2026-07-05T12:39:54+00:00
 etemesi254/zune-image,etemesi254/zune-image,gh/557103490,ok,2026-07-05T12:39:54+00:00
 eternnoir/pytelegrambotapi,eternnoir/pytelegrambotapi,gh/38095954,ok,2026-07-05T12:39:54+00:00
-ethan7g/centra,ethan7g/centra,,not_found,2026-07-05T12:39:54+00:00
-ethan7g/phin,ethan7g/phin,,not_found,2026-07-05T12:39:54+00:00
+ethan7g/centra,ethan7g/centra,,not_found,2026-07-13T17:01:47+00:00
+ethan7g/phin,ethan7g/phin,,not_found,2026-07-13T17:01:47+00:00
 ethanfurman/aenum,ethanfurman/aenum,gh/292376377,ok,2026-07-05T12:39:54+00:00
+ethereal-sheep/heapify,ethereal-sheep/heapify,gh/522891870,ok,2026-07-13T16:57:24+00:00
 ethereum/c-kzg-4844,ethereum/c-kzg-4844,gh/567729203,ok,2026-07-05T12:39:54+00:00
 ethereum/eth-hash,ethereum/eth-hash,gh/120535885,ok,2026-07-05T12:39:55+00:00
 ethereum/eth-typing,ethereum/eth-typing,gh/125402846,ok,2026-07-05T12:39:55+00:00
@@ -2484,9 +2559,11 @@ executablebooks/myst-parser,executablebooks/myst-parser,gh/240151150,ok,2026-07-
 executablebooks/sphinx-copybutton,executablebooks/sphinx-copybutton,gh/140029949,ok,2026-07-05T12:39:55+00:00
 executablebooks/sphinx-design,executablebooks/sphinx-design,gh/388532059,ok,2026-07-05T12:39:55+00:00
 exelscior/logging-azure-rest,exelscior/logging-azure-rest,gh/346664489,ok,2026-07-05T12:39:55+00:00
+exiftool/exiftool,exiftool/exiftool,gh/132751855,ok,2026-07-13T16:57:24+00:00
 exiv2/exiv2,exiv2/exiv2,gh/89623031,ok,2026-07-05T12:39:55+00:00
 exodusoss/bytes,exodusoss/bytes,gh/885154008,ok,2026-07-05T12:39:55+00:00
 exodusoss/schemasafe,exodusoss/schemasafe,gh/271425023,ok,2026-07-05T12:39:55+00:00
+exoticorn/exoquant-rs,exoticorn/exoquant-rs,gh/67351755,ok,2026-07-13T16:57:24+00:00
 experience-monks/load-bmfont,experience-monks/load-bmfont,gh/32085702,ok,2026-07-05T12:39:55+00:00
 experience-monks/parse-bmfont-binary,experience-monks/parse-bmfont-binary,gh/32194225,ok,2026-07-05T12:39:55+00:00
 experience-monks/xml-parse-from-string,experience-monks/xml-parse-from-string,gh/32174940,ok,2026-07-05T12:39:55+00:00
@@ -2507,7 +2584,7 @@ expo/code-signing-certificates,expo/code-signing-certificates,gh/456635767,ok,20
 expo/devcert,expo/devcert,gh/335208160,ok,2026-07-05T12:39:56+00:00
 expo/expo,expo/expo,gh/65750241,ok,2026-07-05T12:39:56+00:00
 expo/expo-cli,expo/expo-cli,gh/128895073,ok,2026-07-05T12:39:56+00:00
-expo/expo-metro,expo/expo-metro,,not_found,2026-07-05T12:39:56+00:00
+expo/expo-metro,expo/expo-metro,,not_found,2026-07-13T17:01:47+00:00
 expo/spawn-async,expo/spawn-async,gh/35259592,ok,2026-07-05T12:39:56+00:00
 expo/sudo-prompt,expo/sudo-prompt,gh/921068185,ok,2026-07-05T12:39:56+00:00
 express-rate-limit/express-rate-limit,express-rate-limit/express-rate-limit,gh/27849281,ok,2026-07-05T12:39:56+00:00
@@ -2604,7 +2681,10 @@ farama-foundation/gym-notices,farama-foundation/gym-notices,gh/453387163,ok,2026
 farama-foundation/gymnasium,farama-foundation/gymnasium,gh/534011733,ok,2026-07-05T12:39:59+00:00
 farsightsec/fstrm,farsightsec/fstrm,gh/16086338,ok,2026-07-05T12:39:59+00:00
 fast/fastant,fast/fastant,gh/841480605,ok,2026-07-05T12:39:59+00:00
+fast/fastpool,fast/fastpool,gh/927014815,ok,2026-07-13T16:57:24+00:00
 fast/fastrace,fast/fastrace,gh/829370199,ok,2026-07-05T12:39:59+00:00
+fast/fasyslog,fast/fasyslog,gh/886439241,ok,2026-07-13T16:57:24+00:00
+fast/logforth,fast/logforth,gh/836529701,ok,2026-07-13T16:57:24+00:00
 fast/mea,fast/mea,gh/878624025,ok,2026-07-05T12:39:59+00:00
 fastapi/annotated-doc,fastapi/annotated-doc,gh/1079997638,ok,2026-07-05T12:39:59+00:00
 fastapi/fastapi,fastapi/fastapi,gh/160919119,ok,2026-07-05T12:39:59+00:00
@@ -2672,6 +2752,7 @@ fenrus75/powertop,fenrus75/powertop,gh/3096701,ok,2026-07-05T12:40:00+00:00
 fent/node-drange,fent/node-drange,gh/110193260,ok,2026-07-05T12:40:00+00:00
 fent/randexp.js,fent/randexp.js,gh/2925284,ok,2026-07-05T12:40:00+00:00
 fent/ret.js,fent/ret.js,gh/3024239,ok,2026-07-05T12:40:00+00:00
+fereidani/branches,fereidani/branches,gh/609577787,ok,2026-07-13T16:57:24+00:00
 fereidani/kanal,fereidani/kanal,gh/513511098,ok,2026-07-05T12:40:00+00:00
 fern-api/fern,fern-api/fern,gh/476820102,ok,2026-07-05T12:40:00+00:00
 feross/arch,feross/arch,gh/68413924,ok,2026-07-05T12:40:00+00:00
@@ -2695,6 +2776,7 @@ ffalcinelli/pydivert,ffalcinelli/pydivert,gh/9773833,ok,2026-07-05T12:40:00+00:0
 fflorent/nom_locate,fflorent/nom_locate,gh/92660094,ok,2026-07-05T12:40:00+00:00
 ffmpeg/ffmpeg,ffmpeg/ffmpeg,gh/1614410,ok,2026-07-05T12:40:00+00:00
 ffms/ffms2,ffms/ffms2,gh/12204382,ok,2026-07-05T12:40:00+00:00
+fftw/fftw3,fftw/fftw3,gh/8843388,ok,2026-07-13T16:57:24+00:00
 fgnass/uniqs,fgnass/uniqs,gh/20387379,ok,2026-07-05T12:40:00+00:00
 fgribreau/spinners,fgribreau/spinners,gh/114479736,ok,2026-07-05T12:40:00+00:00
 file/file,file/file,gh/1303130,ok,2026-07-05T12:40:00+00:00
@@ -2704,6 +2786,7 @@ fillzpp/sys-info-rs,fillzpp/sys-info-rs,gh/31007670,ok,2026-07-05T12:40:02+00:00
 firebase/firebase-admin-node,firebase/firebase-admin-node,gh/84979087,ok,2026-07-05T12:40:02+00:00
 firebase/firebase-admin-python,firebase/firebase-admin-python,gh/84979152,ok,2026-07-05T12:40:02+00:00
 firebase/firebase-js-sdk,firebase/firebase-js-sdk,gh/89290483,ok,2026-07-05T12:40:02+00:00
+firebirdsql/firebird,firebirdsql/firebird,gh/54005538,ok,2026-07-13T16:57:24+00:00
 firefighterblu3/python-pam,firefighterblu3/python-pam,gh/22579127,ok,2026-07-05T12:40:02+00:00
 firefoxgraphics/qcms,firefoxgraphics/qcms,gh/326532436,ok,2026-07-05T12:40:02+00:00
 fisker/git-hooks-list,fisker/git-hooks-list,gh/229213627,ok,2026-07-05T12:40:02+00:00
@@ -2719,9 +2802,11 @@ fitzgen/mach,fitzgen/mach,gh/30133810,ok,2026-07-05T12:40:02+00:00
 fitzgen/mach_o_sys,fitzgen/mach_o_sys,gh/63990967,ok,2026-07-05T12:40:02+00:00
 fitzgen/peeking_take_while,fitzgen/peeking_take_while,gh/91517025,ok,2026-07-05T12:40:02+00:00
 fitzgen/souper-ir,fitzgen/souper-ir,gh/280538844,ok,2026-07-05T12:40:02+00:00
+fivetran/great_expectations,fivetran/great_expectations,gh/103071520,ok,2026-07-13T16:57:24+00:00
 fizyk/port-for,fizyk/port-for,gh/4672572,ok,2026-07-05T12:40:02+00:00
 fizyk20/generic-array,fizyk20/generic-array,gh/43086384,ok,2026-07-05T12:40:02+00:00
 fizyr/subst,fizyr/subst,gh/461902154,ok,2026-07-05T12:40:02+00:00
+fjarri/serde-encoded-bytes,fjarri/serde-encoded-bytes,gh/873832223,ok,2026-07-13T16:57:24+00:00
 fkhadra/react-toastify,fkhadra/react-toastify,gh/73184139,ok,2026-07-05T12:40:02+00:00
 fkoep/downcast-rs,fkoep/downcast-rs,gh/87564530,ok,2026-07-05T12:40:02+00:00
 flashinfer-ai/flashinfer,flashinfer-ai/flashinfer,gh/669331976,ok,2026-07-05T12:40:02+00:00
@@ -2813,9 +2898,11 @@ fraser999/hash-hasher,fraser999/hash-hasher,gh/59158945,ok,2026-07-05T12:40:04+0
 freaky/faccess,freaky/faccess,gh/246973015,ok,2026-07-05T12:40:04+00:00
 freaky/rust-filesize,freaky/rust-filesize,gh/184808506,ok,2026-07-05T12:40:04+00:00
 freedesktop-unofficial-mirror/cairo,freedesktop-unofficial-mirror/cairo,gh/34372735,ok,2026-07-05T12:40:04+00:00
+freedesktop/uchardet,freedesktop/uchardet,,not_found,2026-07-13T17:01:47+00:00
 freeglut/freeglut,freeglut/freeglut,gh/9591436,ok,2026-07-05T12:40:04+00:00
 freerdp/freerdp,freerdp/freerdp,gh/1979797,ok,2026-07-05T12:40:04+00:00
 freestrings/jsonpath,freestrings/jsonpath,gh/163121779,ok,2026-07-05T12:40:04+00:00
+freetds/freetds,freetds/freetds,gh/13513899,ok,2026-07-13T16:57:24+00:00
 freetype/freetype,freetype/freetype,gh/187000659,ok,2026-07-05T12:40:04+00:00
 freewil/scmp,freewil/scmp,gh/8130513,ok,2026-07-05T12:40:04+00:00
 frehberg/test-generator,frehberg/test-generator,gh/166301231,ok,2026-07-05T12:40:04+00:00
@@ -2864,12 +2951,13 @@ g-plane/markup_fmt,g-plane/markup_fmt,gh/704471893,ok,2026-07-05T12:40:05+00:00
 g-plane/raffia,g-plane/raffia,gh/518281170,ok,2026-07-05T12:40:05+00:00
 g-plane/tiny_pretty,g-plane/tiny_pretty,gh/686675317,ok,2026-07-05T12:40:05+00:00
 g-plane/typed-query-selector,g-plane/typed-query-selector,gh/312544654,ok,2026-07-05T12:40:05+00:00
+gabime/spdlog,gabime/spdlog,gh/26038648,ok,2026-07-13T16:57:24+00:00
 gabrieldemarmiesse/python-on-whales,gabrieldemarmiesse/python-on-whales,gh/291525506,ok,2026-07-05T12:40:05+00:00
 gadomski/las-rs,gadomski/las-rs,gh/35166280,ok,2026-07-05T12:40:05+00:00
 gaearon/base16-js,gaearon/base16-js,gh/43076341,ok,2026-07-05T12:40:05+00:00
 gaearon/react-hot-loader,gaearon/react-hot-loader,gh/21779020,ok,2026-07-05T12:40:05+00:00
 gaearon/react-side-effect,gaearon/react-side-effect,gh/30759486,ok,2026-07-05T12:40:05+00:00
-gagle/node-streamifier,gagle/node-streamifier,,not_found,2026-07-05T12:40:05+00:00
+gagle/node-streamifier,gagle/node-streamifier,,not_found,2026-07-13T17:01:47+00:00
 gajus/eslint-plugin-flowtype,gajus/eslint-plugin-flowtype,gh/51695863,ok,2026-07-05T12:40:05+00:00
 gajus/eslint-plugin-jsdoc,gajus/eslint-plugin-jsdoc,gh/42747440,ok,2026-07-05T12:40:05+00:00
 gajus/fast-printf,gajus/fast-printf,gh/326312330,ok,2026-07-05T12:40:05+00:00
@@ -2880,6 +2968,7 @@ gakonst/ethers-rs,gakonst/ethers-rs,gh/266602341,ok,2026-07-05T12:40:05+00:00
 gakonst/open-fastrlp,gakonst/open-fastrlp,gh/556378654,ok,2026-07-05T12:40:05+00:00
 galkn/querystring,galkn/querystring,gh/18273484,ok,2026-07-05T12:40:05+00:00
 gamma0987/either-or-both,gamma0987/either-or-both,gh/1036943840,ok,2026-07-05T12:40:05+00:00
+gamma0987/proc-macro-error3,gamma0987/proc-macro-error3,gh/853379014,ok,2026-07-13T16:57:24+00:00
 gamma0987/simplematch,gamma0987/simplematch,gh/1051412820,ok,2026-07-05T12:40:05+00:00
 gankra/backtrace-ext,gankra/backtrace-ext,gh/621634408,ok,2026-07-05T12:40:05+00:00
 gankra/sptr,gankra/sptr,gh/475122597,ok,2026-07-05T12:40:05+00:00
@@ -2915,9 +3004,11 @@ geopandas/xyzservices,geopandas/xyzservices,gh/369533962,ok,2026-07-05T12:40:07+
 geopozo/logistro,geopozo/logistro,gh/890976989,ok,2026-07-05T12:40:07+00:00
 geopy/geopy,geopy/geopy,gh/547504,ok,2026-07-05T12:40:07+00:00
 george-miao/local-event,george-miao/local-event,gh/1076972127,ok,2026-07-05T12:40:07+00:00
+george-miao/mod_use,george-miao/mod_use,gh/436563361,ok,2026-07-13T16:57:24+00:00
 georgkrause/langcodes,georgkrause/langcodes,gh/756038044,ok,2026-07-05T12:40:07+00:00
 georgkrause/language_data,georgkrause/language_data,gh/762282151,ok,2026-07-05T12:40:07+00:00
 georgmartius/vid.stab,georgmartius/vid.stab,gh/2846384,ok,2026-07-05T12:40:07+00:00
+georust/earcut,georust/earcut,gh/701874743,ok,2026-07-13T16:57:24+00:00
 georust/gdal,georust/gdal,gh/18332499,ok,2026-07-05T12:40:07+00:00
 georust/geo,georust/geo,gh/29326047,ok,2026-07-05T12:40:07+00:00
 georust/geographiclib-rs,georust/geographiclib-rs,gh/259663494,ok,2026-07-05T12:40:07+00:00
@@ -2953,6 +3044,7 @@ getsling/flask-swagger,getsling/flask-swagger,gh/31482659,ok,2026-07-05T12:40:08
 gevent/gevent,gevent/gevent,gh/5801666,ok,2026-07-05T12:40:08+00:00
 geventhttpclient/geventhttpclient,geventhttpclient/geventhttpclient,gh/3003791,ok,2026-07-05T12:40:08+00:00
 gflags/gflags,gflags/gflags,gh/9571473,ok,2026-07-05T12:40:08+00:00
+gflohr/libintl-perl,gflohr/libintl-perl,gh/61024044,ok,2026-07-13T16:57:24+00:00
 gforcada/flake8-isort,gforcada/flake8-isort,gh/42370031,ok,2026-07-05T12:40:08+00:00
 gfx-rs/genmesh,gfx-rs/genmesh,gh/23011371,ok,2026-07-05T12:40:08+00:00
 gfx-rs/metal-rs,gfx-rs/metal-rs,gh/52674302,ok,2026-07-05T12:40:08+00:00
@@ -2999,10 +3091,17 @@ glium/glium,glium/glium,gh/24766967,ok,2026-07-05T12:40:08+00:00
 gltf-rs/gltf,gltf-rs/gltf,gh/73607455,ok,2026-07-05T12:40:08+00:00
 glueball/simple-mermaid,glueball/simple-mermaid,gh/695730189,ok,2026-07-05T12:40:08+00:00
 gluon-lang/lsp-types,gluon-lang/lsp-types,gh/71593179,ok,2026-07-05T12:40:08+00:00
+gluster/glusterfs,gluster/glusterfs,gh/1377037,ok,2026-07-13T16:57:24+00:00
 glyph/automat,glyph/automat,gh/23185643,ok,2026-07-05T12:40:09+00:00
 glyph/publication,glyph/publication,gh/140271091,ok,2026-07-05T12:40:09+00:00
 gmp-mirror/gmp,gmp-mirror/gmp,gh/681340775,ok,2026-07-05T12:40:09+00:00
 gmr/pamqp,gmr/pamqp,gh/3860354,ok,2026-07-05T12:40:09+00:00
+gnome/at-spi2-core,gnome/at-spi2-core,gh/4610259,ok,2026-07-13T16:57:24+00:00
+gnome/dconf,gnome/dconf,gh/4618535,ok,2026-07-13T16:57:24+00:00
+gnome/gdm,gnome/gdm,gh/4533139,ok,2026-07-13T16:57:24+00:00
+gnome/json-glib,gnome/json-glib,gh/4534709,ok,2026-07-13T16:57:24+00:00
+gnome/libadwaita,gnome/libadwaita,gh/353172967,ok,2026-07-13T16:57:24+00:00
+gnome/libgweather,gnome/libgweather,gh/4534443,ok,2026-07-13T16:57:24+00:00
 gnome/pango,gnome/pango,gh/4537144,ok,2026-07-05T12:40:09+00:00
 gnomeddev/extract_map,gnomeddev/extract_map,gh/770120782,ok,2026-07-05T12:40:09+00:00
 gnomeddev/proc-macro-error-2,gnomeddev/proc-macro-error-2,gh/850688185,ok,2026-07-05T12:40:09+00:00
@@ -3013,6 +3112,7 @@ gnuaspell/aspell,gnuaspell/aspell,gh/76153145,ok,2026-07-05T12:40:09+00:00
 gnzlbg/match_cfg,gnzlbg/match_cfg,gh/179054987,ok,2026-07-05T12:40:09+00:00
 gnzlbg/sleef-sys,gnzlbg/sleef-sys,gh/144581945,ok,2026-07-05T12:40:09+00:00
 gnzlbg/slice_deque,gnzlbg/slice_deque,gh/116691849,ok,2026-07-05T12:40:09+00:00
+golang/go,golang/go,gh/23096959,ok,2026-07-13T16:57:24+00:00
 golddranks/try_map,golddranks/try_map,gh/76208365,ok,2026-07-05T12:40:09+00:00
 goldsteine/mark-flaky-tests,goldsteine/mark-flaky-tests,gh/690198854,ok,2026-07-05T12:40:09+00:00
 google-ai-edge/mediapipe,google-ai-edge/mediapipe,gh/191820100,ok,2026-07-05T12:40:09+00:00
@@ -3078,8 +3178,11 @@ googleapis/google-cloud-node-core,googleapis/google-cloud-node-core,gh/105293150
 googleapis/google-cloud-python,googleapis/google-cloud-python,gh/16316451,ok,2026-07-05T12:40:10+00:00
 googleapis/google-cloud-rust,googleapis/google-cloud-rust,gh/429560502,ok,2026-07-05T12:40:10+00:00
 googleapis/google-p12-pem,googleapis/google-p12-pem,gh/26307906,ok,2026-07-05T12:40:10+00:00
+googleapis/js-genai,googleapis/js-genai,gh/899744532,ok,2026-07-13T16:57:24+00:00
 googleapis/node-gtoken,googleapis/node-gtoken,gh/26313215,ok,2026-07-05T12:40:10+00:00
+googleapis/nodejs-common,googleapis/nodejs-common,gh/98463389,ok,2026-07-13T16:57:24+00:00
 googleapis/nodejs-googleapis-common,googleapis/nodejs-googleapis-common,gh/145156319,ok,2026-07-05T12:40:10+00:00
+googleapis/nodejs-logging,googleapis/nodejs-logging,gh/98464491,ok,2026-07-13T16:57:24+00:00
 googleapis/nodejs-paginator,googleapis/nodejs-paginator,gh/142051977,ok,2026-07-05T12:40:10+00:00
 googleapis/nodejs-precise-date,googleapis/nodejs-precise-date,gh/170573821,ok,2026-07-05T12:40:10+00:00
 googleapis/nodejs-projectify,googleapis/nodejs-projectify,gh/142052443,ok,2026-07-05T12:40:10+00:00
@@ -3130,10 +3233,13 @@ goto-bus-stop/sse-codec,goto-bus-stop/sse-codec,gh/222774658,ok,2026-07-05T12:40
 goto-bus-stop/undeclared-identifiers,goto-bus-stop/undeclared-identifiers,gh/124644755,ok,2026-07-05T12:40:11+00:00
 goto100/xpath,goto100/xpath,gh/5476271,ok,2026-07-05T12:40:11+00:00
 gotwarlost/istanbul,gotwarlost/istanbul,gh/5775917,ok,2026-07-05T12:40:11+00:00
-gozala/@multiformats,gozala/@multiformats,,not_found,2026-07-05T12:40:11+00:00
+gozala/@multiformats,gozala/@multiformats,,not_found,2026-07-13T17:01:47+00:00
 gozala/querystring,gozala/querystring,gh/1622111,ok,2026-07-05T12:40:11+00:00
 gozala/web-encoding,gozala/web-encoding,gh/281768624,ok,2026-07-05T12:40:11+00:00
 gpbl/react-day-picker,gpbl/react-day-picker,gh/28566982,ok,2026-07-05T12:40:11+00:00
+gpg/gpgme,gpg/gpgme,gh/42068288,ok,2026-07-13T16:57:24+00:00
+gpg/pinentry,gpg/pinentry,gh/42120957,ok,2026-07-13T16:57:24+00:00
+gpgme++/gpgme++,gpgme++/gpgme++,,not_found,2026-07-13T17:01:47+00:00
 gphoto/libgphoto2,gphoto/libgphoto2,gh/40043855,ok,2026-07-05T12:40:11+00:00
 gpuopenanalytics/pynvml,gpuopenanalytics/pynvml,gh/175095301,ok,2026-07-05T12:40:11+00:00
 gr2m/before-after-hook,gr2m/before-after-hook,gh/75477357,ok,2026-07-05T12:40:11+00:00
@@ -3278,6 +3384,7 @@ gweis/isodate,gweis/isodate,gh/6449370,ok,2026-07-05T12:40:15+00:00
 gwenn/lemon-rs,gwenn/lemon-rs,gh/100366063,ok,2026-07-05T12:40:15+00:00
 gwierzchowski/csv-async,gwierzchowski/csv-async,gh/295133604,ok,2026-07-05T12:40:15+00:00
 gwihlidal/meshopt-rs,gwihlidal/meshopt-rs,gh/153487611,ok,2026-07-05T12:40:15+00:00
+gwsw/less,gwsw/less,gh/97259621,ok,2026-07-13T16:57:24+00:00
 gwtw/ts-fibonacci-heap,gwtw/ts-fibonacci-heap,gh/115892882,ok,2026-07-05T12:40:15+00:00
 gyscos/zstd-rs,gyscos/zstd-rs,gh/52115335,ok,2026-07-05T12:40:15+00:00
 gz/rust-cpuid,gz/rust-cpuid,gh/32820513,ok,2026-07-05T12:40:15+00:00
@@ -3327,9 +3434,11 @@ hapijs/tlds,hapijs/tlds,gh/487656178,ok,2026-07-05T12:40:16+00:00
 hapijs/topo,hapijs/topo,gh/18694142,ok,2026-07-05T12:40:16+00:00
 hapijs/validate,hapijs/validate,gh/280006706,ok,2026-07-05T12:40:16+00:00
 hapijs/wreck,hapijs/wreck,gh/15372882,ok,2026-07-05T12:40:16+00:00
+haraldh/array-const-fn-init,haraldh/array-const-fn-init,gh/265565817,ok,2026-07-13T16:57:24+00:00
 haraldh/rust_uds_windows,haraldh/rust_uds_windows,gh/160685885,ok,2026-07-05T12:40:16+00:00
 harasimowiczkamil/any-base,harasimowiczkamil/any-base,gh/36463663,ok,2026-07-05T12:40:16+00:00
 hardbyte/python-can,hardbyte/python-can,gh/69090889,ok,2026-07-05T12:40:16+00:00
+harehare/mq,harehare/mq,gh/938149101,ok,2026-07-13T16:57:24+00:00
 harens/checkdigit,harens/checkdigit,gh/166576085,ok,2026-07-05T12:40:16+00:00
 harfbuzz/harfbuzz,harfbuzz/harfbuzz,gh/5050525,ok,2026-07-05T12:40:16+00:00
 harfbuzz/harfrust,harfbuzz/harfrust,gh/829031665,ok,2026-07-05T12:40:16+00:00
@@ -3369,6 +3478,7 @@ heineiuo/isomorphic-ws,heineiuo/isomorphic-ws,gh/105848858,ok,2026-07-05T12:40:1
 hejny/locate-app,hejny/locate-app,gh/401527016,ok,2026-07-05T12:40:17+00:00
 hejny/spacetrim,hejny/spacetrim,gh/419477416,ok,2026-07-05T12:40:17+00:00
 helix-editor/nucleo,helix-editor/nucleo,gh/671648100,ok,2026-07-05T12:40:17+00:00
+helix-editor/termina,helix-editor/termina,gh/960683383,ok,2026-07-13T16:57:24+00:00
 helmetjs/helmet,helmetjs/helmet,gh/3329923,ok,2026-07-05T12:40:17+00:00
 helmetjs/nocache,helmetjs/nocache,gh/25873539,ok,2026-07-05T12:40:17+00:00
 henquist/realfft,henquist/realfft,gh/272548444,ok,2026-07-05T12:40:17+00:00
@@ -3428,6 +3538,7 @@ holoviz/param,holoviz/param,gh/4191817,ok,2026-07-05T12:40:19+00:00
 holoviz/pyviz_comms,holoviz/pyviz_comms,gh/122514303,ok,2026-07-05T12:40:19+00:00
 honojs/hono,honojs/hono,gh/438384984,ok,2026-07-05T12:40:19+00:00
 honojs/node-server,honojs/node-server,gh/535328171,ok,2026-07-05T12:40:19+00:00
+hoodie/mac-usernotifications,hoodie/mac-usernotifications,gh/1245051061,ok,2026-07-13T16:57:24+00:00
 hoodie/notify-rust,hoodie/notify-rust,gh/35977602,ok,2026-07-05T12:40:19+00:00
 horazont/aioopenssl,horazont/aioopenssl,gh/62450423,ok,2026-07-05T12:40:19+00:00
 horazont/aiosasl,horazont/aiosasl,gh/47690945,ok,2026-07-05T12:40:19+00:00
@@ -3435,6 +3546,7 @@ horazont/aioxmpp,horazont/aioxmpp,gh/23076316,ok,2026-07-05T12:40:19+00:00
 horejsek/python-fastjsonschema,horejsek/python-fastjsonschema,gh/69604351,ok,2026-07-05T12:40:19+00:00
 host-oman/libraqm,host-oman/libraqm,gh/47186392,ok,2026-07-05T12:40:19+00:00
 hoxxep/rapidhash,hoxxep/rapidhash,gh/862040919,ok,2026-07-05T12:40:19+00:00
+hoxxep/rapidrand,hoxxep/rapidrand,gh/1287478259,ok,2026-07-13T16:57:24+00:00
 hplt-project/sacremoses,hplt-project/sacremoses,gh/130306621,ok,2026-07-05T12:40:19+00:00
 hramrach/lm-sensors,hramrach/lm-sensors,gh/735164340,ok,2026-07-05T12:40:19+00:00
 hsivonen/any_all_workaround,hsivonen/any_all_workaround,gh/784340004,ok,2026-07-05T12:40:19+00:00
@@ -3502,6 +3614,7 @@ humanwhocodes/module-importer,humanwhocodes/module-importer,gh/525920950,ok,2026
 humanwhocodes/retry,humanwhocodes/retry,gh/744253136,ok,2026-07-05T12:40:21+00:00
 hunspell/hunspell,hunspell/hunspell,gh/37258357,ok,2026-07-05T12:40:21+00:00
 hunspell/hyphen,hunspell/hyphen,gh/37258587,ok,2026-07-05T12:40:21+00:00
+hunspell/mythes,hunspell/mythes,gh/37258625,ok,2026-07-13T16:57:24+00:00
 hunterloftis/stoppable,hunterloftis/stoppable,gh/91851379,ok,2026-07-05T12:40:21+00:00
 huonw/fast-math,huonw/fast-math,gh/35371063,ok,2026-07-05T12:40:21+00:00
 huonw/hamming,huonw/hamming,gh/36592968,ok,2026-07-05T12:40:21+00:00
@@ -3527,6 +3640,7 @@ hyperium/mime,hyperium/mime,gh/23398922,ok,2026-07-05T12:40:21+00:00
 hyperium/tonic,grpc/grpc-rust,gh/201517171,ok,2026-07-05T12:40:21+00:00
 hyperledger-solang/solang,hyperledger-solang/solang,gh/163517929,ok,2026-07-05T12:40:21+00:00
 hyperopt/hyperopt,hyperopt/hyperopt,gh/2337852,ok,2026-07-05T12:40:21+00:00
+hyperrealm/libconfig,hyperrealm/libconfig,gh/17386658,ok,2026-07-13T16:57:24+00:00
 hypothesisworks/hypothesis,hypothesisworks/hypothesis,gh/8685799,ok,2026-07-05T12:40:21+00:00
 i-rinat/libvdpau-va-gl,i-rinat/libvdpau-va-gl,gh/8225438,ok,2026-07-05T12:40:21+00:00
 i18next/i18next,i18next/i18next,gh/2994517,ok,2026-07-05T12:40:21+00:00
@@ -3540,6 +3654,7 @@ iamcodemaker/console_log,iamcodemaker/console_log,gh/163714253,ok,2026-07-05T12:
 iamkun/dayjs,iamkun/dayjs,gh/128907699,ok,2026-07-05T12:40:21+00:00
 iamturns/eslint-config-airbnb-typescript,iamturns/eslint-config-airbnb-typescript,gh/166876966,ok,2026-07-05T12:40:21+00:00
 ianlini/flatten-dict,ianlini/flatten-dict,gh/76537871,ok,2026-07-05T12:40:21+00:00
+ianmanske/quantette,ianmanske/quantette,gh/693763277,ok,2026-07-13T16:57:24+00:00
 ianstormtaylor/is-hotkey,ianstormtaylor/is-hotkey,gh/107062480,ok,2026-07-05T12:40:21+00:00
 ianstormtaylor/superstruct,ianstormtaylor/superstruct,gh/111756715,ok,2026-07-05T12:40:21+00:00
 ianstormtaylor/to-no-case,ianstormtaylor/to-no-case,gh/12940671,ok,2026-07-05T12:40:21+00:00
@@ -3576,7 +3691,9 @@ idanarye/rust-typed-builder,idanarye/rust-typed-builder,gh/105786399,ok,2026-07-
 idank/bashlex,idank/bashlex,gh/24256000,ok,2026-07-05T12:39:46+00:00
 iddm/serde-aux,iddm/serde-aux,gh/122485982,ok,2026-07-05T12:39:46+00:00
 iddm/thread-priority,iddm/thread-priority,gh/95105368,ok,2026-07-05T12:39:46+00:00
+idein/gatekeeper,idein/gatekeeper,gh/243690370,ok,2026-07-13T16:57:24+00:00
 identitypython/pysaml2,identitypython/pysaml2,gh/4425387,ok,2026-07-05T12:39:46+00:00
+idletea/mio-timerfd,idletea/mio-timerfd,gh/208645339,ok,2026-07-13T16:57:24+00:00
 ids1024/reis,ids1024/reis,gh/642548191,ok,2026-07-05T12:39:46+00:00
 idubrov/json-patch,idubrov/json-patch,gh/107489065,ok,2026-07-05T12:39:46+00:00
 ifaddr/ifaddr,ifaddr/ifaddr,gh/21394005,ok,2026-07-05T12:39:46+00:00
@@ -3584,10 +3701,10 @@ ifduyue/python-xxhash,ifduyue/python-xxhash,gh/22434000,ok,2026-07-05T12:39:46+0
 igio90/pybytebuffer,igio90/pybytebuffer,gh/171008032,ok,2026-07-05T12:39:46+00:00
 ignlg/heap-js,ignlg/heap-js,gh/98323278,ok,2026-07-05T12:39:46+00:00
 ignore-files/teslamateagil,ignore-files/teslamateagil,gh/1034148290,ok,2026-07-05T12:39:46+00:00
-igoradamenko/esbuild-plugin-alias,igoradamenko/esbuild-plugin-alias,,not_found,2026-07-05T12:39:46+00:00
+igoradamenko/esbuild-plugin-alias,igoradamenko/esbuild-plugin-alias,,not_found,2026-07-13T17:01:47+00:00
 igraph/python-igraph,igraph/python-igraph,gh/28992184,ok,2026-07-05T12:39:46+00:00
 ihciah/auto-const-array,ihciah/auto-const-array,gh/569144673,ok,2026-07-05T12:39:46+00:00
-ihciah/local-sync,ihciah/local-sync,,not_found,2026-07-05T12:39:46+00:00
+ihciah/local-sync,ihciah/local-sync,,not_found,2026-07-13T17:01:47+00:00
 ihrwein/backoff,ihrwein/backoff,gh/92483566,ok,2026-07-05T12:39:46+00:00
 ijl/orjson,ijl/orjson,gh/158618772,ok,2026-07-05T12:39:46+00:00
 ikegami-yukino/jaconv,ikegami-yukino/jaconv,gh/55281582,ok,2026-07-05T12:39:46+00:00
@@ -3622,6 +3739,7 @@ imagemin/imagemin,imagemin/imagemin,gh/14105478,ok,2026-07-05T12:39:47+00:00
 imageoptim/libimagequant,imageoptim/libimagequant,gh/72796114,ok,2026-07-05T12:39:47+00:00
 imageoptim/mozjpeg-rust,imageoptim/mozjpeg-rust,gh/121208635,ok,2026-07-05T12:39:47+00:00
 imagingdatacommons/libdicom,imagingdatacommons/libdicom,gh/383951991,ok,2026-07-05T12:39:47+00:00
+imazen/zenbench,imazen/zenbench,gh/1178589958,ok,2026-07-13T16:57:24+00:00
 immerjs/immer,immerjs/immer,gh/115720575,ok,2026-07-05T12:39:47+00:00
 immortal/fork,immortal/fork,gh/216993116,ok,2026-07-05T12:39:47+00:00
 immutable-js/immutable-js,immutable-js/immutable-js,gh/21413198,ok,2026-07-05T12:39:47+00:00
@@ -3660,11 +3778,13 @@ indygreg/pyoxidizer,indygreg/pyoxidizer,gh/162357299,ok,2026-07-05T12:39:47+00:0
 indygreg/python-zstandard,indygreg/python-zstandard,gh/67307930,ok,2026-07-05T12:39:47+00:00
 inejge/ldap3,inejge/ldap3,gh/86056863,ok,2026-07-05T12:39:47+00:00
 infinidat/munch,infinidat/munch,gh/3664494,ok,2026-07-05T12:39:47+00:00
+infinilabs/diskann,infinilabs/diskann,gh/1008151078,ok,2026-07-13T16:57:24+00:00
 influxdata/influxdb-client-python,influxdata/influxdb-client-python,gh/192689401,ok,2026-07-05T12:39:47+00:00
 influxdata/influxdb-python,influxdata/influxdb-python,gh/14151539,ok,2026-07-05T12:39:47+00:00
-influxdata/influxdb_iox,influxdata/influxdb_iox,,not_found,2026-07-05T12:39:47+00:00
+influxdata/influxdb_iox,influxdata/influxdb_iox,,not_found,2026-07-13T17:01:47+00:00
 influxdata/pbjson,influxdata/pbjson,gh/411318591,ok,2026-07-05T12:39:47+00:00
 informalsystems/flex-error,informalsystems/flex-error,gh/370635758,ok,2026-07-05T12:39:47+00:00
+ingydotnet/yaml-libyaml-pm,ingydotnet/yaml-libyaml-pm,gh/173407,ok,2026-07-13T16:57:24+00:00
 inikulin/parse5,inikulin/parse5,gh/8862593,ok,2026-07-05T12:39:47+00:00
 insomnimus/dur,insomnimus/dur,gh/707434120,ok,2026-07-05T12:39:47+00:00
 inspect-js/array-buffer-byte-length,inspect-js/array-buffer-byte-length,gh/607836784,ok,2026-07-05T12:39:47+00:00
@@ -3756,6 +3876,7 @@ iopsystems/histogram,iopsystems/histogram,gh/1187352804,ok,2026-07-05T12:39:50+0
 ioredis/ascallback,ioredis/ascallback,gh/138414308,ok,2026-07-05T12:39:50+00:00
 ioredis/commands,ioredis/commands,gh/466635630,ok,2026-07-05T12:39:50+00:00
 iotic-labs/py-ubjson,iotic-labs/py-ubjson,gh/40899998,ok,2026-07-05T12:39:50+00:00
+ip7z/7zip,ip7z/7zip,gh/466446150,ok,2026-07-13T16:57:24+00:00
 iputils/iputils,iputils/iputils,gh/18912197,ok,2026-07-05T12:39:50+00:00
 ipython/comm,ipython/comm,gh/520122918,ok,2026-07-05T12:39:50+00:00
 ipython/ipykernel,ipython/ipykernel,gh/33655535,ok,2026-07-05T12:39:50+00:00
@@ -3844,6 +3965,7 @@ iterative/shtab,tqdm/shtab,gh/272102149,ok,2026-07-05T12:39:51+00:00
 iterative/telemetry-python,iterative/telemetry-python,gh/491919455,ok,2026-07-05T12:39:51+00:00
 itsbencodes/cookies,itsbencodes/cookies,gh/32215253,ok,2026-07-05T12:39:51+00:00
 ittiam-systems/libmpeg2,ittiam-systems/libmpeg2,gh/586733775,ok,2026-07-05T12:39:51+00:00
+iustin/pyxattr,iustin/pyxattr,gh/4329424,ok,2026-07-13T16:57:24+00:00
 ivan-korolenko/json-with-bigint,ivan-korolenko/json-with-bigint,gh/617751018,ok,2026-07-05T12:39:51+00:00
 ivanceras/r2d2-sqlite,ivanceras/r2d2-sqlite,gh/39495249,ok,2026-07-05T12:39:51+00:00
 ivankorobkov/python-inject,ivankorobkov/python-inject,gh/507394,ok,2026-07-05T12:39:51+00:00
@@ -3858,6 +3980,7 @@ j4w8n/htmlfy,j4w8n/htmlfy,gh/732244464,ok,2026-07-05T12:39:53+00:00
 j535d165/recordlinkage,j535d165/recordlinkage,gh/44471657,ok,2026-07-05T12:39:53+00:00
 jab/bidict,jab/bidict,gh/24373694,ok,2026-07-05T12:39:53+00:00
 jacherr/sn,jacherr/sn,gh/350145151,ok,2026-07-05T12:39:53+00:00
+jackaudio/jack2,jackaudio/jack2,gh/3337027,ok,2026-07-13T16:57:24+00:00
 jackrosenthal/legacy-cgi,jackrosenthal/legacy-cgi,gh/470861620,ok,2026-07-05T12:39:53+00:00
 jacksonllee/iso639,jacksonllee/iso639,gh/218055121,ok,2026-07-05T12:39:53+00:00
 jackub/diff-match-patch,jackub/diff-match-patch,gh/13122848,ok,2026-07-05T12:39:53+00:00
@@ -3991,6 +4114,7 @@ jdunck/python-unicodecsv,jdunck/python-unicodecsv,gh/1072814,ok,2026-07-05T12:39
 jdx/password-prompt,jdx/password-prompt,gh/64681895,ok,2026-07-05T12:39:55+00:00
 jean-airoldie/humantime-serde,jean-airoldie/humantime-serde,gh/188490870,ok,2026-07-05T12:39:55+00:00
 jedisct1/libsodium,jedisct1/libsodium,gh/7710647,ok,2026-07-05T12:39:55+00:00
+jedisct1/rust-aegis,jedisct1/rust-aegis,gh/416731848,ok,2026-07-13T16:57:24+00:00
 jedisct1/rust-aes-keywrap,jedisct1/rust-aes-keywrap,gh/303681920,ok,2026-07-05T12:39:55+00:00
 jedisct1/rust-benchmark-simple,jedisct1/rust-benchmark-simple,gh/419056388,ok,2026-07-05T12:39:55+00:00
 jedisct1/rust-binstring,jedisct1/rust-binstring,gh/971928121,ok,2026-07-05T12:39:55+00:00
@@ -4006,6 +4130,8 @@ jedisct1/rust-ipcrypt2,jedisct1/rust-ipcrypt2,gh/959868248,ok,2026-07-05T12:39:5
 jedisct1/rust-jwt-simple,jedisct1/rust-jwt-simple,gh/291130821,ok,2026-07-05T12:39:57+00:00
 jedisct1/rust-precision,jedisct1/rust-precision,gh/145619445,ok,2026-07-05T12:39:57+00:00
 jedisct1/rust-siphash,jedisct1/rust-siphash,gh/69944160,ok,2026-07-05T12:39:57+00:00
+jedisct1/rust-softaes,jedisct1/rust-softaes,gh/728225350,ok,2026-07-13T16:57:24+00:00
+jedisct1/rust-sthash,jedisct1/rust-sthash,gh/176266057,ok,2026-07-13T16:57:24+00:00
 jedisct1/rust-superboring,jedisct1/rust-superboring,gh/732687664,ok,2026-07-05T12:39:57+00:00
 jedwatson/classnames,jedwatson/classnames,gh/26195776,ok,2026-07-05T12:39:57+00:00
 jedwatson/exenv,jedwatson/exenv,gh/33903962,ok,2026-07-05T12:39:57+00:00
@@ -4048,14 +4174,15 @@ jfromaniello/selfsigned,jfromaniello/selfsigned,gh/8736532,ok,2026-07-05T12:39:5
 jfromaniello/url-join,jfromaniello/url-join,gh/7895083,ok,2026-07-05T12:39:57+00:00
 jgm/pandocfilters,jgm/pandocfilters,gh/12773222,ok,2026-07-05T12:39:57+00:00
 jhchen/fast-diff,jhchen/fast-diff,gh/24749766,ok,2026-07-05T12:39:57+00:00
-jhermsmeier/node-http-link-header,jhermsmeier/node-http-link-header,,not_found,2026-07-05T12:39:57+00:00
-jhermsmeier/node-scuid,jhermsmeier/node-scuid,,not_found,2026-07-05T12:39:58+00:00
+jhermsmeier/node-http-link-header,jhermsmeier/node-http-link-header,,not_found,2026-07-13T17:01:47+00:00
+jhermsmeier/node-scuid,jhermsmeier/node-scuid,,not_found,2026-07-13T17:01:47+00:00
 jhiesey/stream-http,jhiesey/stream-http,gh/37962052,ok,2026-07-05T12:39:58+00:00
 jhiesey/to-arraybuffer,jhiesey/to-arraybuffer,gh/49547264,ok,2026-07-05T12:39:58+00:00
 jhpratt/deranged,jhpratt/deranged,gh/319572121,ok,2026-07-05T12:39:58+00:00
 jhpratt/num-conv,jhpratt/num-conv,gh/732843102,ok,2026-07-05T12:39:58+00:00
 jhpratt/num_threads,jhpratt/num_threads,gh/428118747,ok,2026-07-05T12:39:58+00:00
 jhpratt/powerfmt,jhpratt/powerfmt,gh/699144047,ok,2026-07-05T12:39:58+00:00
+jhpratt/serde_test2,jhpratt/serde_test2,gh/905202120,ok,2026-07-13T16:57:24+00:00
 jhpratt/standback,jhpratt/standback,gh/245252768,ok,2026-07-05T12:39:58+00:00
 jhurliman/node-rate-limiter,jhurliman/node-rate-limiter,gh/2908546,ok,2026-07-05T12:39:58+00:00
 jihchi/dify,jihchi/dify,gh/313013294,ok,2026-07-05T12:39:58+00:00
@@ -4075,7 +4202,7 @@ jix/zwohash,jix/zwohash,gh/287986782,ok,2026-07-05T12:39:58+00:00
 jjyr/buddy-alloc,jjyr/buddy-alloc,gh/231690973,ok,2026-07-05T12:39:58+00:00
 jkowalsk/iso7816-tlv,jkowalsk/iso7816-tlv,gh/210947147,ok,2026-07-05T12:39:58+00:00
 jkroso/normalize-svg-path,jkroso/normalize-svg-path,gh/15308278,ok,2026-07-05T12:39:58+00:00
-jmap-rs/json-pointer,jmap-rs/json-pointer,,not_found,2026-07-05T12:39:58+00:00
+jmap-rs/json-pointer,jmap-rs/json-pointer,,not_found,2026-07-13T17:01:47+00:00
 jmcarpenter2/swifter,jmcarpenter2/swifter,gh/128570698,ok,2026-07-05T12:39:58+00:00
 jmcnamara/xlsxwriter,jmcnamara/xlsxwriter,gh/7433211,ok,2026-07-05T12:39:58+00:00
 jmcomets/tcmalloc-rs,jmcomets/tcmalloc-rs,gh/135174925,ok,2026-07-05T12:39:58+00:00
@@ -4106,11 +4233,11 @@ johannesbuchner/imagehash,johannesbuchner/imagehash,gh/8528872,ok,2026-07-05T12:
 johannesvollmer/exrs,johannesvollmer/exrs,gh/145625486,ok,2026-07-05T12:39:59+00:00
 johannesvollmer/lebe,johannesvollmer/lebe,gh/228714186,ok,2026-07-05T12:39:59+00:00
 johannhof/difference.rs,johannhof/difference.rs,gh/35933086,ok,2026-07-05T12:39:59+00:00
-johejo/inutimeout,johejo/inutimeout,,not_found,2026-07-05T12:39:59+00:00
+johejo/inutimeout,johejo/inutimeout,,not_found,2026-07-13T17:01:47+00:00
 john-kurkowski/tldextract,john-kurkowski/tldextract,gh/1413932,ok,2026-07-05T12:39:59+00:00
 johnagan/clean-webpack-plugin,johnagan/clean-webpack-plugin,gh/33459469,ok,2026-07-05T12:39:59+00:00
 johnmichel/library-detector-for-chrome,johnmichel/library-detector-for-chrome,gh/495089,ok,2026-07-05T12:39:59+00:00
-johnotander/rgba-regex,johnotander/rgba-regex,,not_found,2026-07-05T12:39:59+00:00
+johnotander/rgba-regex,johnotander/rgba-regex,,not_found,2026-07-13T17:01:47+00:00
 johnschug/cstr-argument,johnschug/cstr-argument,gh/102824287,ok,2026-07-05T12:39:59+00:00
 johnscience/assert_enum_variants,johnscience/assert_enum_variants,gh/966512517,ok,2026-07-05T12:39:59+00:00
 johnscience/qualifier_attr,johnscience/qualifier_attr,gh/620759805,ok,2026-07-05T12:39:59+00:00
@@ -4135,14 +4262,19 @@ jonathaneunice/textwrap3,jonathaneunice/textwrap3,gh/93642651,ok,2026-07-05T12:3
 jonathanong/ee-first,jonathanong/ee-first,gh/20707897,ok,2026-07-05T12:39:59+00:00
 jonathantneal/convert-colors,jonathantneal/convert-colors,gh/118374228,ok,2026-07-05T12:39:59+00:00
 jonbern/fetch-retry,jonbern/fetch-retry,gh/54849689,ok,2026-07-05T12:39:59+00:00
+jonhoo/async-bincode,jonhoo/async-bincode,gh/134601305,ok,2026-07-13T16:57:24+00:00
+jonhoo/atone,jonhoo/atone,gh/277157288,ok,2026-07-13T16:57:25+00:00
 jonhoo/bus,jonhoo/bus,gh/60133277,ok,2026-07-05T12:39:59+00:00
+jonhoo/evmap,jonhoo/evmap,gh/323200805,ok,2026-07-13T16:57:25+00:00
 jonhoo/fantoccini,jonhoo/fantoccini,gh/92643295,ok,2026-07-05T12:39:59+00:00
 jonhoo/flurry,jonhoo/flurry,gh/222169208,ok,2026-07-05T12:39:59+00:00
 jonhoo/griddle,jonhoo/griddle,gh/275959529,ok,2026-07-05T12:39:59+00:00
 jonhoo/guardian,jonhoo/guardian,gh/61647077,ok,2026-07-05T12:39:59+00:00
 jonhoo/haphazard,jonhoo/haphazard,gh/380604045,ok,2026-07-05T12:39:59+00:00
 jonhoo/hashbag,jonhoo/hashbag,gh/238790242,ok,2026-07-05T12:39:59+00:00
+jonhoo/indexmap-amortized,jonhoo/indexmap-amortized,gh/282933716,ok,2026-07-13T16:57:25+00:00
 jonhoo/inferno,jonhoo/inferno,gh/167734795,ok,2026-07-05T12:39:59+00:00
+jonhoo/left-right,jonhoo/left-right,gh/80947295,ok,2026-07-13T16:57:25+00:00
 jonhoo/rust-zipf,jonhoo/rust-zipf,gh/79746453,ok,2026-07-05T12:39:59+00:00
 jonhoo/stream-cancel,jonhoo/stream-cancel,gh/138221669,ok,2026-07-05T12:39:59+00:00
 jonhoo/tokio-io-pool,jonhoo/tokio-io-pool,gh/140354914,ok,2026-07-05T12:39:59+00:00
@@ -4480,6 +4612,7 @@ kaporzhu/protobuf-to-dict,kaporzhu/protobuf-to-dict,gh/50403457,ok,2026-07-05T12
 kardeiz/objekt-clonable,kardeiz/objekt-clonable,gh/167206058,ok,2026-07-05T12:40:08+00:00
 kardeiz/sanitize-filename,kardeiz/sanitize-filename,gh/154534716,ok,2026-07-05T12:40:08+00:00
 kardeiz/type-map,kardeiz/type-map,gh/226138680,ok,2026-07-05T12:40:08+00:00
+karenetheridge/b-hooks-op-check,karenetheridge/b-hooks-op-check,gh/90956385,ok,2026-07-13T16:57:25+00:00
 karma-runner/karma,karma-runner/karma,gh/2560988,ok,2026-07-05T12:40:08+00:00
 karma-runner/karma-chrome-launcher,karma-runner/karma-chrome-launcher,gh/8474181,ok,2026-07-05T12:40:08+00:00
 karma-runner/karma-coverage,karma-runner/karma-coverage,gh/8474328,ok,2026-07-05T12:40:08+00:00
@@ -4499,6 +4632,8 @@ kawanet/int64-buffer,kawanet/int64-buffer,gh/41906225,ok,2026-07-05T12:40:08+00:
 kawanet/msgpack-lite,kawanet/msgpack-lite,gh/39644464,ok,2026-07-05T12:40:08+00:00
 kayak/pypika,kayak/pypika,gh/62725884,ok,2026-07-05T12:40:08+00:00
 kcat/openal-soft,kcat/openal-soft,gh/23277337,ok,2026-07-05T12:40:08+00:00
+kde/phonon-vlc,kde/phonon-vlc,gh/42734333,ok,2026-07-13T16:57:25+00:00
+kdl-org/kdl-rs,kdl-org/kdl-rs,gh/321528788,ok,2026-07-13T16:57:25+00:00
 kdy1/rust-pmutil,kdy1/rust-pmutil,gh/114340789,ok,2026-07-05T12:40:09+00:00
 keats/jsonwebtoken,keats/jsonwebtoken,gh/45360444,ok,2026-07-05T12:40:09+00:00
 keats/rust-bcrypt,keats/rust-bcrypt,gh/48337314,ok,2026-07-05T12:40:09+00:00
@@ -4583,6 +4718,7 @@ khang06/rust-mmap-fixed-fixed,khang06/rust-mmap-fixed-fixed,gh/490003548,ok,2026
 khronosgroup/glslang,khronosgroup/glslang,gh/38064932,ok,2026-07-05T12:40:10+00:00
 khronosgroup/moltenvk,khronosgroup/moltenvk,gh/109875967,ok,2026-07-05T12:40:10+00:00
 khronosgroup/opencl-clhpp,khronosgroup/opencl-clhpp,gh/47572511,ok,2026-07-05T12:40:10+00:00
+khronosgroup/opencl-headers,khronosgroup/opencl-headers,gh/47572476,ok,2026-07-13T16:57:25+00:00
 khronosgroup/openxr-sdk-source,khronosgroup/openxr-sdk-source,gh/174538197,ok,2026-07-05T12:40:10+00:00
 khronosgroup/spirv-headers,khronosgroup/spirv-headers,gh/56254015,ok,2026-07-05T12:40:10+00:00
 khronosgroup/spirv-llvm-translator,khronosgroup/spirv-llvm-translator,gh/127136978,ok,2026-07-05T12:40:10+00:00
@@ -4614,6 +4750,7 @@ kitten/lan-network,kitten/lan-network,gh/936768194,ok,2026-07-05T12:40:11+00:00
 kitten/multitars,kitten/multitars,gh/1099649975,ok,2026-07-05T12:40:11+00:00
 kitten/toqr,kitten/toqr,gh/1148796364,ok,2026-07-05T12:40:11+00:00
 kitware/cmake,kitware/cmake,gh/537699,ok,2026-07-05T12:40:11+00:00
+kitware/vtk,kitware/vtk,gh/631615,ok,2026-07-13T16:57:25+00:00
 kivikakk/comrak,kivikakk/comrak,gh/73984862,ok,2026-07-05T12:40:11+00:00
 kiwicom/pytest-recording,kiwicom/pytest-recording,gh/197214988,ok,2026-07-05T12:40:11+00:00
 kixiron/lasso,kixiron/lasso,gh/250698776,ok,2026-07-05T12:40:11+00:00
@@ -4621,6 +4758,7 @@ kixunil/fmt2io,kixunil/fmt2io,gh/156384208,ok,2026-07-05T12:40:11+00:00
 kixunil/hex_lit,kixunil/hex_lit,gh/524472650,ok,2026-07-05T12:40:11+00:00
 kixunil/percent-encoding-rfc3986,kixunil/percent-encoding-rfc3986,gh/407625307,ok,2026-07-05T12:40:11+00:00
 kizzycode/asn1_der-rust,kizzycode/asn1_der-rust,gh/116991033,ok,2026-07-05T12:40:11+00:00
+kizzycode/serde_asn1_der-rust,kizzycode/serde_asn1_der-rust,gh/177420698,ok,2026-07-13T16:57:25+00:00
 kjd/idna,kjd/idna,gh/10323585,ok,2026-07-05T12:40:11+00:00
 kkawakam/rustyline,kkawakam/rustyline,gh/32559774,ok,2026-07-05T12:40:11+00:00
 kkos/oniguruma,kkos/oniguruma,gh/38999874,ok,2026-07-05T12:40:11+00:00
@@ -4633,6 +4771,7 @@ kludex/uvicorn,kludex/uvicorn,gh/92946971,ok,2026-07-05T12:40:11+00:00
 kludex/uvicorn-worker,kludex/uvicorn-worker,gh/411387067,ok,2026-07-05T12:40:11+00:00
 kmalakoff/response-iterator,kmalakoff/response-iterator,gh/415455509,ok,2026-07-05T12:40:11+00:00
 kmike/text-unidecode,kmike/text-unidecode,gh/6891005,ok,2026-07-05T12:40:11+00:00
+kmod-project/kmod,kmod-project/kmod,gh/331085111,ok,2026-07-13T16:57:25+00:00
 knex/knex,knex/knex,gh/7363211,ok,2026-07-05T12:40:11+00:00
 knickish/constgebra,knickish/constgebra,gh/600598192,ok,2026-07-05T12:40:11+00:00
 knik0/faac,knik0/faac,gh/98275873,ok,2026-07-05T12:40:11+00:00
@@ -4666,6 +4805,7 @@ kornelski/avif-parse,kornelski/avif-parse,gh/290518038,ok,2026-07-05T12:40:12+00
 kornelski/avif-serialize,kornelski/avif-serialize,gh/290334363,ok,2026-07-05T12:40:12+00:00
 kornelski/cavif-rs,kornelski/cavif-rs,gh/290356845,ok,2026-07-05T12:40:12+00:00
 kornelski/deunicode,kornelski/deunicode,gh/132241813,ok,2026-07-05T12:40:12+00:00
+kornelski/dssim,kornelski/dssim,gh/1388070,ok,2026-07-13T16:57:25+00:00
 kornelski/http-cache-semantics,kornelski/http-cache-semantics,gh/60075331,ok,2026-07-05T12:40:12+00:00
 kornelski/image-gif-dispose,kornelski/image-gif-dispose,gh/80375556,ok,2026-07-05T12:40:12+00:00
 kornelski/imgref,kornelski/imgref,gh/86910550,ok,2026-07-05T12:40:12+00:00
@@ -4696,6 +4836,7 @@ kozea/pyphen,kozea/pyphen,gh/7325672,ok,2026-07-05T12:40:12+00:00
 kozea/tinycss2,kozea/tinycss2,gh/9770554,ok,2026-07-05T12:40:12+00:00
 kozea/weasyprint,kozea/weasyprint,gh/2179572,ok,2026-07-05T12:40:12+00:00
 kpdecker/jsdiff,kpdecker/jsdiff,gh/1542219,ok,2026-07-05T12:40:12+00:00
+kpreid/exhaust,kpreid/exhaust,gh/459415883,ok,2026-07-13T16:57:25+00:00
 krb5/krb5,krb5/krb5,gh/4307702,ok,2026-07-05T12:40:12+00:00
 krisk/fuse,krisk/fuse,gh/4467228,ok,2026-07-05T12:40:12+00:00
 kriskowal/asap,kriskowal/asap,gh/11295071,ok,2026-07-05T12:40:12+00:00
@@ -4721,6 +4862,7 @@ ksxnodemodules/typescript-tuple,ksxnodemodules/typescript-tuple,gh/148011446,ok,
 ktbarrett/find_libpython,ktbarrett/find_libpython,gh/279744405,ok,2026-07-05T12:40:14+00:00
 kuba--/zip,kuba--/zip,gh/32760969,ok,2026-07-05T12:40:14+00:00
 kube-rs/kube,kube-rs/kube,gh/157133149,ok,2026-07-05T12:40:14+00:00
+kube-rs/kube-cel,kube-rs/kube-cel,gh/1176743076,ok,2026-07-13T16:57:25+00:00
 kubeflow/pipelines,kubeflow/pipelines,gh/133100880,ok,2026-07-05T12:40:14+00:00
 kubernetes-client/python,kubernetes-client/python,gh/72473727,ok,2026-07-05T12:40:14+00:00
 kubo/odpic-sys,kubo/odpic-sys,gh/889269711,ok,2026-07-05T12:40:14+00:00
@@ -4760,6 +4902,7 @@ lamaani/zthreading.py,lamaani/zthreading.py,gh/274416950,ok,2026-07-05T12:40:15+
 lambda-fairy/if_chain,lambda-fairy/if_chain,gh/77565596,ok,2026-07-05T12:40:15+00:00
 lambda-fairy/maud,lambda-fairy/maud,gh/28127585,ok,2026-07-05T12:40:15+00:00
 lambda-fairy/rust-errno,lambda-fairy/rust-errno,gh/32443636,ok,2026-07-05T12:40:15+00:00
+lan-game-studios/bevy-settings,lan-game-studios/bevy-settings,gh/590442141,ok,2026-07-13T16:57:25+00:00
 landhb/linux-keyutils,landhb/linux-keyutils,gh/535433439,ok,2026-07-05T12:40:15+00:00
 landlock-lsm/rust-landlock,landlock-lsm/rust-landlock,gh/357653675,ok,2026-07-05T12:40:15+00:00
 langchain-ai/langchain,langchain-ai/langchain,gh/552661142,ok,2026-07-05T12:40:15+00:00
@@ -4774,6 +4917,7 @@ lark-parser/lark,lark-parser/lark,gh/80946973,ok,2026-07-05T12:40:15+00:00
 larsgw/sync-fetch,larsgw/sync-fetch,gh/202602511,ok,2026-07-05T12:40:15+00:00
 larskoelpin/magic-bytes,larskoelpin/magic-bytes,gh/127030019,ok,2026-07-05T12:40:15+00:00
 latchset/jwcrypto,latchset/jwcrypto,gh/31667038,ok,2026-07-05T12:40:15+00:00
+latchset/kryoptic,latchset/kryoptic,gh/668477752,ok,2026-07-13T16:57:25+00:00
 latchset/libverto,latchset/libverto,gh/69289169,ok,2026-07-05T12:40:15+00:00
 launchbadge/sqlx,transact-rs/sqlx,gh/230595891,ok,2026-07-05T12:40:15+00:00
 launchdarkly/js-client-sdk,launchdarkly/js-client-sdk,gh/61585941,ok,2026-07-05T12:40:15+00:00
@@ -4803,6 +4947,7 @@ leebyron/iterall,leebyron/iterall,gh/62092872,ok,2026-07-05T12:40:16+00:00
 leecrossley/replaceall,leecrossley/replaceall,gh/15802603,ok,2026-07-05T12:40:16+00:00
 leev/ngx_http_geoip2_module,leev/ngx_http_geoip2_module,gh/16393796,ok,2026-07-05T12:40:16+00:00
 left-pad/left-pad,left-pad/left-pad,gh/17740831,ok,2026-07-05T12:40:16+00:00
+legionus/kbd,legionus/kbd,gh/35050166,ok,2026-07-13T16:57:25+00:00
 legrandin/pycryptodome,legrandin/pycryptodome,gh/19378935,ok,2026-07-05T12:40:16+00:00
 leizongmin/js-css-filter,leizongmin/js-css-filter,gh/34956386,ok,2026-07-05T12:40:16+00:00
 leizongmin/js-xss,leizongmin/js-xss,gh/5857265,ok,2026-07-05T12:40:16+00:00
@@ -4812,7 +4957,7 @@ leoborai/local-ip-address,leoborai/local-ip-address,gh/377041702,ok,2026-07-05T1
 leoborai/network-interface,leoborai/network-interface,gh/409819971,ok,2026-07-05T12:40:16+00:00
 leonardfactory/babel-plugin-transform-typescript-metadata,leonardfactory/babel-plugin-transform-typescript-metadata,gh/177405861,ok,2026-07-05T12:40:16+00:00
 leonidas-from-xiv/node-xml2js,leonidas-from-xiv/node-xml2js,gh/780266,ok,2026-07-05T12:40:16+00:00
-leonskidev/varint-rs,leonskidev/varint-rs,,not_found,2026-07-05T12:40:16+00:00
+leonskidev/varint-rs,leonskidev/varint-rs,,not_found,2026-07-13T17:01:47+00:00
 leopoldarkham/humansize,leopoldarkham/humansize,gh/74229244,ok,2026-07-05T12:40:16+00:00
 lepture/mistune,lepture/mistune,gh/16944764,ok,2026-07-05T12:40:16+00:00
 lericson/pylibmc,lericson/pylibmc,gh/266006,ok,2026-07-05T12:40:16+00:00
@@ -4875,20 +5020,32 @@ libpwquality/libpwquality,libpwquality/libpwquality,gh/81569284,ok,2026-07-05T12
 librasn/compiler,librasn/compiler,gh/694314374,ok,2026-07-05T12:40:17+00:00
 librasn/rasn,librasn/rasn,gh/292537885,ok,2026-07-05T12:40:17+00:00
 libraw/libraw,libraw/libraw,gh/979192,ok,2026-07-05T12:40:17+00:00
+libreoffice/libabw,libreoffice/libabw,gh/17512740,ok,2026-07-13T16:57:25+00:00
+libreoffice/libcdr,libreoffice/libcdr,gh/14022745,ok,2026-07-13T16:57:25+00:00
+libreoffice/libetonyek,libreoffice/libetonyek,gh/14022829,ok,2026-07-13T16:57:25+00:00
+libreoffice/libexttextcat,libreoffice/libexttextcat,gh/14022835,ok,2026-07-13T16:57:25+00:00
+libreoffice/libfreehand,libreoffice/libfreehand,gh/14022844,ok,2026-07-13T16:57:25+00:00
+libreoffice/libmspub,libreoffice/libmspub,gh/14022809,ok,2026-07-13T16:57:25+00:00
+libreoffice/libvisio,libreoffice/libvisio,gh/14022819,ok,2026-07-13T16:57:25+00:00
 librosa/librosa,librosa/librosa,gh/6309729,ok,2026-07-05T12:40:17+00:00
 libsdl-org/sdl,libsdl-org/sdl,gh/330008801,ok,2026-07-05T12:40:17+00:00
 libsdl-org/sdl12-compat,libsdl-org/sdl12-compat,gh/331518551,ok,2026-07-05T12:40:17+00:00
+libsdl-org/sdl2-compat,libsdl-org/sdl2-compat,gh/569413483,ok,2026-07-13T16:57:25+00:00
+libsdl-org/sdl_image,libsdl-org/sdl_image,gh/331517360,ok,2026-07-13T16:57:25+00:00
 libsdl-org/sdl_ttf,libsdl-org/sdl_ttf,gh/337745832,ok,2026-07-05T12:40:17+00:00
 libseccomp-rs/libseccomp-rs,libseccomp-rs/libseccomp-rs,gh/344865648,ok,2026-07-05T12:40:17+00:00
+libsigcplusplus/libsigcplusplus,libsigcplusplus/libsigcplusplus,gh/122759416,ok,2026-07-13T16:57:25+00:00
 libsndfile/libsamplerate,libsndfile/libsamplerate,gh/27333447,ok,2026-07-05T12:40:17+00:00
 libsndfile/libsndfile,libsndfile/libsndfile,gh/3182884,ok,2026-07-05T12:40:17+00:00
 libssh2/libssh2,libssh2/libssh2,gh/31701703,ok,2026-07-05T12:40:17+00:00
+libtom/libtomcrypt,libtom/libtomcrypt,gh/777011,ok,2026-07-13T16:57:25+00:00
 libtom/libtommath,libtom/libtommath,gh/724503,ok,2026-07-05T12:40:17+00:00
 libunwind/libunwind,libunwind/libunwind,gh/78870047,ok,2026-07-05T12:40:17+00:00
 libusb/hidapi,libusb/hidapi,gh/190275430,ok,2026-07-05T12:40:17+00:00
 libusb/libusb,libusb/libusb,gh/15120676,ok,2026-07-05T12:40:17+00:00
 libuv/libuv,libuv/libuv,gh/14812739,ok,2026-07-05T12:40:17+00:00
 libvips/libvips,libvips/libvips,gh/1291410,ok,2026-07-05T12:40:17+00:00
+libxmlplusplus/libxmlplusplus,libxmlplusplus/libxmlplusplus,gh/231944366,ok,2026-07-13T16:57:25+00:00
 licenser/halfbrown,licenser/halfbrown,gh/182157839,ok,2026-07-05T12:40:17+00:00
 lidaobing/python-lunardate,lidaobing/python-lunardate,gh/2167968,ok,2026-07-05T12:40:17+00:00
 lidatong/dataclasses-json,lidatong/dataclasses-json,gh/130478940,ok,2026-07-05T12:40:17+00:00
@@ -4933,6 +5090,7 @@ linusu/react-native-get-random-values,linusu/react-native-get-random-values,gh/1
 linux-audit/audit-userspace,linux-audit/audit-userspace,gh/52464964,ok,2026-07-05T12:40:18+00:00
 linux-pam/linux-pam,linux-pam/linux-pam,gh/76264690,ok,2026-07-05T12:40:18+00:00
 linux-rdma/rdma-core,linux-rdma/rdma-core,gh/68456226,ok,2026-07-05T12:40:18+00:00
+linuxwacom/xf86-input-wacom,linuxwacom/xf86-input-wacom,gh/3075638,ok,2026-07-13T16:57:25+00:00
 liormizr/s3path,liormizr/s3path,gh/149740910,ok,2026-07-05T12:40:18+00:00
 lipanski/mockito,lipanski/mockito,gh/49388109,ok,2026-07-05T12:40:18+00:00
 lipnitsk/libcue,lipnitsk/libcue,gh/44516579,ok,2026-07-05T12:40:18+00:00
@@ -5009,6 +5167,7 @@ llvm/llvm-project,llvm/llvm-project,gh/75821432,ok,2026-07-05T12:40:21+00:00
 lmcinnes/pynndescent,lmcinnes/pynndescent,gh/120684701,ok,2026-07-05T12:40:21+00:00
 lmcinnes/umap,lmcinnes/umap,gh/95995403,ok,2026-07-05T12:40:21+00:00
 lmfit/asteval,lmfit/asteval,gh/3888766,ok,2026-07-05T12:40:21+00:00
+lmmx/figment2,lmmx/figment2,gh/1109158811,ok,2026-07-13T16:57:25+00:00
 lnicola/sd-notify,lnicola/sd-notify,gh/209860365,ok,2026-07-05T12:40:21+00:00
 lo1tuma/eslint-plugin-mocha,lo1tuma/eslint-plugin-mocha,gh/22311376,ok,2026-07-05T12:40:21+00:00
 lo48576/iri-string,lo48576/iri-string,gh/132127433,ok,2026-07-05T12:40:21+00:00
@@ -5024,6 +5183,8 @@ logrocket/redux-logger,logrocket/redux-logger,gh/40568608,ok,2026-07-05T12:40:21
 logrotate/logrotate,logrotate/logrotate,gh/33591844,ok,2026-07-05T12:40:21+00:00
 lojjic/bidi-js,lojjic/bidi-js,gh/357670036,ok,2026-07-05T12:40:21+00:00
 lokathor/bytemuck,lokathor/bytemuck,gh/209673558,ok,2026-07-05T12:40:21+00:00
+lokathor/pack1,lokathor/pack1,gh/621077650,ok,2026-07-13T16:57:25+00:00
+lokathor/png_filters,lokathor/png_filters,gh/625095475,ok,2026-07-13T16:57:25+00:00
 lokathor/randomize,lokathor/randomize,gh/344962450,ok,2026-07-05T12:40:21+00:00
 lokathor/rusty-xinput,lokathor/rusty-xinput,gh/118956246,ok,2026-07-05T12:40:21+00:00
 lokathor/safe_arch,lokathor/safe_arch,gh/259439601,ok,2026-07-05T12:40:21+00:00
@@ -5074,7 +5235,7 @@ lukaskalbertodt/libtest-mimic,lukaskalbertodt/libtest-mimic,gh/141877580,ok,2026
 lukaskalbertodt/litrs,lukaskalbertodt/litrs,gh/369333571,ok,2026-07-05T12:39:45+00:00
 lukaslueg/built,lukaslueg/built,gh/82208976,ok,2026-07-05T12:39:45+00:00
 lukaslueg/railroad,lukaslueg/railroad,gh/144474152,ok,2026-07-05T12:39:45+00:00
-lukaslueg/railroad-verification,lukaslueg/railroad-verification,,not_found,2026-07-05T12:39:45+00:00
+lukaslueg/railroad-verification,lukaslueg/railroad-verification,,not_found,2026-07-13T17:01:47+00:00
 lukeed/clsx,lukeed/clsx,gh/163027171,ok,2026-07-05T12:39:45+00:00
 lukeed/csprng,lukeed/csprng,gh/307529674,ok,2026-07-05T12:39:45+00:00
 lukeed/dequal,lukeed/dequal,gh/174421655,ok,2026-07-05T12:39:45+00:00
@@ -5217,7 +5378,7 @@ mahmoud/boltons,mahmoud/boltons,gh/8307391,ok,2026-07-05T12:39:49+00:00
 mahmoud/face,mahmoud/face,gh/118227458,ok,2026-07-05T12:39:49+00:00
 mahmoud/glom,mahmoud/glom,gh/130011760,ok,2026-07-05T12:39:49+00:00
 maidsafe/lru_time_cache,maidsafe/lru_time_cache,gh/33666278,ok,2026-07-05T12:39:49+00:00
-maidsafe/sn_fake_clock,maidsafe/sn_fake_clock,,not_found,2026-07-05T12:39:49+00:00
+maidsafe/sn_fake_clock,maidsafe/sn_fake_clock,,not_found,2026-07-13T17:01:47+00:00
 main--/rust-timerfd,main--/rust-timerfd,gh/75130659,ok,2026-07-05T12:39:49+00:00
 malaterre/socketxx-1,malaterre/socketxx-1,gh/15103745,ok,2026-07-05T12:39:49+00:00
 maleck13/readline,maleck13/readline,gh/11324744,ok,2026-07-05T12:39:49+00:00
@@ -5258,7 +5419,7 @@ mapbox/vt-pbf,mapbox/vt-pbf,gh/39534398,ok,2026-07-05T12:39:51+00:00
 mapbox/whoots-js,mapbox/whoots-js,gh/59149481,ok,2026-07-05T12:39:51+00:00
 maraisr/meros,maraisr/meros,gh/277017877,ok,2026-07-05T12:39:51+00:00
 marak/colors.js,marak/colors.js,gh/715168,ok,2026-07-05T12:39:51+00:00
-marak/faker.js,marak/faker.js,,not_found,2026-07-05T12:39:51+00:00
+marak/faker.js,marak/faker.js,,not_found,2026-07-13T17:01:47+00:00
 maratyszcza/pthreadpool,maratyszcza/pthreadpool,gh/41115850,ok,2026-07-05T12:39:51+00:00
 marcelklehr/toposort,marcelklehr/toposort,gh/6506814,ok,2026-07-05T12:39:51+00:00
 marcianx/downcast-rs,marcianx/downcast-rs,gh/48083798,ok,2026-07-05T12:39:51+00:00
@@ -5378,6 +5539,7 @@ max-mapper/mississippi,max-mapper/mississippi,gh/40024111,ok,2026-07-05T12:39:53
 maxcountryman/flask-bcrypt,maxcountryman/flask-bcrypt,gh/1886138,ok,2026-07-05T12:39:53+00:00
 maxcountryman/flask-login,maxcountryman/flask-login,gh/3687291,ok,2026-07-05T12:39:53+00:00
 maximkoretskiy/postcss-initial,maximkoretskiy/postcss-initial,gh/41269230,ok,2026-07-05T12:39:53+00:00
+maxmind/geoip-api-c,maxmind/geoip-api-c,gh/4821843,ok,2026-07-13T16:57:25+00:00
 maxmind/geoip2-python,maxmind/geoip2-python,gh/9299325,ok,2026-07-05T12:39:53+00:00
 maxmind/libmaxminddb,maxmind/libmaxminddb,gh/8882852,ok,2026-07-05T12:39:53+00:00
 maxmind/maxmind-db-reader-python,maxmind/maxmind-db-reader-python,gh/13107101,ok,2026-07-05T12:39:53+00:00
@@ -5392,6 +5554,8 @@ mbrubeck/by_address,mbrubeck/by_address,gh/108029935,ok,2026-07-05T12:39:53+00:0
 mbrubeck/rust-debug-unreachable,mbrubeck/rust-debug-unreachable,gh/135765936,ok,2026-07-05T12:39:53+00:00
 mbrubeck/tree_magic,mbrubeck/tree_magic,gh/265965730,ok,2026-07-05T12:39:53+00:00
 mbrubeck/unicode-reverse,mbrubeck/unicode-reverse,gh/75320047,ok,2026-07-05T12:39:53+00:00
+mbuilov/grep-windows,mbuilov/grep-windows,gh/162997383,ok,2026-07-13T16:57:25+00:00
+mbuilov/sed-windows,mbuilov/sed-windows,gh/78859490,ok,2026-07-13T16:57:25+00:00
 mcarton/rust-derivative,mcarton/rust-derivative,gh/70254606,ok,2026-07-05T12:39:53+00:00
 mcarton/rust-punycode,mcarton/rust-punycode,gh/47353001,ok,2026-07-05T12:39:53+00:00
 mccormicka/string-argv,mccormicka/string-argv,gh/16507737,ok,2026-07-05T12:39:53+00:00
@@ -5463,6 +5627,7 @@ medikoo/type,medikoo/type,gh/177198492,ok,2026-07-05T12:39:55+00:00
 medikoo/uni-global,medikoo/uni-global,gh/412095332,ok,2026-07-05T12:39:55+00:00
 megaing/interegular,megaing/interegular,gh/199148230,ok,2026-07-05T12:39:55+00:00
 meh/rust-terminfo,meh/rust-terminfo,gh/77328586,ok,2026-07-05T12:39:55+00:00
+meilisearch/heed,meilisearch/heed,gh/212857695,ok,2026-07-13T16:57:25+00:00
 meilisearch/meilisearch-rust,meilisearch/meilisearch-rust,gh/260656751,ok,2026-07-05T12:39:55+00:00
 meilisearch/yaup,meilisearch/yaup,gh/505901000,ok,2026-07-05T12:39:55+00:00
 meinersbur/isl,meinersbur/isl,gh/37677854,ok,2026-07-05T12:39:55+00:00
@@ -5470,6 +5635,7 @@ meirkriheli/python-bidi,meirkriheli/python-bidi,gh/642279,ok,2026-07-05T12:39:55
 meithecatte/enumflags2,meithecatte/enumflags2,gh/167553735,ok,2026-07-05T12:39:55+00:00
 mellite/colorful,mellite/colorful,gh/160634006,ok,2026-07-05T12:39:55+00:00
 meltano/sdk,meltano/sdk,gh/379008980,ok,2026-07-05T12:39:55+00:00
+mercysimp/libunity,mercysimp/libunity,gh/997723496,ok,2026-07-13T16:57:25+00:00
 meriyah/meriyah,meriyah/meriyah,gh/185327227,ok,2026-07-05T12:39:55+00:00
 mermade/oas-kit,mermade/oas-kit,gh/71464935,ok,2026-07-05T12:39:55+00:00
 mersinvald/aquamarine,mersinvald/aquamarine,gh/323695252,ok,2026-07-05T12:39:55+00:00
@@ -5482,6 +5648,7 @@ messense/jieba-rs,messense/jieba-rs,gh/132325183,ok,2026-07-05T12:39:55+00:00
 messense/nh3,messense/nh3,gh/392311152,ok,2026-07-05T12:39:55+00:00
 messense/rustc-test,messense/rustc-test,gh/125061420,ok,2026-07-05T12:39:55+00:00
 meta-pytorch/torchcodec,meta-pytorch/torchcodec,gh/807642214,ok,2026-07-05T12:39:55+00:00
+metabrainz/libmusicbrainz,metabrainz/libmusicbrainz,gh/3983393,ok,2026-07-13T16:57:25+00:00
 metadevpro/openapi3-ts,metadevpro/openapi3-ts,gh/84108450,ok,2026-07-05T12:39:55+00:00
 metalbear-co/hyper-http-proxy,metalbear-co/hyper-http-proxy,gh/806236166,ok,2026-07-05T12:39:55+00:00
 metaopt/optree,metaopt/optree,gh/540486972,ok,2026-07-05T12:39:55+00:00
@@ -5512,6 +5679,8 @@ mheffner/rust-sketches-ddsketch,mheffner/rust-sketches-ddsketch,gh/209328904,ok,
 mher/flower,mher/flower,gh/4946406,ok,2026-07-05T12:39:57+00:00
 mhogrefe/malachite,mhogrefe/malachite,gh/89758170,ok,2026-07-05T12:39:57+00:00
 mholt/papaparse,mholt/papaparse,gh/13395052,ok,2026-07-05T12:39:57+00:00
+mich101mich/err_span_check,mich101mich/err_span_check,gh/1141465109,ok,2026-07-13T16:57:25+00:00
+mich101mich/sscanf,mich101mich/sscanf,gh/345475482,ok,2026-07-13T16:57:25+00:00
 michael-f-bryan/ffi_helpers,michael-f-bryan/ffi_helpers,gh/130496603,ok,2026-07-05T12:39:57+00:00
 michael-f-bryan/include_dir,michael-f-bryan/include_dir,gh/93580468,ok,2026-07-05T12:39:57+00:00
 michaelkourlas/node-js2xmlparser,michaelkourlas/node-js2xmlparser,gh/5382385,ok,2026-07-05T12:39:57+00:00
@@ -5565,6 +5734,7 @@ microsoft/azure-devops-python-api,microsoft/azure-devops-python-api,gh/107710074
 microsoft/azureml-inference-server,microsoft/azureml-inference-server,gh/607272408,ok,2026-07-05T12:39:57+00:00
 microsoft/debugpy,microsoft/debugpy,gh/234187391,ok,2026-07-05T12:39:57+00:00
 microsoft/definitelytyped-tools,microsoft/definitelytyped-tools,gh/249561407,ok,2026-07-05T12:39:57+00:00
+microsoft/diskann,microsoft/diskann,gh/273157574,ok,2026-07-13T16:57:25+00:00
 microsoft/jschema-to-python,microsoft/jschema-to-python,gh/209115162,ok,2026-07-05T12:39:57+00:00
 microsoft/kiota,microsoft/kiota,gh/323665366,ok,2026-07-05T12:39:57+00:00
 microsoft/kiota-python,microsoft/kiota-python,gh/521636063,ok,2026-07-05T12:39:57+00:00
@@ -5615,6 +5785,7 @@ mikebrennan000/mawk-2,mikebrennan000/mawk-2,gh/65053020,ok,2026-07-05T12:39:59+0
 mikedh/trimesh,mikedh/trimesh,gh/11745275,ok,2026-07-05T12:39:59+00:00
 mikedilger/float-cmp,mikedilger/float-cmp,gh/29447263,ok,2026-07-05T12:39:59+00:00
 mikehall314/es6-promisify,mikehall314/es6-promisify,gh/18805001,ok,2026-07-05T12:39:59+00:00
+mikelodder7/hash2curve,mikelodder7/hash2curve,gh/248107054,ok,2026-07-13T16:57:25+00:00
 mikemcl/big.js,mikemcl/big.js,gh/6584365,ok,2026-07-05T12:39:59+00:00
 mikemcl/bignumber.js,mikemcl/bignumber.js,gh/6602323,ok,2026-07-05T12:39:59+00:00
 mikemcl/decimal.js,mikemcl/decimal.js,gh/18371175,ok,2026-07-05T12:39:59+00:00
@@ -5642,6 +5813,7 @@ mingrammer/diagrams,mingrammer/diagrams,gh/237791077,ok,2026-07-05T12:39:59+00:0
 mingyli/assoc,mingyli/assoc,gh/343229086,ok,2026-07-05T12:39:59+00:00
 minimistjs/minimist,minimistjs/minimist,gh/549230701,ok,2026-07-05T12:39:59+00:00
 minio/minio-py,minio/minio-py,gh/37571213,ok,2026-07-05T12:39:59+00:00
+miniupnp/miniupnp,miniupnp/miniupnp,gh/2435778,ok,2026-07-13T16:57:25+00:00
 minrk/appnope,minrk/appnope,gh/13947252,ok,2026-07-05T12:39:59+00:00
 minrk/findspark,minrk/findspark,gh/37345620,ok,2026-07-05T12:39:59+00:00
 miquels/liblockfile,miquels/liblockfile,gh/74419163,ok,2026-07-05T12:39:59+00:00
@@ -5690,6 +5862,7 @@ mkdocstrings/python,mkdocstrings/python,gh/422878404,ok,2026-07-05T12:40:01+00:0
 mklabs/node-fileset,mklabs/node-fileset,gh/2324326,ok,2026-07-05T12:40:01+00:00
 mkleehammer/pyodbc,mkleehammer/pyodbc,gh/59235,ok,2026-07-05T12:40:01+00:00
 mkorpela/overrides,mkorpela/overrides,gh/36120379,ok,2026-07-05T12:40:01+00:00
+mkrueger/icy_sixel,mkrueger/icy_sixel,gh/689246247,ok,2026-07-13T16:57:25+00:00
 ml-explore/mlx,ml-explore/mlx,gh/724854743,ok,2026-07-05T12:40:01+00:00
 ml-explore/mlx-lm,ml-explore/mlx-lm,gh/946767878,ok,2026-07-05T12:40:01+00:00
 mladedav/json-subscriber,mladedav/json-subscriber,gh/814368251,ok,2026-07-05T12:40:01+00:00
@@ -5722,6 +5895,7 @@ mochajs/mocha,mochajs/mocha,gh/1451352,ok,2026-07-05T12:40:02+00:00
 modal-labs/modal-client,modal-labs/modal-client,gh/553878560,ok,2026-07-05T12:40:02+00:00
 modal-labs/synchronicity,modal-labs/synchronicity,gh/349891952,ok,2026-07-05T12:40:02+00:00
 modelcontextprotocol/python-sdk,modelcontextprotocol/python-sdk,gh/862584018,ok,2026-07-05T12:40:02+00:00
+modelcontextprotocol/rust-sdk,modelcontextprotocol/rust-sdk,gh/934753959,ok,2026-07-13T16:57:25+00:00
 modelcontextprotocol/typescript-sdk,modelcontextprotocol/typescript-sdk,gh/862578138,ok,2026-07-05T12:40:02+00:00
 modin-project/modin,modin-project/modin,gh/138224079,ok,2026-07-05T12:40:02+00:00
 modprog/attribute-derive,modprog/attribute-derive,gh/454850691,ok,2026-07-05T12:40:02+00:00
@@ -5759,8 +5933,11 @@ mongomock/mongomock,mongomock/mongomock,gh/3722168,ok,2026-07-05T12:40:03+00:00
 mongoosejs/kareem,mongoosejs/kareem,gh/27846925,ok,2026-07-05T12:40:03+00:00
 mongoosejs/mpath,mongoosejs/mpath,gh/6523337,ok,2026-07-05T12:40:03+00:00
 mongoosejs/mquery,mongoosejs/mquery,gh/7173240,ok,2026-07-05T12:40:03+00:00
+monoio-rs/monoio,monoio-rs/monoio,gh/433350425,ok,2026-07-13T16:57:25+00:00
 monoio-rs/monoio-codec,monoio-rs/monoio-codec,gh/502997547,ok,2026-07-05T12:40:03+00:00
 monoio-rs/monoio-tls,monoio-rs/monoio-tls,gh/498291970,ok,2026-07-05T12:40:03+00:00
+mooman219/fontdue,mooman219/fontdue,gh/200122012,ok,2026-07-13T16:57:25+00:00
+moose/package-stash-xs,moose/package-stash-xs,gh/163687913,ok,2026-07-13T16:57:25+00:00
 moox/caniuse-api,moox/caniuse-api,gh/27745544,ok,2026-07-05T12:40:03+00:00
 moox/postcss-message-helpers,moox/postcss-message-helpers,gh/27088842,ok,2026-07-05T12:40:03+00:00
 moox/reduce-css-calc,moox/reduce-css-calc,gh/22596934,ok,2026-07-05T12:40:03+00:00
@@ -5787,9 +5964,11 @@ mozilla/atomic_refcell,mozilla/atomic_refcell,gh/77956507,ok,2026-07-05T12:40:03
 mozilla/audio_thread_priority,mozilla/audio_thread_priority,gh/118641084,ok,2026-07-05T12:40:03+00:00
 mozilla/bleach,mozilla/bleach,gh/525316,ok,2026-07-05T12:40:03+00:00
 mozilla/cbindgen,mozilla/cbindgen,gh/88066646,ok,2026-07-05T12:40:03+00:00
+mozilla/gecko-dev,mozilla/gecko-dev,gh/13509108,ok,2026-07-13T16:57:25+00:00
 mozilla/hawk,mozilla/hawk,gh/6837962,ok,2026-07-05T12:40:03+00:00
 mozilla/mozjpeg,mozilla/mozjpeg,gh/15837676,ok,2026-07-05T12:40:03+00:00
 mozilla/mp4parse-rust,mozilla/mp4parse-rust,gh/43644850,ok,2026-07-05T12:40:03+00:00
+mozilla/nss,mozilla/nss,gh/41180493,ok,2026-07-13T16:57:25+00:00
 mozilla/pdf.js,mozilla/pdf.js,gh/1663468,ok,2026-07-05T12:40:03+00:00
 mozilla/pe-unwind-info,mozilla/pe-unwind-info,gh/668012831,ok,2026-07-05T12:40:03+00:00
 mozilla/source-map,mozilla/source-map,gh/2014930,ok,2026-07-05T12:40:03+00:00
@@ -5841,6 +6020,7 @@ mswjs/interceptors,mswjs/interceptors,gh/259082019,ok,2026-07-05T12:40:04+00:00
 mswjs/is-node-process,mswjs/is-node-process,gh/387290758,ok,2026-07-05T12:40:04+00:00
 mswjs/msw,mswjs/msw,gh/157397583,ok,2026-07-05T12:40:04+00:00
 msxdos/ntapi,msxdos/ntapi,gh/147096407,ok,2026-07-05T12:40:04+00:00
+mtanski/xfsprogs,mtanski/xfsprogs,gh/32103456,ok,2026-07-13T16:57:25+00:00
 mtkennerly/dunamai,mtkennerly/dunamai,gh/177762671,ok,2026-07-05T12:40:04+00:00
 mtkennerly/poetry-dynamic-versioning,mtkennerly/poetry-dynamic-versioning,gh/190498619,ok,2026-07-05T12:40:04+00:00
 mtth/hdfs,mtth/hdfs,gh/17606177,ok,2026-07-05T12:40:04+00:00
@@ -5898,10 +6078,12 @@ mysticatea/npm-run-all,mysticatea/npm-run-all,gh/32727687,ok,2026-07-05T12:40:05
 mysticatea/regexpp,mysticatea/regexpp,gh/121845360,ok,2026-07-05T12:40:05+00:00
 mystor/rust-cpp,mystor/rust-cpp,gh/36984252,ok,2026-07-05T12:40:05+00:00
 mystor/synstructure,mystor/synstructure,gh/70418718,ok,2026-07-05T12:40:05+00:00
+mzabaluev/generic-tests,mzabaluev/generic-tests,gh/273772831,ok,2026-07-13T16:57:25+00:00
 mziccard/node-timsort,mziccard/node-timsort,gh/40312625,ok,2026-07-05T12:40:05+00:00
 n1m3/linregress,n1m3/linregress,gh/172799621,ok,2026-07-05T12:40:07+00:00
 n1t0/unicode-normalization,n1t0/unicode-normalization,gh/230347209,ok,2026-07-05T12:40:07+00:00
 nabijaczleweli/rust-embed-resource,nabijaczleweli/rust-embed-resource,gh/80449923,ok,2026-07-05T12:40:07+00:00
+nabijaczleweli/safe-transmute-rs,nabijaczleweli/safe-transmute-rs,gh/72999549,ok,2026-07-13T16:57:25+00:00
 nabijaczleweli/vswhom-sys.rs,nabijaczleweli/vswhom-sys.rs,gh/166088945,ok,2026-07-05T12:40:07+00:00
 nabijaczleweli/vswhom.rs,nabijaczleweli/vswhom.rs,gh/166092097,ok,2026-07-05T12:40:07+00:00
 nadavrot/layout,nadavrot/layout,gh/468217821,ok,2026-07-05T12:40:07+00:00
@@ -5957,6 +6139,7 @@ neon-bindings/neon,neon-bindings/neon,gh/42766295,ok,2026-07-05T12:40:08+00:00
 neonmoe/minreq,neonmoe/minreq,gh/125681542,ok,2026-07-05T12:40:08+00:00
 neosmart/ignore-result,neosmart/ignore-result,gh/163022996,ok,2026-07-05T12:40:08+00:00
 neosmart/prettysize-rs,neosmart/prettysize-rs,gh/144234651,ok,2026-07-05T12:40:08+00:00
+neovim/libvterm,neovim/libvterm,gh/31254787,ok,2026-07-13T16:57:25+00:00
 neovim/neovim,neovim/neovim,gh/16408992,ok,2026-07-05T12:40:08+00:00
 neovim/unibilium,neovim/unibilium,gh/152818885,ok,2026-07-05T12:40:08+00:00
 nephila/giturlparse,nephila/giturlparse,gh/28669433,ok,2026-07-05T12:40:08+00:00
@@ -6040,6 +6223,7 @@ nix-rust/nix,nix-rust/nix,gh/22734848,ok,2026-07-05T12:40:09+00:00
 njaard/libavif-rs,njaard/libavif-rs,gh/241687111,ok,2026-07-05T12:40:09+00:00
 nkbt/react-copy-to-clipboard,nkbt/react-copy-to-clipboard,gh/38528498,ok,2026-07-05T12:40:09+00:00
 nkoriyama/aribb24,nkoriyama/aribb24,gh/22804061,ok,2026-07-05T12:40:09+00:00
+nlitsme/gnubc,nlitsme/gnubc,gh/236091298,ok,2026-07-13T16:57:25+00:00
 nlnetlabs/bcder,nlnetlabs/bcder,gh/142572288,ok,2026-07-05T12:40:09+00:00
 nlnetlabs/domain,nlnetlabs/domain,gh/145591610,ok,2026-07-05T12:40:09+00:00
 nlnetlabs/octseq,nlnetlabs/octseq,gh/408411758,ok,2026-07-05T12:40:09+00:00
@@ -6047,6 +6231,7 @@ nlnetlabs/unbound,nlnetlabs/unbound,gh/94195301,ok,2026-07-05T12:40:09+00:00
 nlohmann/json,nlohmann/json,gh/11171548,ok,2026-07-05T12:40:09+00:00
 nlordell/ethnum-rs,nlordell/ethnum-rs,gh/330600696,ok,2026-07-05T12:40:09+00:00
 nltk/nltk,nltk/nltk,gh/299862,ok,2026-07-05T12:40:09+00:00
+nmap/nmap,nmap/nmap,gh/3671479,ok,2026-07-13T16:57:25+00:00
 nmfr/last-call-webpack-plugin,nmfr/last-call-webpack-plugin,gh/50267612,ok,2026-07-05T12:40:09+00:00
 nmfr/optimize-css-assets-webpack-plugin,nmfr/optimize-css-assets-webpack-plugin,gh/49304920,ok,2026-07-05T12:40:09+00:00
 nneonneo/fixedint,nneonneo/fixedint,gh/21083374,ok,2026-07-05T12:40:10+00:00
@@ -6122,6 +6307,7 @@ not-an-aardvark/eslint-rule-composer,not-an-aardvark/eslint-rule-composer,gh/104
 not-fl3/nanoserde,not-fl3/nanoserde,gh/273762076,ok,2026-07-05T12:40:12+00:00
 not-fl3/quad-rand,not-fl3/quad-rand,gh/248274093,ok,2026-07-05T12:40:12+00:00
 notatestuser/treeify,notatestuser/treeify,gh/6023016,ok,2026-07-05T12:40:12+00:00
+notfilippo/datasketches-rs,notfilippo/datasketches-rs,gh/838750657,ok,2026-07-13T16:57:25+00:00
 notgull/unsend,notgull/unsend,gh/581933850,ok,2026-07-05T12:40:12+00:00
 notify-rs/notify,notify-rs/notify,gh/27861978,ok,2026-07-05T12:40:12+00:00
 notpeter/env-home,notpeter/env-home,gh/785934069,ok,2026-07-05T12:40:12+00:00
@@ -6132,6 +6318,7 @@ novemberborn/ignore-by-default,novemberborn/ignore-by-default,gh/51163829,ok,202
 novemberborn/package-hash,novemberborn/package-hash,gh/56253096,ok,2026-07-05T12:40:12+00:00
 novemberborn/release-zalgo,novemberborn/release-zalgo,gh/80839826,ok,2026-07-05T12:40:12+00:00
 novum/mikktspace-sys,novum/mikktspace-sys,gh/630788258,ok,2026-07-05T12:40:12+00:00
+nox/prometools,nox/prometools,gh/549478647,ok,2026-07-13T16:57:25+00:00
 nox/serde_urlencoded,nox/serde_urlencoded,gh/67926113,ok,2026-07-05T12:40:12+00:00
 noxf/libwebp-sys,noxf/libwebp-sys,gh/109795973,ok,2026-07-05T12:40:12+00:00
 npkgz/cli-progress,npkgz/cli-progress,gh/47921134,ok,2026-07-05T12:40:12+00:00
@@ -6313,6 +6500,7 @@ ofalk/libdnet,ofalk/libdnet,gh/37396564,ok,2026-07-05T12:40:16+00:00
 ofek/coincurve,ofek/coincurve,gh/86128341,ok,2026-07-05T12:40:16+00:00
 ofek/hatch-vcs,ofek/hatch-vcs,gh/449491149,ok,2026-07-05T12:40:16+00:00
 ofek/userpath,ofek/userpath,gh/104287918,ok,2026-07-05T12:40:16+00:00
+offchainlabs/keccak-const,offchainlabs/keccak-const,gh/679945770,ok,2026-07-13T16:57:25+00:00
 ofiwg/libfabric,ofiwg/libfabric,gh/22996097,ok,2026-07-05T12:40:16+00:00
 ofw/curlify,ofw/curlify,gh/65730888,ok,2026-07-05T12:40:16+00:00
 ogeon/palette,ogeon/palette,gh/47269390,ok,2026-07-05T12:40:16+00:00
@@ -6325,10 +6513,12 @@ ogt/valid-url,ogt/valid-url,gh/11711453,ok,2026-07-05T12:40:16+00:00
 ohadravid/win32job-rs,ohadravid/win32job-rs,gh/237802492,ok,2026-07-05T12:40:16+00:00
 oittaa/uuid6-python,oittaa/uuid6-python,gh/433193559,ok,2026-07-05T12:40:16+00:00
 ojarva/python-sshpubkeys,ojarva/python-sshpubkeys,gh/28182691,ok,2026-07-05T12:40:16+00:00
+okibcn/nano-for-windows,okibcn/nano-for-windows,gh/593462384,ok,2026-07-13T16:57:25+00:00
 okken/pytest-check,okken/pytest-check,gh/108791429,ok,2026-07-05T12:40:16+00:00
 okunishinishi/python-stringcase,okunishinishi/python-stringcase,gh/39284642,ok,2026-07-05T12:40:16+00:00
 old-man-programmer/tree,old-man-programmer/tree,gh/472865820,ok,2026-07-05T12:40:16+00:00
 old-storyai/tracing-wasm,old-storyai/tracing-wasm,gh/278714966,ok,2026-07-05T12:40:16+00:00
+olekspickle/serde_default_utils,olekspickle/serde_default_utils,gh/741451808,ok,2026-07-13T16:57:25+00:00
 oli-obk/cargo_metadata,oli-obk/cargo_metadata,gh/79900360,ok,2026-07-05T12:40:16+00:00
 oli-obk/prettydiff,oli-obk/prettydiff,gh/168056910,ok,2026-07-05T12:40:16+00:00
 oli-obk/ui_test,oli-obk/ui_test,gh/518750329,ok,2026-07-05T12:40:16+00:00
@@ -6377,8 +6567,16 @@ open-draft/outvariant,open-draft/outvariant,gh/381859356,ok,2026-07-05T12:40:18+
 open-draft/strict-event-emitter,open-draft/strict-event-emitter,gh/322278894,ok,2026-07-05T12:40:18+00:00
 open-i18n/rust-unic,open-i18n/rust-unic,gh/94862886,ok,2026-07-05T12:40:18+00:00
 open-mpi/hwloc,open-mpi/hwloc,gh/13098944,ok,2026-07-05T12:40:18+00:00
+open-mpi/ompi,open-mpi/ompi,gh/24107001,ok,2026-07-13T16:57:25+00:00
+open-source-cooperative/android-native-keyring-store,open-source-cooperative/android-native-keyring-store,gh/980798037,ok,2026-07-13T16:57:25+00:00
+open-source-cooperative/apple-native-keyring-store,open-source-cooperative/apple-native-keyring-store,gh/992256352,ok,2026-07-13T16:57:25+00:00
+open-source-cooperative/dbus-secret-service-keyring-store,open-source-cooperative/dbus-secret-service-keyring-store,gh/990924552,ok,2026-07-13T16:57:25+00:00
+open-source-cooperative/keyring-core,open-source-cooperative/keyring-core,gh/992116703,ok,2026-07-13T16:57:25+00:00
 open-source-cooperative/keyring-rs,open-source-cooperative/keyring-rs,gh/51272473,ok,2026-07-05T12:40:18+00:00
+open-source-cooperative/linux-keyutils-keyring-store,open-source-cooperative/linux-keyutils-keyring-store,gh/973914753,ok,2026-07-13T16:57:25+00:00
 open-source-cooperative/secret-service-rs,open-source-cooperative/secret-service-rs,gh/49923137,ok,2026-07-05T12:40:18+00:00
+open-source-cooperative/windows-native-keyring-store,open-source-cooperative/windows-native-keyring-store,gh/992257174,ok,2026-07-13T16:57:25+00:00
+open-source-cooperative/zbus-secret-service-keyring-store,open-source-cooperative/zbus-secret-service-keyring-store,gh/990924044,ok,2026-07-13T16:57:25+00:00
 open-source-parsers/jsoncpp,open-source-parsers/jsoncpp,gh/21530861,ok,2026-07-05T12:40:18+00:00
 open-telemetry/opentelemetry-js,open-telemetry/opentelemetry-js,gh/185901023,ok,2026-07-05T12:40:18+00:00
 open-telemetry/opentelemetry-js-contrib,open-telemetry/opentelemetry-js-contrib,gh/255986659,ok,2026-07-05T12:40:18+00:00
@@ -6397,11 +6595,16 @@ opencollective/opencollective-postinstall,opencollective/opencollective-postinst
 opencv/opencv,opencv/opencv,gh/5108051,ok,2026-07-05T12:40:18+00:00
 opencv/opencv-python,opencv/opencv-python,gh/55781523,ok,2026-07-05T12:40:18+00:00
 opendataservices/json-merge-patch,opendataservices/json-merge-patch,gh/61222515,ok,2026-07-05T12:40:18+00:00
+opendevtools/base45,opendevtools/base45,gh/350439874,ok,2026-07-13T16:57:25+00:00
 openethereum/parity-ethereum,openethereum/parity-ethereum,gh/46714939,ok,2026-07-05T12:40:18+00:00
 openjdk/jdk25u,openjdk/jdk25u,gh/998606537,ok,2026-07-05T12:40:18+00:00
+openjdk/jdk26u,openjdk/jdk26u,gh/1113933330,ok,2026-07-13T16:57:25+00:00
+openldap/openldap,openldap/openldap,gh/57230414,ok,2026-07-13T16:57:25+00:00
 openlineage/openlineage,openlineage/openlineage,gh/306977038,ok,2026-07-05T12:40:19+00:00
+openmandrivaassociation/ladspa,openmandrivaassociation/ladspa,gh/39663186,ok,2026-07-13T16:57:25+00:00
 openmathlib/openblas,openmathlib/openblas,gh/1286805,ok,2026-07-05T12:40:19+00:00
 openpmix/openpmix,openpmix/openpmix,gh/44704948,ok,2026-07-05T12:40:19+00:00
+openpmix/prrte,openpmix/prrte,gh/61409768,ok,2026-07-13T16:57:25+00:00
 openprinting/cups,openprinting/cups,gh/292664437,ok,2026-07-05T12:40:19+00:00
 openprinting/cups-filters,openprinting/cups-filters,gh/105824994,ok,2026-07-05T12:40:19+00:00
 openprinting/pycups,openprinting/pycups,gh/62226694,ok,2026-07-05T12:40:19+00:00
@@ -6425,6 +6628,7 @@ openstack/cliff,openstack/cliff,gh/16626954,ok,2026-07-05T12:40:19+00:00
 openstack/swift,openstack/swift,gh/790019,ok,2026-07-05T12:40:19+00:00
 opentracing/opentracing-javascript,opentracing/opentracing-javascript,gh/49756910,ok,2026-07-05T12:40:19+00:00
 opentracing/opentracing-python,opentracing/opentracing-python,gh/49166869,ok,2026-07-05T12:40:19+00:00
+openucx/ucx,openucx/ucx,gh/25379390,ok,2026-07-13T16:57:25+00:00
 openvinotoolkit/openvino,openvinotoolkit/openvino,gh/153097643,ok,2026-07-05T12:40:19+00:00
 opsgenie/opsgenie-python-sdk,opsgenie/opsgenie-python-sdk,gh/54713476,ok,2026-07-05T12:40:19+00:00
 optimisticpeach/hexasphere,optimisticpeach/hexasphere,gh/284858719,ok,2026-07-05T12:40:19+00:00
@@ -6465,6 +6669,7 @@ othiym23/shimmer,othiym23/shimmer,gh/10233093,ok,2026-07-05T12:40:20+00:00
 otter-sec/anchor,otter-sec/anchor,gh/325891672,ok,2026-07-05T12:40:20+00:00
 outmoded/sntp,outmoded/sntp,gh/7724556,ok,2026-07-05T12:40:20+00:00
 owo-colors/owo-colors,owo-colors/owo-colors,gh/290130711,ok,2026-07-05T12:40:20+00:00
+oxc-project/forked-react-compiler,oxc-project/forked-react-compiler,gh/1258105386,ok,2026-07-13T16:57:25+00:00
 oxc-project/oxc,oxc-project/oxc,gh/599431918,ok,2026-07-05T12:40:20+00:00
 oxc-project/oxc-resolver,oxc-project/oxc-resolver,gh/728015366,ok,2026-07-05T12:40:20+00:00
 oxc-project/unicode-id,oxc-project/unicode-id,gh/453388702,ok,2026-07-05T12:40:20+00:00
@@ -6506,6 +6711,7 @@ paholg/typenum,paholg/typenum,gh/43174289,ok,2026-07-05T12:40:21+00:00
 pair-code/lit,pair-code/lit,gh/283215238,ok,2026-07-05T12:40:21+00:00
 pair-code/saliency,pair-code/saliency,gh/93900269,ok,2026-07-05T12:40:21+00:00
 pair-code/what-if-tool,pair-code/what-if-tool,gh/147871487,ok,2026-07-05T12:40:21+00:00
+pal1000/mesa-dist-win,pal1000/mesa-dist-win,gh/81497624,ok,2026-07-13T16:57:25+00:00
 palantir/tslint,palantir/tslint,gh/11672345,ok,2026-07-05T12:40:21+00:00
 palfrey/serial_test,palfrey/serial_test,gh/163653257,ok,2026-07-05T12:40:21+00:00
 pallets-eco/blinker,pallets-eco/blinker,gh/11147893,ok,2026-07-05T12:40:21+00:00
@@ -6558,7 +6764,7 @@ paritytech/libsecp256k1,paritytech/libsecp256k1,gh/113135482,ok,2026-07-05T12:39
 paritytech/mixnet,paritytech/mixnet,gh/444541959,ok,2026-07-05T12:39:45+00:00
 paritytech/nohash-hasher,paritytech/nohash-hasher,gh/149150975,ok,2026-07-05T12:39:45+00:00
 paritytech/orchestra,paritytech/orchestra,gh/540436520,ok,2026-07-05T12:39:45+00:00
-paritytech/pariry-common,paritytech/pariry-common,,not_found,2026-07-05T12:39:45+00:00
+paritytech/pariry-common,paritytech/pariry-common,,not_found,2026-07-13T17:01:47+00:00
 paritytech/parity-common,paritytech/parity-common,gh/139124943,ok,2026-07-05T12:39:45+00:00
 paritytech/parity-db,paritytech/parity-db,gh/251220692,ok,2026-07-05T12:39:45+00:00
 paritytech/parity-scale-codec,paritytech/parity-scale-codec,gh/148650739,ok,2026-07-05T12:39:45+00:00
@@ -6580,6 +6786,7 @@ paritytech/scale-typegen,paritytech/scale-typegen,gh/715729301,ok,2026-07-05T12:
 paritytech/scale-value,paritytech/scale-value,gh/493611725,ok,2026-07-05T12:39:45+00:00
 paritytech/schnorrkel,paritytech/schnorrkel,gh/157298320,ok,2026-07-05T12:39:45+00:00
 paritytech/send_wrapper,paritytech/send_wrapper,gh/188199013,ok,2026-07-05T12:39:45+00:00
+paritytech/smoldot,paritytech/smoldot,gh/241884669,ok,2026-07-13T16:57:25+00:00
 paritytech/smoldot-archive,paritytech/smoldot-archive,gh/599106753,ok,2026-07-05T12:39:45+00:00
 paritytech/soketto,paritytech/soketto,gh/185414508,ok,2026-07-05T12:39:45+00:00
 paritytech/ss58-registry,paritytech/ss58-registry,gh/405090625,ok,2026-07-05T12:39:45+00:00
@@ -6607,7 +6814,7 @@ paulchernoch/quantogram,paulchernoch/quantogram,gh/454629034,ok,2026-07-05T12:39
 paulfitz/daff,paulfitz/daff,gh/7568434,ok,2026-07-05T12:39:47+00:00
 paulirish/speedline,paulirish/speedline,gh/54674448,ok,2026-07-05T12:39:47+00:00
 paulmillr/array.prototype.find,paulmillr/array.prototype.find,gh/15341310,ok,2026-07-05T12:39:47+00:00
-paulmillr/async-each,paulmillr/async-each,,not_found,2026-07-05T12:39:47+00:00
+paulmillr/async-each,paulmillr/async-each,,not_found,2026-07-13T17:01:47+00:00
 paulmillr/chokidar,paulmillr/chokidar,gh/4090287,ok,2026-07-05T12:39:47+00:00
 paulmillr/es6-shim,paulmillr/es6-shim,gh/3046507,ok,2026-07-05T12:39:47+00:00
 paulmillr/noble-ciphers,paulmillr/noble-ciphers,gh/659761312,ok,2026-07-05T12:39:47+00:00
@@ -6621,7 +6828,9 @@ paulocsanz/arraystring,paulocsanz/arraystring,gh/161712753,ok,2026-07-05T12:39:4
 paupino/rust-decimal,paupino/rust-decimal,gh/73561616,ok,2026-07-05T12:39:47+00:00
 pavantatikonda/itypes,pavantatikonda/itypes,gh/48500293,ok,2026-07-05T12:39:47+00:00
 pavdmyt/yaspin,pavdmyt/yaspin,gh/109303405,ok,2026-07-05T12:39:47+00:00
+pawurb/hotpath-rs,pawurb/hotpath-rs,gh/1051353954,ok,2026-07-13T16:57:25+00:00
 pbojinov/request-ip,pbojinov/request-ip,gh/15033690,ok,2026-07-05T12:39:47+00:00
+pciutils/pciutils,pciutils/pciutils,gh/42773383,ok,2026-07-13T16:57:25+00:00
 pcre2project/pcre2,pcre2project/pcre2,gh/398251321,ok,2026-07-05T12:39:47+00:00
 pcwalton/offset-allocator,pcwalton/offset-allocator,gh/793955649,ok,2026-07-05T12:39:47+00:00
 pd4d10/vite-plugin-svgr,pd4d10/vite-plugin-svgr,gh/328100852,ok,2026-07-05T12:39:47+00:00
@@ -6649,6 +6858,7 @@ pennydreadfulmtg/pystache,pennydreadfulmtg/pystache,gh/407899292,ok,2026-07-05T1
 penumbra-zone/ed25519-consensus,penumbra-zone/ed25519-consensus,gh/406994275,ok,2026-07-05T12:39:47+00:00
 pepyakin/binaryen-rs,pepyakin/binaryen-rs,gh/98925020,ok,2026-07-05T12:39:47+00:00
 pepyakin/memory_units,pepyakin/memory_units,gh/120626014,ok,2026-07-05T12:39:47+00:00
+perl/perl5,perl/perl5,gh/8183570,ok,2026-07-13T16:57:25+00:00
 pest-parser/pest,pest-parser/pest,gh/56964647,ok,2026-07-05T12:39:48+00:00
 petebacondarwin/node-canonical-path,petebacondarwin/node-canonical-path,gh/15323082,ok,2026-07-05T12:39:48+00:00
 peterbe/premailer,peterbe/premailer,gh/251729,ok,2026-07-05T12:39:48+00:00
@@ -6704,7 +6914,7 @@ pillarjs/resolve-path,pillarjs/resolve-path,gh/18032158,ok,2026-07-05T12:39:49+0
 pillarjs/router,pillarjs/router,gh/23059630,ok,2026-07-05T12:39:49+00:00
 pillarjs/send,pillarjs/send,gh/4879977,ok,2026-07-05T12:39:49+00:00
 pimterry/loglevel,pimterry/loglevel,gh/8976707,ok,2026-07-05T12:39:49+00:00
-pinecone-io/python-plugin-interface,pinecone-io/python-plugin-interface,,not_found,2026-07-05T12:39:49+00:00
+pinecone-io/python-plugin-interface,pinecone-io/python-plugin-interface,,not_found,2026-07-13T17:01:47+00:00
 pinecone-io/python-sdk,pinecone-io/python-sdk,gh/406959432,ok,2026-07-05T12:39:49+00:00
 pinojs/pino,pinojs/pino,gh/51840802,ok,2026-07-05T12:39:49+00:00
 pinojs/pino-abstract-transport,pinojs/pino-abstract-transport,gh/355916490,ok,2026-07-05T12:39:49+00:00
@@ -6746,6 +6956,7 @@ plotly/dash-table,plotly/dash-table,gh/128151266,ok,2026-07-05T12:39:49+00:00
 plotly/kaleido,plotly/kaleido,gh/268501657,ok,2026-07-05T12:39:49+00:00
 plotly/plotly.py,plotly/plotly.py,gh/14579099,ok,2026-07-05T12:39:49+00:00
 plotters-rs/plotters,plotters-rs/plotters,gh/183275571,ok,2026-07-05T12:39:49+00:00
+pluots/cfg_block,pluots/cfg_block,gh/517192573,ok,2026-07-13T16:57:25+00:00
 pluots/stringmetrics,pluots/stringmetrics,gh/490662493,ok,2026-07-05T12:39:49+00:00
 plurals/pluralize,plurals/pluralize,gh/9152708,ok,2026-07-05T12:39:49+00:00
 pmem/ndctl,pmem/ndctl,gh/34079149,ok,2026-07-05T12:39:49+00:00
@@ -6789,6 +7000,7 @@ popzxc/stdext-rs,popzxc/stdext-rs,gh/275375160,ok,2026-07-05T12:39:50+00:00
 popzxc/trait-set,popzxc/trait-set,gh/359223208,ok,2026-07-05T12:39:50+00:00
 porsager/postgres,porsager/postgres,gh/223498871,ok,2026-07-05T12:39:50+00:00
 portable-network-archive/liblzma-rs,portable-network-archive/liblzma-rs,gh/695544430,ok,2026-07-05T12:39:50+00:00
+portaudio/portaudio,portaudio/portaudio,gh/298133717,ok,2026-07-13T16:57:25+00:00
 postcss/autoprefixer,postcss/autoprefixer,gh/8768406,ok,2026-07-05T12:39:50+00:00
 postcss/postcss,postcss/postcss,gh/13078968,ok,2026-07-05T12:39:50+00:00
 postcss/postcss-calc,postcss/postcss-calc,gh/22369123,ok,2026-07-05T12:39:50+00:00
@@ -6848,6 +7060,7 @@ prisma/engines-wrapper,prisma/engines-wrapper,gh/304578747,ok,2026-07-05T12:39:5
 prisma/opentls,prisma/opentls,gh/327670812,ok,2026-07-05T12:39:52+00:00
 prisma/prisma,prisma/prisma,gh/192925833,ok,2026-07-05T12:39:52+00:00
 prisma/streams,prisma/streams,gh/1183973373,ok,2026-07-05T12:39:52+00:00
+prisma/studio,prisma/studio,gh/202765008,ok,2026-07-13T16:57:25+00:00
 prisma/tiberius,prisma/tiberius,gh/250298089,ok,2026-07-05T12:39:52+00:00
 prismjs/prism,prismjs/prism,gh/4979467,ok,2026-07-05T12:39:53+00:00
 privatenumber/get-tsconfig,privatenumber/get-tsconfig,gh/447268358,ok,2026-07-05T12:39:53+00:00
@@ -6858,12 +7071,14 @@ programatik29/axum-server,programatik29/axum-server,gh/398201470,ok,2026-07-05T1
 progval/unicode_names2,progval/unicode_names2,gh/137616152,ok,2026-07-05T12:39:53+00:00
 projectfluent/fluent-langneg-rs,projectfluent/fluent-langneg-rs,gh/106058983,ok,2026-07-05T12:39:53+00:00
 projectfluent/fluent-rs,projectfluent/fluent-rs,gh/77560730,ok,2026-07-05T12:39:53+00:00
+prometheus/client_js,prometheus/client_js,gh/46582024,ok,2026-07-13T16:57:25+00:00
 prometheus/client_python,prometheus/client_python,gh/30618733,ok,2026-07-05T12:39:53+00:00
 prometheus/client_rust,prometheus/client_rust,gh/323438715,ok,2026-07-05T12:39:53+00:00
 promise-queue/promise-queue,promise-queue/promise-queue,gh/15224271,ok,2026-07-05T12:39:53+00:00
 promplate/partial-json-parser,promplate/partial-json-parser,gh/706085025,ok,2026-07-05T12:39:53+00:00
 prompt-toolkit/python-prompt-toolkit,prompt-toolkit/python-prompt-toolkit,gh/16241224,ok,2026-07-05T12:39:53+00:00
 proptest-rs/proptest,proptest-rs/proptest,gh/94702898,ok,2026-07-05T12:39:53+00:00
+prosemirror/prosemirror-changeset,prosemirror/prosemirror-changeset,gh/104326734,ok,2026-07-13T16:57:25+00:00
 prosemirror/prosemirror-commands,prosemirror/prosemirror-commands,gh/67619085,ok,2026-07-05T12:39:53+00:00
 prosemirror/prosemirror-dropcursor,prosemirror/prosemirror-dropcursor,gh/75847603,ok,2026-07-05T12:39:53+00:00
 prosemirror/prosemirror-gapcursor,prosemirror/prosemirror-gapcursor,gh/100492972,ok,2026-07-05T12:39:53+00:00
@@ -6912,9 +7127,11 @@ pugjs/void-elements,pugjs/void-elements,gh/23461968,ok,2026-07-05T12:39:55+00:00
 pugjs/with,pugjs/with,gh/10192061,ok,2026-07-05T12:39:55+00:00
 puleos/object-hash,puleos/object-hash,gh/17480011,ok,2026-07-05T12:39:55+00:00
 pulldown-cmark/pulldown-cmark,pulldown-cmark/pulldown-cmark,gh/36815297,ok,2026-07-05T12:39:55+00:00
+pulseaudio/pulseaudio,pulseaudio/pulseaudio,gh/7534762,ok,2026-07-13T16:57:25+00:00
 pulumi/pulumi,pulumi/pulumi,gh/72477752,ok,2026-07-05T12:39:55+00:00
 pumpkinseed/fakeit,pumpkinseed/fakeit,gh/186679637,ok,2026-07-05T12:39:55+00:00
 pumpkinseed/simplerand,pumpkinseed/simplerand,gh/272170208,ok,2026-07-05T12:39:55+00:00
+pupnp/pupnp,pupnp/pupnp,gh/855820,ok,2026-07-13T16:57:25+00:00
 puppeteer/puppeteer,puppeteer/puppeteer,gh/90796663,ok,2026-07-05T12:39:55+00:00
 purpleprotocol/mimalloc_rust,purpleprotocol/mimalloc_rust,gh/193500153,ok,2026-07-05T12:39:55+00:00
 puruvj/neotraverse,puruvj/neotraverse,gh/826794914,ok,2026-07-05T12:39:55+00:00
@@ -7046,7 +7263,7 @@ pyppeteer/pyppeteer,pyppeteer/pyppeteer,gh/237223760,ok,2026-07-05T12:39:56+00:0
 pyproj4/pyproj,pyproj4/pyproj,gh/28607354,ok,2026-07-05T12:39:56+00:00
 pyreadline/pyreadline,pyreadline/pyreadline,gh/2608337,ok,2026-07-05T12:39:56+00:00
 pyreadline3/pyreadline3,pyreadline3/pyreadline3,gh/451238915,ok,2026-07-05T12:39:56+00:00
-pyrossh/rust-embed,pyrossh/rust-embed,,not_found,2026-07-05T12:39:56+00:00
+pyrossh/rust-embed,pyrossh/rust-embed,,not_found,2026-07-13T17:01:47+00:00
 pyscaffold/configupdater,pyscaffold/configupdater,gh/137461722,ok,2026-07-05T12:39:56+00:00
 pyserial/pyserial,pyserial/pyserial,gh/40094312,ok,2026-07-05T12:39:56+00:00
 pyston/pyston,pyston/pyston,gh/343576900,ok,2026-07-05T12:39:58+00:00
@@ -7171,7 +7388,7 @@ pytroll/donfig,pytroll/donfig,gh/155937175,ok,2026-07-05T12:40:01+00:00
 pyudev/pyudev,pyudev/pyudev,gh/642328,ok,2026-07-05T12:40:01+00:00
 pyupio/dparse,pyupio/dparse,gh/96868114,ok,2026-07-05T12:40:01+00:00
 pyupio/safety,pyupio/safety,gh/71359600,ok,2026-07-05T12:40:01+00:00
-pyupio/safety_schemas,pyupio/safety_schemas,,not_found,2026-07-05T12:40:01+00:00
+pyupio/safety_schemas,pyupio/safety_schemas,,not_found,2026-07-13T17:01:47+00:00
 pyusb/pyusb,pyusb/pyusb,gh/2315698,ok,2026-07-05T12:40:01+00:00
 pyutils/line_profiler,pyutils/line_profiler,gh/227227463,ok,2026-07-05T12:40:01+00:00
 pywavelets/pywt,pywavelets/pywt,gh/11591264,ok,2026-07-05T12:40:01+00:00
@@ -7195,6 +7412,10 @@ qnighy/libwebp-rs,qnighy/libwebp-rs,gh/138021678,ok,2026-07-05T12:40:01+00:00
 qnighy/libwebp-sys2-rs,qnighy/libwebp-sys2-rs,gh/244087416,ok,2026-07-05T12:40:01+00:00
 qnighy/yasna.rs,qnighy/yasna.rs,gh/62432275,ok,2026-07-05T12:40:01+00:00
 qnnokabayashi/strck,qnnokabayashi/strck,gh/519908968,ok,2026-07-05T12:40:01+00:00
+qt/qtgraphs,qt/qtgraphs,gh/630784961,ok,2026-07-13T16:57:25+00:00
+qt/qthttpserver,qt/qthttpserver,gh/521263809,ok,2026-07-13T16:57:25+00:00
+qt/qtlanguageserver,qt/qtlanguageserver,gh/235808801,ok,2026-07-13T16:57:25+00:00
+qt/qttasktree,qt/qttasktree,gh/1072089990,ok,2026-07-13T16:57:25+00:00
 quadrupleslap/x264,quadrupleslap/x264,gh/116009390,ok,2026-07-05T12:40:01+00:00
 quandyfactory/dicttoxml,quandyfactory/dicttoxml,gh/3259921,ok,2026-07-05T12:40:01+00:00
 quansight-labs/accessible-pygments,quansight-labs/accessible-pygments,gh/539442352,ok,2026-07-05T12:40:01+00:00
@@ -7210,6 +7431,7 @@ quickwit-oss/census,quickwit-oss/census,gh/139085653,ok,2026-07-05T12:40:02+00:0
 quickwit-oss/levenshtein-automata,quickwit-oss/levenshtein-automata,gh/110902512,ok,2026-07-05T12:40:02+00:00
 quickwit-oss/murmurhash32,quickwit-oss/murmurhash32,gh/162057401,ok,2026-07-05T12:40:02+00:00
 quickwit-oss/tantivy,quickwit-oss/tantivy,gh/49412556,ok,2026-07-05T12:40:02+00:00
+quietmisdreavus/synchronoise,quietmisdreavus/synchronoise,gh/83364914,ok,2026-07-13T16:57:25+00:00
 quininer/cbor4ii,quininer/cbor4ii,gh/435149532,ok,2026-07-05T12:40:02+00:00
 quininer/memsec,quininer/memsec,gh/60885883,ok,2026-07-05T12:40:02+00:00
 quininer/precomputed-map,quininer/precomputed-map,gh/973301888,ok,2026-07-05T12:40:02+00:00
@@ -7220,6 +7442,7 @@ quodlibet/mutagen,quodlibet/mutagen,gh/55713112,ok,2026-07-05T12:40:02+00:00
 qwandor/anes-rs,qwandor/anes-rs,gh/217554563,ok,2026-07-05T12:40:02+00:00
 r-efi/r-efi,r-efi/r-efi,gh/159830626,ok,2026-07-05T12:40:02+00:00
 r1chardj0n3s/parse,r1chardj0n3s/parse,gh/2793435,ok,2026-07-05T12:40:02+00:00
+rabbitmq/rabbitmq-server,rabbitmq/rabbitmq-server,gh/924551,ok,2026-07-13T16:57:25+00:00
 radix-ui/primitives,radix-ui/primitives,gh/273499522,ok,2026-07-05T12:40:02+00:00
 rafeca/prettyjson,rafeca/prettyjson,gh/2550317,ok,2026-07-05T12:40:02+00:00
 rahix/atdf2svd,rahix/atdf2svd,gh/185458485,ok,2026-07-05T12:40:02+00:00
@@ -7257,6 +7480,7 @@ ratatui/instability,ratatui/instability,gh/820851766,ok,2026-07-05T12:40:03+00:0
 ratatui/kasuari,ratatui/kasuari,gh/867346542,ok,2026-07-05T12:40:03+00:00
 ratatui/line-clipping,ratatui/line-clipping,gh/890610221,ok,2026-07-05T12:40:03+00:00
 ratatui/ratatui,ratatui/ratatui,gh/600886023,ok,2026-07-05T12:40:03+00:00
+ratatui/ratatui-image,ratatui/ratatui-image,gh/654893244,ok,2026-07-13T16:57:25+00:00
 rauschma/openurl,rauschma/openurl,gh/3541864,ok,2026-07-05T12:40:03+00:00
 rawify/complex.js,rawify/complex.js,gh/37833249,ok,2026-07-05T12:40:03+00:00
 rawify/fraction.js,rawify/fraction.js,gh/17650856,ok,2026-07-05T12:40:03+00:00
@@ -7366,7 +7590,9 @@ react-navigation/react-navigation,react-navigation/react-navigation,gh/80149262,
 react-restart/hooks,react-restart/hooks,gh/154712163,ok,2026-07-05T12:40:05+00:00
 react-restart/ui,react-restart/ui,gh/357743577,ok,2026-07-05T12:40:05+00:00
 react-syntax-highlighter/react-syntax-highlighter,react-syntax-highlighter/react-syntax-highlighter,gh/50480643,ok,2026-07-05T12:40:05+00:00
+react/create-react-app,react/create-react-app,gh/63537249,ok,2026-07-13T16:57:25+00:00
 react/metro,react/metro,gh/76504246,ok,2026-07-05T12:40:05+00:00
+react/react,react/react,gh/10270250,ok,2026-07-13T16:57:25+00:00
 react/react-native,react/react-native,gh/29028775,ok,2026-07-05T12:40:05+00:00
 reactchartjs/react-chartjs-2,reactchartjs/react-chartjs-2,gh/58237167,ok,2026-07-05T12:40:05+00:00
 reactive-extensions/rxjs,reactive-extensions/rxjs,gh/3122202,ok,2026-07-05T12:40:05+00:00
@@ -7397,6 +7623,7 @@ redis/hiredis,redis/hiredis,gh/673267,ok,2026-07-05T12:40:05+00:00
 redis/hiredis-py,redis/hiredis-py,gh/1303362,ok,2026-07-05T12:40:05+00:00
 redis/ioredis,redis/ioredis,gh/33293613,ok,2026-07-05T12:40:05+00:00
 redis/node-redis,redis/node-redis,gh/908893,ok,2026-07-05T12:40:05+00:00
+redis/redis,redis/redis,gh/156018,ok,2026-07-13T16:57:25+00:00
 redis/redis-py,redis/redis-py,gh/363150,ok,2026-07-05T12:40:05+00:00
 redis/redis-vl-python,redis/redis-vl-python,gh/561914940,ok,2026-07-05T12:40:05+00:00
 redox-os/tfs,redox-os/tfs,gh/71287331,ok,2026-07-05T12:40:07+00:00
@@ -7422,6 +7649,7 @@ reem/rust-unreachable,reem/rust-unreachable,gh/36764976,ok,2026-07-05T12:40:07+0
 reem/rust-unsafe-any,reem/rust-unsafe-any,gh/22894900,ok,2026-07-05T12:40:07+00:00
 reem/rust-variance,reem/rust-variance,gh/50395651,ok,2026-07-05T12:40:07+00:00
 reem/rust-void,reem/rust-void,gh/30583335,ok,2026-07-05T12:40:07+00:00
+reference-lapack/lapack,reference-lapack/lapack,gh/57351353,ok,2026-07-13T16:57:25+00:00
 regebro/tzlocal,regebro/tzlocal,gh/5764651,ok,2026-07-05T12:40:07+00:00
 regexhq/dotfile-regex,regexhq/dotfile-regex,gh/29656943,ok,2026-07-05T12:40:07+00:00
 regexhq/filename-regex,regexhq/filename-regex,gh/29173238,ok,2026-07-05T12:40:07+00:00
@@ -7495,6 +7723,7 @@ rexxars/eventsource-parser,rexxars/eventsource-parser,gh/543807814,ok,2026-07-05
 rexxars/hyphenate-style-name,rexxars/hyphenate-style-name,gh/40114317,ok,2026-07-05T12:40:08+00:00
 rexxars/registry-auth-token,rexxars/registry-auth-token,gh/54893312,ok,2026-07-05T12:40:08+00:00
 rfc1036/whois,rfc1036/whois,gh/9126725,ok,2026-07-05T12:40:08+00:00
+rgs/sub-identify,rgs/sub-identify,gh/756241,ok,2026-07-13T16:57:25+00:00
 rhaiscript/rhai,rhaiscript/rhai,gh/52825741,ok,2026-07-05T12:40:08+00:00
 rhboot/efivar,rhboot/efivar,gh/5442598,ok,2026-07-05T12:40:08+00:00
 rhgrant10/ndjson,rhgrant10/ndjson,gh/133843992,ok,2026-07-05T12:40:08+00:00
@@ -7547,6 +7776,7 @@ robinweser/css-in-js-utils,robinweser/css-in-js-utils,gh/81833560,ok,2026-07-05T
 robinweser/inline-style-prefixer,robinweser/inline-style-prefixer,gh/40596634,ok,2026-07-05T12:40:10+00:00
 robjtede/impl-more,robjtede/impl-more,gh/541311381,ok,2026-07-05T12:40:10+00:00
 robjtede/rustversion-msrv,robjtede/rustversion-msrv,gh/799618626,ok,2026-07-05T12:40:10+00:00
+robjtede/tinymap,robjtede/tinymap,gh/289139192,ok,2026-07-13T16:57:25+00:00
 robotframework/pythonlibcore,robotframework/pythonlibcore,gh/80674254,ok,2026-07-05T12:40:10+00:00
 robotframework/robotframework,robotframework/robotframework,gh/21273155,ok,2026-07-05T12:40:10+00:00
 robotframework/seleniumlibrary,robotframework/seleniumlibrary,gh/2625205,ok,2026-07-05T12:40:11+00:00
@@ -7584,6 +7814,7 @@ rollup/rollup-plugin-babel,rollup/rollup-plugin-babel,gh/44689601,ok,2026-07-05T
 rollup/rollup-pluginutils,rollup/rollup-pluginutils,gh/44849666,ok,2026-07-05T12:40:11+00:00
 romeodespres/pkce,romeodespres/pkce,gh/237394253,ok,2026-07-05T12:40:11+00:00
 romis2012/python-socks,romis2012/python-socks,gh/297057488,ok,2026-07-05T12:40:11+00:00
+romnn/yaml-spanned,romnn/yaml-spanned,gh/949514355,ok,2026-07-13T16:57:25+00:00
 ron-rs/ron,ron-rs/ron,gh/34287127,ok,2026-07-05T12:40:11+00:00
 ronaldoussoren/altgraph,ronaldoussoren/altgraph,gh/230886098,ok,2026-07-05T12:40:11+00:00
 ronaldoussoren/macholib,ronaldoussoren/macholib,gh/231951689,ok,2026-07-05T12:40:11+00:00
@@ -7640,6 +7871,7 @@ rundevelopment/refa,rundevelopment/refa,gh/249479294,ok,2026-07-05T12:40:12+00:0
 rundevelopment/regexp-ast-analysis,rundevelopment/regexp-ast-analysis,gh/355883010,ok,2026-07-05T12:40:12+00:00
 rundevelopment/scslre,rundevelopment/scslre,gh/324798871,ok,2026-07-05T12:40:12+00:00
 runk/node-chardet,runk/node-chardet,gh/9749948,ok,2026-07-05T12:40:12+00:00
+rurban/cpanel-json-xs,rurban/cpanel-json-xs,gh/4814021,ok,2026-07-13T16:57:25+00:00
 rushmorem/publicsuffix,rushmorem/publicsuffix,gh/77560156,ok,2026-07-05T12:40:12+00:00
 rusoto/rusoto,rusoto/rusoto,gh/39107211,ok,2026-07-05T12:40:12+00:00
 rusqlite/rusqlite,rusqlite/rusqlite,gh/26177824,ok,2026-07-05T12:40:12+00:00
@@ -7839,8 +8071,9 @@ rustcrypto/block-ciphers,rustcrypto/block-ciphers,gh/76649021,ok,2026-07-05T12:4
 rustcrypto/block-modes,rustcrypto/block-modes,gh/426287087,ok,2026-07-05T12:40:16+00:00
 rustcrypto/crypto-bigint,rustcrypto/crypto-bigint,gh/406052644,ok,2026-07-05T12:40:16+00:00
 rustcrypto/elliptic-curves,rustcrypto/elliptic-curves,gh/231998609,ok,2026-07-05T12:40:16+00:00
-rustcrypto/ff,rustcrypto/ff,,not_found,2026-07-05T12:40:16+00:00
+rustcrypto/ff,rustcrypto/ff,,not_found,2026-07-13T17:01:47+00:00
 rustcrypto/formats,rustcrypto/formats,gh/406051759,ok,2026-07-05T12:40:16+00:00
+rustcrypto/group,rustcrypto/group,gh/1101530475,ok,2026-07-13T16:57:25+00:00
 rustcrypto/hashes,rustcrypto/hashes,gh/74106774,ok,2026-07-05T12:40:16+00:00
 rustcrypto/hybrid-array,rustcrypto/hybrid-array,gh/741742159,ok,2026-07-05T12:40:16+00:00
 rustcrypto/kdfs,rustcrypto/kdfs,gh/28730111,ok,2026-07-05T12:40:16+00:00
@@ -7857,6 +8090,7 @@ rustcrypto/stream-ciphers,rustcrypto/stream-ciphers,gh/83051505,ok,2026-07-05T12
 rustcrypto/traits,rustcrypto/traits,gh/85605821,ok,2026-07-05T12:40:17+00:00
 rustcrypto/universal-hashes,rustcrypto/universal-hashes,gh/205428867,ok,2026-07-05T12:40:17+00:00
 rustcrypto/utils,rustcrypto/utils,gh/77307442,ok,2026-07-05T12:40:17+00:00
+rustcrypto/xofs,rustcrypto/xofs,gh/1239850359,ok,2026-07-13T16:57:25+00:00
 rusterlium/rustler,rusterlium/rustler,gh/40983173,ok,2026-07-05T12:40:17+00:00
 rustgd/cgmath,rustgd/cgmath,gh/12371696,ok,2026-07-05T12:40:17+00:00
 rusticata/asn1-rs,rusticata/asn1-rs,gh/382397099,ok,2026-07-05T12:40:17+00:00
@@ -7884,9 +8118,10 @@ rustls/webpki,rustls/webpki,gh/528342545,ok,2026-07-05T12:40:17+00:00
 rustls/webpki-roots,rustls/webpki-roots,gh/66767732,ok,2026-07-05T12:40:17+00:00
 rustonaut/maybe-owned,rustonaut/maybe-owned,gh/91564933,ok,2026-07-05T12:40:17+00:00
 rustonaut/vec1,rustonaut/vec1,gh/117703394,ok,2026-07-05T12:40:17+00:00
-rustpq/pqclean,rustpq/pqclean,,not_found,2026-07-05T12:40:17+00:00
+rustpq/pqclean,rustpq/pqclean,,not_found,2026-07-13T17:01:47+00:00
 rustpq/pqcrypto,rustpq/pqcrypto,gh/179281380,ok,2026-07-05T12:40:17+00:00
 rustpython/parser,rustpython/parser,gh/636754925,ok,2026-07-05T12:40:17+00:00
+rustpython/rustpython,rustpython/rustpython,gh/135201145,ok,2026-07-13T16:57:25+00:00
 rustsec/rustsec,rustsec/rustsec,gh/81192894,ok,2026-07-05T12:40:17+00:00
 rustwasm/console_error_panic_hook,rustwasm/console_error_panic_hook,gh/134631768,ok,2026-07-05T12:40:17+00:00
 rustwasm/wee_alloc,rustwasm/wee_alloc,gh/118973621,ok,2026-07-05T12:40:17+00:00
@@ -7942,12 +8177,14 @@ salesforce/buffer-equal-constant-time,salesforce/buffer-equal-constant-time,gh/1
 salesforce/cloudsplaining,salesforce/cloudsplaining,gh/256772852,ok,2026-07-05T12:40:19+00:00
 salesforce/policy_sentry,salesforce/policy_sentry,gh/209652627,ok,2026-07-05T12:40:19+00:00
 salesforce/tough-cookie,salesforce/tough-cookie,gh/2606873,ok,2026-07-05T12:40:19+00:00
+salvo-rs/certon,salvo-rs/certon,gh/1185393716,ok,2026-07-13T16:57:25+00:00
 salvo-rs/mime-infer,salvo-rs/mime-infer,gh/705481705,ok,2026-07-05T12:40:19+00:00
+salvo-rs/multra,salvo-rs/multra,gh/1198498795,ok,2026-07-13T16:57:25+00:00
 salvo-rs/salvo,salvo-rs/salvo,gh/220185454,ok,2026-07-05T12:40:19+00:00
 salvo-rs/salvo-http3,salvo-rs/salvo-http3,gh/662815449,ok,2026-07-05T12:40:19+00:00
 salvo-rs/saysion,salvo-rs/saysion,gh/1126596859,ok,2026-07-05T12:40:19+00:00
 sam-github/node-debuglog,sam-github/node-debuglog,gh/11188392,ok,2026-07-05T12:40:19+00:00
-sam-osamu/com.kanaria,sam-osamu/com.kanaria,,not_found,2026-07-05T12:40:19+00:00
+sam-osamu/com.kanaria,sam-osamu/com.kanaria,,not_found,2026-07-13T17:01:47+00:00
 sam0x17/docify,sam0x17/docify,gh/637964668,ok,2026-07-05T12:40:19+00:00
 sam0x17/macro_magic,sam0x17/macro_magic,gh/606307053,ok,2026-07-05T12:40:20+00:00
 sam0x17/proc-utils,sam0x17/proc-utils,gh/650899391,ok,2026-07-05T12:40:20+00:00
@@ -8016,6 +8253,7 @@ sazze/node-nanotime,sazze/node-nanotime,gh/71184161,ok,2026-07-05T12:40:22+00:00
 sbdchd/celery-types,sbdchd/celery-types,gh/336931276,ok,2026-07-05T12:40:22+00:00
 sbdchd/codeowners,sbdchd/codeowners,gh/200386032,ok,2026-07-05T12:40:22+00:00
 sboudrias/inquirer.js,sboudrias/inquirer.js,gh/10114077,ok,2026-07-05T12:40:22+00:00
+sboudrias/mem-fs,sboudrias/mem-fs,gh/25338542,ok,2026-07-13T17:01:47+00:00
 sboudrias/mem-fs-editor,sboudrias/mem-fs-editor,gh/25338697,ok,2026-07-05T12:40:22+00:00
 sboudrias/readline2,sboudrias/readline2,gh/16335158,ok,2026-07-05T12:40:22+00:00
 sboudrias/run-async,sboudrias/run-async,gh/22822109,ok,2026-07-05T12:40:22+00:00
@@ -8069,10 +8307,12 @@ scttcper/tinycolor,scttcper/tinycolor,gh/131563275,ok,2026-07-05T12:39:46+00:00
 scufflecloud/static-assertions,scufflecloud/static-assertions,gh/744151610,ok,2026-07-05T12:39:46+00:00
 scverse/anndata,scverse/anndata,gh/100038377,ok,2026-07-05T12:39:46+00:00
 scverse/fast-array-utils,scverse/fast-array-utils,gh/923015488,ok,2026-07-05T12:39:46+00:00
+scverse/gget,scverse/gget,gh/488684164,ok,2026-07-13T16:57:25+00:00
 scverse/scanpy,scverse/scanpy,gh/80342493,ok,2026-07-05T12:39:46+00:00
 scverse/session-info2,scverse/session-info2,gh/734840558,ok,2026-07-05T12:39:46+00:00
 scylladb/scylla-rust-driver,scylladb/scylla-rust-driver,gh/305989099,ok,2026-07-05T12:39:46+00:00
 sdd/kiddo,sdd/kiddo,gh/535228415,ok,2026-07-05T12:39:46+00:00
+sde-gui/gtk-engines,sde-gui/gtk-engines,gh/636064085,ok,2026-07-13T16:57:25+00:00
 sdispater/cachy,sdispater/cachy,gh/40030070,ok,2026-07-05T12:39:46+00:00
 sdispater/clikit,sdispater/clikit,gh/160699253,ok,2026-07-05T12:39:46+00:00
 sdispater/pastel,sdispater/pastel,gh/80675194,ok,2026-07-05T12:39:46+00:00
@@ -8098,7 +8338,9 @@ seaql/sea-schema,seaql/sea-schema,gh/347671583,ok,2026-07-05T12:39:46+00:00
 seatgeek/fuzzywuzzy,seatgeek/fuzzywuzzy,gh/2019626,ok,2026-07-05T12:39:46+00:00
 seatgeek/thefuzz,seatgeek/thefuzz,gh/344908284,ok,2026-07-05T12:39:46+00:00
 sebastienrousseau/libyml,sebastienrousseau/libyml,gh/806936767,ok,2026-07-05T12:39:46+00:00
+sebastienrousseau/noyalib,sebastienrousseau/noyalib,gh/1161101789,ok,2026-07-13T16:57:25+00:00
 sebastienrousseau/serde_yml,sebastienrousseau/serde_yml,gh/806126168,ok,2026-07-05T12:39:46+00:00
+sebastinas/ascon-aead,sebastinas/ascon-aead,gh/360664742,ok,2026-07-13T16:57:25+00:00
 sebcrozet/cordic,sebcrozet/cordic,gh/259392320,ok,2026-07-05T12:39:47+00:00
 sebcrozet/instant,sebcrozet/instant,gh/180235156,ok,2026-07-05T12:39:47+00:00
 sebhildebrandt/systeminformation,sebhildebrandt/systeminformation,gh/17677611,ok,2026-07-05T12:39:47+00:00
@@ -8134,6 +8376,7 @@ senchalabs/connect,senchalabs/connect,gh/687836,ok,2026-07-05T12:39:47+00:00
 sendgrid/python-http-client,sendgrid/python-http-client,gh/52136436,ok,2026-07-05T12:39:47+00:00
 sendgrid/sendgrid-nodejs,sendgrid/sendgrid-nodejs,gh/3114742,ok,2026-07-05T12:39:47+00:00
 sendgrid/sendgrid-python,sendgrid/sendgrid-python,gh/3546794,ok,2026-07-05T12:39:47+00:00
+seperman/deepdiff,qlustered/deepdiff,gh/24484622,ok,2026-07-13T16:57:25+00:00
 seperman/orderly-set,seperman/orderly-set,gh/801769044,ok,2026-07-05T12:39:47+00:00
 seppo0010/rustc-version-runtime-rs,seppo0010/rustc-version-runtime-rs,gh/41276997,ok,2026-07-05T12:39:47+00:00
 sequelize/sequelize,sequelize/sequelize,gh/790359,ok,2026-07-05T12:39:47+00:00
@@ -8142,6 +8385,7 @@ sequelize/umzug,sequelize/umzug,gh/25937956,ok,2026-07-05T12:39:47+00:00
 serde-rs/bytes,serde-rs/bytes,gh/87358441,ok,2026-07-05T12:39:47+00:00
 serde-rs/json,serde-rs/json,gh/35894511,ok,2026-07-05T12:39:47+00:00
 serde-rs/serde,serde-rs/serde,gh/14367737,ok,2026-07-05T12:39:47+00:00
+sereal/sereal,sereal/sereal,gh/5597025,ok,2026-07-13T16:57:25+00:00
 serenity-rs/serenity,serenity-rs/serenity,gh/73012103,ok,2026-07-05T12:39:47+00:00
 serge-sans-paille/gast,serge-sans-paille/gast,gh/63594069,ok,2026-07-05T12:39:47+00:00
 sergey-dryabzhinsky/python-zstd,sergey-dryabzhinsky/python-zstd,gh/32665798,ok,2026-07-05T12:39:47+00:00
@@ -8159,7 +8403,7 @@ sergiobenitez/yansi,sergiobenitez/yansi,gh/93125609,ok,2026-07-05T12:39:48+00:00
 sergiusiw/noisy_float-rs,sergiusiw/noisy_float-rs,gh/66750799,ok,2026-07-05T12:39:48+00:00
 serialport/serialport-rs,serialport/serialport-rs,gh/456655985,ok,2026-07-05T12:39:48+00:00
 serverless/serverless,serverless/serverless,gh/34302698,ok,2026-07-05T12:39:48+00:00
-serverless/utils,serverless/utils,,not_found,2026-07-05T12:39:48+00:00
+serverless/utils,serverless/utils,,not_found,2026-07-13T17:01:47+00:00
 servo/cgl-rs,servo/cgl-rs,gh/25901673,ok,2026-07-05T12:39:48+00:00
 servo/core-foundation-rs,servo/core-foundation-rs,gh/5621513,ok,2026-07-05T12:39:48+00:00
 servo/dwrote-rs,servo/dwrote-rs,gh/82345324,ok,2026-07-05T12:39:48+00:00
@@ -8177,6 +8421,7 @@ servo/rust-cssparser,servo/rust-cssparser,gh/11317014,ok,2026-07-05T12:39:48+00:
 servo/rust-fnv,servo/rust-fnv,gh/33499190,ok,2026-07-05T12:39:48+00:00
 servo/rust-fontconfig,servo/rust-fontconfig,gh/6392857,ok,2026-07-05T12:39:48+00:00
 servo/rust-freetype,servo/rust-freetype,gh/6391267,ok,2026-07-05T12:39:48+00:00
+servo/rust-harfbuzz,servo/rust-harfbuzz,gh/4301795,ok,2026-07-13T16:57:25+00:00
 servo/rust-smallvec,servo/rust-smallvec,gh/33456236,ok,2026-07-05T12:39:48+00:00
 servo/rust-url,servo/rust-url,gh/14934771,ok,2026-07-05T12:39:48+00:00
 servo/servo,servo/servo,gh/3390243,ok,2026-07-05T12:39:48+00:00
@@ -8255,6 +8500,7 @@ shepmaster/twox-hash,shepmaster/twox-hash,gh/35312393,ok,2026-07-05T12:39:51+00:
 sherlock-holo/io_uring_buf_ring,sherlock-holo/io_uring_buf_ring,gh/821205263,ok,2026-07-05T12:39:51+00:00
 sheroz/tick_counter,sheroz/tick_counter,gh/660386424,ok,2026-07-05T12:39:51+00:00
 shesek/iferr,shesek/iferr,gh/18680222,ok,2026-07-05T12:39:51+00:00
+shevek/libspf2,shevek/libspf2,gh/3289233,ok,2026-07-13T16:57:25+00:00
 shibukawa/imagesize_py,shibukawa/imagesize_py,gh/50823059,ok,2026-07-05T12:39:51+00:00
 shikijs/shiki,shikijs/shiki,gh/155288604,ok,2026-07-05T12:39:51+00:00
 shikijs/vscode-textmate,shikijs/vscode-textmate,gh/850414885,ok,2026-07-05T12:39:51+00:00
@@ -8297,8 +8543,19 @@ sigstore/protobuf-specs,sigstore/protobuf-specs,gh/555326109,ok,2026-07-05T12:39
 sigstore/sigstore-js,sigstore/sigstore-js,gh/495574555,ok,2026-07-05T12:39:51+00:00
 siilwyn/css-declaration-sorter,siilwyn/css-declaration-sorter,gh/49274737,ok,2026-07-05T12:39:51+00:00
 siimon/prom-client,prometheus/client_js,gh/46582024,ok,2026-07-05T12:39:51+00:00
+sile/atomic_immut,sile/atomic_immut,gh/90363846,ok,2026-07-13T16:57:25+00:00
+sile/bytecodec,sile/bytecodec,gh/126373737,ok,2026-07-13T16:57:25+00:00
+sile/factory,sile/factory,gh/127317697,ok,2026-07-13T16:57:25+00:00
+sile/fibers_global,sile/fibers_global,gh/142867693,ok,2026-07-13T16:57:25+00:00
+sile/fibers_http_server,sile/fibers_http_server,gh/125169312,ok,2026-07-13T16:57:25+00:00
+sile/handy_async,sile/handy_async,gh/72302782,ok,2026-07-13T16:57:25+00:00
+sile/httpcodec,sile/httpcodec,gh/129116905,ok,2026-07-13T16:57:25+00:00
 sile/libflate,sile/libflate,gh/70087765,ok,2026-07-05T12:39:51+00:00
+sile/nbchan,sile/nbchan,gh/90545982,ok,2026-07-13T16:57:25+00:00
+sile/prometrics,sile/prometrics,gh/104910042,ok,2026-07-13T16:57:25+00:00
 sile/serdeconv,sile/serdeconv,gh/90442542,ok,2026-07-05T12:39:51+00:00
+sile/sloggers,sile/sloggers,gh/89844285,ok,2026-07-13T16:57:25+00:00
+sile/splay_tree,sile/splay_tree,gh/65414326,ok,2026-07-13T16:57:25+00:00
 sile/thrift_codec,sile/thrift_codec,gh/106398982,ok,2026-07-05T12:39:52+00:00
 sile/trackable,sile/trackable,gh/81593364,ok,2026-07-05T12:39:52+00:00
 sile/trackable_derive,sile/trackable_derive,gh/149388058,ok,2026-07-05T12:39:52+00:00
@@ -8314,6 +8571,7 @@ simdutf/simdutf,simdutf/simdutf,gh/335799265,ok,2026-07-05T12:39:52+00:00
 simenb/collect-v8-coverage,simenb/collect-v8-coverage,gh/228471713,ok,2026-07-05T12:39:52+00:00
 simenb/realpath-native,simenb/realpath-native,gh/114526283,ok,2026-07-05T12:39:52+00:00
 simlist/pyluach,simlist/pyluach,gh/20846811,ok,2026-07-05T12:39:52+00:00
+simonask/libyaml-safer,simonask/libyaml-safer,gh/748580775,ok,2026-07-13T16:57:25+00:00
 simonepri/pidtree,simonepri/pidtree,gh/125794606,ok,2026-07-05T12:39:52+00:00
 simonpercivall/astunparse,simonpercivall/astunparse,gh/18298291,ok,2026-07-05T12:39:52+00:00
 simonsapin/rust-std-candidates,simonsapin/rust-std-candidates,gh/27554149,ok,2026-07-05T12:39:52+00:00
@@ -8654,6 +8912,7 @@ sinonjs/fake-timers,sinonjs/fake-timers,gh/16523712,ok,2026-07-05T12:40:01+00:00
 sinonjs/nise,sinonjs/nise,gh/95355021,ok,2026-07-05T12:40:01+00:00
 sinonjs/samsam,sinonjs/samsam,gh/5026317,ok,2026-07-05T12:40:01+00:00
 sinonjs/sinon,sinonjs/sinon,gh/747698,ok,2026-07-05T12:40:01+00:00
+sinonjs/text-encoding,sinonjs/text-encoding,gh/171283897,ok,2026-07-13T16:57:25+00:00
 sirosen/dependency-groups,sirosen/dependency-groups,gh/984236948,ok,2026-07-05T12:40:01+00:00
 sissaschool/elementpath,sissaschool/elementpath,gh/126886685,ok,2026-07-05T12:40:01+00:00
 sissaschool/xmlschema,sissaschool/xmlschema,gh/70905710,ok,2026-07-05T12:40:01+00:00
@@ -8686,6 +8945,7 @@ slog-rs/async,slog-rs/async,gh/82147169,ok,2026-07-05T12:40:01+00:00
 slog-rs/atomic,slog-rs/atomic,gh/75219709,ok,2026-07-05T12:40:01+00:00
 slog-rs/envlogger,slog-rs/envlogger,gh/71210481,ok,2026-07-05T12:40:01+00:00
 slog-rs/json,slog-rs/json,gh/75225802,ok,2026-07-05T12:40:01+00:00
+slog-rs/kvfilter,slog-rs/kvfilter,gh/80497998,ok,2026-07-13T16:57:25+00:00
 slog-rs/scope,slog-rs/scope,gh/75222740,ok,2026-07-05T12:40:01+00:00
 slog-rs/slog,slog-rs/slog,gh/60992052,ok,2026-07-05T12:40:01+00:00
 slog-rs/stdlog,slog-rs/stdlog,gh/77270659,ok,2026-07-05T12:40:01+00:00
@@ -8783,6 +9043,7 @@ solana-labs/solana-program-library,solana-labs/solana-program-library,gh/2679405
 solana-program/associated-token-account,solana-program/associated-token-account,gh/902120855,ok,2026-07-05T12:40:03+00:00
 solana-program/config,solana-program/config,gh/773934784,ok,2026-07-05T12:40:03+00:00
 solana-program/libraries,solana-program/libraries,gh/902121386,ok,2026-07-05T12:40:03+00:00
+solana-program/memo,solana-program/memo,gh/771960907,ok,2026-07-13T16:57:25+00:00
 solana-program/stake,solana-program/stake,gh/768750967,ok,2026-07-05T12:40:03+00:00
 solana-program/token,solana-program/token,gh/793503448,ok,2026-07-05T12:40:03+00:00
 solana-program/token-2022,solana-program/token-2022,gh/798237492,ok,2026-07-05T12:40:03+00:00
@@ -8856,6 +9117,7 @@ squattingsocrates/sqlite,squattingsocrates/sqlite,gh/578295329,ok,2026-07-05T12:
 squidfunk/mkdocs-material,squidfunk/mkdocs-material,gh/50617428,ok,2026-07-05T12:40:06+00:00
 squirrelchat/smol-toml,squirrelchat/smol-toml,gh/635832264,ok,2026-07-05T12:40:06+00:00
 srijs/rust-crc32fast,srijs/rust-crc32fast,gh/157348282,ok,2026-07-05T12:40:06+00:00
+srijs/rust-gearhash,srijs/rust-gearhash,gh/226493378,ok,2026-07-13T16:57:25+00:00
 srivatsa-kasagar/diff,srivatsa-kasagar/diff,gh/1126681292,ok,2026-07-05T12:40:06+00:00
 sru-systems/rust-argon2,sru-systems/rust-argon2,gh/83714826,ok,2026-07-05T12:40:06+00:00
 ssheldon/malloc_buf,ssheldon/malloc_buf,gh/29405822,ok,2026-07-05T12:40:06+00:00
@@ -8866,6 +9128,8 @@ ssheldon/rust-objc-exception,ssheldon/rust-objc-exception,gh/35143204,ok,2026-07
 ssheldon/rust-objc-foundation,ssheldon/rust-objc-foundation,gh/32739728,ok,2026-07-05T12:40:06+00:00
 ssheldon/rust-objc-id,ssheldon/rust-objc-id,gh/34960030,ok,2026-07-05T12:40:06+00:00
 ssut/py-googletrans,ssut/py-googletrans,gh/36921680,ok,2026-07-05T12:40:06+00:00
+stack-rs/bandwidth,stack-rs/bandwidth,gh/599081781,ok,2026-07-13T16:57:25+00:00
+stack-rs/human-bandwidth,stack-rs/human-bandwidth,gh/819844208,ok,2026-07-13T16:57:25+00:00
 stackabletech/tokio-zookeeper,stackabletech/tokio-zookeeper,gh/139356249,ok,2026-07-05T12:40:06+00:00
 stackblitz/alien-signals,stackblitz/alien-signals,gh/707495991,ok,2026-07-05T12:40:06+00:00
 stacktracejs/error-stack-parser,stacktracejs/error-stack-parser,gh/15014773,ok,2026-07-05T12:40:06+00:00
@@ -8884,6 +9148,7 @@ stainless-steel/temporary,stainless-steel/temporary,gh/31137961,ok,2026-07-05T12
 staktrace/cafebabe,staktrace/cafebabe,gh/352843908,ok,2026-07-05T12:40:06+00:00
 staktrace/mailparse,staktrace/mailparse,gh/59927945,ok,2026-07-05T12:40:06+00:00
 staktrace/quoted-printable,staktrace/quoted-printable,gh/59925267,ok,2026-07-05T12:40:06+00:00
+stal-ix/sources,stal-ix/sources,gh/668723922,ok,2026-07-13T16:57:25+00:00
 stan-dev/cmdstanpy,stan-dev/cmdstanpy,gh/163899458,ok,2026-07-05T12:40:06+00:00
 stan-dev/httpstan,stan-dev/httpstan,gh/91521117,ok,2026-07-05T12:40:06+00:00
 stan-dev/pystan,stan-dev/pystan,gh/103834038,ok,2026-07-05T12:40:06+00:00
@@ -8948,6 +9213,7 @@ steve-o/openpgm,steve-o/openpgm,gh/32273301,ok,2026-07-05T12:40:07+00:00
 stevegrubb/libcap-ng,stevegrubb/libcap-ng,gh/94882569,ok,2026-07-05T12:40:07+00:00
 steveire/grantlee,steveire/grantlee,gh/32039803,ok,2026-07-05T12:40:07+00:00
 steveklabnik/semver-parser,steveklabnik/semver-parser,gh/58594336,ok,2026-07-05T12:40:07+00:00
+stevelr/db-keystore,stevelr/db-keystore,gh/1138685494,ok,2026-07-13T16:57:25+00:00
 stevemao/array-ify,stevemao/array-ify,gh/37433491,ok,2026-07-05T12:40:07+00:00
 stevemao/compare-func,stevemao/compare-func,gh/33363541,ok,2026-07-05T12:40:08+00:00
 stevemao/html-comment-regex,stevemao/html-comment-regex,gh/35999833,ok,2026-07-05T12:40:08+00:00
@@ -8968,10 +9234,12 @@ stoeffel/compose-function,stoeffel/compose-function,gh/28769775,ok,2026-07-05T12
 stoeoef/spade,stoeoef/spade,gh/66854872,ok,2026-07-05T12:40:08+00:00
 stoken-dev/stoken,stoken-dev/stoken,gh/6117968,ok,2026-07-05T12:40:08+00:00
 stoplightio/types,stoplightio/types,gh/152335630,ok,2026-07-05T12:40:08+00:00
+storaged-project/udisks,storaged-project/udisks,gh/31362286,ok,2026-07-13T16:57:24+00:00
 storybookjs/babel-plugin-react-docgen,storybookjs/babel-plugin-react-docgen,gh/70151075,ok,2026-07-05T12:40:08+00:00
 storybookjs/global,storybookjs/global,gh/576389803,ok,2026-07-05T12:40:08+00:00
 storybookjs/icons,storybookjs/icons,gh/640466286,ok,2026-07-05T12:40:08+00:00
 storybookjs/lazy-universal-dotenv,storybookjs/lazy-universal-dotenv,gh/152976131,ok,2026-07-05T12:40:08+00:00
+storybookjs/react-docgen-typescript-plugin,storybookjs/react-docgen-typescript-plugin,gh/369076493,ok,2026-07-13T16:57:24+00:00
 storybookjs/react-inspector,storybookjs/react-inspector,gh/54451461,ok,2026-07-05T12:40:08+00:00
 storybookjs/storybook,storybookjs/storybook,gh/54173593,ok,2026-07-05T12:40:08+00:00
 storybookjs/telejson,storybookjs/telejson,gh/154148194,ok,2026-07-05T12:40:08+00:00
@@ -9029,26 +9297,26 @@ stylelint/stylelint,stylelint/stylelint,gh/27549019,ok,2026-07-05T12:40:09+00:00
 stylelint/stylelint-config-recommended,stylelint/stylelint-config-recommended,gh/95962064,ok,2026-07-05T12:40:09+00:00
 stylelint/stylelint-config-standard,stylelint/stylelint-config-standard,gh/49444538,ok,2026-07-05T12:40:09+00:00
 stylus/stylus,stylus/stylus,gh/1204214,ok,2026-07-05T12:40:09+00:00
-substack/array-reduce,substack/array-reduce,,not_found,2026-07-05T12:40:09+00:00
+substack/array-reduce,substack/array-reduce,,not_found,2026-07-13T17:01:47+00:00
 substack/deep-freeze,substack/deep-freeze,,not_found,2026-07-05T12:40:09+00:00
-substack/github-from-package,substack/github-from-package,,not_found,2026-07-05T12:40:09+00:00
-substack/https-browserify,substack/https-browserify,,not_found,2026-07-05T12:40:09+00:00
-substack/node-archy,substack/node-archy,,not_found,2026-07-05T12:40:09+00:00
-substack/node-binary,substack/node-binary,,not_found,2026-07-05T12:40:09+00:00
-substack/node-buffers,substack/node-buffers,,not_found,2026-07-05T12:40:09+00:00
-substack/node-chainsaw,substack/node-chainsaw,,not_found,2026-07-05T12:40:09+00:00
-substack/node-charm,substack/node-charm,,not_found,2026-07-05T12:40:09+00:00
-substack/node-commondir,substack/node-commondir,,not_found,2026-07-05T12:40:09+00:00
-substack/node-optimist,substack/node-optimist,,not_found,2026-07-05T12:40:09+00:00
-substack/node-parents,substack/node-parents,,not_found,2026-07-05T12:40:09+00:00
-substack/node-wordwrap,substack/node-wordwrap,,not_found,2026-07-05T12:40:09+00:00
-substack/quote-stream,substack/quote-stream,,not_found,2026-07-05T12:40:09+00:00
-substack/read-only-stream,substack/read-only-stream,,not_found,2026-07-05T12:40:09+00:00
-substack/semver-compare,substack/semver-compare,,not_found,2026-07-05T12:40:09+00:00
-substack/shallow-copy,substack/shallow-copy,,not_found,2026-07-05T12:40:09+00:00
-substack/stream-combiner2,substack/stream-combiner2,,not_found,2026-07-05T12:40:09+00:00
-substack/subarg,substack/subarg,,not_found,2026-07-05T12:40:09+00:00
-substack/text-table,substack/text-table,,not_found,2026-07-05T12:40:09+00:00
+substack/github-from-package,substack/github-from-package,,not_found,2026-07-13T17:01:47+00:00
+substack/https-browserify,substack/https-browserify,,not_found,2026-07-13T17:01:47+00:00
+substack/node-archy,substack/node-archy,,not_found,2026-07-13T17:01:47+00:00
+substack/node-binary,substack/node-binary,,not_found,2026-07-13T17:01:47+00:00
+substack/node-buffers,substack/node-buffers,,not_found,2026-07-13T17:01:47+00:00
+substack/node-chainsaw,substack/node-chainsaw,,not_found,2026-07-13T17:01:47+00:00
+substack/node-charm,substack/node-charm,,not_found,2026-07-13T17:01:47+00:00
+substack/node-commondir,substack/node-commondir,,not_found,2026-07-13T17:01:47+00:00
+substack/node-optimist,substack/node-optimist,,not_found,2026-07-13T17:01:47+00:00
+substack/node-parents,substack/node-parents,,not_found,2026-07-13T17:01:47+00:00
+substack/node-wordwrap,substack/node-wordwrap,,not_found,2026-07-13T17:01:47+00:00
+substack/quote-stream,substack/quote-stream,,not_found,2026-07-13T17:01:47+00:00
+substack/read-only-stream,substack/read-only-stream,,not_found,2026-07-13T17:01:47+00:00
+substack/semver-compare,substack/semver-compare,,not_found,2026-07-13T17:01:47+00:00
+substack/shallow-copy,substack/shallow-copy,,not_found,2026-07-13T17:01:47+00:00
+substack/stream-combiner2,substack/stream-combiner2,,not_found,2026-07-13T17:01:47+00:00
+substack/subarg,substack/subarg,,not_found,2026-07-13T17:01:47+00:00
+substack/text-table,substack/text-table,,not_found,2026-07-13T17:01:47+00:00
 substrait-io/substrait-rs,substrait-io/substrait-rs,gh/483457655,ok,2026-07-05T12:40:11+00:00
 substrait-io/substrait-validator,substrait-io/substrait-validator,gh/490124272,ok,2026-07-05T12:40:11+00:00
 sudodoki/copy-to-clipboard,sudodoki/copy-to-clipboard,gh/36111399,ok,2026-07-05T12:40:11+00:00
@@ -9072,6 +9340,14 @@ sunshowers-code/debug-ignore,sunshowers-code/debug-ignore,gh/412640823,ok,2026-0
 sunshowers-code/enable-ansi-support,sunshowers-code/enable-ansi-support,gh/434762947,ok,2026-07-05T12:40:11+00:00
 sunshowers-code/partial-io,sunshowers-code/partial-io,gh/540540842,ok,2026-07-05T12:40:11+00:00
 suor/funcy,suor/funcy,gh/6198326,ok,2026-07-05T12:40:11+00:00
+supabase/auth-js,supabase/auth-js,gh/293511548,ok,2026-07-13T16:57:24+00:00
+supabase/functions-js,supabase/functions-js,gh/472080929,ok,2026-07-13T16:57:24+00:00
+supabase/iceberg-js,supabase/iceberg-js,gh/1100602144,ok,2026-07-13T16:57:24+00:00
+supabase/phoenix,supabase/phoenix,gh/1066260025,ok,2026-07-13T16:57:24+00:00
+supabase/postgrest-js,supabase/postgrest-js,gh/236425882,ok,2026-07-13T16:57:24+00:00
+supabase/realtime-js,supabase/realtime-js,gh/264389263,ok,2026-07-13T16:57:24+00:00
+supabase/storage-js,supabase/storage-js,gh/356769750,ok,2026-07-13T16:57:24+00:00
+supabase/supabase-js,supabase/supabase-js,gh/264192686,ok,2026-07-13T16:57:24+00:00
 supabase/supabase-py,supabase/supabase-py,gh/290969078,ok,2026-07-05T12:40:11+00:00
 superchupudev/tinyglobby,superchupudev/tinyglobby,gh/832295123,ok,2026-07-05T12:40:11+00:00
 supervisor/supervisor,supervisor/supervisor,gh/1148352,ok,2026-07-05T12:40:11+00:00
@@ -9088,6 +9364,7 @@ surrealdb/surrealdb,surrealdb/surrealdb,gh/436658287,ok,2026-07-05T12:40:11+00:0
 surrealdb/surrealdb-protocol,surrealdb/surrealdb-protocol,gh/1009063029,ok,2026-07-05T12:40:11+00:00
 surrealdb/surrealkv,surrealdb/surrealkv,gh/658762448,ok,2026-07-05T12:40:11+00:00
 surrealdb/surrealmx,surrealdb/surrealmx,gh/780799742,ok,2026-07-05T12:40:11+00:00
+surrealdb/tikv-client,surrealdb/tikv-client,gh/619324855,ok,2026-07-13T16:57:24+00:00
 surrealdb/trice,surrealdb/trice,gh/458830589,ok,2026-07-05T12:40:11+00:00
 surrealdb/vart,surrealdb/vart,gh/658762583,ok,2026-07-05T12:40:11+00:00
 survivejs/webpack-merge,survivejs/webpack-merge,gh/38106307,ok,2026-07-05T12:40:11+00:00
@@ -9108,6 +9385,7 @@ swagger-api/swagger-ui,swagger-api/swagger-ui,gh/2055965,ok,2026-07-05T12:40:12+
 swami/libinstpatch,swami/libinstpatch,gh/175613619,ok,2026-07-05T12:40:12+00:00
 swc-project/pkgs,swc-project/pkgs,gh/666256215,ok,2026-07-05T12:40:12+00:00
 swc-project/swc,swc-project/swc,gh/115110181,ok,2026-07-05T12:40:12+00:00
+swc-project/swc-node,swc-project/swc-node,gh/280068470,ok,2026-07-13T16:57:24+00:00
 swe-agent/swe-rex,swe-agent/swe-rex,gh/872672155,ok,2026-07-05T12:40:12+00:00
 sweepline/eslint-plugin-unused-imports,sweepline/eslint-plugin-unused-imports,gh/209257922,ok,2026-07-05T12:40:12+00:00
 swellaby/nias,swellaby/nias,gh/184819354,ok,2026-07-05T12:40:12+00:00
@@ -9249,6 +9527,7 @@ tarruda/has,tarruda/has,gh/13399785,ok,2026-07-05T12:40:14+00:00
 tartley/colorama,tartley/colorama,gh/18892209,ok,2026-07-05T12:40:14+00:00
 tats-u/rust-oem-cp,tats-u/rust-oem-cp,gh/287910394,ok,2026-07-05T12:40:14+00:00
 tats/w3m,tats/w3m,gh/16247635,ok,2026-07-05T12:40:14+00:00
+tatsuz/musepack,tatsuz/musepack,gh/219628975,ok,2026-07-13T16:57:24+00:00
 tauri-apps/javascriptcore-rs,tauri-apps/javascriptcore-rs,gh/68547685,ok,2026-07-05T12:40:15+00:00
 tauri-apps/muda,tauri-apps/muda,gh/488951773,ok,2026-07-05T12:40:15+00:00
 tauri-apps/plugins-workspace,tauri-apps/plugins-workspace,gh/450890277,ok,2026-07-05T12:40:15+00:00
@@ -9268,12 +9547,15 @@ tbeu/matio,tbeu/matio,gh/48456015,ok,2026-07-05T12:40:15+00:00
 tblue/python-jproperties,tblue/python-jproperties,gh/43246180,ok,2026-07-05T12:40:15+00:00
 tbu-/hexdump,tbu-/hexdump,gh/56323489,ok,2026-07-05T12:40:15+00:00
 tcltk/tcl,tcltk/tcl,gh/1325933,ok,2026-07-05T12:40:15+00:00
+tcltk/tk,tcltk/tk,gh/1325546,ok,2026-07-13T16:57:24+00:00
 tcort/dijkstrajs,tcort/dijkstrajs,gh/19886872,ok,2026-07-05T12:40:15+00:00
+tczajka/ibig,tczajka/ibig,gh/314501122,ok,2026-07-13T16:57:24+00:00
 tczajka/ibig-rs,tczajka/ibig,gh/314501122,ok,2026-07-05T12:40:15+00:00
 tdegrunt/jsonschema,tdegrunt/jsonschema,gh/4930918,ok,2026-07-05T12:40:15+00:00
 tdf/libcmis,tdf/libcmis,gh/39193170,ok,2026-07-05T12:40:15+00:00
 team-charls/charls,team-charls/charls,gh/42828575,ok,2026-07-05T12:40:15+00:00
 teambition/merge2,teambition/merge2,gh/25396227,ok,2026-07-05T12:40:15+00:00
+techie-pi/doxygen-rs,techie-pi/doxygen-rs,gh/513142458,ok,2026-07-13T16:57:24+00:00
 technologicalmayhem/human-date-parser,technologicalmayhem/human-date-parser,gh/589318611,ok,2026-07-05T12:40:15+00:00
 tedder/requests-aws4auth,tedder/requests-aws4auth,gh/31682127,ok,2026-07-05T12:40:15+00:00
 teddriggs/darling,teddriggs/darling,gh/89984100,ok,2026-07-05T12:40:15+00:00
@@ -9330,6 +9612,7 @@ testing-library/user-event,testing-library/user-event,gh/149638165,ok,2026-07-05
 tesuji/junction,tesuji/junction,gh/186016625,ok,2026-07-05T12:40:16+00:00
 tetcoin/nohash,tetcoin/nohash,gh/334334489,ok,2026-07-05T12:40:16+00:00
 teun/thenby.js,teun/thenby.js,gh/11881065,ok,2026-07-05T12:40:16+00:00
+tex-live/texlive-source,tex-live/texlive-source,gh/118131691,ok,2026-07-13T16:57:24+00:00
 texitoi/structopt,texitoi/structopt,gh/80781523,ok,2026-07-05T12:40:16+00:00
 textualize/rich,textualize/rich,gh/220809393,ok,2026-07-05T12:40:16+00:00
 textualize/textual,textualize/textual,gh/355959597,ok,2026-07-05T12:40:16+00:00
@@ -9368,7 +9651,7 @@ then/is-promise,then/is-promise,gh/7296439,ok,2026-07-05T12:40:18+00:00
 then/promise,then/promise,gh/7297261,ok,2026-07-05T12:40:18+00:00
 thenables/thenify,thenables/thenify,gh/28123746,ok,2026-07-05T12:40:18+00:00
 thenables/thenify-all,thenables/thenify-all,gh/28124637,ok,2026-07-05T12:40:18+00:00
-thenativeweb/boolean,thenativeweb/boolean,,not_found,2026-07-05T12:40:18+00:00
+thenativeweb/boolean,thenativeweb/boolean,,not_found,2026-07-13T17:01:47+00:00
 therealprof/display-interface,therealprof/display-interface,gh/249197068,ok,2026-07-05T12:40:18+00:00
 theskumar/python-dotenv,theskumar/python-dotenv,gh/23727790,ok,2026-07-05T12:40:18+00:00
 theturtle32/websocket-node,theturtle32/websocket-node,gh/1590986,ok,2026-07-05T12:40:18+00:00
@@ -9394,6 +9677,7 @@ thom311/libnl,thom311/libnl,gh/4571664,ok,2026-07-05T12:40:18+00:00
 thomasaribart/json-schema-to-ts,thomasaribart/json-schema-to-ts,gh/279603897,ok,2026-07-05T12:40:18+00:00
 thomasaribart/ts-algebra,thomasaribart/ts-algebra,gh/398345696,ok,2026-07-05T12:40:18+00:00
 thomasdenh/iban_validate,thomasdenh/iban_validate,gh/88279856,ok,2026-07-05T12:40:18+00:00
+thomasdickey/mawk-snapshots,thomasdickey/mawk-snapshots,gh/62791881,ok,2026-07-13T16:57:24+00:00
 thomaseizinger/rust-futures-bounded,thomaseizinger/rust-futures-bounded,gh/767343296,ok,2026-07-05T12:40:18+00:00
 thomaswaldmann/argparse,thomaswaldmann/argparse,gh/42367913,ok,2026-07-05T12:40:18+00:00
 thombashi/dataproperty,thombashi/dataproperty,gh/52094644,ok,2026-07-05T12:40:18+00:00
@@ -9411,6 +9695,7 @@ thoucheese/cloud-storage-rs,thoucheese/cloud-storage-rs,gh/213755996,ok,2026-07-
 thriftpy/thriftpy2,thriftpy/thriftpy2,gh/150396294,ok,2026-07-05T12:40:19+00:00
 thuml/depyf,thuml/depyf,gh/683917057,ok,2026-07-05T12:40:19+00:00
 thysultan/stylis,thysultan/stylis,gh/74873203,ok,2026-07-05T12:40:19+00:00
+tiborschneider/prefix-trie,tiborschneider/prefix-trie,gh/583640405,ok,2026-07-13T16:57:24+00:00
 tigt/mini-svg-data-uri,tigt/mini-svg-data-uri,gh/115453488,ok,2026-07-05T12:40:19+00:00
 tikv/client-rust,tikv/client-rust,gh/146678664,ok,2026-07-05T12:40:19+00:00
 tikv/fail-rs,tikv/fail-rs,gh/103275720,ok,2026-07-05T12:40:19+00:00
@@ -9428,7 +9713,7 @@ timothee-haudebourg/cc-traits,timothee-haudebourg/cc-traits,gh/343425309,ok,2026
 timothee-haudebourg/iref,timothee-haudebourg/iref,gh/247737585,ok,2026-07-05T12:40:19+00:00
 timothee-haudebourg/khronos-egl,timothee-haudebourg/khronos-egl,gh/200681562,ok,2026-07-05T12:40:19+00:00
 timothee-haudebourg/pct-str,timothee-haudebourg/pct-str,gh/246296767,ok,2026-07-05T12:40:19+00:00
-timothee-haudebourg/static-automata,timothee-haudebourg/static-automata,,not_found,2026-07-05T12:40:19+00:00
+timothee-haudebourg/static-automata,timothee-haudebourg/static-automata,,not_found,2026-07-13T17:01:47+00:00
 timothee-haudebourg/static-iref,timothee-haudebourg/static-iref,gh/251587911,ok,2026-07-05T12:40:19+00:00
 timothee-haudebourg/str-newtype-rs,timothee-haudebourg/str-newtype-rs,gh/1053247978,ok,2026-07-05T12:40:19+00:00
 timothee-haudebourg/utf8-decode,timothee-haudebourg/utf8-decode,gh/197800579,ok,2026-07-05T12:40:19+00:00
@@ -9476,6 +9761,7 @@ tlhunter/node-sorted-set,tlhunter/node-sorted-set,gh/727934033,ok,2026-07-05T12:
 tlowerison/scoped-futures,tlowerison/scoped-futures,gh/549904947,ok,2026-07-05T12:40:21+00:00
 tlsfuzzer/python-ecdsa,tlsfuzzer/python-ecdsa,gh/617112,ok,2026-07-05T12:40:21+00:00
 tlwg/libdatrie,tlwg/libdatrie,gh/57871086,ok,2026-07-05T12:40:21+00:00
+tlwg/libthai,tlwg/libthai,gh/57871473,ok,2026-07-13T16:57:24+00:00
 tmbo/questionary,tmbo/questionary,gh/159971988,ok,2026-07-05T12:40:21+00:00
 tmccombs/tls-listener,tmccombs/tls-listener,gh/168109460,ok,2026-07-05T12:40:21+00:00
 tmiasko/shell-words,tmiasko/shell-words,gh/199471452,ok,2026-07-05T12:40:21+00:00
@@ -9567,13 +9853,16 @@ tox-dev/toml-fmt,tox-dev/toml-fmt,gh/873462279,ok,2026-07-05T12:39:45+00:00
 tox-dev/tox,tox-dev/tox,gh/68465360,ok,2026-07-05T12:39:45+00:00
 toyobayashi/wasm-util,toyobayashi/wasm-util,gh/554316530,ok,2026-07-05T12:39:45+00:00
 tpm2-software/tpm2-tss,tpm2-software/tpm2-tss,gh/38320020,ok,2026-07-05T12:39:45+00:00
+tqdm/shtab,tqdm/shtab,gh/272102149,ok,2026-07-13T16:57:24+00:00
 tqdm/tqdm,tqdm/tqdm,gh/36804486,ok,2026-07-05T12:39:45+00:00
 tqwewe/bae,tqwewe/bae,gh/416021161,ok,2026-07-05T12:39:45+00:00
 tqwewe/rustdoc-md,tqwewe/rustdoc-md,gh/950044761,ok,2026-07-05T12:39:45+00:00
 traceflight/rs-community-id,traceflight/rs-community-id,gh/640525566,ok,2026-07-05T12:39:45+00:00
+trailofbits/windows-acl,trailofbits/windows-acl,gh/129290685,ok,2026-07-13T16:57:24+00:00
 trallnag/prometheus-fastapi-instrumentator,trallnag/prometheus-fastapi-instrumentator,gh/278339916,ok,2026-07-05T12:39:45+00:00
 transact-rs/sqlx,transact-rs/sqlx,gh/230595891,ok,2026-07-05T12:39:45+00:00
 transferwise/pipelinewise-singer-python,transferwise/pipelinewise-singer-python,gh/236775194,ok,2026-07-05T12:39:45+00:00
+transmission/transmission,transmission/transmission,gh/35129809,ok,2026-07-13T16:57:24+00:00
 traverse-research/gpu-allocator,traverse-research/gpu-allocator,gh/309704407,ok,2026-07-05T12:39:45+00:00
 tredoe/ascii_utils,tredoe/ascii_utils,gh/61289926,ok,2026-07-05T12:39:45+00:00
 tree-sitter-grammars/tree-sitter-markdown,tree-sitter-grammars/tree-sitter-markdown,gh/429403657,ok,2026-07-05T12:39:45+00:00
@@ -9591,7 +9880,7 @@ tree-sitter/tree-sitter-json,tree-sitter/tree-sitter-json,gh/49680959,ok,2026-07
 tree-sitter/tree-sitter-python,tree-sitter/tree-sitter-python,gh/76530115,ok,2026-07-05T12:39:45+00:00
 tree-sitter/tree-sitter-regex,tree-sitter/tree-sitter-regex,gh/143076740,ok,2026-07-05T12:39:45+00:00
 tree-sitter/tree-sitter-rust,tree-sitter/tree-sitter-rust,gh/86603981,ok,2026-07-05T12:39:45+00:00
-tree-sitter/tree-sitter-xml,tree-sitter/tree-sitter-xml,,not_found,2026-07-05T12:39:45+00:00
+tree-sitter/tree-sitter-xml,tree-sitter/tree-sitter-xml,,not_found,2026-07-13T17:01:47+00:00
 treeverse/dvc,treeverse/dvc,gh/83878269,ok,2026-07-05T12:39:45+00:00
 treeverse/dvc-data,treeverse/dvc-data,gh/429878061,ok,2026-07-05T12:39:45+00:00
 treeverse/dvc-http,treeverse/dvc-http,gh/434615246,ok,2026-07-05T12:39:45+00:00
@@ -9644,6 +9933,7 @@ ts-essentials/ts-essentials,ts-essentials/ts-essentials,gh/148948562,ok,2026-07-
 tscanlin/tocbot,tscanlin/tocbot,gh/53110044,ok,2026-07-05T12:39:47+00:00
 tschaub/karma-source-map-support,tschaub/karma-source-map-support,gh/28726846,ok,2026-07-05T12:39:47+00:00
 tsconfig/bases,tsconfig/bases,gh/263697285,ok,2026-07-05T12:39:47+00:00
+tsee/class-xsaccessor,tsee/class-xsaccessor,gh/878062,ok,2026-07-13T16:57:24+00:00
 tsertkov/exec-sh,tsertkov/exec-sh,gh/20822497,ok,2026-07-05T12:39:47+00:00
 tsutsu3/linkify-it-py,tsutsu3/linkify-it-py,gh/308944657,ok,2026-07-05T12:39:47+00:00
 tsutsu3/uc.micro-py,tsutsu3/uc.micro-py,gh/308924041,ok,2026-07-05T12:39:47+00:00
@@ -9654,10 +9944,13 @@ tuffy/bitstream-io,tuffy/bitstream-io,gh/82324504,ok,2026-07-05T12:39:48+00:00
 tukaani-project/xz,tukaani-project/xz,gh/553665726,ok,2026-07-05T12:39:48+00:00
 tulios/kafkajs,tulios/kafkajs,gh/98979720,ok,2026-07-05T12:39:48+00:00
 turfjs/turf,turfjs/turf,gh/13301038,ok,2026-07-05T12:39:48+00:00
+tursodatabase/turso,tursodatabase/turso,gh/683347556,ok,2026-07-13T16:57:24+00:00
 tusharsadhwani/pytokens,tusharsadhwani/pytokens,gh/905974199,ok,2026-07-05T12:39:48+00:00
 tuxera/ntfs-3g,tuxera/ntfs-3g,gh/343714504,ok,2026-07-05T12:39:48+00:00
 tuxsudo/is-in-browser,tuxsudo/is-in-browser,gh/53910917,ok,2026-07-05T12:39:48+00:00
 tvcutsem/harmony-reflect,tvcutsem/harmony-reflect,gh/3380952,ok,2026-07-05T12:39:48+00:00
+twaugh/libieee1284,twaugh/libieee1284,gh/48990153,ok,2026-07-13T16:57:24+00:00
+twaugh/patchutils,twaugh/patchutils,gh/28334090,ok,2026-07-13T16:57:24+00:00
 twbs/bootstrap,twbs/bootstrap,gh/2126244,ok,2026-07-05T12:39:48+00:00
 tweepy/tweepy,tweepy/tweepy,gh/244025,ok,2026-07-05T12:39:48+00:00
 twilio/twilio-node,twilio/twilio-node,gh/8281084,ok,2026-07-05T12:39:48+00:00
@@ -9724,6 +10017,7 @@ ultrajson/ultrajson,ultrajson/ultrajson,gh/1418941,ok,2026-07-05T12:39:50+00:00
 ultralytics/thop,ultralytics/thop,gh/808727645,ok,2026-07-05T12:39:50+00:00
 ultralytics/ultralytics,ultralytics/ultralytics,gh/535360445,ok,2026-07-05T12:39:50+00:00
 ultravideo/kvazaar,ultravideo/kvazaar,gh/16339396,ok,2026-07-05T12:39:50+00:00
+ulyssa/modalkit,ulyssa/modalkit,gh/399964107,ok,2026-07-13T16:57:24+00:00
 un-es/import-meta-resolve,un-es/import-meta-resolve,gh/764653009,ok,2026-07-05T12:39:50+00:00
 un-ts/eslint-import-context,un-ts/eslint-import-context,gh/989634998,ok,2026-07-05T12:39:50+00:00
 un-ts/napi-postinstall,un-ts/napi-postinstall,gh/968783814,ok,2026-07-05T12:39:50+00:00
@@ -9736,6 +10030,7 @@ un33k/python-slugify,un33k/python-slugify,gh/6220331,ok,2026-07-05T12:39:50+00:0
 unclechu/node-deep-extend,unclechu/node-deep-extend,gh/2228683,ok,2026-07-05T12:39:50+00:00
 undef1nd/sfv,undef1nd/sfv,gh/265202251,ok,2026-07-05T12:39:50+00:00
 ungap/structured-clone,ungap/structured-clone,gh/422723294,ok,2026-07-05T12:39:50+00:00
+unicode-entropy/char_index,unicode-entropy/char_index,gh/683885801,ok,2026-07-13T16:57:23+00:00
 unicode-org/icu,unicode-org/icu,gh/49244766,ok,2026-07-05T12:39:50+00:00
 unicode-org/icu-docs,unicode-org/icu-docs,gh/138914718,ok,2026-07-05T12:39:50+00:00
 unicode-org/icu4x,unicode-org/icu4x,gh/243395141,ok,2026-07-05T12:39:50+00:00
@@ -9804,6 +10099,7 @@ unstructured-io/unstructured-python-client,unstructured-io/unstructured-python-c
 untitaker/python-atomicwrites,untitaker/python-atomicwrites,gh/29976873,ok,2026-07-05T12:39:52+00:00
 untitaker/rust-atomicwrites,untitaker/rust-atomicwrites,gh/29551708,ok,2026-07-05T12:39:52+00:00
 upsuper/assert-impl,upsuper/assert-impl,gh/144214181,ok,2026-07-05T12:39:52+00:00
+upsuper/cstr,upsuper/cstr,gh/119838496,ok,2026-07-13T16:57:23+00:00
 upsuper/delegate-attr,upsuper/delegate-attr,gh/265236218,ok,2026-07-05T12:39:52+00:00
 upsuper/dtoa-short,upsuper/dtoa-short,gh/100236103,ok,2026-07-05T12:39:52+00:00
 upsuper/retain_mut,upsuper/retain_mut,gh/159488490,ok,2026-07-05T12:39:52+00:00
@@ -9812,6 +10108,7 @@ uqfoundation/multiprocess,uqfoundation/multiprocess,gh/37775115,ok,2026-07-05T12
 uqfoundation/pathos,uqfoundation/pathos,gh/11017847,ok,2026-07-05T12:39:52+00:00
 uqfoundation/pox,uqfoundation/pox,gh/11032687,ok,2026-07-05T12:39:52+00:00
 uqfoundation/ppft,uqfoundation/ppft,gh/29220214,ok,2026-07-05T12:39:52+00:00
+urcu/userspace-rcu,urcu/userspace-rcu,gh/18916799,ok,2026-07-13T16:57:23+00:00
 uriparser/uriparser,uriparser/uriparser,gh/116530664,ok,2026-07-05T12:39:52+00:00
 urllib3/urllib3,urllib3/urllib3,gh/2410676,ok,2026-07-05T12:39:52+00:00
 urllib3/urllib3-secure-extra,urllib3/urllib3-secure-extra,gh/521358066,ok,2026-07-05T12:39:52+00:00
@@ -9887,6 +10184,7 @@ vgrem/office365-rest-python-client,vgrem/office365-rest-python-client,gh/5130579
 vi/float-pretty-print,vi/float-pretty-print,gh/185311050,ok,2026-07-05T12:39:54+00:00
 vi3k6i5/flashtext,vi3k6i5/flashtext,gh/100404920,ok,2026-07-05T12:39:54+00:00
 viankakrisna/loader-fs-cache,viankakrisna/loader-fs-cache,gh/83358163,ok,2026-07-05T12:39:54+00:00
+vicanso/charts-rs,vicanso/charts-rs,gh/620275465,ok,2026-07-13T16:57:23+00:00
 vidartf/ipydatawidgets,vidartf/ipydatawidgets,gh/98913174,ok,2026-07-05T12:39:54+00:00
 video-dev/hls.js,video-dev/hls.js,gh/30064588,ok,2026-07-05T12:39:54+00:00
 videolan/libspatialaudio,videolan/libspatialaudio,gh/88265349,ok,2026-07-05T12:39:54+00:00
@@ -9981,14 +10279,15 @@ wasi-master/rich-rst,wasi-master/rich-rst,gh/455873874,ok,2026-07-05T12:39:56+00
 wasix-org/wasix-abi-rust,wasix-org/wasix-abi-rust,gh/644297849,ok,2026-07-05T12:39:56+00:00
 wasm-bindgen/walrus,wasm-bindgen/walrus,gh/151892294,ok,2026-07-05T12:39:56+00:00
 wasm-bindgen/wasm-bindgen,wasm-bindgen/wasm-bindgen,gh/114685405,ok,2026-07-05T12:39:56+00:00
+wasm-crypto/wasi-crypto-bindings,wasm-crypto/wasi-crypto-bindings,gh/670303661,ok,2026-07-13T16:57:23+00:00
 wasmcloud/nkeys,wasmcloud/nkeys,gh/178463740,ok,2026-07-05T12:39:56+00:00
 wasmerio/loupe,wasmerio/loupe,gh/346820340,ok,2026-07-05T12:39:56+00:00
-wasmerio/pirita,wasmerio/pirita,,not_found,2026-07-05T12:39:56+00:00
+wasmerio/pirita,wasmerio/pirita,,not_found,2026-07-13T17:01:47+00:00
 wasmerio/rusty_jsc,wasmerio/rusty_jsc,gh/529259582,ok,2026-07-05T12:39:56+00:00
 wasmerio/shared-buffer,wasmerio/shared-buffer,gh/642295804,ok,2026-07-05T12:39:56+00:00
 wasmerio/wai,wasmerio/wai,gh/412113443,ok,2026-07-05T12:39:56+00:00
 wasmerio/wasmer,wasmerio/wasmer,gh/152572186,ok,2026-07-05T12:39:56+00:00
-wasmerio/wcgi,wasmerio/wcgi,,not_found,2026-07-05T12:39:56+00:00
+wasmerio/wcgi,wasmerio/wcgi,,not_found,2026-07-13T17:01:47+00:00
 wasmi-labs/wasmi,wasmi-labs/wasmi,gh/118469706,ok,2026-07-05T12:39:56+00:00
 watchexec/clearscreen,watchexec/clearscreen,gh/361325164,ok,2026-07-05T12:39:56+00:00
 watchexec/command-group,watchexec/command-group,gh/387559730,ok,2026-07-05T12:39:56+00:00
@@ -10030,6 +10329,7 @@ webdriverio/webdriverio,webdriverio/webdriverio,gh/2296970,ok,2026-07-05T12:39:5
 webern/cargo-readme,webern/cargo-readme,gh/43921761,ok,2026-07-05T12:39:57+00:00
 webgptorg/promptbook,webgptorg/promptbook,gh/697356168,ok,2026-07-05T12:39:57+00:00
 webgpu-tools/wesl-rs,webgpu-tools/wesl-rs,gh/844674302,ok,2026-07-05T12:39:57+00:00
+webkit/webkit,webkit/webkit,gh/320636477,ok,2026-07-13T16:57:23+00:00
 webmodules/custom-event,webmodules/custom-event,gh/28934500,ok,2026-07-05T12:39:57+00:00
 webmodules/dom-serialize,webmodules/dom-serialize,gh/28938240,ok,2026-07-05T12:39:57+00:00
 webmproject/libvpx,webmproject/libvpx,gh/22927608,ok,2026-07-05T12:39:57+00:00
@@ -10087,6 +10387,7 @@ websockets/bufferutil,websockets/bufferutil,gh/30013915,ok,2026-07-05T12:39:58+0
 websockets/utf-8-validate,websockets/utf-8-validate,gh/29940655,ok,2026-07-05T12:39:58+00:00
 websockets/ws,websockets/ws,gh/2744972,ok,2026-07-05T12:39:58+00:00
 webwareforpython/dbutils,webwareforpython/dbutils,gh/80627654,ok,2026-07-05T12:39:58+00:00
+weidai11/cryptopp,weidai11/cryptopp,gh/36832736,ok,2026-07-13T16:57:23+00:00
 weiwei/junitparser,weiwei/junitparser,gh/71689841,ok,2026-07-05T12:39:58+00:00
 welch/tdigest,welch/tdigest,gh/36345932,ok,2026-07-05T12:39:58+00:00
 wellwelwel/lru.min,wellwelwel/lru.min,gh/846469830,ok,2026-07-05T12:39:58+00:00
@@ -10096,6 +10397,7 @@ wevm/isows,wevm/isows,gh/701976309,ok,2026-07-05T12:39:58+00:00
 wez/varbincode,wez/varbincode,gh/188939953,ok,2026-07-05T12:39:58+00:00
 wezm/titlecase,wezm/titlecase,gh/94591704,ok,2026-07-05T12:39:58+00:00
 wezterm/wezterm,wezterm/wezterm,gh/120568143,ok,2026-07-05T12:39:58+00:00
+whatisaphone/genawaiter,whatisaphone/genawaiter,gh/219345042,ok,2026-07-13T16:57:23+00:00
 whatisinternet/inflector,whatisinternet/inflector,gh/41618342,ok,2026-07-05T12:39:58+00:00
 whentze/drain_filter_polyfill,whentze/drain_filter_polyfill,gh/427873942,ok,2026-07-05T12:39:58+00:00
 whisperfish/rust-phonenumber,whisperfish/rust-phonenumber,gh/95766784,ok,2026-07-05T12:39:58+00:00
@@ -10231,10 +10533,11 @@ xinntao/facexlib,xinntao/facexlib,gh/349361573,ok,2026-07-05T12:40:02+00:00
 xiph/flac,xiph/flac,gh/23097875,ok,2026-07-05T12:40:02+00:00
 xiph/ogg,xiph/ogg,gh/33956205,ok,2026-07-05T12:40:02+00:00
 xiph/rav1e,xiph/rav1e,gh/104629023,ok,2026-07-05T12:40:02+00:00
+xiph/vorbis,xiph/vorbis,gh/35348574,ok,2026-07-13T16:57:23+00:00
 xiphoseer/serde-java-properties,xiphoseer/serde-java-properties,gh/446105417,ok,2026-07-05T12:40:02+00:00
 xkbcommon/libxkbcommon,xkbcommon/libxkbcommon,gh/9152006,ok,2026-07-05T12:40:02+00:00
 xlwings/jsondiff,xlwings/jsondiff,gh/44523781,ok,2026-07-05T12:40:02+00:00
-xmistt/benbot,xmistt/benbot,,not_found,2026-07-05T12:40:02+00:00
+xmistt/benbot,xmistt/benbot,,not_found,2026-07-13T17:01:47+00:00
 xmistt/fortniteapiasync,xmistt/fortniteapiasync,gh/278424360,ok,2026-07-05T12:40:02+00:00
 xmldom/is-dom-node,xmldom/is-dom-node,gh/680156144,ok,2026-07-05T12:40:02+00:00
 xmldom/xmldom,xmldom/xmldom,gh/229145432,ok,2026-07-05T12:40:02+00:00
@@ -10291,6 +10594,7 @@ yarnpkg/berry,yarnpkg/berry,gh/148228732,ok,2026-07-05T12:40:04+00:00
 yarnpkg/yarn,yarnpkg/yarn,gh/49970642,ok,2026-07-05T12:40:04+00:00
 yashtodi94/pytest-custom_exit_code,yashtodi94/pytest-custom_exit_code,gh/165633420,ok,2026-07-05T12:40:04+00:00
 ydb-platform/ydb-python-sdk,ydb-platform/ydb-python-sdk,gh/181687264,ok,2026-07-05T12:40:04+00:00
+yegor256/micromap,yegor256/micromap,gh/628644726,ok,2026-07-13T16:57:23+00:00
 yeoman/generator,yeoman/generator,gh/5151909,ok,2026-07-05T12:40:04+00:00
 yeoman/yeoman-api,yeoman/yeoman-api,gh/601619362,ok,2026-07-05T12:40:04+00:00
 yeraze/ytnef,yeraze/ytnef,gh/20061896,ok,2026-07-05T12:40:04+00:00
@@ -10327,6 +10631,7 @@ youki-dev/youki,youki-dev/youki,gh/352051262,ok,2026-07-05T12:40:05+00:00
 youknowone/methodtools,youknowone/methodtools,gh/185008190,ok,2026-07-05T12:40:05+00:00
 youknowone/python-deadlib,youknowone/python-deadlib,gh/789831517,ok,2026-07-05T12:40:05+00:00
 youknowone/wirerope,youknowone/wirerope,gh/137254094,ok,2026-07-05T12:40:05+00:00
+youknowone/xz-rs,youknowone/xz-rs,gh/1167418613,ok,2026-07-13T16:57:23+00:00
 yousufkalim/react-easy-router,yousufkalim/react-easy-router,gh/583428291,ok,2026-07-05T12:40:05+00:00
 youtype/boto3_stubs_docs,youtype/boto3_stubs_docs,gh/363553185,ok,2026-07-05T12:40:05+00:00
 youtype/botocore-stubs,youtype/botocore-stubs,gh/519363230,ok,2026-07-05T12:40:05+00:00
@@ -10400,6 +10705,7 @@ zhiburt/expectrl,zhiburt/expectrl,gh/380309062,ok,2026-07-05T12:40:06+00:00
 zhiburt/ptyprocess,zhiburt/ptyprocess,gh/381335669,ok,2026-07-05T12:40:06+00:00
 zhiburt/tabled,zhiburt/tabled,gh/242960969,ok,2026-07-05T12:40:06+00:00
 zhiyelee/graceful-readlink,zhiyelee/graceful-readlink,gh/30651995,ok,2026-07-05T12:40:07+00:00
+zim32/serde_yaml2,zim32/serde_yaml2,gh/787298238,ok,2026-07-13T16:57:23+00:00
 zip-rs/zip2,zip-rs/zip2,gh/631680896,ok,2026-07-05T12:40:07+00:00
 zjonsson/node-unzipper,zjonsson/node-unzipper,gh/62640599,ok,2026-07-05T12:40:07+00:00
 zkat/cacache-rs,zkat/cacache-rs,gh/187733059,ok,2026-07-05T12:40:07+00:00
