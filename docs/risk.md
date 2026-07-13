@@ -19,6 +19,28 @@ derives metrics, and produces the `score` it contributes to `risk.csv`:
 
 `risk_score` = geometric mean of the four — blank unless all four are present.
 
+## Scope: GitHub and GitLab only
+
+The risk pipeline supports **GitHub and GitLab repos, and nothing else**
+(`settings.json` → `top_repos.platforms`). Every dimension leans on a signal
+only those hosts serve: per-year commit anchors, an issue-tracker API
+(`workload`), and OpenSSF Scorecard (`security`). A repo whose canonical
+upstream is a self-hosted git server therefore cannot be scored, and is left
+**out of scope** rather than scored on partial data — `platform=custom` rows
+never reach this stage.
+
+That is a deliberate boundary, and it excludes real projects: glibc,
+binutils-gdb, readline, gettext, libunistring, libgpg-error, qt5, bzip2 and
+acl all live on sourceware, GNU Savannah, gnupg.org or code.qt.io. They stay
+in `value.csv` (class-A, `git_valid=True`) and are simply not risk-scored.
+
+The rule is about the **canonical upstream**, not convenience: a custom host
+that speaks git and validates goes in `git_url` (see
+[value.md](value.md#manual-overrides)) even when that costs the repo its place
+in scope. Pointing a repo at a GitHub/GitLab *mirror* to keep it scoreable
+would mean measuring a copy — which is exactly the bug that once put bzip2's
+abandoned GitLab fork at the top of the C/C++ list.
+
 ## Running it
 
 The risk stage runs only through the pipeline script; never invoke the stage
