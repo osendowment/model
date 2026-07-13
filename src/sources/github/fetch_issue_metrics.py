@@ -43,6 +43,7 @@ from src.common.repos import (
     VALUE_FILE,
     load_github_top_slugs,
     load_repo_ids,
+    load_top_repos,
     load_value_repo_ids,
 )
 from src.sources.github.display import _ETAColumn, console
@@ -510,13 +511,39 @@ def main() -> None:
     # Writer id map, most-authoritative last: ids already on disk (so a
     # rewrite can never wipe one we knew), then repos.csv, then value.csv
     # (canonical slugs — repos.csv lags renames; see _write_long docstring).
+    #
+    # Both lookup layers are restricted to the fetch scope. repos.csv is keyed by
+    # GitHub slug, and some GitLab-hosted top repos have a same-named GitHub
+    # MIRROR (gnome/glib, fontconfig/fontconfig) — so an unrestricted layer would
+    # re-stamp those rows with the unrelated mirror's `gh/` id, exactly the
+    # pollution `load_github_top_slugs` exists to prevent. A slug outside the
+    # scope keeps whatever id is already on disk.
+    scope = set(all_repos)
     repo_ids = {
         **_load_disk_repo_ids(args.output),
-        **load_repo_ids(repos_file=args.repos_file),
-        **load_value_repo_ids(value_file=args.input),
+        **{s: rid for s, rid in load_repo_ids(repos_file=args.repos_file).items()
+           if s in scope},
+        **{s: rid for s, rid in load_value_repo_ids(value_file=args.input).items()
+           if s in scope},
     }
     rows_by_state, _existing_years, cell_dates = _load_long(args.output)
     extra_rows = _load_extra_rows(args.output)
+
+    # A GitLab top repo's issues live in gitlab/issues.csv, fetched from the
+    # GitLab API. Several of them (gnome/glib, fontconfig/fontconfig, …) have a
+    # same-named GitHub MIRROR whose tracker is empty, so a row here under that
+    # slug describes a different repo and reads as a zero backlog. Drop any such
+    # row on write: this file is GitHub-scope only.
+    gitlab_slugs = {e.repo for e in load_top_repos(value_file=args.input)
+                    if str(e.repo_id or "").startswith("gl/")}
+    dropped = 0
+    for state in rows_by_state:
+        for slug in [s for s in rows_by_state[state] if s in gitlab_slugs]:
+            dropped += len(rows_by_state[state].pop(slug))
+    extra_rows = [r for r in extra_rows if r.get("repo") not in gitlab_slugs]
+    if dropped:
+        console.print(f"[yellow]Dropped {dropped:,} row(s) for {len(gitlab_slugs & set(repo_ids)):,} "
+                      f"GitLab repo(s) — their issues live in gitlab/issues.csv[/yellow]")
 
     # Find repos with at least one missing cell — these are the fetch candidates.
     if args.force:
@@ -550,6 +577,11 @@ def main() -> None:
     console.print()
 
     if not missing:
+        # Still rewrite when the GitLab-row purge above removed something: the
+        # cleanup must land even on a run with nothing left to fetch.
+        if dropped:
+            _write_long(args.output, rows_by_state, repo_ids, extra_rows, cell_dates)
+            console.print("[dim]Rewrote issues.csv (purge only).[/dim]")
         console.print("[dim]Nothing to fetch.[/dim]")
         return
 
