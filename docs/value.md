@@ -387,16 +387,26 @@ for bad source data, not a patch for a parsing bug. Rows key on
 | `package`, `ecosystem` | The key. |
 | `repo` | Force the correct GitHub `owner/repo`. Sets `platform` = `github` and derives the matching `git_url`. |
 | `git_url` | Force a corrected non-GitHub **git clone URL**. Absolute: every eco-/registry-derived host is dropped, and `(platform, repo)` are re-derived from it. |
-| `canonical_url` | The project has **no git upstream** (tarball / hg / svn only) — this is where its source actually lives. |
+| `canonical_url` | The project's canonical upstream — the thing being mirrored, not the mirror. With a `git_url` it marks that repo as a **mirror**; alone it means the project has **no git upstream** at all (tarball / hg / svn). |
 | `valid` | Pin the git target's validity (`True`/`False`); consumed by `build_validation`, not applied at resolve time. |
 | `reason` | Required free-text justification. |
 
-Two encodings matter.
+Three encodings matter.
 
 **Repo / URL correction** — set `repo` (GitHub) or `git_url` (any other host).
 A non-GitHub `git_url` on a `repo` row is the live upstream a GitHub mirror
 syncs from, and is preserved as `canonical_url` (`torvalds/linux` →
 `git.kernel.org`).
+
+**Self-hosted project, reached through its mirror** — `git_url` = the
+GitHub/GitLab **mirror**, `canonical_url` = the upstream it copies, `valid`
+blank. This is how a project on a self-hosted git server enters the risk scope
+at all (`gnutools/glibc` ← `sourceware.org`, `qt/qt5` ← `code.qt.io`): the
+[risk stage](risk.md#scope-github-and-gitlab-only) scores only GitHub and
+GitLab. The mirror must be *verified* — identical HEAD sha, full ref set, in
+sync now — and the `reason` field records that evidence. Because the mirror's
+issue tracker is not the project's, a row carrying a `canonical_url` scores no
+issue backlog (see [components/workload.md](components/workload.md)).
 
 **No git upstream** — `git_url` **blank**, the real source URL in `canonical_url`,
 `valid` **blank**. The package resolves to no repo at all, and validity is

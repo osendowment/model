@@ -24,22 +24,40 @@ derives metrics, and produces the `score` it contributes to `risk.csv`:
 The risk pipeline supports **GitHub and GitLab repos, and nothing else**
 (`settings.json` → `top_repos.platforms`). Every dimension leans on a signal
 only those hosts serve: per-year commit anchors, an issue-tracker API
-(`workload`), and OpenSSF Scorecard (`security`). A repo whose canonical
-upstream is a self-hosted git server therefore cannot be scored, and is left
-**out of scope** rather than scored on partial data — `platform=custom` rows
-never reach this stage.
+(`workload`), and OpenSSF Scorecard (`security`). `load_top_repos`
+(`src/common/repos.py`) enforces it — `settings.json` may narrow the set, never
+widen it, since `params.SUPPORTED_PLATFORMS` fails the import otherwise, so an
+unmeasurable host can't be admitted and then silently score blank.
 
-`load_top_repos` (`src/common/repos.py`) enforces this: it admits `github` and
-`gitlab` rows and nothing else. `settings.json` may narrow the set, never widen
-it — `params.SUPPORTED_PLATFORMS` fails the import otherwise, so an unmeasurable
-host can't be admitted and then silently score blank.
+### Reaching a self-hosted project through its mirror
 
-The rule is about the **canonical upstream**, not convenience: a custom host
-that speaks git and validates goes in `git_url` (see
-[value.md](value.md#manual-overrides)) even when that costs the repo its place
-in scope. Never repoint a repo at a GitHub/GitLab *mirror* to keep it
-scoreable — a mirror's commits, issues and Scorecard describe the mirror, so
-the resulting score measures a copy rather than the project.
+Some of the most-depended-on C libraries live on a self-hosted git server —
+sourceware, GNU Savannah, gnupg.org, code.qt.io. They enter scope through a
+**verified mirror**: `git_url` names the GitHub/GitLab mirror the model scores,
+`canonical_url` records the upstream it copies. Both go in
+[`data/value/overrides.csv`](value.md#manual-overrides).
+
+A mirror must be *proved* to be one — a name is not evidence, and a fork that
+diverged years ago looks identical to a mirror in every listing:
+
+| Check | Why |
+|---|---|
+| `git ls-remote` HEAD sha == upstream's, **now** | proves it is currently in sync, not a snapshot |
+| upstream's refs present (tags + branches) | a fork carries a subset; a mirror carries the lot |
+| pushed within the upstream's own cadence | a dead mirror still advertises itself as one |
+| not a fork, not archived | GitHub's own flags |
+
+That test is not academic: `bminor/glibc`, the best-known glibc mirror, stopped
+syncing and no longer contains upstream's HEAD.
+
+**A mirror's issue tracker is not the project's.** Its bugs live in Bugzilla, in
+Jira, or on a mailing list, and the mirror's tracker is switched off or empty —
+which the Search API reports as zero issues, i.e. the *best possible* workload.
+So a repo carrying a `canonical_url` scores no issue backlog at all: the metric
+is blank (unknown) and neutral-fills, rather than banking a fabricated zero. See
+[components/workload.md](components/workload.md). Everything else —
+concentration, complexity, CVEs — is measured from code that is byte-identical
+to the upstream, so it describes the project exactly.
 
 ## Running it
 

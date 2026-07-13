@@ -167,6 +167,26 @@ lone 50 on an otherwise-blank row). `issue_close_ratio_p` and
 `issue_trend_score_p` are informational — they describe backlog dynamics but are
 **not** scoring inputs.
 
+### An unreadable backlog is unknown, not empty
+
+"No fetched issues" covers every repo whose GitHub/GitLab tracker is not where
+the project's bugs are:
+
+| Case | Column | Where the bugs really are |
+|---|---|---|
+| Tracker switched off | `has_issues=False` | Bugzilla, a mailing list, Gerrit — ffmpeg, git, sqlite, linux, gcc, krb5 … |
+| Repo is a mirror | `canonical_url` set | the upstream's own tracker — gnutools/glibc → sourceware |
+
+The Search API answers **0 issues for every year** in both cases, and 0 is not a
+missing value — it sails through the all-years coverage gate and lands
+`nni_per_ac = 0`, the *best possible* value on this axis. Left alone, a project
+whose backlog we simply cannot read would collect a workload **discount** for
+being unreadable.
+
+So both cases blank the issue metrics outright and neutral-fill the percentile.
+A repo whose own tracker really is empty keeps its measured zero — the gate
+distinguishes "no data" from "no backlog", and only the first is filled.
+
 ## Output
 
 ### `data/risk/workload.csv` (per-dimension build)
