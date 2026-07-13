@@ -218,7 +218,7 @@ def test_results_columns():
     expected = (
         ["package", "github_repo", "git", "eco_guess", "avg_downloads"]
         + YEAR_COLS
-        + ["top", "pagerank", "value_class", "repo_id", "mirror_url", "license"]
+        + ["top", "pagerank", "value_class", "repo_id", "canonical_url", "license"]
     )
     # column ORDER is append-order-dependent (enrichment scripts add missing
     # columns as they run), so pin the exact SET, not the sequence.

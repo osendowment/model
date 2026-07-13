@@ -29,17 +29,17 @@ upstream is a self-hosted git server therefore cannot be scored, and is left
 **out of scope** rather than scored on partial data — `platform=custom` rows
 never reach this stage.
 
-That is a deliberate boundary, and it excludes real projects: glibc,
-binutils-gdb, readline, gettext, libunistring, libgpg-error, qt5, bzip2 and
-acl all live on sourceware, GNU Savannah, gnupg.org or code.qt.io. They stay
-in `value.csv` (class-A, `git_valid=True`) and are simply not risk-scored.
+`load_top_repos` (`src/common/repos.py`) enforces this: it admits `github` and
+`gitlab` rows and nothing else. `settings.json` may narrow the set, never widen
+it — `params.SUPPORTED_PLATFORMS` fails the import otherwise, so an unmeasurable
+host can't be admitted and then silently score blank.
 
 The rule is about the **canonical upstream**, not convenience: a custom host
 that speaks git and validates goes in `git_url` (see
 [value.md](value.md#manual-overrides)) even when that costs the repo its place
-in scope. Pointing a repo at a GitHub/GitLab *mirror* to keep it scoreable
-would mean measuring a copy — which is exactly the bug that once put bzip2's
-abandoned GitLab fork at the top of the C/C++ list.
+in scope. Never repoint a repo at a GitHub/GitLab *mirror* to keep it
+scoreable — a mirror's commits, issues and Scorecard describe the mirror, so
+the resulting score measures a copy rather than the project.
 
 ## Running it
 

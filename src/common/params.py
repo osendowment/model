@@ -43,11 +43,27 @@ RISK_INPUT_CLASSES: list[str] = _P["risk_input"]["value_classes"]
 # load_top_repos scope — the platforms and value classes that define the "top
 # repos" set shared by the risk and eligibility stages. A value.csv row is a top
 # repo iff its `platform` is in TOP_REPO_PLATFORMS, its `class` is in
-# TOP_REPO_CLASSES, and it is git_valid. GitHub-only today; the gate is
-# host-agnostic so adding "gitlab" here (once gl/ enrichment lands) pulls in
-# valid GitLab repos without further code changes.
+# TOP_REPO_CLASSES, and it is git_valid.
+#
+# The model scores GITHUB AND GITLAB REPOS ONLY. That is not a config choice
+# but a property of the metrics: every risk dimension leans on a signal only
+# those hosts serve (per-year commit anchors, an issue-tracker API for
+# workload, OpenSSF Scorecard for security). A repo on a self-hosted git server
+# cannot be scored, so it is left OUT of scope rather than scored on partial
+# data. settings.json may narrow the set (e.g. github only) but never widen it
+# past what the fetchers can actually measure — hence the check below, which
+# fails loudly at import rather than admitting rows the pipeline would then
+# silently leave blank.
+SUPPORTED_PLATFORMS: frozenset[str] = frozenset({"github", "gitlab"})
 TOP_REPO_PLATFORMS: set[str] = set(_P["top_repos"]["platforms"])
 TOP_REPO_CLASSES: set[str] = set(_P["top_repos"]["classes"])
+
+if not TOP_REPO_PLATFORMS <= SUPPORTED_PLATFORMS:
+    raise ValueError(
+        "settings.json top_repos.platforms may only contain "
+        f"{sorted(SUPPORTED_PLATFORMS)} — the risk pipeline cannot score "
+        f"{sorted(TOP_REPO_PLATFORMS - SUPPORTED_PLATFORMS)}"
+    )
 
 # Value score — value.csv `score`, a 0–100 pro-rata blend of up to three
 # components: OpenSSF criticality (openssf_crit, stored ·100 as 0-100), the ecosyste.ms

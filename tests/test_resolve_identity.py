@@ -1,6 +1,6 @@
 """Tests for the GitHub identity pass in src/value/apply_ecosystems_authority.py.
 
-`_resolve_github` stamps `repo_id`, `github_repo`, `git`, and `mirror_url` onto
+`_resolve_github` stamps `repo_id`, `github_repo`, `git`, and `canonical_url` onto
 per-package rows (in-place) using a repos.csv lookup after a TTL-gated fetch.
 
 Tests use a fake repos.csv under `tmp_path` and stub `fetch_and_persist` so no
@@ -24,7 +24,7 @@ def _write_repos_csv(tmp_path: Path, rows: list[list]) -> Path:
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f, quoting=csv.QUOTE_ALL)
-        w.writerow(["repo", "valid", "repo_id", "full_name", "mirror_url"])
+        w.writerow(["repo", "valid", "repo_id", "full_name", "canonical_url"])
         w.writerows(rows)
     return csv_path
 
@@ -113,33 +113,33 @@ class TestRepoCurrentName:
         assert rows[0]["github_repo"] == "react/react"
 
 
-# ── mirror_url ───────────────────────────────────────────────────────────────
+# ── canonical_url ───────────────────────────────────────────────────────────────
 
 class TestMirrorUrl:
-    def test_populates_mirror_url_for_github_mirror(self, tmp_path, monkeypatch):
+    def test_populates_canonical_url_for_github_mirror(self, tmp_path, monkeypatch):
         # GitHub records the upstream a mirror syncs from; stamp must copy it.
         repos_csv = _patch(tmp_path, monkeypatch, [
             ["gcc-mirror/gcc", "True", "22711503", "gcc-mirror/gcc",
              "git://gcc.gnu.org/git/gcc.git"]])
         rows = [{"git": "", "github_repo": "gcc-mirror/gcc"}]
         _resolve_github(rows, repos_file=str(repos_csv))
-        assert rows[0]["mirror_url"] == "git://gcc.gnu.org/git/gcc.git"
+        assert rows[0]["canonical_url"] == "git://gcc.gnu.org/git/gcc.git"
         assert rows[0]["git"] == "https://github.com/gcc-mirror/gcc.git"
 
-    def test_non_mirror_repo_has_blank_mirror_url(self, tmp_path, monkeypatch):
-        # An ordinary GitHub repo gets an empty mirror_url.
+    def test_non_mirror_repo_has_blank_canonical_url(self, tmp_path, monkeypatch):
+        # An ordinary GitHub repo gets an empty canonical_url.
         repos_csv = _patch(tmp_path, monkeypatch, [
             ["facebook/react", "True", "10270250", "facebook/react", ""]])
         rows = [{"git": "", "github_repo": "facebook/react"}]
         _resolve_github(rows, repos_file=str(repos_csv))
-        assert rows[0]["mirror_url"] == ""
+        assert rows[0]["canonical_url"] == ""
 
-    def test_unresolved_row_has_blank_mirror_url(self, tmp_path, monkeypatch):
-        # A row with no GitHub slug gets an empty mirror_url (not stamped).
+    def test_unresolved_row_has_blank_canonical_url(self, tmp_path, monkeypatch):
+        # A row with no GitHub slug gets an empty canonical_url (not stamped).
         repos_csv = _patch(tmp_path, monkeypatch, [])
         rows = [{"git": "git://sourceware.org/git/glibc.git", "github_repo": ""}]
         _resolve_github(rows, repos_file=str(repos_csv))
-        assert rows[0]["mirror_url"] == ""
+        assert rows[0]["canonical_url"] == ""
 
     def test_non_github_git_url_preserved_when_no_slug(self, tmp_path, monkeypatch):
         # A non-GitHub URL is canonicalised in step 1 and kept when no slug resolves.

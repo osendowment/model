@@ -166,20 +166,20 @@ class TestVerifyNonGithubIntegration:
         _write(p,
                ["repo", "platform", "git_url", "git_valid", "ecosystems",
                 "packages", "top_eco", "top_eco_pkg", "top_eco_pct", "class",
-                "repo_id", "mirror_url",
+                "repo_id", "canonical_url",
                 "class_npm", "class_pypi", "class_crates", "class_cpp"],
                [
                    {"repo": "a/b", "platform": "github",
                     "git_url": "https://github.com/a/b.git",
                     "git_valid": "", "ecosystems": "npm", "packages": "1",
                     "top_eco": "npm", "top_eco_pkg": "pkg", "top_eco_pct": "99",
-                    "class": "A", "repo_id": "", "mirror_url": "",
+                    "class": "A", "repo_id": "", "canonical_url": "",
                     "class_npm": "A", "class_pypi": "", "class_crates": "", "class_cpp": ""},
                    {"repo": "", "platform": "gitlab",
                     "git_url": "https://gitlab.com/x/y.git",
                     "git_valid": "", "ecosystems": "npm", "packages": "1",
                     "top_eco": "npm", "top_eco_pkg": "pkg2", "top_eco_pct": "50",
-                    "class": "B", "repo_id": "", "mirror_url": "",
+                    "class": "B", "repo_id": "", "canonical_url": "",
                     "class_npm": "B", "class_pypi": "", "class_crates": "", "class_cpp": ""},
                ])
         return p

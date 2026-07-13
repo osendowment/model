@@ -70,7 +70,7 @@ Rust (crates.io)
 `results.csv` (`data/sources/crates/`) — one row per dep-tree crate, with
 `package`, `github_repo`, `avg_downloads`, the `2021`–`2025` columns, `top`,
 `pagerank`, and `value_class`, plus the repo-identity columns (`git`,
-`eco_guess`, `repo_id`, `mirror_url` — the git URL/slug is rewritten by the
+`eco_guess`, `repo_id`, `canonical_url` — the git URL/slug is rewritten by the
 value rollup's ecosyste.ms authority pass,
 `src.value.apply_ecosystems_authority`) and `license` (filled by
 `fetch_licenses.py`).

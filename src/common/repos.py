@@ -70,7 +70,10 @@ class RepoEntry:
     enriched: bool = False  # True iff metadata came from github/repos.csv
     valid: bool = False
     full_name: str = ""
-    mirror_url: str = ""
+    # The project's canonical upstream clone URL when this repo is a mirror of
+    # it — the thing being mirrored, not the mirror (a GitHub mirror of glibc
+    # carries https://sourceware.org/git/glibc.git). Empty for non-mirror repos.
+    canonical_url: str = ""
     git_url: str = ""  # authoritative clone URL from value.csv (host-agnostic)
 
 
@@ -109,7 +112,7 @@ def _read_github_repos(path: str) -> tuple[dict[str, str], dict[str, RepoEntry]]
                 enriched=True,
                 valid=(row.get("valid") or "").strip().lower() in ("true", "1"),
                 full_name=full,
-                mirror_url=(row.get("mirror_url") or "").strip(),
+                canonical_url=(row.get("canonical_url") or "").strip(),
             )
     return canon, meta
 
@@ -142,7 +145,7 @@ def _read_gitlab_projects(path: str = GITLAB_PROJECTS_FILE) -> dict[str, RepoEnt
                 enriched=True,
                 valid=(row.get("valid") or "").strip().lower() in ("true", "1"),
                 full_name=full,
-                mirror_url="",
+                canonical_url="",
             )
     return meta
 
@@ -153,23 +156,31 @@ def load_top_repos(
     skip_archived: bool = False,
     skip_invalid: bool = True,
 ) -> list[RepoEntry]:
-    """Return the *top* repos — valid class-A — sorted by slug.
+    """Return the *top* repos — valid class-A GitHub/GitLab repos — sorted by slug.
+
+    **GitHub and GitLab only.** A row on any other host (`platform=custom` — a
+    self-hosted git server such as sourceware or GNU Savannah) is never a top
+    repo, however valuable: the risk dimensions cannot be measured for it (see
+    `params.SUPPORTED_PLATFORMS`), so it is left out of scope rather than scored
+    on partial data. Such repos stay in `value.csv` with `git_valid=True` and
+    are simply not scored.
 
     Scope = valid class-A. Archived repos are **included by default**
     (`skip_archived=False`): the risk and eligibility stages both score them
     and surface archival as a signal (risk rescored, eligibility `active=False`)
     rather than dropping them silently. Pass `skip_archived=True` to exclude
     them. The risk pipeline runs on this set: repos whose `class` in
-    `value.csv` is one of
-    `settings.json top_repos.classes` (default {A}) AND whose `platform` is one
-    of `top_repos.platforms` (default {github}) AND whose unified `git_valid`
-    column is `True`.
+    `value.csv` is one of `settings.json top_repos.classes` (default {A}) AND
+    whose `platform` is one of `top_repos.platforms` (`github`, `gitlab` — the
+    only supported values) AND whose unified `git_valid` column is `True`.
 
     - Keeps rows whose `platform` ∈ `TOP_REPO_PLATFORMS`, `class` ∈
       `TOP_REPO_CLASSES`, a non-empty `repo`, and `git_valid == "True"`. Both the
-      platform and class sets come from `settings.json top_repos`; the
-      `git_valid` gate applies to every configured platform (host-agnostic) and
-      is on by default (drops failed/404/invalid targets); pass `skip_invalid=False`
+      platform and class sets come from `settings.json top_repos`; the platform
+      set is validated at import against `SUPPORTED_PLATFORMS`, so it can be
+      narrowed but never widened past what the fetchers can measure. The
+      `git_valid` gate applies to both platforms (host-agnostic) and is on by
+      default (drops failed/404/invalid targets); pass `skip_invalid=False`
       to include rows regardless of validity. The eligibility stage shares
       this exact scope (valid class-A repos).
     - Slugs are canonicalised against `github/repos.csv` `full_name`, so a
@@ -187,19 +198,28 @@ def load_top_repos(
     """
     canon, gh_meta = _read_github_repos(repos_file)
     gl_meta = _read_gitlab_projects()
-    # chosen: dedup key -> (class, platform, repo_id, slug, git_url). The key
-    # is the canonical github slug for github repos and the stable gl/ repo_id
-    # for gitlab repos, so a same-named repo on both hosts never collapses.
+    # chosen: dedup key -> (class, platform, repo_id, slug, git_url, canonical_url).
+    # The key is the canonical github slug for github repos and the stable gl/
+    # repo_id for gitlab repos, so a same-named repo on both hosts never collapses.
     # git_url is value.csv's authoritative clone URL, carried so the clone-URL
     # routing (Phase 2) can hand each fetcher the repo's real host.
-    chosen: dict[str, tuple[str, str, str, str, str]] = {}
+    #
+    # canonical_url comes from value.csv, not from github/repos.csv: GitHub only
+    # populates its own mirror_url field for repos imported through its mirror
+    # feature, and leaves it null for the cron-pushed mirrors we actually track
+    # (gnutools/glibc, qt/qt5). value.csv's column — written from overrides.csv —
+    # is the one that knows a repo is a mirror, which build_workload needs: a
+    # mirror's empty issue tracker is not the project's backlog.
+    chosen: dict[str, tuple[str, str, str, str, str, str]] = {}
     with open(value_file, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             cls = (row.get("class") or "").strip()
             if cls not in TOP_REPO_CLASSES:
                 continue
-            # Scope platforms are configured in settings.json (top_repos.platforms);
-            # the git_valid gate below applies to every configured platform.
+            # GitHub/GitLab only (TOP_REPO_PLATFORMS ⊆ SUPPORTED_PLATFORMS, checked
+            # at import). A custom-host row — a project whose canonical upstream is
+            # a self-hosted git server — is dropped here: none of the four risk
+            # dimensions can be measured for it, so it never enters scope.
             platform = (row.get("platform") or "").strip().lower()
             if platform not in TOP_REPO_PLATFORMS:
                 continue
@@ -212,6 +232,7 @@ def load_top_repos(
                 continue
             rid = to_repo_id((row.get("repo_id") or "").strip())
             git_url = (row.get("git_url") or "").strip()
+            canonical_url = (row.get("canonical_url") or "").strip()
             if platform == "github":
                 slug = canon.get(raw, raw)      # resolve renamed repos
                 key = slug
@@ -219,19 +240,21 @@ def load_top_repos(
                 slug = raw                       # non-github: value.csv path is canonical
                 key = rid or f"{platform}:{raw}"
             if key not in chosen or _RANK.get(cls, 0) > _RANK.get(chosen[key][0], 0):
-                chosen[key] = (cls, platform, rid, slug, git_url)
+                chosen[key] = (cls, platform, rid, slug, git_url, canonical_url)
 
     entries: list[RepoEntry] = []
     dropped_archived: list[str] = []
-    for key, (cls, platform, rid, slug, git_url) in chosen.items():
+    for key, (cls, platform, rid, slug, git_url, canonical_url) in chosen.items():
         if platform == "github":
             e = gh_meta.get(slug) or RepoEntry(repo=slug)
-        elif platform == "gitlab":
+        else:  # gitlab — the only other platform that survives the gate above
             e = gl_meta.get(rid) or RepoEntry(repo=slug, repo_id=rid)
-        else:
-            e = RepoEntry(repo=slug, repo_id=rid)
         e.repo = slug
         e.value_class = cls
+        # value.csv wins: it carries the curated canonical upstream, where the
+        # GitHub API's own field is null for a cron-pushed mirror.
+        if canonical_url:
+            e.canonical_url = canonical_url
         if not e.repo_id:
             e.repo_id = rid
         # Clone URL: prefer value.csv's authoritative git_url (host-agnostic).

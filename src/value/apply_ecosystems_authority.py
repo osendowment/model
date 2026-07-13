@@ -125,13 +125,13 @@ def resolve(prior_git: str, prior_github: str, strong: list[str], weak: list[str
             if plat:
                 merged[plat] = canon
                 srcs[plat] = "override"
-        elif ov.get("mirror_url"):
+        elif ov.get("canonical_url"):
             # The project has NO git upstream (tarball / hg / svn only). Drop every
             # eco/prior-derived URL and claim no identity at all: the alternative is
             # a fork or a personal mirror, which credits the wrong maintainers — the
             # exact failure this file exists to correct (IJG libjpeg was crediting
             # mozilla/mozjpeg; Info-ZIP was crediting zlib's author). Where the code
-            # really lives is recorded in `mirror_url`, stamped by `apply_eco`.
+            # really lives is recorded in `canonical_url`, stamped by `apply_eco`.
             merged.clear()
             srcs.clear()
 
@@ -144,7 +144,7 @@ def resolve(prior_git: str, prior_github: str, strong: list[str], weak: list[str
     # (non-GitHub canonical repos may still carry a github mirror downstream).
     if git_plat == "github":
         github = _github_repo_from_url(git)
-    elif ov and (ov.get("git_url") or ov.get("mirror_url")):
+    elif ov and (ov.get("git_url") or ov.get("canonical_url")):
         github = ""
     else:
         github = prior_github
@@ -183,7 +183,7 @@ def load_canonical_map() -> dict[str, str]:
 
 def _resolve_github(rows: list[dict], repos_file: str | None = None,
                     offline: bool = False, force: bool = False) -> None:
-    """In-place: stamp repo_id, github_repo, git, mirror_url from github/repos.csv.
+    """In-place: stamp repo_id, github_repo, git, canonical_url from github/repos.csv.
 
     After the eco-authority rewrite, each row's git URL is canonicalised
     (GitHub URLs are cleared; non-GitHub URLs normalised), then the GitHub
@@ -192,8 +192,9 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None,
         repo_id    = "gh/<numeric>"
         github_repo = <post-rename canonical full_name>
         git        = "https://github.com/<full_name>.git"
-        mirror_url  = <upstream URL if this is a GitHub mirror, else "">
-    Unresolved rows get empty repo_id/mirror_url and keep their (canonicalised)
+        canonical_url  = <the project's canonical upstream clone URL when this
+                          repo is a mirror of it, else "">
+    Unresolved rows get empty repo_id/canonical_url and keep their (canonicalised)
     git URL.
     """
     if repos_file is None:
@@ -241,7 +242,7 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None,
         slug = _slug(r)
         if not slug:
             r.setdefault("repo_id", "")
-            r.setdefault("mirror_url", "")
+            r.setdefault("canonical_url", "")
             continue
         canonical = canon.get(slug, slug)
         entry = meta.get(canonical)
@@ -249,10 +250,10 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None,
             r["repo_id"] = entry.repo_id  # already namespaced by the loader (gh/<id>)
             r["github_repo"] = entry.full_name
             r["git"] = f"https://github.com/{entry.full_name}.git"
-            r["mirror_url"] = entry.mirror_url or ""
+            r["canonical_url"] = entry.canonical_url or ""
         else:
             r.setdefault("repo_id", "")
-            r.setdefault("mirror_url", "")
+            r.setdefault("canonical_url", "")
             if slug:  # had a GitHub slug → keep its clone URL so it's not an orphan
                 r["git"] = f"https://github.com/{slug}.git"
 
@@ -365,22 +366,22 @@ def apply_eco(ecosystem: str, overrides: dict, is_invalid, canonical: dict,
         r["git"], r["github_repo"], r["eco_guess"] = git, gh, guess
 
     # ── Identity pass (GitHub first — it wins — then GitLab fills the rest) ──────
-    # After the eco-authority rewrite, stamp repo_id / mirror_url from repos.csv,
+    # After the eco-authority rewrite, stamp repo_id / canonical_url from repos.csv,
     # then stamp gl/ ids on any GitLab rows GitHub left unresolved.
-    for col in ("repo_id", "mirror_url"):
+    for col in ("repo_id", "canonical_url"):
         if col not in fields:
             fields.append(col)
     _resolve_github(rows, offline=offline, force=force)
     _resolve_gitlab(rows, offline=offline, force=force)
 
-    # A curated `mirror_url` override names where a repo-less project's source
+    # A curated `canonical_url` override names where a repo-less project's source
     # actually lives. Stamp it AFTER the identity pass: _resolve_github fills
-    # mirror_url from github/repos.csv (blank for these rows, since they resolve
+    # canonical_url from github/repos.csv (blank for these rows, since they resolve
     # to no repo), so stamping earlier would be overwritten.
     for r in rows:
         ov = overrides.get((r["package"], ecosystem))
-        if ov and ov.get("mirror_url"):
-            r["mirror_url"] = ov["mirror_url"]
+        if ov and ov.get("canonical_url"):
+            r["canonical_url"] = ov["canonical_url"]
 
     tmp = results_path.with_suffix(".csv.tmp")
     with open(tmp, "w", newline="", encoding="utf-8") as f:

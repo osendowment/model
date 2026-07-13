@@ -79,7 +79,7 @@ JavaScript / TypeScript (npm)
 | `top` | `True` if in the 95% cumulative set |
 | `pagerank` | Download-weighted PageRank score |
 | `value_class` | A/B/C |
-| `repo_id`, `mirror_url` | Stable numeric GitHub repo id; upstream URL when the GitHub repo is a mirror |
+| `repo_id`, `canonical_url` | Stable numeric GitHub repo id; upstream URL when the GitHub repo is a mirror |
 | `license` | SPDX license (filled by `fetch_licenses.py`) |
 
 ### npm funnel & classes

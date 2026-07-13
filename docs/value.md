@@ -140,11 +140,11 @@ Value
     │                                (GitLab/Codeberg/Sourcehut/Bitbucket
     │                                 /custom hosts when no GH match);
     │                                 git clone URLs only — never a tarball/hg/svn
-    ├── mirror_url                ← two meanings (see the column table):   [most recent]
+    ├── canonical_url             ← two meanings (see the column table):   [most recent]
     │                                (a) upstream a github MIRROR syncs from
     │                                    (GitHub Repos API + repo overrides)
     │                                (b) source location of a project with NO git
-    │                                    upstream (mirror_url-only override)
+    │                                    upstream (canonical_url-only override)
     ├── git_valid                 ← build_validation (strictly True/False) [most recent]
     │                                (rollup of GitHub API + git ls-remote
     │                                 caches → value/validation.csv)
@@ -305,7 +305,7 @@ All dep-tree packages with downloads, PageRank, and value class.
 | `pagerank` | Download-weighted PageRank score |
 | `value_class` | A/B/C (see [Value Classes](#value-classes)) |
 | `repo_id` | Stable namespaced repo id (`gh/<id>` / `gl/…`), stamped by the `resolve` step |
-| `mirror_url` | A GitHub mirror's non-GitHub upstream, when known — or, for a `mirror_url`-only override, the source location of a project with no git upstream at all (see [Manual overrides](#manual-overrides)) |
+| `canonical_url` | A GitHub mirror's non-GitHub upstream, when known — or, for a `canonical_url`-only override, the source location of a project with no git upstream at all (see [Manual overrides](#manual-overrides)) |
 | `license` | Registry-reported license (stamped by the per-eco `fetch_licenses.py`) |
 
 cpp differs: `debian_avg_downloads`, `homebrew_avg_downloads`, and the blended
@@ -360,8 +360,8 @@ subgraphs.
 | `repo` | Lowercase repo slug on its `platform` — GitHub `owner/repo`, GitLab's arbitrarily-nested `owner/…/repo`, Sourcehut `~user/repo`, custom best-effort path. Empty only for orphans (no upstream repo at all). |
 | `platform` | Host class of `git_url`, from `classify()` in `src/value/build_git_urls.py`: `github` / `gitlab` / `bitbucket` / `sourcehut` / `codeberg` / `custom`. `gitlab` means **any** GitLab instance — `classify()` derives its host set from `HOST_NICKNAMES` in `src/sources/gitlab/gitlab_client.py` (gitlab.com, salsa.debian.org, gitlab.gnome.org, gitlab.freedesktop.org, invent.kde.org, code.videolan.org, gitlab.inria.fr, …), plus a `gitlab.*` heuristic for self-hosted instances not yet registered. A registered host missing from that set would fall through to `custom`, get no `repo_id`, and silently drop out of the top-repo scope. Empty for orphan rows with no URL. Downstream consumers (risk, eligibility) filter on the platforms configured in `settings.json → top_repos.platforms` (currently `github` + `gitlab`). |
 | `repo_id` | Stable repo id namespaced by platform: `gh/<numeric>` (GitHub Repos API id) for a resolved GitHub repo; `gl/<nickname>-<id>` (bare `gl/<id>` for gitlab.com; host nicknames per `HOST_NICKNAMES` in `src/sources/gitlab/gitlab_client.py`) for a project resolved via the GitLab project API on any GitLab host; empty for other platforms (no API id) and unresolved/404 repos. |
-| `git_url` | Canonical **git clone URL** — `https://github.com/<repo>.git` for GitHub repos (so a valid repo always carries both `repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by the shared git-URL helpers (`src/value/git_urls.py`). A **non-git** source (tarball / hg / svn) never belongs here — it goes in `mirror_url` (see [Manual overrides](#manual-overrides)). Empty for orphan packages and for projects with no git upstream at all. |
-| `mirror_url` | **Two distinct meanings**, distinguished by whether the row has a repo. (1) *Mirror upstream* — on a **GitHub mirror repo** row, the non-GitHub upstream it syncs from (`gcc-mirror/gcc` → `https://gcc.gnu.org/git/gcc.git`). Two sources: GitHub's own `mirror_url` field from `data/sources/github/repos.csv` (stamped by the rollup's `resolve` step), and override-declared live upstreams — a repo override carrying a non-GitHub `git_url` (`torvalds/linux` → `https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git`) is preserved here. Authoritative mirror→upstream link when present. (2) *No-git source* — on a row with **no `repo`, no `repo_id` and no `git_url`**, the place the code actually lives for a project that has no git upstream at all (tarball / hg / svn: IJG libjpeg, Info-ZIP unzip, GraphicsMagick, Berkeley DB, R). Set by a `mirror_url`-only row in `overrides.csv`. Empty for ordinary rows. |
+| `git_url` | Canonical **git clone URL** — `https://github.com/<repo>.git` for GitHub repos (so a valid repo always carries both `repo` and `git_url`), otherwise the non-GitHub canonical (GitLab / Codeberg / Sourcehut / Bitbucket / custom: sourceware.org, savannah, gitlab.gnome.org, etc.). For non-GitHub repos it's the first non-empty value from per-ecosystem `data/sources/{eco}/git.csv`, canonicalised by the shared git-URL helpers (`src/value/git_urls.py`). A **non-git** source (tarball / hg / svn) never belongs here — it goes in `canonical_url` (see [Manual overrides](#manual-overrides)). Empty for orphan packages and for projects with no git upstream at all. |
+| `canonical_url` | The project's **canonical upstream** clone URL — the thing being mirrored, not the mirror. **Two distinct meanings**, distinguished by whether the row has a repo. (1) *Mirror upstream* — on a **GitHub mirror repo** row, the non-GitHub upstream it syncs from (`gnutools/glibc` → `https://sourceware.org/git/glibc.git`; `gcc-mirror/gcc` → `https://gcc.gnu.org/git/gcc.git`). Two sources: the `canonical_url` column of `data/sources/github/repos.csv` (GitHub's mirror metadata, stamped by the rollup's `resolve` step), and override-declared live upstreams — a repo override carrying a non-GitHub `git_url` (`torvalds/linux` → `https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git`) is preserved here. Authoritative mirror→upstream link when present. (2) *No-git source* — on a row with **no `repo`, no `repo_id` and no `git_url`**, the place the code actually lives for a project that has no git upstream at all (tarball / hg / svn: IJG libjpeg, Info-ZIP unzip, GraphicsMagick, Berkeley DB, R). Set by a `canonical_url`-only row in `overrides.csv`. Empty for ordinary rows. |
 | `git_valid` | Strictly `True` / `False` — never blank. `True` iff the repo's upstream is reachable. Host-agnostic: GitHub rows are checked via the Repos API cache, non-GitHub rows via `git ls-remote`; a GitLab `gl/` `repo_id` counts as proof on its own (the GitLab project API confirmed the project exists, which is more authoritative than `ls-remote` on hosts whose `git://` endpoint can fail for a live project). `False` means **either** of two legitimate outcomes: *no `git_url` at all* — an orphan package, or a project with no git upstream (nothing to validate) — **or** *a `git_url` that failed validation* (unreachable / 404). Set by `build_validation`; audit trail in [`data/value/validation.csv`](components/validation.md). |
 | `ecosystems` | Comma-separated list of ecosystems where the repo has packages (e.g. `crates,npm`) |
 | `packages` | Total package count in the repo |
@@ -387,7 +387,7 @@ for bad source data, not a patch for a parsing bug. Rows key on
 | `package`, `ecosystem` | The key. |
 | `repo` | Force the correct GitHub `owner/repo`. Sets `platform` = `github` and derives the matching `git_url`. |
 | `git_url` | Force a corrected non-GitHub **git clone URL**. Absolute: every eco-/registry-derived host is dropped, and `(platform, repo)` are re-derived from it. |
-| `mirror_url` | The project has **no git upstream** (tarball / hg / svn only) — this is where its source actually lives. |
+| `canonical_url` | The project has **no git upstream** (tarball / hg / svn only) — this is where its source actually lives. |
 | `valid` | Pin the git target's validity (`True`/`False`); consumed by `build_validation`, not applied at resolve time. |
 | `reason` | Required free-text justification. |
 
@@ -395,10 +395,10 @@ Two encodings matter.
 
 **Repo / URL correction** — set `repo` (GitHub) or `git_url` (any other host).
 A non-GitHub `git_url` on a `repo` row is the live upstream a GitHub mirror
-syncs from, and is preserved as `mirror_url` (`torvalds/linux` →
+syncs from, and is preserved as `canonical_url` (`torvalds/linux` →
 `git.kernel.org`).
 
-**No git upstream** — `git_url` **blank**, the real source URL in `mirror_url`,
+**No git upstream** — `git_url` **blank**, the real source URL in `canonical_url`,
 `valid` **blank**. The package resolves to no repo at all, and validity is
 *derived*: no `git_url` ⇒ nothing to validate ⇒ `git_valid` = `False`. A non-git
 URL must never go in `git_url`. The point is that the alternative — mapping the
@@ -408,7 +408,7 @@ author. Info-ZIP unzip, GraphicsMagick (hg), Berkeley DB (Oracle tarball) and R
 (svn) are encoded this way.
 
 Overrides are applied by the `resolve` step (`apply_ecosystems_authority` —
-rewrites each `results.csv`'s `git` / `github_repo`, stamps `mirror_url`) and by
+rewrites each `results.csv`'s `git` / `github_repo`, stamps `canonical_url`) and by
 the `unify` step (forces the group's identity); the `valid` pin is applied by
 `build_validation`.
 
@@ -467,7 +467,7 @@ gitlab.gnome.org, gitlab.inria.fr, salsa.debian.org, …) and are scored by
 risk and eligibility alongside GitHub repos. Formerly-excluded projects now
 in scope this way include glib (gitlab.gnome.org), mpfr (gitlab.inria.fr) and
 pixman (gitlab.freedesktop.org). gcc is covered via its GitHub mirror
-(`gcc-mirror/gcc`) with the live upstream recorded in `mirror_url`. glibc is
+(`gcc-mirror/gcc`) with the live upstream recorded in `canonical_url`. glibc is
 not in scope: its upstream is sourceware.org (a `custom` host, so no
 `repo_id`), its GitHub mirror `bminor/glibc` is archived, and the Debian salsa
 repo carries only packaging files, not glibc's source.
@@ -497,8 +497,8 @@ A handful of load-bearing C/C++ projects publish only tarballs, Mercurial, or
 Subversion — IJG libjpeg, Info-ZIP unzip, GraphicsMagick, Berkeley DB, R. They
 carry no `repo` / `repo_id` / `git_url`, so `git_valid` is `False` and they are
 out of the top-repo scope: **unfundable via a repo**, which is the honest
-answer. Their source location is recorded in `mirror_url` via a
-`mirror_url`-only row in [`overrides.csv`](#manual-overrides), deliberately in
+answer. Their source location is recorded in `canonical_url` via a
+`canonical_url`-only row in [`overrides.csv`](#manual-overrides), deliberately in
 preference to mapping them onto a fork or a personal GitHub mirror, which would
 credit the wrong maintainers.
 

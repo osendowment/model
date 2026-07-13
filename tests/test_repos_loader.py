@@ -261,25 +261,25 @@ def test_load_default_branches(tmp_path):
     assert "owner/nobranch" not in branches
 
 
-def test_read_github_repos_populates_valid_full_name_mirror_url(tmp_path):
-    """Verify that _read_github_repos populates the new valid/full_name/mirror_url fields."""
+def test_read_github_repos_populates_valid_full_name_canonical_url(tmp_path):
+    """Verify that _read_github_repos populates the new valid/full_name/canonical_url fields."""
     gh = tmp_path / "repos.csv"
-    _write(gh, ["repo", "valid", "full_name", "mirror_url", "repo_id", "archived", "size", "stars"], [
+    _write(gh, ["repo", "valid", "full_name", "canonical_url", "repo_id", "archived", "size", "stars"], [
         # Valid repo with mirror URL
         {"repo": "gcc-mirror/gcc", "valid": "True", "full_name": "gcc-mirror/gcc",
-         "mirror_url": "git://gcc.gnu.org/git/gcc.git", "repo_id": "123", "archived": "False", "size": "100", "stars": "10"},
+         "canonical_url": "git://gcc.gnu.org/git/gcc.git", "repo_id": "123", "archived": "False", "size": "100", "stars": "10"},
         # Valid repo without mirror URL
         {"repo": "owner/normal", "valid": "True", "full_name": "owner/normal",
-         "mirror_url": "", "repo_id": "456", "archived": "False", "size": "50", "stars": "5"},
+         "canonical_url": "", "repo_id": "456", "archived": "False", "size": "50", "stars": "5"},
         # Invalid repo with mirror URL
         {"repo": "some/invalid", "valid": "False", "full_name": "some/invalid",
-         "mirror_url": "https://example.com/repo.git", "repo_id": "789", "archived": "False", "size": "10", "stars": "1"},
+         "canonical_url": "https://example.com/repo.git", "repo_id": "789", "archived": "False", "size": "10", "stars": "1"},
         # Repo with "1" as valid value (should be treated as True)
         {"repo": "owner/alt", "valid": "1", "full_name": "owner/alt",
-         "mirror_url": "", "repo_id": "000", "archived": "False", "size": "20", "stars": "2"},
+         "canonical_url": "", "repo_id": "000", "archived": "False", "size": "20", "stars": "2"},
         # Repo with whitespace in valid value
         {"repo": "owner/spaces", "valid": " true ", "full_name": "owner/spaces",
-         "mirror_url": "  https://example.com/spaced.git  ", "repo_id": "111", "archived": "False", "size": "30", "stars": "3"},
+         "canonical_url": "  https://example.com/spaced.git  ", "repo_id": "111", "archived": "False", "size": "30", "stars": "3"},
     ])
     canon, meta = repos._read_github_repos(str(gh))
 
@@ -287,19 +287,19 @@ def test_read_github_repos_populates_valid_full_name_mirror_url(tmp_path):
     gcc_entry = meta["gcc-mirror/gcc"]
     assert gcc_entry.valid is True
     assert gcc_entry.full_name == "gcc-mirror/gcc"
-    assert gcc_entry.mirror_url == "git://gcc.gnu.org/git/gcc.git"
+    assert gcc_entry.canonical_url == "git://gcc.gnu.org/git/gcc.git"
 
     # Test normal repo without mirror
     normal_entry = meta["owner/normal"]
     assert normal_entry.valid is True
     assert normal_entry.full_name == "owner/normal"
-    assert normal_entry.mirror_url == ""
+    assert normal_entry.canonical_url == ""
 
     # Test invalid repo
     invalid_entry = meta["some/invalid"]
     assert invalid_entry.valid is False
     assert invalid_entry.full_name == "some/invalid"
-    assert invalid_entry.mirror_url == "https://example.com/repo.git"
+    assert invalid_entry.canonical_url == "https://example.com/repo.git"
 
     # Test "1" as valid
     alt_entry = meta["owner/alt"]
@@ -310,4 +310,41 @@ def test_read_github_repos_populates_valid_full_name_mirror_url(tmp_path):
     spaces_entry = meta["owner/spaces"]
     assert spaces_entry.valid is True
     assert spaces_entry.full_name == "owner/spaces"
-    assert spaces_entry.mirror_url == "https://example.com/spaced.git"
+    assert spaces_entry.canonical_url == "https://example.com/spaced.git"
+
+
+def test_load_top_repos_admits_github_and_gitlab_only(tmp_path, monkeypatch):
+    """A class-A, git_valid repo on a self-hosted git server is NOT a top repo.
+
+    None of the four risk dimensions can be measured off GitHub/GitLab (no
+    per-year commit anchors, no issue-tracker API, no Scorecard), so a
+    custom-host row is left out of scope rather than scored on partial data.
+    Regression: bzip2's canonical upstream is sourceware.org — repointing it
+    there (correctly) must drop it from scope, not smuggle it in unscored.
+    """
+    value = tmp_path / "value.csv"
+    _write(value, ["repo", "git_valid", "class", "platform", "repo_id"], [
+        {"repo": "owner/gh", "git_valid": "True", "class": "A",
+         "platform": "github", "repo_id": "gh/11"},
+        {"repo": "group/gl", "git_valid": "True", "class": "A",
+         "platform": "gitlab", "repo_id": "gl/22"},
+        {"repo": "git/bzip2", "git_valid": "True", "class": "A",
+         "platform": "custom", "repo_id": ""},
+    ])
+    gh = tmp_path / "repos.csv"
+    _write(gh, ["repo", "valid", "repo_id", "archived", "size", "stars"], [
+        {"repo": "owner/gh", "valid": "True", "repo_id": "11",
+         "archived": "False", "size": "5", "stars": "9"},
+    ])
+    monkeypatch.setattr(repos, "TOP_REPO_PLATFORMS", {"github", "gitlab"})
+    out = repos.load_top_repos(value_file=str(value), repos_file=str(gh))
+    assert {e.repo for e in out} == {"owner/gh", "group/gl"}
+
+
+def test_settings_platforms_cannot_be_widened_past_what_we_can_measure():
+    """settings.json may narrow the scope (github only) but never widen it —
+    admitting a host the fetchers cannot measure would silently blank every
+    risk dimension for those rows instead of failing."""
+    from src.common.params import SUPPORTED_PLATFORMS, TOP_REPO_PLATFORMS
+    assert SUPPORTED_PLATFORMS == frozenset({"github", "gitlab"})
+    assert TOP_REPO_PLATFORMS <= SUPPORTED_PLATFORMS

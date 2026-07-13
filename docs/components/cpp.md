@@ -103,7 +103,7 @@ In `data/sources/cpp/`:
 - `dependency-tree.csv` — runtime project→project edges (`type` = `"declared"`)
 - `github-repos.csv` — project→GitHub-repo mappings
 - `results.csv` — all dep-tree projects with `pagerank` + `value_class` (plus
-  the repo-identity columns `git`, `eco_guess`, `repo_id`, `mirror_url` and
+  the repo-identity columns `git`, `eco_guess`, `repo_id`, `canonical_url` and
   `license`)
 
 ```bash

@@ -11,7 +11,7 @@ Reads `data/sources/{ecosystem}/results.csv` for each ecosystem (npm, pypi, crat
 cpp), groups packages by canonical `git_url` (or by a per-package synthetic
 key for orphans), and writes `data/value/value.csv` with **one row per repo**:
 
-    repo, platform, repo_id, git_url, mirror_url, git_valid,
+    repo, platform, repo_id, git_url, canonical_url, git_valid,
     ecosystems, packages, top_eco, top_eco_pkg,
     top_eco_pct, pr_score, class, class_npm, class_pypi, class_crates,
     class_cpp, openssf_crit, score
@@ -29,10 +29,11 @@ canonical `git_url`:
 
 `git_url` is the canonical clone URL from `results.csv`'s `git` column
 (lowercased), which already covers GitHub plus GitLab / Codeberg / Sourcehut /
-Bitbucket / custom hosts (sourceware, savannah, etc.). `mirror_url` is the
-upstream a GitHub *mirror* repo syncs from (GitHub's own `mirror_url` field,
-e.g. `gcc-mirror/gcc` → `git://gcc.gnu.org/git/gcc.git`); empty for
-non-mirror and non-github rows. Both are set by the resolve step. cpp is the
+Bitbucket / custom hosts (sourceware, savannah, etc.). `canonical_url` is the
+project's **canonical upstream** clone URL when the repo we track is a *mirror*
+of it — the thing being mirrored, not the mirror (`gnutools/glibc`, a GitHub
+mirror, carries `canonical_url = https://sourceware.org/git/glibc.git`); empty
+for non-mirror rows. Both are set by the resolve step. cpp is the
 unified C/C++ ecosystem (Debian + Homebrew, joined via Repology) -- see
 `src/sources/cpp/process_data.py`. The per-repo `git_valid` column is filled by the
 `build_validation` step (a rollup of the GitHub API + `git ls-remote`
@@ -105,7 +106,7 @@ ECOSYSTEMS: tuple[str, ...] = ("npm", "pypi", "crates", "cpp")
 CLASS_RANK = {"A": 0, "B": 1, "C": 2}
 
 FIELDS = (
-    ["repo", "platform", "repo_id", "git_url", "mirror_url", "git_valid",
+    ["repo", "platform", "repo_id", "git_url", "canonical_url", "git_valid",
      "ecosystems", "packages",
      "top_eco", "top_eco_pkg", "top_eco_pct", "pr_score", "class"]
     + [f"class_{e}" for e in ECOSYSTEMS]
@@ -205,7 +206,7 @@ def collect_ecosystem(ecosystem: str, data_dir: Path = SOURCES_DIR) -> tuple[lis
                     "github_repo": _normalise_repo(r.get("github_repo", "")),
                     "git_url": (r.get("git") or "").strip().lower(),
                     "repo_id": (r.get("repo_id") or "").strip(),
-                    "mirror_url": (r.get("mirror_url") or "").strip(),
+                    "canonical_url": (r.get("canonical_url") or "").strip(),
                     "pagerank": r.get("pagerank", ""),
                     "value_class": r.get("value_class", ""),
                     "is_eol": eol_idx.get(pkg, False),
@@ -362,7 +363,7 @@ def load_repo_overrides(path: Path = OVERRIDES_FILE) -> dict[tuple[str, str], di
                      file's `repo` column is always a GitHub `owner/repo`; forcing
                      a non-GitHub identity is done via the `git_url` column.
     - `git_url`    — force a corrected non-GitHub clone URL (lowercased).
-    - `mirror_url` — the source location when it is NOT a git URL (tarball / hg /
+    - `canonical_url` — the source location when it is NOT a git URL (tarball / hg /
                      svn: IJG libjpeg, Info-ZIP, GraphicsMagick, Berkeley DB, R).
                      A non-git URL never belongs in `git_url`. Naming it here
                      records where the code lives while claiming NO git identity,
@@ -373,9 +374,9 @@ def load_repo_overrides(path: Path = OVERRIDES_FILE) -> dict[tuple[str, str], di
     - `valid`      — manually pin the target's validity (`True`/`False`),
                      consumed later by `build_validation` (NOT applied here). Only
                      for rescuing a false verdict on a real git target; a
-                     `mirror_url` row does not need it.
+                     `canonical_url` row does not need it.
 
-    Each value is `{"repo": str, "git_url": str, "mirror_url": str, "valid": str}`
+    Each value is `{"repo": str, "git_url": str, "canonical_url": str, "valid": str}`
     (any field may be empty). Rows with a blank `reason` are rejected (these are
     curated and must be explained). A row that sets none of them is skipped
     (nothing to do). Missing file → no overrides.
@@ -398,7 +399,7 @@ def load_repo_overrides(path: Path = OVERRIDES_FILE) -> dict[tuple[str, str], di
             override = {
                 "repo": _normalise_repo(r.get("repo") or ""),
                 "git_url": (r.get("git_url") or "").strip().lower(),
-                "mirror_url": (r.get("mirror_url") or "").strip(),
+                "canonical_url": (r.get("canonical_url") or "").strip(),
                 "valid": (r.get("valid") or "").strip(),
             }
             if not any(override.values()):
@@ -483,10 +484,10 @@ def apply_repo_overrides(
             a["repo"] = ov["repo"]
             a["git_url"] = _github_git_url(ov["repo"])
             # A non-GitHub git_url on a repo-override is the live upstream mirror
-            # (e.g. bminor/glibc → sourceware.org).  Preserve it as mirror_url.
+            # (e.g. bminor/glibc → sourceware.org).  Preserve it as canonical_url.
             gu = ov.get("git_url", "")
             if gu and not gu.startswith("https://github.com/"):
-                a["mirror_url"] = gu
+                a["canonical_url"] = gu
             # A non-GitHub member id (e.g. gl/…) belongs to the identity the
             # override just discarded — never carry it onto a github row.
             if not (a.get("repo_id") or "").startswith("gh/"):
@@ -547,17 +548,17 @@ def aggregate_by_repo(
     for key, members in groups.items():
         group_repo_id = next((m.get("repo_id", "") for m in members if m.get("repo_id")), "")
         group_git_url = next((m.get("git_url", "") for m in members if m.get("git_url")), "")
-        group_mirror_url = next(
-            (m.get("mirror_url", "") for m in members if m.get("mirror_url")), "")
+        group_canonical_url = next(
+            (m.get("canonical_url", "") for m in members if m.get("canonical_url")), "")
 
         if group_repo_id.startswith("gh/"):
             # GitHub group: identity already resolved per-row by _resolve_github.
             # Read the canonical values directly off a member — all members share the
-            # same repo_id so they agree on github_repo/git/mirror_url.
+            # same repo_id so they agree on github_repo/git/canonical_url.
             platform = "github"
             repo = next((m.get("github_repo", "") for m in members if m.get("github_repo")), "")
             agg_git_url = f"https://github.com/{repo}.git" if repo else group_git_url
-            agg_mirror_url = group_mirror_url
+            agg_canonical_url = group_canonical_url
         elif group_repo_id.startswith("gl/"):
             # GitLab group: id resolved by _resolve_gitlab (GitHub already declined
             # it). A gl/ id means the project was GitLab-API-validated, so the
@@ -567,7 +568,7 @@ def aggregate_by_repo(
             _plat, repo = _identity("", group_git_url)
             platform = "gitlab"
             agg_git_url = group_git_url
-            agg_mirror_url = ""
+            agg_canonical_url = ""
         else:
             # Non-repo_id upstream (other host w/o id) or orphan: derive from
             # git_url. _select_group_github_repo filters reserved-namespace URLs
@@ -576,12 +577,12 @@ def aggregate_by_repo(
                 _select_group_github_repo(members, group_git_url), group_git_url,
             )
             agg_git_url = group_git_url
-            # Keep a curated mirror_url here. An overrides.csv row may name where
+            # Keep a curated canonical_url here. An overrides.csv row may name where
             # a repo-LESS project's code actually lives (IJG's tarball, Info-ZIP,
             # GraphicsMagick's hg, R's svn) while claiming no git identity; such a
             # group lands in this branch with no repo_id and no git_url, so
             # blanking it would throw away the only pointer we have to the source.
-            agg_mirror_url = group_mirror_url
+            agg_canonical_url = group_canonical_url
 
         a: dict = {
             "group_key": key,
@@ -589,7 +590,7 @@ def aggregate_by_repo(
             "platform": platform,
             "repo_id": group_repo_id,
             "git_url": agg_git_url,
-            "mirror_url": agg_mirror_url,
+            "canonical_url": agg_canonical_url,
             # `git_valid` is left empty here; build_validation fills the verdict.
             "git_valid": "",
             "packages": len(members),

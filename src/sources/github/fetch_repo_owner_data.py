@@ -62,7 +62,7 @@ MAX_REDIRECTS = 10  # cap on a rename-redirect chain before we give up
 REPO_FIELDS = [
     "repo", "valid", "repo_id", "node_id",
     "owner_login", "owner_id", "owner_type",
-    "name", "full_name", "description", "homepage", "mirror_url",
+    "name", "full_name", "description", "homepage", "canonical_url",
     "default_branch", "license", "language", "topics",
     "size", "stars", "forks", "open_issues", "watchers",
     "fork", "has_downloads", "has_issues", "has_wiki",
@@ -221,11 +221,13 @@ def _flat_repo(d: dict, full_name: str) -> dict:
         "full_name": d.get("full_name", ""),
         "description": (d.get("description") or "")[:500],
         "homepage": d.get("homepage") or "",
-        # GitHub records the upstream a mirror repo syncs from (e.g.
-        # gcc-mirror/gcc → git://gcc.gnu.org/git/gcc.git). Non-empty ONLY for
-        # repos GitHub created as mirrors, so it's an authoritative
-        # mirror→upstream link — surfaced as value.csv's `mirror_url` column.
-        "mirror_url": d.get("mirror_url") or "",
+        # API BOUNDARY: GitHub's own JSON key is `mirror_url`; ours is
+        # `canonical_url`. When the repo we track is a GitHub mirror, this holds
+        # the project's CANONICAL upstream clone URL — the thing being mirrored
+        # (gnutools/glibc → https://sourceware.org/git/glibc.git). Non-empty ONLY
+        # for repos GitHub created as mirrors, so it's an authoritative link from
+        # the mirror to the real upstream.
+        "canonical_url": d.get("mirror_url") or "",
         "default_branch": d.get("default_branch", ""),
         "license": lic.get("spdx_id") or lic.get("key") or "",
         "language": d.get("language") or "",

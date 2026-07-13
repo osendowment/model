@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pytest
 
+from src.value import unify_value_data as unify
 from src.value.unify_value_data import (
     CLASS_RANK,
     ECOSYSTEMS,
@@ -281,7 +282,7 @@ _AUTO_GIT = object()
 
 def _pkg_row(package, ecosystem, github_repo="", git_url=_AUTO_GIT,
              pagerank="0.0", value_class="D", is_eol=False,
-             repo_id="", mirror_url="") -> dict:
+             repo_id="", canonical_url="") -> dict:
     """Test fixture for one per-package row.
 
     Grouping uses `repo_id` first, then `git_url`. When only `github_repo` is
@@ -295,7 +296,7 @@ def _pkg_row(package, ecosystem, github_repo="", git_url=_AUTO_GIT,
     return {
         "package": package, "ecosystem": ecosystem,
         "github_repo": github_repo, "git_url": git_url,
-        "repo_id": repo_id, "mirror_url": mirror_url,
+        "repo_id": repo_id, "canonical_url": canonical_url,
         "pagerank": pagerank, "value_class": value_class, "is_eol": is_eol,
     }
 
@@ -620,7 +621,7 @@ class TestRepoOverrides:
         # key is (package, ecosystem); slug is lowercased like the rest of the pipeline
         assert idx == {("@sinclair/typebox", "npm"):
                        {"repo": "sinclairzx81/typebox", "git_url": "",
-                        "mirror_url": "", "valid": ""}}
+                        "canonical_url": "", "valid": ""}}
 
     def test_load_overrides_skips_blank_reason(self, tmp_path):
         # A curated override MUST carry a reason; a blank-reason row is dropped.
@@ -638,9 +639,9 @@ class TestRepoOverrides:
         idx = load_repo_overrides(p)
         assert idx[("pkg-a", "pypi")] == {
             "repo": "", "git_url": "https://example.com/x.git",
-            "mirror_url": "", "valid": ""}
+            "canonical_url": "", "valid": ""}
         assert idx[("pkg-b", "crates")] == {
-            "repo": "owner/repo", "git_url": "", "mirror_url": "", "valid": "True"}
+            "repo": "owner/repo", "git_url": "", "canonical_url": "", "valid": "True"}
 
     def test_override_forces_github_repo_over_registry_value(self):
         # A package whose registry-derived github_repo / git_url point at the
@@ -686,22 +687,26 @@ class TestRepoOverrides:
         assert fixed[0]["repo"] == "gnome/glib"
         assert "github_repo" not in fixed[0]
 
-    def test_git_url_only_override_clears_stale_repo_id(self):
-        # Regression: git/gettext + libgpg-error. A package resolved against a
-        # salsa packaging repo (gl/ repo_id stamped by the resolve step) is
-        # then redirected by a git_url-only override to its real custom-host
-        # upstream. The gl/ id belongs to the discarded salsa identity and
-        # must be cleared — a `custom` platform row never carries a repo_id.
+    def test_git_url_only_override_clears_stale_repo_id(self, monkeypatch):
+        # A package resolved against a salsa packaging repo (gl/ repo_id stamped
+        # by the resolve step) is then redirected by a git_url-only override to a
+        # custom-host upstream. The gl/ id belongs to the discarded salsa identity
+        # and must be cleared — a `custom` platform row never carries a repo_id.
+        #
+        # `aggregate_by_repo` applies data/value/overrides.csv itself, so the
+        # override under test is monkeypatched in: a fixture passed only to
+        # apply_repo_overrides would be silently outranked by the real file.
         rows = [
-            _pkg_row("gettext", "cpp",
+            _pkg_row("libfoo", "cpp",
                      github_repo="",
-                     git_url="https://salsa.debian.org/sanvila/gettext.git",
+                     git_url="https://salsa.debian.org/sanvila/libfoo.git",
                      pagerank="1.0", value_class="A"),
         ]
         rows[0]["repo_id"] = "gl/debian-91954"
-        overrides = {("gettext", "cpp"):
-                     {"repo": "", "git_url": "https://git.savannah.gnu.org/git/gettext.git",
-                      "valid": ""}}
+        overrides = {("libfoo", "cpp"):
+                     {"repo": "", "git_url": "https://git.savannah.gnu.org/git/libfoo.git",
+                      "canonical_url": "", "valid": ""}}
+        monkeypatch.setattr(unify, "load_repo_overrides", lambda *a, **k: overrides)
         fixed = apply_repo_overrides(
             aggregate_by_repo(rows, drop_d_class=False), rows, overrides)
         assert fixed[0]["platform"] == "custom"
@@ -793,10 +798,10 @@ class TestRepoOverrides:
         assert aggs[0]["platform"] == "github"
         assert aggs[0]["git_url"] == "https://github.com/sinclairzx81/typebox.git"
 
-    def test_override_repo_plus_nongithub_git_url_sets_mirror_url(self):
+    def test_override_repo_plus_nongithub_git_url_sets_canonical_url(self):
         # An override with both `repo` (GitHub slug) AND a non-GitHub `git_url`
         # keeps the GitHub mirror as the canonical identity and stores the
-        # upstream as `mirror_url` metadata (e.g. gcc-mirror/gcc → gcc.gnu.org,
+        # upstream as `canonical_url` metadata (e.g. gcc-mirror/gcc → gcc.gnu.org,
         # torvalds/linux → git.kernel.org). This is distinct from the retired
         # archived-mirror exemption. Uses a package absent from the shipped
         # overrides.csv so aggregate_by_repo's internal override is a no-op and
@@ -816,7 +821,7 @@ class TestRepoOverrides:
         assert fixed[0]["repo"] == "acme/gcc-mirror"
         assert fixed[0]["platform"] == "github"
         assert fixed[0]["git_url"] == "https://github.com/acme/gcc-mirror.git"
-        assert fixed[0]["mirror_url"] == "https://gcc.gnu.org/git/gcc.git"
+        assert fixed[0]["canonical_url"] == "https://gcc.gnu.org/git/gcc.git"
 
     def test_shipped_overrides_file_includes_typebox(self):
         # The committed override file must carry the typebox correction.
@@ -965,11 +970,11 @@ class TestInvariants:
         # The per-repo validity column is `git_valid`; the old bare `valid`
         # and the previous gh_valid pair are gone. llm_guess removed entirely.
         # Verdicts now live in validation.csv.
-        # Column order: git_url → mirror_url → git_valid.
+        # Column order: git_url → canonical_url → git_valid.
         assert "git_valid" in FIELDS
         assert "valid" not in FIELDS
-        assert FIELDS[FIELDS.index("git_url") + 1] == "mirror_url"
-        assert FIELDS[FIELDS.index("mirror_url") + 1] == "git_valid"
+        assert FIELDS[FIELDS.index("git_url") + 1] == "canonical_url"
+        assert FIELDS[FIELDS.index("canonical_url") + 1] == "git_valid"
         for dropped in ("gh_valid", "llm_guess"):
             assert dropped not in FIELDS
 
@@ -1039,20 +1044,20 @@ class TestPrScore:
         assert ranked["pr_score"] == "100.00"
 
 
-def test_mirror_url_only_override_claims_no_git_identity():
+def test_canonical_url_only_override_claims_no_git_identity():
     """A project with NO git upstream (tarball/hg/svn only) must resolve to no
-    repo, with its real home recorded in mirror_url.
+    repo, with its real home recorded in canonical_url.
 
     Regression: IJG libjpeg was credited to mozilla/mozjpeg and Info-ZIP's unzip
     to madler/unzip (zlib's author) — a fork/mirror standing in for a repo-less
     upstream credits the wrong maintainers. Encoding is: a non-git URL never goes
-    in git_url; it goes in mirror_url, and `valid` is left blank because with no
+    in git_url; it goes in canonical_url, and `valid` is left blank because with no
     git_url there is no git target to validate.
     """
     from src.value.apply_ecosystems_authority import resolve
 
     ov = {"repo": "", "git_url": "",
-          "mirror_url": "https://www.ijg.org/files/jpegsrc.v10.tar.gz",
+          "canonical_url": "https://www.ijg.org/files/jpegsrc.v10.tar.gz",
           "valid": ""}
     # the eco/prior tiers offer a plausible-but-wrong repo; the override must win
     git, github, guess = resolve(
@@ -1067,30 +1072,51 @@ def test_mirror_url_only_override_claims_no_git_identity():
     assert github == ""   # and no GitHub slug survives
 
 
-def test_mirror_url_only_override_is_loaded_and_pins_nothing():
-    """The loader surfaces mirror_url, and a mirror_url-only row is a legitimate
-    no-op for the validity pinner (there is no git target to pin)."""
+def test_canonical_url_override_encodes_both_shapes():
+    """`canonical_url` means "the project's real upstream lives here" — and it
+    appears in exactly two shapes, distinguished by whether `git_url` is set.
+
+    1. canonical_url ALONE — the project has no git upstream at all (IJG's
+       tarball, Info-ZIP, GraphicsMagick's hg, R's svn). There is no git target,
+       so nothing is pinned and `git_valid` derives to False.
+    2. canonical_url WITH a git_url — the repo we track is a MIRROR: `git_url`
+       is the GitHub/GitLab mirror we score, `canonical_url` records the true
+       upstream it copies (gnutools/glibc ← sourceware.org).
+
+    Both leave `valid` blank: validity is DERIVED from the git target, never
+    hand-pinned here.
+    """
     import csv as _csv
     from src.value.build_validation import apply_overrides
     from src.value.unify_value_data import load_repo_overrides, OVERRIDES_FILE
 
     ovs = load_repo_overrides(OVERRIDES_FILE)
+
+    # shape 1 — no git upstream anywhere
     jpeg = ovs[("jpeg", "cpp")]
-    assert jpeg["mirror_url"].startswith("https://www.ijg.org/")
+    assert jpeg["canonical_url"].startswith("https://www.ijg.org/")
     assert jpeg["git_url"] == "" and jpeg["repo"] == ""
+    # pinning must not invent a verdict keyed on the canonical_url
+    assert apply_overrides({}, {("jpeg", "cpp"): jpeg}) == {}
 
-    # pinning must not invent a verdict keyed on the mirror_url
-    verdicts = apply_overrides({}, {("jpeg", "cpp"): jpeg})
-    assert verdicts == {}
+    # shape 2 — a mirror: scored on GitHub, canonical upstream recorded
+    glibc = ovs[("glibc", "cpp")]
+    assert glibc["git_url"] == "https://github.com/gnutools/glibc.git"
+    assert glibc["canonical_url"] == "https://sourceware.org/git/glibc.git"
 
-    # Every no-git-upstream row uses the same encoding: the non-git URL lives in
-    # mirror_url, git_url is empty, and `valid` is left blank — validity is
-    # DERIVED (no git target => git_valid False), never hand-pinned here.
     with open(OVERRIDES_FILE, encoding="utf-8") as f:
         for r in _csv.DictReader(f):
-            if (r.get("mirror_url") or "").strip() and not (r.get("repo") or "").strip():
-                assert not (r.get("git_url") or "").strip(), r["package"]
-                assert not (r.get("valid") or "").strip(), r["package"]
+            canonical = (r.get("canonical_url") or "").strip()
+            git = (r.get("git_url") or "").strip()
+            if not canonical or (r.get("repo") or "").strip():
+                continue
+            assert not (r.get("valid") or "").strip(), r["package"]
+            if not git:
+                continue
+            # A mirror's git_url must be on a host we can actually score, and
+            # must not merely repeat the upstream it is supposed to mirror.
+            assert git.startswith(("https://github.com/", "https://gitlab.com/")), r["package"]
+            assert git != canonical, r["package"]
 
 
 def test_classify_recognises_every_declared_gitlab_host():
