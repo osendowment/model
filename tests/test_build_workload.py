@@ -27,8 +27,8 @@ def test_workload_blanks_issues_when_repo_not_fetched(monkeypatch):
     import types
     from src.risk import build_workload as bw
 
-    repos = [types.SimpleNamespace(repo="o/present", repo_id="o/present"),
-             types.SimpleNamespace(repo="o/absent", repo_id="o/absent")]
+    repos = [types.SimpleNamespace(repo="o/present", repo_id="o/present", canonical_url=""),
+             types.SimpleNamespace(repo="o/absent", repo_id="o/absent", canonical_url="")]
     issues = {
         "opened_issues": {"o/present": {y: 0 for y in bw.YEARS}},
         "closed_issues": {"o/present": {y: 0 for y in bw.YEARS}},
@@ -71,7 +71,7 @@ def test_workload_blanks_issues_on_partial_year_coverage(monkeypatch):
     import types
     from src.risk import build_workload as bw
 
-    repos = [types.SimpleNamespace(repo="o/partial", repo_id="o/partial")]
+    repos = [types.SimpleNamespace(repo="o/partial", repo_id="o/partial", canonical_url="")]
     years = list(bw.YEARS)
     issues = {
         # opened: every year present (fully fetched).
@@ -126,7 +126,7 @@ def test_issue_sums_windowed_to_years(monkeypatch):
     import types
     from src.risk import build_workload as bw
 
-    repos = [types.SimpleNamespace(repo="o/r", repo_id="o/r")]
+    repos = [types.SimpleNamespace(repo="o/r", repo_id="o/r", canonical_url="")]
     in_open = {y: i + 1 for i, y in enumerate(bw.YEARS)}   # 1..5 -> sum 15
     in_close = {y: 1 for y in bw.YEARS}                    # sum 5
     # Inject out-of-window years that must NOT be counted.
@@ -158,7 +158,7 @@ def test_empty_nni_neutral_filled_only_when_loc_and_cve_present(monkeypatch):
     import types
     from src.risk import build_workload as bw
 
-    repos = [types.SimpleNamespace(repo=f"o/r{i}", repo_id=f"o/r{i}") for i in range(5)]
+    repos = [types.SimpleNamespace(repo=f"o/r{i}", repo_id=f"o/r{i}", canonical_url="") for i in range(5)]
     cols = {
         "loc_eoy": {f"o/r{i}": str(100 * (i + 1)) for i in range(5)},       # all
         "cve_count_5y": {f"o/r{i}": str(i + 1) for i in range(4)},          # r0..r3
@@ -199,8 +199,8 @@ def test_dormant_repo_scored_with_ac_one(monkeypatch):
     import types
     from src.risk import build_workload as bw
 
-    repos = [types.SimpleNamespace(repo="o/dormant", repo_id="o/dormant"),
-             types.SimpleNamespace(repo="o/live", repo_id="o/live")]
+    repos = [types.SimpleNamespace(repo="o/dormant", repo_id="o/dormant", canonical_url=""),
+             types.SimpleNamespace(repo="o/live", repo_id="o/live", canonical_url="")]
     cols = {
         "loc_eoy": {"o/dormant": "1000", "o/live": "1000"},
         "cve_count_5y": {"o/dormant": "4", "o/live": "4"},
@@ -225,3 +225,84 @@ def test_dormant_repo_scored_with_ac_one(monkeypatch):
     assert rows["o/live"]["dormant"] == "0"
     assert rows["o/live"]["loc_per_ac"] == 500.0
     assert rows["o/live"]["score"] != ""
+
+
+def test_workload_treats_an_unreadable_tracker_as_unknown_not_empty(monkeypatch):
+    """A tracker that isn't the project's must not score as a zero backlog.
+
+    Two repos have a GitHub tracker that says nothing about their real backlog:
+      • `o/no-tracker` has issues switched OFF (ffmpeg, git, sqlite, linux, gcc …
+        trade in Bugzilla / on a mailing list), and
+      • `o/mirror` is a MIRROR of an upstream elsewhere (gnutools/glibc ←
+        sourceware) — its tracker is the mirror's, not glibc's.
+    The Search API answers 0 for every year in both cases, which sails through
+    the year-coverage gate and lands nni_per_ac = 0 — the BEST possible value on
+    that component, i.e. a workload DISCOUNT for being unreadable. Both must come
+    out blank (unknown), while a repo with a real, genuinely empty tracker keeps
+    its measured 0.
+    """
+    import types
+    from src.risk import build_workload as bw
+
+    repos = [
+        types.SimpleNamespace(repo="o/no-tracker", repo_id="o/no-tracker", canonical_url=""),
+        types.SimpleNamespace(repo="o/mirror", repo_id="o/mirror",
+                              canonical_url="https://sourceware.org/git/glibc.git"),
+        types.SimpleNamespace(repo="o/real", repo_id="o/real", canonical_url=""),
+    ]
+    zeros = {r.repo_id: {y: 0 for y in bw.YEARS} for r in repos}
+    issues = {"opened_issues": dict(zeros), "closed_issues": dict(zeros)}
+    meta = {
+        "o/no-tracker": {"has_issues": "False"},
+        "o/mirror": {"has_issues": "True"},   # enabled on the mirror, but empty
+        "o/real": {"has_issues": "True"},
+    }
+    monkeypatch.setattr(bw, "load_top_repos", lambda: repos)
+    monkeypatch.setattr(bw, "load_rows_by_id", lambda *a, **k: meta)
+    monkeypatch.setattr(bw, "_load_commits_years", lambda: {})
+    monkeypatch.setattr(bw, "_load_openssf_maintained", lambda: {})
+    monkeypatch.setattr(bw, "_load_issues_long", lambda *paths: issues)
+    monkeypatch.setattr(bw, "load_column_by_id",
+                        lambda path, col: {r.repo_id: "5" for r in repos})
+
+    rows = {r["repo"]: r for r in bw.build()}
+
+    for name in ("o/no-tracker", "o/mirror"):
+        r = rows[name]
+        assert r["nni_per_ac"] == "", name          # unknown, NOT a zero backlog
+        assert r["net_new_issues_5y"] == "", name
+        assert r["issues_opened_5y"] == "", name
+        assert r["issue_close_ratio"] == "", name
+
+    # A project whose own tracker really is empty keeps its measured zero — the
+    # gate must not swallow a genuine finding.
+    assert rows["o/real"]["nni_per_ac"] == 0.0
+    assert rows["o/real"]["net_new_issues_5y"] == 0
+    # (a blank nni_per_ac neutral-fills to a median percentile downstream, which
+    # `neutral_fill` in build() covers; percentiles need a real population, so
+    # they are not asserted against this 3-row fixture.)
+
+
+def test_github_issues_file_holds_no_gitlab_repo_rows():
+    """A GitLab top repo's issues live in gitlab/issues.csv — never here.
+
+    Several GitLab-hosted top repos (gnome/glib, fontconfig/fontconfig, …) have a
+    same-named GitHub MIRROR with an empty tracker. A row for that slug in
+    github/issues.csv describes a different repo and reads as a zero backlog, and
+    the GitHub id it carries disagrees with the repo's gl/ identity in value.csv.
+    fetch_issue_metrics drops such rows on write; this pins the file itself.
+    """
+    import csv
+    from pathlib import Path
+
+    from src.common.repos import load_top_repos
+
+    issues = Path("data/sources/github/issues.csv")
+    if not issues.exists():
+        return
+    gitlab_slugs = {e.repo for e in load_top_repos()
+                    if str(e.repo_id or "").startswith("gl/")}
+    with open(issues, encoding="utf-8") as f:
+        offenders = sorted({r["repo"] for r in csv.DictReader(f)
+                            if r["repo"] in gitlab_slugs})
+    assert not offenders, f"GitLab repos in github/issues.csv: {offenders}"

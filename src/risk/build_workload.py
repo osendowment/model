@@ -46,6 +46,11 @@ Notes:
     score is the geometric mean of loc_per_ac_p, cve_per_ac_p, nni_per_ac_p. A
     repo with no fetched issues has a blank nni_per_ac; its nni_per_ac_p is
     neutral-filled to 50 so loc + cve still produce a score (see build()).
+    "No fetched issues" includes every repo whose GitHub/GitLab tracker is not
+    where the project's bugs are — issues switched off (`has_issues=False`), or
+    a mirror whose upstream lives elsewhere (`canonical_url` set). The Search
+    API returns 0 for those, and a 0 backlog is the BEST possible workload, so
+    they are treated as unknown rather than empty.
     Repos with zero active contributors (`dormant = 1`) are scored with AC=1
     rather than left blank, so every top repo gets a workload score.
     build_workload must run after build_complexity, build_security,
@@ -280,9 +285,28 @@ def build() -> list[dict]:
         # silently corrupts net_new_issues_5y (feeds the SCORED nni_per_ac
         # metric), issue_close_ratio, and both OLS slopes if a missing year is
         # ever mistaken for a real zero — so this is an all-or-nothing gate.
+        #
+        # The same all-or-nothing rule covers repos whose GitHub/GitLab tracker
+        # is not where the project's bugs are:
+        #   • has_issues=False — the tracker is switched off (ffmpeg, git, sqlite,
+        #     linux, gcc … all triage in Bugzilla or on a mailing list), and
+        #   • a MIRROR (canonical_url set) — gnutools/glibc's tracker is not
+        #     glibc's; the project's backlog lives at sourceware.
+        # The Search API answers 0 for every year in both cases, which would sail
+        # through the year-coverage gate and score nni_per_ac = 0 — the BEST
+        # possible workload. An unreadable backlog is unknown, not empty, so the
+        # issue metrics stay blank and nni_per_ac_p neutral-fills to 50; loc + cve
+        # still produce a workload score.
+        tracker_is_the_projects = (
+            (meta.get("has_issues") or "").strip() != "False"
+            and not entry.canonical_url
+        )
         op = opened.get(rid, {})
         cl = closed.get(rid, {})
-        issues_fetched = all(y in op for y in YEARS) and all(y in cl for y in YEARS)
+        issues_fetched = (
+            tracker_is_the_projects
+            and all(y in op for y in YEARS) and all(y in cl for y in YEARS)
+        )
         if issues_fetched:
             op_vals = [op[y] for y in YEARS]
             cl_vals = [cl[y] for y in YEARS]
