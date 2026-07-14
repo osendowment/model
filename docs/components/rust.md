@@ -77,7 +77,7 @@ value rollup's ecosyste.ms authority pass,
 
 ### crates.io funnel & classes
 
-See the preview stats sheet → Value for the crates.io funnel counts (top crates → dep tree → results → repo coverage) and class distribution.
+See the preview pipeline sheet → Value for the crates.io funnel counts (top crates → dep tree → results → repo coverage) and class distribution.
 
 The crates.io `repository` field resolves non-GitHub Git hosts, so Git coverage
 slightly exceeds GitHub coverage.

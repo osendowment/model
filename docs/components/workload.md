@@ -231,7 +231,7 @@ partial geometric mean is not comparable across repos).
 
 ## Coverage
 
-See the preview stats sheet → Risk → Workload for current per-signal coverage over the top repos and the score distribution.
+See the preview pipeline sheet → Risk → Workload for current per-signal coverage over the top repos and the score distribution.
 
 Repos without a `score` are those missing the LOC or CVE burden (a missing
 issue figure is neutral-filled, and `AC = 0` is scored as dormant with AC=1, so

@@ -1,4 +1,4 @@
-"""Generate every pipeline statistic shown on the preview workbook's stats sheet.
+"""Generate every pipeline statistic shown on the preview workbook's pipeline sheet.
 
 The single source of truth for the model's counts, funnels, coverage and
 distribution figures. Everything is recomputed from the live CSVs:
@@ -7,7 +7,7 @@ distribution figures. Everything is recomputed from the live CSVs:
   uv run python scripts/stats.py --markdown   # emit the tables as markdown
 
 `src.build_preview_workbook` imports this module and renders `markdown()`
-straight onto the `stats` sheet of data/preview/preview.xlsx — there is no
+straight onto the `pipeline` sheet of data/preview/preview.xlsx — there is no
 intermediate stats document to refresh or drift.
 
 Every figure is derived from data, never hard-coded:
@@ -610,7 +610,7 @@ def _pct(n: int, d: int) -> str:
     if not d:
         return "—"
     p = 100 * n / d
-    # the preview stats sheet convention: an exact 100% is written "100%", everything else 1dp.
+    # the preview pipeline sheet convention: an exact 100% is written "100%", everything else 1dp.
     return "100%" if n == d else f"{p:.1f}%"
 
 
@@ -737,7 +737,7 @@ def dashboard(v: dict, r: dict, e: dict) -> None:
     console.print(t)
 
 
-# ── rendering: markdown (the preview stats sheet tables) ────────────────────────────────────
+# ── rendering: markdown (the preview pipeline sheet tables) ────────────────────────────────────
 
 def markdown(v: dict, r: dict, e: dict) -> str:
     out: list[str] = []
@@ -912,7 +912,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Compute the pipeline statistics.")
     ap.add_argument("--markdown", action="store_true",
                     help="emit the stats tables as markdown (the preview "
-                         "workbook's stats sheet builds from this renderer)")
+                         "workbook's pipeline sheet builds from this renderer)")
     args = ap.parse_args()
 
     v, r, e = value_stats(), risk_stats(), eligibility_stats()

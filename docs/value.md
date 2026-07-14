@@ -207,7 +207,7 @@ PageRank = 0). C/C++'s `Results` is smaller than `After dep tree` because the
 cpp pipeline applies an `is_cpp` filter — language-agnostic distro packages get
 dropped.
 
-See the preview stats sheet → Value for the
+See the preview pipeline sheet → Value for the
 per-ecosystem funnel counts and repo-coverage percentages.
 
 ## Ecosystems
@@ -430,7 +430,7 @@ package (no `repo`, kept as its own row so nothing is dropped).
 *Strongest* class is the highest class a repo achieves across any of its
 ecosystems (the `class` column in `value.csv`).
 
-See the preview stats sheet → Value for the per-class ×
+See the preview pipeline sheet → Value for the per-class ×
 per-ecosystem counts and the GitHub-group / orphan split.
 
 EOL information is intentionally **not** stored here — it feeds the
@@ -489,7 +489,7 @@ project-owned hosts) carry a first-class identity and are not silently
 dropped at the value-pipeline level — but they are still excluded from the
 downstream analyses (e.g. libunistring on savannah). Per-ecosystem GitHub vs
 Git coverage (and the load-bearing class-A subset) is in
-the preview stats sheet → Value.
+the preview pipeline sheet → Value.
 
 A GitLab host is only recognised as such if it is registered in `HOST_NICKNAMES`
 (`src/sources/gitlab/gitlab_client.py`) or matches the `gitlab.*` heuristic —

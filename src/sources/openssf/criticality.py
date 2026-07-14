@@ -27,7 +27,7 @@ contributor login fails the whole repo with `Could not resolve to a User`. The
 dominant case is GitHub's **"Copilot"** coding-agent identity appearing as a
 recent contributor — an upstream `criticality_score` v2.0.4 bug, not a fetch we
 can retry. These repos fail deterministically (no backoff-retry) and are the
-bulk of the sub-100% coverage; see [the preview stats sheet] for the count.
+bulk of the sub-100% coverage; see [the preview pipeline sheet] for the count.
 
 Install the binary once:
     go install github.com/ossf/criticality_score/v2/cmd/criticality_score@latest

@@ -69,7 +69,7 @@ Consumers: `src/risk/build_complexity.py` (scc, lizard),
 depsdev), `build_workload.py` (commits-years) — see
 [complexity](../components/complexity.md), [concentration](../components/concentration.md),
 [security](../components/security.md), [workload](../components/workload.md).
-Coverage/funnel counts: the preview stats sheet → Risk.
+Coverage/funnel counts: the preview pipeline sheet → Risk.
 
 ## Scripts
 

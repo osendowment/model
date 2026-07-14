@@ -63,7 +63,7 @@ those repos `score` = openssf_score_p whenever that axis clears 50 (it does for
 most), so the score tracks the OpenSSF axis; the CVE axis takes over only for
 the minority carrying CVEs whose `cve_score` exceeds the openssf axis — a repo
 with real CVEs is never masked by otherwise-good hygiene. (Coverage counts live
-on the preview stats sheet, not here.)
+on the preview pipeline sheet, not here.)
 
 Usage:
     uv run python -m src.risk.build_security

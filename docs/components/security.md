@@ -187,7 +187,7 @@ are present (a partial geometric mean is not comparable across repos).
 
 ## Coverage
 
-See the preview stats sheet → Risk → Security for current per-signal coverage over the top repos and the score distribution.
+See the preview pipeline sheet → Risk → Security for current per-signal coverage over the top repos and the score distribution.
 
 ## Limitations
 

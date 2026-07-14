@@ -7,7 +7,7 @@ distils them into one **complexity-risk score (`score`)** that feeds
 `data/risk/risk.csv`. Higher = larger / harder to maintain.
 
 Scope: the valid class-A top repos in the risk pipeline — GitHub + GitLab,
-archived included (counts in the preview stats sheet → Risk; see
+archived included (counts in the preview pipeline sheet → Risk; see
 [value.md](../value.md)). Build step: `src/risk/build_complexity.py`.
 
 ## Metrics Roadmap
@@ -200,7 +200,7 @@ blank unless all four are present).
 
 ## Coverage
 
-See the preview stats sheet → Risk → Complexity for current per-signal coverage over the top repos and the score distribution.
+See the preview pipeline sheet → Risk → Complexity for current per-signal coverage over the top repos and the score distribution.
 
 A row is empty only when **no snapshot was measured at all** — a repo with no
 usable sha, or one whose checkouts never produced an scc row. A genuinely

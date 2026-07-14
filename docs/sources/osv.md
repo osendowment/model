@@ -83,4 +83,4 @@ uv run python -m src.sources.osv.fetch_cves --repos python/cpython  # targeted, 
 | Caveat | Effect |
 |---|---|
 | CVE mapping is package-name-bound | mismapped repos under-count; known cases are fixed via the overrides file; a residual `0` means "no mapped CVEs", not "no vulnerabilities" — see [security.md](../components/security.md#limitations) |
-| Repo has no package mapping | skipped entirely — appears in neither output file; coverage in the preview stats sheet |
+| Repo has no package mapping | skipped entirely — appears in neither output file; coverage in the preview pipeline sheet |

@@ -17,7 +17,7 @@ Repository metadata, issue metrics, and code complexity for open-source projects
 ## Raw Data
 
 In `data/sources/github/search/`:
-- `top-repos.csv` -- searched repos with metadata (stars, forks, license, language, etc.; counts in the preview stats sheet)
+- `top-repos.csv` -- searched repos with metadata (stars, forks, license, language, etc.; counts in the preview pipeline sheet)
 - `repo-counts.csv` -- cached search API counts (skip repeat queries)
 
 All git-clone / git-analysis raw data lives under `data/sources/git/` (host-agnostic:
