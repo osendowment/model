@@ -10,9 +10,13 @@ funding channels.
 Inclusion rule — a column earns its place only if a builder actually READS it
 to produce a score or an eligibility flag, plus the components/verdicts it
 produces. Everything a fetcher merely collected along the way (fetch dates,
-`ossfuzz_enrolled`, `gh_sponsorships`, `issue_close_ratio`, the lifetime
-concentration columns, the per-ecosystem `class_*` gates, `value_comps` /
-`risk_comps` / `complete`) is left out: it did not move a number.
+`ossfuzz_enrolled`, `issue_close_ratio`, the lifetime concentration columns,
+the per-ecosystem `class_*` gates, `value_comps` / `risk_comps` / `complete`)
+is left out: it did not move a number.
+
+The exceptions are the popularity/sponsorship columns — `gh_stars`, `gl_stars`,
+`gh_sponsorships*` — which no score reads but every reviewer asks for. They are
+context for a human reading a row, never an input.
 
 Two consequences worth knowing when reading a row:
 
@@ -35,11 +39,14 @@ value.csv):
     pagerank_<eco>         sum of the repo's packages' PageRank in that
                            ecosystem — the raw dependency mass behind
                            top_eco_pct and pr_score
-    crit_*                 the OpenSSF criticality tool's own input signals
-                           (data/sources/openssf/criticality.csv), prefixed so
-                           they can't be confused with the git-derived risk
-                           columns (crit_contributors is GitHub's contributor
-                           list; active_contributors_git_5y is the commit log's)
+    gh_stars / gl_stars    stars, from whichever host the repo lives on — one
+                           column each, never merged: a GitHub star and a
+                           GitLab star are not the same currency, and a blank
+                           means "not on that host", not zero.
+
+The two OpenSSF signals keep their `openssf_` names and their distinct
+meanings: `openssf_crit` is the Criticality score (a value component),
+`openssf_score` is the Scorecard score (a security input).
 
 Usage:
     uv run python -m src.build_data
@@ -64,7 +71,6 @@ WORKLOAD_FILE = DATA_DIR / "risk" / "workload.csv"
 LICENSES_FILE = DATA_DIR / "eligibility" / "licenses.csv"
 ACTIVE_FILE = DATA_DIR / "eligibility" / "active.csv"
 FUNDING_FILE = DATA_DIR / "eligibility" / "funding.csv"
-CRITICALITY_FILE = DATA_DIR / "sources" / "openssf" / "criticality.csv"
 GITHUB_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
 GITLAB_REPOS_FILE = DATA_DIR / "sources" / "gitlab" / "repos.csv"
 OUTPUT_FILE = DATA_DIR / "preview" / "data.csv"
@@ -85,31 +91,14 @@ DOWNLOAD_COLS = {
             "downloads_homebrew": "homebrew_avg_downloads"},
 }
 
-# OpenSSF criticality's own inputs → the raw signals behind openssf_crit, the
-# heaviest value component (weight 0.6). `star_count` is dropped: it is the same
-# measurement as the `stars` column, fetched by a different source.
-CRIT_SIGNALS = {
-    "crit_contributors": "contributor_count",
-    "crit_orgs": "org_count",
-    "crit_commit_freq": "commit_frequency",
-    "crit_releases": "recent_release_count",
-    "crit_issues_updated": "updated_issues_count",
-    "crit_issues_closed": "closed_issues_count",
-    "crit_issue_comment_freq": "issue_comment_frequency",
-    "crit_mentions": "github_mention_count",
-    "crit_created_since": "created_since",
-    "crit_updated_since": "updated_since",
-}
-
 FIELDS = (
     # identity
-    ["repo", "platform", "stars", "forks", "ecosystems", "packages",
+    ["repo", "platform", "gh_stars", "gl_stars", "ecosystems", "packages",
      "ecosystem", "top_eco_pkg"]
     # value — raw: registry demand, dependency mass, criticality's own signals
     + list(DOWNLOAD_COLS["npm"]) + list(DOWNLOAD_COLS["pypi"])
     + list(DOWNLOAD_COLS["crates"]) + list(DOWNLOAD_COLS["cpp"])
     + [f"pagerank_{eco}" for eco in ECOSYSTEMS]
-    + list(CRIT_SIGNALS)
     # value — components → value_score
     + ["top_eco_pct", "pr_score", "openssf_crit", "eco_crit", "value_score"]
     # risk — raw inputs, in the order the dimensions consume them
@@ -121,7 +110,8 @@ FIELDS = (
     + ["concentration", "complexity", "security", "workload", "risk_score"]
     # eligibility — raw signals behind each boolean
     + ["license", "license_source", "eol", "archived",
-       "gh_sponsors_enabled", "has_funding_yml", "has_funding_json",
+       "gh_sponsors_enabled", "gh_sponsorships_in", "gh_sponsorships_out",
+       "gh_sponsorships", "has_funding_yml", "has_funding_json",
        "has_funding_links", "has_npm_funding", "has_pypi_funding",
        "bf_maintainer_fundable", "paypal", "oc_slug",
        "host", "host_type", "owner", "owner_type"]
@@ -179,7 +169,6 @@ def build() -> list[dict]:
     licenses = load_rows_by_id(LICENSES_FILE)
     active = load_rows_by_id(ACTIVE_FILE)
     funding = load_rows_by_id(FUNDING_FILE)
-    criticality = load_rows_by_id(CRITICALITY_FILE)
     github = load_rows_by_id(GITHUB_REPOS_FILE)
     gitlab = load_rows_by_id(GITLAB_REPOS_FILE)
     downloads, pagerank = _package_totals()
@@ -190,20 +179,15 @@ def build() -> list[dict]:
         v, cc = value.get(rid, {}), concentration.get(rid, {})
         cx, sec, wl = complexity.get(rid, {}), security.get(rid, {}), workload.get(rid, {})
         lic, act, fund = licenses.get(rid, {}), active.get(rid, {}), funding.get(rid, {})
-        # A criticality row that didn't run cleanly carries no usable signals —
-        # the value stage ignores it, and so does this table (blank, not zero).
-        crit = criticality.get(rid, {})
-        if (crit.get("status") or "").strip().lower() != "ok":
-            crit = {}
-        # Stars/forks: GitHub's repos.csv, else the GitLab project API.
-        host = github.get(rid) or gitlab.get(rid, {})
         dl, pr = downloads.get(rid, {}), pagerank.get(rid, {})
 
         row = {
             "repo": result["repo"],
             "platform": result["platform"],
-            "stars": (host.get("stars") or "").strip(),
-            "forks": (host.get("forks") or "").strip(),
+            # A repo lives on one host, so exactly one of these carries a count;
+            # the other stays blank rather than reading as zero stars.
+            "gh_stars": (github.get(rid, {}).get("stars") or "").strip(),
+            "gl_stars": (gitlab.get(rid, {}).get("stars") or "").strip(),
             "ecosystems": (v.get("ecosystems") or "").strip(),
             "packages": (v.get("packages") or "").strip(),
             "ecosystem": result["ecosystem"],
@@ -215,7 +199,6 @@ def build() -> list[dict]:
             **{f"pagerank_{eco}": (f"{pr[f'pagerank_{eco}']:.6f}"
                                    if f"pagerank_{eco}" in pr else "")
                for eco in ECOSYSTEMS},
-            **{out: (crit.get(src) or "").strip() for out, src in CRIT_SIGNALS.items()},
             **{col: result[col] for col in
                ("top_eco_pct", "pr_score", "openssf_crit", "eco_crit", "value_score")},
             "active_contributors_git_5y": (cc.get("active_contributors_git_5y") or "").strip(),
@@ -236,7 +219,8 @@ def build() -> list[dict]:
             "eol": (act.get("eol") or "").strip(),
             "archived": (act.get("archived") or "").strip(),
             **{col: (fund.get(col) or "").strip() for col in
-               ("gh_sponsors_enabled", "has_funding_yml", "has_funding_json",
+               ("gh_sponsors_enabled", "gh_sponsorships_in", "gh_sponsorships_out",
+                "gh_sponsorships", "has_funding_yml", "has_funding_json",
                 "has_funding_links", "has_npm_funding", "has_pypi_funding",
                 "bf_maintainer_fundable", "paypal", "oc_slug",
                 "host", "host_type", "owner", "owner_type")},

@@ -300,9 +300,6 @@ DATA_STAGE_FILLS = [
         "downloads_npm", "downloads_pypi", "downloads_crates",
         "downloads_debian", "downloads_homebrew",
         "pagerank_npm", "pagerank_pypi", "pagerank_crates", "pagerank_cpp",
-        "crit_contributors", "crit_orgs", "crit_commit_freq", "crit_releases",
-        "crit_issues_updated", "crit_issues_closed", "crit_issue_comment_freq",
-        "crit_mentions", "crit_created_since", "crit_updated_since",
         "top_eco_pct", "pr_score", "openssf_crit", "eco_crit", "value_score",
     ]),
     ("C0504D", [  # risk
@@ -314,6 +311,7 @@ DATA_STAGE_FILLS = [
     ]),
     ("8064A2", [  # eligibility
         "license", "license_source", "eol", "archived", "gh_sponsors_enabled",
+        "gh_sponsorships_in", "gh_sponsorships_out", "gh_sponsorships",
         "has_funding_yml", "has_funding_json", "has_funding_links",
         "has_npm_funding", "has_pypi_funding", "bf_maintainer_fundable",
         "paypal", "oc_slug", "host", "host_type", "owner", "owner_type",
@@ -325,14 +323,13 @@ DATA_STAGE_FILLS = [
 # Counts read as counts (#,##0), PageRank keeps the precision that separates
 # neighbouring repos, scores show 2dp.
 DATA_NUMBER_FORMATS = {
-    "#,##0": ["stars", "forks", "packages", "downloads_npm", "downloads_pypi",
-              "downloads_crates", "downloads_debian", "downloads_homebrew",
-              "crit_contributors", "crit_orgs", "crit_releases",
-              "crit_issues_updated", "crit_issues_closed", "crit_mentions",
-              "loc_eoy", "cyclomatic_max", "cve_count_5y",
+    "#,##0": ["gh_stars", "gl_stars", "packages", "downloads_npm",
+              "downloads_pypi", "downloads_crates", "downloads_debian",
+              "downloads_homebrew", "loc_eoy", "cyclomatic_max", "cve_count_5y",
               "hhi_commits_git_5y", "issues_opened_5y", "issues_closed_5y",
               "net_new_issues_5y", "active_contributors_git_5y",
-              "bf_commits_git_5y"],
+              "bf_commits_git_5y", "gh_sponsorships_in", "gh_sponsorships_out",
+              "gh_sponsorships"],
     "0.000000": ["pagerank_npm", "pagerank_pypi", "pagerank_crates",
                  "pagerank_cpp"],
     "0.00": ["top_eco_pct", "pr_score", "openssf_crit", "value_score",
@@ -742,13 +739,20 @@ COMPONENT_TABLES: list[tuple[str, str, list[tuple[str, object]]]] = [
          "dependency mass behind top_eco_pct and pr_score. The pipeline holds "
          "these only in memory, so this sheet is the only place they are "
          "written down."),
-        ("crit_*",
-         "The OpenSSF criticality tool's own input signals (contributors, "
-         "orgs, commit frequency, releases, issue activity, mentions, age) — "
-         "the raw evidence behind openssf_crit, the heaviest value component. "
-         "Prefixed so they cannot be confused with the git-derived risk "
-         "columns: crit_contributors is GitHub's contributor list, while "
-         "active_contributors_git_5y is the commit log's."),
+        ("the two openssf_*",
+         "Two different OpenSSF products, two different jobs — keep them "
+         "apart. openssf_crit is the CRITICALITY score (how load-bearing the "
+         "project is): the heaviest value component, weight 0.6. "
+         "openssf_score is the SCORECARD score (how well the project defends "
+         "itself, 0-10): an input to the security risk dimension, where it is "
+         "percentile-ranked INVERTED, so a low Scorecard reads as high risk."),
+        ("gh_stars / gl_stars, gh_sponsorships*",
+         "Context, not inputs — no score reads them. Stars stay in one column "
+         "per host: a repo lives on GitHub or GitLab, so the other column is "
+         "blank (which means 'not on that host', not zero stars). "
+         "gh_sponsorships is the inbound + outbound count; only "
+         "gh_sponsors_enabled — whether the repo can be sponsored at all — "
+         "feeds the intent check."),
         ("reading a row",
          "Two things the numbers alone will not tell you. (1) Complexity, "
          "security and workload score off PERCENTILE RANKS of the raw columns "
