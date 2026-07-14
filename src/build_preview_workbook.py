@@ -811,24 +811,33 @@ def _write_components_sheet(ws: Worksheet) -> int:
     return len(COMPONENT_TABLES)
 
 
+# Tab order, left to right: the answer, then how it was reached, then how much
+# of the world it covers, then the evidence. `data` sits last — it is the widest
+# and most technical sheet, and it reads far better once `components` has
+# explained what its columns mean.
+SHEET_ORDER = ["repos", "components", "pipeline", "data"]
+
+
 def build() -> None:
     wb = Workbook()
     wb.remove(wb.active)  # drop the default blank sheet; we name our own
+    csv_sheets = dict(SHEETS)
+    decorate = {"repos": _decorate_repos_sheet, "data": _decorate_data_sheet}
 
-    for name, path in SHEETS:
+    for name in SHEET_ORDER:
+        if name not in csv_sheets:
+            continue
         ws = wb.create_sheet(name)
-        n = _write_sheet(ws, path)
-        if n and name == "repos":
-            _decorate_repos_sheet(ws)
-        if n and name == "data":
-            _decorate_data_sheet(ws)
-        console.print(f"  [cyan]{name}[/cyan]: {n:,} rows ← {path}")
+        n = _write_sheet(ws, csv_sheets[name])
+        if n:
+            decorate[name](ws)
+        console.print(f"  [cyan]{name}[/cyan]: {n:,} rows ← {csv_sheets[name]}")
 
-    ws = wb.create_sheet("components")
+    ws = wb.create_sheet("components", SHEET_ORDER.index("components"))
     n = _write_components_sheet(ws)
     console.print(f"  [cyan]components[/cyan]: {n} methodology tables (static)")
 
-    ws = wb.create_sheet("pipeline")
+    ws = wb.create_sheet("pipeline", SHEET_ORDER.index("pipeline"))
     n = _write_pipeline_sheet(ws, _stats_markdown())
     console.print(f"  [cyan]pipeline[/cyan]: {n} tables ← scripts/stats.py (live CSVs)")
 
