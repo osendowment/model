@@ -31,3 +31,6 @@ data/preview/~$*.xlsx
 # Ad-hoc review notes over the preview table; not a pipeline output
 data/preview/board-preview-report.md
 data/preview/board-preview-report.pdf
+
+# Logo assets for reports/decks — fetched from upstream brand pages, not a pipeline output
+logos/
