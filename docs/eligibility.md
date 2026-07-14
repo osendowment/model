@@ -22,7 +22,7 @@ eligible = oss AND intent AND nonprofit AND active
 
 `src.eligibility.build_eligibility` joins the four flags into
 `data/eligibility/eligibility.csv`. Coverage counts live in
-the preview stats sheet.
+the preview pipeline sheet.
 
 It also stamps three **signal-completeness** columns (independent of the
 `eligible` verdict): `value_comps` and `risk_comps` count how many value
@@ -239,13 +239,13 @@ npm/PyPI funding, inbound/outbound Sponsors, bus-factor maintainer Sponsors,
 FLOSS Fund, the Open Collective reverse-map + budgets) and the
 FOSS-foundation roster scrapers + host matcher. Builders:
 `licenses` → `active` → `funding-build` → `aggregate`. The `data/preview/`
-deliverables (`results`, `people`, `preview-xlsx`) live in their own runner —
-`src.run_preview_pipeline`, the stage after this one — since they roll up all
-three stages, not just eligibility.
+deliverables (`results`, `data`, `people`, `preview-xlsx`) live in their own
+runner — `src.run_preview_pipeline`, the stage after this one — since they roll
+up all three stages, not just eligibility.
 
 `scripts/pipeline_health.py` (the `health` stage) verifies every stage CSV
 matches its builder's current output; `scripts/stats.py` recomputes the
-preview stats sheet coverage tables.
+preview pipeline sheet coverage tables.
 
 ## The bus-factor maintainer cache
 

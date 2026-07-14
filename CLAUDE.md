@@ -88,6 +88,8 @@ you what it is:
 - `data/risk/` — Risk-stage outputs: `risk.csv` (final aggregated risk table) plus the per-dimension builds (`concentration.csv`, `complexity.csv`, `security.csv`, `workload.csv`).
 - `data/eligibility/` — Eligibility-stage outputs: `eligibility.csv` (the rollup: `eligible = oss AND intent AND nonprofit AND active`) plus the per-dimension builds (`licenses.csv`, `active.csv`, `funding.csv`) and `overrides.csv` (curated per-repo host/owner backing, OC slug, and the manual `eol` verdict). Raw funding signals live under `data/sources/github/` (`sponsors.csv` inbound, `sponsorships.csv` outbound, `funding-yml.csv`), `data/sources/floss-fund/` (`funding-json.csv`), `data/sources/opencollective/` (`budgets.csv`), and `data/sources/funding/` (foundation rosters + `host-by-repo.csv`); license/EOL source signals under `data/sources/osi/` and the per-ecosystem folders.
 
+- `data/preview/` — cross-stage deliverables, all rebuilt by `src.run_preview_pipeline` and nowhere else: `repos.csv` (the scored rollup), `data.csv` (the measurements those scores were computed from — one column per data point a builder actually *reads*, never the columns a fetcher merely collected), `people.csv` (owners/key contributors), and `preview.xlsx` (all of it as one workbook: `repos` → `data` → `components` → `pipeline`).
+
 Rule: a script reading external/fetched data points at `data/sources/<source>/…`; a script reading or writing a stage result points at `data/<stage>/…`. Never write a stage output into `data/sources/`, and never write fetched source data into a stage folder.
 
 Exception: regenerable vendor-dump data never enters git/LFS. The raw 3.9 GB crates db-dump is transient scratch in the gitignored `tmp/`; `fetch_db_dump` slims it to the pipeline-read columns in `data/sources/crates/db-dump/` (~560 MB, gitignored) — re-downloadable on demand.
@@ -102,11 +104,11 @@ Exception: regenerable vendor-dump data never enters git/LFS. The raw 3.9 GB cra
 
 When a doc's content spans multiple stages, fold it into the relevant stage page(s) rather than adding a new top-level overview doc.
 
-### Stats live only on the preview stats sheet
+### Stats live only on the preview pipeline sheet
 
-**Every pipeline/funnel/coverage/distribution figure lives on the `stats` sheet of `data/preview/preview.xlsx` and nowhere else.** The sheet is rendered at build time by `src.build_preview_workbook` from `scripts/stats.py` (the generator — every figure recomputed from the live CSVs; `--markdown` emits the same tables as text). There is no stats document in `docs/` to refresh or drift. That covers: per-stage funnel counts (packages → dep tree → results → with-repo), class/score distributions, repo-identity coverage, and per-component "N of the top repos carry signal X" coverage tables (Risk and Eligibility share one scope — the valid class-A set **including archived repos**, which surface in eligibility as `active=False`).
+**Every pipeline/funnel/coverage/distribution figure lives on the `pipeline` sheet of `data/preview/preview.xlsx` and nowhere else.** The sheet is rendered at build time by `src.build_preview_workbook` from `scripts/stats.py` (the generator — every figure recomputed from the live CSVs; `--markdown` emits the same tables as text). There is no stats document in `docs/` to refresh or drift. That covers: per-stage funnel counts (packages → dep tree → results → with-repo), class/score distributions, repo-identity coverage, and per-component "N of the top repos carry signal X" coverage tables (Risk and Eligibility share one scope — the valid class-A set **including archived repos**, which surface in eligibility as `active=False`).
 
-- Methodology pages (`value.md`, `risk.md`, `eligibility.md`, the component and source docs) describe **how** a metric is built (formulas, schemas, column descriptions, worked illustrative examples) and **point to** the preview stats sheet for **how many** — they must not restate the counts.
+- Methodology pages (`value.md`, `risk.md`, `eligibility.md`, the component and source docs) describe **how** a metric is built (formulas, schemas, column descriptions, worked illustrative examples) and **point to** the preview pipeline sheet for **how many** — they must not restate the counts.
 - A single concrete number that *defines* a parameter (e.g. "top = 95% of cumulative downloads") stays in the methodology page — it's config, not a result.
 - One number, one place: adding a new figure means adding it to `scripts/stats.py`, never hard-coding it in a doc. A coverage/funnel count found in any page is a bug — move it into the generator and leave a pointer.
 

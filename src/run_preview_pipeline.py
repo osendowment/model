@@ -16,6 +16,8 @@ from src.common.pipeline_runner import Step, build_parser, run_pipeline
 STEPS = [
     # Terminal cross-stage rollup: eligible repos + value_score + risk_score.
     Step("results",      "src.build_results"),
+    # The measurements those scores were computed from, same repos, same order.
+    Step("data",         "src.build_data"),
     # Owners/key-contributors of the results.csv repo scope, for outreach.
     Step("people",       "src.build_people"),
     # Both preview CSVs as one styled, filterable workbook.

@@ -15,11 +15,18 @@ and formula. The value-component weights are formatted at build time from
 `settings.json` (via src.common.params) so the text cannot drift from the
 config.
 
-Sheet 3, 'stats', renders every pipeline count/funnel/coverage table
+Sheet 3, 'pipeline', renders every pipeline count/funnel/coverage table
 as stacked blocks — each under its section heading, with the same styled
 header row. The tables come straight from the generator
 (`scripts/stats.py`, its markdown renderer), computed from the live CSVs at
 build time: this sheet IS the single home of the pipeline's numbers.
+
+Sheet 4, 'data', is the audit trail behind sheet 1: the same repos, one row
+each, carrying every measurement the three stages actually consumed to score
+them (see DATA_COLUMNS) — the raw inputs (LOC, active contributors, CVE
+counts, bus factor, licence, funding channels…) alongside the components they
+produce. Score-irrelevant bookkeeping (fetch dates, comments, unused fetched
+flags) is deliberately left out.
 
 The CSV sheets get:
     - a styled header row (bold white text on a dark-blue fill) so it reads
@@ -68,10 +75,11 @@ console = Console()
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 REPOS_CSV = DATA_DIR / "preview" / "repos.csv"
+DATA_CSV = DATA_DIR / "preview" / "data.csv"
 STATS_SCRIPT = ROOT / "scripts" / "stats.py"
 OUTPUT_FILE = DATA_DIR / "preview" / "preview.xlsx"
 
-SHEETS = [("repos", REPOS_CSV)]
+SHEETS = [("repos", REPOS_CSV), ("data", DATA_CSV)]
 
 HEADER_FILL = PatternFill(start_color="1F3864", end_color="1F3864", fill_type="solid")
 HEADER_FONT = Font(bold=True, color="FFFFFF")
@@ -280,6 +288,111 @@ def _add_repos_conditional_formats(ws: Worksheet, headers: dict) -> None:
             formula=[f"NOT(ISBLANK({letter}2))"], fill=PRIORITY_FILL))
 
 
+# ---------------------------------------------------------------------------
+# data sheet — the measurements behind repos.csv (src.build_data). Wide, so the
+# header is colored BY STAGE (the same hues the components sheet uses for its
+# banners): identity navy, value green, risk red, eligibility purple, results
+# blue. Any column not listed keeps the navy default.
+
+DATA_STAGE_FILLS = [
+    ("9BBB59", [  # value: registry demand → dependency mass → criticality signals
+        "ecosystems", "packages", "ecosystem", "top_eco_pkg",
+        "downloads_npm", "downloads_pypi", "downloads_crates",
+        "downloads_debian", "downloads_homebrew",
+        "pagerank_npm", "pagerank_pypi", "pagerank_crates", "pagerank_cpp",
+        "crit_contributors", "crit_orgs", "crit_commit_freq", "crit_releases",
+        "crit_issues_updated", "crit_issues_closed", "crit_issue_comment_freq",
+        "crit_mentions", "crit_created_since", "crit_updated_since",
+        "top_eco_pct", "pr_score", "openssf_crit", "eco_crit", "value_score",
+    ]),
+    ("C0504D", [  # risk
+        "active_contributors_git_5y", "dormant", "bf_commits_git_5y",
+        "hhi_commits_git_5y", "loc_eoy", "cyclomatic_max", "openssf_score",
+        "cve_count_5y", "issues_opened_5y", "issues_closed_5y",
+        "net_new_issues_5y",
+        "concentration", "complexity", "security", "workload", "risk_score",
+    ]),
+    ("8064A2", [  # eligibility
+        "license", "license_source", "eol", "archived", "gh_sponsors_enabled",
+        "has_funding_yml", "has_funding_json", "has_funding_links",
+        "has_npm_funding", "has_pypi_funding", "bf_maintainer_fundable",
+        "paypal", "oc_slug", "host", "host_type", "owner", "owner_type",
+        "oss", "intent", "nonprofit", "active", "eligible",
+    ]),
+    ("4F81BD", ["score", "priority"]),  # preview results
+]
+
+# Counts read as counts (#,##0), PageRank keeps the precision that separates
+# neighbouring repos, scores show 2dp.
+DATA_NUMBER_FORMATS = {
+    "#,##0": ["stars", "forks", "packages", "downloads_npm", "downloads_pypi",
+              "downloads_crates", "downloads_debian", "downloads_homebrew",
+              "crit_contributors", "crit_orgs", "crit_releases",
+              "crit_issues_updated", "crit_issues_closed", "crit_mentions",
+              "loc_eoy", "cyclomatic_max", "cve_count_5y",
+              "hhi_commits_git_5y", "issues_opened_5y", "issues_closed_5y",
+              "net_new_issues_5y", "active_contributors_git_5y",
+              "bf_commits_git_5y"],
+    "0.000000": ["pagerank_npm", "pagerank_pypi", "pagerank_crates",
+                 "pagerank_cpp"],
+    "0.00": ["top_eco_pct", "pr_score", "openssf_crit", "value_score",
+             "openssf_score", "concentration", "complexity", "security",
+             "workload", "risk_score", "score"],
+}
+
+DATA_BOOL_COLS = ["dormant", "eol", "archived", "gh_sponsors_enabled",
+                  "has_funding_yml", "has_funding_json", "has_funding_links",
+                  "has_npm_funding", "has_pypi_funding", "bf_maintainer_fundable",
+                  "oss", "intent", "nonprofit", "active", "eligible"]
+
+DATA_COLUMN_WIDTHS = {"repo": 26, "platform": 9, "license": 20,
+                      "license_source": 13, "ecosystems": 12, "ecosystem": 10,
+                      "top_eco_pkg": 16, "oc_slug": 14, "host": 12, "owner": 14,
+                      "host_type": 10, "owner_type": 10, "repo_id": 12}
+DATA_DEFAULT_WIDTH = 11
+
+
+def _decorate_data_sheet(ws: Worksheet) -> None:
+    """data-sheet dressing: stage-colored header, `repo` frozen alongside the
+    header row (the sheet is 70+ columns wide — without it you lose the row's
+    identity two screens right), per-column number formats, True/False in
+    green/red, and the same eligible/priority accents the repos sheet uses."""
+    headers = {c.value: c.column for c in ws[1]}
+    for rgb, names in DATA_STAGE_FILLS:
+        fill = _fill(rgb)
+        for name in names:
+            if name in headers:
+                ws.cell(row=1, column=headers[name]).fill = fill
+
+    fmt_by_col = {headers[n]: fmt for fmt, names in DATA_NUMBER_FORMATS.items()
+                  for n in names if n in headers}
+    bool_cols = {headers[n] for n in DATA_BOOL_COLS if n in headers}
+    eligible_col = headers.get("eligible")
+    for row in ws.iter_rows(min_row=2):
+        for col, fmt in fmt_by_col.items():
+            row[col - 1].number_format = fmt
+        for col in bool_cols:
+            row[col - 1].alignment = CENTER
+        if eligible_col:
+            row[eligible_col - 1].fill = REPOS_STATIC_FILLS["eligible"]
+
+    for name in DATA_BOOL_COLS:
+        col = headers.get(name)
+        if not col or ws.max_row < 2:
+            continue
+        letter = get_column_letter(col)
+        rng = f"{letter}2:{letter}{ws.max_row}"
+        ws.conditional_formatting.add(rng, CellIsRule(
+            operator="equal", formula=['"True"'], font=BOOL_TRUE_FONT))
+        ws.conditional_formatting.add(rng, CellIsRule(
+            operator="equal", formula=['"False"'], font=BOOL_FALSE_FONT))
+
+    ws.freeze_panes = "B2"
+    for name, col in headers.items():
+        ws.column_dimensions[get_column_letter(col)].width = \
+            DATA_COLUMN_WIDTHS.get(name, DATA_DEFAULT_WIDTH)
+
+
 def _md_cell(raw: str) -> tuple[int | float | str | None, str | None]:
     """One markdown table cell → (Excel value, number format).
 
@@ -321,7 +434,7 @@ def _stats_markdown() -> str:
 
     `scripts/stats.py` computes every count from the live CSVs; its
     `markdown()` renderer is the one source of truth for the numbers on
-    this sheet (the preview stats sheet no longer exists)."""
+    this sheet (the preview pipeline sheet no longer exists)."""
     import importlib.util
     spec = importlib.util.spec_from_file_location("_stats_gen", STATS_SCRIPT)
     mod = importlib.util.module_from_spec(spec)
@@ -402,8 +515,8 @@ BANNER_FILLS = {
 BANNER_SPAN_COLS = 13  # fill A..M so the banner reads as a full-width bar
 
 
-def _write_stats_sheet(ws: Worksheet, md_text: str) -> int:
-    """Render the generator's markdown as the stats sheet.
+def _write_pipeline_sheet(ws: Worksheet, md_text: str) -> int:
+    """Render the generator's markdown as the pipeline sheet.
 
     Layout rules (mirroring the reviewed design):
       - gridlines off; column A is an empty gutter, content starts at B;
@@ -610,6 +723,41 @@ COMPONENT_TABLES: list[tuple[str, str, list[tuple[str, object]]]] = [
          "upstream is off GitHub is repointed there in value/overrides.csv "
          "(e.g. glibc → sourceware, pixman → gitlab.freedesktop.org)."),
     ]),
+    ("Data Sheet — the evidence behind the scores", "1F3864", [
+        ("what it is",
+         "The same repos as the repos sheet, same order — carrying the "
+         "measurements each score was computed FROM. A column is on the sheet "
+         "only if a builder actually read it to produce a score or an "
+         "eligibility flag; anything a fetcher merely collected along the way "
+         "is left off. Column names match the source CSV they came from, so "
+         "any cell can be traced back to its file."),
+        ("downloads_*",
+         "Registry demand: the summed downloads of the repo's packages in that "
+         "registry (Debian popcon and Homebrew installs stay separate — they "
+         "are different units and are never added together). Blank means the "
+         "repo ships nothing on that registry, which is not the same as zero "
+         "downloads."),
+        ("pagerank_*",
+         "The repo's summed package PageRank in that ecosystem — the raw "
+         "dependency mass behind top_eco_pct and pr_score. The pipeline holds "
+         "these only in memory, so this sheet is the only place they are "
+         "written down."),
+        ("crit_*",
+         "The OpenSSF criticality tool's own input signals (contributors, "
+         "orgs, commit frequency, releases, issue activity, mentions, age) — "
+         "the raw evidence behind openssf_crit, the heaviest value component. "
+         "Prefixed so they cannot be confused with the git-derived risk "
+         "columns: crit_contributors is GitHub's contributor list, while "
+         "active_contributors_git_5y is the commit log's."),
+        ("reading a row",
+         "Two things the numbers alone will not tell you. (1) Complexity, "
+         "security and workload score off PERCENTILE RANKS of the raw columns "
+         "shown here, so a value's contribution is relative to the other repos, "
+         "not absolute. (2) intent propagates at the owner level — one repo of "
+         "an owner declaring a funding channel flips intent = True for all its "
+         "siblings, so a row can read intent = True with every funding signal "
+         "on it blank."),
+    ]),
     ("Preview Results", "4F81BD", [
         ("score",
          "sqrt(value_score × risk_score) — unnormalized geometric mean on "
@@ -666,17 +814,19 @@ def build() -> None:
     for name, path in SHEETS:
         ws = wb.create_sheet(name)
         n = _write_sheet(ws, path)
-        if name == "repos" and n:
+        if n and name == "repos":
             _decorate_repos_sheet(ws)
+        if n and name == "data":
+            _decorate_data_sheet(ws)
         console.print(f"  [cyan]{name}[/cyan]: {n:,} rows ← {path}")
 
     ws = wb.create_sheet("components")
     n = _write_components_sheet(ws)
     console.print(f"  [cyan]components[/cyan]: {n} methodology tables (static)")
 
-    ws = wb.create_sheet("stats")
-    n = _write_stats_sheet(ws, _stats_markdown())
-    console.print(f"  [cyan]stats[/cyan]: {n} tables ← scripts/stats.py (live CSVs)")
+    ws = wb.create_sheet("pipeline")
+    n = _write_pipeline_sheet(ws, _stats_markdown())
+    console.print(f"  [cyan]pipeline[/cyan]: {n} tables ← scripts/stats.py (live CSVs)")
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     wb.save(OUTPUT_FILE)

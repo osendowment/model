@@ -784,10 +784,11 @@ def check_stats_data() -> list[Result]:
 def check_preview_data() -> list[Result]:
     """The preview deliverables are in sync end to end.
 
-    repos.csv vs build_results.build(), people.csv vs build_people.build()
-    (sorted the way main() writes), and preview.xlsx cell contents vs both
-    CSVs. The xlsx is compared by *content* (openpyxl), never by bytes —
-    Workbook.save() embeds timestamps, so bytes are non-deterministic.
+    repos.csv vs build_results.build(), data.csv vs build_data.build(),
+    people.csv vs build_people.build() (sorted the way main() writes), and
+    preview.xlsx cell contents vs the CSV-backed sheets. The xlsx is compared by
+    *content* (openpyxl), never by bytes — Workbook.save() embeds timestamps, so
+    bytes are non-deterministic.
     """
     from openpyxl import load_workbook
 
@@ -814,6 +815,20 @@ def check_preview_data() -> list[Result]:
         out.append(("preview/repos.csv", diffs == 0,
                     f"in sync ({len(built)} repos)" if diffs == 0
                     else f"{diffs} stale cells — re-run build_results"))
+
+    from src.build_data import build as build_data_rows
+
+    built = {r["repo_id"]: {k: ("" if v is None else str(v)) for k, v in r.items()}
+             for r in build_data_rows()}
+    with open(ROOT / "data" / "preview" / "data.csv", encoding="utf-8") as f:
+        disk = {r["repo_id"]: dict(r) for r in csv.DictReader(f)}
+    if set(built) != set(disk):
+        out.append(("preview/data.csv", False, _set_diff_detail(built, disk)))
+    else:
+        diffs = _cell_diffs(built, disk)
+        out.append(("preview/data.csv", diffs == 0,
+                    f"in sync ({len(built)} repos)" if diffs == 0
+                    else f"{diffs} stale cells — re-run build_data"))
 
     people = build_people_rows()
     people.sort(key=lambda r: (r["platform"], r["login"]))
@@ -859,7 +874,7 @@ def check_preview_data() -> list[Result]:
                 stale.append(f"{sheet}: {cells} differing row(s)")
     wb.close()
     out.append(("preview/preview.xlsx", not stale,
-                "both sheets match the CSVs" if not stale
+                f"{len(SHEETS)} CSV sheets match their CSVs" if not stale
                 else "; ".join(stale) + " — re-run build_preview_workbook"))
     return out
 
