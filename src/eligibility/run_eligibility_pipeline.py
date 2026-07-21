@@ -8,9 +8,9 @@ for funding? Four checks — OSI-approved license (`oss`), funding intent
 By default fetches any MISSING raw data first (incremental — each fetcher
 skips data already present / within its TTL, so only gaps are fetched),
 then runs the three dimension builders -> aggregate -> the terminal preview
-outputs: results.csv (eligible repos + value_score + risk_score), people.csv
-(owners/key-contributors of that repo scope), and preview.xlsx (both as one
-styled, filterable workbook). Pass --skip-fetch to skip all fetchers and
+outputs: results.csv (eligible repos + value_score + risk_score), data.csv
+(the measurements behind those scores), and preview.xlsx (the styled,
+filterable workbook). Pass --skip-fetch to skip all fetchers and
 only re-run the builders/aggregate/preview steps from existing data.
 
 Usage:

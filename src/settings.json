@@ -57,10 +57,6 @@
     "bus_factor_threshold": 0.5,
     "comment": "window_years: '_5y' window length in complete years anchored to max(years) (the last complete year); '_full' = all commits through max(years). bus_factor_threshold: commit-share that defines the bus factor (0.5 = the fewest contributors covering 50% of commits). concentration.csv column names stay year-agnostic (_5y / _full); the year boundary lives here, not in the schema."
   },
-  "key_contributors": {
-    "cum_share": 0.5,
-    "comment": "Commit-share threshold for data/preview/people.csv's 'key contributor' role. Independent of concentration.bus_factor_threshold so it can be loosened later (e.g. to surface more contributors) without changing risk/eligibility scoring. Consumed only by src.build_people, via src.sources.github.key_contributors.load_key_contributors(cum_share=...)."
-  },
   "years": [
     2021,
     2022,

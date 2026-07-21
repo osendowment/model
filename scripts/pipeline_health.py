@@ -32,7 +32,7 @@ Checks:
  11. data/value/validation.csv and data/value/stats.csv match fresh
      (no-network) builder runs — stats.csv especially, since stats.py
      --check reads it as an input and cannot see it go stale.
- 12. The preview deliverables (repos.csv / people.csv / preview.xlsx) match
+ 12. The preview deliverables (repos.csv / data.csv / preview.xlsx) match
      their builders; the xlsx is compared by cell content, not bytes.
  13. Curated override rows (value, eligibility, maintainer, cve-package)
      still point at in-scope keys — an orphaned override is a silent no-op.
@@ -784,15 +784,13 @@ def check_stats_data() -> list[Result]:
 def check_preview_data() -> list[Result]:
     """The preview deliverables are in sync end to end.
 
-    repos.csv vs build_results.build(), data.csv vs build_data.build(),
-    people.csv vs build_people.build() (sorted the way main() writes), and
+    repos.csv vs build_results.build(), data.csv vs build_data.build(), and
     preview.xlsx cell contents vs the CSV-backed sheets. The xlsx is compared by
     *content* (openpyxl), never by bytes — Workbook.save() embeds timestamps, so
     bytes are non-deterministic.
     """
     from openpyxl import load_workbook
 
-    from src.build_people import build as build_people_rows
     from src.build_preview_workbook import (
         OUTPUT_FILE,
         REPOS_DROP_COLS,
@@ -829,23 +827,6 @@ def check_preview_data() -> list[Result]:
         out.append(("preview/data.csv", diffs == 0,
                     f"in sync ({len(built)} repos)" if diffs == 0
                     else f"{diffs} stale cells — re-run build_data"))
-
-    people = build_people_rows()
-    people.sort(key=lambda r: (r["platform"], r["login"]))
-    built_rows = [{k: ("" if v is None else str(v)) for k, v in r.items()}
-                  for r in people]
-    with open(ROOT / "data" / "preview" / "people.csv", encoding="utf-8") as f:
-        disk_rows = [dict(r) for r in csv.DictReader(f)]
-    if len(built_rows) != len(disk_rows):
-        out.append(("preview/people.csv", False,
-                    f"row count differs (builder {len(built_rows)}, disk {len(disk_rows)}) "
-                    "— re-run build_people"))
-    else:
-        diffs = sum(1 for b, d in zip(built_rows, disk_rows)
-                    for k in set(b) | set(d) if b.get(k, "") != d.get(k, ""))
-        out.append(("preview/people.csv", diffs == 0,
-                    f"in sync ({len(built_rows):,} people)" if diffs == 0
-                    else f"{diffs} stale cells — re-run build_people"))
 
     if not OUTPUT_FILE.exists():
         out.append(("preview/preview.xlsx", False, "file missing — re-run build_preview_workbook"))
@@ -890,8 +871,8 @@ def check_overrides_integrity() -> list[Result]:
         per-package input rows.
       - eligibility/overrides.csv: per-repo rows by repo_id in the top scope
         (archived included); `owner/*` rows by owner having an in-scope repo.
-      - eligibility/maintainer-overrides.csv: login appears as a github
-        person in preview/people.csv.
+      - eligibility/maintainer-overrides.csv: login is a bus-factor
+        maintainer of an in-scope repo.
       - risk/cve-package-overrides.csv: github_repo (rename-canonicalized)
         is an in-scope slug.
     """
@@ -949,22 +930,21 @@ def check_overrides_integrity() -> list[Result]:
               if dormant else "")
     out.append(("eligibility/overrides.csv", not bad, detail))
 
-    people_logins: set[str] = set()
-    people_path = ROOT / "data" / "preview" / "people.csv"
-    if people_path.exists():
-        with open(people_path, encoding="utf-8") as f:
-            people_logins = {(r.get("login") or "").strip().lower()
-                             for r in csv.DictReader(f)
-                             if (r.get("platform") or "") == "github"}
-    bad = []
+    # The override only ever fires through build_funding's bus-factor join, so
+    # the membership universe IS load_bf_contributors() — a login absent from it
+    # can never flip bf_maintainer_fundable, whatever the curation says.
+    from src.sources.github.bf_contributors import load_bf_contributors
+
+    bf_logins = {login.lower() for logins in load_bf_contributors().values()
+                 for login in logins}
     with open(ROOT / "data" / "eligibility" / "maintainer-overrides.csv",
               encoding="utf-8") as f:
         bad = [login for r in csv.DictReader(f)
                if (login := (r.get("login") or "").strip().lower())
-               and login not in people_logins]
+               and login not in bf_logins]
     out.append(("eligibility/maintainer-overrides.csv", not bad,
-                f"{len(bad)} login(s) not in people.csv: " + ", ".join(bad[:3]) if bad
-                else "every login resolves to a github person"))
+                f"{len(bad)} login(s) not a bus-factor maintainer: " + ", ".join(bad[:3]) if bad
+                else "every login carries an in-scope repo"))
 
     canon = canonical_repo_map()
     bad = []

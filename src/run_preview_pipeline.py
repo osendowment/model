@@ -1,10 +1,9 @@
 """Preview pipeline runner — the cross-stage deliverables in data/preview/.
 
 Terminal rollup of all three stages (Value → Risk → Eligibility): the
-eligible-repo table with value/risk scores, the owners/key-contributors
-table for outreach, and both as one styled workbook. Runs after the
-eligibility pipeline; every file in data/preview/ is rebuilt here and
-nowhere else.
+eligible-repo table with value/risk scores, the measurements behind those
+scores, and the styled workbook. Runs after the eligibility pipeline;
+every file in data/preview/ is rebuilt here and nowhere else.
 
 Usage:
     uv run python -m src.run_preview_pipeline
@@ -18,9 +17,7 @@ STEPS = [
     Step("results",      "src.build_results"),
     # The measurements those scores were computed from, same repos, same order.
     Step("data",         "src.build_data"),
-    # Owners/key-contributors of the results.csv repo scope, for outreach.
-    Step("people",       "src.build_people"),
-    # Both preview CSVs as one styled, filterable workbook.
+    # repos.csv + methodology + pipeline stats as one styled, filterable workbook.
     Step("preview-xlsx", "src.build_preview_workbook"),
 ]
 
