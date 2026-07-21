@@ -6,13 +6,13 @@ It collects data on open-source software from [20+ data sources](docs/data-sourc
 
 ### Principles
 
-1. We aim to build a transparent, measurable, and verifiable model that can be iteratively improved by the open-source community and approved by a majority of OSE members.
+1. We are building a transparent, measurable, and verifiable model that can be iteratively improved by the open-source community and approved by the OSE members.
 
-2. We aim to focus our support on the critical core of open-source ecosystems — roughly the 1% of packages that account for 99% of downloads and dependencies.
+2. We focus our support on the critical core of open-source ecosystems — roughly the 1% of projects that account for 99% of downloads and dependencies.
 
 3. Our model is a data-driven approximation of global open-source supply chain usage, designed to find the riskiest of its most valuable components.
 
-4. This model will never be perfect, because open-source consumption cannot be measured with 100% precision, and there is no ideal consensus on how to prioritize OSS grants.
+4. This model will never be perfect, because open-source consumption cannot be precisely measured, and there is no ideal consensus on how to prioritize OSS grants.
 
 
 ## Model
