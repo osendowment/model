@@ -23,10 +23,10 @@ Currently, the model aggregates data on packages from four ecosystems:
 
 | Language | Registries |
 |---|---|
-| JavaScript/TypeScript | npm |
-| Python | PyPI |
-| Rust | crates.io |
-| C/C++ | Debian, Homebrew |
+| JavaScript/TypeScript | [npmjs.com](https://www.npmjs.com/) |
+| Python | [pypi.org](https://pypi.org/) |
+| Rust | [crates.io](https://crates.io/) |
+| C/C++ | [debian.org](https://www.debian.org/), [brew.sh](https://brew.sh/) |
 
 The most valuable packages (based on downloads and dependency graph) are linked with corresponding repos, which are later used to collect risk and eligibility data points for scoring.
 
@@ -50,7 +50,7 @@ Most package managers store clean historical data. The C/C++ ecosystem does not,
 
 **All three scoring stages are automated.**
 
-The final `score` is `sqrt(value_score × risk_score)` — an unnormalized geometric mean on the same 0–100 scale as its inputs, so **both** dimensions must be high. `eligible` is used to filter out ineligible projects from results. `priority` is a dense rank by `score` descending over potentially eligible projects only.
+The final `score` is `sqrt(value_score × risk_score)` — an unnormalized geometric mean on the same 0–100 scale as its inputs, so **both** dimensions must be high. `eligible` is used to flag ineligible projects in the preview results. `priority` is a dense rank by `score` descending over potentially eligible projects only.
 
 ### Running it
 
