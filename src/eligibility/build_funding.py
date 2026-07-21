@@ -505,8 +505,10 @@ def _load_funding_overrides(path: Path) -> tuple[dict[str, dict], dict[str, dict
     declare no FUNDING.yml (e.g. socketio); `paypal` is a curated PayPal.me URL
     for a maintainer who takes donations that way but declares no FUNDING.yml
     (e.g. ronaldoussoren/pyobjc) — a declared, unmeasured funding channel. `repo`
-    is the human-readable slug (may drift on a rename); `repo_id` is GitHub's
-    immutable numeric id — the join key.
+    is the human-readable slug (may drift on a rename); `repo_id` is the stable
+    host-namespaced id — the join key. It is `gh/<numeric>` for GitHub, and
+    `gl/<id>` (gitlab.com) or `gl/<nickname>-<id>` (self-hosted) for GitLab,
+    which the curated override rows also use.
 
     Two row shapes share the file:
 

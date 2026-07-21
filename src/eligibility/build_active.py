@@ -11,8 +11,11 @@ pointed at that upstream in data/value/overrides.csv rather than exempted here.
   per-ecosystem registry EOL signals (data/sources/<eco>/eol.csv, produced by
   src.sources.<eco>.check_eol) are advisory inputs to that manual call — they
   flag *packages* (deprecations, yanks), while `eol` is a per-repo verdict.
-- **`archived`** — the GitHub `archived` flag from
-  data/sources/github/repos.csv (src.sources.github.fetch_repo_owner_data).
+- **`archived`** — the host's `archived` flag, read off the RepoEntry that
+  load_top_repos hands over. GitHub rows come from data/sources/github/repos.csv
+  (src.sources.github.fetch_repo_owner_data); GitLab rows enrich from
+  data/sources/gitlab/repos.csv (src.sources.gitlab.fetch_project_data), so
+  `gl/` repos carry a real verdict rather than a default False.
 
 Usage:
     uv run python -m src.eligibility.build_active

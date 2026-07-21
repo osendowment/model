@@ -7,15 +7,16 @@ for funding? Four checks — OSI-approved license (`oss`), funding intent
 
 By default fetches any MISSING raw data first (incremental — each fetcher
 skips data already present / within its TTL, so only gaps are fetched),
-then runs the three dimension builders -> aggregate -> the terminal preview
-outputs: results.csv (eligible repos + value_score + risk_score), data.csv
-(the measurements behind those scores), and preview.xlsx (the styled,
-filterable workbook). Pass --skip-fetch to skip all fetchers and
-only re-run the builders/aggregate/preview steps from existing data.
+then runs the three dimension builders (licenses, active, funding) ->
+aggregate, writing data/eligibility/eligibility.csv. The data/preview
+deliverables are NOT built here — they roll up all three stages and live in
+src.run_preview_pipeline (see the note above BUILDERS).
+
+Pass --offline to skip every network fetch and rebuild from cached data.
 
 Usage:
-    uv run python -m src.eligibility.run_eligibility_pipeline                # fetch + build
-    uv run python -m src.eligibility.run_eligibility_pipeline --skip-fetch   # build only
+    uv run python -m src.eligibility.run_eligibility_pipeline               # fetch + build
+    uv run python -m src.eligibility.run_eligibility_pipeline --offline     # build only, no network
     uv run python -m src.eligibility.run_eligibility_pipeline --from aggregate
     uv run python -m src.eligibility.run_eligibility_pipeline --list
 """
