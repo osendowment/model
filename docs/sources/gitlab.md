@@ -22,7 +22,7 @@ project metadata for a `namespace/path` (path URL-encoded, slashes → `%2F`; mu
 `group/subgroup/project` supported). One call returns the repo **and** its owner kind
 (`namespace.kind` = `group`/`user`). 301/302 rename redirects are followed to the terminal
 response; the requested path stays the row key. A 404 is recorded as a sparse `valid=False`
-row so re-runs honour the TTL instead of re-hammering dead projects.
+row so re-runs honor the TTL instead of re-hammering dead projects.
 
 **Languages API**: `GET https://{host}/api/v4/projects/{id}/languages` — the linguist-style
 byte-share breakdown (`{"C": 90.8, "CMake": 3.7, …}`). Fetched best-effort by numeric `id`
@@ -56,13 +56,13 @@ not authenticate against salsa.debian.org.
 
 The bare `GITLAB_TOKEN` / per-host `GITLAB_TOKEN_<SLUG>` fallbacks cover only the 17
 `KNOWN_GITLAB_HOSTS` (= the keys of `HOST_NICKNAMES`, listed under [Identity](#identity)).
-Host *detection* additionally accepts any `gitlab.*` hostname, but such a host is tokenised
+Host *detection* additionally accepts any `gitlab.*` hostname, but such a host is tokenized
 only through an explicit `GITLAB_TOKENS` JSON entry.
 
 A tokenless host is still scored: self-hosted instances serve their REST API anonymously, so
 Scorecard's GitLab mode scores them token-free (a few auth-only checks come back inconclusive).
 Only gitlab.com is skipped without a token — its anonymous quota is too small for Scorecard's
-call volume (`SCORECARD_ANON_UNRELIABLE`). Rate limiting honours each host's
+call volume (`SCORECARD_ANON_UNRELIABLE`). Rate limiting honors each host's
 `RateLimit-Remaining` / `RateLimit-Reset` headers, with a minimum backoff floor and per-host
 isolation (an exhausted host never blocks another host).
 
@@ -125,7 +125,7 @@ genuinely-absent value is distinguishable from a failed fetch (auditability).
 ## Freshness
 
 90-day TTL on `fetched_at` (via `src/common/freshness.py`), matching the GitHub owner fetcher.
-A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honour the same TTL.
+A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honor the same TTL.
 
 ## Scripts
 

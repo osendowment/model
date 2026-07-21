@@ -6,7 +6,7 @@ source of per-repo CVE rows (published 2021–2025).
 
 ## Fetch mechanics
 
-| Aspect | Behaviour |
+| Aspect | behavior |
 |---|---|
 | Endpoint | `POST https://api.osv.dev/v1/query` with `{"package": {"name", "ecosystem"}}`; no auth |
 | Pagination | ≤1000 vulns/page; follows `next_page_token` |

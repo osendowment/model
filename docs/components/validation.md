@@ -31,7 +31,7 @@ Steps:
 
 1. **Collect targets** from `data/value/value.csv`. For each value row,
    `_row_target` picks a single target: the row's `repo` slug (type
-   `github_repo`) when its `platform == github`, else its canonicalised
+   `github_repo`) when its `platform == github`, else its canonicalized
    non-GitHub `git_url` (type `git_url`). The GitHub branch wins, so a GitHub row's derived
    `git_url` is never double-counted. A row with neither is an **orphan** and
    contributes no target. Each target accumulates the `sources` — the ecosystems

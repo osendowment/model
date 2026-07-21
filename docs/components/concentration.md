@@ -134,7 +134,7 @@ the stable `repo_id`; rows with a blank `repo_id` are skipped.
 | `value/value.csv` | value pipeline | valid class-A top-repo scope (`load_top_repos`) | `repo_id` |
 
 The commit log is authoritative for two reasons. It sees **every** contributor
-(no API list cap), and it carries **author dates**, so it can honour a 2021–2025
+(no API list cap), and it carries **author dates**, so it can honor a 2021–2025
 window rather than only a lifetime total. It reads a clone, not a host API, so
 GitHub and GitLab repos go through the identical code path.
 
@@ -144,7 +144,7 @@ GitHub and GitLab repos go through the identical code path.
 
 The raw rows are keyed by mailmap-resolved `(author_name, author_email)` pairs;
 the repo's own `.mailmap` is applied at fetch time. The builder then union-finds
-identities that share a normalised email **or** a full name
+identities that share a normalized email **or** a full name
 (`merge_identity_groups`), so a person who committed under several addresses
 counts once. It drops bot identities (`_is_bot_identity`) before it computes any
 metric.

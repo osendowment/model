@@ -73,7 +73,7 @@ Per-roster extras carried through from each source:
 
 ## Keying & auditability
 
-| Mechanism | Behaviour |
+| Mechanism | behavior |
 |-----------|-----------|
 | Row key | The foundation's own project identity (`name` / `project_slug` / `project_id`) — **not** a GitHub repo. `github_repo` is an attribute; repo ids attach downstream in `host-by-repo.csv` |
 | `fetched_at` | Stamped on every row at write time — each host match is traceable to the scrape that produced it |

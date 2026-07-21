@@ -1,7 +1,7 @@
 # Workload (risk component)
 
 How much maintenance burden rests on each active contributor? The workload
-component normalises three burdens — codebase size, security debt, and issue
+component normalizes three burdens — codebase size, security debt, and issue
 backlog — **per active contributor (AC)**. It then folds the three per-AC
 percentiles into one **workload-risk score** (`score`), which feeds
 `data/risk/risk.csv` as the `workload` column.
@@ -113,7 +113,7 @@ from reading as "zero issues" and skewing the per-AC percentiles.
 
 ## Processing & scoring
 
-### Per-AC normalisation
+### Per-AC normalization
 
 `AC = active_contributors_git_5y` — distinct non-bot contributors who authored a
 commit in 2021–2025, read from `concentration.csv`. Each burden is divided by AC.
@@ -138,7 +138,7 @@ when the concentration clone failed — the one case that blanks the per-AC rati
 closed counts over 2021–2025. Both are emitted only when `issues_opened_5y ≥ 1`.
 
 `issue_trend_score = (slope_closed − slope_opened) / mean_opened` — a
-volume-normalised measure of whether the maintainers close the gap (positive) or
+volume-normalized measure of whether the maintainers close the gap (positive) or
 fall behind (negative). It is emitted only when mean opened volume ≥ 1, so
 low-traffic repos produce no noisy trend.
 
@@ -215,7 +215,7 @@ gate separates "no data" from "no backlog", and fills only the first.
 | `issue_close_ratio_p` | percentile of `issue_close_ratio` (info-only) |
 | `net_new_issues_5y` | `opened_5y − closed_5y` |
 | `slope_opened`, `slope_closed` | OLS slopes of yearly counts (2 dp) |
-| `issue_trend_score` | vol-normalised `slope_closed − slope_opened` |
+| `issue_trend_score` | vol-normalized `slope_closed − slope_opened` |
 | `issue_trend_score_p` | percentile of `issue_trend_score` (info-only) |
 | `loc_per_ac` | LOC per active contributor |
 | `loc_per_ac_p` | risk percentile of `loc_per_ac` |

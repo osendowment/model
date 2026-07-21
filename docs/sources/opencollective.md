@@ -28,7 +28,7 @@ Repo-link extraction, per collective, in priority order: `repositoryUrl` →
   `github_url`.
 - **GitLab is the fallback.** Only when no GitHub link exists does
   `_gitlab_link()` scan the same candidates for a GitLab project — gitlab.com
-  or any self-hosted instance `is_gitlab_host()` recognises — and store the
+  or any self-hosted instance `is_gitlab_host()` recognizes — and store the
   normalized URL in `repo_url`. `load_url_index()` joins it downstream by
   `normalize_repo_url(entry.git_url)`.
 - A URL that names neither host is kept in `urls` but yields no repo link;
@@ -99,7 +99,7 @@ one.
 | `oc_status` | separates a real zero from a failure: `ok` (account resolved), `not_found` (no such collective), `error` (request failed after retries) |
 | Error rows | never fresh — retried next run, not cached as "no funding" |
 | TTL (365 d, `src/common/freshness.py`) | budgets gated per row on `fetched_at` + `oc_status`; collectives index gated per file (mtime) |
-| Rate limiting | 429s retried up to 6× honouring `Retry-After` (cap 90 s); default concurrency 2 |
+| Rate limiting | 429s retried up to 6× honoring `Retry-After` (cap 90 s); default concurrency 2 |
 
 ## Scripts
 

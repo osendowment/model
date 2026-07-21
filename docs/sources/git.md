@@ -2,10 +2,10 @@
 
 Code metrics computed by cloning each repo and running local tools — no
 hosting-platform API in the measurement itself. Every fetcher clones the
-repo's real `git_url` (from `value.csv`), so GitLab repos are analysed exactly
+repo's real `git_url` (from `value.csv`), so GitLab repos are analyzed exactly
 like GitHub ones; this is why most risk signals are host-agnostic. The two
 exceptions are the SHA-anchoring helpers (`commits_years`, `resolve_head`),
-which query the GitHub Commits API to pick *which* commit to analyse.
+which query the GitHub Commits API to pick *which* commit to analyze.
 
 `data/sources/git/` is also the shared store for **all** per-(repo, sha)
 long-format metric files — including ones written by other source modules
@@ -31,7 +31,7 @@ failed git step **raises** — it must never be recorded as a genuine 0-LOC repo
 
 All sha-pinned analyses (scc, lizard) key off `commits-years.csv`:
 
-| Step | Module | Behaviour |
+| Step | Module | behavior |
 |------|--------|-----------|
 | Per-year SHAs | `commits_years.py` | GitHub Commits API, per (repo, year): newest + oldest commit in the year on the default branch (2 calls: `per_page=1`, then `&page={count}` from the Link header) → `first_sha`, `last_sha`, `commits`. Inactive years stored with empty SHAs, `commits=0` |
 | Snapshot pick | `resolve_snapshot_sha` | target year's `last_sha`, cascading back through earlier years (`SNAPSHOT_WALKBACK_YEARS = 30`); no usable sha → no row |
@@ -94,7 +94,7 @@ uv run python -m src.sources.git.contributors --inspect curl/curl
 
 ## Auditability & caveats
 
-| Concern | Behaviour |
+| Concern | behavior |
 |---------|-----------|
 | Fetch dates | every file carries `fetched_at` / `checked_at` |
 | Failure vs zero | `contributor-commits.status.csv` records `timeout` / `clone_failed` explicitly; a failed sparse clone raises instead of writing a fake 0-LOC snapshot |

@@ -1,7 +1,7 @@
 # Complexity (risk component)
 
 How large and hard to audit is a project's codebase? The complexity component
-analyses a pinned end-of-year snapshot of each repo's default branch — lines of
+analyzes a pinned end-of-year snapshot of each repo's default branch — lines of
 code (scc) plus per-function McCabe and cognitive complexity (lizard) — and
 reduces them to one **complexity-risk score (`score`)** in
 `data/risk/risk.csv`. Higher = larger and harder to maintain.
@@ -71,7 +71,7 @@ would measure a template tree.
 ## Collection
 
 The build reads one unified SHA-metrics fetcher (scc + lizard) plus
-`commits-years.csv` for the sha. Every fetcher records the analysed sha and a
+`commits-years.csv` for the sha. Every fetcher records the analyzed sha and a
 `fetched_at`, so a `0` or empty value is distinguishable from a failed fetch.
 
 | Source file (`data/sources/`) | Fetcher | Collects | Key |
@@ -89,10 +89,10 @@ skips to the next-oldest year.
 ### The lizard false-zero guard
 
 The fetcher already applies the mainline-sha correction above, so scc and lizard
-analyse the same corrected tree. `build_complexity._is_lizard_false_zero` guards
+analyze the same corrected tree. `build_complexity._is_lizard_false_zero` guards
 the join against any residual mismatch. It fires when scc found real branching
 (`scc_complexity_eoy ≥ LIZARD_FALSE_ZERO_MIN_SCC_CX`, **5**) but lizard reports
-`cyclomatic_total == 0` — lizard analysed the wrong, function-free tree. The
+`cyclomatic_total == 0` — lizard analyzed the wrong, function-free tree. The
 guard drops all six lizard columns to **MISSING** rather than keep a
 score-deflating `0`. A genuinely function-free repo (a pure data or config
 module) has near-zero scc complexity too, so the threshold spares it.
