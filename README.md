@@ -17,7 +17,7 @@ It collects data on open-source software from [20+ data sources](docs/data-sourc
 
 ## Model
 
-Value narrows the open-source universe to a core set of projects. Risk and Eligibility then score and flag that core. The fourth step is human.
+Value narrows the open-source universe to a core set of projects. Risk and Eligibility then score and flag that core. The fourth step is human-based due diligence and approval by the OSE board.
 
 | VALUE | RISK | ELIGIBILITY | DUE DILIGENCE |
 |:---|:---|:---|:---|
