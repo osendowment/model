@@ -26,18 +26,23 @@ import datetime
 import os
 import time
 
+from src.common.params import fetch_retry_days, fetch_ttl_days
+
 # One TTL for the entire funding-intent discovery layer (days). A record that
 # already carries a funding signal is cached for this full window — declared
 # funding rarely disappears, so re-running inside it is a no-op (the idempotency
-# guarantee for *positive* results).
-FUNDING_TTL_DAYS = 365
+# guarantee for *positive* results). The window is 365 days and comes from
+# settings.json (`fetch_ttl_days`).
+FUNDING_TTL_DAYS = fetch_ttl_days("common/freshness")
 
 # A record with NO funding signal yet (`has_funding_links=False`, 0 sponsors, …)
 # is the one most likely to GAIN one and the cheapest to re-query, so it is
 # rechecked on this much shorter window instead of the full TTL. This is what
 # keeps a freshly-added FUNDING.yml from staying invisible for up to a year
 # (the canonical miss: rust-lang/regex added a FUNDING.yml 1.5h after a fetch).
-FUNDING_EMPTY_RECHECK_DAYS = 30
+# It is a RETRY back-off (30 days), not a cache TTL, so it comes from
+# settings.json `fetch_retry_days`.
+FUNDING_EMPTY_RECHECK_DAYS = fetch_retry_days("common/freshness.funding_empty_recheck")
 
 # Status values that mark a record as a failed fetch (never fresh → always retried).
 ERROR_STATUSES = ("error",)

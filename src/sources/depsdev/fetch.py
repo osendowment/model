@@ -71,6 +71,7 @@ from rich.progress import (
 from rich.table import Table
 from yarl import URL
 
+from src.common.params import fetch_ttl_days
 from src.common.repos import load_top_repos
 from src.sources.git.long_format import upsert_rows as upsert_long_rows
 
@@ -92,7 +93,8 @@ FIELDS = [
 DEPSDEV_BASE = "https://api.deps.dev"
 BESTPRACTICES_URL = "https://www.bestpractices.dev/projects.json"
 
-TTL_DAYS_DEFAULT = 365
+# Default cache TTL — 365 days, from settings.json (`fetch_ttl_days`).
+TTL_DAYS_DEFAULT = fetch_ttl_days("sources/depsdev/fetch")
 REQUEST_TIMEOUT_S = 30
 MAX_RETRIES = 4
 WORKER_MIN_INTERVAL_S = 0.05  # ~20 req/sec per worker (deps.dev tolerates this)

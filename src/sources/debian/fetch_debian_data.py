@@ -37,6 +37,7 @@ from tqdm import tqdm
 # ── config ────────────────────────────────────────────────────────────────────
 
 from src.common.freshness import file_is_fresh
+from src.common.params import fetch_ttl_days
 
 RAW_PACKAGES = "data/sources/debian/raw/cpp-packages.csv"
 RAW_DOWNLOADS = "data/sources/debian/raw/downloads.csv"
@@ -46,7 +47,8 @@ RAW_ALIASES = "data/sources/debian/raw/aliases.csv"
 
 # Registry indexes / popcon stats move slowly; a warm pipeline run should not
 # re-download them. --refresh (propagated by the pipeline runner) overrides.
-TTL_DAYS = 7
+# The TTL is 365 days and comes from settings.json (`fetch_ttl_days`).
+TTL_DAYS = fetch_ttl_days("sources/debian/fetch_debian_data")
 
 UDD_DSN = "host=udd-mirror.debian.net port=5432 user=udd-mirror password=udd-mirror dbname=udd"
 

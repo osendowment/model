@@ -11,7 +11,8 @@ Reads `data/value/value.csv`, takes every repo whose `value_class` is A or B
      in the eligibility table.
 
 Cached: rows in `data/sources/github/repos.csv` / `data/sources/github/users.csv` whose
-`fetched_at` is within 90 days are skipped. Use `--force` to refetch.
+`fetched_at` is within the TTL (365 days, from settings.json) are skipped. Use
+`--force` to refetch.
 
 Async with 10-way concurrency + token rotation (reuses the same rate
 limiter pattern as `fetch_top_repos.py`). For the AB scope (~1.2k repos +
@@ -42,6 +43,7 @@ from rich.progress import (BarColumn, MofNCompleteColumn, Progress,
                            TextColumn, TimeElapsedColumn)
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
 from src.sources.github.github_client import get_revolver
 
 log = logging.getLogger(__name__)
@@ -55,7 +57,8 @@ REPOS_OUT = REPO / "data" / "sources" / "github" / "repos.csv"
 USERS_OUT = REPO / "data" / "sources" / "github" / "users.csv"
 
 GITHUB_API = "https://api.github.com"
-TTL_DAYS = 90
+# Cache TTL (365 days) from settings.json; `--force` ignores it.
+TTL_DAYS = fetch_ttl_days("sources/github/fetch_repo_owner_data")
 MAX_CONCURRENT = 10
 MAX_REDIRECTS = 10  # cap on a rename-redirect chain before we give up
 
@@ -445,7 +448,8 @@ def fetch_and_persist(
     `src.value.unify_value_data`) can drive github data collection without going
     through the CLI. Behaviour:
 
-    - Caches via 90-day TTL on `fetched_at` (loaded from existing CSVs).
+    - Caches via the TTL (365 days, from settings.json) on `fetched_at`
+      (loaded from existing CSVs).
     - 404'd repos are recorded with `valid=False` so re-runs honour the
       same TTL on dead repos.
     - If `repos` is None, falls back to the historical AB-class loader.

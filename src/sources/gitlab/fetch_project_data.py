@@ -33,6 +33,7 @@ from rich.console import Console
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
 
 from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
 from src.sources.gitlab.gitlab_client import GitLabLimiter, api_base, encode_project_path, make_repo_id, parse_git_url
 
 log = logging.getLogger(__name__)
@@ -44,7 +45,8 @@ VALUE_FILE = REPO / "data" / "value" / "value.csv"
 REPOS_OUT = REPO / "data" / "sources" / "gitlab" / "repos.csv"
 NAMESPACES_OUT = REPO / "data" / "sources" / "gitlab" / "namespaces.csv"
 
-TTL_DAYS = 90
+# Cache TTL (365 days) from settings.json; `--force` ignores it.
+TTL_DAYS = fetch_ttl_days("sources/gitlab/fetch_project_data")
 MAX_CONCURRENT = 10
 MAX_REDIRECTS = 10
 
@@ -288,7 +290,7 @@ def _atomic_write(path: Path, rows: list[dict], fieldnames: list[str]) -> None:
 
 def _filter_stale(items: list[dict], existing: dict[str, dict], key: str,
                   force: bool) -> tuple[list[dict], int, int]:
-    """Return (to_fetch, fresh_count, missing_count) using a 90-day TTL.
+    """Return (to_fetch, fresh_count, missing_count) using the TTL (365 days).
 
     A row whose stored `valid` is the string "False" is still re-checked only
     once its `fetched_at` ages past TTL (dead-repo backoff), exactly like the
@@ -410,7 +412,7 @@ def fetch_and_persist(target: str = "projects", force: bool = False,
                       limit: int | None = None, quiet: bool = False,
                       classes: set[str] | None = None,
                       targets: list[dict] | None = None) -> dict:
-    """Fetch GitLab projects (+ namespaces). Idempotent under the 90-day TTL.
+    """Fetch GitLab projects (+ namespaces). Idempotent under the TTL (365 days).
 
     `classes` (e.g. {"A", "B"}) scopes the projects phase to those value
     classes; None fetches every GitLab-hosted repo. `targets` (a list of

@@ -25,12 +25,15 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
+
 EOL_FIELDS = ["package", "is_eol", "eol_method", "eol_reason", "source", "eol_checked_at"]
 
 # Deprecation status changes slowly; the registry-hitting checkers (npm, pypi)
 # skip packages checked within this window instead of re-querying every one of
 # them on every pipeline run. `error` rows are never fresh (always retried).
-EOL_TTL_DAYS = 7
+# The window is 365 days and comes from settings.json (`fetch_ttl_days`).
+EOL_TTL_DAYS = fetch_ttl_days("common/eol_common")
 
 
 def now_iso() -> str:

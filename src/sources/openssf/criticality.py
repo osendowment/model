@@ -18,8 +18,8 @@ mode produced each row.
 Output (wide, one row per repo): ``data/sources/openssf/criticality.csv``.
 Every row carries `checked_at` (UTC ISO 8601), a `status` flag, and an
 `error_reason`, so a `0`/empty value is distinguishable from a failed/never-run
-fetch. A 1-year TTL skips repos already fetched within the last 365 days
-(override with ``--force``).
+fetch. A 365-day TTL (from settings.json) skips repos already fetched within
+that window (override with ``--force``).
 
 Known structural gap (`error_reason=unresolvable-contributor`): the tool derives
 `org_count` by GraphQL-querying each top contributor's company, and a non-user
@@ -58,6 +58,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
 from src.common.repos import VALUE_FILE, load_repo_ids, load_top_slugs
 from src.sources.openssf.scorecard import _github_tokens
 
@@ -67,7 +68,7 @@ console = Console()
 ROOT = Path(__file__).resolve().parents[3]
 OUTPUT_FILE = ROOT / "data" / "sources" / "openssf" / "criticality.csv"
 
-TTL_DAYS = 365  # criticality moves slowly; refresh at most yearly
+TTL_DAYS = fetch_ttl_days("sources/openssf/criticality")  # 365 days, from settings.json
 # The score's dependents proxy (`github_mention_count`) is fetched via GitHub's
 # `search/commits` endpoint, which trips a strict SECONDARY rate limit under
 # concurrency/burst — and the binary treats that 403 as a fatal per-repo error
@@ -419,7 +420,8 @@ def _print_coverage(rows_by_repo: dict[str, dict], scope: list[str]) -> None:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("repos", nargs="*", help="owner/repo slugs (default: all top repos)")
-    p.add_argument("--force", action="store_true", help="ignore the 1-year TTL and refetch")
+    p.add_argument("--force", action="store_true",
+                   help=f"ignore the {TTL_DAYS}-day TTL and refetch")
     # The pipeline runs this as a net=True step, which appends --offline/--refresh.
     p.add_argument("--refresh", action="store_true",
                    help="ignore the TTL and refetch (alias of --force; the pipeline's flag)")

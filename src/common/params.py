@@ -118,3 +118,42 @@ def assign_value_class(cumulative_share: float) -> str:
     if cumulative_share <= VALUE_CLASS_B:
         return "B"
     return "C"
+
+
+# ── Fetcher cache TTLs ────────────────────────────────────────────────────────
+# Every fetcher's cache TTL lives in settings.json, never as a literal in the
+# fetcher. One key per module path under src/; a module with two independent
+# caches uses a dotted suffix (e.g. "sources/npm/fetch_npm_data.deps").
+_FETCH_TTL_DAYS: dict[str, int] = _P["fetch_ttl_days"]
+_FETCH_RETRY_DAYS: dict[str, int] = _P["fetch_retry_days"]
+
+
+def fetch_ttl_days(module: str) -> int:
+    """Cache TTL in days for `module`, from settings.json `fetch_ttl_days`.
+
+    `module` is the fetcher's path under `src/` without the extension, e.g.
+    "sources/npm/fetch_licenses". Raises KeyError for an unknown key: a new
+    fetcher must declare its TTL in settings.json rather than silently
+    inheriting a default, so `fetch_ttl_days` stays the complete inventory.
+    """
+    try:
+        return int(_FETCH_TTL_DAYS[module])
+    except KeyError:
+        raise KeyError(
+            f"fetch_ttl_days: no TTL for {module!r} in settings.json. "
+            f"Add it under `fetch_ttl_days` — every fetcher must declare one."
+        ) from None
+
+
+def fetch_retry_days(key: str) -> int:
+    """Back-off window in days for `key`, from settings.json `fetch_retry_days`.
+
+    These govern how soon a FAILED or empty result is retried. They are NOT
+    cache TTLs and are deliberately short — see the comment in settings.json.
+    """
+    try:
+        return int(_FETCH_RETRY_DAYS[key])
+    except KeyError:
+        raise KeyError(
+            f"fetch_retry_days: no back-off window for {key!r} in settings.json."
+        ) from None

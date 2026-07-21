@@ -69,6 +69,7 @@ from rich.progress import (
 )
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
 from src.common.repos import load_default_branches, load_top_repos
 from src.sources.git.clone import SOURCE_EXTS, corrected_clone_sha, sparse_clone
 from src.sources.git.commits_years import load_sha_data
@@ -100,8 +101,9 @@ DEFAULT_LIMIT = 0          # pipeline step: full risk scope, no random sampling
 DEFAULT_CONCURRENCY = int(os.environ.get("SHA_METRICS_WORKERS") or 4)
 # lizard rows are sha-pinned (same sha → same complexity forever) and a changed
 # sha always re-analyzes regardless of TTL — so the TTL only gates pointless
-# same-sha re-analysis. 365 matches the repo-wide freshness convention.
-DEFAULT_TTL_DAYS = 365
+# same-sha re-analysis. The TTL is 365 days and comes from settings.json
+# (`fetch_ttl_days`), the repo-wide freshness convention.
+DEFAULT_TTL_DAYS = fetch_ttl_days("sources/git/fetch_sha_metrics")
 
 # lizard metrics emitted per (repo, sha) snapshot → data/sources/git/lizard.csv.
 LIZARD_METRICS: tuple[str, ...] = (

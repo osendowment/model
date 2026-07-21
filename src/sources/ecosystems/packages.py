@@ -9,8 +9,9 @@ cross-registry consensus.
 For each ecosystem (npm, pypi, crates, cpp), reads `data/sources/{eco}/results.csv`
 and finds packages with empty `github_repo` AND empty `git`. Queries
 ecosyste.ms for those packages, caches the full raw JSON response under
-`data/sources/ecosystems/{eco}/raw/{package}.json` (90-day TTL), and writes a
-downstream-consumable index at `data/sources/ecosystems/{eco}/packages.csv`:
+`data/sources/ecosystems/{eco}/raw/{package}.json` (365-day TTL, from
+settings.json), and writes a downstream-consumable index at
+`data/sources/ecosystems/{eco}/packages.csv`:
 
     package, registry_hit, repository_url, homepage, fetched_at
 
@@ -52,6 +53,8 @@ from rich.progress import (
 )
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
+
 log = logging.getLogger(__name__)
 console = Console()
 
@@ -68,7 +71,8 @@ REGISTRY_MAP: dict[str, list[str]] = {
 ECOSYSTE_API = "https://packages.ecosyste.ms/api/v1"
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"
 
-DEFAULT_TTL_DAYS = 90
+# Default cache TTL — 365 days, from settings.json (`fetch_ttl_days`).
+DEFAULT_TTL_DAYS = fetch_ttl_days("sources/ecosystems/packages")
 DEFAULT_CONCURRENCY = 8
 INDEX_FIELDS = ["package", "registry_hit", "repository_url", "homepage", "fetched_at"]
 

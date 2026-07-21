@@ -30,6 +30,7 @@ from src.sources.github.github_client import (
     _fetch_total_contributors,
 )
 from src.sources.github.models import THRESHOLD
+from src.common.params import fetch_ttl_days
 from src.common.repos import git_url_for, load_git_urls
 
 log = logging.getLogger(__name__)
@@ -48,7 +49,8 @@ GH_CONTRIB_STATUS_FILE = "data/sources/github/contributor-commits.status.csv"
 GH_CONTRIB_FIELDS = ["repo", "repo_id", "git_url", "login", "contributions", "account_type"]
 GH_CONTRIB_STATUS_FIELDS = ["repo", "repo_id", "git_url", "status", "n_contributors", "fetched_at"]
 
-CONCENTRATION_TTL_DAYS = 90  # rows older than this get re-fetched
+# Cache TTL (365 days) from settings.json — rows older than this get re-fetched.
+CONCENTRATION_TTL_DAYS = fetch_ttl_days("sources/github/batch_runner")
 GH_REPOS_FILE = "data/sources/github/repos.csv"
 
 

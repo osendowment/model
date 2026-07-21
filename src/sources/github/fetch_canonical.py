@@ -15,10 +15,11 @@ Writes `data/sources/github/canonical-repos.csv`:
 — `canonical_repo` is left equal to `repo` and `repo_id` blank, so a normaliser
 can leave it untouched. `repo_id` is the join key that survives renames.
 
-Per-row TTL-gated (`TTL_DAYS`, 90 days — renames are rare): a re-run inside the
-window fetches only repos that are new or whose row is stale, so a fully-fresh
-re-run makes ZERO network calls. A `not_found` row is never fresh — a deleted /
-renamed slug is retried every run rather than cached as a permanent verdict.
+Per-row TTL-gated (`TTL_DAYS`, 365 days, from settings.json — renames are rare):
+a re-run inside the window fetches only repos that are new or whose row is
+stale, so a fully-fresh re-run makes ZERO network calls. A `not_found` row is
+never fresh — a deleted / renamed slug is retried every run rather than cached
+as a permanent verdict.
 Fetched in aliased GraphQL batches, so ~10k repos cost ~200 requests.
 
 Usage:
@@ -48,6 +49,7 @@ from rich.progress import (
 )
 
 from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
 from src.common.repos import to_repo_id
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
 
@@ -60,10 +62,11 @@ OUTPUT_FILE = DATA_DIR / "sources" / "github" / "canonical-repos.csv"
 FIELDS = ["repo", "canonical_repo", "repo_id", "status", "fetched_at"]
 BATCH_SIZE = 50
 
-# Per-row TTL. Renames/moves are rare, so a resolved `ok` row stays good for a
-# long window; `--refresh` ignores it. Rows that failed to resolve (`not_found`)
-# are never fresh and are retried every run — see `batch()`.
-TTL_DAYS = 90
+# Per-row TTL (365 days) from settings.json. Renames/moves are rare, so a
+# resolved `ok` row stays good for a long window; `--refresh` ignores it. Rows
+# that failed to resolve (`not_found`) are never fresh and are retried every run
+# — see `batch()`.
+TTL_DAYS = fetch_ttl_days("sources/github/fetch_canonical")
 
 
 def load_value_repos() -> list[str]:

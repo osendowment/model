@@ -43,6 +43,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.common.freshness import file_is_fresh
+from src.common.params import fetch_ttl_days
 from src.common.repos import load_repo_ids, load_value_repo_ids
 
 # ── config ────────────────────────────────────────────────────────────────────
@@ -50,9 +51,10 @@ from src.common.repos import load_repo_ids, load_value_repo_ids
 OUT_PATH = "data/sources/ossfuzz/projects.csv"
 
 # Whole-file TTL: one bulk index download, refreshed as a unit. The OSS-Fuzz
-# project roster changes slowly (a handful of projects a month), so a month-old
-# index is still authoritative; `--refresh` ignores this.
-TTL_DAYS = 30
+# project roster changes slowly (a handful of projects a month), so the cached
+# index stays authoritative for the full 365-day TTL declared in settings.json;
+# `--refresh` ignores it.
+TTL_DAYS = fetch_ttl_days("sources/ossfuzz/fetch_ossfuzz_data")
 TARBALL = "https://codeload.github.com/google/oss-fuzz/tar.gz/refs/heads/master"
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"
 TIMEOUT = 300

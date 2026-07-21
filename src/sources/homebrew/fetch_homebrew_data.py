@@ -30,14 +30,16 @@ from rich.table import Table
 # ── config ────────────────────────────────────────────────────────────────────
 
 from src.common.freshness import file_is_fresh
+from src.common.params import fetch_ttl_days
 
 RAW_FORMULAS = "data/sources/homebrew/raw/formulas.csv"
 RAW_DEPS = "data/sources/homebrew/raw/dependencies.csv"
 RAW_DOWNLOADS = "data/sources/homebrew/raw/downloads.csv"
 
 # Formula index / analytics move slowly; a warm pipeline run should not
-# re-download them. --refresh (propagated by the pipeline runner) overrides.
-TTL_DAYS = 7
+# re-download them. The TTL is 365 days, declared in settings.json;
+# --refresh (propagated by the pipeline runner) overrides it.
+TTL_DAYS = fetch_ttl_days("sources/homebrew/fetch_homebrew_data")
 
 FORMULA_URL = "https://formulae.brew.sh/api/formula.json"
 ANALYTICS_URL = "https://formulae.brew.sh/api/analytics/install/365d.json"

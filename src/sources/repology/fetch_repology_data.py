@@ -36,6 +36,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.common.freshness import file_is_fresh
+from src.common.params import fetch_ttl_days
 
 # ── config ────────────────────────────────────────────────────────────────────
 
@@ -49,10 +50,10 @@ PAGE_SIZE = 200
 MAX_RETRIES = 4
 RETRY_BACKOFF = [5, 15, 30, 60]
 
-# Whole-file TTL. Distro package sets move slowly, but the cross-distro join key
-# going 6+ weeks stale silently degrades the C/C++ pipeline, so refresh monthly.
-# --refresh (propagated by the pipeline runner) overrides.
-TTL_DAYS = 30
+# Whole-file TTL: 365 days, declared in settings.json. Distro package sets move
+# slowly, so the cached cross-distro join key stays usable for the C/C++
+# pipeline. --refresh (propagated by the pipeline runner) overrides it.
+TTL_DAYS = fetch_ttl_days("sources/repology/fetch_repology_data")
 
 KEEP_FIELDS = [
     "project", "repo", "srcname", "binname", "visiblename",

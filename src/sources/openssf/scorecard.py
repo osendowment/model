@@ -46,6 +46,7 @@ from rich.console import Console
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
+from src.common.params import fetch_retry_days
 from src.common.repos import load_github_top_slugs
 from src.common.repos import load_repo_ids as load_repo_id_map
 from src.common.repos import load_value_repo_ids
@@ -540,7 +541,9 @@ def display_summary(results: dict[str, dict]) -> None:
 # ---------------------------------------------------------------------------
 
 
-SCAN_ERROR_RETRY_DAYS = 7  # back-off window before re-trying a failed scan
+# Back-off window before re-trying a failed scan — a retry window, NOT a cache
+# TTL, so it stays short (7 days, from settings.json `fetch_retry_days`).
+SCAN_ERROR_RETRY_DAYS = fetch_retry_days("sources/openssf/scorecard.scan_error")
 
 
 def load_already_scored(long_path: Path) -> set[str]:

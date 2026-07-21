@@ -27,7 +27,8 @@ Output columns:
   osi_url           — first opensource.org/license link from `seeAlso`, if any
   fetched_at        — UTC ISO 8601 timestamp
 
-90-day TTL — re-runs within the window are no-ops unless `--force`.
+365-day TTL (from settings.json) — re-runs within the window are no-ops unless
+`--force`.
 
 Usage:
     uv run python -m src.sources.spdx.fetch_licenses
@@ -44,6 +45,8 @@ from pathlib import Path
 import httpx
 from rich.console import Console
 
+from src.common.params import fetch_ttl_days
+
 logging.basicConfig(level="INFO")
 log = logging.getLogger(__name__)
 console = Console()
@@ -55,7 +58,7 @@ SPDX_LIST_URL = (
     "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
 )
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"
-TTL_DAYS = 90
+TTL_DAYS = fetch_ttl_days("sources/spdx/fetch_licenses")  # 365 days, from settings.json
 
 FIELDS = ["spdx_id", "spdx_id_canonical", "name",
           "is_osi_approved", "is_fsf_libre", "is_deprecated",
@@ -144,7 +147,7 @@ def ensure(force: bool = False, verbose: bool = True) -> Path:
     """Ensure `data/sources/spdx/licenses.csv` exists and is fresh.
 
     Called by the OSS-set builder (`src.sources.osi.fetch_licenses`) so the
-    chain is self-bootstrapping. Honors the 90-day TTL; `force=True` refetches.
+    chain is self-bootstrapping. Honors the 365-day TTL; `force=True` refetches.
     """
     if not force and _is_fresh(OUT):
         if verbose:
@@ -162,7 +165,8 @@ def ensure(force: bool = False, verbose: bool = True) -> Path:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    p.add_argument("--force", action="store_true", help="ignore the 90-day TTL")
+    p.add_argument("--force", action="store_true",
+                   help=f"ignore the {TTL_DAYS}-day TTL")
     args = p.parse_args()
     ensure(force=args.force)
 

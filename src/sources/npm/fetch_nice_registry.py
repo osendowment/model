@@ -23,17 +23,17 @@ from rich.console import Console
 from rich.table import Table
 
 from src.common.lfs import has_real_data
+from src.common.params import fetch_ttl_days
 
 PACKAGES_URL = "https://media.githubusercontent.com/media/nice-registry/all-the-package-repos/master/data/packages.json"
 OUT_DIR      = "data/sources/npm/nice-registry"
 OUT_CSV      = f"{OUT_DIR}/packages.csv"
 
-# 365 days. This is a 212 MB download and a slow-moving name→repo index, so it
-# is deliberately refreshed about once a year. A refresh also introduces newly
-# published packages, which resolve to repos that have never been validated —
-# and validation needs the network, so a refresh makes the next value run
-# network-bound. Pass --refresh to override.
-TTL_DAYS = 365
+# A 212 MB download over a slow-moving name→repo index. A refresh also
+# introduces newly published packages, which resolve to repos that have never
+# been validated — and validation needs the network, so a refresh makes the
+# next value run network-bound. Pass --refresh to override.
+TTL_DAYS = fetch_ttl_days("sources/npm/fetch_nice_registry")
 
 console = Console()
 

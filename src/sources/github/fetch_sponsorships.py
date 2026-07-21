@@ -44,6 +44,7 @@ from rich.progress import (
 )
 
 from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
 from src.common.repos import load_top_repos
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
 
@@ -55,10 +56,11 @@ OUTPUT_FILE = DATA_DIR / "sources" / "github" / "sponsorships.csv"
 FIELDS = ["login", "sponsoring_count", "sponsoring_status", "fetched_at"]
 
 # An account's outbound sponsoring list changes slowly, so a login is re-queried
-# at most once a quarter. `--refresh` overrides. (Flat window, unlike the
-# inbound-sponsors fetcher: a 0 here means "backs nobody", which is not the kind
-# of empty that self-heals into a signal, so it needs no shorter recheck.)
-TTL_DAYS = 90
+# at most once a year. The TTL (365 days) comes from settings.json; `--refresh`
+# overrides it. (Flat window, unlike the inbound-sponsors fetcher: a 0 here means
+# "backs nobody", which is not the kind of empty that self-heals into a signal,
+# so it needs no shorter recheck.)
+TTL_DAYS = fetch_ttl_days("sources/github/fetch_sponsorships")
 
 SPONSORING_QUERY = """
 query($login: String!) {

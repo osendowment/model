@@ -78,6 +78,8 @@ from rich.progress import (
 )
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
+
 log = logging.getLogger(__name__)
 console = Console()
 
@@ -102,7 +104,8 @@ REGISTRY_MAP: dict[str, list[str]] = {
     "cpp":    ["spack.io", "conan.io", "vcpkg.io", "debian-13", "debian-12"],
 }
 
-DEFAULT_TTL_DAYS = 90
+# Default cache TTL — 365 days, from settings.json (`fetch_ttl_days`).
+DEFAULT_TTL_DAYS = fetch_ttl_days("sources/ecosystems/criticality")
 DEFAULT_CONCURRENCY = 8
 
 # value.csv's top_eco_pkg occasionally differs from the registry's canonical

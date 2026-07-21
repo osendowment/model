@@ -16,6 +16,7 @@ from src.sources.gitlab.fetch_project_data import (
     _fetch_namespace,
     _fetch_project,
     _filter_stale,
+    TTL_DAYS,
     _flat_namespace,
     _flat_project,
     _fresher,
@@ -273,9 +274,14 @@ class TestUpsertAndStale:
         assert n2 == 1
 
     def test_filter_stale_skips_fresh_keeps_old_and_missing(self, tmp_path):
+        # Ages are expressed RELATIVE to the TTL, which lives in settings.json.
+        # A hardcoded "200 days is old" silently became "fresh" when the TTL
+        # moved from 90 to 365.
         existing = {
-            "gitlab.com/a/b": {"project": "gitlab.com/a/b", "fetched_at": _iso_days_ago(10)},
-            "gitlab.com/c/d": {"project": "gitlab.com/c/d", "fetched_at": _iso_days_ago(200)},
+            "gitlab.com/a/b": {"project": "gitlab.com/a/b",
+                               "fetched_at": _iso_days_ago(TTL_DAYS // 2)},
+            "gitlab.com/c/d": {"project": "gitlab.com/c/d",
+                               "fetched_at": _iso_days_ago(TTL_DAYS + 10)},
         }
         items = [
             {"project": "gitlab.com/a/b"}, {"project": "gitlab.com/c/d"},

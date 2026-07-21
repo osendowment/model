@@ -2,7 +2,8 @@
 
 Two-stage flow so the data survives `process_data.py` re-runs:
 
-  1. Fetch → `data/sources/npm/raw/licenses.csv` (persistent cache, 90-day TTL).
+  1. Fetch → `data/sources/npm/raw/licenses.csv` (persistent cache, 365-day
+     TTL from settings.json).
      Schema: package, license, fetched_at.
   2. Apply → joins the raw cache into `data/sources/npm/results.csv` as a
      `license` column. Re-runs after `process_data.py` rewrites
@@ -50,6 +51,8 @@ from rich.console import Console
 from rich.table import Table
 from tqdm.asyncio import tqdm_asyncio
 
+from src.common.params import fetch_ttl_days
+
 logging.basicConfig(level="WARNING")
 log = logging.getLogger(__name__)
 console = Console()
@@ -60,7 +63,7 @@ RAW = DATA_DIR / "sources" / "npm" / "raw" / "licenses.csv"
 
 REGISTRY = "https://registry.npmjs.org"
 USER_AGENT = "osendowment-model/1.0 (research; +https://endowment.dev)"
-TTL_DAYS = 90
+TTL_DAYS = fetch_ttl_days("sources/npm/fetch_licenses")  # 365 days, from settings.json
 RAW_FIELDS = ["package", "license", "fetched_at"]
 
 
@@ -193,7 +196,7 @@ def main() -> None:
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--concurrency", type=int, default=80)
     p.add_argument("--force", action="store_true",
-                   help="ignore 90-day TTL, refetch everything")
+                   help=f"ignore the {TTL_DAYS}-day TTL, refetch everything")
     p.add_argument("--apply-only", action="store_true",
                    help="skip the API fetch — only join the existing raw cache into results.csv")
     args = p.parse_args()

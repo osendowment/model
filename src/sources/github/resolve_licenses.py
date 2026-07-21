@@ -44,6 +44,7 @@ from rich.progress import (BarColumn, MofNCompleteColumn, Progress,
                            TextColumn, TimeElapsedColumn)
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
 from src.sources.github.fetch_repo_owner_data import (REPO_FIELDS, REPOS_OUT,
                                               _Limiter, _now_iso)
 
@@ -53,7 +54,8 @@ logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(message)s")
 console = Console()
 
 GITHUB_API = "https://api.github.com"
-TTL_DAYS = 90
+# Cache TTL (365 days) from settings.json; `--force` ignores it.
+TTL_DAYS = fetch_ttl_days("sources/github/resolve_licenses")
 MAX_CONCURRENT = 10
 
 # Schema additions: append to whatever's already in REPO_FIELDS so old

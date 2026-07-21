@@ -13,6 +13,8 @@ from pathlib import Path
 
 from rich.console import Console
 
+from src.common.params import fetch_ttl_days
+
 console = Console()
 
 # ── Paths / constants ──────────────────────────────────────────────────────────
@@ -20,7 +22,7 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 GIT_VALIDITY_CACHE = DATA_DIR / "sources" / "git" / "urls.csv"
 
-GIT_URL_TTL_DAYS = 365
+GIT_URL_TTL_DAYS = fetch_ttl_days("value/git_urls")  # 365 days, from settings.json
 LS_REMOTE_TIMEOUT = 25
 LSREMOTE_PARALLEL = 5
 

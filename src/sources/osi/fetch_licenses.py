@@ -34,8 +34,8 @@ Output: `data/sources/osi/oss-licenses.csv`. Columns:
   osi_url           — first `https://opensource.org/license/...` link from seeAlso
   fetched_at        — UTC ISO 8601 timestamp
 
-90-day TTL — re-runs within the window are no-ops unless `--force` (which
-also refetches the underlying SPDX list).
+365-day TTL (from settings.json) — re-runs within the window are no-ops unless
+`--force` (which also refetches the underlying SPDX list).
 
 Usage:
     uv run python -m src.sources.osi.fetch_licenses
@@ -53,6 +53,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
 from src.sources.spdx import fetch_licenses as spdx
 
 logging.basicConfig(level="INFO")
@@ -62,7 +63,7 @@ console = Console()
 DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "sources" / "osi"
 OUT = DATA_DIR / "oss-licenses.csv"
 
-TTL_DAYS = 90
+TTL_DAYS = fetch_ttl_days("sources/osi/fetch_licenses")  # 365 days, from settings.json
 
 FIELDS = ["spdx_id", "spdx_id_canonical", "name", "source", "is_deprecated",
           "reference", "osi_url", "fetched_at"]
@@ -105,7 +106,7 @@ EXTRAS: dict[str, str] = {
     # 2026-02-03 when Christoph Röth filed a review with OSI's
     # license-review committee, with Stenberg's explicit permission
     # the same day. Once OSI approves and SPDX flips
-    # `isOsiApproved=true`, the 90-day refetch will move this entry
+    # `isOsiApproved=true`, the next refetch (365-day TTL) moves this entry
     # from `extras` to `osi` automatically.
     # Sources:
     #   SPDX:        https://spdx.org/licenses/curl.html
@@ -444,7 +445,7 @@ def ensure(force: bool = False, verbose: bool = True) -> Path:
     self-bootstrapping — no need to remember to run the fetcher first.
     Returns the resolved path.
 
-    Honors the same 90-day TTL as the CLI: a re-call on a fresh file is a
+    Honors the same 365-day TTL as the CLI: a re-call on a fresh file is a
     no-op. Set `force=True` to ignore the TTL.
     """
     if not force and _is_fresh(OUT):
@@ -476,7 +477,7 @@ def ensure(force: bool = False, verbose: bool = True) -> Path:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("--force", action="store_true",
-                   help="ignore 90-day TTL and re-fetch the SPDX list")
+                   help=f"ignore the {TTL_DAYS}-day TTL and re-fetch the SPDX list")
     p.add_argument("--compare", action="store_true",
                    help="print the OSI-vs-FSF comparison from existing data and exit")
     args = p.parse_args()

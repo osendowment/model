@@ -40,7 +40,8 @@ package returned None) do NOT update the sidecar — so a re-run retries.
 
 Re-run behaviour:
 - A repo is skipped if its `queried.csv` row's `fetched_at` is within
-  `--ttl-days` (default 365) and the lookup wasn't a failure.
+  `--ttl-days` (default 365, from settings.json) and the lookup wasn't a
+  failure.
 - For repos we re-fetch, existing rows in `cves.csv` for that repo are
   replaced wholesale with the fresh result (an upsert keyed by repo).
 - Repos we don't touch keep their existing `cves.csv` rows untouched.
@@ -76,6 +77,7 @@ from rich.progress import (
 )
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
 from src.common.repos import canonical_repo_map, load_top_repos
 
 console = Console()
@@ -104,7 +106,7 @@ ECOSYSTEM_FILES: list[tuple[Path, str]] = [
 ]
 
 OSV_QUERY_URL = "https://api.osv.dev/v1/query"
-TTL_DAYS_DEFAULT = 365
+TTL_DAYS_DEFAULT = fetch_ttl_days("sources/osv/fetch_cves")  # 365 days, from settings.json
 YEAR_MIN = 2021
 YEAR_MAX = 2025
 

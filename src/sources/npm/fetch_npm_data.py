@@ -34,6 +34,8 @@ from rich.console import Console
 from rich.table import Table
 from tqdm import tqdm
 
+from src.common.params import fetch_ttl_days
+
 load_dotenv()
 
 RAW_DOWNLOADS    = "data/sources/npm/raw/downloads.csv"
@@ -58,8 +60,12 @@ CONCURRENCY   = 3
 MAX_RETRIES   = 5
 RETRY_BACKOFF = [5, 15, 30, 60, 90]
 RATE_PER_SEC  = 1.0
-DEPS_TTL_DAYS = 365  # re-fetch a package's dep edges after this age — /latest deps drift with releases
-DOWNLOADS_STATUS_TTL_DAYS = 365  # sidecar verdicts (ok / not_found) older than this are re-checkable
+# Two independent caches, each with its own TTL (365 days) in settings.json.
+# Deps: re-fetch a package's dep edges after this age — /latest deps drift with
+# releases. Downloads status: sidecar verdicts (ok / not_found) older than this
+# are re-checkable.
+DEPS_TTL_DAYS = fetch_ttl_days("sources/npm/fetch_npm_data.deps")
+DOWNLOADS_STATUS_TTL_DAYS = fetch_ttl_days("sources/npm/fetch_npm_data.downloads_status")
 USER_AGENT    = "osendowment-model/1.0 (research; +https://endowment.dev)"
 NPM_TOKEN     = os.environ.get("NPM_TOKEN", "")
 

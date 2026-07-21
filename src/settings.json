@@ -4,6 +4,43 @@
     "threshold_pct": 95,
     "comment": "A package is 'top' if it falls within the top X% of cumulative download mass in its ecosystem"
   },
+  "fetch_ttl_days": {
+    "comment": "Cache TTL in days for every fetcher, keyed by its module path under src/ (a module with two independent caches gets a dotted suffix). A fetcher re-fetches only when its cached data is older than this, so a warm checkout runs --offline for a year without touching the network. --refresh overrides any of them. Every fetcher MUST have a key here: params.fetch_ttl_days() raises on an unknown one, so a new fetcher cannot silently default. Back-off windows are not cache TTLs and live in fetch_retry_days.",
+    "common/eol_common": 365,
+    "common/freshness": 365,
+    "sources/debian/fetch_debian_data": 365,
+    "sources/depsdev/fetch": 365,
+    "sources/ecosystems/candidates": 365,
+    "sources/ecosystems/criticality": 365,
+    "sources/ecosystems/packages": 365,
+    "sources/git/fetch_sha_metrics": 365,
+    "sources/github/batch_runner": 365,
+    "sources/github/fetch_canonical": 365,
+    "sources/github/fetch_churn": 365,
+    "sources/github/fetch_contributors_metrics": 365,
+    "sources/github/fetch_repo_owner_data": 365,
+    "sources/github/fetch_sponsorships": 365,
+    "sources/github/resolve_licenses": 365,
+    "sources/gitlab/fetch_project_data": 365,
+    "sources/homebrew/fetch_homebrew_data": 365,
+    "sources/npm/fetch_licenses": 365,
+    "sources/npm/fetch_nice_registry": 365,
+    "sources/npm/fetch_npm_data.deps": 365,
+    "sources/npm/fetch_npm_data.downloads_status": 365,
+    "sources/openssf/criticality": 365,
+    "sources/osi/fetch_licenses": 365,
+    "sources/ossfuzz/fetch_ossfuzz_data": 365,
+    "sources/osv/fetch_cves": 365,
+    "sources/pypi/fetch_licenses": 365,
+    "sources/repology/fetch_repology_data": 365,
+    "sources/spdx/fetch_licenses": 365,
+    "value/git_urls": 365
+  },
+  "fetch_retry_days": {
+    "comment": "Back-off windows, NOT cache TTLs. These govern how soon a FAILED or empty result is retried, so they stay short — stretching them to a year would leave a transient failure unretried for a year.",
+    "sources/openssf/scorecard.scan_error": 7,
+    "common/freshness.funding_empty_recheck": 30
+  },
   "pagerank": {
     "alpha": 0.85,
     "comment": "Damping factor for PageRank (0.85 = standard)"

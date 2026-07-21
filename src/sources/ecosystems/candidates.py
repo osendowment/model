@@ -25,10 +25,11 @@ with one row per package:
 `repo_host` / `repo_full_name` come from ecosyste.ms's `repo_metadata` — its own
 rename-resolved canonical repo identity on the hosting platform (github/gitlab/…).
 
-Fetch is **incremental with a 1-year TTL**: a package already present in
-packages.csv with a `fetched_at` within the TTL is kept untouched; only missing
-or stale rows hit the network (and even then, a still-fresh raw-JSON cache file
-is reused without a request).
+Fetch is **incremental**: a package already present in packages.csv with a
+`fetched_at` within the TTL is kept untouched; only missing or stale rows hit
+the network (and even then, a still-fresh raw-JSON cache file is reused without
+a request). The TTL is 365 days and comes from settings.json
+(`fetch_ttl_days`).
 
 Usage:
     uv run python -m src.sources.ecosystems.candidates
@@ -57,6 +58,8 @@ from rich.progress import (
 )
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
+
 # Reuse the fetch/cache core from the backfill connector — one engine, two views.
 from src.sources.ecosystems.packages import (
     DATA_DIR,
@@ -72,7 +75,8 @@ from src.sources.ecosystems.packages import (
 log = logging.getLogger(__name__)
 console = Console()
 
-DEFAULT_TTL_DAYS = 365
+# Default cache TTL — 365 days, from settings.json (`fetch_ttl_days`).
+DEFAULT_TTL_DAYS = fetch_ttl_days("sources/ecosystems/candidates")
 DEFAULT_CONCURRENCY = 10
 # Flush the consolidated packages.csv every this many newly-fetched rows, so an
 # interrupted run keeps its progress (and packages.csv reflects it live).

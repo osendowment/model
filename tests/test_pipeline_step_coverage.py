@@ -11,11 +11,16 @@ So: any producer wired in must (a) be a step of the stage that reads it, (b) run
 before its consumer, and (c) carry a TTL so a warm re-run stays zero-network.
 """
 import importlib
+import re
+from pathlib import Path
 
+from src.common.params import fetch_ttl_days
 from src.eligibility.run_eligibility_pipeline import FETCHERS as ELIG_FETCHERS
 from src.eligibility.run_eligibility_pipeline import BUILDERS as ELIG_BUILDERS
 from src.risk.run_risk_pipeline import BUILDERS as RISK_BUILDERS
 from src.value.run_value_pipeline import ROLLUP_LABELS, STEPS as VALUE_STEPS
+
+ROOT = Path(__file__).resolve().parent.parent
 
 
 def _order(steps) -> list[str]:
@@ -101,23 +106,43 @@ def test_eligibility_net_steps_honour_offline():
 # ── TTLs ─────────────────────────────────────────────────────────────────────
 
 
-def test_every_newly_wired_fetcher_carries_a_ttl():
+def test_every_fetcher_ttl_is_sourced_from_settings():
     """A step with no TTL either refetches its whole scope every run (slow) or,
-    worse, is skipped by hand forever (stale). Each of these gates on one."""
-    expected = {
-        # bf_fundable's maintainer log — 90 days, set by the model owner.
-        "src.sources.github.fetch_contributors_metrics": 90,
-        "src.sources.github.fetch_sponsorships": 90,
-        "src.sources.github.fetch_canonical": 90,          # renames are rare
-        "src.sources.ossfuzz.fetch_ossfuzz_data": 30,      # whole-file
-        "src.sources.repology.fetch_repology_data": 30,    # whole-file
+    worse, is skipped by hand forever (stale). Each fetcher gates on one, and
+    the value lives in settings.json — never as a literal in the fetcher, so
+    the TTLs can be reviewed and changed in one place."""
+    # Assert against settings.json rather than hardcoded numbers: duplicating
+    # them here is what made this test stale the moment the TTLs changed.
+    cases = {
+        "src.sources.github.fetch_contributors_metrics": (
+            "TTL_DAYS", "sources/github/fetch_contributors_metrics"),
+        "src.sources.github.fetch_sponsorships": (
+            "TTL_DAYS", "sources/github/fetch_sponsorships"),
+        "src.sources.github.fetch_canonical": (
+            "TTL_DAYS", "sources/github/fetch_canonical"),
+        "src.sources.ossfuzz.fetch_ossfuzz_data": (
+            "TTL_DAYS", "sources/ossfuzz/fetch_ossfuzz_data"),
+        "src.sources.repology.fetch_repology_data": (
+            "TTL_DAYS", "sources/repology/fetch_repology_data"),
+        "src.sources.openssf.criticality": (
+            "TTL_DAYS", "sources/openssf/criticality"),
+        "src.sources.ecosystems.criticality": (
+            "DEFAULT_TTL_DAYS", "sources/ecosystems/criticality"),
     }
-    for module, ttl in expected.items():
+    for module, (const, key) in cases.items():
         mod = importlib.import_module(module)
-        assert getattr(mod, "TTL_DAYS", None) == ttl, f"{module}: TTL_DAYS != {ttl}"
+        assert getattr(mod, const, None) == fetch_ttl_days(key), (
+            f"{module}.{const} must come from settings.json fetch_ttl_days[{key!r}]")
 
-    # The two criticality fetchers predate the sweep and keep their own names.
-    from src.sources.ecosystems import criticality as eco_crit
-    from src.sources.openssf import criticality as ossf_crit
-    assert ossf_crit.TTL_DAYS >= 365      # criticality moves slowly
-    assert eco_crit.DEFAULT_TTL_DAYS == 90
+
+def test_no_fetcher_hardcodes_a_ttl_literal():
+    """settings.json is the only place a TTL may be written down."""
+    offenders = []
+    for path in (ROOT / "src").rglob("*.py"):
+        for m in re.finditer(r"^([A-Z_]*TTL[A-Z_]*) *= *(\d+)", path.read_text(), re.M):
+            if "THROTTLE" in m.group(1):
+                continue  # 'THROTTLE_DEFAULT' contains the letters TTL
+            offenders.append(f"{path.relative_to(ROOT)}:{m.group(1)}={m.group(2)}")
+    assert not offenders, (
+        "TTLs must come from settings.json via params.fetch_ttl_days(): "
+        + ", ".join(offenders))

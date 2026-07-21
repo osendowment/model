@@ -62,6 +62,7 @@ from rich.table import Table
 from src.sources.git.clone import SOURCE_EXTS
 from src.sources.git.disk import check_disk_or_exit, make_clone_tmpdir, print_disk_banner, sweep_stale_clone_dirs
 from src.sources.github.display import _ETAColumn
+from src.common.params import fetch_ttl_days
 from src.common.repos import git_url_for, load_git_urls, load_repo_ids, load_top_repos
 
 log = logging.getLogger(__name__)
@@ -73,7 +74,8 @@ PERIOD_START = "2021-01-01"
 PERIOD_END_EXCLUSIVE = "2026-01-01"  # git log --until is exclusive at midnight UTC
 ANALYZED_THROUGH_YEAR = 2025
 
-DEFAULT_TTL_DAYS = 365
+# Default cache TTL (365 days) from settings.json; `--ttl-days` overrides it.
+DEFAULT_TTL_DAYS = fetch_ttl_days("sources/github/fetch_churn")
 DEFAULT_CONCURRENCY = int(os.environ.get("CHURN_WORKERS") or 4)
 PER_REPO_TIMEOUT = 300  # 5 minutes hard cap per repo
 

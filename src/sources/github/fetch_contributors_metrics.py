@@ -33,12 +33,14 @@ from src.sources.github.models import (
     THRESHOLD, is_bot,
 )
 from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
 from src.common.repos import VALUE_FILE, load_github_top_slugs
 
 # Contributor mixes move slowly, and the /contributors payload is the most
 # expensive fetch in this source (paginated, one round-trip per page per repo),
-# so a repo is re-fetched at most once a quarter. `--refresh` overrides.
-TTL_DAYS = 90
+# so a repo is re-fetched at most once a year. The TTL (365 days) comes from
+# settings.json. `--refresh` overrides it.
+TTL_DAYS = fetch_ttl_days("sources/github/fetch_contributors_metrics")
 
 
 def fresh_repos(ttl_days: int = TTL_DAYS) -> set[str]:
