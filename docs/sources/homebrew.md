@@ -1,7 +1,7 @@
 # Homebrew
 
 Formula install counts, dependencies, and metadata from the macOS package
-manager. One of the two inputs to the [C/C++ pipeline](../components/cpp.md),
+manager. One of the two inputs to the [C/C++ pipeline](cpp.md),
 alongside [Debian](debian.md).
 
 ## Data Sources

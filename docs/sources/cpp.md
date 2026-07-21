@@ -2,12 +2,12 @@
 
 C/C++ has **no single package registry**, so this ecosystem is *assembled*: it
 unifies Debian and Homebrew C/C++ packages — joined at the
-[Repology](../sources/repology.md) canonical-project level — and uses
-[OSS-Fuzz](../sources/ossfuzz.md) as a security signal. There is no
+[Repology](repology.md) canonical-project level — and uses
+[OSS-Fuzz](ossfuzz.md) as a security signal. There is no
 `sources/cpp.md`; this component page is the cpp pipeline's home, and the
 underlying sources are documented separately:
-[debian](../sources/debian.md), [homebrew](../sources/homebrew.md),
-[repology](../sources/repology.md), [ossfuzz](../sources/ossfuzz.md).
+[debian](debian.md), [homebrew](homebrew.md),
+[repology](repology.md), [ossfuzz](ossfuzz.md).
 
 ## Sources & data collected
 
@@ -141,4 +141,4 @@ language-agnostic distro packages that rode in as dependencies.
 - **`is_cpp` drops** — language-agnostic distro packages are filtered out of
   `results.csv`, so the cpp result set is smaller than its raw dep tree.
 - **Wayback-derived installs** — both download proxies have sparse/truncated
-  snapshots (see [debian](../sources/debian.md) / [homebrew](../sources/homebrew.md)).
+  snapshots (see [debian](debian.md) / [homebrew](homebrew.md)).

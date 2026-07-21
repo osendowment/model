@@ -83,7 +83,7 @@ Steps run in this order (`src/value/run_value_pipeline.py`); steps sharing a
 | Step | pgroup | Work |
 |---|---|---|
 | `repology` · `ossfuzz` | dumps | 30-day whole-file-TTL dumps the ecosystem sub-pipelines read. Repology's `packages.csv` is the cpp distro-version input; OSS-Fuzz's `projects.csv` feeds `build_git_urls` and the risk stage's fuzzed flag. |
-| `npm` · `crates` · `pypi` · `cpp` | eco | The four ecosystem sub-pipelines (see the [component docs](#ecosystems)). |
+| `npm` · `crates` · `pypi` · `cpp` | eco | The four ecosystem sub-pipelines (see the [ecosystem pages](#ecosystems)). |
 | `stats` | — | Write the per-ecosystem matrix `data/value/stats.csv`. |
 | `git-urls` | — | Classify each package's git URL into `data/sources/{eco}/git.csv`. |
 | `eco-fetch` | identity | Pull ecosyste.ms repo candidates. |
@@ -103,9 +103,9 @@ output](#unified-output).
 ## Metrics Roadmap
 
 Each leaf is one metric, with its source and the period it covers. Per-language
-lineage lives in the component docs — [JavaScript/npm](components/javascript.md),
-[Python/PyPI](components/python.md), [Rust/crates](components/rust.md),
-[C/C++](components/cpp.md). The cross-ecosystem rollup is below.
+lineage lives on the ecosystem pages — [npm](sources/npm.md),
+[pypi](sources/pypi.md), [crates](sources/crates.md), [cpp](sources/cpp.md).
+The cross-ecosystem rollup is below.
 
 > `[2021–2025]` is the 5-year window; `[most recent]` is the latest pull of
 > that source.
@@ -113,9 +113,9 @@ lineage lives in the component docs — [JavaScript/npm](components/javascript.m
 ```
 Value
 │
-├── Per-language value pipelines      → components/{javascript,python,rust,cpp}.md
+├── Per-language value pipelines      → sources/{npm,pypi,crates,cpp}.md
 │       downloads → top (95% cum-dl) → dep tree → DL-weighted PageRank (α=0.85) → value_class
-│       (per-language metric lineage + sources live in each component doc)
+│       (per-language metric lineage + sources live on each ecosystem page)
 │
 └── Cross-ecosystem rollup → value/value.csv
     ├── repo                      ← per-eco package→repo union (any host) [most recent]
@@ -202,20 +202,20 @@ repo-coverage percentages. Its columns mean:
 
 ## Ecosystems
 
-Each language assembles the steps above from its own sources. The component
-docs cover what each source supplies and which stage consumes it.
+Each language assembles the steps above from its own sources. One page per
+ecosystem covers the fetch, the process and the scoring.
 
-| Language | Registry / sources | Pipeline doc | Raw-fetch reference |
-|---|---|---|---|
-| JavaScript / TypeScript | npm | [components/javascript.md](components/javascript.md) | [sources/npm.md](sources/npm.md) |
-| Python | PyPI | [components/python.md](components/python.md) | [sources/pypi.md](sources/pypi.md) |
-| Rust | crates.io | [components/rust.md](components/rust.md) | [sources/crates.md](sources/crates.md) |
-| C / C++ | Debian + Homebrew + Repology + OSS-Fuzz | [components/cpp.md](components/cpp.md) | [debian](sources/debian.md) · [homebrew](sources/homebrew.md) · [repology](sources/repology.md) · [ossfuzz](sources/ossfuzz.md) |
+| Language | Registry / sources | Page |
+|---|---|---|
+| JavaScript / TypeScript | npm | [npm](sources/npm.md) |
+| Python | PyPI | [pypi](sources/pypi.md) |
+| Rust | crates.io | [crates](sources/crates.md) |
+| C / C++ | Debian + Homebrew + Repology + OSS-Fuzz | [cpp](sources/cpp.md) |
 
-C/C++ has no single registry, so it is unified from Debian and Homebrew (joined
-via Repology) and has a component doc instead of a `sources/cpp.md`. Its
-Wayback-derived install proxies carry snapshot caveats — see the
-[debian](sources/debian.md) and [homebrew](sources/homebrew.md) pages.
+C/C++ has no single registry. The pipeline unifies it from Debian and Homebrew,
+joined via Repology. Its install proxies come from Wayback snapshots and carry
+snapshot caveats — see [debian](sources/debian.md) and
+[homebrew](sources/homebrew.md).
 
 ## Value data sources
 

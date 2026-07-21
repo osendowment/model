@@ -1,7 +1,7 @@
 # Debian
 
 Package install counts, dependencies, and metadata from the Debian Linux
-distribution. One of the two inputs to the [C/C++ pipeline](../components/cpp.md),
+distribution. One of the two inputs to the [C/C++ pipeline](cpp.md),
 alongside [Homebrew](homebrew.md).
 
 ## Data Sources

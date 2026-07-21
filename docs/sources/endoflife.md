@@ -32,7 +32,7 @@ are ignored.
 
 This is the second of two cpp EOL signals. Homebrew's `disable!` /
 `deprecate!` formula flags run first; endoflife.date resolves the rest. See
-[cpp](../components/cpp.md) and [homebrew](homebrew.md).
+[cpp](cpp.md) and [homebrew](homebrew.md).
 
 ## Scripts
 

@@ -99,8 +99,8 @@ Exception: regenerable vendor-dump data never enters git/LFS. The raw 3.9 GB cra
 `docs/` mirrors the pipeline. Keep the `docs/` root to **exactly one page per stage** — `value.md`, `risk.md`, `eligibility.md` — plus **`docs/data-sources.md`**, with everything else in a subfolder:
 
 - `docs/data-sources.md` — the source × stage matrix: one row per external source (favicon + link to its `sources/` page), columns Value / Risk / Eligibility.
-- `docs/sources/<source>.md` — one page per external data source.
-- `docs/components/<component>.md` — cross-cutting component docs (e.g. `validation.md`, how `data/value/validation.csv` is formed).
+- `docs/sources/<source>.md` — one page per external data source. **Exactly one**: a source's fetch mechanics, its processing, and the scoring it feeds all live on the same page. Never add a second page about a source under another folder. The four ecosystem pages (`npm`, `pypi`, `crates`, `cpp`) are source pages that also carry the per-language pipeline narrative; `cpp` has no registry of its own and rolls up Debian + Homebrew + Repology + OSS-Fuzz.
+- `docs/components/<component>.md` — cross-cutting component docs, for concepts that belong to no single source: `validation.md`, `funding.md`, and the four risk dimensions. If a page is about one source, it belongs in `docs/sources/`.
 
 When a doc's content spans multiple stages, fold it into the relevant stage page(s) rather than adding a new top-level overview doc.
 
