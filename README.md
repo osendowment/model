@@ -26,8 +26,6 @@ Value narrows the open-source universe to a core set of projects. Risk and Eligi
 
 Downloads, dependencies and dependents combine into a weighted PageRank. Its cumulative share defines the core — a power-law distribution, where a small head of projects carries almost all the dependency mass. Criticality then ranks projects *within* the core; it does not decide who is in it.
 
-Nothing is deleted along the way. Risk and Eligibility annotate the core rather than shrinking it, so an ineligible project keeps its row with the failing check visible.
-
 ### Limitations
 
 Currently, the model aggregates data on packages from four ecosystems:
