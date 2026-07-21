@@ -87,7 +87,7 @@ FIELDS = (
     + RISK_COMPONENTS
     + ["risk_score", "score"]
     + ELIGIBILITY_COMPONENTS
-    + ["eligible", "priority", "repo_id"]
+    + ["eligible", "priority", "eco_priority", "repo_id"]
 )
 
 
@@ -145,6 +145,7 @@ def build() -> list[dict]:
             **{col: (e.get(col) or "").strip() for col in ELIGIBILITY_COMPONENTS},
             "eligible": (e.get("eligible") or "").strip(),
             "priority": "",
+            "eco_priority": "",
             "repo_id": rid,
         }
         rows.append(row)
@@ -167,6 +168,16 @@ def build() -> list[dict]:
     )
     for i, row in enumerate(ranked, start=1):
         row["priority"] = str(i)
+
+    # eco_priority: the same dense rank, restarted within each ecosystem, so a
+    # reviewer can pick the top N of npm without npm's rows being interleaved
+    # with pypi's. Same population and same ordering key as `priority` — only
+    # the grouping differs — so a row blank in one is blank in the other.
+    per_eco: dict[str, int] = {}
+    for row in ranked:                      # already in global score order
+        eco = row["ecosystem"]
+        per_eco[eco] = per_eco.get(eco, 0) + 1
+        row["eco_priority"] = str(per_eco[eco])
 
     # Row order: scored rows first (score desc, matching priority order),
     # then everything else by repo for determinism.

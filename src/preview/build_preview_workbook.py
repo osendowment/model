@@ -35,7 +35,7 @@ each `repo` cell hyperlinks to the repo's home page (host derived from
 anchored at 0/50/100 and the risk columns the reversed scale (higher risk
 = red); `score` fades white→blue; the boolean columns render True/False as
 dark-green/dark-red text, with `eligible` also on a static light-purple
-column fill; non-empty `priority` cells fill light blue. Numeric, boolean
+column fill; non-empty `priority` / `eco_priority` cells fill light blue. Numeric, boolean
 and priority data cells are centered, `value_score`/`risk_score` are bold,
 and every known column gets a fixed width.
 
@@ -92,7 +92,7 @@ REPOS_RISK_SCALE_COLS = ["concentration", "complexity", "security", "workload",
                          "risk_score"]
 REPOS_SCORE_COL = "score"
 REPOS_BOOL_COLS = ["oss", "intent", "nonprofit", "active", "eligible"]
-REPOS_PRIORITY_COL = "priority"
+REPOS_PRIORITY_COLS = ["priority", "eco_priority"]
 REPOS_BOLD_COLS = ["value_score", "risk_score"]
 # Score cells DISPLAY as whole numbers but keep their full 2-decimal value
 # (visible in the formula bar / on export) — pure number formatting.
@@ -101,7 +101,7 @@ REPOS_ROUNDED_COLS = (REPOS_VALUE_SCALE_COLS + REPOS_RISK_SCALE_COLS
 ROUNDED_FORMAT = "0"
 REPOS_CENTERED_COLS = (REPOS_VALUE_SCALE_COLS + REPOS_RISK_SCALE_COLS
                        + [REPOS_SCORE_COL] + REPOS_BOOL_COLS
-                       + [REPOS_PRIORITY_COL])
+                       + REPOS_PRIORITY_COLS)
 
 # Reviewed widths (from the hand-tuned workbook). Columns not listed —
 # pr_score, openssf_crit, the four risk dimensions, risk_score — stay at
@@ -110,7 +110,7 @@ REPOS_COLUMN_WIDTHS = {
     "repo": 24, "platform": 9, "ecosystem": 10, "top_eco_pkg": 16,
     "top_eco_pct": 10, "eco_crit": 8, "value_score": 10,
     "score": 9, "oss": 7, "intent": 8, "nonprofit": 9,
-    "active": 8, "eligible": 9, "priority": 8,
+    "active": 8, "eligible": 9, "priority": 8, "eco_priority": 12,
 }
 
 # repos.csv keeps repo_id as its join/trace key, but the sheet is for human
@@ -274,10 +274,11 @@ def _add_repos_conditional_formats(ws: Worksheet, headers: dict) -> None:
                 operator="equal", formula=['"True"'], font=BOOL_TRUE_FONT))
             ws.conditional_formatting.add(rng, CellIsRule(
                 operator="equal", formula=['"False"'], font=BOOL_FALSE_FONT))
-    letter, rng = data_range(REPOS_PRIORITY_COL)
-    if rng:
-        ws.conditional_formatting.add(rng, FormulaRule(
-            formula=[f"NOT(ISBLANK({letter}2))"], fill=PRIORITY_FILL))
+    for name in REPOS_PRIORITY_COLS:
+        letter, rng = data_range(name)
+        if rng:
+            ws.conditional_formatting.add(rng, FormulaRule(
+                formula=[f"NOT(ISBLANK({letter}2))"], fill=PRIORITY_FILL))
 
 
 def _md_cell(raw: str) -> tuple[int | float | str | None, str | None]:
@@ -619,6 +620,10 @@ COMPONENT_TABLES: list[tuple[str, str, list[tuple[str, object]]]] = [
         ("priority",
          "Dense rank (1, 2, 3, …) by score descending over eligible rows "
          "only — blank for ineligible or unscored rows."),
+        ("eco_priority",
+         "The same rank restarted within each ecosystem, so npm rank 1 and "
+         "PyPI rank 1 are both present. Same rows and same order as "
+         "priority — only the grouping differs."),
     ]),
 ]
 
