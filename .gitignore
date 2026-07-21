@@ -22,6 +22,16 @@ data/sources/ecosystems/raw/criticality/
 # Scratch + transient full vendor dumps; never commit
 tmp/
 
+# ecosyste.ms per-package API cache — regenerable (90-day TTL, refetched by
+# src.sources.ecosystems.packages). No builder reads it; the derived index
+# data/sources/ecosystems/<eco>/packages.csv stays tracked.
+data/sources/ecosystems/*/raw/
+
+# PyPI per-package API cache — regenerable (refetched by
+# src.sources.pypi.fetch_pypi_urls). No builder reads it; the derived
+# data/sources/pypi/raw/package-urls.csv stays tracked.
+data/sources/pypi/raw/api-cache/
+
 # crates db-dump slim extracts — regenerable via fetch_db_dump (~560 MB); never commit
 data/sources/crates/db-dump
 

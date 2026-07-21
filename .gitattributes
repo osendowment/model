@@ -1,2 +1,18 @@
 data/sources/npm/github-repos.csv filter=lfs diff=lfs merge=lfs -text
 data/sources/npm/nice-registry/packages.csv filter=lfs diff=lfs merge=lfs -text
+
+# Large pipeline-read data files. Content is unchanged — LFS only changes how
+# git stores them. Every one of these is read by a builder or a stage step, so
+# none may be untracked; see docs/sources/ for each file's producer.
+data/sources/crates/version-downloads/*.csv filter=lfs diff=lfs merge=lfs -text
+data/sources/git/contributor-commits.csv filter=lfs diff=lfs merge=lfs -text
+data/sources/git/openssf.csv filter=lfs diff=lfs merge=lfs -text
+data/sources/pypi/bigquery/bq-package-downloads.csv filter=lfs diff=lfs merge=lfs -text
+data/sources/homebrew/raw/formula-api.json filter=lfs diff=lfs merge=lfs -text
+data/sources/openssf/data.json filter=lfs diff=lfs merge=lfs -text
+data/sources/github/repo-git-metrics.csv filter=lfs diff=lfs merge=lfs -text
+data/sources/github/search/top-repos.csv filter=lfs diff=lfs merge=lfs -text
+data/sources/github/contributor-commits.csv filter=lfs diff=lfs merge=lfs -text
+data/sources/npm/raw/dependencies.csv filter=lfs diff=lfs merge=lfs -text
+data/sources/debian/raw/dependencies.csv filter=lfs diff=lfs merge=lfs -text
+data/sources/repology/packages.csv filter=lfs diff=lfs merge=lfs -text
