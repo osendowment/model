@@ -30,8 +30,11 @@ for the snapshot-coverage caveats. No authentication required.
 name, then:
 
 - **Downloads** — MAX within each ecosystem (avoid double-counting variants like
-  `boost1.74`/`boost1.81`), SUM across ecosystems (Debian and Homebrew are disjoint
-  user populations).
+  `boost1.74`/`boost1.81`), then a weighted sum across ecosystems, since Debian
+  and Homebrew are disjoint user populations. `downloads_score =
+  1.39·debian_avg + 1.0·homebrew_avg` (`downloads_score` in
+  `src/settings.json`); the ratio inverts the two ecosystems' annual install
+  totals, so a typical package from either contributes equally.
 - **Dependencies** — union of **runtime-only** project→project edges (see below).
 - **is_cpp** — true if any constituent binary/formula is flagged C/C++.
 - **Top selection** — within the 95% cumulative download mass of **either** Debian
@@ -66,8 +69,8 @@ aggregation.
 ```
 C / C++ (Debian + Homebrew + Repology)
 ├── debian_avg_downloads   ← Debian popcon (Wayback snapshots)    [2021–2025]
-├── homebrew_avg_downloads ← Homebrew analytics (Wayback)         [2021–2025]
-├── downloads_score        ← derived (debian+homebrew composite)  [2021–2025]
+├── homebrew_avg_downloads ← Homebrew analytics (Wayback)         [2022–2025]
+├── downloads_score        ← derived (1.39·debian + 1.0·homebrew) [2021–2025]
 ├── dep edges (package→dep)← Debian Packages.xz (Depends/Pre-)    [most recent]
 │                            + Homebrew formula.json (runtime)    [most recent]
 ├── pagerank               ← derived                              [2021–2025]
@@ -79,35 +82,43 @@ C / C++ (Debian + Homebrew + Repology)
 
 - **Value** — `value_class` feeds the `class_cpp` column of
   `data/value/value.csv`.
-- **Risk & Eligibility** — both automated stages (the risk pipeline and the
-  [Eligibility stage](../eligibility.md)) filter to `platform == github`, and cpp
-  identity is **GitHub-only**. Many flagship cpp upstreams live off GitHub — glibc
-  (sourceware.org), gcc (Savannah), glib (gitlab.gnome.org), mpfr (gitlab.inria.fr),
-  curl (curl.se) — so they carry a non-github `platform` + `git_url` in `value.csv`,
-  and slip out of both stages. Counting non-GitHub
-  Git hosts (sourceware, Savannah, GNOME) lifts coverage well above the
-  GitHub-only figure — most non-GitHub upstreams are the load-bearing class-A
-  libraries. For the repos that do resolve to GitHub, the eligibility stage
-  consumes cpp's per-ecosystem signals: `fetch_licenses.py` fills the `license`
-  column of `results.csv` (the registry-first input to the stage's license
-  check), and `check_eol.py` → `data/sources/cpp/eol.csv` produces advisory
-  package-level EOL signals that inform the manual `eol` override in
+- **Risk & Eligibility** — both automated stages score `platform in {github,
+  gitlab}` (`SUPPORTED_PLATFORMS` in `src/common/params.py`,
+  `top_repos.platforms` in `src/settings.json`), so cpp's GitLab-hosted
+  upstreams rank in alongside its GitHub ones. Projects on
+  gitlab.freedesktop.org, salsa.debian.org, gitlab.gnome.org,
+  gitlab.inria.fr, and gitlab.com all enter this way — `gnome/glib` and
+  `mpfr/mpfr` are scored class-A cpp repos. A project on a self-hosted git
+  server (`platform=custom`) cannot be
+  measured, so it enters only through a **verified mirror**: `git_url` points
+  at the mirror and `canonical_url` records the upstream. `gnutools/glibc`
+  (canonical sourceware.org) and `gcc-mirror/gcc` (canonical gcc.gnu.org)
+  reach both stages that way. The eligibility stage also consumes cpp's
+  per-ecosystem signals: `fetch_licenses.py` fills the `license` column of
+  `results.csv` (the registry-first input to the stage's license check), and
+  `check_eol.py` → `data/sources/cpp/eol.csv` produces advisory package-level
+  EOL signals that inform the manual `eol` override in
   `data/eligibility/overrides.csv`.
 
 ## Outputs
 
 In `data/sources/cpp/`:
 
-- `raw/packages.csv` — per-project join with aggregated signals
-- `top-packages.csv` — top C/C++ projects by download mass
-- `dependency-tree.csv` — runtime project→project edges (`type` = `"declared"`)
-- `github-repos.csv` — project→GitHub-repo mappings
-- `results.csv` — all dep-tree projects with `pagerank` + `value_class` (plus
-  the repo-identity columns `git`, `eco_guess`, `repo_id`, `canonical_url` and
-  `license`)
+| File | Description |
+|---|---|
+| `raw/packages.csv` | Per-project join: `project, github_repo, debian_sources, homebrew_formulas, debian_avg_downloads, homebrew_avg_downloads, downloads_score, is_cpp, is_oss_fuzz` |
+| `top-packages.csv` | Top C/C++ projects by download mass, with each ecosystem's average and share |
+| `dependency-tree.csv` | Runtime project→project edges (`type` = `"declared"`) |
+| `github-repos.csv` | Project → GitHub repo mappings |
+| `git.csv` | Project → upstream git URL per host; written by the value stage |
+| `results.csv` | Every dep-tree project with `pagerank`, `value_class`, `repo_id`, `canonical_url`, `license` |
+| `eol.csv` | `package, is_eol, eol_method, eol_reason, source, eol_checked_at` |
 
 ```bash
 uv run python -m src.sources.cpp.process_data [--top-share F]
+uv run python -m src.sources.cpp.fetch_repology_urls [--classes A,B,C] [--limit N] [--refresh]
+uv run python -m src.sources.cpp.fetch_licenses
+uv run python -m src.sources.cpp.check_eol [--limit N] [--refresh]
 ```
 
 ### cpp funnel & classes
@@ -121,10 +132,12 @@ language-agnostic distro packages that rode in as dependencies.
 
 - **Runtime-only dep tree** — build infrastructure (cmake, pkgconf) is undervalued;
   PageRank reflects runtime coupling, not build coupling.
-- **GitHub-only identity downstream** — Risk and Eligibility miss non-GitHub
-  upstreams even though `value.csv` now exposes their `git_url`. Fully fixing
-  this needs per-host adapters (GitLab API, Savannah, sourceware) for
-  license/EOL/contributor checks.
+- **Self-hosted upstreams need a mirror** — Risk and Eligibility score GitHub
+  and GitLab. A project living only on sourceware, Savannah, or another
+  self-hosted server stays in `value.csv` with `git_valid=True` but is never
+  scored, unless a curated `data/value/overrides.csv` row routes it through a
+  verified mirror. Scoring such repos directly needs per-host adapters for the
+  license, EOL, and contributor checks.
 - **`is_cpp` drops** — language-agnostic distro packages are filtered out of
   `results.csv`, so the cpp result set is smaller than its raw dep tree.
 - **Wayback-derived installs** — both download proxies have sparse/truncated

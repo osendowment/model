@@ -13,12 +13,12 @@ the source reference [`sources/npm.md`](../sources/npm.md).
 | [npm downloads API](https://api.npmjs.org/downloads/point) | per-package annual downloads (2021–2025) | `raw/downloads.csv` |
 | [npm downloads API](https://api.npmjs.org/downloads/point) | ecosystem-wide annual totals (the 95% denominator) | `raw/npm-stats.csv` |
 | [npm registry](https://registry.npmjs.org) | declared runtime dependencies (`package → dep`) | `raw/dependencies.csv` |
-| [nice-registry](https://github.com/nice-registry/all-the-package-repos) | `package → repo_url` mapping (~2M packages) | `nice-registry/packages.csv` |
+| [nice-registry](https://github.com/nice-registry/all-the-package-repos) | the full npm `package → repo_url` index | `nice-registry/packages.csv` |
 
-No authentication required (an optional `NPM_TOKEN` raises the registry rate
-limit for dependency lookups). npm publishes no fixed rate limit for the
-downloads API; sustained ~1 req/s is the measured-safe rate, and the fetcher
-enforces it with a global rate limiter.
+No authentication required. An optional `NPM_TOKEN` raises the registry rate
+limit for dependency lookups. npm publishes no fixed limit for the downloads
+API, so the fetcher holds a global 1 req/s limiter — see
+[`sources/npm.md`](../sources/npm.md) for the backoff behavior.
 
 ## Value pipeline
 
@@ -59,7 +59,7 @@ JavaScript / TypeScript (npm)
   `risk_input.value_classes` in `src/settings.json`).
 - **Eligibility** — the same class-A repos (archived included) enter the
   automated [Eligibility stage](../eligibility.md)
-  (`src.eligibility.run_eligibility_pipeline`), also keyed off `github_repo`.
+  (`src.eligibility.run_eligibility_pipeline`), joined by `repo_id`.
   The per-ecosystem signals feed it: `fetch_licenses.py` fills the `license`
   column of `results.csv` (the registry-first input to the stage's license
   check), and `check_eol.py` → `data/sources/npm/eol.csv` produces advisory
@@ -79,13 +79,15 @@ JavaScript / TypeScript (npm)
 | `top` | `True` if in the 95% cumulative set |
 | `pagerank` | Download-weighted PageRank score |
 | `value_class` | A/B/C |
-| `repo_id`, `canonical_url` | Stable numeric GitHub repo id; upstream URL when the GitHub repo is a mirror |
+| `repo_id` | Host-namespaced repo id — `gh/<numeric id>` on GitHub, `gl/<host>-<numeric id>` on GitLab (`to_repo_id` in `src/common/repos.py`) |
+| `canonical_url` | Upstream clone URL, set when the hosted repo is a mirror |
 | `license` | SPDX license (filled by `fetch_licenses.py`) |
 
 ### npm funnel & classes
 
 See the preview pipeline sheet → Value for the npm funnel counts (top packages → dep tree → results → repo coverage) and class distribution.
 
-npm has the cleanest upstream identity (highest GitHub-repo coverage) of the four
-ecosystems, so essentially all load-bearing npm packages reach Risk and
-Eligibility.
+npm has the cleanest upstream identity of the four ecosystems: `package.json`
+carries a `repository` field, and nice-registry indexes it for the whole
+registry, so nearly every dep-tree package resolves to a repo and reaches Risk
+and Eligibility.

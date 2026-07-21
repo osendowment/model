@@ -1,29 +1,30 @@
 # Validation Table
 
-`data/value/validation.csv` is the **git/GitHub validation audit table** — a
-rollup of the two per-source validation caches that decides, per validation
-*target*, whether a repo's resolved URL is real and reachable. It is the audit
-trail behind the `git_valid` column in
-[`data/value/value.csv`](../value.md): `validation.csv` records *why* each target
-was judged valid (which cache verdict, checked when, which ecosystems point at
-it), and `build_validation` joins that verdict back onto every value row.
+`data/value/validation.csv` is the **git/GitHub validation audit table**. It
+rolls up the two validation caches and decides, per validation *target*,
+whether a repo's resolved URL is real and reachable. It is the audit trail
+behind the `git_valid` column of [`data/value/value.csv`](../value.md): it
+records which cache verdict applied, when the check ran, and which ecosystems
+point at the target. `build_validation` joins that verdict back onto every
+value row.
 
-**Grain:** one row per distinct *validation target*, not per repo. A target is
-either a GitHub `owner/repo` slug (type `github_repo`) or a non-GitHub clone URL
-(type `git_url`). Many value rows can share a target, and they union their
-ecosystems into the target's `sources` column.
+**Grain:** one row per *target*, not per repo. A target is a GitHub
+`owner/repo` slug (type `github_repo`) or a non-GitHub clone URL (type
+`git_url`). Value rows that share a target union their ecosystems into its
+`sources` column.
 
 ## How it's built
 
 Built by [`src/value/build_validation.py`](../../src/value/build_validation.py),
-which runs as the `validation` step of the value pipeline runner (after
-`unify`, before the final `criticality` step). It does one piece of network
-I/O of its own: before rolling up, it refreshes the non-GitHub `git ls-remote`
-reachability cache (`data/sources/git/urls.csv`, TTL 365 days) — `--offline`
-skips the refresh (cache only), `--refresh` forces a re-check regardless of
-age. The GitHub cache (`data/sources/github/repos.csv`) is not touched here:
-it is the GitHub Repos API record maintained by
-`src.sources.github.fetch_repo_owner_data`, refreshed during the rollup's
+which runs as the `validation` step of the value pipeline runner — after
+`unify`, and before `openssf-crit`, `eco-crit` and `criticality`.
+
+It does one piece of network I/O: before rolling up, it refreshes the
+non-GitHub `git ls-remote` reachability cache (`data/sources/git/urls.csv`,
+TTL 365 days). `--offline` skips that refresh (cache only); `--refresh` forces
+a re-check regardless of age. It never touches the GitHub cache
+(`data/sources/github/repos.csv`) — that is the GitHub Repos API record
+maintained by `src.sources.github.fetch_repo_owner_data` and refreshed by the
 earlier `resolve` step.
 
 Steps:
@@ -41,11 +42,14 @@ Steps:
      holding either form resolves). `valid` is parsed case-insensitively.
    - `data/sources/git/urls.csv` — `valid` + `checked_at`, keyed by `url`.
 3. **Apply override pins** from `data/value/overrides.csv`. A row there may pin a
-   target's validity via its `valid` column (`True`/`False`); the pin resolves
-   to the override's `repo` target, else its `git_url` target, and
-   **overrides whatever the cache said** (its `checked_at` is recorded as the
-   literal string `override`). A pin with no resolvable target is skipped with a
-   warning.
+   target's validity via its `valid` column (`True`/`False`). The pin resolves
+   to the override's `repo` target, else its `git_url` target, and **overrides
+   whatever the cache said** (its `checked_at` becomes the literal string
+   `override`). Two kinds of pin resolve to no target and are dropped:
+   a `canonical_url`-only row is skipped **silently** — it declares "this
+   project has no git upstream", so having no git target is correct — while a
+   row with no `repo`, `git_url` or `canonical_url` at all is a
+   misconfiguration and prints a warning.
 4. **Hard gate:** every collected target must have a verdict. If any target has
    none, the step raises `SystemExit` listing the offenders and refusing to
    write — a missing verdict is treated as a pipeline error, never silently
@@ -55,33 +59,25 @@ Steps:
 
 ## The `valid` / `git_valid` columns
 
-`build_validation` produces two values from the same verdicts: a per-*target*
-`valid` in `validation.csv`, and a per-*row* (per-repo) `git_valid` joined
-into `value.csv`.
-
-In **`validation.csv`**, `valid` is a plain boolean (`True`/`False`) — the cache
-verdict (or override pin) for that one target.
-
-In **`value.csv`**, `git_valid` is a boolean set by `join_valid` from each
-row's target verdict. It is **host-agnostic**: a reachable non-GitHub upstream
-(sourceware / savannah / a GitLab host / …) is valid on its own, not only a
-GitHub repo.
+The same verdicts produce two columns. In `validation.csv`, `valid` is the
+cache verdict (or override pin) for one target. In `value.csv`, `git_valid` is
+the per-row projection of that verdict, set by `join_valid`. `git_valid` is
+**host-agnostic**: a reachable non-GitHub upstream (sourceware / savannah / a
+GitLab host / …) is valid on its own, not only a GitHub repo.
 
 | `git_valid` | Meaning | How derived |
 |---------|---------|-------------|
 | `True`  | The repo's upstream is real/reachable. | The row's target verdict is `True` (GitHub Repos API for `platform == github` rows, `git ls-remote` for non-GitHub `git_url` rows) — **or** the row carries a GitLab `gl/` `repo_id`, which is itself a validity proof: the resolver only assigns it after the GitLab project API confirmed the project exists, more authoritative than `git ls-remote` (which can fail on hosts like salsa.debian.org even for live projects). This keeps the `repo_id ⇒ git_valid` invariant. |
 | `False` | No reachable upstream. | Orphan rows (no target at all — nothing to validate), a target whose reachability check failed, or a github `repo` that 404s. |
 
-Marking a non-GitHub upstream valid does **not** pull it into the risk /
-eligibility scope — `load_top_repos` still filters to the platforms configured
-in `settings.json → top_repos`; `git_valid` only records that the URL
-resolves.
+Every non-orphan value row's `git_valid` traces to exactly one
+`validation.csv` row, matched by target + type. `gl/`-id rows are the
+exception: they are `True` whatever their `git_url` target's ls-remote verdict
+says.
 
-So `validation.csv` is the per-target ledger and `value.csv`'s `git_valid` is
-its per-row projection. Every non-orphan `value.csv` row's `git_valid` traces
-to its one `validation.csv` row (matched by the row's target + type) — except
-`gl/`-id rows, which are `True` regardless of their `git_url` target's
-ls-remote verdict.
+A valid non-GitHub upstream does **not** enter the risk / eligibility scope.
+`load_top_repos` still filters to the platforms in `settings.json →
+top_repos`; `git_valid` only records that the URL resolves.
 
 ## Columns
 
@@ -95,23 +91,19 @@ ls-remote verdict.
 
 ## Refreshing
 
-`build_validation` refreshes the non-GitHub `git ls-remote` cache itself
-(TTL 365 days), then rolls up:
-
 ```bash
 # Rebuild validation.csv and re-join git_valid onto value.csv.
 # Refreshes stale ls-remote entries first (the step's only network I/O).
 uv run python -m src.value.build_validation
-
-# Variants:
 uv run python -m src.value.build_validation --offline   # cache only, no network
 uv run python -m src.value.build_validation --refresh   # force re-check all URLs
 ```
 
-The GitHub cache (`data/sources/github/repos.csv`) is refreshed by the
-rollup's `resolve` step, so to refresh everything run the rollup (or the whole
-value pipeline), which wires the steps in order
-(`eco-fetch` → `resolve` → `unify` → `validation` → `criticality`):
+The `resolve` step refreshes the GitHub cache
+(`data/sources/github/repos.csv`), so to refresh everything run the rollup (or
+the whole value pipeline). It wires the steps in order — `eco-fetch` →
+`canonical` → `resolve` → `unify` → `validation` → `openssf-crit` →
+`eco-crit` → `criticality`:
 
 ```bash
 uv run python -m src.value.run_value_pipeline --rollup
