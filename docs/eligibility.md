@@ -1,19 +1,22 @@
 # Eligibility Pipeline
 
-**Question: can we actually fund it? Output: `eligible`, a boolean.**
+Eligibility asks whether OSE can actually fund a project. Four independent
+checks answer it: the project carries an open-source license, it has shown some
+intent to be funded, no company is strongly affiliated with it, and it is still
+alive. A repo is `eligible` only when all four pass — there are no weights and
+no trade-offs, so any single failure is disqualifying.
 
-Eligibility is the third scoring stage — Value → Risk → **Eligibility**. The
-[README](../README.md#data-pipeline) summarizes all three; this page is the next
-level of detail. The stage is **fully automated**, not a manual review: a
-builder computes every check from fetched sources plus the curated override
-files in `data/eligibility/`. The `preview` and `health` stages run after it,
-but they score nothing.
+The stage flags; it never drops. An ineligible repo keeps its row in
+`data/eligibility/eligibility.csv`, with `eligible=False` and the failing check
+both visible, and `data/preview/repos.csv` holds the same population. Row counts
+stay identical across the stages, so filtering is a downstream choice — filter
+on `eligible` when you want candidates only.
 
-**The stage flags; it never drops.** `eligibility.csv` holds one row per top
-repo, and `data/preview/repos.csv` holds the same population. An ineligible repo
-keeps its row, with `eligible=False` and the failing check both visible. Row
-counts stay identical across the stages, so "filtering" is a downstream choice —
-filter on `eligible` when you want candidates only.
+Every check is automated. A builder computes each one from fetched sources plus
+the curated override files in `data/eligibility/`. This is the last stage that
+scores anything: `preview` and `health` run afterwards but change no verdict.
+The [README](../README.md#data-pipeline) summarizes all three stages in one
+table.
 
 ## What the stage produces
 

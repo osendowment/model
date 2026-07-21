@@ -1,15 +1,21 @@
 # Value Pipeline
 
-**Question:** how important is this project?
-**Output:** `value_score`, 0–100, one row per repo in `data/value/value.csv`.
+Value ranks open-source projects by how heavily the software ecosystem depends
+on them. It starts from download counts in each package registry, walks the
+dependency graph outward, and writes one row per repo to
+`data/value/value.csv`.
 
-The [README](../README.md#what-each-score-is-made-of) states the rule in one
-table: four weighted components, blended pro rata. This page gives the rest —
-how each component is built, where the class cut falls, what every output column
-means, and which projects the scope leaves out.
+The stage produces two things, and they are computed differently. The **value
+class** — A, B or C — comes from a repo's share of dependency mass alone, and
+class A is the "core" that Risk and Eligibility go on to score. The
+**`value_score`** is a 0–100 blend of four weighted components, and it ranks
+repos *within* that core. Dependency mass decides who is in; the blend decides
+the order.
 
-Value runs first. Risk and Eligibility both read their working set from
-`value.csv`, so a repo that Value never resolves never reaches them.
+Value runs first, and both later stages read their working set from
+`value.csv`. A repo that Value never resolves never reaches them. The
+[README](../README.md#what-each-score-is-made-of) summarizes all three stages
+in one table.
 
 <a id="pipeline-overview"></a>
 

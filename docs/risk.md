@@ -1,13 +1,16 @@
 # Risk Pipeline
 
-**Question:** how likely is this project to fail?
-**Output:** `risk_score`, 0–100, higher = riskier, one row per repo in
-`data/risk/risk.csv`.
+Risk asks how likely a project is to fail the people who depend on it — through
+a maintainer walking away, a codebase nobody can audit, an unpatched
+vulnerability, or a backlog that outgrows the contributors. Four dimensions
+measure those failure modes separately, and their geometric mean is the repo's
+`risk_score`, from 0–100, where higher means riskier.
 
-Risk measures sustainability risk over the last 5 years. The
-[README](../README.md#what-each-score-is-made-of) gives one line per dimension;
-this page gives the metrics inside each one, how they combine, and where the
-deep detail lives.
+Every measurement covers the last 5 years, so a score describes where a project
+is heading rather than what it once was. Risk scores only the core — the
+class-A repos [Value](value.md) selected — and it writes one row per repo to
+`data/risk/risk.csv`. The [README](../README.md#what-each-score-is-made-of)
+summarizes all three stages in one table.
 
 | File the stage writes | What it holds |
 |---|---|
