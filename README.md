@@ -1,42 +1,56 @@
 # Open Source Endowment Fund Distribution Model
 
-This is the work-in-progress fund distribution model for the [Open Source Endowment][ose].
+This is the work-in-progress model used by the [Open Source Endowment](https://endowment.dev/) to determine target open-source projects for its grant program.
 
-## High-level Overview
+It collects data on open-source software from 20+ data sources, calculates their Value and Risk scores, checks Eligibility factors, and provides the OSE board of directors with preview results for the final due diligence and grant approval.
 
 ### Principles
 
-1. We aim to build a transparent, measurable, and verifiable model that can be iteratively improved by the open-source community and approved by a majority of active OSE donors.
+1. We aim to build a transparent, measurable, and verifiable model that can be iteratively improved by the open-source community and approved by a majority of OSE members.
 
-2. It will never be a perfect model, because (1) open-source consumption cannot be measured with 100% precision, and (2) there is no ideal consensus on how to prioritize OSS grants.
+2. We aim to focus our support on the critical core of open-source ecosystems — roughly the 1% of packages that account for 99% of downloads and dependencies.
 
-### Ecosystems
+3. Our model is a data-driven approximation of global open-source supply chain usage, designed to find the riskiest of its most valuable components.
 
-We aim to focus our support on the core of open-source ecosystems — roughly the ~1% of packages that account for 99% of downloads and dependencies. Our model is a data-driven approximation of global open-source supply chain usage, designed to surface its most critical yet underfunded components.
+4. This model will never be perfect, because open-source consumption cannot be measured with 100% precision, and there is no ideal consensus on how to prioritize OSS grants.
 
-It is important to trace dependencies across ecosystem boundaries, not just within them. For instance, Pandas [Python] depends on NumPy [Python], which depends on OpenBLAS [C] ([details](https://codeberg.org/vladh/bindep)). This cross-ecosystem view naturally elevates low-level infrastructure libraries in C/C++, Fortran, and similar languages.
 
-Four registries are covered: **npm** (JS/TS), **PyPI** (Python), **crates** (Rust), and **C/C++** (Debian + Homebrew, which have no single registry). Repos are resolved on both **GitHub and GitLab** (gitlab.com, salsa.debian.org, gitlab.gnome.org, gitlab.freedesktop.org, invent.kde.org, and other instances).
+## Model
 
-## The Pipeline
+### Limitations
 
-Three scoring stages, then a preview build and a health gate. Each stage narrows the set the next operates on:
+Currently, the model aggregates data on packages from four ecosystems:
 
-```
-value → risk → eligibility → preview → health
-```
+| Language | Registries |
+|---|---|
+| JavaScript/TypeScript | npm |
+| Python | PyPI |
+| Rust | crates.io |
+| C/C++ | Debian, Homebrew |
+
+The most valuable packages (based on downloads and dependency graph) are linked with corresponding repos, which are later used to collect risk and eligibility data points for scoring.
+
+The model currently resolves only repos hosted on:
+
+* GitHub
+* GitLab, including custom hosts
+
+Most package managers store clean historical data. The C/C++ ecosystem does not, so the model has to use approximations.
+
+## Data Pipeline
+
 
 | Stage | Question | Output |
 |---|---|---|
 | **[Value](docs/value.md)** | How important is this project? | `value_score` (0–100) |
 | **[Risk](docs/risk.md)** | How likely is it to fail? | `risk_score` (0–100, higher = riskier) |
 | **[Eligibility](docs/eligibility.md)** | Can we actually fund it? | `eligible` (boolean) |
-| **Preview** | Publish the result | `data/preview/preview.xlsx` |
-| **Health** | Is the build self-consistent? | red check ⇒ the run aborts |
+| **[Preview](data/preview/preview.xlsx)** | Publish the result | [`data/preview/preview.xlsx`](data/preview/preview.xlsx) |
 
-**All three scoring stages are automated.** Eligibility used to be a manual review; it is now a full stage, with the residual human judgment confined to curated override files (`data/*/overrides.csv`), never to LLM-generated data.
 
-The final `score` is `sqrt(value_score × risk_score)` — an unnormalized geometric mean on the same 0–100 scale as its inputs, so **both** dimensions must be high. `priority` is a dense rank by `score` descending over eligible rows only.
+**All three scoring stages are automated.**
+
+The final `score` is `sqrt(value_score × risk_score)` — an unnormalized geometric mean on the same 0–100 scale as its inputs, so **both** dimensions must be high. `eligible` is used to filter out ineligible projects from results. `priority` is a dense rank by `score` descending over potentially eligible projects only.
 
 ### Running it
 
@@ -50,7 +64,7 @@ scripts/run-pipeline.sh --from-stage risk  # that stage through to the end
 scripts/run-pipeline.sh --list-stages
 ```
 
-`health` runs last and aborts on failure — a red check is a bug, never noise.
+The `health` check runs last to ensure pipeline data consistency, and aborts on failure.
 
 ### What each score is made of
 
@@ -60,7 +74,7 @@ scripts/run-pipeline.sh --list-stages
 |---|---|---|
 | `openssf_crit` | 60% | OpenSSF Criticality Score: commit cadence, contributor count, org diversity, dependents, issue activity. GitHub-only. |
 | `eco_crit` | 20% | Whether ecosyste.ms lists the package as critical infrastructure. Covers GitHub **and** GitLab, so it is the importance signal GitLab repos still get. |
-| `top_eco_pct` | 10% | PageRank *position* within the repo's strongest ecosystem. Downloads pick the top packages (95% of cumulative downloads), their dependency tree is fetched, and a download-personalized PageRank (α = 0.85) ranks every node. |
+| `top_eco_pct` | 10% | Weighted PageRank *position* within the repo's strongest ecosystem. Downloads pick the top packages (95% of cumulative downloads), their dependency tree is fetched, and a download-personalized PageRank (α = 0.85) ranks every node. |
 | `pr_score` | 10% | Cross-ecosystem dependency *mass*, complementing `top_eco_pct`'s position. |
 
 **Risk** — geometric mean of four dimensions, each 0–100 with higher = riskier.
@@ -79,7 +93,7 @@ scripts/run-pipeline.sh --list-stages
 | `oss` | The repo's SPDX license is OSI-approved. |
 | `intent` | The repo shows *any* funding signal (Sponsors, FUNDING.yml, funding.json, Open Collective, institutional host…). Propagates at the owner level. |
 | `nonprofit` | No company host/owner backs it — company-backed projects are already resourced. |
-| `active` | `NOT eol AND NOT archived`. No exemptions: a project whose canonical upstream is off GitHub is *repointed* there (glibc → sourceware, pixman → gitlab.freedesktop.org), never exempted. |
+| `active` | `NOT eol AND NOT archived`. No exemptions: a project whose canonical upstream sits off GitHub is *repointed* to that upstream (glibc → sourceware, pixman → gitlab.freedesktop.org), never skipped. |
 
 ## Layout
 
@@ -89,19 +103,17 @@ scripts/run-pipeline.sh --list-stages
 - `data/sources/<source>/` — raw + intermediate fetched data; `data/{value,risk,eligibility}/` — stage outputs; `data/preview/` — the published workbook.
 - `docs/` — one page per stage ([value](docs/value.md), [risk](docs/risk.md), [eligibility](docs/eligibility.md)) plus [`docs/data-sources.md`](docs/data-sources.md), with [`docs/sources/`](docs/sources/) (one page per data source) and [`docs/components/`](docs/components/) (cross-cutting components) beneath.
 
-**Every count lives in one place.** Funnel, coverage, and distribution figures are on the `stats` sheet of `preview.xlsx`, regenerated from the live CSVs on every build. The methodology pages describe *how* a metric is built and never restate *how many* — so there is no stats document to drift.
+**Every count lives in one place.** Funnel, coverage, and distribution figures are on the `pipeline` sheet of [`preview.xlsx`](data/preview/preview.xlsx), regenerated from the live CSVs on every build. The methodology pages describe *how* a metric is built and never restate *how many* — so there is no stats document to drift.
 
 ## Auditability
 
 The model must be traceable end to end: every metric in an output CSV traces back to the fetch that produced it. Every fetch records a date and a success flag, so a `False`/`0` can never silently stand in for a network error. Repo-keyed source files carry a stable `repo_id` (`gh/<numeric>` or `gl/<nickname>-<id>`), because slugs drift on renames and every downstream join is by id. `scripts/pipeline_health.py` enforces this, and it is the last stage of every run.
 
-Work is currently happening in this repo and the following places:
+## Roadmap
 
-* [bindep][bindep] ([@vladh][vlad.website]) — Strategies for finding binary dependencies
-* [software-finder][software-finder] ([@jring-o][jring-o]) — PyPI to GitHub repository mapper
+* **Cross-ecosystem dependencies:** It is important to trace dependencies across ecosystem boundaries, not just within them. For instance, Pandas [Python] depends on NumPy [Python], which depends on OpenBLAS [C] ([details](https://codeberg.org/vladh/bindep)). This cross-ecosystem view naturally elevates low-level infrastructure libraries in C/C++, Fortran, and similar languages.
 
-[bindep]: https://codeberg.org/vladh/bindep
-[jring-o]: https://github.com/jring-o/software-finder
-[ose]: https://endowment.dev
-[software-finder]: https://github.com/jring-o/software-finder
-[vlad.website]: https://vlad.website
+* **More value and risk metrics:** We will learn from the first grant distributions and update the model accordingly.
+
+* **More ecosystems:** Go, Java, etc.
+
