@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build data/preview/data.csv — the evidence behind every score in repos.csv.
 
-Same repos, same order as `src.build_results` (score desc), one row each — but
+Same repos, same order as `src.preview.build_results` (score desc), one row each — but
 where repos.csv shows the *verdicts* (value_score, risk_score, eligible), this
 table shows the **measurements those verdicts were computed from**: LOC, active
 contributors, bus factor, CVE counts, download volume, PageRank mass, licence,
@@ -49,7 +49,7 @@ meanings: `openssf_crit` is the Criticality score (a value component),
 `openssf_score` is the Scorecard score (a security input).
 
 Usage:
-    uv run python -m src.build_data
+    uv run python -m src.preview.build_data
 """
 
 import csv
@@ -57,12 +57,12 @@ from pathlib import Path
 
 from rich.console import Console
 
-from src.build_results import build as build_repo_rows
+from src.preview.build_results import build as build_repo_rows
 from src.common.tables import load_rows_by_id
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 VALUE_FILE = DATA_DIR / "value" / "value.csv"
 CONCENTRATION_FILE = DATA_DIR / "risk" / "concentration.csv"
 COMPLEXITY_FILE = DATA_DIR / "risk" / "complexity.csv"

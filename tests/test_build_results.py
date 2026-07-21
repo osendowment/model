@@ -1,7 +1,7 @@
-"""Tests for src/build_results.py — the final cross-stage rollup (all top repos)."""
+"""Tests for src/preview/build_results.py — the final cross-stage rollup (all top repos)."""
 import csv
 
-from src import build_results as br
+from src.preview import build_results as br
 
 
 def _write(path, header, rows):

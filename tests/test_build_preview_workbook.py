@@ -1,9 +1,9 @@
-"""Tests for src/build_preview_workbook.py — repos/people/stats -> preview.xlsx."""
+"""Tests for src/preview/build_preview_workbook.py — repos/people/stats -> preview.xlsx."""
 import csv
 
 from openpyxl import load_workbook
 
-from src import build_preview_workbook as bpw
+from src.preview import build_preview_workbook as bpw
 
 _STATS_MD = """# Pipeline Statistics
 

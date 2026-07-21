@@ -2,7 +2,7 @@
 """Build data/preview/preview.xlsx — repos.csv + methodology + stats as one workbook.
 
 The terminal step of the pipeline, a spreadsheet for non-technical review.
-Sheet 1, 'repos', is src.build_results -> repos.csv; numeric-looking cells
+Sheet 1, 'repos', is src.preview.build_results -> repos.csv; numeric-looking cells
 (scores, counts) are written as real Excel numbers, not text, so
 sorting/filtering behaves numerically rather than alphabetically.
 (data.csv stays a standalone CSV deliverable — it is not shipped in the
@@ -40,7 +40,7 @@ and priority data cells are centered, `value_score`/`risk_score` are bold,
 and every known column gets a fixed width.
 
 Usage:
-    uv run python -m src.build_preview_workbook
+    uv run python -m src.preview.build_preview_workbook
 """
 
 import csv
@@ -65,7 +65,7 @@ from src.common.params import (
 
 console = Console()
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = ROOT / "data"
 REPOS_CSV = DATA_DIR / "preview" / "repos.csv"
 STATS_SCRIPT = ROOT / "scripts" / "stats.py"

@@ -58,7 +58,7 @@ Sorted by `score` desc (blank last), then `repo` — so row order matches
 `priority` order for the scored/eligible subset.
 
 Usage:
-    uv run python -m src.build_results
+    uv run python -m src.preview.build_results
 """
 
 import csv
@@ -72,7 +72,7 @@ from src.common.tables import load_rows_by_id
 
 console = Console()
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 ELIGIBILITY_FILE = DATA_DIR / "eligibility" / "eligibility.csv"
 VALUE_FILE = DATA_DIR / "value" / "value.csv"
 RISK_FILE = DATA_DIR / "risk" / "risk.csv"

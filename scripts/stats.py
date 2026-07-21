@@ -6,7 +6,7 @@ distribution figures. Everything is recomputed from the live CSVs:
   uv run python scripts/stats.py              # rich dashboard (read the numbers)
   uv run python scripts/stats.py --markdown   # emit the tables as markdown
 
-`src.build_preview_workbook` imports this module and renders `markdown()`
+`src.preview.build_preview_workbook` imports this module and renders `markdown()`
 straight onto the `pipeline` sheet of data/preview/preview.xlsx — there is no
 intermediate stats document to refresh or drift.
 

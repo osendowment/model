@@ -791,13 +791,13 @@ def check_preview_data() -> list[Result]:
     """
     from openpyxl import load_workbook
 
-    from src.build_preview_workbook import (
+    from src.preview.build_preview_workbook import (
         OUTPUT_FILE,
         REPOS_DROP_COLS,
         SHEETS,
         _cell_value,
     )
-    from src.build_results import build as build_repos_rows
+    from src.preview.build_results import build as build_repos_rows
 
     out: list[Result] = []
 
@@ -814,7 +814,7 @@ def check_preview_data() -> list[Result]:
                     f"in sync ({len(built)} repos)" if diffs == 0
                     else f"{diffs} stale cells — re-run build_results"))
 
-    from src.build_data import build as build_data_rows
+    from src.preview.build_data import build as build_data_rows
 
     built = {r["repo_id"]: {k: ("" if v is None else str(v)) for k, v in r.items()}
              for r in build_data_rows()}

@@ -10,7 +10,7 @@ skips data already present / within its TTL, so only gaps are fetched),
 then runs the three dimension builders (licenses, active, funding) ->
 aggregate, writing data/eligibility/eligibility.csv. The data/preview
 deliverables are NOT built here — they roll up all three stages and live in
-src.run_preview_pipeline (see the note above BUILDERS).
+src.preview.run_preview_pipeline (see the note above BUILDERS).
 
 Pass --offline to skip every network fetch and rebuild from cached data.
 
@@ -83,7 +83,7 @@ BUILDERS = [
     Step("funding-build", "src.eligibility.build_funding"),
     Step("aggregate",     "src.eligibility.build_eligibility"),
     # The data/preview deliverables (results/people/xlsx) moved to their own
-    # runner: src.run_preview_pipeline — they roll up ALL three stages, not
+    # runner: src.preview.run_preview_pipeline — they roll up ALL three stages, not
     # just eligibility.
 ]
 

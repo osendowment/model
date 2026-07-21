@@ -226,7 +226,7 @@ funding group. `bf-contributors` runs serially ahead of that group, because
 order is in [components/funding.md](components/funding.md#pipeline-order).
 
 Builders then run in order: `licenses` → `active` → `funding-build` →
-`aggregate`. The next stage's runner, `src.run_preview_pipeline`, rebuilds every
+`aggregate`. The next stage's runner, `src.preview.run_preview_pipeline`, rebuilds every
 `data/preview/` deliverable; `scripts/pipeline_health.py` (the `health` stage)
 then verifies each stage CSV matches its builder's current output, and
 `scripts/stats.py` recomputes the preview pipeline sheet.
@@ -234,7 +234,7 @@ then verifies each stage CSV matches its builder's current output, and
 ## What the model hands over
 
 The pipeline ends at a **ranked shortlist**, never at a funding decision.
-`src.build_results` writes `data/preview/repos.csv` with one row per top repo.
+`src.preview.build_results` writes `data/preview/repos.csv` with one row per top repo.
 Two columns turn that table into a queue:
 
 | Column | Meaning |

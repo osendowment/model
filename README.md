@@ -111,7 +111,7 @@ The `health` check runs last to ensure pipeline data consistency, and aborts on 
 
 `src/`, `data/`, and `docs/` all mirror the three scoring stages:
 
-- `src/sources/<source>/` — everything that fetches or processes one external source; `src/{value,risk,eligibility}/` — the stage builders and their runners; `src/common/` — shared infrastructure. The preview builders sit at the `src/` root, and `scripts/pipeline_health.py` runs the health check.
+- `src/sources/<source>/` — everything that fetches or processes one external source; `src/{value,risk,eligibility,preview}/` — the stage builders and their runners; `src/common/` — shared infrastructure. `scripts/pipeline_health.py` runs the health check.
 - `data/sources/<source>/` — raw + intermediate fetched data; `data/{value,risk,eligibility}/` — stage outputs; `data/preview/` — the published deliverables (`preview.xlsx`, `repos.csv`, `data.csv`).
 - `docs/` — one page per stage ([value](docs/value.md), [risk](docs/risk.md), [eligibility](docs/eligibility.md)) plus [`docs/data-sources.md`](docs/data-sources.md), with [`docs/sources/`](docs/sources/) (one page per data source) and [`docs/components/`](docs/components/) (cross-cutting components) beneath.
 

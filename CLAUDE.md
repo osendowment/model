@@ -67,13 +67,16 @@ you what it is:
   (e.g. code `floss_fund/` ↔ data `floss-fund/`).
 - `src/common/` — shared infrastructure used across stages: `params.py`, `repos.py`,
   `tables.py`, `stats.py`, `pipeline_runner.py`, `funding_platforms.py`.
-- `src/value/`, `src/risk/`, `src/eligibility/` — pipeline-stage scripts:
-  the per-dimension builders for that stage **plus** its orchestrator
+- `src/value/`, `src/risk/`, `src/eligibility/`, `src/preview/` — pipeline-stage
+  scripts: the per-dimension builders for that stage **plus** its orchestrator
   (`run_<stage>_pipeline.py`, run via
   `uv run python -m src.<stage>.run_<stage>_pipeline`). The eligibility
   stage's source inputs (`src/sources/osi/`, `src/sources/funding/`, the
   per-ecosystem `check_eol.py` / `fetch_licenses.py`,
-  `fetch_repo_owner_data`) stay under `src/sources/`.
+  `fetch_repo_owner_data`) stay under `src/sources/`. `src/preview/` holds the
+  cross-stage rollup (`build_results.py`, `build_data.py`,
+  `build_preview_workbook.py`); it scores nothing, it only assembles.
+  No stage module belongs at the `src/` root.
 - `src/settings.json` — model parameters/config at the `src/` root (loaded by `src/common/params.py`).
 - Only truly general-purpose scripts (tied to no source or stage) go in a top-level
   `scripts/` folder. Never leave a script in a bare `scripts/` folder if it belongs
@@ -88,7 +91,7 @@ you what it is:
 - `data/risk/` — Risk-stage outputs: `risk.csv` (final aggregated risk table) plus the per-dimension builds (`concentration.csv`, `complexity.csv`, `security.csv`, `workload.csv`).
 - `data/eligibility/` — Eligibility-stage outputs: `eligibility.csv` (the rollup: `eligible = oss AND intent AND nonprofit AND active`) plus the per-dimension builds (`licenses.csv`, `active.csv`, `funding.csv`) and `overrides.csv` (curated per-repo host/owner backing, OC slug, and the manual `eol` verdict). Raw funding signals live under `data/sources/github/` (`sponsors.csv` inbound, `sponsorships.csv` outbound, `funding-yml.csv`), `data/sources/floss-fund/` (`funding-json.csv`), `data/sources/opencollective/` (`budgets.csv`), and `data/sources/funding/` (foundation rosters + `host-by-repo.csv`); license/EOL source signals under `data/sources/osi/` and the per-ecosystem folders.
 
-- `data/preview/` — cross-stage deliverables, all rebuilt by `src.run_preview_pipeline` and nowhere else: `repos.csv` (the scored rollup), `data.csv` (the measurements those scores were computed from — one column per data point a builder actually *reads*, never the columns a fetcher merely collected), and `preview.xlsx` (the workbook: `repos` → `components` → `pipeline`). `data.csv` is a standalone CSV deliverable — it is not a sheet in the workbook. The folder also holds `board-preview-report.md`/`.pdf`, which are **not** pipeline outputs: the `.md` is hand-written, `scripts/render-board-report.sh` renders the `.pdf`, and both are gitignored.
+- `data/preview/` — cross-stage deliverables, all rebuilt by `src.preview.run_preview_pipeline` and nowhere else: `repos.csv` (the scored rollup), `data.csv` (the measurements those scores were computed from — one column per data point a builder actually *reads*, never the columns a fetcher merely collected), and `preview.xlsx` (the workbook: `repos` → `components` → `pipeline`). `data.csv` is a standalone CSV deliverable — it is not a sheet in the workbook. The folder also holds `board-preview-report.md`/`.pdf`, which are **not** pipeline outputs: the `.md` is hand-written, `scripts/render-board-report.sh` renders the `.pdf`, and both are gitignored.
 
 Rule: a script reading external/fetched data points at `data/sources/<source>/…`; a script reading or writing a stage result points at `data/<stage>/…`. Never write a stage output into `data/sources/`, and never write fetched source data into a stage folder.
 
@@ -106,7 +109,7 @@ When a doc's content spans multiple stages, fold it into the relevant stage page
 
 ### Stats live only on the preview pipeline sheet
 
-**Every pipeline/funnel/coverage/distribution figure lives on the `pipeline` sheet of `data/preview/preview.xlsx` and nowhere else.** The sheet is rendered at build time by `src.build_preview_workbook` from `scripts/stats.py` (the generator — every figure recomputed from the live CSVs; `--markdown` emits the same tables as text). There is no stats document in `docs/` to refresh or drift. That covers: per-stage funnel counts (packages → dep tree → results → with-repo), class/score distributions, repo-identity coverage, and per-component "N of the top repos carry signal X" coverage tables (Risk and Eligibility share one scope — the valid class-A set **including archived repos**, which surface in eligibility as `active=False`).
+**Every pipeline/funnel/coverage/distribution figure lives on the `pipeline` sheet of `data/preview/preview.xlsx` and nowhere else.** The sheet is rendered at build time by `src.preview.build_preview_workbook` from `scripts/stats.py` (the generator — every figure recomputed from the live CSVs; `--markdown` emits the same tables as text). There is no stats document in `docs/` to refresh or drift. That covers: per-stage funnel counts (packages → dep tree → results → with-repo), class/score distributions, repo-identity coverage, and per-component "N of the top repos carry signal X" coverage tables (Risk and Eligibility share one scope — the valid class-A set **including archived repos**, which surface in eligibility as `active=False`).
 
 - Methodology pages (`value.md`, `risk.md`, `eligibility.md`, the component and source docs) describe **how** a metric is built (formulas, schemas, column descriptions, worked illustrative examples) and **point to** the preview pipeline sheet for **how many** — they must not restate the counts.
 - A single concrete number that *defines* a parameter (e.g. "top = 95% of cumulative downloads") stays in the methodology page — it's config, not a result.

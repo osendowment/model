@@ -40,7 +40,7 @@ module_for() {
     value)       echo "src.value.run_value_pipeline" ;;
     risk)        echo "src.risk.run_risk_pipeline" ;;
     eligibility) echo "src.eligibility.run_eligibility_pipeline" ;;
-    preview)     echo "src.run_preview_pipeline" ;;
+    preview)     echo "src.preview.run_preview_pipeline" ;;
     health)      echo "scripts.pipeline_health" ;;
     *)           return 1 ;;
   esac
