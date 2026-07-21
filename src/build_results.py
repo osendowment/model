@@ -12,10 +12,6 @@ Columns:
     repo              canonical slug (first column — the row's identity for
                       human readers; the preview workbook links it to the
                       repo's home page)
-    language          primary language, lowercased. GitHub repos from
-                      `data/sources/github/repos.csv`; GitLab repos fall back
-                      to `data/sources/gitlab/repos.csv` (GitLab Languages API).
-                      Blank for any repo not fetched on either host.
     platform          repo host, `github` / `gitlab`    (value.csv `platform`;
                       falls back to the repo_id prefix when the value row is
                       missing)
@@ -80,15 +76,13 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 ELIGIBILITY_FILE = DATA_DIR / "eligibility" / "eligibility.csv"
 VALUE_FILE = DATA_DIR / "value" / "value.csv"
 RISK_FILE = DATA_DIR / "risk" / "risk.csv"
-GITHUB_REPOS_FILE = DATA_DIR / "sources" / "github" / "repos.csv"
-GITLAB_REPOS_FILE = DATA_DIR / "sources" / "gitlab" / "repos.csv"
 OUTPUT_FILE = DATA_DIR / "preview" / "repos.csv"
 
 RISK_COMPONENTS = ["concentration", "complexity", "security", "workload"]
 ELIGIBILITY_COMPONENTS = ["oss", "intent", "nonprofit", "active"]
 
 FIELDS = (
-    ["repo", "language", "platform", "ecosystem", "top_eco_pkg", "top_eco_pct",
+    ["repo", "platform", "ecosystem", "top_eco_pkg", "top_eco_pct",
      "pr_score", "openssf_crit", "eco_crit", "value_score"]
     + RISK_COMPONENTS
     + ["risk_score", "score"]
@@ -113,8 +107,6 @@ def _round2(x: str) -> str:
 def build() -> list[dict]:
     value_by_id = load_rows_by_id(VALUE_FILE)
     risk_by_id = load_rows_by_id(RISK_FILE)
-    language_by_id = load_rows_by_id(GITHUB_REPOS_FILE)
-    gitlab_language_by_id = load_rows_by_id(GITLAB_REPOS_FILE)
 
     with open(ELIGIBILITY_FILE, encoding="utf-8") as f:
         eligibility_rows = list(csv.DictReader(f))
@@ -126,12 +118,6 @@ def build() -> list[dict]:
         repo = (e.get("repo") or "").strip()
         v = value_by_id.get(rid, {})
         r = risk_by_id.get(rid, {})
-        g = language_by_id.get(rid, {})
-        # GitHub language first; GitLab repos (gl/ ids, absent from github/repos.csv)
-        # fall back to their GitLab Languages API result in gitlab/repos.csv.
-        language = (g.get("language") or "").strip()
-        if not language:
-            language = (gitlab_language_by_id.get(rid, {}).get("language") or "").strip()
 
         value_score = (v.get("value_score") or "").strip()
         risk_score = (r.get("risk_score") or "").strip()
@@ -145,7 +131,6 @@ def build() -> list[dict]:
 
         row = {
             "repo": repo,
-            "language": language.lower(),
             "platform": platform,
             "ecosystem": (v.get("top_eco") or "").strip(),
             "top_eco_pkg": (v.get("top_eco_pkg") or "").strip(),

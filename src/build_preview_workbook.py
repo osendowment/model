@@ -5,7 +5,7 @@ The terminal step of the pipeline, a spreadsheet for non-technical review.
 Sheet 1, 'repos', is src.build_results -> repos.csv; numeric-looking cells
 (scores, counts) are written as real Excel numbers, not text, so
 sorting/filtering behaves numerically rather than alphabetically.
-(people.csv stays a standalone CSV deliverable — it is not shipped in the
+(data.csv stays a standalone CSV deliverable — it is not shipped in the
 workbook.)
 
 Sheet 2, 'components', documents the methodology: one banner-headed
@@ -21,14 +21,7 @@ header row. The tables come straight from the generator
 (`scripts/stats.py`, its markdown renderer), computed from the live CSVs at
 build time: this sheet IS the single home of the pipeline's numbers.
 
-Sheet 4, 'data', is the audit trail behind sheet 1: the same repos, one row
-each, carrying every measurement the three stages actually consumed to score
-them (see DATA_COLUMNS) — the raw inputs (LOC, active contributors, CVE
-counts, bus factor, licence, funding channels…) alongside the components they
-produce. Score-irrelevant bookkeeping (fetch dates, comments, unused fetched
-flags) is deliberately left out.
-
-The CSV sheets get:
+The repos sheet gets:
     - a styled header row (bold white text on a dark-blue fill) so it reads
       as a header at a glance, distinct from the data rows
     - an AutoFilter over the full used range, so every column has a
@@ -75,11 +68,10 @@ console = Console()
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 REPOS_CSV = DATA_DIR / "preview" / "repos.csv"
-DATA_CSV = DATA_DIR / "preview" / "data.csv"
 STATS_SCRIPT = ROOT / "scripts" / "stats.py"
 OUTPUT_FILE = DATA_DIR / "preview" / "preview.xlsx"
 
-SHEETS = [("repos", REPOS_CSV), ("data", DATA_CSV)]
+SHEETS = [("repos", REPOS_CSV)]
 
 HEADER_FILL = PatternFill(start_color="1F3864", end_color="1F3864", fill_type="solid")
 HEADER_FONT = Font(bold=True, color="FFFFFF")
@@ -115,7 +107,7 @@ REPOS_CENTERED_COLS = (REPOS_VALUE_SCALE_COLS + REPOS_RISK_SCALE_COLS
 # pr_score, openssf_crit, the four risk dimensions, risk_score — stay at
 # Excel's default width.
 REPOS_COLUMN_WIDTHS = {
-    "repo": 24, "language": 11, "platform": 9, "ecosystem": 10, "top_eco_pkg": 16,
+    "repo": 24, "platform": 9, "ecosystem": 10, "top_eco_pkg": 16,
     "top_eco_pct": 10, "eco_crit": 8, "value_score": 10,
     "score": 9, "oss": 7, "intent": 8, "nonprofit": 9,
     "active": 8, "eligible": 9, "priority": 8,
@@ -286,108 +278,6 @@ def _add_repos_conditional_formats(ws: Worksheet, headers: dict) -> None:
     if rng:
         ws.conditional_formatting.add(rng, FormulaRule(
             formula=[f"NOT(ISBLANK({letter}2))"], fill=PRIORITY_FILL))
-
-
-# ---------------------------------------------------------------------------
-# data sheet — the measurements behind repos.csv (src.build_data). Wide, so the
-# header is colored BY STAGE (the same hues the components sheet uses for its
-# banners): identity navy, value green, risk red, eligibility purple, results
-# blue. Any column not listed keeps the navy default.
-
-DATA_STAGE_FILLS = [
-    ("9BBB59", [  # value: registry demand → dependency mass → criticality signals
-        "ecosystems", "packages", "ecosystem", "top_eco_pkg",
-        "downloads_npm", "downloads_pypi", "downloads_crates",
-        "downloads_debian", "downloads_homebrew",
-        "pagerank_npm", "pagerank_pypi", "pagerank_crates", "pagerank_cpp",
-        "top_eco_pct", "pr_score", "openssf_crit", "eco_crit", "value_score",
-    ]),
-    ("C0504D", [  # risk
-        "active_contributors_git_5y", "dormant", "bf_commits_git_5y",
-        "hhi_commits_git_5y", "loc_eoy", "cyclomatic_max", "openssf_score",
-        "cve_count_5y", "issues_opened_5y", "issues_closed_5y",
-        "net_new_issues_5y",
-        "concentration", "complexity", "security", "workload", "risk_score",
-    ]),
-    ("8064A2", [  # eligibility
-        "license", "license_source", "eol", "archived", "gh_sponsors_enabled",
-        "gh_sponsorships_in", "gh_sponsorships_out", "gh_sponsorships",
-        "has_funding_yml", "has_funding_json", "has_funding_links",
-        "has_npm_funding", "has_pypi_funding", "bf_maintainer_fundable",
-        "paypal", "oc_slug", "host", "host_type", "owner", "owner_type",
-        "oss", "intent", "nonprofit", "active", "eligible",
-    ]),
-    ("4F81BD", ["score", "priority"]),  # preview results
-]
-
-# Counts read as counts (#,##0), PageRank keeps the precision that separates
-# neighbouring repos, scores show 2dp.
-DATA_NUMBER_FORMATS = {
-    "#,##0": ["gh_stars", "gl_stars", "packages", "downloads_npm",
-              "downloads_pypi", "downloads_crates", "downloads_debian",
-              "downloads_homebrew", "loc_eoy", "cyclomatic_max", "cve_count_5y",
-              "hhi_commits_git_5y", "issues_opened_5y", "issues_closed_5y",
-              "net_new_issues_5y", "active_contributors_git_5y",
-              "bf_commits_git_5y", "gh_sponsorships_in", "gh_sponsorships_out",
-              "gh_sponsorships"],
-    "0.000000": ["pagerank_npm", "pagerank_pypi", "pagerank_crates",
-                 "pagerank_cpp"],
-    "0.00": ["top_eco_pct", "pr_score", "openssf_crit", "value_score",
-             "openssf_score", "concentration", "complexity", "security",
-             "workload", "risk_score", "score"],
-}
-
-DATA_BOOL_COLS = ["dormant", "eol", "archived", "gh_sponsors_enabled",
-                  "has_funding_yml", "has_funding_json", "has_funding_links",
-                  "has_npm_funding", "has_pypi_funding", "bf_maintainer_fundable",
-                  "oss", "intent", "nonprofit", "active", "eligible"]
-
-DATA_COLUMN_WIDTHS = {"repo": 26, "platform": 9, "license": 20,
-                      "license_source": 13, "ecosystems": 12, "ecosystem": 10,
-                      "top_eco_pkg": 16, "oc_slug": 14, "host": 12, "owner": 14,
-                      "host_type": 10, "owner_type": 10, "repo_id": 12}
-DATA_DEFAULT_WIDTH = 11
-
-
-def _decorate_data_sheet(ws: Worksheet) -> None:
-    """data-sheet dressing: stage-colored header, `repo` frozen alongside the
-    header row (the sheet is 70+ columns wide — without it you lose the row's
-    identity two screens right), per-column number formats, True/False in
-    green/red, and the same eligible/priority accents the repos sheet uses."""
-    headers = {c.value: c.column for c in ws[1]}
-    for rgb, names in DATA_STAGE_FILLS:
-        fill = _fill(rgb)
-        for name in names:
-            if name in headers:
-                ws.cell(row=1, column=headers[name]).fill = fill
-
-    fmt_by_col = {headers[n]: fmt for fmt, names in DATA_NUMBER_FORMATS.items()
-                  for n in names if n in headers}
-    bool_cols = {headers[n] for n in DATA_BOOL_COLS if n in headers}
-    eligible_col = headers.get("eligible")
-    for row in ws.iter_rows(min_row=2):
-        for col, fmt in fmt_by_col.items():
-            row[col - 1].number_format = fmt
-        for col in bool_cols:
-            row[col - 1].alignment = CENTER
-        if eligible_col:
-            row[eligible_col - 1].fill = REPOS_STATIC_FILLS["eligible"]
-
-    for name in DATA_BOOL_COLS:
-        col = headers.get(name)
-        if not col or ws.max_row < 2:
-            continue
-        letter = get_column_letter(col)
-        rng = f"{letter}2:{letter}{ws.max_row}"
-        ws.conditional_formatting.add(rng, CellIsRule(
-            operator="equal", formula=['"True"'], font=BOOL_TRUE_FONT))
-        ws.conditional_formatting.add(rng, CellIsRule(
-            operator="equal", formula=['"False"'], font=BOOL_FALSE_FONT))
-
-    ws.freeze_panes = "B2"
-    for name, col in headers.items():
-        ws.column_dimensions[get_column_letter(col)].width = \
-            DATA_COLUMN_WIDTHS.get(name, DATA_DEFAULT_WIDTH)
 
 
 def _md_cell(raw: str) -> tuple[int | float | str | None, str | None]:
@@ -720,48 +610,6 @@ COMPONENT_TABLES: list[tuple[str, str, list[tuple[str, object]]]] = [
          "upstream is off GitHub is repointed there in value/overrides.csv "
          "(e.g. glibc → sourceware, pixman → gitlab.freedesktop.org)."),
     ]),
-    ("Data Sheet — the evidence behind the scores", "1F3864", [
-        ("what it is",
-         "The same repos as the repos sheet, same order — carrying the "
-         "measurements each score was computed FROM. A column is on the sheet "
-         "only if a builder actually read it to produce a score or an "
-         "eligibility flag; anything a fetcher merely collected along the way "
-         "is left off. Column names match the source CSV they came from, so "
-         "any cell can be traced back to its file."),
-        ("downloads_*",
-         "Registry demand: the summed downloads of the repo's packages in that "
-         "registry (Debian popcon and Homebrew installs stay separate — they "
-         "are different units and are never added together). Blank means the "
-         "repo ships nothing on that registry, which is not the same as zero "
-         "downloads."),
-        ("pagerank_*",
-         "The repo's summed package PageRank in that ecosystem — the raw "
-         "dependency mass behind top_eco_pct and pr_score. The pipeline holds "
-         "these only in memory, so this sheet is the only place they are "
-         "written down."),
-        ("the two openssf_*",
-         "Two different OpenSSF products, two different jobs — keep them "
-         "apart. openssf_crit is the CRITICALITY score (how load-bearing the "
-         "project is): the heaviest value component, weight 0.6. "
-         "openssf_score is the SCORECARD score (how well the project defends "
-         "itself, 0-10): an input to the security risk dimension, where it is "
-         "percentile-ranked INVERTED, so a low Scorecard reads as high risk."),
-        ("gh_stars / gl_stars, gh_sponsorships*",
-         "Context, not inputs — no score reads them. Stars stay in one column "
-         "per host: a repo lives on GitHub or GitLab, so the other column is "
-         "blank (which means 'not on that host', not zero stars). "
-         "gh_sponsorships is the inbound + outbound count; only "
-         "gh_sponsors_enabled — whether the repo can be sponsored at all — "
-         "feeds the intent check."),
-        ("reading a row",
-         "Two things the numbers alone will not tell you. (1) Complexity, "
-         "security and workload score off PERCENTILE RANKS of the raw columns "
-         "shown here, so a value's contribution is relative to the other repos, "
-         "not absolute. (2) intent propagates at the owner level — one repo of "
-         "an owner declaring a funding channel flips intent = True for all its "
-         "siblings, so a row can read intent = True with every funding signal "
-         "on it blank."),
-    ]),
     ("Preview Results", "4F81BD", [
         ("score",
          "sqrt(value_score × risk_score) — unnormalized geometric mean on "
@@ -812,17 +660,15 @@ def _write_components_sheet(ws: Worksheet) -> int:
 
 
 # Tab order, left to right: the answer, then how it was reached, then how much
-# of the world it covers, then the evidence. `data` sits last — it is the widest
-# and most technical sheet, and it reads far better once `components` has
-# explained what its columns mean.
-SHEET_ORDER = ["repos", "components", "pipeline", "data"]
+# of the world it covers.
+SHEET_ORDER = ["repos", "components", "pipeline"]
 
 
 def build() -> None:
     wb = Workbook()
     wb.remove(wb.active)  # drop the default blank sheet; we name our own
     csv_sheets = dict(SHEETS)
-    decorate = {"repos": _decorate_repos_sheet, "data": _decorate_data_sheet}
+    decorate = {"repos": _decorate_repos_sheet}
 
     for name in SHEET_ORDER:
         if name not in csv_sheets:
