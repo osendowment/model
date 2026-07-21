@@ -2,7 +2,7 @@
 
 This is the work-in-progress model used by the [Open Source Endowment](https://endowment.dev/) to determine target open-source projects for its grant program.
 
-It collects data on open-source software from 20+ data sources, calculates their Value and Risk scores, checks Eligibility factors, and provides the OSE board of directors with preview results for the final due diligence and grant approval.
+It collects data on open-source software from [20+ data sources](docs/data-sources.md), calculates their Value and Risk scores, checks Eligibility factors, and provides the OSE board of directors with preview results for the final due diligence and grant approval.
 
 ### Principles
 
@@ -90,10 +90,10 @@ The `health` check runs last to ensure pipeline data consistency, and aborts on 
 
 | Check | True when |
 |---|---|
-| `oss` | The repo's SPDX license is OSI-approved. |
-| `intent` | The repo shows *any* funding signal (Sponsors, FUNDING.yml, funding.json, Open Collective, institutional host…). Propagates at the owner level. |
-| `nonprofit` | No company host/owner backs it — company-backed projects are already resourced. |
-| `active` | `NOT eol AND NOT archived`. No exemptions: a project whose canonical upstream sits off GitHub is *repointed* to that upstream (glibc → sourceware, pixman → gitlab.freedesktop.org), never skipped. |
+| `oss` | The repo carries an open-source license — OSI-approved, FSF-libre, or a curated equivalent. |
+| `intent` | The repo shows *any* intent to be funded (GitHub Sponsors, FUNDING.yml, funding.json, Open Collective, institutional host, etc.) — OSE supports only those who want to be supported. Propagates at the repo owner level. |
+| `nonprofit` | No company is strongly affiliated with the project — OSE supports only nonprofit initiatives. |
+| `active` | `NOT eol AND NOT archived` — OSE supports only projects that still have work ahead of them. |
 
 ## Layout
 
