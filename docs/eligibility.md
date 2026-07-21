@@ -244,8 +244,8 @@ Two columns turn that table into a queue:
 
 `priority` is the grant-selection queue. Everything after it is **manual and
 outside the model**: verify each project's eligibility by hand, contact the
-project leaders, then distribute the grants. The model contacts nobody and moves
-no money.
+project leaders, then put the shortlist to the OSE board for final approval.
+The model contacts nobody, approves nothing and moves no money.
 
 Read `eligible` as *provisional*. It is the model's verdict from the signals it
 can see, and manual due diligence confirms or overturns it. The README calls the
