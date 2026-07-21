@@ -20,10 +20,15 @@ all validation signals:
   5. **Hard gate:** every target must have a verdict. A target with none is a
      pipeline error (run the resolve step first) — never silently invalid.
   6. Write `data/value/validation.csv` (target, type, sources, checked_at,
-     valid) and join the per-repo `git_valid` verdict back into `value.csv`:
-     `True` iff the repo has a validated github `repo` (mirror); `False`
-     otherwise — no GitHub repo at all (orphan or non-GitHub-only upstream),
-     or a github `repo` that 404s.
+     valid) and join the per-repo `git_valid` verdict back into `value.csv`.
+     `git_valid` is host-agnostic: `True` whenever the row's validation
+     target resolves — a github `repo` via the API, or a canonicalised
+     `git_url` via `git ls-remote` for any other platform. A reachable
+     sourceware / savannah / gitlab upstream is valid on its own. A `gl/`
+     repo_id is itself a validity proof (see `join_valid`). `False` covers
+     orphans, a failed reachability check, and a github `repo` that 404s.
+     Valid does NOT mean in scope — `load_top_repos` still filters to the
+     configured platforms.
 
 Usage:
     uv run python -m src.value.build_validation [--offline] [--refresh]
