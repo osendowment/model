@@ -1,35 +1,72 @@
 # Repology
 
-Cross-distribution package name mapping. Used by the C/C++ pipeline to unify
-Debian and Homebrew packages under a single canonical project name.
+Cross-distribution package name mapping. The C/C++ pipeline uses it to unify
+Debian and Homebrew packages under one canonical project name.
 
 ## Data Source
 
-**API**: [repology.org/api/v1/projects](https://repology.org/api/v1/projects) -- paginated project list. Fair-use rate limit (~1 req/s, enforced at 1.2s delay). Full crawl takes ~3 minutes.
-
-No authentication required.
+**API**: `https://repology.org/api/v1/projects/{cursor}/?inrepo=<repo>` — a
+cursor-paginated project list, 200 projects per page. No authentication.
+The fetcher waits 1.2 s between requests to stay inside Repology's ~1 rps
+fair-use limit, and retries 429/502/503/504 with a 5/15/30/60 s backoff.
+A full crawl of both repos takes about 3 minutes.
 
 ## Why It's Needed
 
-The same upstream project appears under different names in different ecosystems:
-- boost1.74 / boost1.81 / boost1.83 (Debian) -> **boost** (Repology)
-- openssl@3 / openssl@3.0 / openssl@3.5 (Homebrew) -> **openssl** (Repology)
-- libpng1.6 (Debian) / libpng (Homebrew) -> **libpng** (Repology)
+One upstream project carries a different name in each ecosystem:
 
-Repology's canonical project name collapses this noise so downloads and deps
-can be aggregated correctly across ecosystems.
+| Ecosystem names | Repology project |
+|---|---|
+| boost1.74 / boost1.81 / boost1.83 (Debian) | `boost` |
+| openssl@3 / openssl@3.0 / openssl@3.5 (Homebrew) | `openssl` |
+| libpng1.6 (Debian) / libpng (Homebrew) | `libpng` |
+
+The canonical name collapses this noise, so downloads and dependencies
+aggregate correctly across ecosystems.
 
 ## Raw Data
 
-- `data/sources/repology/packages.csv` -- project, repo, srcname, binname, visiblename, version, status, categories, licenses
-- `data/sources/repology/project-urls.csv` -- cache of git-URL candidates scraped from Repology's per-project information pages (project, candidate_url, platform, status, fetched_at); written by `src/sources/cpp/fetch_repology_urls.py`, not by this fetcher
+`data/sources/repology/packages.csv` — one row per (project, repo, package):
+
+| Column | Description |
+|---|---|
+| `project` | Repology canonical project name — the join key |
+| `repo` | Source repo (`debian_13` \| `homebrew`) |
+| `srcname` | Source package name in that repo |
+| `binname` | Binary package name in that repo |
+| `visiblename` | Name Repology displays |
+| `version` | Packaged version |
+| `status` | Repology version status (`newest`, `outdated`, …) |
+| `categories` | Repo section/category list |
+| `licenses` | Licenses the repo declares |
+| `fetched_at` | UTC fetch timestamp |
+
+`data/sources/repology/project-urls.csv` — git-URL candidates scraped from
+Repology's per-project information pages (`project`, `candidate_url`,
+`platform`, `status`, `fetched_at`). A different script writes it:
+`src/sources/cpp/fetch_repology_urls.py`.
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `src/sources/repology/fetch_repology_data.py` | Crawl project list for target repos |
+| `src/sources/repology/fetch_repology_data.py` | Crawl the project list for the target repos → `packages.csv` |
 
 ```bash
-uv run src/sources/repology/fetch_repology_data.py [--repo debian_13|homebrew]
+uv run python -m src.sources.repology.fetch_repology_data                  # debian_13 + homebrew
+uv run python -m src.sources.repology.fetch_repology_data --repo debian_13 # one repo
+uv run python -m src.sources.repology.fetch_repology_data --refresh        # ignore the TTL
+uv run python -m src.sources.repology.fetch_repology_data --offline        # never touch the network
 ```
+
+## Refresh
+
+| Aspect | Behavior |
+|---|---|
+| TTL | 30 days, gating the whole file — a warm re-run makes zero network calls |
+| `--refresh` | Refetch past the TTL. The pipeline runner propagates it |
+| `--offline` | Use the cached file only; never call the API |
+| Pipeline step | `repology` in `src.value.run_value_pipeline` (`net=True`) |
+
+`src.sources.cpp.process_data` and `src.sources.cpp.check_eol` both read
+`packages.csv`, so a stale file misjoins the C/C++ pipeline.

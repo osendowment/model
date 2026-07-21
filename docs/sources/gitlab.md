@@ -4,18 +4,16 @@ Project metadata, owner/namespace data, and per-year commit SHAs for GitLab-host
 open-source projects — across gitlab.com **and** self-hosted instances (salsa.debian.org,
 invent.kde.org, gitlab.gnome.org, gitlab.freedesktop.org, code.videolan.org, …).
 
-Mirrors the GitHub fetchers (`src/sources/github/`) so a GitLab-hosted repo can carry the
-same identity, owner, and SHA-anchor signals a GitHub repo does. The GitLab API surface is
-identical across instances (`/api/v4`), so multi-instance support is a per-host base URL +
-per-host token.
+These fetchers mirror `src/sources/github/`, so a GitLab-hosted repo carries the same identity,
+owner, and SHA-anchor signals a GitHub repo does. The `/api/v4` surface is identical across
+instances, so multi-instance support is one base URL and one token per host.
 
-> **Status:** fully wired in. GitLab is a first-class platform in the pipeline scope
-> (`src/settings.json` `top_repos.platforms = ["github", "gitlab"]`): GitLab rows carry
-> through `value.csv`, `src.common.repos.load_top_repos`, and all four risk dimensions into
-> `risk.csv`. The clone-based fetchers (sha-metrics = scc + lizard, contributors) and
-> Scorecard's GitLab mode (`src/sources/openssf/scorecard.py --gitlab`, see below) run
-> against GitLab hosts. Coverage/funnel counts live in the preview pipeline sheet — this page
-> describes **how** the data is fetched, not **how many**.
+GitLab is a first-class platform in the pipeline scope (`src/settings.json`
+`top_repos.platforms = ["github", "gitlab"]`). GitLab rows carry through `value.csv`,
+`src.common.repos.load_top_repos`, and all four risk dimensions into `risk.csv`. The
+clone-based fetchers (sha-metrics = scc + lizard, contributors) and Scorecard's GitLab mode
+(`scorecard.py --gitlab`) run against GitLab hosts. Coverage counts live in the preview
+pipeline sheet — this page describes **how** the data is fetched, not **how many**.
 
 ## Data Sources
 
@@ -36,11 +34,14 @@ byte-share breakdown (`{"C": 90.8, "CMake": 3.7, …}`). Fetched best-effort by 
 metadata (group vs user). (Note: GitLab's Namespaces endpoint omits `description` for **user**
 namespaces, so that column is blank for individual owners.)
 
-**Commits API**: `GET /projects/{id}/repository/commits?ref_name={branch}&since={yr}-01-01&until={yr}-12-31&per_page=1`
-— the newest commit in a calendar year (item `[0]` = the year's `last_sha`) plus the in-year
-commit count (`X-Total` header). This is the SHA anchor sha-pinned analyses (scc/lizard)
-key off. (GitLab omits `X-Total` for result sets > 10,000, so `commits` may under-report in
-that rare case; `last_sha` — the anchor — is unaffected.)
+**Commits API**: `GET /projects/{id}/repository/commits?ref_name={branch}&since={yr}-01-01&until={yr}-12-31&per_page=100`
+— the year's SHA anchor for the sha-pinned analyses (scc/lizard), plus its commit count.
+GitLab serves **no `X-Total` header** on this endpoint — only `X-Page` / `X-Next-Page` — so the
+fetcher walks every page newest-first and sums the row counts: page 1 item `[0]` is `last_sha`,
+the final page's last item is `first_sha`, and `commits` is the total rows seen. A page error
+aborts that year and writes **no** row; a truncated count is worse than a missing one, and the
+next run simply refetches. A genuinely commit-less year writes `commits=0`, so it is never
+refetched forever.
 
 **Git metrics**: the clone-based fetchers (sha-metrics=scc+lizard, contributors) are
 host-agnostic — each clone is routed through the repo's real `git_url` (the `repo_url`
@@ -50,31 +51,45 @@ rows on the `gl/…` repo_id.
 **Authentication**: per-host tokens via the `PRIVATE-TOKEN` header. Resolution precedence per
 host: `GITLAB_TOKENS` (JSON `{host: token}`) → `GITLAB_TOKEN_<HOST_SLUG>` (dots→underscores,
 upper) → `GITLAB_TOKEN` (default applied to known hosts). Missing → anonymous for that host
-(public read works at a lower rate limit). Note: the bare `GITLAB_TOKEN` / per-host
-`GITLAB_TOKEN_<SLUG>` fallbacks only cover the curated `KNOWN_GITLAB_HOSTS`
-(gitlab.com, salsa.debian.org, invent.kde.org, code.videolan.org); any other host
-(host detection also accepts any `gitlab.*` hostname) is only tokenised via an explicit
-`GITLAB_TOKENS` JSON entry. A tokenless host is still scored: self-hosted instances serve
-their REST API anonymously, so Scorecard's GitLab mode scores them token-free (a few
-auth-only checks come back inconclusive), and only gitlab.com is skipped without a token —
-its anonymous quota is too small for Scorecard's call volume (`SCORECARD_ANON_UNRELIABLE`).
-Tokens are **per-instance** — a gitlab.com token does
-not authenticate against salsa.debian.org. Rate limiting honours each host's
+(public read works at a lower rate limit). Tokens are **per-instance** — a gitlab.com token does
+not authenticate against salsa.debian.org.
+
+The bare `GITLAB_TOKEN` / per-host `GITLAB_TOKEN_<SLUG>` fallbacks cover only the 17
+`KNOWN_GITLAB_HOSTS` (= the keys of `HOST_NICKNAMES`, listed under [Identity](#identity)).
+Host *detection* additionally accepts any `gitlab.*` hostname, but such a host is tokenised
+only through an explicit `GITLAB_TOKENS` JSON entry.
+
+A tokenless host is still scored: self-hosted instances serve their REST API anonymously, so
+Scorecard's GitLab mode scores them token-free (a few auth-only checks come back inconclusive).
+Only gitlab.com is skipped without a token — its anonymous quota is too small for Scorecard's
+call volume (`SCORECARD_ANON_UNRELIABLE`). Rate limiting honours each host's
 `RateLimit-Remaining` / `RateLimit-Reset` headers, with a minimum backoff floor and per-host
-isolation (an exhausted host never blocks requests to another host).
+isolation (an exhausted host never blocks another host).
 
 ## Identity
 
-Unified `repo_id`, built by `gitlab_client.make_repo_id`: gitlab.com is the canonical instance
-and gets a **bare `gl/{project_id}`** — e.g. `gl/278964` — parallel to GitHub's `gh/{id}` (both
-default instances need no host qualifier). Every self-hosted instance is namespaced by its
-**host nickname** — the short alias from `HOST_NICKNAMES` in
-`src/sources/gitlab/gitlab_client.py` (e.g. `salsa.debian.org` → `debian`,
-`invent.kde.org` → `kde`) — joined with a hyphen so the id carries no path separator:
-`gl/{nickname}-{project_id}` — e.g. `gl/debian-678`. Self-hosted needs the qualifier because
-each instance has an independent project-id space, so a bare `gl/{id}` would collide across
-instances. A host without a nickname never gets an id — `make_repo_id` raises until the host
-is added to `HOST_NICKNAMES`. The numeric `project_id` comes from that instance's Projects API.
+Unified `repo_id`, built by `gitlab_client.make_repo_id`. gitlab.com is the canonical instance
+and gets a **bare `gl/{project_id}`** — e.g. `gl/278964` — parallel to GitHub's `gh/{id}`. Every
+self-hosted instance is namespaced by its **host nickname**, joined with a hyphen so the id
+carries no path separator: `gl/{nickname}-{project_id}` — e.g. `gl/debian-678`. The qualifier is
+required because each instance has an independent project-id space. The numeric `project_id`
+comes from that instance's Projects API.
+
+`HOST_NICKNAMES` in `src/sources/gitlab/gitlab_client.py` is the full list — 17 hosts, and
+also the exact membership of `KNOWN_GITLAB_HOSTS`. A host outside it never gets an id:
+`make_repo_id` raises until the host is added.
+
+| Host | Nickname | Host | Nickname |
+|---|---|---|---|
+| `gitlab.com` | *(bare `gl/{id}`)* | `gitlab.inria.fr` | `inria` |
+| `salsa.debian.org` | `debian` | `gitlab.isc.org` | `isc` |
+| `invent.kde.org` | `kde` | `gitlab.cern.ch` | `cern` |
+| `gitlab.gnome.org` | `gnome` | `gitlab.dkrz.de` | `dkrz` |
+| `gitlab.freedesktop.org` | `freedesktop` | `gitlab.kitware.com` | `kitware` |
+| `code.videolan.org` | `videolan` | `gitlab.exherbo.org` | `exherbo` |
+| `gitlab.xiph.org` | `xiph` | `gitlab.xfce.org` | `xfce` |
+| `gitlab.redox-os.org` | `redox` | `gitlab.linss.com` | `linss` |
+| `gitlab.ibr.cs.tu-bs.de` | `tubs` | | |
 
 ## Raw Data
 
@@ -90,10 +105,19 @@ In `data/sources/gitlab/`:
 - **`namespaces.csv`** — owner/group metadata (mirrors `github/users.csv`):
   `namespace` (= `host/full_path`, the key), `namespace_id`, `host`, `kind`, `name`, `path`,
   `full_path`, `web_url`, `description`, `fetched_at`.
+- **`issues.csv`** — long per (repo, year) issue counts (mirrors `github/issues.csv`):
+  `repo, repo_id, year, metric, value, fetched_at`. Read by `src/risk/build_workload.py`.
+- **`funding-files.csv`** — in-repo funding declarations: `repo, repo_id, project,
+  has_funding_yml, funding_yml_path, has_funding_links, funding_link_platforms,
+  has_funding_json_file, status, fetched_at`. Read by `src/eligibility/build_funding.py`.
 - SHA anchors land in the **shared** `data/sources/git/commits-years.csv` beside the GitHub
   rows (same unified schema: `repo, repo_id, git_url, year, first_sha, last_sha, commits,
   fetched_at`), upserted by `(repo, repo_id, year)` so a GitHub mirror sharing a slug keeps
   its own `gh/…` row.
+- **`commits-years.csv`** (`repo_id, git_url, project, year, first_sha, last_sha, commits,
+  fetched_at`) — a **stale artefact**, not a live output. No module in `src/` writes or reads
+  it; `commits_years.py` writes the shared `data/sources/git/commits-years.csv` instead. Treat
+  it as unused and expect it to be deleted.
 
 Each fetcher records `fetched_at` and a success flag (`valid`) or a status sidecar, so a
 genuinely-absent value is distinguishable from a failed fetch (auditability).
@@ -126,16 +150,18 @@ A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honour th
   A separate curated mapping, `data/eligibility/gitlab-hosts.csv`, marks a repo hosted
   on an institution's own GitLab instance (salsa.debian.org, gitlab.gnome.org, …) as
   institutionally host-backed → `intent` (gitlab.com deliberately maps to nothing).
-- `src/sources/openssf/scorecard.py --gitlab [--host {host} …]` — OpenSSF Scorecard security
-  scores for the valid GitLab projects in `repos.csv`, per-host `GITLAB_AUTH_TOKEN`. Uses a
-  GitLab-applicable check subset (`GITLAB_SCORECARD_CHECKS`) and tolerates the CLI's non-zero
-  exit when a single check errors (recovers the still-valid aggregate JSON). Output shares the
-  GitHub scorecard's files: raw JSON in `data/sources/openssf/data.json`, long-format rows in
-  `data/sources/git/openssf.csv` keyed on the `gl/{nickname}-{id}` repo_id.
+- `src.sources.openssf.scorecard --gitlab [--host {host} …]` — OpenSSF Scorecard security
+  scores for the valid GitLab projects in `repos.csv`. Each subprocess receives its host's token
+  as `GITLAB_AUTH_TOKEN` and runs the GitLab-applicable check subset
+  (`GITLAB_SCORECARD_CHECKS`). It tolerates the CLI's non-zero exit when a single check errors,
+  recovering the still-valid aggregate JSON. Output shares the GitHub scorecard's files: raw JSON
+  in `data/sources/openssf/data.json`, long-format rows in `data/sources/git/openssf.csv`, keyed
+  on the `gl/{nickname}-{id}` repo_id.
 
-## Related
-
-The GitHub SHA anchor `data/sources/git/commits-years.csv` was also given the durable
-`repo_id` (= `gh/{id}`) and `git_url` columns (see `src/sources/git/commits_years.py` — both its
-writer and `resolve_head.py` emit them; `--backfill` rewrites the existing file), so both anchors
-join on the same identity scheme.
+```bash
+uv run python -m src.sources.gitlab.fetch_project_data --target both
+uv run python -m src.sources.gitlab.commits_years --limit 10
+uv run python -m src.sources.gitlab.fetch_issue_metrics
+uv run python -m src.sources.gitlab.fetch_funding_files
+uv run python -m src.sources.openssf.scorecard --gitlab
+```

@@ -7,7 +7,8 @@ and funding channels/plans. We ingest the whole directory as a
 funding-**intent** signal for the eligibility stage: a repo registered here —
 directly, or via its owner's org-level manifest — has a declared funding
 channel (`has_funding_json`). Consumption details:
-[funding](../components/funding.md); coverage: stats.
+[funding](../components/funding.md); coverage counts live in the preview
+pipeline sheet.
 
 ## Data Source
 

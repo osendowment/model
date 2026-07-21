@@ -5,9 +5,14 @@ in the C/C++ pipeline to identify projects with active fuzz testing.
 
 ## Data Source
 
-**Source**: [github.com/google/oss-fuzz](https://github.com/google/oss-fuzz) -- downloaded as a tarball. Each project has a `project.yaml` with language, repo URL, and homepage.
+**Source**: [github.com/google/oss-fuzz](https://github.com/google/oss-fuzz) --
+downloaded as a tarball. Each project carries a `project.yaml` with language,
+repo URL, and homepage. No authentication, one request per run.
 
-No authentication required (single tarball download).
+**Freshness**: the whole index arrives in one download, so the TTL is
+whole-file — `TTL_DAYS = 30` on `projects.csv` (`file_is_fresh`). A re-run
+inside the window downloads nothing. `--refresh` ignores the TTL; `--offline`
+never touches the network.
 
 ## Raw Data
 
@@ -28,4 +33,6 @@ carry the file's last data-commit date).
 
 ```bash
 uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data
+uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data --refresh   # ignore the 30-day TTL
+uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data --offline   # cache only, no network
 ```

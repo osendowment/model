@@ -44,7 +44,7 @@ prior-SHA snapshots are preserved:
 
 | Script | Purpose |
 |--------|---------|
-| `src/sources/depsdev/fetch.py` | Fetch all four endpoints; write both CSVs |
+| `src/sources/depsdev/fetch.py` | Fetch both endpoints (`fetch_project`, `fetch_bestpractices`); write both CSVs |
 
 ```bash
 uv run python -m src.sources.depsdev.fetch                  # full run (risk pipeline step)

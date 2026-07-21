@@ -1,9 +1,10 @@
 # Open Collective
 
 Crowdfunding / fiscal-hosting platform where many OSS projects collect
-donations. Two datasets are pulled: the **reverse map** (which GitHub
-repo/org each collective declares it funds) and **annual gross budgets** per
-collective. Both feed `src/eligibility/build_funding.py` — see
+donations. Three datasets are pulled: the **reverse map** (which repo or org
+each collective declares it funds), **annual gross budgets** per collective,
+and a **rename cache** that follows GitHub redirects for declared slugs. All
+three feed `src/eligibility/build_funding.py` — see
 [funding.md](../components/funding.md) for slug attribution and scoring;
 coverage counts are in the preview pipeline sheet.
 
@@ -17,14 +18,23 @@ rejected).
 
 | Query | What it fetches |
 |-------|-----------------|
-| Collectives index | Every `COLLECTIVE` account (paginated, 1000/page); keeps only those with a GitHub link |
+| Collectives index | Every `COLLECTIVE` account (paginated, 1000/page); keeps every collective that declares at least one URL, whether or not that URL is a code host |
 | Budgets | Per slug: `stats.totalAmountReceived` (gross incoming) for each calendar year 2021–2025, one aliased query |
 
-GitHub link priority: `repositoryUrl` → `GITHUB` social link → other social
-links → `website`. Only `github.com` URLs count (a non-GitHub website is
-skipped, never guessed at); search-result URLs (`?q=`) are rejected — a
-filtered listing is not a profile/repo claim; reserved paths (`sponsors`,
-`orgs`, …) are not owners.
+Repo-link extraction, per collective, in priority order: `repositoryUrl` →
+`GITHUB` social link → other social links → `website`.
+
+- **GitHub wins.** A `github.com` URL fills `github_owner` / `github_repo` /
+  `github_url`.
+- **GitLab is the fallback.** Only when no GitHub link exists does
+  `_gitlab_link()` scan the same candidates for a GitLab project — gitlab.com
+  or any self-hosted instance `is_gitlab_host()` recognises — and store the
+  normalized URL in `repo_url`. `load_url_index()` joins it downstream by
+  `normalize_repo_url(entry.git_url)`.
+- A URL that names neither host is kept in `urls` but yields no repo link;
+  nothing is guessed at.
+- Search-result URLs (`?q=`) are rejected — a filtered listing is not a
+  profile/repo claim. Reserved paths (`sponsors`, `orgs`, …) are not owners.
 
 Budget slugs are discovered from four sources unioned over class-A-scope
 repos (FUNDING.yml handles, FLOSS Fund export, curated overrides, the
@@ -45,9 +55,11 @@ repo** — a documented exemption from the repo_id schema contract
 |--------|-------------|---------|
 | `slug` | OC collective slug | `socketio` |
 | `name` | display name | `socket.io` |
-| `github_owner` | linked GitHub owner, lowercased | `socketio` |
+| `urls` | every declared URL, space-joined — the raw candidate set the link rules ran over | `https://github.com/socketio/socket.io https://socket.io` |
+| `github_owner` | linked GitHub owner, lowercased; blank when no GitHub link | `socketio` |
 | `github_repo` | `owner/repo` for repo-level links; empty for org-only links (`webpack` links only `github.com/webpack`) | `socketio/socket.io` |
-| `github_url` | the URL the link was taken from | `https://github.com/socketio/socket.io` |
+| `github_url` | the URL the GitHub link was taken from | `https://github.com/socketio/socket.io` |
+| `repo_url` | normalized GitLab project URL (scheme-stripped, by `normalize_repo_url`); filled **only** when the collective declares no GitHub link | `salsa.debian.org/ruby-team/gitlab` |
 | `fetched_at` | UTC timestamp, one per run | `2026-06-29T23:55:44+00:00` |
 
 Repo-level and org-only rows stay distinct because attribution differs:
