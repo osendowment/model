@@ -17,6 +17,17 @@ It collects data on open-source software from [20+ data sources](docs/data-sourc
 
 ## Model
 
+Value narrows the open-source universe to a core set of projects. Risk and Eligibility then score and flag that core. The fourth step is human.
+
+| VALUE | RISK | ELIGIBILITY | DD + GRANTS |
+|---|---|---|---|
+| Downloads<br>Dependencies<br>Dependents<br>Criticality | Concentration<br>Complexity<br>Security<br>Workload | Open source<br>Funding intent<br>Nonprofit<br>Active | Double-check eligibility<br>Contact project leaders<br>Distribute grants |
+| **Defines the "core" projects** | **Finds the riskiest repos within the core** | **Flags ineligible repos within the core** | **Manual checks and grant distribution** |
+
+Downloads, dependencies and dependents combine into a weighted PageRank. Its cumulative share defines the core — a power-law distribution, where a small head of projects carries almost all the dependency mass. Criticality then ranks projects *within* the core; it does not decide who is in it.
+
+Nothing is deleted along the way. Risk and Eligibility annotate the core rather than shrinking it, so an ineligible project keeps its row with the failing check visible.
+
 ### Limitations
 
 Currently, the model aggregates data on packages from four ecosystems:
