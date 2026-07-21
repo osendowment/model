@@ -46,7 +46,7 @@ In `data/sources/npm/nice-registry/`:
 
 | File | Schema | Notes |
 |---|---|---|
-| `packages.csv` | `package, repo_url` | Non-null entries of `packages.json` |
+| `packages.csv` | `package, repo_url` | Non-null entries of `packages.json`. Cached for **365 days** (`TTL_DAYS` in `fetch_nice_registry.py`) — a 212 MB download over a slow-moving index. `--refresh` forces it; `--offline` uses the cache and fails loudly if there is none. A refresh introduces newly published packages whose repos have never been validated, so the next value run needs network for `build_validation`. |
 | `metadata.csv` | `package, github_repo, repo_url` | **Stale artifact.** No reader or writer anywhere in the repo |
 
 ## Scripts

@@ -4,10 +4,14 @@ Fetch all-the-package-repos from nice-registry and save as CSV.
 Downloads packages.json (212 MB): {package_name: repo_url | null}
 Saves non-null entries to data/sources/npm/nice-registry/packages.csv.
 
+Cached for TTL_DAYS (365) — see the constant for why it is that long.
+
 Run:
-    uv run src/sources/npm/fetch_nice_registry.py
+    uv run python -m src.sources.npm.fetch_nice_registry
+    uv run python -m src.sources.npm.fetch_nice_registry --refresh   # ignore TTL
 """
 
+import argparse
 import asyncio
 import csv
 import json
@@ -23,6 +27,13 @@ from src.common.lfs import has_real_data
 PACKAGES_URL = "https://media.githubusercontent.com/media/nice-registry/all-the-package-repos/master/data/packages.json"
 OUT_DIR      = "data/sources/npm/nice-registry"
 OUT_CSV      = f"{OUT_DIR}/packages.csv"
+
+# 365 days. This is a 212 MB download and a slow-moving name→repo index, so it
+# is deliberately refreshed about once a year. A refresh also introduces newly
+# published packages, which resolve to repos that have never been validated —
+# and validation needs the network, so a refresh makes the next value run
+# network-bound. Pass --refresh to override.
+TTL_DAYS = 365
 
 console = Console()
 
@@ -40,16 +51,38 @@ async def download() -> bytes:
 
 
 def main() -> None:
+    p = argparse.ArgumentParser()
+    p.add_argument("--refresh", action="store_true",
+                   help=f"Force refetch, ignoring the {TTL_DAYS}-day output TTL")
+    p.add_argument("--offline", action="store_true",
+                   help="Skip all network fetches (keep whatever is cached)")
+    args = p.parse_args()
+
     console.rule("[bold]npm — fetch_nice_registry")
     t0 = time.perf_counter()
 
     # A Git LFS pointer counts as missing — fall through and re-fetch real data.
-    if has_real_data(OUT_CSV):
-        age = time.time() - os.path.getmtime(OUT_CSV)
-        if age < 86400:
-            console.print(f"[dim]{OUT_CSV} is {age/3600:.1f}h old — skipping fetch (< 24h)[/dim]")
+    cached = has_real_data(OUT_CSV)
+
+    # --offline never downloads. A warm cache is used as-is; a cold one is a
+    # hard error, because silently continuing would drop npm's whole
+    # package→repo index and strip repos out of the value stage.
+    if args.offline:
+        if cached:
+            console.print(f"  [dim]skipped (--offline) — using cached {OUT_CSV}[/dim]")
             return
-        console.print(f"[yellow]{OUT_CSV} is {age/3600:.1f}h old — re-fetching[/yellow]")
+        raise SystemExit(
+            f"fetch_nice_registry: --offline but no cached {OUT_CSV}.\n"
+            "Run once with network access to populate it.")
+
+    if cached and not args.refresh:
+        age = time.time() - os.path.getmtime(OUT_CSV)
+        if age < TTL_DAYS * 86400:
+            console.print(f"[dim]{OUT_CSV} is {age/86400:.0f}d old — skipping fetch "
+                          f"(TTL {TTL_DAYS}d)[/dim]")
+            return
+        console.print(f"[yellow]{OUT_CSV} is {age/86400:.0f}d old — re-fetching "
+                      f"(TTL {TTL_DAYS}d)[/yellow]")
 
     raw = asyncio.run(download())
 
