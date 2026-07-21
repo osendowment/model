@@ -22,7 +22,7 @@ repo URL, and homepage. No authentication, one request per run.
 
 **Freshness**: the whole index arrives in one download, so the TTL is
 whole-file — `TTL_DAYS = 30` on `projects.csv` (`file_is_fresh`). A re-run
-inside the window downloads nothing. `--refresh` ignores the TTL; `--offline`
+inside the window downloads nothing. `--refresh` ignores the TTL
 never touches the network.
 
 ## Raw Data
@@ -44,6 +44,5 @@ carry the file's last data-commit date).
 
 ```bash
 uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data
-uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data --refresh   # ignore the 30-day TTL
-uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data --offline   # cache only, no network
+uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data --refresh   # ignore the 365-day TTL
 ```

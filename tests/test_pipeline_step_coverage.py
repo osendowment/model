@@ -37,7 +37,7 @@ def _by_module(steps) -> dict[str, object]:
 def test_value_runs_the_sources_its_steps_read():
     """repology + ossfuzz feed the eco pipelines / git-urls; canonical feeds
     resolve; both criticality sources feed apply_criticality (80% of
-    value_score). Each must be a net step, so --offline/--refresh reach it."""
+    value_score). Each must be a net step, so --refresh reaches it."""
     steps = _by_module(VALUE_STEPS)
     for module in ("src.sources.repology.fetch_repology_data",
                    "src.sources.ossfuzz.fetch_ossfuzz_data",
@@ -45,7 +45,7 @@ def test_value_runs_the_sources_its_steps_read():
                    "src.sources.openssf.criticality",
                    "src.sources.ecosystems.criticality"):
         assert module in steps, f"{module} is read by a value step but never run"
-        assert steps[module].net, f"{module} must be net=True to honour --offline"
+        assert steps[module].net, f"{module} must be net=True so --refresh reaches it"
 
 
 def test_value_step_order_puts_producers_before_consumers():
@@ -96,11 +96,11 @@ def test_eligibility_fetches_the_maintainer_log_it_scores_on():
     assert "sponsorships" in order             # outbound sponsorships → build_funding
 
 
-def test_eligibility_net_steps_honour_offline():
+def test_eligibility_net_steps_receive_refresh():
     steps = _by_module(ELIG_FETCHERS)
     for module in ("src.sources.github.fetch_contributors_metrics",
                    "src.sources.github.fetch_sponsorships"):
-        assert steps[module].net, f"{module} must be net=True to honour --offline"
+        assert steps[module].net, f"{module} must be net=True so --refresh reaches it"
 
 
 # ── TTLs ─────────────────────────────────────────────────────────────────────

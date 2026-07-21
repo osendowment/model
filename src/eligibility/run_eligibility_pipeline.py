@@ -12,11 +12,11 @@ aggregate, writing data/eligibility/eligibility.csv. The data/preview
 deliverables are NOT built here — they roll up all three stages and live in
 src.preview.run_preview_pipeline (see the note above BUILDERS).
 
-Pass --offline to skip every network fetch and rebuild from cached data.
+Cache policy is TTL-only: each fetcher no-ops when its cache is warm, so a
+repeat run is already zero-network. Pass --refresh to force a refetch.
 
 Usage:
     uv run python -m src.eligibility.run_eligibility_pipeline               # fetch + build
-    uv run python -m src.eligibility.run_eligibility_pipeline --offline     # build only, no network
     uv run python -m src.eligibility.run_eligibility_pipeline --from aggregate
     uv run python -m src.eligibility.run_eligibility_pipeline --list
 """

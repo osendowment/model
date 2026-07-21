@@ -124,7 +124,7 @@ genuinely-absent value is distinguishable from a failed fetch (auditability).
 
 ## Freshness
 
-90-day TTL on `fetched_at` (via `src/common/freshness.py`), matching the GitHub owner fetcher.
+365-day TTL on `fetched_at` (via `src/common/freshness.py`), matching the GitHub owner fetcher.
 A re-run inside the window is a no-op; `--force` bypasses it. 404 rows honor the same TTL.
 
 ## Scripts

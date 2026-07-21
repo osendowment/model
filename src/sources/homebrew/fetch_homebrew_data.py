@@ -368,8 +368,6 @@ def main() -> None:
                    help="Cap per-year analytics rows (keeps top-installs; for testing)")
     p.add_argument("--refresh", action="store_true",
                    help=f"Force refetch, ignoring the {TTL_DAYS}-day output TTL")
-    p.add_argument("--offline", action="store_true",
-                   help="Skip all network fetches (keep whatever is cached)")
     args = p.parse_args()
 
     console.rule("[bold]homebrew — fetch_homebrew_data")
@@ -382,10 +380,7 @@ def main() -> None:
     t0 = time.perf_counter()
 
     def _skip(label: str, *outputs: str) -> bool:
-        """True when this step's outputs are all within TTL (or --offline)."""
-        if args.offline:
-            console.print(f"  [dim]{label}: skipped (--offline)[/dim]")
-            return True
+        """True when this step's outputs are all within TTL."""
         if not args.refresh and all(file_is_fresh(o, TTL_DAYS) for o in outputs):
             console.print(f"  [dim]{label}: outputs fresh (< {TTL_DAYS}d) — skipping; --refresh to force[/dim]")
             return True

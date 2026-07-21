@@ -56,7 +56,6 @@ Repology's per-project information pages (`project`, `candidate_url`,
 uv run python -m src.sources.repology.fetch_repology_data                  # debian_13 + homebrew
 uv run python -m src.sources.repology.fetch_repology_data --repo debian_13 # one repo
 uv run python -m src.sources.repology.fetch_repology_data --refresh        # ignore the TTL
-uv run python -m src.sources.repology.fetch_repology_data --offline        # never touch the network
 ```
 
 ## Refresh
@@ -65,7 +64,6 @@ uv run python -m src.sources.repology.fetch_repology_data --offline        # nev
 |---|---|
 | TTL | 30 days, gating the whole file — a warm re-run makes zero network calls |
 | `--refresh` | Refetch past the TTL. The pipeline runner propagates it |
-| `--offline` | Use the cached file only; never call the API |
 | Pipeline step | `repology` in `src.value.run_value_pipeline` (`net=True`) |
 
 `src.sources.cpp.process_data` and `src.sources.cpp.check_eol` both read

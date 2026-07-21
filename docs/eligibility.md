@@ -215,7 +215,7 @@ scripts/run-pipeline.sh --from-stage eligibility   # eligibility → preview →
 
 Per-step flags pass through to the stage runner
 (`src.eligibility.run_eligibility_pipeline`), so `--list`, `--from <step>`, `--only <step>`,
-`--offline` and `--refresh` compose with stage selection.
+`--refresh` composes with stage selection.
 
 Every fetcher is incremental / TTL-gated. The stage fetches repo state (the
 GitHub repo-owner and GitLab project refreshes — the archived flag plus both

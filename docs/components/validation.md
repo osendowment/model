@@ -21,7 +21,7 @@ which runs as the `validation` step of the value pipeline runner — after
 
 It does one piece of network I/O: before rolling up, it refreshes the
 non-GitHub `git ls-remote` reachability cache (`data/sources/git/urls.csv`,
-TTL 365 days). `--offline` skips that refresh (cache only); `--refresh` forces
+TTL 365 days). The TTL makes a warm re-run a no-op; `--refresh` forces
 a re-check regardless of age. It never touches the GitHub cache
 (`data/sources/github/repos.csv`) — that is the GitHub Repos API record
 maintained by `src.sources.github.fetch_repo_owner_data` and refreshed by the
@@ -98,7 +98,6 @@ network I/O.
 
 ```bash
 scripts/run-pipeline.sh --stage value --only validation
-scripts/run-pipeline.sh --stage value --only validation --offline  # cache only
 scripts/run-pipeline.sh --stage value --only validation --refresh  # re-check URLs
 ```
 

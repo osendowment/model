@@ -422,11 +422,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("repos", nargs="*", help="owner/repo slugs (default: all top repos)")
     p.add_argument("--force", action="store_true",
                    help=f"ignore the {TTL_DAYS}-day TTL and refetch")
-    # The pipeline runs this as a net=True step, which appends --offline/--refresh.
+    # The pipeline runs this as a net=True step, which appends --refresh.
     p.add_argument("--refresh", action="store_true",
                    help="ignore the TTL and refetch (alias of --force; the pipeline's flag)")
-    p.add_argument("--offline", action="store_true",
-                   help="never fetch — use only the cached criticality.csv")
     p.add_argument("--workers", type=int, default=WORKERS_DEFAULT, help="binary -workers concurrency")
     p.add_argument("--chunk", type=int, default=CHUNK_DEFAULT,
                    help="repos per binary invocation (>1 risks losing repos to batch-abort)")
@@ -461,9 +459,7 @@ def main() -> None:
         console.print(f"[yellow]Healed {healed} stale row(s) "
                       f"(repo_id backfill / rename dedupe) → rewrote file[/yellow]")
 
-    if args.offline:
-        todo = []
-    elif args.force or args.refresh:
+    if args.force or args.refresh:
         todo = list(scope)
     else:
         todo = [r for r in scope if not _is_fresh(existing.get(r, {}), TTL_DAYS)]
@@ -473,7 +469,6 @@ def main() -> None:
         f"[bold]OpenSSF Criticality Score[/bold] — scope {len(scope):,} top repos · "
         f"{fresh:,} fresh (TTL {TTL_DAYS}d, skipped) · {len(todo):,} to fetch · "
         f"{dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds')}"
-        + (" · [yellow]offline[/yellow]" if args.offline else "")
     )
     if not todo:
         console.print("[green]All top repos fresh — nothing to fetch.[/green]")

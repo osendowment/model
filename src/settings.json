@@ -5,7 +5,7 @@
     "comment": "A package is 'top' if it falls within the top X% of cumulative download mass in its ecosystem"
   },
   "fetch_ttl_days": {
-    "comment": "Cache TTL in days for every fetcher, keyed by its module path under src/ (a module with two independent caches gets a dotted suffix). A fetcher re-fetches only when its cached data is older than this, so a warm checkout runs --offline for a year without touching the network. --refresh overrides any of them. Every fetcher MUST have a key here: params.fetch_ttl_days() raises on an unknown one, so a new fetcher cannot silently default. Back-off windows are not cache TTLs and live in fetch_retry_days.",
+    "comment": "Cache TTL in days for every fetcher, keyed by its module path under src/ (a module with two independent caches gets a dotted suffix). A fetcher re-fetches only when its cached data is older than this, so a warm checkout runs for a year without touching the network. There is no offline mode: the TTL IS the cache policy, and --refresh is the only override. Every fetcher MUST have a key here: params.fetch_ttl_days() raises on an unknown one, so a new fetcher cannot silently default. Back-off windows are not cache TTLs and live in fetch_retry_days.",
     "common/eol_common": 365,
     "common/freshness": 365,
     "sources/cpp/check_eol": 365,

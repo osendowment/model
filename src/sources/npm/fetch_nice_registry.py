@@ -54,8 +54,6 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--refresh", action="store_true",
                    help=f"Force refetch, ignoring the {TTL_DAYS}-day output TTL")
-    p.add_argument("--offline", action="store_true",
-                   help="Skip all network fetches (keep whatever is cached)")
     args = p.parse_args()
 
     console.rule("[bold]npm — fetch_nice_registry")
@@ -63,17 +61,6 @@ def main() -> None:
 
     # A Git LFS pointer counts as missing — fall through and re-fetch real data.
     cached = has_real_data(OUT_CSV)
-
-    # --offline never downloads. A warm cache is used as-is; a cold one is a
-    # hard error, because silently continuing would drop npm's whole
-    # package→repo index and strip repos out of the value stage.
-    if args.offline:
-        if cached:
-            console.print(f"  [dim]skipped (--offline) — using cached {OUT_CSV}[/dim]")
-            return
-        raise SystemExit(
-            f"fetch_nice_registry: --offline but no cached {OUT_CSV}.\n"
-            "Run once with network access to populate it.")
 
     if cached and not args.refresh:
         age = time.time() - os.path.getmtime(OUT_CSV)

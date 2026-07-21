@@ -42,12 +42,12 @@ throughout.
 | `src/sources/debian/process_data.py` | Build the outputs, aggregated at source-package level |
 
 ```bash
-uv run python -m src.sources.debian.fetch_debian_data [--step packages|popcon|index|all] [--years 2023 2024 2025] [--limit N] [--refresh] [--offline]
+uv run python -m src.sources.debian.fetch_debian_data [--step packages|popcon|index|all] [--years 2023 2024 2025] [--limit N] [--refresh]
 uv run python -m src.sources.debian.process_data
 ```
 
-Each fetch step carries a 7-day output TTL. A warm run skips it; `--refresh`
-forces the refetch and `--offline` blocks the network entirely.
+Each fetch step carries a 365-day output TTL. A warm run skips it; `--refresh`
+forces the refetch; without it a warm cache is reused.
 
 ## Key Design
 

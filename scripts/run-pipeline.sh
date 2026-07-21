@@ -9,7 +9,6 @@
 # Usage:
 #   scripts/run-pipeline.sh                       # every stage (TTL-cached, ~2 min warm)
 #   scripts/run-pipeline.sh --refresh             # force refetch past every TTL
-#   scripts/run-pipeline.sh --offline             # pure-cache run, no network
 #
 #   scripts/run-pipeline.sh --stage risk          # ONE stage
 #   scripts/run-pipeline.sh --from-stage risk     # that stage through to the end (incl. health)
@@ -21,7 +20,7 @@
 #   scripts/run-pipeline.sh --stage risk --list   # the steps of that stage
 #
 # --stage / --from-stage / --no-health are consumed here. EVERY other argument
-# is passed through verbatim to the stage runners — so --refresh / --offline,
+# is passed through verbatim to the stage runners — so --refresh,
 # and the runners' own per-step --from STEP / --only STEP / --list flags, keep
 # working. Stage selection needs its own flag names precisely because --from
 # already means "from this STEP" to a stage runner. (The health stage takes no

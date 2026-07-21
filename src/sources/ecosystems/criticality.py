@@ -522,7 +522,7 @@ class RunStats:
 
 
 async def run(classes: set[str] | None, ttl_days: int, concurrency: int,
-              limit: int | None = None, offline: bool = False) -> RunStats:
+              limit: int | None = None) -> RunStats:
     repos = load_repos(classes)
     if limit:
         repos = repos[:limit]
@@ -535,17 +535,15 @@ async def run(classes: set[str] | None, ttl_days: int, concurrency: int,
     cached_results: dict[str, CritResult] = {}
     for repo in repos:
         cache = _read_cached(_cache_path(repo.ecosystem, repo.package))
-        # Offline: a stale cache still beats no answer — the run must never
-        # touch the network, so an expired row is served rather than refetched.
-        if cache and (offline or _is_fresh(cache.get("fetched_at", ""), ttl_days)):
+        if cache and _is_fresh(cache.get("fetched_at", ""), ttl_days):
             cached_results[repo.repository_url] = _result_from_cache(repo, cache)
-        elif not offline:
+        else:
             to_fetch.append(repo)
 
     scope = "/".join(sorted(classes)) if classes else "all"
     console.print(f"[bold]criticality[/bold]  [dim]classes={scope} | {len(repos):,} repos | "
                   f"{len(cached_results):,} cached | {len(to_fetch):,} to fetch"
-                  + (" | offline" if offline else "") + "[/dim]")
+                  + "[/dim]")
 
     fetched: dict[str, CritResult] = {}
     sem = asyncio.Semaphore(concurrency)
@@ -596,7 +594,7 @@ async def run(classes: set[str] | None, ttl_days: int, concurrency: int,
     # A session is opened only when something actually needs HTTP — primary
     # fetches, or a flagless row whose lookup cache is stale. A fully-fresh
     # run (packages AND lookups cached) stays off the network entirely.
-    lookup_needs_http = not offline and any(
+    lookup_needs_http = any(
         not _lookup_cache_fresh(r.repo, ttl_days)
         for r in _flagless(cached_results))
     if to_fetch or lookup_needs_http:
@@ -669,11 +667,9 @@ def main() -> None:
     parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                         help=f"concurrent in-flight requests (default: {DEFAULT_CONCURRENCY})")
     parser.add_argument("--limit", type=int, help="process only first N repos (testing)")
-    # The pipeline runs this as a net=True step, which appends --offline/--refresh.
+    # The pipeline runs this as a net=True step, which appends --refresh.
     parser.add_argument("--refresh", action="store_true",
                         help="ignore the TTL and refetch everything (same as --ttl 0)")
-    parser.add_argument("--offline", action="store_true",
-                        help="never fetch — serve whatever is cached, stale included")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
@@ -684,7 +680,7 @@ def main() -> None:
     ttl = 0 if args.refresh else args.ttl
     t_start = time.monotonic()
     stats = asyncio.run(run(classes, ttl_days=ttl, concurrency=args.concurrency,
-                            limit=args.limit, offline=args.offline))
+                            limit=args.limit))
 
     console.print()
     console.print(_summary_table(stats))

@@ -70,7 +70,6 @@ The final `score` is `sqrt(value_score × risk_score)` — an unnormalized geome
 
 ```bash
 scripts/run-pipeline.sh                    # every stage (TTL-cached, ~2 min warm)
-scripts/run-pipeline.sh --offline          # pure-cache run, no network
 scripts/run-pipeline.sh --stage risk       # one stage
 scripts/run-pipeline.sh --from-stage risk  # that stage through to the end
 scripts/run-pipeline.sh --list-stages

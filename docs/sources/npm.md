@@ -38,7 +38,7 @@ In `data/sources/npm/raw/`:
 | `downloads.csv` | `package, year, downloads` | |
 | `downloads.status.csv` | `package, status, checked_at` | Per-package fetch verdict (`ok` \| `not_found`), 365-day TTL. A `downloads=0` row alone cannot separate a measured zero from a 404, so audits read this instead of re-fetching every all-zero package |
 | `dependencies.csv` | `package, dep_name, dep_version, fetched_at` | Edges re-fetched after 365 days — `/latest` deps drift with releases |
-| `licenses.csv` | `package, license, fetched_at` | Lowercase SPDX cache, 90-day TTL. `fetch_licenses.py` joins it into `results.csv` |
+| `licenses.csv` | `package, license, fetched_at` | Lowercase SPDX cache, 365-day TTL. `fetch_licenses.py` joins it into `results.csv` |
 | `npm-stats.csv` | `year, downloads` | Ecosystem-wide totals — the 95% denominator |
 | `top-packages.csv` | — | **Stale artifact.** Nothing in `src/`, `scripts/`, or `tests/` reads or writes it; the live file is `data/sources/npm/top-packages.csv` |
 
@@ -46,7 +46,7 @@ In `data/sources/npm/nice-registry/`:
 
 | File | Schema | Notes |
 |---|---|---|
-| `packages.csv` | `package, repo_url` | Non-null entries of `packages.json`. Cached for **365 days** (`TTL_DAYS` in `fetch_nice_registry.py`) — a 212 MB download over a slow-moving index. `--refresh` forces it; `--offline` uses the cache and fails loudly if there is none. A refresh introduces newly published packages whose repos have never been validated, so the next value run needs network for `build_validation`. |
+| `packages.csv` | `package, repo_url` | Non-null entries of `packages.json`. Cached for **365 days** (`TTL_DAYS` in `fetch_nice_registry.py`) — a 212 MB download over a slow-moving index. `--refresh` forces it. A refresh introduces newly published packages whose repos have never been validated, so the next value run needs network for `build_validation`. |
 | `metadata.csv` | `package, github_repo, repo_url` | **Stale artifact.** No reader or writer anywhere in the repo |
 
 ## Scripts
@@ -55,7 +55,7 @@ In `data/sources/npm/nice-registry/`:
 |--------|---------|
 | `src/sources/npm/fetch_npm_data.py` | Iterative crawler — fetches downloads + deps until the graph is complete |
 | `src/sources/npm/fetch_npm_stats.py` | Fetch ecosystem-wide annual download totals |
-| `src/sources/npm/fetch_nice_registry.py` | Download the package→repo index. Skips when the local copy is under 24 h old |
+| `src/sources/npm/fetch_nice_registry.py` | Download the package→repo index. Skips when the local copy is inside the 365-day TTL |
 | `src/sources/npm/process_data.py` | Build the outputs from raw data |
 | `src/sources/npm/fetch_licenses.py` | Fetch SPDX licenses → `raw/licenses.csv`, then join into `results.csv` |
 | `src/sources/npm/check_eol.py` | Flag packages whose latest version is `deprecated` → `eol.csv` |

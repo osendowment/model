@@ -182,7 +182,7 @@ def load_canonical_map() -> dict[str, str]:
 
 
 def _resolve_github(rows: list[dict], repos_file: str | None = None,
-                    offline: bool = False, force: bool = False) -> None:
+                    force: bool = False) -> None:
     """In-place: stamp repo_id, github_repo, git, canonical_url from github/repos.csv.
 
     After the eco-authority rewrite, each row's git URL is canonicalised
@@ -223,9 +223,8 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None,
     slugs = {_slug(r) for r in rows} - {""}
 
     # Step 3: TTL-gated fetch (90d).  Already-fresh rows cost ~0 network.
-    # --offline skips the fetch entirely (hard-forbid network);
     # --refresh forces a refetch ignoring the TTL.
-    if slugs and not offline:
+    if slugs:
         fetch_and_persist(
             repos=sorted(slugs),
             owners=owners_from_repos(sorted(slugs)),
@@ -279,13 +278,13 @@ def _load_gitlab_repo_ids(path=None) -> dict[str, str]:
     return out
 
 
-def _resolve_gitlab(rows: list[dict], offline: bool = False, force: bool = False) -> None:
+def _resolve_gitlab(rows: list[dict], force: bool = False) -> None:
     """In-place: stamp `gl/` repo_id on GitLab rows GitHub left unresolved.
 
     Runs AFTER `_resolve_github`, so **GitHub wins**: only a row with an empty
     `repo_id` (GitHub didn't claim it) and a GitLab clone URL is considered.
     Collects the distinct GitLab targets, TTL-fetches their project metadata into
-    `data/sources/gitlab/repos.csv` (skipped under --offline), then stamps
+    `data/sources/gitlab/repos.csv`, then stamps
     `repo_id = gl/{nickname}-{id}` (`gl/{id}` for gitlab.com) for every target that
     resolved to a valid project. A 404 / unreachable GitLab URL keeps an empty
     repo_id — it groups by `git_url` and gets `git_valid` from the ls-remote pass.
@@ -304,9 +303,8 @@ def _resolve_gitlab(rows: list[dict], offline: bool = False, force: bool = False
             targets[key] = {"host": host, "path": path, "project": key}
     if not targets:
         return
-    if not offline:
-        _gitlab_fetch_and_persist(target="projects", targets=list(targets.values()),
-                                  force=force, quiet=True)
+    _gitlab_fetch_and_persist(target="projects", targets=list(targets.values()),
+                              force=force, quiet=True)
     ids = _load_gitlab_repo_ids()
     for r in rows:
         parsed = _target(r)
@@ -326,7 +324,7 @@ PLATFORM_RESOLVERS: dict[str, object] = {"github": _resolve_github, "gitlab": _r
 
 
 def apply_eco(ecosystem: str, overrides: dict, is_invalid, canonical: dict,
-              offline: bool = False, force: bool = False) -> dict:
+              force: bool = False) -> dict:
     results_path = DATA_DIR / "sources" / ecosystem / "results.csv"
     if not results_path.exists():
         return {"ecosystem": ecosystem, "total": 0}
@@ -371,8 +369,8 @@ def apply_eco(ecosystem: str, overrides: dict, is_invalid, canonical: dict,
     for col in ("repo_id", "canonical_url"):
         if col not in fields:
             fields.append(col)
-    _resolve_github(rows, offline=offline, force=force)
-    _resolve_gitlab(rows, offline=offline, force=force)
+    _resolve_github(rows, force=force)
+    _resolve_gitlab(rows, force=force)
 
     # A curated `canonical_url` override names where a repo-less project's source
     # actually lives. Stamp it AFTER the identity pass: _resolve_github fills
@@ -419,8 +417,6 @@ def _print(stats: list[dict]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--eco", choices=ECOSYSTEMS + ["all"], default="all")
-    parser.add_argument("--offline", action="store_true",
-                        help="Skip network fetches; use only existing caches.")
     parser.add_argument("--refresh", action="store_true",
                         help="Force refetch, ignoring TTL caches.")
     args = parser.parse_args()
@@ -437,8 +433,8 @@ def main() -> None:
     console.print(f"[bold]ecosyste.ms authoritative layer[/bold]  "
                   f"[dim]{len(overrides)} overrides | {len(canonical)} GitHub renames | "
                   "priority: override > github-canonical > eco_strong > prior > eco_weak[/dim]")
-    stats = [apply_eco(e, overrides, is_invalid, canonical,
-                       offline=args.offline, force=args.refresh) for e in ecosystems]
+    stats = [apply_eco(e, overrides, is_invalid, canonical, force=args.refresh)
+             for e in ecosystems]
     _print(stats)
 
 

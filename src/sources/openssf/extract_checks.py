@@ -10,7 +10,7 @@ lives in `data.json`.
 This script flattens the JSON into a wide CSV so downstream pipeline stages
 can join per-check scores by repo without parsing JSON.
 
-Pure transform — no network I/O, so it takes no --offline/--refresh and needs
+Pure transform — no network I/O, so it takes no --refresh and needs
 no TTL. It runs as a plain pipeline step AFTER the `scorecard` fetcher (which
 writes data.json) and is safe to re-run: the output is deterministic (rows
 sorted by repo, one row per repo) and written atomically.

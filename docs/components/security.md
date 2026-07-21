@@ -91,7 +91,7 @@ yields a score, `openssf_score` and `openssf_score_source` are empty.
 Pipeline order (`src/risk/run_risk_pipeline.py`, run via `scripts/run-pipeline.sh
 --from-stage risk`). The risk runner fetches these sources by default. Each
 fetcher is incremental: it skips data already present, so a re-run fills only
-gaps. Pass `--offline` to rebuild from existing data without fetching. The
+gaps. Each fetcher's TTL makes a warm re-run fetch nothing. The
 runner holds **score-forming fetchers only** — the model scores nothing it does
 not fetch:
 

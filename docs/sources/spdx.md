@@ -53,7 +53,7 @@ uv run python -m src.sources.spdx.fetch_licenses --force
 
 | Aspect | Behavior |
 |--------|----------|
-| TTL | 90 days. A re-run inside the window is a no-op unless you pass `--force` |
+| TTL | 365 days (`fetch_ttl_days` in settings.json). A re-run inside the window is a no-op unless you pass `--force` |
 | Self-bootstrap | `ensure()` runs from the OSS-set builder and from the `spdx` step of `run_eligibility_pipeline` |
 | `isFsfLibre` coverage | SPDX marks only the licenses the FSF explicitly lists. Licenses the FSF accepts in practice — bzip2-1.0.6, libtiff, MIT-Open-Group — carry `False`, so they need the curated `EXTRAS` route in [osi.md](osi.md) |
 | Schema contract | Keyed by SPDX id, not by repo — exempt from the repo-keyed `repo_id` contract |

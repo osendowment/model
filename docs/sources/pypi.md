@@ -45,7 +45,7 @@ the value-stage git-URL builder classifies those by host.
 | `raw/package-dependencies.csv` | `package, dependency, type, fetched_at` | |
 | `raw/package-github-mapping.csv` | `package, github_url` | Manual, static |
 | `raw/package-urls.csv` | `package, url` | All project URLs; responses cached in `raw/api-cache/` |
-| `raw/licenses.csv` | `package, license, fetched_at` | Lowercase SPDX cache, 90-day TTL |
+| `raw/licenses.csv` | `package, license, fetched_at` | Lowercase SPDX cache, 365-day TTL |
 | `raw/package-dependencies-full-manual.csv` | — | **Stale artifact.** No reader or writer anywhere in the repo |
 
 ## Scripts

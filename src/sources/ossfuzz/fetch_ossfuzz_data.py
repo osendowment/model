@@ -24,7 +24,6 @@ so a good index is never overwritten by a zero-row one.
 Run:
     uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data
     uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data --refresh   # ignore TTL
-    uv run python -m src.sources.ossfuzz.fetch_ossfuzz_data --offline   # cache only, no network
 """
 
 import argparse
@@ -158,19 +157,12 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--refresh", action="store_true",
                    help=f"Force refetch, ignoring the {TTL_DAYS}-day output TTL")
-    p.add_argument("--offline", action="store_true",
-                   help="Skip all network fetches (keep whatever is cached)")
     args = p.parse_args()
 
     console.rule("[bold]ossfuzz — fetch_ossfuzz_data")
     console.print(f"  Started : [cyan]{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}[/cyan]\n")
 
-    # Whole-file TTL gate. --offline never touches the network (an absent cache
-    # is not an error — downstream simply sees no OSS-Fuzz enrollment).
-    if args.offline:
-        state = "cached" if os.path.exists(OUT_PATH) else "[yellow]absent[/yellow]"
-        console.print(f"  [dim]skipped (--offline) — {OUT_PATH}: {state}[/dim]")
-        return
+    # Whole-file TTL gate. A warm run inside the window makes zero network calls.
     if not args.refresh and file_is_fresh(OUT_PATH, TTL_DAYS):
         console.print(f"  [dim]{OUT_PATH} is fresh (< {TTL_DAYS}d) — skipping; "
                       f"--refresh to force[/dim]")

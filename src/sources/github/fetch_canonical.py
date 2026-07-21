@@ -25,7 +25,6 @@ Fetched in aliased GraphQL batches, so ~10k repos cost ~200 requests.
 Usage:
     uv run python -m src.sources.github.fetch_canonical
     uv run python -m src.sources.github.fetch_canonical --refresh   # ignore TTL
-    uv run python -m src.sources.github.fetch_canonical --offline   # cache only, no network
     uv run python -m src.sources.github.fetch_canonical --limit 50
 """
 from __future__ import annotations
@@ -209,20 +208,9 @@ def main() -> None:
     p.add_argument("--concurrency", type=int, default=8)
     p.add_argument("--refresh", "--force", dest="refresh", action="store_true",
                    help=f"Force refetch of every repo, ignoring the {TTL_DAYS}-day row TTL")
-    p.add_argument("--offline", action="store_true",
-                   help="Skip all network fetches (use only the cached canonical-repos.csv)")
     p.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args()
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
-
-    if args.offline:
-        # Pure-cache run: the consumer (apply_ecosystems_authority) reads whatever
-        # is already on disk. Never an error — an absent cache just means no
-        # rename remapping this run.
-        cached = _load_existing()
-        console.print(f"[bold]canonical[/bold]: [dim]--offline — no network; "
-                      f"using {len(cached):,} cached row(s) from {OUTPUT_FILE}[/dim]")
-        return
 
     asyncio.run(batch(load_value_repos(), args.refresh, args.limit, args.concurrency))
 

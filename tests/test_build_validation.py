@@ -157,8 +157,9 @@ class TestJoinValid:
 # ── _verify_non_github integration (Part A) ──────────────────────────────────
 
 class TestVerifyNonGithubIntegration:
-    """main() must call _verify_non_github with non-github URLs before rollup,
-    and must skip it when --offline is set."""
+    """main() must always call _verify_non_github with non-github URLs before
+    the rollup. There is no flag that skips it — the 365-day TTL inside
+    _verify_non_github is what makes a warm re-run a no-op."""
 
     def _make_value_csv(self, tmp_path):
         """Write a minimal value.csv with one github and one non-github row."""
@@ -206,7 +207,7 @@ class TestVerifyNonGithubIntegration:
     def test_main_calls_verify_non_github_with_nongithub_urls(
             self, tmp_path, monkeypatch):
         """main() collects non-github git_urls and passes them to
-        _verify_non_github before the rollup (not --offline)."""
+        _verify_non_github before the rollup."""
         import sys
         value_csv = self._make_value_csv(tmp_path)
         captured: list = []
@@ -233,9 +234,14 @@ class TestVerifyNonGithubIntegration:
         assert "https://github.com/a/b.git" not in captured[0]["urls"]
         assert captured[0]["force"] is False
 
-    def test_main_skips_verify_non_github_when_offline(
-            self, tmp_path, monkeypatch):
-        """--offline suppresses the _verify_non_github call entirely."""
+    def test_verify_non_github_always_runs(self, tmp_path, monkeypatch):
+        """No flag suppresses the reachability check.
+
+        --offline used to skip it, which let a run produce a validation table
+        built purely from whatever happened to be cached. The TTL inside
+        _verify_non_github already makes a warm re-run free, so the call is
+        now unconditional.
+        """
         import sys
         value_csv = self._make_value_csv(tmp_path)
         called: list = []
@@ -247,7 +253,7 @@ class TestVerifyNonGithubIntegration:
         monkeypatch.setattr(bv, "_verify_non_github", fake_verify)
         monkeypatch.setattr(bv, "VALUE_FILE", value_csv)
         monkeypatch.setattr(bv, "VALIDATION_FILE", tmp_path / "validation.csv")
-        monkeypatch.setattr(sys, "argv", ["build_validation", "--offline"])
+        monkeypatch.setattr(sys, "argv", ["build_validation"])
 
         stub_verdicts = self._make_stub_verdicts()
         monkeypatch.setattr(bv, "load_verdicts", lambda: stub_verdicts)
@@ -256,7 +262,7 @@ class TestVerifyNonGithubIntegration:
 
         bv.main()
 
-        assert called == [], "--offline must skip _verify_non_github"
+        assert called == [True], "_verify_non_github must always run"
 
     def test_main_passes_force_true_when_refresh(self, tmp_path, monkeypatch):
         """--refresh passes force=True to _verify_non_github."""

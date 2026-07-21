@@ -17,7 +17,6 @@ value → risk → eligibility → preview → health
 ```bash
 scripts/run-pipeline.sh                     # every stage (TTL-cached, ~2 min warm)
 scripts/run-pipeline.sh --refresh           # force refetch past every TTL
-scripts/run-pipeline.sh --offline           # pure-cache run, no network
 
 scripts/run-pipeline.sh --stage risk        # ONE stage
 scripts/run-pipeline.sh --from-stage risk   # that stage through to the end (incl. health)
@@ -34,7 +33,7 @@ flags compose with stage selection:
 | `--stage risk --list` | the steps of the risk stage |
 | `--stage risk --from scorecard` | risk, starting at the `scorecard` step |
 | `--stage value --only unify` | just the `unify` step of value |
-| `--from-stage eligibility --offline` | eligibility → preview → health, no network |
+| `--from-stage eligibility --refresh` | eligibility → preview → health, forcing refetch |
 
 Stage selection uses its *own* flag names (`--from-stage`, not `--from`)
 because `--from STEP` already means "from this step" to a stage runner.

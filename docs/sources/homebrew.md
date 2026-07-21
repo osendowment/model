@@ -34,13 +34,13 @@ In `data/sources/homebrew/raw/`:
 | `src/sources/homebrew/fetch_licenses.py` | Join the `license` column of `raw/formulas.csv` into `results.csv`, lower-cased |
 
 ```bash
-uv run python -m src.sources.homebrew.fetch_homebrew_data [--step formulas|analytics|all] [--years 2023 2024 2025] [--limit N] [--refresh] [--offline]
+uv run python -m src.sources.homebrew.fetch_homebrew_data [--step formulas|analytics|all] [--years 2023 2024 2025] [--limit N] [--refresh]
 uv run python -m src.sources.homebrew.process_data
 uv run python -m src.sources.homebrew.fetch_licenses
 ```
 
-Each fetch step carries a 7-day output TTL. A warm run skips it; `--refresh`
-forces the refetch and `--offline` blocks the network entirely.
+Each fetch step carries a 365-day output TTL. A warm run skips it; `--refresh`
+forces the refetch; without it a warm cache is reused.
 `fetch_licenses` runs as the `homebrew-lic` step of
 `src.eligibility.run_eligibility_pipeline`, before `cpp-lic` — the cpp license
 join reads Homebrew's result.

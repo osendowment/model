@@ -222,7 +222,6 @@ skips data already on disk.
 scripts/run-pipeline.sh --from-stage risk    # risk → eligibility → preview → health
 scripts/run-pipeline.sh --stage risk         # risk alone (later stages left stale)
 scripts/run-pipeline.sh --stage risk --list  # its steps
-scripts/run-pipeline.sh --stage risk --offline   # builders only, from cached data
 scripts/run-pipeline.sh --stage risk --refresh   # refetch past every TTL
 ```
 

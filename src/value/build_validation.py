@@ -5,9 +5,8 @@ Refreshes the non-GitHub `git ls-remote` reachability cache, then rolls up
 all validation signals:
 
   1. Refresh non-GitHub URL reachability via `_verify_non_github` (writes
-     `data/sources/git/urls.csv`, TTL 365 days). Pass `--offline` to skip the
-     refresh and use only the existing cache; `--refresh` to force re-check
-     regardless of age.
+     `data/sources/git/urls.csv`, TTL 365 days). The TTL makes a warm re-run
+     a no-op; pass `--refresh` to force a re-check regardless of age.
   2. Collect every distinct validation *target* from `data/value/value.csv`:
      a github row's `repo` slug (type `github_repo`) or, for non-GitHub repos,
      its `git_url` (type `git_url`). Each target accumulates the `sources` —
@@ -31,7 +30,7 @@ all validation signals:
      configured platforms.
 
 Usage:
-    uv run python -m src.value.build_validation [--offline] [--refresh]
+    uv run python -m src.value.build_validation [--refresh]
 """
 
 from __future__ import annotations
@@ -281,10 +280,6 @@ def main() -> None:  # pragma: no cover
         description="Build data/value/validation.csv and update value.csv git_valid column."
     )
     parser.add_argument(
-        "--offline", action="store_true",
-        help="Skip the non-GitHub ls-remote refresh; use only the existing cache.",
-    )
-    parser.add_argument(
         "--refresh", action="store_true",
         help="Force re-check all non-GitHub URLs regardless of cache age.",
     )
@@ -295,7 +290,7 @@ def main() -> None:  # pragma: no cover
         value_rows = list(csv.DictReader(f))
 
     # Refresh the non-GitHub ls-remote reachability cache before rolling up.
-    # Gate behind --offline (skip) and --refresh (force=True).
+    # The 365-day TTL keeps a warm re-run free; --refresh forces (force=True).
     # Verify the CANONICALIZED urls — the exact keys `_row_target` /
     # `collect_targets` look the verdicts up under. Verifying the raw git_url
     # instead caches the verdict under a key nothing reads (e.g. it checks
@@ -308,8 +303,7 @@ def main() -> None:  # pragma: no cover
         if (r.get("platform") or "") != "github"
         and (gu := (r.get("git_url") or "").strip())
     })
-    if not args.offline:
-        _verify_non_github(nongithub_urls, force=args.refresh)
+    _verify_non_github(nongithub_urls, force=args.refresh)
 
     targets = collect_targets(value_rows)
     verdicts = apply_overrides(load_verdicts(), load_repo_overrides())

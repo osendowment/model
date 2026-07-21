@@ -221,7 +221,6 @@ scripts/run-pipeline.sh --from-stage value           # value → … → health
 scripts/run-pipeline.sh --stage value                # value alone (later stages left stale)
 scripts/run-pipeline.sh --stage value --only unify   # one step of it
 scripts/run-pipeline.sh --stage value --list         # its steps
-scripts/run-pipeline.sh --stage value --offline      # pure-cache run, no network
 ```
 
 Steps run in this order (`src/value/run_value_pipeline.py`); steps sharing a
@@ -229,12 +228,12 @@ Steps run in this order (`src/value/run_value_pipeline.py`); steps sharing a
 
 | Step | pgroup | Work |
 |---|---|---|
-| `repology` · `ossfuzz` | dumps | 30-day whole-file-TTL dumps the ecosystem sub-pipelines read. Repology's `packages.csv` is the cpp distro-version input; OSS-Fuzz's `projects.csv` feeds `build_git_urls` and the risk stage's fuzzed flag. |
+| `repology` · `ossfuzz` | dumps | 365-day whole-file-TTL dumps the ecosystem sub-pipelines read. Repology's `packages.csv` is the cpp distro-version input; OSS-Fuzz's `projects.csv` feeds `build_git_urls` and the risk stage's fuzzed flag. |
 | `npm` · `crates` · `pypi` · `cpp` | eco | The four ecosystem sub-pipelines (see the [ecosystem pages](#ecosystems)). |
 | `stats` | — | Write the per-ecosystem matrix `data/value/stats.csv`. |
 | `git-urls` | — | Classify each package's git URL into `data/sources/{eco}/git.csv`. |
 | `eco-fetch` | identity | Pull ecosyste.ms repo candidates. |
-| `canonical` | identity | Resolve every `github_repo` to its current `nameWithOwner` + numeric id (90-day per-row TTL). |
+| `canonical` | identity | Resolve every `github_repo` to its current `nameWithOwner` + numeric id (365-day per-row TTL). |
 | `resolve` | — | Apply both identity sources onto each per-eco `results.csv`. |
 | `unify` | — | Group packages by repo into `value.csv`. |
 | `validation` | — | Stamp `git_valid`. |

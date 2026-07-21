@@ -9,7 +9,6 @@ lifetime aggregate at fetch time.
 Usage:
     python -m src.sources.github.fetch_contributors_metrics facebook/react   # one repo
     python -m src.sources.github.fetch_contributors_metrics                  # batch: value-data.csv A/B repos
-    python -m src.sources.github.fetch_contributors_metrics --offline        # cache only, no network
     python -m src.sources.github.fetch_contributors_metrics --refresh        # ignore the TTL, refetch all
 
 Caching: a repo whose status row in contributor-commits.status.csv is younger
@@ -173,8 +172,6 @@ def main() -> None:
                         help="Include bots as regular contributors in bus factor calculation")
     parser.add_argument("--refresh", "--force", action="store_true", dest="refresh",
                         help=f"Re-fetch all repos, ignoring the {TTL_DAYS}-day freshness gate")
-    parser.add_argument("--offline", action="store_true",
-                        help="Never hit the network — use only what is already cached")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
@@ -189,9 +186,6 @@ def main() -> None:
     # ad-hoc request should not be skipped by the freshness gate).
     if args.repo:
         repo = parse_repo(args.repo)
-        if args.offline:
-            console.print(f"[dim]offline: {repo} not fetched (cache only)[/dim]")
-            return
         asyncio.run(batch_update(
             [repo], threshold=args.threshold,
             include_bots=args.include_bots, force=True,
@@ -216,11 +210,6 @@ def main() -> None:
         f"{len(repos) - len(to_fetch)} fresh (< {TTL_DAYS}d)"
     )
 
-    if args.offline:
-        # Cached data only. Missing/stale repos stay missing/stale — that is a
-        # gap the next online run fills, not an error.
-        console.print(f"[dim]offline: {len(to_fetch)} stale/missing repos left unfetched[/dim]")
-        return
     if not to_fetch:
         console.print(f"[dim]All repos fresh (< {TTL_DAYS}d) — nothing to fetch; "
                       f"--refresh to force.[/dim]")

@@ -72,7 +72,7 @@ The 10 current entries:
 | `src/sources/osi/fetch_licenses.py` | Build the unified OSS set from it (`osi` ∪ `fsf` software ∪ `EXTRAS`), print the OSI-vs-FSF comparison, write CSV |
 
 ```bash
-uv run python -m src.sources.osi.fetch_licenses            # respects 90-day TTL
+uv run python -m src.sources.osi.fetch_licenses            # respects the 365-day TTL
 uv run python -m src.sources.osi.fetch_licenses --force    # refetch SPDX + rebuild
 uv run python -m src.sources.osi.fetch_licenses --compare  # comparison only
 ```
@@ -81,7 +81,7 @@ uv run python -m src.sources.osi.fetch_licenses --compare  # comparison only
 
 | Aspect | Behavior |
 |--------|----------|
-| TTL | 90 days — re-runs within the window are no-ops unless `--force` |
+| TTL | 365 days (`fetch_ttl_days` in settings.json) — re-runs within the window are no-ops unless `--force` |
 | Self-bootstrap | `ensure()` runs from `build_licenses.load_oss_approved` and as the `osi` fetch step of `run_eligibility_pipeline` — the CSV regenerates when missing/stale |
 | Audit trail | each fetch rewrites the whole file with one new `fetched_at`; `source` says which rule admitted each row |
 | Extras → osi migration | if OSI approves an extra and SPDX flips `isOsiApproved`, the next refetch moves it to `source=osi` automatically |

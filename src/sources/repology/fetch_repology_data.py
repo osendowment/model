@@ -9,7 +9,6 @@ Run:
     uv run python -m src.sources.repology.fetch_repology_data                   # both repos
     uv run python -m src.sources.repology.fetch_repology_data --repo debian_13  # just Debian
     uv run python -m src.sources.repology.fetch_repology_data --refresh         # ignore the TTL
-    uv run python -m src.sources.repology.fetch_repology_data --offline         # never touch the network
 
 Output:
     data/sources/repology/packages.csv   project, repo, srcname, binname, visiblename,
@@ -182,8 +181,6 @@ def main() -> None:
                    help=f"Repo to fetch (repeatable). Default: {DEFAULT_REPOS}")
     p.add_argument("--refresh", action="store_true",
                    help=f"Force refetch, ignoring the {TTL_DAYS}-day output TTL")
-    p.add_argument("--offline", action="store_true",
-                   help="Skip all network fetches (keep whatever is cached)")
     args = p.parse_args()
     repos = args.repo or DEFAULT_REPOS
 
@@ -195,13 +192,6 @@ def main() -> None:
     # ── TTL gate: a warm run makes ZERO network calls ─────────────────────────
     # The full fetch is ~3 min at Repology's ~1 rps fair-use limit, so it must
     # not run on every pipeline invocation.
-    if args.offline:
-        if os.path.exists(OUT_PATH):
-            console.print(f"  [dim]skipped (--offline) — using cached {OUT_PATH}[/dim]")
-        else:
-            console.print(f"  [yellow]--offline and {OUT_PATH} is missing — "
-                          f"downstream cpp steps will have no Repology join key[/yellow]")
-        return
     if not args.refresh and file_is_fresh(OUT_PATH, TTL_DAYS):
         age_days = (time.time() - os.path.getmtime(OUT_PATH)) / 86400
         console.print(f"  [dim]output fresh ({age_days:.1f}d < {TTL_DAYS}d) — "

@@ -75,7 +75,7 @@ signals), owner `login` (outbound sponsoring, FLOSS org manifests) or `slug`
 
 Run via `scripts/run-pipeline.sh --stage eligibility`
 (`src/eligibility/run_eligibility_pipeline.py`). Fetchers are incremental; pass
-`--offline` to rebuild from existing data. Steps in `[…]` share a parallel
+`--refresh` to force a refetch. Steps in `[…]` share a parallel
 group; everything else is serial.
 
 ```
@@ -106,7 +106,7 @@ the actual join key.
 | `github/sponsors.csv` | `src/sources/github/fetch_sponsors.py` | inbound GitHub Sponsors count + `gh_sponsors_enabled` | `repo_id` |
 | `github/sponsorships.csv` | `src/sources/github/fetch_sponsorships.py` | outbound sponsoring count | `login` |
 | `github/maintainer-sponsors.csv` | `src/sources/github/fetch_maintainer_sponsors.py` | personal Sponsors listing per bus factor maintainer | `user_id` |
-| `github/contributor-commits.csv` | `src/sources/github/fetch_contributors_metrics.py` — **`bf-contributors` step, 90-day TTL** | GitHub `/contributors` rows; the bus factor membership behind `bf_maintainer_fundable` | `repo_id` |
+| `github/contributor-commits.csv` | `src/sources/github/fetch_contributors_metrics.py` — **`bf-contributors` step, 365-day TTL** | GitHub `/contributors` rows; the bus factor membership behind `bf_maintainer_fundable` | `repo_id` |
 | `data/eligibility/maintainer-overrides.csv` | curated | `login,reason` — maintainers fundable through a channel the fetch cannot see | `login` |
 | `github/funding-yml.csv` | `src/sources/github/fetch_funding_yml.py` | resolved funding links (GraphQL `fundingLinks`) + FUNDING.yml file presence — platforms + handles | `repo_id` |
 | `gitlab/funding-files.csv` | `src/sources/gitlab/fetch_funding_files.py` | the GitLab twin of `funding-yml.csv` — FUNDING.yml variants + an in-repo `funding.json` / `.well-known` pointer, probed on the default branch | `repo_id` |
@@ -165,7 +165,7 @@ whether any of them personally has a GitHub Sponsors listing (GraphQL
   fetch cannot see, so `hasSponsorsListing` reads False despite real intent.
 
 The bus factor set comes from `data/sources/github/contributor-commits.csv`,
-written by the `bf-contributors` step (90-day per-row TTL). This is a
+written by the `bf-contributors` step (365-day per-row TTL). This is a
 **different file** from the git-clone contributor log
 `data/sources/git/contributor-commits.csv`, which the risk stage fetches
 independently for the concentration score.

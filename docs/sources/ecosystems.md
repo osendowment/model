@@ -122,7 +122,7 @@ a `repository_url` to the correct registry name, e.g. `bdwgc/bdwgc → bdw-gc`, 
 
 ### Freshness & scope
 
-90-day TTL on `fetched_at`; a re-run inside the window is a no-op, `--ttl 0` forces refresh. Scoped
+365-day TTL on `fetched_at`; a re-run inside the window is a no-op, `--ttl 0` forces refresh. Scoped
 to value class A by default (`--classes A B …`, or `all`); criticality is an importance signal for
 the head of the distribution. Raw package JSON is cached per `(ecosystem, package)` under
 `data/sources/ecosystems/raw/criticality/` for audit. This cache is deliberately **separate**

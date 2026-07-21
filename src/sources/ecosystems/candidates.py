@@ -176,26 +176,15 @@ async def _ensure_row(
     ttl_days: int,
     sem: asyncio.Semaphore,
     counters: dict[str, int],
-    offline: bool = False,
 ) -> dict[str, str]:
     """Return a packages.csv row for one package, fetching only if the shared
     raw-JSON cache is missing or stale. Mutates `counters` for perf reporting.
-
-    Pass `offline=True` to hard-forbid network access: cache hits are returned
-    as usual, but a cache miss/stale entry is returned as-is without fetching.
     """
     cache_p = _cache_path(eco, pkg)
     cached = _read_cached(cache_p)
     if cached and _is_fresh(cached.get("fetched_at", ""), ttl_days):
         counters["cache"] += 1
         return _row_from_cache(eco, pkg, cached)
-
-    if offline:
-        # Hard-forbid network: return whatever cache has (may be stale/empty).
-        counters["cache"] += 1
-        if cached:
-            return _row_from_cache(eco, pkg, cached)
-        return {"ecosystem": eco, "package": pkg, "fetched_at": ""}
 
     # Cache miss / stale → hit the network (writes the raw JSON on a 200).
     await _fetch_one(session, eco, pkg, REGISTRY_MAP[eco], sem)
@@ -215,7 +204,6 @@ async def fetch_eco(
     flush,
     limit: int | None,
     scope: str = "a-class",
-    offline: bool = False,
 ) -> dict[str, int]:
     """Fetch candidates for one ecosystem INTO the shared `all_rows` dict.
 
@@ -223,8 +211,6 @@ async def fetch_eco(
     resolve, and `flush()` rewrites packages.csv every BATCH_FLUSH new rows plus
     once at the end of the ecosystem — so an interrupted run keeps its progress.
     Returns counters.
-
-    Pass `offline=True` to hard-forbid network: only cached/stale data is used.
     """
     pkgs = _candidate_packages(eco, scope)
     if limit:
@@ -261,7 +247,7 @@ async def fetch_eco(
                 async def _run(p: str) -> None:
                     nonlocal since_flush
                     all_rows[(eco, p)] = await _ensure_row(
-                        session, eco, p, ttl_days, sem, counters, offline=offline)
+                        session, eco, p, ttl_days, sem, counters)
                     progress.update(task, advance=1, description=p[:24])
                     since_flush += 1
                     if since_flush >= BATCH_FLUSH:
@@ -286,8 +272,6 @@ def main() -> None:
                              "a-class = value_class==A only")
     parser.add_argument("--ttl", type=int, default=DEFAULT_TTL_DAYS,
                         help=f"Skip refetch if cached within N days (default: {DEFAULT_TTL_DAYS}, 0 to force)")
-    parser.add_argument("--offline", action="store_true",
-                        help="Hard-forbid network; use only existing caches (stale data is OK).")
     parser.add_argument("--refresh", action="store_true",
                         help="Force refetch for all packages, ignoring TTL (equivalent to --ttl 0).")
     parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
@@ -296,7 +280,7 @@ def main() -> None:
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
-    # --refresh maps to ttl=0 (force all); --offline overrides to skip network.
+    # --refresh maps to ttl=0 (force all).
     ttl = 0 if args.refresh else args.ttl
 
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
@@ -307,7 +291,7 @@ def main() -> None:
     console.print()
     console.print(f"[bold]ecosyste.ms candidate fetch[/bold]  [dim]scope={args.scope} | "
                   f"{_now_iso()} | ttl={ttl}d | conc={args.concurrency}"
-                  f"{' | OFFLINE' if args.offline else ''}[/dim]")
+                  "[/dim]")
 
     all_rows: dict[tuple[str, str], dict[str, str]] = _read_output()
 
@@ -326,7 +310,7 @@ def main() -> None:
     t0 = time.monotonic()
     for eco in ecosystems:
         c = fetch_eco_sync(eco, ttl, args.concurrency, all_rows, flush, args.limit,
-                           args.scope, offline=args.offline)
+                           args.scope)
         network_pkgs += c["fetch"]
         with_repo = sum(1 for k, v in all_rows.items() if k[0] == eco and v.get("repo_full_name"))
         for k in grand:
@@ -359,11 +343,9 @@ def main() -> None:
                   f"| wrote {OUTPUT_CSV}[/dim]")
 
 
-def fetch_eco_sync(eco, ttl, conc, all_rows, flush, limit, scope="a-class",
-                   offline: bool = False):
+def fetch_eco_sync(eco, ttl, conc, all_rows, flush, limit, scope="a-class"):
     """Sync wrapper so the per-eco coroutine runs under one event loop per eco."""
-    return asyncio.run(fetch_eco(eco, ttl, conc, all_rows, flush, limit, scope,
-                                 offline=offline))
+    return asyncio.run(fetch_eco(eco, ttl, conc, all_rows, flush, limit, scope))
 
 
 if __name__ == "__main__":

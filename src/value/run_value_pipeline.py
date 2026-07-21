@@ -8,7 +8,6 @@ unified per-repo value table, and the validation rollup (`validation.csv`
 
 Usage:
     uv run python -m src.value.run_value_pipeline
-    uv run python -m src.value.run_value_pipeline --offline
     uv run python -m src.value.run_value_pipeline --refresh
     uv run python -m src.value.run_value_pipeline --rollup
     uv run python -m src.value.run_value_pipeline --from unify
@@ -62,8 +61,8 @@ AUDIT_STEPS = [
 # gitignored tmp/), so it runs even on a checkout where those large
 # regenerable inputs have never been downloaded.
 #
-# Net steps use TTL caches — pass --offline to hard-forbid network (pure-cache
-# run) or --refresh to force refetch ignoring TTL.
+# Net steps use TTL caches, so a warm re-run costs no network. Pass --refresh
+# to force a refetch that ignores the TTL.
 #
 #   eco-fetch    — pull ecosyste.ms repo identity for every top package (network)
 #   canonical    — resolve every github_repo to its current slug + numeric id
