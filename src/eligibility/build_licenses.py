@@ -12,9 +12,10 @@ license string and classify it against the OSS-approved set:
   (wmi — MIT declared only in PyPI metadata). Joined on the stable repo_id.
 - **registry license** (primary) — the `license` column of each ecosystem's
   results.csv (npm/pypi/crates/cpp, populated by the per-eco fetch_licenses
-  scripts), joined package → github_repo. Multiple packages can map to the
-  same repo (monorepos); the most common SPDX value wins, ties break
-  alphabetically.
+  scripts), joined package → github_repo, and falling back to that
+  ecosystem's durable `raw/licenses.csv` cache when a results.csv rebuild
+  dropped the column. Multiple packages can map to the same repo
+  (monorepos); the most common SPDX value wins, ties break alphabetically.
 - **GitHub license** (fallback) — data/sources/github/repos.csv `license`
   (GitHub's Licensee detection), used when no registry license is found.
 - **GitLab license** (fallback) — data/sources/gitlab/repos.csv `license`
@@ -136,14 +137,41 @@ def classify_oss(spdx: str, approved: set[str]) -> bool | None:
     return False
 
 
+def load_license_cache(eco: str) -> dict[str, str]:
+    """{package: lowercase SPDX} from an ecosystem's durable license cache.
+
+    `data/sources/<eco>/raw/licenses.csv` is written by that ecosystem's
+    fetch_licenses step and outlives results.csv: the value stage's `process`
+    step rewrites results.csv and drops its `license` column. Returns {} when
+    the ecosystem keeps no cache.
+    """
+    path = DATA_DIR / "sources" / eco / "raw" / "licenses.csv"
+    if not path.exists():
+        return {}
+    out: dict[str, str] = {}
+    with open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            pkg = (r.get("package") or "").strip()
+            lic = (r.get("license") or "").strip().lower()
+            if pkg and lic:
+                out[pkg] = lic
+    return out
+
+
 def load_registry_licenses() -> dict[str, str]:
-    """Aggregate per-eco results.csv `license` columns into a per-repo SPDX.
+    """Aggregate per-eco registry licenses into a per-repo SPDX.
 
     For each ecosystem, joins package → github_repo → license. Slugs are
     canonicalised (rename-resolved) so they match the top-repo scope keys.
     Multiple packages mapping to the same repo: most common SPDX value wins,
-    ties break alphabetically. Ecosystems whose results.csv has no `license`
-    column yet (fetch_licenses not applied) are skipped.
+    ties break alphabetically.
+
+    The license comes from the `license` column of results.csv. When that
+    column is absent — the value stage's `process` step rebuilt results.csv
+    and dropped it — the license comes from the ecosystem's durable cache at
+    `raw/licenses.csv` instead, joined on the same `package` key. results.csv
+    still supplies the package → github_repo mapping in both cases. An
+    ecosystem with neither the column nor a cache is skipped.
     """
     canon = canonical_repo_map()
     by_repo: dict[str, list[str]] = {}
@@ -153,11 +181,19 @@ def load_registry_licenses() -> dict[str, str]:
             continue
         with open(results, encoding="utf-8") as f:
             reader = csv.DictReader(f)
-            if "license" not in (reader.fieldnames or []):
-                continue  # ecosystem hasn't been enriched yet — skip
+            has_column = "license" in (reader.fieldnames or [])
+            cache = {} if has_column else load_license_cache(eco)
+            if not has_column:
+                if not cache:
+                    continue  # no column, no cache — nothing to read
+                console.print(f"[yellow]![/yellow] [dim]{eco}: results.csv has no "
+                              f"license column — reading raw/licenses.csv "
+                              f"({len(cache):,} packages)[/dim]")
             for r in reader:
                 slug = (r.get("github_repo") or "").strip().lower()
-                lic = (r.get("license") or "").strip().lower()
+                lic = (r.get("license") if has_column
+                       else cache.get((r.get("package") or "").strip(), ""))
+                lic = (lic or "").strip().lower()
                 if slug and lic:
                     by_repo.setdefault(canon.get(slug, slug), []).append(lic)
     return {

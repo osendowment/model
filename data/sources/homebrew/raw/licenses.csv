@@ -1,0 +1,1272 @@
+package,license,fetched_at
+abseil,apache-2.0,2026-07-21T21:08:14Z
+ack,artistic-2.0,2026-07-21T21:08:14Z
+acl,gpl-2.0-or-later and lgpl-2.1-or-later,2026-07-21T21:08:14Z
+act,mit,2026-07-21T21:08:14Z
+actionlint,mit,2026-07-21T21:08:14Z
+ada-url,apache-2.0 or mit,2026-07-21T21:08:14Z
+adwaita-icon-theme,lgpl-3.0-or-later or cc-by-sa-3.0,2026-07-21T21:08:14Z
+aften,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+age,bsd-3-clause,2026-07-21T21:08:14Z
+aider,apache-2.0,2026-07-21T21:08:14Z
+aircrack-ng,bsd-3-clause and gpl-2.0-or-later and (gpl-2.0-or-later with cryptsetup-openssl-exception),2026-07-21T21:08:14Z
+allure,apache-2.0,2026-07-21T21:08:14Z
+alsa-lib,lgpl-2.1-or-later and gpl-2.0-or-later,2026-07-21T21:08:14Z
+ampl-asl,bsd-3-clause,2026-07-21T21:08:14Z
+angular-cli,mit,2026-07-21T21:08:14Z
+ansible,gpl-3.0-or-later,2026-07-21T21:08:14Z
+ansible-lint,mit and gpl-3.0-or-later,2026-07-21T21:08:14Z
+ant,apache-2.0,2026-07-21T21:08:14Z
+aom,bsd-2-clause,2026-07-21T21:08:14Z
+apache-arrow,apache-2.0,2026-07-21T21:08:14Z
+apache-serf,apache-2.0,2026-07-21T21:08:14Z
+apache-spark,apache-2.0,2026-07-21T21:08:14Z
+apktool,apache-2.0,2026-07-21T21:08:14Z
+appstream,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+apr,apache-2.0,2026-07-21T21:08:14Z
+apr-util,apache-2.0,2026-07-21T21:08:14Z
+arduino-cli,gpl-3.0-only,2026-07-21T21:08:14Z
+argocd,apache-2.0,2026-07-21T21:08:14Z
+argon2,cc0-1.0 or apache-2.0,2026-07-21T21:08:14Z
+aria2,gpl-2.0-or-later,2026-07-21T21:08:14Z
+aribb24,lgpl-3.0-only,2026-07-21T21:08:14Z
+arpack,bsd-3-clause,2026-07-21T21:08:14Z
+asciidoc,gpl-2.0-or-later,2026-07-21T21:08:14Z
+asciidoctor,mit,2026-07-21T21:08:14Z
+asciinema,gpl-3.0-only,2026-07-21T21:08:14Z
+asdf,mit,2026-07-21T21:08:14Z
+aspell,lgpl-2.1-only,2026-07-21T21:08:14Z
+assimp,bsd-3-clause and cc-pddc and mit and bsl-1.0 and unlicense and zlib,2026-07-21T21:08:14Z
+assimp@5,bsd-3-clause and cc-pddc and mit and bsl-1.0 and unlicense and zlib,2026-07-21T21:08:14Z
+ast-grep,mit,2026-07-21T21:08:14Z
+at-spi2-core,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+attr,gpl-2.0-or-later,2026-07-21T21:08:14Z
+atuin,mit,2026-07-21T21:08:14Z
+augeas,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+autoconf,gpl-3.0-or-later and (gpl-3.0-or-later with autoconf-exception-3.0),2026-07-21T21:08:14Z
+autoconf-archive,gpl-3.0-or-later,2026-07-21T21:08:14Z
+autojump,gpl-3.0-or-later,2026-07-21T21:08:14Z
+automake,gpl-2.0-or-later,2026-07-21T21:08:14Z
+avrdude,gpl-2.0-or-later,2026-07-21T21:08:14Z
+avro-c,apache-2.0,2026-07-21T21:08:14Z
+awk,smlnj,2026-07-21T21:08:14Z
+aws-c-auth,apache-2.0,2026-07-21T21:08:14Z
+aws-c-cal,apache-2.0,2026-07-21T21:08:14Z
+aws-c-common,apache-2.0,2026-07-21T21:08:14Z
+aws-c-compression,apache-2.0,2026-07-21T21:08:14Z
+aws-c-event-stream,apache-2.0,2026-07-21T21:08:14Z
+aws-c-http,apache-2.0,2026-07-21T21:08:14Z
+aws-c-io,apache-2.0,2026-07-21T21:08:14Z
+aws-c-mqtt,apache-2.0,2026-07-21T21:08:14Z
+aws-c-s3,apache-2.0,2026-07-21T21:08:14Z
+aws-c-sdkutils,apache-2.0,2026-07-21T21:08:14Z
+aws-cdk,apache-2.0,2026-07-21T21:08:14Z
+aws-checksums,apache-2.0,2026-07-21T21:08:14Z
+aws-crt-cpp,apache-2.0,2026-07-21T21:08:14Z
+aws-elasticbeanstalk,apache-2.0,2026-07-21T21:08:14Z
+aws-iam-authenticator,apache-2.0,2026-07-21T21:08:14Z
+aws-sam-cli,apache-2.0,2026-07-21T21:08:14Z
+aws-sdk-cpp,apache-2.0,2026-07-21T21:08:14Z
+aws-vault,mit,2026-07-21T21:08:14Z
+awscli,apache-2.0,2026-07-21T21:08:14Z
+azcopy,mit,2026-07-21T21:08:14Z
+azure-cli,mit,2026-07-21T21:08:14Z
+bash,gpl-3.0-or-later,2026-07-21T21:08:14Z
+bash-completion,gpl-2.0-or-later,2026-07-21T21:08:14Z
+bash-completion@2,gpl-2.0-or-later,2026-07-21T21:08:14Z
+bat,apache-2.0 or mit,2026-07-21T21:08:14Z
+bats-core,mit,2026-07-21T21:08:14Z
+bazel,apache-2.0,2026-07-21T21:08:14Z
+bazelisk,apache-2.0,2026-07-21T21:08:14Z
+bdw-gc,boehm-gc and hpnd-sell-variant,2026-07-21T21:08:14Z
+bear,gpl-3.0-or-later,2026-07-21T21:08:14Z
+berkeley-db,agpl-3.0-only,2026-07-21T21:08:14Z
+berkeley-db@5,sleepycat,2026-07-21T21:08:14Z
+bind,mpl-2.0,2026-07-21T21:08:14Z
+binutils,gpl-2.0-or-later and gpl-3.0-or-later and lgpl-2.0-or-later and lgpl-3.0-only,2026-07-21T21:08:14Z
+binwalk,mit,2026-07-21T21:08:14Z
+bison,gpl-3.0-or-later,2026-07-21T21:08:14Z
+bitwarden-cli,gpl-3.0-only,2026-07-21T21:08:14Z
+black,mit,2026-07-21T21:08:14Z
+blake3,cc0-1.0 or apache-2.0,2026-07-21T21:08:14Z
+blueutil,mit,2026-07-21T21:08:14Z
+boost,bsl-1.0,2026-07-21T21:08:14Z
+boost-python3,bsl-1.0,2026-07-21T21:08:14Z
+bottom,mit,2026-07-21T21:08:14Z
+broot,mit,2026-07-21T21:08:14Z
+brotli,mit,2026-07-21T21:08:14Z
+btop,apache-2.0,2026-07-21T21:08:14Z
+buf,apache-2.0,2026-07-21T21:08:14Z
+buildifier,apache-2.0,2026-07-21T21:08:14Z
+bullet,zlib,2026-07-21T21:08:14Z
+bundletool,apache-2.0,2026-07-21T21:08:14Z
+bzip2,bzip2-1.0.6,2026-07-21T21:08:14Z
+c-ares,mit,2026-07-21T21:08:14Z
+c-blosc,bsd-3-clause,2026-07-21T21:08:14Z
+ca-certificates,mpl-2.0,2026-07-21T21:08:14Z
+cabextract,gpl-3.0-or-later,2026-07-21T21:08:14Z
+caddy,apache-2.0,2026-07-21T21:08:14Z
+cairo,lgpl-2.1-only or mpl-1.1,2026-07-21T21:08:14Z
+capnp,mit,2026-07-21T21:08:14Z
+capstone,bsd-3-clause,2026-07-21T21:08:14Z
+cargo-c,mit,2026-07-21T21:08:14Z
+carthage,mit,2026-07-21T21:08:14Z
+cask,gpl-3.0-or-later,2026-07-21T21:08:14Z
+cassandra,apache-2.0,2026-07-21T21:08:14Z
+ccache,gpl-3.0-or-later,2026-07-21T21:08:14Z
+cdk8s,apache-2.0,2026-07-21T21:08:14Z
+cdrtools,cddl-1.0,2026-07-21T21:08:14Z
+ceres-solver,bsd-3-clause,2026-07-21T21:08:14Z
+certbot,apache-2.0,2026-07-21T21:08:14Z
+certifi,mpl-2.0,2026-07-21T21:08:14Z
+cffi,mit-0,2026-07-21T21:08:14Z
+cfitsio,cfitsio,2026-07-21T21:08:14Z
+cfn-lint,mit-0,2026-07-21T21:08:14Z
+cgal,gpl-3.0-or-later,2026-07-21T21:08:14Z
+cgif,mit,2026-07-21T21:08:14Z
+cgns,bsd-3-clause,2026-07-21T21:08:14Z
+checkov,apache-2.0,2026-07-21T21:08:14Z
+chezmoi,mit,2026-07-21T21:08:14Z
+chibi-scheme,bsd-3-clause,2026-07-21T21:08:14Z
+chruby,mit,2026-07-21T21:08:14Z
+circleci,mit,2026-07-21T21:08:14Z
+cjson,mit,2026-07-21T21:08:14Z
+clamav,gpl-2.0-or-later,2026-07-21T21:08:14Z
+clang-format,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+cliclick,bsd-3-clause,2026-07-21T21:08:14Z
+clisp,gpl-2.0-or-later,2026-07-21T21:08:14Z
+cloc,gpl-2.0-or-later,2026-07-21T21:08:14Z
+clojure,epl-1.0,2026-07-21T21:08:14Z
+cloudflared,apache-2.0,2026-07-21T21:08:14Z
+cmake,bsd-3-clause,2026-07-21T21:08:14Z
+cmake-docs,bsd-3-clause,2026-07-21T21:08:14Z
+cmatrix,gpl-3.0-or-later,2026-07-21T21:08:14Z
+cmocka,apache-2.0,2026-07-21T21:08:14Z
+cocoapods,mit,2026-07-21T21:08:14Z
+colima,mit,2026-07-21T21:08:14Z
+commitizen,mit,2026-07-21T21:08:14Z
+composer,mit,2026-07-21T21:08:14Z
+conan,mit,2026-07-21T21:08:14Z
+conftest,apache-2.0,2026-07-21T21:08:14Z
+confuse,isc,2026-07-21T21:08:14Z
+cookiecutter,bsd-3-clause,2026-07-21T21:08:14Z
+coreutils,gpl-3.0-or-later,2026-07-21T21:08:14Z
+cosign,apache-2.0,2026-07-21T21:08:14Z
+cowsay,gpl-3.0-only,2026-07-21T21:08:14Z
+cpio,gpl-3.0-or-later,2026-07-21T21:08:14Z
+cppcheck,gpl-3.0-or-later,2026-07-21T21:08:14Z
+cppzmq,mit,2026-07-21T21:08:14Z
+cpu_features,apache-2.0,2026-07-21T21:08:14Z
+cryptography,apache-2.0 or bsd-3-clause,2026-07-21T21:08:14Z
+crystal,apache-2.0,2026-07-21T21:08:14Z
+cscope,bsd-3-clause,2026-07-21T21:08:14Z
+cunit,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+cups,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+curl,curl,2026-07-21T21:08:14Z
+cyrus-sasl,bsd-3-clause-attribution,2026-07-21T21:08:14Z
+cython,apache-2.0,2026-07-21T21:08:14Z
+d2,mpl-2.0,2026-07-21T21:08:14Z
+daemontools,licenseref-homebrew-public-domain,2026-07-21T21:08:14Z
+dav1d,bsd-2-clause,2026-07-21T21:08:14Z
+dbmate,mit,2026-07-21T21:08:14Z
+dbus,afl-2.1 or gpl-2.0-or-later,2026-07-21T21:08:14Z
+deno,mit,2026-07-21T21:08:14Z
+dependency-check,apache-2.0,2026-07-21T21:08:14Z
+dfu-util,gpl-2.0-or-later,2026-07-21T21:08:14Z
+dialog,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+difftastic,mit,2026-07-21T21:08:14Z
+diffutils,gpl-3.0-or-later,2026-07-21T21:08:14Z
+direnv,mit,2026-07-21T21:08:14Z
+dive,mit,2026-07-21T21:08:14Z
+dnsmasq,gpl-2.0-only or gpl-3.0-only,2026-07-21T21:08:14Z
+docbook,licenseref-homebrew-cannot-represent,2026-07-21T21:08:14Z
+docbook-xsl,mit,2026-07-21T21:08:14Z
+docker,apache-2.0,2026-07-21T21:08:14Z
+docker-buildx,apache-2.0,2026-07-21T21:08:14Z
+docker-completion,apache-2.0,2026-07-21T21:08:14Z
+docker-compose,apache-2.0,2026-07-21T21:08:14Z
+docker-credential-helper,mit,2026-07-21T21:08:14Z
+docker-credential-helper-ecr,apache-2.0,2026-07-21T21:08:14Z
+docker-machine,apache-2.0,2026-07-21T21:08:14Z
+doctl,apache-2.0,2026-07-21T21:08:14Z
+docutils,licenseref-homebrew-public-domain and bsd-2-clause and gpl-3.0-or-later and python-2.0,2026-07-21T21:08:14Z
+dos2unix,bsd-2-clause,2026-07-21T21:08:14Z
+dotnet,mit,2026-07-21T21:08:14Z
+dotnet@8,mit,2026-07-21T21:08:14Z
+double-conversion,bsd-3-clause,2026-07-21T21:08:14Z
+doxygen,gpl-2.0-only,2026-07-21T21:08:14Z
+dpkg,gpl-2.0-or-later,2026-07-21T21:08:14Z
+dtc,gpl-2.0-or-later or bsd-2-clause,2026-07-21T21:08:14Z
+duckdb,mit,2026-07-21T21:08:14Z
+duktape,mit,2026-07-21T21:08:14Z
+dust,apache-2.0,2026-07-21T21:08:14Z
+dvc,apache-2.0,2026-07-21T21:08:14Z
+dwarfutils,bsd-2-clause and lgpl-2.1-or-later and gpl-2.0-or-later,2026-07-21T21:08:14Z
+dysk,mit,2026-07-21T21:08:14Z
+edencommon,mit,2026-07-21T21:08:14Z
+eigen,mpl-2.0 and apache-2.0 and bsd-3-clause and minpack,2026-07-21T21:08:14Z
+eksctl,apache-2.0,2026-07-21T21:08:14Z
+elfutils,gpl-3.0-or-later and (gpl-2.0-or-later or lgpl-3.0-or-later) and gfdl-1.3-no-invariants-or-later,2026-07-21T21:08:14Z
+elixir,apache-2.0,2026-07-21T21:08:14Z
+emacs,gpl-3.0-or-later,2026-07-21T21:08:14Z
+emscripten,apache-2.0 and (apache-2.0 with llvm-exception) and (mit or ncsa),2026-07-21T21:08:14Z
+enchant,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+epsilon,bsd-3-clause and (gpl-3.0-or-later or lgpl-3.0-or-later),2026-07-21T21:08:14Z
+epstool,gpl-2.0-only,2026-07-21T21:08:14Z
+erlang,apache-2.0,2026-07-21T21:08:14Z
+erlang@28,apache-2.0,2026-07-21T21:08:14Z
+eslint,mit,2026-07-21T21:08:14Z
+etcd,apache-2.0,2026-07-21T21:08:14Z
+ethereum,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+exercism,mit,2026-07-21T21:08:14Z
+exiftool,artistic-1.0-perl or gpl-1.0-or-later,2026-07-21T21:08:14Z
+expat,mit,2026-07-21T21:08:14Z
+expect,licenseref-homebrew-public-domain,2026-07-21T21:08:14Z
+eza,eupl-1.2,2026-07-21T21:08:14Z
+faac,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+faad2,gpl-2.0-or-later,2026-07-21T21:08:14Z
+fastfetch,mit,2026-07-21T21:08:14Z
+fastlane,mit,2026-07-21T21:08:14Z
+faudio,zlib,2026-07-21T21:08:14Z
+fb303,apache-2.0,2026-07-21T21:08:14Z
+fbthrift,apache-2.0,2026-07-21T21:08:14Z
+fd,apache-2.0 or mit,2026-07-21T21:08:14Z
+fdk-aac,apache-2.0,2026-07-21T21:08:14Z
+fetch,mit,2026-07-21T21:08:14Z
+ffmpeg,gpl-3.0-or-later,2026-07-21T21:08:14Z
+ffmpeg@4,gpl-3.0-or-later,2026-07-21T21:08:14Z
+ffmpeg@6,gpl-3.0-or-later,2026-07-21T21:08:14Z
+fftw,gpl-2.0-or-later and bsd-2-clause,2026-07-21T21:08:14Z
+fig2dev,mit,2026-07-21T21:08:14Z
+figlet,bsd-3-clause,2026-07-21T21:08:14Z
+findutils,gpl-3.0-or-later,2026-07-21T21:08:14Z
+firebase-cli,mit,2026-07-21T21:08:14Z
+fish,gpl-2.0-only,2026-07-21T21:08:14Z
+fizz,bsd-3-clause,2026-07-21T21:08:14Z
+flac,bsd-3-clause and gpl-2.0-or-later and isc and lgpl-2.0-or-later and lgpl-2.1-or-later and licenseref-homebrew-public-domain and (gpl-2.0-or-later or lgpl-2.1-or-later),2026-07-21T21:08:14Z
+flann,bsd-3-clause,2026-07-21T21:08:14Z
+flex,bsd-2-clause,2026-07-21T21:08:14Z
+fltk,lgpl-2.0-only with fltk-exception,2026-07-21T21:08:14Z
+fluid-synth,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+flyctl,apache-2.0,2026-07-21T21:08:14Z
+flyway,apache-2.0,2026-07-21T21:08:14Z
+fmt,mit,2026-07-21T21:08:14Z
+fnm,gpl-3.0-only,2026-07-21T21:08:14Z
+folly,apache-2.0,2026-07-21T21:08:14Z
+fontconfig,hpnd-sell-variant and unicode-3.0 and mit-modern-variant and mit and licenseref-homebrew-public-domain,2026-07-21T21:08:14Z
+fontforge,gpl-3.0-or-later,2026-07-21T21:08:14Z
+freeglut,mit,2026-07-21T21:08:14Z
+freeimage,freeimage,2026-07-21T21:08:14Z
+freerdp,apache-2.0,2026-07-21T21:08:14Z
+freetds,gpl-2.0-or-later,2026-07-21T21:08:14Z
+freetype,ftl,2026-07-21T21:08:14Z
+freexl,mpl-1.1 or gpl-2.0-or-later or lgpl-2.1-or-later,2026-07-21T21:08:14Z
+frei0r,gpl-2.0-or-later,2026-07-21T21:08:14Z
+fribidi,gpl-2.0-or-later and lgpl-2.1-or-later,2026-07-21T21:08:14Z
+fswatch,gpl-3.0-or-later and apache-2.0,2026-07-21T21:08:14Z
+fx,mit,2026-07-21T21:08:14Z
+fzf,mit,2026-07-21T21:08:14Z
+gallery-dl,gpl-2.0-only,2026-07-21T21:08:14Z
+game-music-emu,lgpl-2.1-or-later and gpl-2.0-or-later,2026-07-21T21:08:14Z
+gauche,bsd-3-clause,2026-07-21T21:08:14Z
+gawk,gpl-3.0-or-later,2026-07-21T21:08:14Z
+gcc,gpl-3.0-or-later with gcc-exception-3.1,2026-07-21T21:08:14Z
+gd,gd,2026-07-21T21:08:14Z
+gdal,mit,2026-07-21T21:08:14Z
+gdb,gpl-3.0-or-later,2026-07-21T21:08:14Z
+gdbm,gpl-3.0-or-later,2026-07-21T21:08:14Z
+gdk-pixbuf,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+geckodriver,mpl-2.0,2026-07-21T21:08:14Z
+gedit,gpl-2.0-or-later,2026-07-21T21:08:14Z
+gemini-cli,apache-2.0,2026-07-21T21:08:14Z
+geos,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+gettext,gpl-3.0-or-later and lgpl-2.1-or-later,2026-07-21T21:08:14Z
+gflags,bsd-3-clause,2026-07-21T21:08:14Z
+ggml,mit,2026-07-21T21:08:14Z
+gh,mit,2026-07-21T21:08:14Z
+ghc,bsd-3-clause,2026-07-21T21:08:14Z
+ghostscript,agpl-3.0-or-later,2026-07-21T21:08:14Z
+giflib,mit,2026-07-21T21:08:14Z
+gimme-aws-creds,apache-2.0,2026-07-21T21:08:14Z
+git,gpl-2.0-only and gpl-2.0-or-later and lgpl-2.1-or-later and bsd-3-clause and mit,2026-07-21T21:08:14Z
+git-crypt,gpl-3.0-or-later,2026-07-21T21:08:14Z
+git-delta,mit,2026-07-21T21:08:14Z
+git-filter-repo,mit,2026-07-21T21:08:14Z
+git-flow,bsd-2-clause,2026-07-21T21:08:14Z
+git-gui,gpl-2.0-only,2026-07-21T21:08:14Z
+git-lfs,mit,2026-07-21T21:08:14Z
+gitlab-runner,mit,2026-07-21T21:08:14Z
+gitleaks,mit,2026-07-21T21:08:14Z
+gitui,mit,2026-07-21T21:08:14Z
+gl2ps,gl2ps,2026-07-21T21:08:14Z
+glab,mit,2026-07-21T21:08:14Z
+glances,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+glew,bsd-3-clause,2026-07-21T21:08:14Z
+glfw,zlib,2026-07-21T21:08:14Z
+glib,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+glib-networking,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+glibc,gpl-2.0-or-later and lgpl-2.1-or-later,2026-07-21T21:08:14Z
+glog,bsd-3-clause,2026-07-21T21:08:14Z
+glow,mit,2026-07-21T21:08:14Z
+glpk,gpl-3.0-or-later,2026-07-21T21:08:14Z
+glslang,bsd-3-clause and gpl-3.0-or-later and mit and apache-2.0,2026-07-21T21:08:14Z
+gmp,lgpl-3.0-or-later or gpl-2.0-or-later,2026-07-21T21:08:14Z
+gnu-getopt,gpl-2.0-or-later,2026-07-21T21:08:14Z
+gnu-sed,gpl-3.0-or-later,2026-07-21T21:08:14Z
+gnu-tar,gpl-3.0-or-later,2026-07-21T21:08:14Z
+gnupg,gpl-3.0-or-later,2026-07-21T21:08:14Z
+gnuplot,gnuplot,2026-07-21T21:08:14Z
+gnuradio,gpl-3.0-or-later,2026-07-21T21:08:14Z
+gnutls,lgpl-2.1-or-later and gpl-3.0-only,2026-07-21T21:08:14Z
+go,bsd-3-clause,2026-07-21T21:08:14Z
+go-md2man,mit,2026-07-21T21:08:14Z
+go-task,mit,2026-07-21T21:08:14Z
+go@1.21,bsd-3-clause,2026-07-21T21:08:14Z
+go@1.22,bsd-3-clause,2026-07-21T21:08:14Z
+go@1.24,bsd-3-clause,2026-07-21T21:08:14Z
+gobject-introspection,gpl-2.0-or-later and lgpl-2.0-or-later and mit,2026-07-21T21:08:14Z
+golang-migrate,mit,2026-07-21T21:08:14Z
+golangci-lint,gpl-3.0-only,2026-07-21T21:08:14Z
+gomplate,mit,2026-07-21T21:08:14Z
+googletest,bsd-3-clause,2026-07-21T21:08:14Z
+gopls,bsd-3-clause,2026-07-21T21:08:14Z
+goreleaser,mit,2026-07-21T21:08:14Z
+gpatch,gpl-3.0-or-later,2026-07-21T21:08:14Z
+gperf,gpl-3.0-or-later,2026-07-21T21:08:14Z
+gpgme,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+gpgmepp,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+gping,mit,2026-07-21T21:08:14Z
+gradle,apache-2.0,2026-07-21T21:08:14Z
+gradle-completion,mit,2026-07-21T21:08:14Z
+grafana,agpl-3.0-only,2026-07-21T21:08:14Z
+graphene,mit,2026-07-21T21:08:14Z
+graphicsmagick,mit,2026-07-21T21:08:14Z
+graphite2,mit or mpl-2.0 or lgpl-2.1-or-later or gpl-2.0-or-later,2026-07-21T21:08:14Z
+graphviz,epl-1.0,2026-07-21T21:08:14Z
+grep,gpl-3.0-or-later,2026-07-21T21:08:14Z
+groff,gpl-3.0-or-later,2026-07-21T21:08:14Z
+groonga,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+groovy,apache-2.0,2026-07-21T21:08:14Z
+grpc,apache-2.0,2026-07-21T21:08:14Z
+grpcurl,mit,2026-07-21T21:08:14Z
+grype,apache-2.0,2026-07-21T21:08:14Z
+gsettings-desktop-schemas,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+gsl,gpl-3.0-or-later,2026-07-21T21:08:14Z
+gspell,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+gstreamer,lgpl-2.0-or-later and lgpl-2.1-or-later and mit,2026-07-21T21:08:14Z
+gtk+,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+gtk+3,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+gtk-mac-integration,lgpl-2.1-only,2026-07-21T21:08:14Z
+gtk-vnc,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+gtk4,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+gtksourceview4,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+gts,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+guile,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+gum,mit,2026-07-21T21:08:14Z
+gumbo-parser,apache-2.0,2026-07-21T21:08:14Z
+gzip,gpl-3.0-or-later,2026-07-21T21:08:14Z
+hadolint,gpl-3.0-only,2026-07-21T21:08:14Z
+hadoop,apache-2.0,2026-07-21T21:08:14Z
+handbrake,gpl-2.0-only,2026-07-21T21:08:14Z
+harfbuzz,mit,2026-07-21T21:08:14Z
+hashcat,mit and lzma-sdk-9.22 and licenseref-homebrew-public-domain,2026-07-21T21:08:14Z
+haskell-stack,bsd-3-clause,2026-07-21T21:08:14Z
+hdf5,bsd-3-clause,2026-07-21T21:08:14Z
+hdrhistogram_c,cc0-1.0 or bsd-2-clause,2026-07-21T21:08:14Z
+helix,mpl-2.0,2026-07-21T21:08:14Z
+hello,gpl-3.0-or-later,2026-07-21T21:08:14Z
+helm,apache-2.0,2026-07-21T21:08:14Z
+helmfile,mit,2026-07-21T21:08:14Z
+hicolor-icon-theme,gpl-2.0-only,2026-07-21T21:08:14Z
+hidapi,gpl-3.0-only or bsd-3-clause or hidapi,2026-07-21T21:08:14Z
+highlight,gpl-3.0-or-later,2026-07-21T21:08:14Z
+highway,apache-2.0 or bsd-3-clause,2026-07-21T21:08:14Z
+hiredis,bsd-3-clause,2026-07-21T21:08:14Z
+htop,gpl-2.0-or-later,2026-07-21T21:08:14Z
+httpd,apache-2.0,2026-07-21T21:08:14Z
+httpie,bsd-3-clause,2026-07-21T21:08:14Z
+httrack,gpl-3.0-or-later with openvpn-openssl-exception,2026-07-21T21:08:14Z
+hub,mit,2026-07-21T21:08:14Z
+hugo,apache-2.0,2026-07-21T21:08:14Z
+hunspell,mpl-1.1 or gpl-2.0-or-later or lgpl-2.1-or-later,2026-07-21T21:08:14Z
+hwloc,bsd-3-clause,2026-07-21T21:08:14Z
+icu4c@75,unicode-3.0,2026-07-21T21:08:14Z
+icu4c@76,unicode-3.0,2026-07-21T21:08:14Z
+icu4c@77,unicode-3.0,2026-07-21T21:08:14Z
+icu4c@78,unicode-3.0,2026-07-21T21:08:14Z
+ideviceinstaller,gpl-2.0-or-later,2026-07-21T21:08:14Z
+imagemagick,imagemagick,2026-07-21T21:08:14Z
+imagemagick@6,imagemagick,2026-07-21T21:08:14Z
+imath,bsd-3-clause,2026-07-21T21:08:14Z
+img2pdf,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+imlib2,imlib2,2026-07-21T21:08:14Z
+inetutils,gpl-3.0-or-later,2026-07-21T21:08:14Z
+infracost,apache-2.0,2026-07-21T21:08:14Z
+ios-deploy,gpl-3.0-or-later and bsd-3-clause,2026-07-21T21:08:14Z
+iperf,bsd-3-clause,2026-07-21T21:08:14Z
+iperf3,bsd-3-clause,2026-07-21T21:08:14Z
+ipopt,epl-2.0,2026-07-21T21:08:14Z
+iproute2mac,mit,2026-07-21T21:08:14Z
+ipython,bsd-3-clause,2026-07-21T21:08:14Z
+isl,mit,2026-07-21T21:08:14Z
+iso-codes,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+istioctl,apache-2.0,2026-07-21T21:08:14Z
+jack,gpl-2.0-or-later,2026-07-21T21:08:14Z
+jadx,apache-2.0,2026-07-21T21:08:14Z
+jansson,mit,2026-07-21T21:08:14Z
+jasper,jasper-2.0,2026-07-21T21:08:14Z
+jbig2dec,agpl-3.0-or-later,2026-07-21T21:08:14Z
+jbig2enc,apache-2.0,2026-07-21T21:08:14Z
+jemalloc,bsd-2-clause,2026-07-21T21:08:14Z
+jenkins,mit,2026-07-21T21:08:14Z
+jenkins-lts,mit,2026-07-21T21:08:14Z
+jenv,mit,2026-07-21T21:08:14Z
+jfrog-cli,apache-2.0,2026-07-21T21:08:14Z
+jmeter,apache-2.0,2026-07-21T21:08:14Z
+jo,gpl-2.0-or-later and mit,2026-07-21T21:08:14Z
+jpeg,ijg,2026-07-21T21:08:14Z
+jpeg-turbo,ijg and zlib and bsd-3-clause,2026-07-21T21:08:14Z
+jpeg-xl,bsd-3-clause,2026-07-21T21:08:14Z
+jq,mit,2026-07-21T21:08:14Z
+json-c,mit,2026-07-21T21:08:14Z
+json-glib,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+jsoncpp,mit,2026-07-21T21:08:14Z
+jsonnet,apache-2.0,2026-07-21T21:08:14Z
+julia,mit and bsd-3-clause and apache-2.0 and bsl-1.0,2026-07-21T21:08:14Z
+jupyterlab,bsd-3-clause and mit,2026-07-21T21:08:14Z
+just,cc0-1.0,2026-07-21T21:08:14Z
+k3d,mit,2026-07-21T21:08:14Z
+k6,agpl-3.0-or-later,2026-07-21T21:08:14Z
+k9s,apache-2.0,2026-07-21T21:08:14Z
+kafka,apache-2.0,2026-07-21T21:08:14Z
+kcat,bsd-2-clause,2026-07-21T21:08:14Z
+kcov,gpl-2.0-or-later,2026-07-21T21:08:14Z
+keyring,mit,2026-07-21T21:08:14Z
+keyutils,gpl-2.0-or-later and lgpl-2.0-or-later,2026-07-21T21:08:14Z
+kind,apache-2.0,2026-07-21T21:08:14Z
+kompose,apache-2.0,2026-07-21T21:08:14Z
+kotlin,apache-2.0,2026-07-21T21:08:14Z
+krb5,bsd-2-clause and bsd-2-clause-first-lines and bsd-3-clause and bsd-4-clause and brian-gladman-2-clause and cmu-mach-nodoc and fsfullrwd and hpnd and hpnd-export2-us and hpnd-export-us and hpnd-export-us-acknowledgement and hpnd-export-us-modify and isc and mit and mit-cmu and oldap-2.8 and openvision and (bsd-2-clause or gpl-2.0-or-later),2026-07-21T21:08:14Z
+krew,apache-2.0,2026-07-21T21:08:14Z
+ktlint,mit,2026-07-21T21:08:14Z
+kube-ps1,apache-2.0,2026-07-21T21:08:14Z
+kubeconform,apache-2.0,2026-07-21T21:08:14Z
+kubectx,apache-2.0,2026-07-21T21:08:14Z
+kubernetes-cli,apache-2.0,2026-07-21T21:08:14Z
+kubeseal,apache-2.0,2026-07-21T21:08:14Z
+kustomize,apache-2.0,2026-07-21T21:08:14Z
+ladspa-sdk,lgpl-2.1-only,2026-07-21T21:08:14Z
+lame,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+lazydocker,mit,2026-07-21T21:08:14Z
+lazygit,mit,2026-07-21T21:08:14Z
+lcov,gpl-2.0-or-later,2026-07-21T21:08:14Z
+ldns,bsd-3-clause,2026-07-21T21:08:14Z
+lefthook,mit,2026-07-21T21:08:14Z
+leptonica,bsd-2-clause,2026-07-21T21:08:14Z
+libadwaita,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libaec,bsd-2-clause,2026-07-21T21:08:14Z
+libapplewm,mit,2026-07-21T21:08:14Z
+libarchive,bsd-2-clause,2026-07-21T21:08:14Z
+libass,isc,2026-07-21T21:08:14Z
+libassuan,lgpl-2.1-or-later and gpl-3.0-or-later and fsfullr,2026-07-21T21:08:14Z
+libassuan@2,lgpl-2.1-or-later and gpl-3.0-or-later and fsfullr,2026-07-21T21:08:14Z
+libavif,bsd-2-clause,2026-07-21T21:08:14Z
+libb2,cc0-1.0,2026-07-21T21:08:14Z
+libblastrampoline,mit and bsd-2-clause-views and bsd-3-clause,2026-07-21T21:08:14Z
+libbluray,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libcap,bsd-3-clause and gpl-2.0-or-later,2026-07-21T21:08:14Z
+libcbor,mit,2026-07-21T21:08:14Z
+libcerf,mit,2026-07-21T21:08:14Z
+libclc,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+libcuefile,gpl-2.0-or-later,2026-07-21T21:08:14Z
+libdap,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libdatrie,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libde265,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+libdeflate,mit,2026-07-21T21:08:14Z
+libdicom,mit,2026-07-21T21:08:14Z
+libdrm,mit,2026-07-21T21:08:14Z
+libdvdcss,gpl-2.0-or-later,2026-07-21T21:08:14Z
+libdvdnav,gpl-2.0-or-later,2026-07-21T21:08:14Z
+libdvdread,gpl-2.0-or-later,2026-07-21T21:08:14Z
+libebml,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libedit,bsd-3-clause,2026-07-21T21:08:14Z
+libepoxy,mit,2026-07-21T21:08:14Z
+libev,bsd-2-clause or gpl-2.0-or-later,2026-07-21T21:08:14Z
+libevent,bsd-3-clause,2026-07-21T21:08:14Z
+libexif,lgpl-2.1-or-later and lgpl-2.0-or-later,2026-07-21T21:08:14Z
+libffcall,gpl-2.0-or-later,2026-07-21T21:08:14Z
+libffi,mit,2026-07-21T21:08:14Z
+libfido2,bsd-2-clause,2026-07-21T21:08:14Z
+libfontenc,mit,2026-07-21T21:08:14Z
+libftdi,lgpl-2.1-only,2026-07-21T21:08:14Z
+libfyaml,mit,2026-07-21T21:08:14Z
+libgccjit,gpl-3.0-or-later with gcc-exception-3.1,2026-07-21T21:08:14Z
+libgcrypt,lgpl-2.1-or-later and gpl-2.0-or-later,2026-07-21T21:08:14Z
+libgedit-amtk,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+libgedit-gfls,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+libgedit-gtksourceview,lgpl-2.1-only,2026-07-21T21:08:14Z
+libgedit-tepl,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libgeotiff,mit,2026-07-21T21:08:14Z
+libgit2,gpl-2.0-only with gcc-exception-2.0,2026-07-21T21:08:14Z
+libgit2@1.7,gpl-2.0-only with gcc-exception-2.0,2026-07-21T21:08:14Z
+libgit2@1.8,gpl-2.0-only with gcc-exception-2.0,2026-07-21T21:08:14Z
+libgpg-error,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libgphoto2,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libgsf,lgpl-2.1-only,2026-07-21T21:08:14Z
+libhandy,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libharu,zlib,2026-07-21T21:08:14Z
+libheif,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+libice,mit,2026-07-21T21:08:14Z
+libiconv,gpl-3.0-or-later and lgpl-2.0-or-later,2026-07-21T21:08:14Z
+libidn,gpl-2.0-or-later or lgpl-3.0-or-later,2026-07-21T21:08:14Z
+libidn2,(gpl-2.0-or-later or lgpl-3.0-or-later) and (unicode-tou and unicode-dfs-2016) and gpl-3.0-or-later and lgpl-2.1-or-later and fsfap-no-warranty-disclaimer,2026-07-21T21:08:14Z
+libimagequant,gpl-3.0-or-later and hpnd,2026-07-21T21:08:14Z
+libimobiledevice,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libimobiledevice-glue,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libiscsi,licenseref-homebrew-public-domain and lgpl-2.1-or-later and gpl-2.0-or-later,2026-07-21T21:08:14Z
+libkml,bsd-3-clause,2026-07-21T21:08:14Z
+libksba,lgpl-3.0-or-later or gpl-2.0-or-later,2026-07-21T21:08:14Z
+liblerc,apache-2.0,2026-07-21T21:08:14Z
+liblinear,bsd-3-clause,2026-07-21T21:08:14Z
+liblqr,lgpl-3.0-only,2026-07-21T21:08:14Z
+libmagic,bsd-2-clause-darwin and bsd-2-clause and licenseref-homebrew-public-domain,2026-07-21T21:08:14Z
+libmatio,bsd-2-clause,2026-07-21T21:08:14Z
+libmatroska,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libmaxminddb,apache-2.0,2026-07-21T21:08:14Z
+libmd,bsd-3-clause and bsd-2-clause and isc and beerware and licenseref-homebrew-public-domain,2026-07-21T21:08:14Z
+libmediainfo,bsd-2-clause,2026-07-21T21:08:14Z
+libmicrohttpd,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libmms,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libmng,zlib,2026-07-21T21:08:14Z
+libmpc,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+libnet,bsd-2-clause,2026-07-21T21:08:14Z
+libnghttp2,mit,2026-07-21T21:08:14Z
+libnghttp3,mit,2026-07-21T21:08:14Z
+libngtcp2,mit,2026-07-21T21:08:14Z
+libnice,lgpl-2.1-or-later or mpl-1.1,2026-07-21T21:08:14Z
+libnsl,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libogg,bsd-3-clause,2026-07-21T21:08:14Z
+libomp,mit,2026-07-21T21:08:14Z
+libosinfo,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+libpaper,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libpcap,bsd-3-clause,2026-07-21T21:08:14Z
+libpciaccess,mit,2026-07-21T21:08:14Z
+libpeas@1,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libplacebo,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libplist,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libpng,libpng-2.0,2026-07-21T21:08:14Z
+libpq,postgresql,2026-07-21T21:08:14Z
+libproxy,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libpsl,mit,2026-07-21T21:08:14Z
+libpthread-stubs,mit,2026-07-21T21:08:14Z
+libptytty,gpl-2.0-or-later,2026-07-21T21:08:14Z
+libraqm,mit,2026-07-21T21:08:14Z
+libraw,lgpl-2.1-only or cddl-1.0,2026-07-21T21:08:14Z
+librdkafka,bsd-2-clause,2026-07-21T21:08:14Z
+libreplaygain,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libressl,openssl,2026-07-21T21:08:14Z
+librist,bsd-2-clause,2026-07-21T21:08:14Z
+librsvg,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+librtlsdr,gpl-2.0-or-later,2026-07-21T21:08:14Z
+librttopo,gpl-2.0-or-later,2026-07-21T21:08:14Z
+libsamplerate,bsd-2-clause,2026-07-21T21:08:14Z
+libscrypt,bsd-2-clause,2026-07-21T21:08:14Z
+libseccomp,lgpl-2.1-only,2026-07-21T21:08:14Z
+libsecret,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libserdes,apache-2.0,2026-07-21T21:08:14Z
+libshout,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+libsigsegv,gpl-2.0-or-later,2026-07-21T21:08:14Z
+libslirp,bsd-3-clause,2026-07-21T21:08:14Z
+libsm,mit,2026-07-21T21:08:14Z
+libsmi,tcl and bsd-3-clause and beerware,2026-07-21T21:08:14Z
+libsndfile,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libsodium,isc,2026-07-21T21:08:14Z
+libsoup,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+libsoxr,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libspatialite,mpl-1.1 or gpl-2.0-or-later or lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libspiro,gpl-3.0-or-later,2026-07-21T21:08:14Z
+libspng,bsd-2-clause,2026-07-21T21:08:14Z
+libssh,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libssh2,bsd-3-clause,2026-07-21T21:08:14Z
+libtasn1,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libtatsu,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libtermkey,mit,2026-07-21T21:08:14Z
+libthai,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libtiff,libtiff,2026-07-21T21:08:14Z
+libtirpc,bsd-3-clause,2026-07-21T21:08:14Z
+libtomcrypt,unlicense,2026-07-21T21:08:14Z
+libtommath,unlicense,2026-07-21T21:08:14Z
+libtool,gpl-2.0-or-later,2026-07-21T21:08:14Z
+libudfread,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libultrahdr,apache-2.0,2026-07-21T21:08:14Z
+libunibreak,zlib,2026-07-21T21:08:14Z
+libuninameslist,bsd-3-clause,2026-07-21T21:08:14Z
+libunistring,gpl-2.0-or-later or lgpl-3.0-or-later,2026-07-21T21:08:14Z
+libunwind,mit,2026-07-21T21:08:14Z
+libusb,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libusb-compat,lgpl-2.1-or-later and (lgpl-2.1-or-later or bsd-3-clause),2026-07-21T21:08:14Z
+libusbmuxd,gpl-2.0-or-later and lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libusrsctp,bsd-3-clause,2026-07-21T21:08:14Z
+libuv,mit,2026-07-21T21:08:14Z
+libva,mit,2026-07-21T21:08:14Z
+libvidstab,gpl-2.0-or-later,2026-07-21T21:08:14Z
+libvirt,lgpl-2.1-or-later and gpl-2.0-or-later,2026-07-21T21:08:14Z
+libvirt-glib,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libvirt-python,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libvmaf,bsd-2-clause-patent,2026-07-21T21:08:14Z
+libvorbis,bsd-3-clause,2026-07-21T21:08:14Z
+libvpx,bsd-3-clause,2026-07-21T21:08:14Z
+libvterm,mit,2026-07-21T21:08:14Z
+libwebsockets,mit,2026-07-21T21:08:14Z
+libx11,mit,2026-07-21T21:08:14Z
+libxau,mit,2026-07-21T21:08:14Z
+libxcb,mit,2026-07-21T21:08:14Z
+libxcrypt,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libxcursor,mit,2026-07-21T21:08:14Z
+libxdamage,mit,2026-07-21T21:08:14Z
+libxdmcp,mit,2026-07-21T21:08:14Z
+libxext,mit,2026-07-21T21:08:14Z
+libxfixes,mit,2026-07-21T21:08:14Z
+libxfont2,mit,2026-07-21T21:08:14Z
+libxft,mit,2026-07-21T21:08:14Z
+libxi,mit,2026-07-21T21:08:14Z
+libxinerama,mit,2026-07-21T21:08:14Z
+libxkbcommon,mit,2026-07-21T21:08:14Z
+libxkbfile,mit,2026-07-21T21:08:14Z
+libxml2,mit,2026-07-21T21:08:14Z
+libxmlb,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libxmlsec1,mit,2026-07-21T21:08:14Z
+libxmp,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+libxmu,mit,2026-07-21T21:08:14Z
+libxpm,mit,2026-07-21T21:08:14Z
+libxrandr,mit,2026-07-21T21:08:14Z
+libxrender,mit,2026-07-21T21:08:14Z
+libxslt,x11,2026-07-21T21:08:14Z
+libxt,mit,2026-07-21T21:08:14Z
+libxtst,mit,2026-07-21T21:08:14Z
+libxv,mit,2026-07-21T21:08:14Z
+libxxf86vm,mit,2026-07-21T21:08:14Z
+libyaml,mit,2026-07-21T21:08:14Z
+libzen,zlib,2026-07-21T21:08:14Z
+libzip,bsd-3-clause,2026-07-21T21:08:14Z
+licenseplist,mit,2026-07-21T21:08:14Z
+lima,apache-2.0,2026-07-21T21:08:14Z
+linux-headers@5.15,gpl-2.0-only with linux-syscall-note,2026-07-21T21:08:14Z
+linux-headers@6.8,gpl-2.0-only with linux-syscall-note,2026-07-21T21:08:14Z
+linux-pam,bsd-3-clause or gpl-1.0-only,2026-07-21T21:08:14Z
+liquibase,apache-2.0,2026-07-21T21:08:14Z
+litehtml,bsd-3-clause,2026-07-21T21:08:14Z
+little-cms2,mit,2026-07-21T21:08:14Z
+llama.cpp,mit,2026-07-21T21:08:14Z
+lld,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+lld@19,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+lld@21,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+llhttp,mit,2026-07-21T21:08:14Z
+llvm,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+llvm@16,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+llvm@17,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+llvm@18,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+llvm@19,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+llvm@20,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+llvm@21,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+lm-sensors,gpl-2.0-or-later or lgpl-2.1-or-later,2026-07-21T21:08:14Z
+lmdb,oldap-2.8,2026-07-21T21:08:14Z
+lnav,bsd-2-clause,2026-07-21T21:08:14Z
+localstack,apache-2.0,2026-07-21T21:08:14Z
+lpeg,mit,2026-07-21T21:08:14Z
+lsd,apache-2.0,2026-07-21T21:08:14Z
+lua,mit,2026-07-21T21:08:14Z
+lua-language-server,mit,2026-07-21T21:08:14Z
+luajit,mit,2026-07-21T21:08:14Z
+luajit-openresty,mit,2026-07-21T21:08:14Z
+luarocks,mit,2026-07-21T21:08:14Z
+luv,apache-2.0,2026-07-21T21:08:14Z
+lychee,apache-2.0 or mit,2026-07-21T21:08:14Z
+lynx,gpl-2.0-only,2026-07-21T21:08:14Z
+lz4,bsd-2-clause,2026-07-21T21:08:14Z
+lzip,gpl-2.0-or-later,2026-07-21T21:08:14Z
+lzlib,bsd-2-clause,2026-07-21T21:08:14Z
+lzo,gpl-2.0-or-later,2026-07-21T21:08:14Z
+m4,gpl-3.0-or-later,2026-07-21T21:08:14Z
+macos-term-size,mit,2026-07-21T21:08:14Z
+macvim,vim,2026-07-21T21:08:14Z
+mad,gpl-2.0-or-later,2026-07-21T21:08:14Z
+magic-wormhole,mit,2026-07-21T21:08:14Z
+make,gpl-3.0-only,2026-07-21T21:08:14Z
+mandoc,isc,2026-07-21T21:08:14Z
+mariadb,gpl-2.0-only,2026-07-21T21:08:14Z
+mariadb-connector-c,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+mas,mit,2026-07-21T21:08:14Z
+maven,apache-2.0,2026-07-21T21:08:14Z
+mbedtls,apache-2.0,2026-07-21T21:08:14Z
+mbedtls@3,apache-2.0,2026-07-21T21:08:14Z
+md4c,mit,2026-07-21T21:08:14Z
+md5sha1sum,gpl-2.0-or-later,2026-07-21T21:08:14Z
+mecab,gpl-2.0-only or lgpl-2.1-only or bsd-3-clause,2026-07-21T21:08:14Z
+mecab-ipadic,naist-2003,2026-07-21T21:08:14Z
+media-info,bsd-2-clause,2026-07-21T21:08:14Z
+memcached,bsd-3-clause,2026-07-21T21:08:14Z
+mercurial,gpl-2.0-or-later,2026-07-21T21:08:14Z
+merve,apache-2.0,2026-07-21T21:08:14Z
+mesa,mit and apache-2.0 and bsd-2-clause and bsd-3-clause and bsl-1.0 and hpnd and hpnd-sell-variant and icu and mit-khronos-old and sgi-b-2.0 and licenseref-homebrew-public-domain and (gpl-1.0-or-later with linux-syscall-note) and (gpl-2.0-only with linux-syscall-note),2026-07-21T21:08:14Z
+mesa-glu,sgi-b-1.1 and sgi-b-2.0,2026-07-21T21:08:14Z
+meson,apache-2.0,2026-07-21T21:08:14Z
+metis,apache-2.0,2026-07-21T21:08:14Z
+midnight-commander,gpl-3.0-or-later,2026-07-21T21:08:14Z
+mingw-w64,zpl-2.1 and (gpl-2.0-or-later and gpl-3.0-or-later and lgpl-2.0-or-later and lgpl-3.0-only) and (gpl-3.0-or-later with gcc-exception-3.1),2026-07-21T21:08:14Z
+minicom,gpl-2.0-or-later,2026-07-21T21:08:14Z
+minikube,apache-2.0,2026-07-21T21:08:14Z
+minio-mc,agpl-3.0-or-later,2026-07-21T21:08:14Z
+miniupnpc,bsd-3-clause,2026-07-21T21:08:14Z
+minizip,zlib,2026-07-21T21:08:14Z
+mint,mit,2026-07-21T21:08:14Z
+mise,mit,2026-07-21T21:08:14Z
+mkcert,bsd-3-clause,2026-07-21T21:08:14Z
+mkvtoolnix,gpl-2.0-or-later,2026-07-21T21:08:14Z
+mlx,mit and apache-2.0,2026-07-21T21:08:14Z
+mlx-c,mit,2026-07-21T21:08:14Z
+mockery,bsd-3-clause,2026-07-21T21:08:14Z
+molten-vk,apache-2.0,2026-07-21T21:08:14Z
+mongodb-atlas-cli,apache-2.0,2026-07-21T21:08:14Z
+mongosh,apache-2.0,2026-07-21T21:08:14Z
+mono,apache-2.0,2026-07-21T21:08:14Z
+moreutils,gpl-2.0-or-later and (gpl-2.0-only or artistic-2.0),2026-07-21T21:08:14Z
+mosh,gpl-3.0-or-later,2026-07-21T21:08:14Z
+mosquitto,epl-1.0 or bsd-3-clause,2026-07-21T21:08:14Z
+mozjpeg,ijg and zlib and bsd-3-clause,2026-07-21T21:08:14Z
+mpdecimal,bsd-2-clause,2026-07-21T21:08:14Z
+mpfr,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+mpg123,lgpl-2.1-only,2026-07-21T21:08:14Z
+mpv,gpl-2.0-or-later and lgpl-2.1-or-later,2026-07-21T21:08:14Z
+msgpack,bsl-1.0,2026-07-21T21:08:14Z
+mtr,gpl-2.0-only and bsd-3-clause and lgpl-2.0-only,2026-07-21T21:08:14Z
+mujs,isc,2026-07-21T21:08:14Z
+mupdf,agpl-3.0-or-later,2026-07-21T21:08:14Z
+musepack,bsd-3-clause and lgpl-2.1-or-later and gpl-2.0-or-later and zlib,2026-07-21T21:08:14Z
+mvfst,mit,2026-07-21T21:08:14Z
+mycli,bsd-3-clause,2026-07-21T21:08:14Z
+mypy,mit,2026-07-21T21:08:14Z
+mysql,gpl-2.0-only with universal-foss-exception-1.0,2026-07-21T21:08:14Z
+mysql-client,gpl-2.0-only with universal-foss-exception-1.0,2026-07-21T21:08:14Z
+mysql-client@8.0,gpl-2.0-only with universal-foss-exception-1.0,2026-07-21T21:08:14Z
+mysql-client@8.4,gpl-2.0-only with universal-foss-exception-1.0,2026-07-21T21:08:14Z
+mysql@8.0,gpl-2.0-only with universal-foss-exception-1.0,2026-07-21T21:08:14Z
+mysql@8.4,gpl-2.0-only with universal-foss-exception-1.0,2026-07-21T21:08:14Z
+n,mit,2026-07-21T21:08:14Z
+nano,gpl-3.0-or-later,2026-07-21T21:08:14Z
+nasm,bsd-2-clause,2026-07-21T21:08:14Z
+nbytes,mit,2026-07-21T21:08:14Z
+ncdu,mit,2026-07-21T21:08:14Z
+ncurses,x11-distribute-modifications-variant,2026-07-21T21:08:14Z
+neovim,apache-2.0,2026-07-21T21:08:14Z
+net-snmp,mit-cmu and mit and bsd-3-clause,2026-07-21T21:08:14Z
+netcat,gpl-2.0-or-later,2026-07-21T21:08:14Z
+netcdf,bsd-3-clause,2026-07-21T21:08:14Z
+netpbm,gpl-3.0-or-later,2026-07-21T21:08:14Z
+nettle,gpl-2.0-or-later or lgpl-3.0-or-later,2026-07-21T21:08:14Z
+nghttp2,mit,2026-07-21T21:08:14Z
+nginx,bsd-2-clause,2026-07-21T21:08:14Z
+ninja,apache-2.0,2026-07-21T21:08:14Z
+nlohmann-json,mit,2026-07-21T21:08:14Z
+nmap,licenseref-homebrew-cannot-represent,2026-07-21T21:08:14Z
+node,mit,2026-07-21T21:08:14Z
+node-build,mit,2026-07-21T21:08:14Z
+node@18,mit,2026-07-21T21:08:14Z
+node@20,mit,2026-07-21T21:08:14Z
+node@22,mit,2026-07-21T21:08:14Z
+node@24,mit,2026-07-21T21:08:14Z
+nodebrew,mit,2026-07-21T21:08:14Z
+nodenv,mit,2026-07-21T21:08:14Z
+npth,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+nspr,mpl-2.0,2026-07-21T21:08:14Z
+nss,mpl-2.0,2026-07-21T21:08:14Z
+nuget,mit,2026-07-21T21:08:14Z
+numpy,bsd-3-clause,2026-07-21T21:08:14Z
+nushell,mit,2026-07-21T21:08:14Z
+nvm,mit,2026-07-21T21:08:14Z
+oci-cli,upl-1.0 or apache-2.0,2026-07-21T21:08:14Z
+ocrmypdf,mpl-2.0,2026-07-21T21:08:14Z
+octave,gpl-3.0-or-later,2026-07-21T21:08:14Z
+oh-my-posh,mit,2026-07-21T21:08:14Z
+okta-aws-cli,apache-2.0,2026-07-21T21:08:14Z
+ollama,mit,2026-07-21T21:08:14Z
+onigmo,bsd-2-clause,2026-07-21T21:08:14Z
+oniguruma,bsd-2-clause,2026-07-21T21:08:14Z
+onnx,apache-2.0,2026-07-21T21:08:14Z
+opam,lgpl-2.1-only,2026-07-21T21:08:14Z
+open-mpi,bsd-3-clause-open-mpi and mpich2,2026-07-21T21:08:14Z
+openapi-generator,apache-2.0,2026-07-21T21:08:14Z
+openblas,bsd-3-clause and bsd-2-clause-views and bsd-3-clause-open-mpi and bsd-2-clause,2026-07-21T21:08:14Z
+openblas64,bsd-3-clause and bsd-2-clause-views and bsd-3-clause-open-mpi and bsd-2-clause,2026-07-21T21:08:14Z
+opencode,mit,2026-07-21T21:08:14Z
+openconnect,lgpl-2.1-only,2026-07-21T21:08:14Z
+opencore-amr,apache-2.0,2026-07-21T21:08:14Z
+opencv,apache-2.0,2026-07-21T21:08:14Z
+openexr,bsd-3-clause,2026-07-21T21:08:14Z
+openjdk,gpl-2.0-only with classpath-exception-2.0,2026-07-21T21:08:14Z
+openjdk@11,gpl-2.0-only,2026-07-21T21:08:14Z
+openjdk@17,gpl-2.0-only with classpath-exception-2.0,2026-07-21T21:08:14Z
+openjdk@21,gpl-2.0-only with classpath-exception-2.0,2026-07-21T21:08:14Z
+openjdk@8,gpl-2.0-only,2026-07-21T21:08:14Z
+openjpeg,bsd-2-clause,2026-07-21T21:08:14Z
+openjph,bsd-2-clause,2026-07-21T21:08:14Z
+openldap,oldap-2.8,2026-07-21T21:08:14Z
+openlibm,mit and isc and bsd-2-clause,2026-07-21T21:08:14Z
+openshift-cli,apache-2.0,2026-07-21T21:08:14Z
+openslide,lgpl-2.1-only,2026-07-21T21:08:14Z
+openssh,ssh-openssh,2026-07-21T21:08:14Z
+openssl@3,apache-2.0,2026-07-21T21:08:14Z
+openssl@3.5,apache-2.0,2026-07-21T21:08:14Z
+openssl@4,apache-2.0,2026-07-21T21:08:14Z
+opentofu,mpl-2.0,2026-07-21T21:08:14Z
+openvino,apache-2.0,2026-07-21T21:08:14Z
+openvpn,gpl-2.0-only with openvpn-openssl-exception,2026-07-21T21:08:14Z
+operator-sdk,apache-2.0,2026-07-21T21:08:14Z
+opus,bsd-3-clause,2026-07-21T21:08:14Z
+opusfile,bsd-3-clause,2026-07-21T21:08:14Z
+oras,apache-2.0,2026-07-21T21:08:14Z
+orc,bsd-2-clause and bsd-3-clause,2026-07-21T21:08:14Z
+osinfo-db,gpl-2.0-or-later,2026-07-21T21:08:14Z
+ossp-uuid,bsd-1-clause,2026-07-21T21:08:14Z
+overmind,mit,2026-07-21T21:08:14Z
+p11-kit,bsd-3-clause,2026-07-21T21:08:14Z
+p7zip,lgpl-2.1-or-later and gpl-2.0-or-later,2026-07-21T21:08:14Z
+pandoc,gpl-2.0-or-later,2026-07-21T21:08:14Z
+pango,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+parallel,gpl-3.0-or-later,2026-07-21T21:08:14Z
+passt,gpl-2.0-or-later and bsd-3-clause,2026-07-21T21:08:14Z
+pcre,bsd-3-clause,2026-07-21T21:08:14Z
+pcre2,bsd-3-clause,2026-07-21T21:08:14Z
+pdm,mit,2026-07-21T21:08:14Z
+percona-toolkit,gpl-2.0-only or artistic-1.0-perl,2026-07-21T21:08:14Z
+periphery,mit,2026-07-21T21:08:14Z
+perl,artistic-1.0-perl or gpl-1.0-or-later,2026-07-21T21:08:14Z
+perl-dbd-mysql,artistic-1.0-perl or gpl-1.0-or-later,2026-07-21T21:08:14Z
+pgcli,bsd-3-clause,2026-07-21T21:08:14Z
+phodav,lgpl-2.1-only,2026-07-21T21:08:14Z
+php,php-3.01 and zend-2.0 and bsl-1.0 and mit and apache-1.0 and apache-2.0 and bcrypt-solar-designer and bsd-2-clause-darwin and bsd-2-clause and bsd-3-clause and bsd-4-clause-uc and isc and lgpl-2.1-only and lgpl-2.1-or-later and oldap-2.8 and tcl and zlib,2026-07-21T21:08:14Z
+php-cs-fixer,mit,2026-07-21T21:08:14Z
+php@8.1,php-3.01,2026-07-21T21:08:14Z
+php@8.2,php-3.01 and zend-2.0 and bsl-1.0 and mit and apache-1.0 and bcrypt-solar-designer and bsd-2-clause-darwin and bsd-2-clause and bsd-3-clause and bsd-4-clause-uc and isc and lgpl-2.1-only and lgpl-2.1-or-later and oldap-2.8 and tcl and zlib,2026-07-21T21:08:14Z
+php@8.3,php-3.01 and zend-2.0 and bsl-1.0 and mit and apache-1.0 and bcrypt-solar-designer and bsd-2-clause-darwin and bsd-2-clause and bsd-3-clause and bsd-4-clause-uc and isc and lgpl-2.1-only and lgpl-2.1-or-later and oldap-2.8 and tcl and zlib,2026-07-21T21:08:14Z
+phpmyadmin,gpl-2.0-only and gpl-2.0-or-later and bsd-2-clause and bsd-3-clause and cc-by-3.0 and isc and lgpl-3.0-only and mit and mpl-2.0 and licenseref-homebrew-public-domain,2026-07-21T21:08:14Z
+pigz,zlib,2026-07-21T21:08:14Z
+pillow,hpnd,2026-07-21T21:08:14Z
+pinentry,gpl-2.0-or-later,2026-07-21T21:08:14Z
+pinentry-mac,gpl-2.0-or-later and gpl-3.0-or-later,2026-07-21T21:08:14Z
+pipenv,mit,2026-07-21T21:08:14Z
+pipx,mit,2026-07-21T21:08:14Z
+pixman,mit,2026-07-21T21:08:14Z
+pkcs11-helper,bsd-3-clause or gpl-2.0-or-later,2026-07-21T21:08:14Z
+pkgconf,isc,2026-07-21T21:08:14Z
+plantuml,gpl-3.0-or-later,2026-07-21T21:08:14Z
+platformio,apache-2.0,2026-07-21T21:08:14Z
+plotutils,gpl-3.0-or-later,2026-07-21T21:08:14Z
+pmix,bsd-3-clause-open-mpi,2026-07-21T21:08:14Z
+pngquant,gpl-3.0-or-later and hpnd and bsd-2-clause,2026-07-21T21:08:14Z
+pnpm,mit,2026-07-21T21:08:14Z
+podman,apache-2.0 and gpl-3.0-or-later,2026-07-21T21:08:14Z
+podman-compose,gpl-2.0-only,2026-07-21T21:08:14Z
+poetry,mit,2026-07-21T21:08:14Z
+poppler,gpl-2.0-only or gpl-3.0-only,2026-07-21T21:08:14Z
+poppler-qt5,gpl-2.0-only or gpl-3.0-only,2026-07-21T21:08:14Z
+popt,mit,2026-07-21T21:08:14Z
+portaudio,mit,2026-07-21T21:08:14Z
+postgis,gpl-2.0-or-later,2026-07-21T21:08:14Z
+postgresql@12,postgresql,2026-07-21T21:08:14Z
+postgresql@13,postgresql,2026-07-21T21:08:14Z
+postgresql@14,postgresql,2026-07-21T21:08:14Z
+postgresql@15,postgresql,2026-07-21T21:08:14Z
+postgresql@16,postgresql,2026-07-21T21:08:14Z
+postgresql@17,postgresql,2026-07-21T21:08:14Z
+postgresql@18,postgresql,2026-07-21T21:08:14Z
+potrace,gpl-2.0-or-later,2026-07-21T21:08:14Z
+powerlevel10k,mit,2026-07-21T21:08:14Z
+pre-commit,mit,2026-07-21T21:08:14Z
+prettier,mit,2026-07-21T21:08:14Z
+procs,mit,2026-07-21T21:08:14Z
+proj,mit,2026-07-21T21:08:14Z
+prometheus,apache-2.0,2026-07-21T21:08:14Z
+protobuf,bsd-3-clause,2026-07-21T21:08:14Z
+protobuf-c,bsd-2-clause,2026-07-21T21:08:14Z
+protobuf@21,bsd-3-clause,2026-07-21T21:08:14Z
+protobuf@29,bsd-3-clause,2026-07-21T21:08:14Z
+protoc-gen-go,bsd-3-clause,2026-07-21T21:08:14Z
+prrte,bsd-3-clause-open-mpi,2026-07-21T21:08:14Z
+pstoedit,gpl-2.0-or-later,2026-07-21T21:08:14Z
+pstree,gpl-3.0-only,2026-07-21T21:08:14Z
+psutils,gpl-3.0-or-later,2026-07-21T21:08:14Z
+pugixml,mit,2026-07-21T21:08:14Z
+pulseaudio,gpl-2.0-or-later and lgpl-2.1-or-later and bsd-3-clause,2026-07-21T21:08:14Z
+pulumi,apache-2.0,2026-07-21T21:08:14Z
+putty,mit,2026-07-21T21:08:14Z
+pv,artistic-2.0,2026-07-21T21:08:14Z
+pwgen,gpl-2.0-only,2026-07-21T21:08:14Z
+py3cairo,lgpl-2.1-only or mpl-1.1,2026-07-21T21:08:14Z
+pybind11,bsd-3-clause,2026-07-21T21:08:14Z
+pycparser,bsd-3-clause,2026-07-21T21:08:14Z
+pydantic,mit,2026-07-21T21:08:14Z
+pyenv,mit,2026-07-21T21:08:14Z
+pyenv-virtualenv,mit,2026-07-21T21:08:14Z
+pygit2,gpl-2.0-only with gcc-exception-2.0,2026-07-21T21:08:14Z
+pygments,bsd-2-clause,2026-07-21T21:08:14Z
+pygobject3,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+pylint,gpl-2.0-or-later,2026-07-21T21:08:14Z
+pyqt,gpl-3.0-only,2026-07-21T21:08:14Z
+pyqt@5,gpl-3.0-only,2026-07-21T21:08:14Z
+pyright,mit,2026-07-21T21:08:14Z
+pytest,mit,2026-07-21T21:08:14Z
+python-argcomplete,apache-2.0,2026-07-21T21:08:14Z
+python-lsp-server,mit,2026-07-21T21:08:14Z
+python-matplotlib,psf-2.0,2026-07-21T21:08:14Z
+python-packaging,apache-2.0 or bsd-2-clause,2026-07-21T21:08:14Z
+python-setuptools,mit,2026-07-21T21:08:14Z
+python-tabulate,mit,2026-07-21T21:08:14Z
+python-tk@3.10,python-2.0,2026-07-21T21:08:14Z
+python-tk@3.11,python-2.0,2026-07-21T21:08:14Z
+python-tk@3.12,python-2.0,2026-07-21T21:08:14Z
+python-tk@3.13,python-2.0,2026-07-21T21:08:14Z
+python-tk@3.14,python-2.0,2026-07-21T21:08:14Z
+python-tk@3.9,python-2.0,2026-07-21T21:08:14Z
+python-yq,apache-2.0,2026-07-21T21:08:14Z
+python@3.10,python-2.0,2026-07-21T21:08:14Z
+python@3.11,python-2.0,2026-07-21T21:08:14Z
+python@3.12,python-2.0,2026-07-21T21:08:14Z
+python@3.13,python-2.0,2026-07-21T21:08:14Z
+python@3.14,python-2.0,2026-07-21T21:08:14Z
+python@3.9,python-2.0,2026-07-21T21:08:14Z
+pytorch,bsd-3-clause,2026-07-21T21:08:14Z
+qcachegrind,gpl-2.0-or-later,2026-07-21T21:08:14Z
+qemu,gpl-2.0-only,2026-07-21T21:08:14Z
+qhull,qhull,2026-07-21T21:08:14Z
+qpdf,apache-2.0,2026-07-21T21:08:14Z
+qrencode,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+qrupdate,gpl-3.0-or-later,2026-07-21T21:08:14Z
+qscintilla2,gpl-3.0-only,2026-07-21T21:08:14Z
+qt,bsd-3-clause and gfdl-1.3-no-invariants-only and gpl-2.0-only and (gpl-3.0-only with qt-gpl-exception-1.0) and lgpl-3.0-only,2026-07-21T21:08:14Z
+qt3d,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause and mit,2026-07-21T21:08:14Z
+qt5compat,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-2-clause and bsd-3-clause,2026-07-21T21:08:14Z
+qt@5,gfdl-1.3-only and gpl-2.0-only and gpl-3.0-only and lgpl-2.1-only and lgpl-3.0-only,2026-07-21T21:08:14Z
+qtbase,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and (gpl-3.0-only with qt-gpl-exception-1.0) and bsd-3-clause and gfdl-1.3-no-invariants-only,2026-07-21T21:08:14Z
+qtcanvaspainter,gpl-3.0-only and (gpl-3.0-only with qt-gpl-exception-1.0) and bsd-3-clause and zlib,2026-07-21T21:08:14Z
+qtcharts,gpl-3.0-only and bsd-3-clause,2026-07-21T21:08:14Z
+qtconnectivity,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qtdatavis3d,gpl-3.0-only and bsd-3-clause,2026-07-21T21:08:14Z
+qtdeclarative,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and (gpl-3.0-only with qt-gpl-exception-1.0) and bsd-2-clause and bsd-3-clause,2026-07-21T21:08:14Z
+qtgraphs,gpl-3.0-only and bsd-3-clause,2026-07-21T21:08:14Z
+qtgrpc,gpl-3.0-only and (lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and (gpl-3.0-only with qt-gpl-exception-1.0) and bsd-3-clause,2026-07-21T21:08:14Z
+qthttpserver,gpl-3.0-only and bsd-3-clause,2026-07-21T21:08:14Z
+qtimageformats,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qtlanguageserver,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qtlocation,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qtlottie,gpl-3.0-only and bsd-3-clause,2026-07-21T21:08:14Z
+qtmultimedia,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and (mpl-2.0 and bsd-3-clause) and apache-2.0 and bsd-3-clause and gpl-3.0-only and mit,2026-07-21T21:08:14Z
+qtnetworkauth,gpl-3.0-only and bsd-3-clause,2026-07-21T21:08:14Z
+qtpositioning,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause and bsl-1.0 and mit,2026-07-21T21:08:14Z
+qtquick3d,gpl-3.0-only and (gpl-3.0-only with qt-gpl-exception-1.0) and apache-2.0 and bsd-3-clause and mit,2026-07-21T21:08:14Z
+qtquick3dphysics,gpl-3.0-only and (gpl-3.0-only with qt-gpl-exception-1.0) and bsd-3-clause,2026-07-21T21:08:14Z
+qtquickeffectmaker,(gpl-3.0-only with qt-gpl-exception-1.0) and bsd-3-clause,2026-07-21T21:08:14Z
+qtquicktimeline,gpl-3.0-only and bsd-3-clause,2026-07-21T21:08:14Z
+qtremoteobjects,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and (gpl-3.0-only with qt-gpl-exception-1.0) and bsd-3-clause,2026-07-21T21:08:14Z
+qtscxml,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and (gpl-3.0-only with qt-gpl-exception-1.0) and bsd-3-clause,2026-07-21T21:08:14Z
+qtsensors,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qtserialbus,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and (gpl-3.0-only with qt-gpl-exception-1.0) and bsd-3-clause,2026-07-21T21:08:14Z
+qtserialport,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qtshadertools,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and (gpl-3.0-only with qt-gpl-exception-1.0) and (apache-2.0 and mit-khronos-old) and (bsd-3-clause and mit-khronos-old and apache-2.0 and aml-glslang and (gpl-3.0-or-later with bison-exception-2.2)) and bsd-3-clause,2026-07-21T21:08:14Z
+qtspeech,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qtsvg,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qttasktree,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qttools,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and (gpl-3.0-only with qt-gpl-exception-1.0) and bsd-3-clause and bsl-1.0,2026-07-21T21:08:14Z
+qttranslations,bsd-3-clause,2026-07-21T21:08:14Z
+qtvirtualkeyboard,gpl-3.0-only and apache-2.0 and bsd-3-clause,2026-07-21T21:08:14Z
+qtwebchannel,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qtwebengine,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and (gpl-3.0-only with qt-gpl-exception-1.0) and bsd-3-clause and apache-2.0 and blessing and bsd-2-clause and lgpl-2.1-or-later and libpng-2.0 and mit and mpl-1.1 and ncl and sgi-b-2.0 and sunpro and zlib and licenseref-homebrew-public-domain,2026-07-21T21:08:14Z
+qtwebsockets,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qtwebview,(lgpl-3.0-only or gpl-2.0-only or gpl-3.0-only) and bsd-3-clause,2026-07-21T21:08:14Z
+qwen-code,apache-2.0,2026-07-21T21:08:14Z
+qwt-qt5,lgpl-2.1-only with qwt-exception-1.0,2026-07-21T21:08:14Z
+r,gpl-2.0-or-later,2026-07-21T21:08:14Z
+rabbitmq,mpl-2.0,2026-07-21T21:08:14Z
+ranger,gpl-3.0-or-later,2026-07-21T21:08:14Z
+rapidjson,mit,2026-07-21T21:08:14Z
+rav1e,bsd-2-clause,2026-07-21T21:08:14Z
+rbenv,mit,2026-07-21T21:08:14Z
+rclone,mit,2026-07-21T21:08:14Z
+re2,bsd-3-clause,2026-07-21T21:08:14Z
+re2c,licenseref-homebrew-public-domain,2026-07-21T21:08:14Z
+readline,gpl-3.0-or-later,2026-07-21T21:08:14Z
+redis,agpl-3.0-only and bsd-2-clause and bsl-1.0 and mit and (cc0-1.0 or bsd-2-clause),2026-07-21T21:08:14Z
+rename,artistic-1.0-perl or gpl-1.0-or-later,2026-07-21T21:08:14Z
+renovate,agpl-3.0-only,2026-07-21T21:08:14Z
+ripgrep,unlicense,2026-07-21T21:08:14Z
+rlwrap,gpl-2.0-or-later,2026-07-21T21:08:14Z
+rpds-py,mit,2026-07-21T21:08:14Z
+rpm,gpl-2.0-or-later and lgpl-2.0-or-later,2026-07-21T21:08:14Z
+rsync,gpl-3.0-or-later,2026-07-21T21:08:14Z
+rtmpdump,gpl-2.0-or-later and lgpl-2.1-or-later,2026-07-21T21:08:14Z
+rubberband,gpl-2.0-or-later,2026-07-21T21:08:14Z
+ruby,ruby,2026-07-21T21:08:14Z
+ruby-build,mit,2026-07-21T21:08:14Z
+ruby-install,mit,2026-07-21T21:08:14Z
+ruby@3.1,ruby,2026-07-21T21:08:14Z
+ruff,mit,2026-07-21T21:08:14Z
+rust,apache-2.0 or mit,2026-07-21T21:08:14Z
+rust-analyzer,apache-2.0 or mit,2026-07-21T21:08:14Z
+rustup,apache-2.0 or mit,2026-07-21T21:08:14Z
+s-lang,gpl-2.0-or-later,2026-07-21T21:08:14Z
+s2n,apache-2.0,2026-07-21T21:08:14Z
+s3cmd,gpl-2.0-or-later,2026-07-21T21:08:14Z
+samba,gpl-3.0-or-later,2026-07-21T21:08:14Z
+saml2aws,mit,2026-07-21T21:08:14Z
+sane-backends,gpl-2.0-or-later,2026-07-21T21:08:14Z
+sbcl,licenseref-homebrew-public-domain and mit and xerox and bsd-3-clause,2026-07-21T21:08:14Z
+sbt,apache-2.0,2026-07-21T21:08:14Z
+scala,apache-2.0,2026-07-21T21:08:14Z
+scala-cli,apache-2.0,2026-07-21T21:08:14Z
+sccache,apache-2.0,2026-07-21T21:08:14Z
+scipy,bsd-3-clause,2026-07-21T21:08:14Z
+scons,mit,2026-07-21T21:08:14Z
+scrcpy,apache-2.0,2026-07-21T21:08:14Z
+screen,gpl-3.0-or-later,2026-07-21T21:08:14Z
+screenresolution,gpl-2.0-only,2026-07-21T21:08:14Z
+sdl12-compat,zlib and mit-0,2026-07-21T21:08:14Z
+sdl2-compat,zlib,2026-07-21T21:08:14Z
+sdl2_image,zlib,2026-07-21T21:08:14Z
+sdl2_mixer,zlib,2026-07-21T21:08:14Z
+sdl2_ttf,zlib,2026-07-21T21:08:14Z
+sdl3,zlib,2026-07-21T21:08:14Z
+sdl3_ttf,zlib,2026-07-21T21:08:14Z
+selenium-server,apache-2.0,2026-07-21T21:08:14Z
+semgrep,lgpl-2.1-only,2026-07-21T21:08:14Z
+serverless,mit,2026-07-21T21:08:14Z
+sevenzip,lgpl-2.1-or-later and bsd-3-clause,2026-07-21T21:08:14Z
+sfcgal,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+shaderc,apache-2.0,2026-07-21T21:08:14Z
+shared-mime-info,gpl-2.0-only,2026-07-21T21:08:14Z
+shellcheck,gpl-3.0-or-later,2026-07-21T21:08:14Z
+shfmt,bsd-3-clause,2026-07-21T21:08:14Z
+simdjson,apache-2.0,2026-07-21T21:08:14Z
+simdutf,apache-2.0 or mit,2026-07-21T21:08:14Z
+sip,bsd-2-clause,2026-07-21T21:08:14Z
+six,mit,2026-07-21T21:08:14Z
+skaffold,apache-2.0,2026-07-21T21:08:14Z
+skopeo,apache-2.0,2026-07-21T21:08:14Z
+sleef,bsl-1.0,2026-07-21T21:08:14Z
+slirp4netns,gpl-2.0-or-later,2026-07-21T21:08:14Z
+smartmontools,gpl-2.0-or-later,2026-07-21T21:08:14Z
+snappy,bsd-3-clause,2026-07-21T21:08:14Z
+snyk-cli,apache-2.0,2026-07-21T21:08:14Z
+soapyrtlsdr,mit,2026-07-21T21:08:14Z
+soapysdr,bsl-1.0,2026-07-21T21:08:14Z
+socat,gpl-2.0-only,2026-07-21T21:08:14Z
+solidity,gpl-3.0-or-later and mit and bsd-3-clause and apache-2.0 and cc0-1.0,2026-07-21T21:08:14Z
+sonar-scanner,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+sops,mpl-2.0,2026-07-21T21:08:14Z
+source-highlight,gpl-3.0-or-later,2026-07-21T21:08:14Z
+sourcekitten,mit,2026-07-21T21:08:14Z
+sourcery,mit,2026-07-21T21:08:14Z
+sox,gpl-2.0-or-later and lgpl-2.1-or-later,2026-07-21T21:08:14Z
+spaceship,mit,2026-07-21T21:08:14Z
+spdlog,mit,2026-07-21T21:08:14Z
+speedtest-cli,apache-2.0,2026-07-21T21:08:14Z
+speex,bsd-3-clause,2026-07-21T21:08:14Z
+speexdsp,bsd-3-clause,2026-07-21T21:08:14Z
+sphinx-doc,bsd-2-clause,2026-07-21T21:08:14Z
+spice-gtk,gpl-2.0-or-later and lgpl-2.1-or-later and bsd-3-clause,2026-07-21T21:08:14Z
+spice-protocol,bsd-3-clause,2026-07-21T21:08:14Z
+spirv-headers,mit,2026-07-21T21:08:14Z
+spirv-llvm-translator,apache-2.0 with llvm-exception,2026-07-21T21:08:14Z
+spirv-tools,apache-2.0,2026-07-21T21:08:14Z
+sqlite,blessing,2026-07-21T21:08:14Z
+sqlmap,gpl-2.0-or-later,2026-07-21T21:08:14Z
+srt,mpl-2.0,2026-07-21T21:08:14Z
+srtp,bsd-3-clause,2026-07-21T21:08:14Z
+ssh-copy-id,ssh-openssh,2026-07-21T21:08:14Z
+sshpass,gpl-2.0-only,2026-07-21T21:08:14Z
+sshuttle,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+starship,isc,2026-07-21T21:08:14Z
+step,apache-2.0,2026-07-21T21:08:14Z
+stern,apache-2.0,2026-07-21T21:08:14Z
+stoken,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+stow,gpl-3.0-or-later,2026-07-21T21:08:14Z
+streamlink,bsd-2-clause,2026-07-21T21:08:14Z
+subversion,apache-2.0,2026-07-21T21:08:14Z
+suite-sparse,bsd-3-clause and lgpl-2.1-or-later and gpl-2.0-or-later and apache-2.0 and gpl-3.0-only and (lgpl-3.0-or-later or gpl-2.0-or-later),2026-07-21T21:08:14Z
+sundials,bsd-3-clause,2026-07-21T21:08:14Z
+svt-av1,bsd-3-clause,2026-07-21T21:08:14Z
+swagger-codegen,apache-2.0,2026-07-21T21:08:14Z
+swi-prolog,bsd-2-clause,2026-07-21T21:08:14Z
+swift-format,apache-2.0,2026-07-21T21:08:14Z
+swift-protobuf,apache-2.0,2026-07-21T21:08:14Z
+swift-sh,unlicense,2026-07-21T21:08:14Z
+swiftformat,mit,2026-07-21T21:08:14Z
+swiftgen,mit,2026-07-21T21:08:14Z
+swiftlint,mit,2026-07-21T21:08:14Z
+swig,gpl-3.0-or-later,2026-07-21T21:08:14Z
+syncthing,mpl-2.0,2026-07-21T21:08:14Z
+systemd,lgpl-2.1-or-later and gpl-2.0-or-later and cc0-1.0 and lgpl-2.0-or-later and mit and mit-0 and licenseref-homebrew-public-domain and (lgpl-2.0-or-later with linux-syscall-note) and (gpl-1.0-or-later with linux-syscall-note) and (gpl-2.0-or-later with linux-syscall-note) and (gpl-2.0-only with linux-syscall-note) and (bsd-3-clause or (gpl-2.0-only with linux-syscall-note)) and (mit or (gpl-2.0-only with linux-syscall-note)) and (mit or (gpl-2.0-or-later with linux-syscall-note)) and (gpl-2.0-only or bsd-2-clause),2026-07-21T21:08:14Z
+ta-lib,bsd-3-clause,2026-07-21T21:08:14Z
+taglib,lgpl-2.1-only or mpl-1.1,2026-07-21T21:08:14Z
+tailscale,bsd-3-clause,2026-07-21T21:08:14Z
+talhelper,bsd-3-clause,2026-07-21T21:08:14Z
+talisman,mit,2026-07-21T21:08:14Z
+talloc,gpl-3.0-or-later,2026-07-21T21:08:14Z
+talosctl,mpl-2.0,2026-07-21T21:08:14Z
+tbb,apache-2.0,2026-07-21T21:08:14Z
+tcl-tk,tcl,2026-07-21T21:08:14Z
+tcl-tk@8,tcl,2026-07-21T21:08:14Z
+tdb,lgpl-3.0-or-later and gpl-3.0-or-later,2026-07-21T21:08:14Z
+tealdeer,apache-2.0 or mit,2026-07-21T21:08:14Z
+teleport,agpl-3.0-or-later and apache-2.0,2026-07-21T21:08:14Z
+television,mit,2026-07-21T21:08:14Z
+telnet,bsd-4-clause-uc and apsl-1.0,2026-07-21T21:08:14Z
+terminal-notifier,mit,2026-07-21T21:08:14Z
+terraform-docs,mit,2026-07-21T21:08:14Z
+terragrunt,mit,2026-07-21T21:08:14Z
+tesseract,apache-2.0,2026-07-21T21:08:14Z
+tesseract-lang,apache-2.0,2026-07-21T21:08:14Z
+testdisk,gpl-2.0-or-later,2026-07-21T21:08:14Z
+tevent,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+texinfo,gpl-3.0-or-later,2026-07-21T21:08:14Z
+texlive,licenseref-homebrew-cannot-represent,2026-07-21T21:08:14Z
+tfenv,mit,2026-07-21T21:08:14Z
+tfsec,mit,2026-07-21T21:08:14Z
+the_silver_searcher,apache-2.0,2026-07-21T21:08:14Z
+thefuck,mit,2026-07-21T21:08:14Z
+theora,bsd-3-clause,2026-07-21T21:08:14Z
+thrift,apache-2.0,2026-07-21T21:08:14Z
+tidy-html5,zlib,2026-07-21T21:08:14Z
+tig,gpl-2.0-or-later,2026-07-21T21:08:14Z
+tilt,apache-2.0,2026-07-21T21:08:14Z
+tinyxml2,zlib,2026-07-21T21:08:14Z
+tldr,mit,2026-07-21T21:08:14Z
+tlrc,mit,2026-07-21T21:08:14Z
+tmux,isc,2026-07-21T21:08:14Z
+tomcat,apache-2.0,2026-07-21T21:08:14Z
+tomcat@9,apache-2.0,2026-07-21T21:08:14Z
+topgrade,gpl-3.0-or-later,2026-07-21T21:08:14Z
+tor,bsd-2-clause and bsd-3-clause and mit and ncsa,2026-07-21T21:08:14Z
+tox,mit,2026-07-21T21:08:14Z
+transmission-cli,gpl-2.0-only or gpl-3.0-only,2026-07-21T21:08:14Z
+tree,gpl-2.0-or-later,2026-07-21T21:08:14Z
+tree-sitter,mit,2026-07-21T21:08:14Z
+tree-sitter@0.25,mit,2026-07-21T21:08:14Z
+trivy,apache-2.0,2026-07-21T21:08:14Z
+trufflehog,agpl-3.0-only,2026-07-21T21:08:14Z
+typescript,apache-2.0,2026-07-21T21:08:14Z
+uchardet,mpl-1.1 or gpl-2.0-or-later or lgpl-2.1-or-later,2026-07-21T21:08:14Z
+ugrep,bsd-3-clause,2026-07-21T21:08:14Z
+uhd,gpl-3.0-or-later and lgpl-3.0-or-later and mit and bsd-3-clause and apache-2.0,2026-07-21T21:08:14Z
+unar,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+unbound,bsd-3-clause,2026-07-21T21:08:14Z
+unibilium,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+universal-ctags,gpl-2.0-or-later,2026-07-21T21:08:14Z
+unixodbc,lgpl-2.1-or-later and gpl-2.0-or-later,2026-07-21T21:08:14Z
+unpaper,gpl-2.0-or-later,2026-07-21T21:08:14Z
+unzip,info-zip,2026-07-21T21:08:14Z
+upx,gpl-2.0-or-later,2026-07-21T21:08:14Z
+uriparser,bsd-3-clause,2026-07-21T21:08:14Z
+usage,mit,2026-07-21T21:08:14Z
+usb.ids,gpl-2.0-or-later or bsd-3-clause,2026-07-21T21:08:14Z
+usbredir,gpl-2.0-or-later and lgpl-2.0-or-later,2026-07-21T21:08:14Z
+userspace-rcu,lgpl-2.1-or-later and mit,2026-07-21T21:08:14Z
+utf8cpp,bsl-1.0,2026-07-21T21:08:14Z
+utf8proc,mit and unicode-dfs-2015,2026-07-21T21:08:14Z
+uthash,bsd-1-clause,2026-07-21T21:08:14Z
+util-linux,bsd-3-clause and bsd-4-clause-uc and gpl-2.0-only and gpl-2.0-or-later and gpl-3.0-or-later and lgpl-2.1-or-later and licenseref-homebrew-public-domain,2026-07-21T21:08:14Z
+util-macros,mit,2026-07-21T21:08:14Z
+uutils-coreutils,mit,2026-07-21T21:08:14Z
+uutils-findutils,mit,2026-07-21T21:08:14Z
+uv,apache-2.0 or mit,2026-07-21T21:08:14Z
+uvwasi,mit,2026-07-21T21:08:14Z
+vala,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+vale,mit,2026-07-21T21:08:14Z
+valgrind,gpl-2.0-or-later,2026-07-21T21:08:14Z
+vapoursynth,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+vde,gpl-2.0-or-later and lgpl-2.1-or-later,2026-07-21T21:08:14Z
+velero,apache-2.0,2026-07-21T21:08:14Z
+vim,vim,2026-07-21T21:08:14Z
+vips,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+virt-manager,gpl-2.0-or-later,2026-07-21T21:08:14Z
+virtualenv,mit,2026-07-21T21:08:14Z
+vite,mit,2026-07-21T21:08:14Z
+volk,lgpl-3.0-or-later,2026-07-21T21:08:14Z
+vte3,lgpl-2.0-or-later,2026-07-21T21:08:14Z
+vtk,bsd-3-clause,2026-07-21T21:08:14Z
+vulkan-headers,apache-2.0,2026-07-21T21:08:14Z
+vulkan-loader,apache-2.0,2026-07-21T21:08:14Z
+wangle,apache-2.0,2026-07-21T21:08:14Z
+watch,gpl-2.0-or-later and lgpl-2.1-or-later,2026-07-21T21:08:14Z
+watchman,mit,2026-07-21T21:08:14Z
+wavpack,bsd-3-clause,2026-07-21T21:08:14Z
+wayland,mit,2026-07-21T21:08:14Z
+wayland-protocols,mit,2026-07-21T21:08:14Z
+webp,bsd-3-clause,2026-07-21T21:08:14Z
+websocat,mit,2026-07-21T21:08:14Z
+wget,gpl-3.0-or-later,2026-07-21T21:08:14Z
+wimlib,gpl-3.0-or-later,2026-07-21T21:08:14Z
+winetricks,lgpl-2.1-or-later,2026-07-21T21:08:14Z
+wireguard-go,mit,2026-07-21T21:08:14Z
+wireguard-tools,gpl-2.0-only,2026-07-21T21:08:14Z
+wireshark,gpl-2.0-or-later,2026-07-21T21:08:14Z
+woff2,mit,2026-07-21T21:08:14Z
+wxwidgets,lgpl-2.0-or-later with wxwindows-exception-3.1,2026-07-21T21:08:14Z
+wxwidgets@3.2,lgpl-2.0-or-later with wxwindows-exception-3.1,2026-07-21T21:08:14Z
+x264,gpl-2.0-or-later,2026-07-21T21:08:14Z
+x265,gpl-2.0-or-later,2026-07-21T21:08:14Z
+xauth,mit-open-group,2026-07-21T21:08:14Z
+xcb-proto,mit,2026-07-21T21:08:14Z
+xcb-util,mit,2026-07-21T21:08:14Z
+xcb-util-image,x11,2026-07-21T21:08:14Z
+xcb-util-keysyms,x11,2026-07-21T21:08:14Z
+xcb-util-renderutil,x11 and hpnd-sell-variant,2026-07-21T21:08:14Z
+xcb-util-wm,x11,2026-07-21T21:08:14Z
+xcbeautify,mit,2026-07-21T21:08:14Z
+xclogparser,apache-2.0,2026-07-21T21:08:14Z
+xcodegen,mit,2026-07-21T21:08:14Z
+xcodes,mit,2026-07-21T21:08:14Z
+xcresultparser,mit,2026-07-21T21:08:14Z
+xctesthtmlreport,mit,2026-07-21T21:08:14Z
+xerces-c,apache-2.0,2026-07-21T21:08:14Z
+xinput,mit,2026-07-21T21:08:14Z
+xkbcomp,hpnd and mit-open-group,2026-07-21T21:08:14Z
+xkeyboard-config,mit,2026-07-21T21:08:14Z
+xmlstarlet,mit,2026-07-21T21:08:14Z
+xmlto,gpl-2.0-or-later,2026-07-21T21:08:14Z
+xorg-server,mit and apsl-2.0,2026-07-21T21:08:14Z
+xorgproto,mit,2026-07-21T21:08:14Z
+xsimd,bsd-3-clause,2026-07-21T21:08:14Z
+xtrans,mit,2026-07-21T21:08:14Z
+xvid,gpl-2.0-or-later,2026-07-21T21:08:14Z
+xxhash,bsd-2-clause and gpl-2.0-or-later,2026-07-21T21:08:14Z
+xz,0bsd and gpl-2.0-or-later,2026-07-21T21:08:14Z
+yajl,isc,2026-07-21T21:08:14Z
+yamllint,gpl-3.0-or-later,2026-07-21T21:08:14Z
+yara,bsd-3-clause,2026-07-21T21:08:14Z
+yarn,bsd-2-clause,2026-07-21T21:08:14Z
+yasm,bsd-2-clause and bsd-3-clause and licenseref-homebrew-public-domain and (artistic-1.0-perl or gpl-2.0-or-later or lgpl-2.0-or-later),2026-07-21T21:08:14Z
+yazi,mit,2026-07-21T21:08:14Z
+ykman,bsd-2-clause,2026-07-21T21:08:14Z
+yq,mit,2026-07-21T21:08:14Z
+yt-dlp,unlicense,2026-07-21T21:08:14Z
+yuicompressor,bsd-3-clause,2026-07-21T21:08:14Z
+yyjson,mit,2026-07-21T21:08:14Z
+z3,mit,2026-07-21T21:08:14Z
+zabbix,agpl-3.0-only,2026-07-21T21:08:14Z
+zbar,lgpl-2.1-only,2026-07-21T21:08:14Z
+zellij,mit,2026-07-21T21:08:14Z
+zeromq,mpl-2.0,2026-07-21T21:08:14Z
+zig,mit,2026-07-21T21:08:14Z
+zimg,wtfpl,2026-07-21T21:08:14Z
+zip,info-zip,2026-07-21T21:08:14Z
+zizmor,mit,2026-07-21T21:08:14Z
+zlib,zlib,2026-07-21T21:08:14Z
+zlib-ng-compat,zlib,2026-07-21T21:08:14Z
+zookeeper,apache-2.0,2026-07-21T21:08:14Z
+zoxide,mit,2026-07-21T21:08:14Z
+zsh,mit-modern-variant and gpl-2.0-only and gpl-2.0-or-later and isc,2026-07-21T21:08:14Z
+zsh-async,mit,2026-07-21T21:08:14Z
+zsh-autosuggestions,mit,2026-07-21T21:08:14Z
+zsh-completions,mit-modern-variant and bsd-3-clause and mit and apache-2.0 and isc and ncsa,2026-07-21T21:08:14Z
+zsh-syntax-highlighting,bsd-3-clause,2026-07-21T21:08:14Z
+zstd,(bsd-3-clause or gpl-2.0-only) and bsd-2-clause and mit,2026-07-21T21:08:14Z

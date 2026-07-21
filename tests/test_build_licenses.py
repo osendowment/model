@@ -114,6 +114,73 @@ class TestLicenseOverrides:
         assert out.get("gh/27193779") == "mit"       # nodejs/node (namespaced repo_id)
 
 
+class TestRegistryCacheFallback:
+    """The value stage's `process` step rewrites data/sources/<eco>/results.csv
+    and drops its `license` column. The durable per-eco cache at
+    raw/licenses.csv then carries the registry license, so 900 registry
+    verdicts don't collapse to blanks and weaker GitHub fallbacks."""
+
+    def _eco(self, root, eco, rows, *, license_column, cache=None):
+        """Write one ecosystem's results.csv (+ optional raw/licenses.csv).
+
+        `rows` is [(package, github_repo, license)]; `cache` is
+        [(package, license)] or None for "no cache on disk".
+        """
+        d = root / "sources" / eco
+        (d / "raw").mkdir(parents=True, exist_ok=True)
+        fields = ["package", "github_repo"] + (["license"] if license_column else [])
+        with open(d / "results.csv", "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+            w.writeheader()
+            for pkg, slug, lic in rows:
+                w.writerow({"package": pkg, "github_repo": slug, "license": lic})
+        if cache is not None:
+            with open(d / "raw" / "licenses.csv", "w", newline="",
+                      encoding="utf-8") as f:
+                w = csv.DictWriter(f, fieldnames=["package", "license", "fetched_at"])
+                w.writeheader()
+                for pkg, lic in cache:
+                    w.writerow({"package": pkg, "license": lic,
+                                "fetched_at": "2026-07-21T00:00:00Z"})
+
+    @pytest.fixture
+    def data_dir(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(bl, "DATA_DIR", tmp_path)
+        monkeypatch.setattr(bl, "canonical_repo_map", lambda: {})
+        monkeypatch.setattr(bl, "ECOSYSTEMS", ("npm",))
+        return tmp_path
+
+    def test_column_present_wins_over_cache(self, data_dir):
+        # Normal case: the column is authoritative, the cache is not read.
+        self._eco(data_dir, "npm", [("left-pad", "stevemao/left-pad", "mit")],
+                  license_column=True, cache=[("left-pad", "apache-2.0")])
+        assert bl.load_registry_licenses() == {"stevemao/left-pad": "mit"}
+
+    def test_column_absent_falls_back_to_cache(self, data_dir):
+        self._eco(data_dir, "npm", [("left-pad", "stevemao/left-pad", "")],
+                  license_column=False, cache=[("left-pad", "mit")])
+        assert bl.load_registry_licenses() == {"stevemao/left-pad": "mit"}
+
+    def test_column_absent_and_no_cache_skips_ecosystem(self, data_dir):
+        self._eco(data_dir, "npm", [("left-pad", "stevemao/left-pad", "")],
+                  license_column=False, cache=None)
+        assert bl.load_registry_licenses() == {}
+
+    def test_cache_fallback_keeps_monorepo_tiebreak(self, data_dir):
+        # Same repo, three packages: most common wins, ties break alphabetically.
+        self._eco(data_dir, "npm",
+                  [("a", "acme/mono", ""), ("b", "acme/mono", ""),
+                   ("c", "acme/mono", "")],
+                  license_column=False,
+                  cache=[("a", "MIT"), ("b", "apache-2.0"), ("c", "mit")])
+        assert bl.load_registry_licenses() == {"acme/mono": "mit"}
+
+    def test_cache_misses_leave_the_repo_unlicensed(self, data_dir):
+        self._eco(data_dir, "npm", [("left-pad", "stevemao/left-pad", "")],
+                  license_column=False, cache=[("other-pkg", "mit")])
+        assert bl.load_registry_licenses() == {}
+
+
 class TestSourcePrecedence:
     def _build(self, monkeypatch, *, registry=None, github=None, gitlab=None,
                overrides=None):
