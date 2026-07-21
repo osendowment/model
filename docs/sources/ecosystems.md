@@ -1,14 +1,13 @@
 # ecosyste.ms
 
 [ecosyste.ms](https://ecosyste.ms) is a cross-registry index of open-source packages and
-repositories. The model uses four connectors/extractors against it, all under
-`src/sources/ecosystems/`.
+repositories. The model runs four connectors against it, all under `src/sources/ecosystems/`.
 
-> **Status:** the criticality connector's `critical` flag now feeds the **Value** stage as
-> `value.csv`'s `eco_crit` column — the 0.2-weight component of `value_score`, and the only
-> importance signal GitLab class-A repos carry (see [value.md](../value.md), applied by
-> `src.value.apply_criticality`). Coverage counts live in the preview pipeline sheet; this page
-> describes **how** the data is fetched, not **how many**.
+The criticality connector's `critical` flag feeds the **Value** stage as `value.csv`'s
+`eco_crit` column — the 0.2-weight component of `value_score`, and the only importance signal
+GitLab class-A repos carry (see [value.md](../value.md); applied by
+`src.value.apply_criticality`). Coverage counts live in the preview pipeline sheet — this page
+describes **how** the data is fetched, not **how many**.
 
 ## Packages connector (URL backfill)
 
@@ -133,5 +132,16 @@ would silently regress cpp rankings to 100 (see `_cache_path` in `criticality.py
 
 ### Scripts
 
-- `uv run python -m src.sources.ecosystems.criticality` — class-A by default.
-- `--classes A B` / `--limit N` / `--ttl 0` / `--concurrency N`.
+| Module | Writes |
+|---|---|
+| `src.sources.ecosystems.packages` | `{eco}/packages.csv` — URL backfill for packages with no repo |
+| `src.sources.ecosystems.candidates` | `packages.csv` — the cross-ecosystem class-A index |
+| `src.sources.ecosystems.fetch_maintainers` | `maintainers.csv` — from the cached JSON, no network |
+| `src.sources.ecosystems.criticality` | `criticality.csv` — class-A by default; `--classes A B` / `--limit N` / `--ttl 0` / `--concurrency N` |
+
+```bash
+uv run python -m src.sources.ecosystems.packages
+uv run python -m src.sources.ecosystems.candidates
+uv run python -m src.sources.ecosystems.fetch_maintainers
+uv run python -m src.sources.ecosystems.criticality
+```

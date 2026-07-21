@@ -33,18 +33,30 @@ Writes:
                                             score: 0 known CVEs → 50, ≥1 CVE
                                             ranked into (50, 100], worst → 100)
         score,                              (max of openssf_score_p and
-                                            cve_score; "" if either
-                                            openssf_score or cve_count_5y missing)
+                                            cve_score over whichever axes are
+                                            present; "" only when BOTH are)
         fetched_at                          (checked_at of openssf row used)
 
 Latest-sha picker
 -----------------
 For each long file, we walk per-repo year priority 2025→2024→…→2021 from
 `commits-years.csv` and pick the first sha that has any rows in that file.
-This keeps the build aligned with the same "snapshot year" convention used
-by build_complexity. If commits-years has no usable year for a repo, we
-fall back to any sha present in the long file for that repo (deterministic
-lexicographic pick).
+If commits-years has no usable year for a repo, we fall back to any sha
+present in the long file for that repo (deterministic lexicographic pick).
+
+This is NOT the same picker build_complexity uses. Both take years with a
+non-empty `last_sha` and `commits > 0`, then differ:
+
+  - here, `_per_year_shas` clamps to the settings `years` window, so a
+    pre-window snapshot is unreachable;
+  - build_complexity keeps EVERY real year, letting a dormant repo fall back
+    to a pre-window snapshot, and additionally requires scc `loc > 0`;
+  - the no-usable-year fallback differs too: lexicographic sha here, the
+    empty-tree sha there.
+
+A Scorecard scan is a point-in-time audit, so an in-window snapshot is the
+only meaningful one — an old scan does not describe today's repo. LOC is
+cumulative, so complexity gains from walking further back.
 
 Security score
 --------------

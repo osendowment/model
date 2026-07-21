@@ -1,17 +1,23 @@
 # Eligibility Pipeline
 
-Stage 3 of the pipeline (Value → Risk → **Eligibility**). Takes the top
-repos and answers one question per repo: **is it eligible for funding?**
+The last scoring stage (Value → Risk → **Eligibility**). It takes the top
+repos and answers one question per repo: **is it eligible for funding?** The
+`preview` and `health` stages run after it but score nothing.
 
 It is a **fully automated pipeline stage**, not a manual review: every check is
 computed by a builder from fetched sources plus the curated override files in
 `data/eligibility/`. Four independent checks, one AND-rollup — a plain AND of
-four booleans, no weights. Ineligible repos stay in the table with the failing
-flag visible:
+four booleans, no weights:
 
 ```
 eligible = oss AND intent AND nonprofit AND active
 ```
+
+**The stage flags; it never drops.** `eligibility.csv` holds one row per top
+repo, and `data/preview/repos.csv` holds the same population. An ineligible
+repo keeps its row, with `eligible=False` and the failing check both visible.
+Row counts therefore stay identical across the stages, and "filtering" is a
+downstream choice — filter on `eligible` when you want candidates only.
 
 | Check | Meaning | Built by | Output |
 |---|---|---|---|
@@ -44,6 +50,9 @@ default** — every stage shares this one scope. Archived repos appear in the
 stage output as `active=False`, so the reason for their ineligibility is
 visible rather than silently dropped before the stage runs.
 
+This class-A set is also called the **core** —
+[value.md](value.md#pipeline-overview) defines it.
+
 ## Metrics Roadmap
 
 ```
@@ -72,7 +81,7 @@ Eligibility
 │
 ├── intent + nonprofit — Funding (→ funding.csv, see components/funding.md)
 │   ├── GitHub Sponsors in/out, FUNDING.yml, funding.json, npm/PyPI
-│   │   funding fields, bus-factor-maintainer Sponsors, Open Collective budgets
+│   │   funding fields, bus factor maintainer Sponsors, Open Collective budgets
 │   ├── GitLab funding files        ← data/sources/gitlab/funding-files.csv
 │   │                                 (FUNDING.yml / funding.json probed in-repo —
 │   │                                  the GitLab twin of github/funding-yml.csv)
@@ -135,23 +144,30 @@ stays distinguishable from known-non-OSS. The rollup treats only
 
 ### `intent` and `nonprofit` — funding signals
 
-Built by `build_funding` (full methodology, score formula and worked examples in
-[components/funding.md](components/funding.md)). `intent` is True when the
-repo shows at least one funding signal: the owner's GitHub Sponsors
-listing being enabled (any inbound sponsor count implies it; outbound
-sponsoring feeds only the score, NOT intent), a declared channel
-(FUNDING.yml — a resolved funding link or the file's mere presence,
-funding.json — repo- or org-level, npm/PyPI funding field, a real Open
-Collective, a curated PayPal.me handle), a bus-factor maintainer with a
-personal Sponsors listing (union of the fetched listings and the curated
-`maintainer-overrides.csv`), or an institutional host/owner. `intent` then
-propagates at the owner level: once any repo an owner has in scope
-self-declares a channel, every repo of that owner gets `intent=True`
-(GitHub's own org-`.github`/personal-Sponsors semantics — see
-[components/funding.md](components/funding.md)). `nonprofit` defaults True and flips False only
-when a curated/scraped `company` host or owner backs the repo — those
-repos are already resourced, so they are ineligible but stay visible in
-the table.
+Both flags come from `build_funding`. Full methodology, score formula and
+worked examples are in [components/funding.md](components/funding.md).
+
+`intent` is True on any one funding signal:
+
+- the owner's GitHub Sponsors listing is enabled (any inbound count implies it;
+  outbound sponsoring feeds the score only, never intent);
+- a declared channel — a FUNDING.yml resolved link or the file's mere presence,
+  a repo- or org-level funding.json, an npm/PyPI funding field, a real Open
+  Collective, a curated PayPal.me handle;
+- a bus factor maintainer with a personal Sponsors listing (the fetched
+  listings ∪ the curated `maintainer-overrides.csv`);
+- an institutional host or owner.
+
+`intent` then propagates at the owner level: once any repo an owner has in
+scope self-declares a channel, every repo of that owner gets `intent=True`.
+This mirrors GitHub's own org-`.github`/personal-Sponsors semantics.
+
+`nonprofit` is an **exclusion rule, not proof of nonprofit status**. It
+defaults True and flips False only when a curated or scraped `company` host or
+owner backs the repo (`_nonprofit_flag` in `src/eligibility/build_funding.py`).
+A True therefore means "no corporate backer found", never "verified nonprofit".
+Company-backed repos are already resourced, so they are ineligible but stay
+visible in the table.
 
 ### `active` — not EOL, not archived
 
@@ -168,9 +184,11 @@ the table.
   is inactive, full stop. A project whose canonical upstream lives off
   GitHub is repointed at that upstream in `data/value/overrides.csv` (a
   `git_url`-only row, blank `repo` slug) so it enters the pipeline as the
-  live upstream rather than as the archived GitHub mirror — e.g. glibc
-  resolves to its Debian salsa GitLab repo and pixman to
-  gitlab.freedesktop.org, not to `bminor/glibc` / `libpixman/pixman`.
+  live upstream rather than as the archived GitHub mirror. glibc resolves
+  to `gnutools/glibc` (`git_url` on GitHub, `canonical_url`
+  `sourceware.org/git/glibc.git`) and pixman to
+  `gitlab.freedesktop.org/pixman/pixman` — not to the archived
+  `libpixman/pixman` mirror.
 
 `active = NOT eol AND NOT archived`.
 
@@ -184,8 +202,8 @@ a per-repo row always wins) — shared by three builders:
 |---|---|---|
 | `repo` | all | lowercased `owner/name` key (or `owner/*` org glob) |
 | `repo_id` | all | stable GitHub id — the actual join key (rename-proof) |
-| `host`, `host_type` | build_funding | legally-stewarding foundation/company (domain + company/nonprofit) |
-| `gh_user` | — | GitHub login (informational) |
+| `host`, `host_type` | build_funding | legally-stewarding foundation or company, as a **domain** (`rustfoundation.org`), plus `company`/`nonprofit`. Scraped rosters instead emit a roster code (`apache`, `fsf/gnu`) — see [components/funding.md](components/funding.md) |
+| `gh_user` | — | GitHub login (informational; no builder reads it) |
 | `owner`, `owner_type` | build_funding | entity owning the GitHub org |
 | `oc_slug` | build_funding | curated Open Collective slug; empty on a curated row = authoritative "no OC" |
 | `license` | build_licenses | manual SPDX assertion (highest priority) when upstream detection fails — GitHub Licensee returns `noassertion` on bundled/dual/stacked LICENSE files, or the repo ships no standard LICENSE (e.g. node=`mit`, cpython=`python-2.0`, linux=`gpl-2.0-only`, icu=`unicode-3.0`) |
@@ -200,7 +218,7 @@ Two more curated files live in `data/eligibility/`:
 
 | File | Used by | Meaning |
 |---|---|---|
-| `maintainer-overrides.csv` | build_funding | `login,reason` — bus-factor maintainers fundable through a channel the Sponsors fetch can't see; unioned into the fundable-maintainer set |
+| `maintainer-overrides.csv` | build_funding | `login,reason` — bus factor maintainers fundable through a channel the Sponsors fetch can't see; unioned into the fundable-maintainer set |
 | `gitlab-hosts.csv` | build_funding | `gitlab_host,host,host_type,reason` — a repo on an institution's OWN GitLab (salsa.debian.org → debian.org, invent.kde.org → kde.org, …) is host-backed by that institution. `gitlab.com` is deliberately absent: commercial shared hosting backs nothing |
 
 ## Outputs
@@ -232,10 +250,10 @@ and `--skip-fetch` compose with stage selection.
 Fetchers (all incremental / TTL-gated): the GitHub repo-owner refresh
 (archived flag + license fallback), the GitLab project refresh (GitLab
 license fallback), the SPDX license list + the derived OSS-approved set,
-the per-eco license and EOL fetchers, the bus-factor contributor-commit
+the per-eco license and EOL fetchers, the bus factor contributor-commit
 fetch (`bf-contributors`, serial, ahead of the funding group), the
 funding-intent fetchers (FUNDING.yml, the GitLab funding-file probe,
-npm/PyPI funding, inbound/outbound Sponsors, bus-factor maintainer Sponsors,
+npm/PyPI funding, inbound/outbound Sponsors, bus factor maintainer Sponsors,
 FLOSS Fund, the Open Collective reverse-map + budgets) and the
 FOSS-foundation roster scrapers + host matcher. Builders:
 `licenses` → `active` → `funding-build` → `aggregate`. The `data/preview/`
@@ -247,15 +265,34 @@ up all three stages, not just eligibility.
 matches its builder's current output; `scripts/stats.py` recomputes the
 preview pipeline sheet coverage tables.
 
-## The bus-factor maintainer cache
+## The bus factor maintainer cache
 
-`bf_maintainer_fundable` (an `intent` signal) is keyed off each repo's
-bus-factor set, read from `data/sources/github/contributor-commits.csv`. That
-file is written by the `bf-contributors` step
-(`src.sources.github.fetch_contributors_metrics`, 90-day per-row TTL), which
-runs serially, before the `funding` pgroup — both `maintainer-sponsors` (which
-picks which logins to query from it) and `funding-build` read its output, so
-every repo in scope has bus-factor rows before either consumer runs. The
-git-clone contributor log (`data/sources/git/contributor-commits.csv`) that
-feeds the risk stage's concentration score is a *different* file, fetched
-independently.
+`bf_maintainer_fundable` (an `intent` signal) keys off each repo's bus factor
+set in `data/sources/github/contributor-commits.csv`. The `bf-contributors`
+step (`src.sources.github.fetch_contributors_metrics`, 90-day per-row TTL)
+writes it, serially and before the `funding` pgroup, because both
+`maintainer-sponsors` and `funding-build` read it.
+
+Do not confuse it with `data/sources/git/contributor-commits.csv` — the
+git-clone contributor log that the risk stage fetches independently for the
+concentration score. Details in
+[components/funding.md](components/funding.md).
+
+## What the model hands over
+
+The pipeline ends at a **ranked shortlist**, never at a funding decision.
+`src.build_results` writes `data/preview/repos.csv` with one row per top repo.
+Two columns turn that table into a queue:
+
+- **`score`** — `sqrt(value_score × risk_score)`, the geometric mean of the
+  value and risk scores, on the same absolute 0–100 scale as its inputs. It is
+  computed for every row carrying both inputs, eligible or not.
+- **`priority`** — the eligible scored rows numbered 1, 2, 3 … by `score`
+  descending. It is blank for an ineligible row and for any row with no
+  `score`. The rank runs on the full-precision product, not on the displayed
+  2-decimal `score`.
+
+`priority` is the grant-selection queue. Everything after it is **manual and
+outside the model**: verify each project's eligibility by hand, contact the
+project leaders, then distribute the grants. The model contacts nobody and
+moves no money.

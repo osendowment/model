@@ -1,482 +1,424 @@
 # Funding (eligibility component)
 
-How well-resourced is a project? The funding component of the
-[Eligibility stage](../eligibility.md) gathers every public
-signal that a repo receives (or gives) financial support — GitHub Sponsors,
-`FUNDING.yml` platforms, the FLOSS Fund directory, npm/PyPI registry funding
-fields, OpenCollective budgets, personal Sponsors of the repo's bus-factor
-maintainers, FOSS-foundation hosting, and the curated stage overrides — and
-distills them into:
+How well-resourced is a project? This component of the
+[Eligibility stage](../eligibility.md) collects every public signal that a repo
+receives or gives financial support, then emits:
 
-1. a **funding-risk score (`score`, 1–100, higher = more at-risk)** stored in
-   `data/eligibility/funding.csv` (informational — not carried into any
-   aggregate; see below), and
-2. two boolean flags — **`intent`** and **`nonprofit`** — that
+1. a **funding-risk score** (`score`, 1–100, higher = more at-risk) in
+   `data/eligibility/funding.csv` — informational, fed into no aggregate, and
+2. two booleans — **`intent`** and **`nonprofit`** — which
    `src/eligibility/build_eligibility.py` joins into
    `data/eligibility/eligibility.csv` as two of the four eligibility checks.
 
-Scope: the top repos — valid class-A, **archived included**
-(`load_top_repos()`, which includes archived by default), so an archived repo keeps its funding
-row and surfaces downstream as `active=False` rather than being dropped
-(counts in
-the preview pipeline sheet → Eligibility → Intent and nonprofit;
-see [value.md](../value.md)).
+Scope: the top repos — valid class-A, **archived included** (`load_top_repos()`
+keeps archived rows by default). An archived repo keeps its funding row and
+surfaces downstream as `active=False`.
 Build step: `src/eligibility/build_funding.py`.
 
-## Metrics Roadmap
+## Metrics roadmap
 
-Each leaf is one column with its data source and the period it represents.
-`[most recent]` = the latest pull of that source; `[2021–2025]` = a 5-year
-window. Raw signals are fetched per-source under `data/sources/`; derived
-columns are computed by `build_funding.py`.
+Each leaf is one column with its source and period. `[most recent]` = the latest
+pull of that source; `[2021–2025]` = a 5-year window. Column meanings are in
+[Output](#dataeligibilityfundingcsv); the mechanisms are in the sections below.
 
 ```
 Funding  → data/eligibility/funding.csv  (one row per top repo, archived included)
 │
-├── GitHub Sponsors
-│   ├── gh_sponsors_enabled   ← GraphQL hasSponsorsListing on the repo OWNER (set up to receive)      [most recent]
-│   ├── gh_sponsorships_in    ← GraphQL sponsorshipsAsMaintainer (repo OWNER only — FUNDING.yml
-│   │                            co-maintainer logins deliberately NOT credited)                       [most recent]
-│   ├── gh_sponsorships_out   ← GraphQL sponsorshipsAsSponsor   (repo owner account)                  [most recent]
-│   ├── gh_sponsorships       ← derived (in + out, total engagement)                                  [most recent]
-│   └── gh_sponsorships_p     ← derived (worst-pinned CDF risk percentile of gh_sponsorships)         [most recent]
+├── GitHub Sponsors            ← github/sponsors.csv + github/sponsorships.csv
+│   ├── gh_sponsors_enabled    ← GraphQL hasSponsorsListing on the repo OWNER          [most recent]
+│   ├── gh_sponsorships_in     ← GraphQL sponsorshipsAsMaintainer (OWNER only)         [most recent]
+│   ├── gh_sponsorships_out    ← GraphQL sponsorshipsAsSponsor (owner account)         [most recent]
+│   ├── gh_sponsorships        ← derived: in + out                                     [most recent]
+│   └── gh_sponsorships_p      ← derived: worst-pinned CDF risk percentile             [most recent]
 │
-├── Funding links  (GitHub: GraphQL repository.fundingLinks — the "Sponsor" widget;
-│   │               GitLab: gitlab/funding-files.csv — FUNDING.yml variants probed
-│   │               on the default branch, same columns)
-│   ├── has_funding_links     ← GraphQL fundingLinks (resolves FUNDING.yml anywhere + org default);
-│   │                            GitLab: the probed FUNDING.yml parsed to ≥1 platform key             [most recent]
-│   ├── has_funding_yml       ← a FUNDING.yml FILE exists for the repo or its owner (even if it
-│   │                            resolves to no links — the file itself signals intent); GitLab:
-│   │                            FUNDING.yml / .github/FUNDING.yml / .gitlab/FUNDING.yml in the repo  [most recent]
-│   └── funding_link_platforms ← declared platform keys (per-platform handles stay in the
-│                                source file, github/funding-yml.csv)                                 [most recent]
+├── Funding links              ← github/funding-yml.csv ∪ gitlab/funding-files.csv
+│   ├── has_funding_links      ← ≥1 resolved funding link                              [most recent]
+│   ├── has_funding_yml        ← a FUNDING.yml file exists for the repo or its owner   [most recent]
+│   └── funding_link_platforms ← declared platform keys (handles stay in the source)   [most recent]
 │
-├── FLOSS Fund  (funding.json)
-│   └── has_funding_json      ← dir.floss.fund export ∩ repo (id-first join, incl. redirect-resolved
-│                                URLs; non-GitHub manifests join by normalized repository URL) OR an
-│                                ORG-level manifest (github.com/<org>) covering the owner OR, for a
-│                                GitLab repo, an in-repo funding.json / .well-known manifest pointer
-│                                (gitlab/funding-files.csv)                                            [most recent]
+├── FLOSS Fund
+│   └── has_funding_json       ← floss-fund/funding-json.csv, repo- or org-level       [most recent]
 │
 ├── Registry funding fields
-│   ├── has_npm_funding, npm_funding_url        ← npm package.json `funding` field (npm repos)        [most recent]
-│   └── has_pypi_funding, pypi_funding_platforms ← PyPI project_urls funding link (pypi repos)        [most recent]
+│   ├── has_npm_funding, npm_funding_url         ← npm/funding.csv                     [most recent]
+│   └── has_pypi_funding, pypi_funding_platforms ← pypi/funding.csv                    [most recent]
 │
-├── OpenCollective
-│   ├── oc_slug               ← attributed collective (reverse-map / curated override)                [most recent]
-│   ├── oc_avg_funding        ← OC GraphQL totalAmountReceived (gross, mean of years; $0 if none)     [2021–2025]
-│   └── oc_avg_funding_p      ← derived (worst-pinned CDF risk percentile of oc_avg_funding)          [2021–2025]
+├── OpenCollective             ← opencollective/collectives.csv + budgets.csv
+│   ├── oc_slug                ← attributed collective (override / reverse map)        [most recent]
+│   ├── oc_avg_funding         ← OC totalAmountReceived, gross, mean of years            [2021–2025]
+│   └── oc_avg_funding_p       ← derived: worst-pinned CDF risk percentile               [2021–2025]
 │
-├── Bus-factor maintainer Sponsors  (github/maintainer-sponsors.csv ∪ eligibility/maintainer-overrides.csv;
-│   │                                bus-factor membership from github/contributor-commits.csv,
-│   │                                the `bf-contributors` step's output, see below)
-│   └── bf_maintainer_fundable ← any bus-factor maintainer (wrote ≥50% of the repo) has a personal
-│                                GitHub Sponsors listing (GraphQL hasSponsorsListing, keyed by user id)  [most recent]
+├── Bus factor maintainer Sponsors ← github/maintainer-sponsors.csv ∪ eligibility/maintainer-overrides.csv
+│   └── bf_maintainer_fundable ← a ≥50%-of-commits maintainer has a personal listing   [most recent]
 │
-├── Institutional backing  (funding/host-by-repo.csv ∪ data/eligibility/overrides.csv
-│   │                       ∪ data/eligibility/gitlab-hosts.csv)
-│   ├── host, host_type      ← legally-connected steward domain (e.g. apache.org, react.foundation).
-│   │                            Precedence: overrides.csv > scraped foundation roster > the curated
-│   │                            GitLab-instance mapping — a repo on an institution's OWN GitLab
-│   │                            (salsa.debian.org → debian.org, gitlab.gnome.org → gnome, …) is
-│   │                            host-backed by that institution; gitlab.com maps to nothing          [most recent]
-│   ├── owner, owner_type     ← owning-entity domain (e.g. meta.com), from overrides.csv               [most recent]
-│   └── host_score           ← derived: combined backing, most-funded of host/owner (0 · 0.5 · 1)     [most recent]
+├── Institutional backing      ← funding/host-by-repo.csv ∪ eligibility/overrides.csv
+│   │                            ∪ eligibility/gitlab-hosts.csv
+│   ├── host, host_type        ← legally-connected steward; roster code or domain      [most recent]
+│   ├── owner, owner_type      ← owning-entity domain, from overrides.csv only         [most recent]
+│   └── host_score             ← derived: min(type(host), type(owner)) ∈ {0, 0.5, 1}   [most recent]
 │
-├── paypal                    ← curated PayPal.me URL from overrides.csv (declared channel: feeds intent + channels_count, caps score)  [curated]
-├── channels_count           ← derived (funding-link platforms ∪ funding.json channels — repo + org
-│                               manifests ∪ npm ∪ pypi ∪ paypal, deduped)                              [most recent]
-├── gh_stars, gh_forks        ← GitHub /repos (informational, not scored)                             [most recent]
+├── paypal                     ← curated PayPal.me URL from overrides.csv                  [curated]
+├── channels_count             ← derived: distinct declared platforms, deduped         [most recent]
+├── gh_stars, gh_forks         ← github/repos.csv (informational, not scored)          [most recent]
 │
-├── score  (funding-risk score)  ← derived (geom-mean of gh_sponsorships_p, oc_avg_funding_p, host_score×100; int 1–100)  [most recent]
-│                                  (NOT carried into eligibility.csv or risk.csv — funding is not a scored dimension)
-├── intent                     ← derived bool: ≥1 funding signal present (see below) → eligibility.csv
-└── nonprofit                  ← derived bool: false only when host_type or owner_type == company → eligibility.csv
+├── score                      ← derived: ∛(gh_sponsorships_p × oc_avg_funding_p × host_score×100)
+├── intent                     ← derived bool → eligibility.csv
+└── nonprofit                  ← derived bool → eligibility.csv
 ```
 
-## How It Works
+The TTL-controlled fetchers write raw signals into `data/sources/`.
+`build_funding.py` joins them onto the top repos by `repo_id` (GitHub repo
+signals), owner `login` (outbound sponsoring, FLOSS org manifests) or `slug`
+(OC), derives the columns marked *derived* above, and writes `funding.csv`.
 
-1. **Collect** — the funding fetchers (FUNDING.yml links, npm/PyPI funding
-   fields, Sponsors, bus-factor maintainer Sponsors, FLOSS Fund, the OC
-   reverse-map + budgets, and the foundation roster scrapers + host matcher)
-   pull raw signals into `data/sources/`, each TTL-controlled so re-runs only
-   fetch what's missing or stale.
-2. **Join** — `build_funding.py` joins the sources onto the top repos
-   (archived included; GitHub-repo signals by the stable `repo_id`, outbound
-   sponsoring by owner `login`, OC by `slug`, FLOSS org manifests by owner).
-3. **Derive** — combine raw signals (`gh_sponsorships`, `channels_count`,
-   `has_funding_json`) and compute the percentiles.
-4. **Score** — `score` = geometric mean of the two channel percentiles and
-   **`host_score`×100** — the combined backing axis (most-funded of host /
-   owner: company 0 · nonprofit 0.5 · none 1); integer 1–100, higher = more at-risk.
-5. **Flags** — `build_funding.py` derives the `intent` and `nonprofit` booleans
-   from the funding signals (`_intent_flag` / `_nonprofit_flag`) and writes them
-   to `funding.csv`; `build_eligibility.py` joins just those two columns into
-   `eligibility.csv` alongside the `oss` and `active` checks. The funding
-   `score` does **not** feed `eligibility.csv` (or `risk.csv`); funding is a
-   signal-only component, not a scored dimension.
+## Pipeline order
 
-Pipeline order (`src/eligibility/run_eligibility_pipeline.py`, run via
-`scripts/run-pipeline.sh --stage eligibility`). The eligibility runner fetches
-these sources by default (incremental — each fetcher skips data already present
-or within its TTL, so a re-run only fills gaps); pass `--skip-fetch` to rebuild
-from existing data without fetching:
+Run via `scripts/run-pipeline.sh --stage eligibility`
+(`src/eligibility/run_eligibility_pipeline.py`). Fetchers are incremental; pass
+`--skip-fetch` to rebuild from existing data. Steps in `[…]` share a parallel
+group; everything else is serial.
 
 ```
-funding-yml → gitlab-funding → npm-funding → pypi-funding → sponsors → maintainer-sponsors → floss-fund → oc-collectives → opencollective → foundation scrapers → match-hosts → funding-build
+bf-contributors
+  → [funding-yml · sponsorships · gitlab-funding · npm-funding · pypi-funding
+     · sponsors · maintainer-sponsors · floss-fund · oc-collectives]
+  → opencollective
+  → [apache · cncf · eclipse · fsf · gnome · gnu · lf · xorg · numfocus · openjs · psf · sfc]
+  → match-hosts
+  → funding-build
 ```
 
-(The same runner also fetches the license and EOL signals for the stage's
-other dimensions — see [eligibility.md](../eligibility.md).)
+`bf-contributors` runs serially and first: both `maintainer-sponsors` and
+`funding-build` read its output. `opencollective` (budgets) stays serial after
+the group because it reads `oc-collectives`.
+
+The same runner also fetches the license and EOL signals for the stage's other
+dimensions — see [eligibility.md](../eligibility.md).
 
 ## Collection
 
-These sources feed the build. Each fetcher records a `*_status` and/or
-`fetched_at`, so a `0`/`False` value is distinguishable from a failed fetch.
-Repo-keyed files carry a `repo_id` column — the actual (rename-proof) join key.
+Each fetcher records a `*_status` and/or `fetched_at`, so a `0`/`False` value
+stays distinguishable from a failed fetch. Repo-keyed files carry `repo_id` —
+the actual join key.
 
 | Source file (`data/sources/` unless noted) | Fetcher | Collects | Key |
 |---|---|---|---|
 | `github/sponsors.csv` | `src/sources/github/fetch_sponsors.py` | inbound GitHub Sponsors count + `gh_sponsors_enabled` | `repo_id` |
 | `github/sponsorships.csv` | `src/sources/github/fetch_sponsorships.py` | outbound sponsoring count | `login` |
-| `github/maintainer-sponsors.csv` | `src/sources/github/fetch_maintainer_sponsors.py` | personal Sponsors listing per bus-factor maintainer | `user_id` |
-| `github/contributor-commits.csv` | `src/sources/github/fetch_contributors_metrics.py` — **`bf-contributors` step, 90-day TTL** | GitHub `/contributors` rows; the bus-factor membership behind `bf_maintainer_fundable` (see below) | `repo_id` |
-| `data/eligibility/maintainer-overrides.csv` | curated | `login,reason` — maintainers fundable via a channel the fetch can't see; unioned into the fundable set | `login` |
+| `github/maintainer-sponsors.csv` | `src/sources/github/fetch_maintainer_sponsors.py` | personal Sponsors listing per bus factor maintainer | `user_id` |
+| `github/contributor-commits.csv` | `src/sources/github/fetch_contributors_metrics.py` — **`bf-contributors` step, 90-day TTL** | GitHub `/contributors` rows; the bus factor membership behind `bf_maintainer_fundable` | `repo_id` |
+| `data/eligibility/maintainer-overrides.csv` | curated | `login,reason` — maintainers fundable through a channel the fetch cannot see | `login` |
 | `github/funding-yml.csv` | `src/sources/github/fetch_funding_yml.py` | resolved funding links (GraphQL `fundingLinks`) + FUNDING.yml file presence — platforms + handles | `repo_id` |
-| `gitlab/funding-files.csv` | `src/sources/gitlab/fetch_funding_files.py` | the GitLab twin of `funding-yml.csv` — FUNDING.yml variants + an in-repo `funding.json` / `.well-known` pointer probed on the default branch; same columns | `repo_id` |
+| `gitlab/funding-files.csv` | `src/sources/gitlab/fetch_funding_files.py` | the GitLab twin of `funding-yml.csv` — FUNDING.yml variants + an in-repo `funding.json` / `.well-known` pointer, probed on the default branch | `repo_id` |
 | `npm/funding.csv` | `src/sources/npm/fetch_funding.py` | npm package.json `funding` field | `repo_id` |
 | `pypi/funding.csv` | `src/sources/pypi/fetch_funding.py` | PyPI `project_urls` funding link | `repo_id` |
 | `floss-fund/funding-json.csv` | `src/sources/floss_fund/funding_json.py` | FLOSS Fund manifest directory (repo_id-stamped) | `id` |
-| `opencollective/collectives.csv` | `src/sources/opencollective/fetch_collectives.py` | OC ↔ GitHub reverse-map (which repo/org each collective funds) | `slug` |
-| `opencollective/budgets.csv` | `src/sources/opencollective/fetch_budgets.py` | OC gross annual budgets | `slug` |
-| `funding/host-by-repo.csv` | foundations scrapers (`src/sources/funding/`) | scraped FOSS-foundation host | `repo_id` |
-| `data/eligibility/gitlab-hosts.csv` | curated | GitLab instance → institutional host (`salsa.debian.org` → `debian.org`, `invent.kde.org` → `kde.org`, …); hosting on an institution's OWN GitLab is host backing. `gitlab.com` is deliberately absent | `gitlab_host` |
-| `data/eligibility/overrides.csv` | curated | per-repo (or `owner/*` org-glob) `host`/`owner` **domains** + types (company/nonprofit), a curated `oc_slug`, and a curated `paypal` PayPal.me URL; funding reads `repo,repo_id,host,host_type,gh_user,owner,owner_type,oc_slug,paypal` — the stage-level `license`/`eol`/`reason` columns are consumed by `build_licenses`/`build_active`, not here | `repo_id` |
+| `opencollective/collectives.csv` | `src/sources/opencollective/fetch_collectives.py` | OC ↔ GitHub reverse map (which repo/org each collective funds) | `slug` |
+| `opencollective/budgets.csv` | `src/sources/opencollective/fetch_budgets.py` | OC gross annual budgets + `oc_status` | `slug` |
+| `funding/host-by-repo.csv` | foundation scrapers (`src/sources/funding/`) → `match_repos` | scraped FOSS-foundation host, as a roster code | `repo_id` |
+| `data/eligibility/gitlab-hosts.csv` | curated | `gitlab_host,host,host_type,reason` — GitLab instance → institutional host (`salsa.debian.org` → `debian.org`). `gitlab.com` is deliberately absent | `gitlab_host` |
+| `data/eligibility/overrides.csv` | curated | per-repo (or `owner/*` org-glob) backing. `build_funding` reads `repo, repo_id, host, host_type, owner, owner_type, oc_slug, paypal`; the `license`/`eol`/`reason`/`gh_user` columns belong to other builders or to audit | `repo_id` |
 
-`gh_stars` / `gh_forks` are read from `data/sources/github/repos.csv` (GitHub
-`/repos`) and carried as informational columns — they are **not** scored.
+`gh_stars` / `gh_forks` come from `data/sources/github/repos.csv` and are
+informational — never scored.
 
 ### GitHub Sponsors — inbound vs outbound
 
-GitHub sponsorship has two directions, and they mean opposite things:
-
 | Metric | GraphQL field | Meaning |
 |---|---|---|
-| `gh_sponsorships_in` | `sponsorshipsAsMaintainer` | accounts **sponsoring** this repo's owner — owner only: a `github:` login in FUNDING.yml that is not the owner (a co-maintainer) is deliberately NOT credited, since their sponsors fund that person's whole portfolio, not this repo |
-| `gh_sponsorships_out` | `sponsorshipsAsSponsor` | accounts the repo's **owner sponsors** (the org's "Sponsoring N") |
+| `gh_sponsorships_in` | `sponsorshipsAsMaintainer` | accounts **sponsoring** this repo's owner |
+| `gh_sponsorships_out` | `sponsorshipsAsSponsor` | accounts the repo's **owner sponsors** |
 
-`fetch_sponsors` also records **`gh_sponsors_enabled`** — whether the owner has
-an active Sponsors listing (set up to receive, even at a public count of 0) —
-the intent signal proper. `gh_sponsorships_out` is an account-level property,
-so `sponsorships.csv` is keyed by `login` (one row per owner, far fewer than
-per-repo) and gap-fills only new owners. A repo whose owner sponsors others
-is a *resourced* backer, not an unfunded project — which is why the score uses
-**`in + out`** rather than `in − out`.
+Inbound counts the owner only. A `github:` login in FUNDING.yml that is not the
+owner is a co-maintainer, whose sponsors fund that person's whole portfolio, so
+the fetch does not credit them.
 
-### Bus-factor maintainer Sponsors (`bf_maintainer_fundable`)
+`fetch_sponsors` also records **`gh_sponsors_enabled`** — the owner has an
+active Sponsors listing, even at a public count of 0. That is the intent signal
+proper. `gh_sponsorships_out` is an account-level property, so
+`sponsorships.csv` is keyed by `login` and gap-fills only new owners. An owner
+who sponsors others is a *resourced* backer, so the score uses **`in + out`**,
+not `in − out`.
 
-`fetch_sponsors` (above) asks whether a repo's **owner** has Sponsors enabled.
-For a repo under a *project org* — `acornjs/acorn`, `serde-rs/json`,
-`crossbeam-rs/crossbeam` — the owner is the org, which almost never has a
-listing, even though the maintainer who actually wrote the repo does
-(marijnh, dtolnay, taiki-e all have personal Sponsors). That intent was
-invisible.
+### Bus factor maintainer Sponsors (`bf_maintainer_fundable`)
 
-`fetch_maintainer_sponsors.py` closes the gap. For every top repo it takes the
-**bus-factor set** — the fewest top contributors whose commits cumulatively
+`fetch_sponsors` covers the repo's **owner**. Under a project org —
+`acornjs/acorn`, `serde-rs/json`, `crossbeam-rs/crossbeam` — the owner is the
+org, which rarely has a listing, even though the maintainer who wrote the repo
+does (marijnh, dtolnay, taiki-e).
+
+`fetch_maintainer_sponsors.py` closes that gap. For each top repo it takes the
+**bus factor set** — the fewest top contributors whose commits cumulatively
 reach 50% of the repo (`src/sources/github/bf_contributors.py`) — and checks
-whether *any of them personally* has a GitHub Sponsors listing
-(GraphQL `hasSponsorsListing`). If so, the repo is `bf_maintainer_fundable` — a
-funding-intent signal in its own right (someone who carries this repo can be
-funded directly).
+whether any of them personally has a GitHub Sponsors listing (GraphQL
+`hasSponsorsListing`).
 
-Two deliberate choices keep it honest and stable:
+- **Bus factor only, not any contributor.** A drive-by contributor with Sponsors
+  cannot manufacture intent for a project they did not build.
+- **Keyed by numeric user id.** `maintainer-sponsors.csv` keys on the account's
+  immutable `databaseId`, so a maintainer who carries several repos
+  (dtolnay → serde/syn/quote) is checked once and survives a rename. `login` is
+  stored alongside for the join back and for audit; `status` separates a
+  resolved "not fundable" from a failed lookup.
+- **Unioned with a curated override.** `maintainer-overrides.csv`
+  (`login,reason`) lists maintainers who solicit funding through a channel the
+  fetch cannot see, so `hasSponsorsListing` reads False despite real intent.
 
-- **Bus-factor only, not any contributor.** Restricting to the people who wrote
-  ≥50% of the repo means a drive-by contributor who merely happens to have
-  Sponsors cannot manufacture intent for a project they did not build.
-- **Keyed by numeric user id.** `maintainer-sponsors.csv` is keyed by the
-  account's immutable `databaseId` (mirroring the `gh/<n>` repo_id convention),
-  so a maintainer who carries several repos (dtolnay → serde/syn/quote…) is
-  checked once, and the identity survives a GitHub rename. `login` is stored
-  alongside for the join back from the (login-keyed) contributor data and for
-  audit; `status` distinguishes a resolved "not fundable" from a failed lookup.
-
-The fetched set is **unioned with a curated override file**,
-`data/eligibility/maintainer-overrides.csv` (`login,reason`) — bus-factor
-maintainers who solicit funding through a channel the automated fetch can't
-see (an external profile funding link, an off-GitHub donation page), so
-`hasSponsorsListing` reads False despite real funding intent.
-
-The bus-factor set comes from `data/sources/github/contributor-commits.csv`
-(via `src/sources/github/bf_contributors.py`), written by the
-`bf-contributors` step (`src.sources.github.fetch_contributors_metrics`,
-90-day per-row TTL). It runs serially, ahead of the `funding` pgroup, because
-both `maintainer-sponsors` (which picks which logins to query from it) and
-`funding-build` read its output — so every repo in scope has bus-factor rows
-before either consumer runs. This is a *different* file from the git-clone
-contributor log `data/sources/git/contributor-commits.csv`, which is fetched
-independently (`src.sources.git.contributors`, risk stage) and feeds the
-concentration score instead.
+The bus factor set comes from `data/sources/github/contributor-commits.csv`,
+written by the `bf-contributors` step (90-day per-row TTL). This is a
+**different file** from the git-clone contributor log
+`data/sources/git/contributor-commits.csv`, which the risk stage fetches
+independently for the concentration score.
 
 ### funding.json from the FLOSS Fund directory
 
-Rather than fetch `funding.json` from every top repo individually,
 `funding_json.py` downloads the whole [FLOSS Fund](https://dir.floss.fund)
-directory once and `build_funding` matches manifests against the top repos —
-by the fetcher-stamped `repo_id` first (rename-proof), with a
-canonical-slug fallback for rows the fetcher could not id — with zero
-per-repo requests. The export also parses each manifest's
-channels into per-platform handles + `channel_platforms`. Two matching refinements
-catch manifests a raw URL-equality check would miss:
+directory once, instead of probing every top repo. `build_funding` matches a
+manifest by the fetcher-stamped `repo_id` first (rename-proof), then by
+canonical slug, then by normalized repository URL — zero per-repo requests. The
+export also parses each manifest's channels into per-platform handles plus
+`channel_platforms`.
+
+Two refinements catch manifests a raw URL-equality check would miss:
 
 - **Redirect resolution.** A manifest may point at a redirect rather than a
-  GitHub URL (e.g. `tukaani.org/xz/redirect-to-github-xz` →
-  `github.com/tukaani-project/xz`). The fetcher follows these and records the
-  final GitHub URL in `project_repository_resolved`; `export_repo_slug` prefers
-  it over the raw URL. Only non-GitHub URLs are probed (best-effort, cached in
-  the export, which refreshes on the shared 365-day funding TTL).
-- **Org-level manifests.** A manifest whose repo URL is a GitHub
-  *org page* (`github.com/<org>`, not a specific repo) declares funding for the
-  whole org. Every in-scope repo under that owner gets `has_funding_json=True`
-  (repo- and org-level manifests are folded into the one flag) and inherits the
-  org manifest's channels — "if the org is fundable, its repos have
-  a funding channel". (GitHub Sponsors and `fundingLinks` are already
-  owner/org-inherited per repo, so this only fills the FLOSS-side gap.)
+  GitHub URL (`tukaani.org/xz/redirect-to-github-xz` →
+  `github.com/tukaani-project/xz`). The fetcher follows it and records the final
+  URL in `project_repository_resolved`; `export_repo_slug` prefers that over the
+  raw URL. Only non-GitHub URLs are probed. Results cache in the export, which
+  refreshes on the shared 365-day funding TTL.
+- **Org-level manifests.** A manifest whose repo URL is a GitHub *org page*
+  (`github.com/<org>`) declares funding for the whole org. Every in-scope repo
+  under that owner gets `has_funding_json=True` and inherits the org manifest's
+  channels. GitHub Sponsors and `fundingLinks` are already owner-inherited, so
+  this only fills the FLOSS-side gap.
 
 ### OpenCollective budgets
 
-Slug discovery unions four sources: `open_collective` handles declared in
-`funding-yml.csv`, the FLOSS Fund export (in-scope only), the curated
-`oc_slug` overrides, and the **reverse map** (`collectives.csv`, from
-`fetch_collectives.py` — OC itself declares which repo/org each collective
-funds, catching OC-funded projects that never declared a FUNDING.yml, e.g.
-socketio). For each slug `fetch_budgets.py` queries the OC GraphQL API for
-`totalAmountReceived` per calendar year 2021–2025 (gross incoming). The API
-rate-limits hard unauthenticated (HTTP 429); set `OPENCOLLECTIVE_PERSONAL_TOKEN`
-in `.env` to lift it. `oc_avg_funding` is the mean over years with data.
+Slug discovery unions four sources: `open_collective` handles in
+`funding-yml.csv`, the FLOSS Fund export (in-scope only), the curated `oc_slug`
+overrides, and the **reverse map** (`collectives.csv` — OC itself declares which
+repo or org each collective funds, catching OC-funded projects that never wrote
+a FUNDING.yml, e.g. socketio).
 
-`build_funding` then **attributes** a collective to each repo (`oc_slug`): a
-curated override row is authoritative (its `oc_slug` wins even when empty —
-an empty slug on a curated row means "no OC", suppressing a spurious
-reverse-map match); otherwise a repo-level reverse-map match takes the
-collective's full average budget (a real, `oc_status=ok` collective counts
-even at $0 raised — the channel itself is intent); otherwise an org-level
-match splits the org collective's budget equally across the org's class-A
-repos (guarded to non-$0 collectives, since an org-only $0 collective is
-usually junk).
+`fetch_budgets.py` queries the OC GraphQL API for `totalAmountReceived` per
+calendar year 2021–2025 (gross incoming). The API rate-limits hard
+unauthenticated (HTTP 429); set `OPENCOLLECTIVE_PERSONAL_TOKEN` in `.env` to
+lift it. `oc_avg_funding` is the mean over years with data.
 
-## Processing & scoring
+#### Attributing a collective to a repo
+
+`build_funding` picks `oc_slug` by first match:
+
+| # | Rule | Amount |
+|---|---|---|
+| 1 | a curated `overrides.csv` row for this `repo_id` | its `oc_slug`, or `""` when the cell is empty |
+| 2 | repo-level reverse-map match on the repo slug | the collective's full average budget |
+| 3 | repo-level match on the normalized clone URL (GitLab repos) | the collective's full average budget |
+| 4 | org-level match, repo is class-A | the org collective's budget ÷ the org's class-A repo count |
+| 5 | no match | `""`, `0` |
+
+Rules 2–4 share one guard: `_real_oc(slug)` — the collective was fetched
+successfully and carries `oc_status == ok`. There is **no dollar threshold at
+any level.** A real collective that raised $0 still attributes, because the
+channel itself is the intent signal, and `oc_avg_funding` carries the $0
+separately. The consequence is visible in `funding.csv`: an org-level
+collective at $0 (`for-the-mage` claiming `github.com/facebook`,
+`nodejs-google-summer-of-code`) attaches to that org's class-A repos.
+
+Rule 1 is the fix for a wrong match. A curated row is authoritative **even with
+an empty `oc_slug`** — an empty cell on a curated row means "no OC" and
+suppresses a spurious reverse-map match.
+
+## Processing and scoring
 
 ### Derived signals
 
 | Column | Formula |
 |---|---|
 | `gh_sponsorships` | `gh_sponsorships_in + gh_sponsorships_out` |
-| `channels_count` | distinct platforms across funding links ∪ funding.json channels (repo + org manifests) ∪ npm ∪ pypi ∪ paypal |
-| `has_funding_json` | repo present in the FLOSS Fund export (id-first, incl. redirect-resolved) OR its owner has an org-level manifest (`github.com/<org>`) |
-| `bf_maintainer_fundable` | any bus-factor maintainer (≥50%-of-commits set) has a personal GitHub Sponsors listing (∪ curated `maintainer-overrides.csv`) |
-| `oc_avg_funding` | mean of OC `raised_*` years (**`0`** when no OC presence) |
+| `channels_count` | distinct platforms across funding links ∪ funding.json channels (repo + org) ∪ npm ∪ pypi ∪ paypal |
+| `has_funding_json` | repo present in the FLOSS Fund export (id-first, incl. redirect-resolved) OR its owner has an org-level manifest |
+| `bf_maintainer_fundable` | any bus factor maintainer has a personal GitHub Sponsors listing (∪ curated `maintainer-overrides.csv`) |
+| `oc_avg_funding` | mean of the OC `raised_*` years (`0` when no OC presence) |
 
-### The percentiles (`_p`)
+### The score
 
-Each funding channel is turned into a **worst-pinned CDF risk percentile** —
-lower funding ranks *higher* (more at-risk), mirroring the negated
-`openssf_score` in the security component. Both are computed over all the top
-repos (`gh_sponsorships` defaults to 0, `oc_avg_funding` defaults to $0).
-
-| Column | Basis | Direction |
-|---|---|---|
-| `gh_sponsorships_p` | `gh_sponsorships` (in + out) | low engagement → high percentile |
-| `oc_avg_funding_p` | `oc_avg_funding` | low $ → high percentile |
-| **`score`** | geom-mean of **three** axes: the two `_p` **and `host_score×100`** | the funding-risk score (int 1–100) |
+Each channel becomes a **worst-pinned CDF risk percentile** — lower funding
+ranks higher (more at-risk), mirroring the negated `openssf_score` in the
+security component. Both percentiles are computed over all the top repos
+(`gh_sponsorships` defaults to 0, `oc_avg_funding` to $0).
 
 ```
 score      = max(1, round( ∛(gh_sponsorships_p × oc_avg_funding_p × host_score×100) ))
-host_score = min( type(host), type(owner) )      # 0 company · 0.5 nonprofit · 1 none
+host_score = min( type(host), type(owner) )      # TYPE_SCORE: company 0 · nonprofit 0.5 · none 1
 ```
 
-`host_score` (0/0.5/1) enters the geom mean **scaled to the 0–100 axis** (×100:
-company 0 · nonprofit 50 · none 100) so it is commensurate with the two channel
-percentiles — one of three equal voices rather than a blunt multiplier.
+`host_score` enters scaled ×100 (company 0 · nonprofit 50 · none 100) so it is
+commensurate with the two percentiles — one of three equal voices, not a blunt
+multiplier.
 
 The **geometric mean** is the key choice: a repo funded strongly on *either*
-channel gets a low (good) `score`, because one low percentile pulls the
-product down. A project with no GitHub Sponsors but a healthy OpenCollective
-(or vice-versa) is correctly read as funded.
+channel gets a low (good) score, because one low percentile pulls the product
+down. A project with no GitHub Sponsors but a healthy OpenCollective reads as
+funded.
 
-The **`host_score`** then folds in institutional resourcing the GitHub/OC axes
-miss. `host` is the foundation/company **legally** stewarding the project (a
-domain — only a *legally connected* steward counts, not a loose community
-association); `owner` is the owning entity (a domain). Each is classified
-**company** (0 — fully resourced, score floors at 1), **nonprofit/foundation**
-(0.5 — halved), or **none** (1 — unchanged). `host_score` is the **most-funded
-of the two** (`min`), so a single value ∈ {0, 0.5, 1}:
+### `host_score` — institutional backing
 
-- A scraped FOSS-foundation host (`funding/host-by-repo.csv`) defaults to
-  nonprofit, so Apache/CNCF/Eclipse/OpenJS/PSF/NumFOCUS/LF, the **GNU project**
-  (host `fsf/gnu` — every GNU package is FSF-stewarded), the **FSF** itself,
-  **Software Freedom Conservancy** members (incl. Sourceware-hosted libs like
-  `libffi`), the **GNOME Foundation** (`gnome/*`, gnome.org), and the **X.Org
-  Foundation** (its gitlab.freedesktop.org/xorg projects, e.g. `libxcb`) repos
-  drop from 100 → 50. `match_repos` joins each roster to a repo by exact
-  `owner/name` slug, a curated foundation org-prefix (`autotools-mirror/*`,
-  `gcc-mirror/*`, `coreutils/*` → GNU; `GNOME/*` → GNOME), or apex/suffix domain
-  (`*.gnu.org` → GNU, `sfconservancy.org` → SFC, `gnome.org` → GNOME, `x.org` →
-  X.Org — but NOT `freedesktop.org`, a broader umbrella that would
-  over-attribute). Reference-only subdomains (`peps.python.org`, docs pages) are
-  excluded so a repo that merely links to a foundation is not miscredited.
-- A curated `data/eligibility/overrides.csv` row sets either side by domain.
-  `facebook/watchman` (owner `meta.com` company) → host_score `min(1, 0)` = 0
-  → ∛(100·100·0) = **1**; `rust-lang/rust` (host `rustfoundation.org`
-  nonprofit, no owner) → host_score `min(0.5, 1)` = 0.5 → ∛(100·100·50) =
-  **79**. Overrides evolve with reality: `react/react`
-  is stewarded by the React Foundation (nonprofit) with no company owner,
-  so it sits at host_score 0.5 → **79** rather
-  than the company floor of 1.
+`host` is the foundation or company **legally** stewarding the project; a loose
+community association does not count. `owner` is the owning entity, always a
+domain from `overrides.csv`. Each is typed `company` (0 — fully resourced,
+score floors at 1), `nonprofit` (0.5 — halved), or empty (1 — unchanged).
+`host_score` takes the most-funded of the two (`min`).
 
-Non-backed unfunded repos stay at 100 — **unless they declare a funding channel
-whose $ we can't measure**, which caps the score at `DECLARED_FUNDING_CAP` (79).
-A project that has set up *a way* to be funded is not maximally unfunded. The cap
-fires on: a registry channel (`has_npm_funding` / `has_pypi_funding`), a FLOSS
-Fund manifest for the repo or its owner (`has_funding_json`), a curated `paypal`
-PayPal.me handle, or a funding
-**link** to any platform *other than* GitHub Sponsors / Open Collective. Those two are excluded because their real
-dollars already feed the score (`gh_sponsorships_p`, `oc_avg_funding_p`) — a
-link to them adds nothing to cap on. So a Liberapay/Ko-fi/Tidelift link caps
-(e.g. `tukaani-project/xz` → 79), but a GitHub-Sponsors-only repo with 0
-sponsors stays at its measured score.
+`host` values come from three origins, in precedence order:
 
-Worked examples (from the current `funding.csv`):
+| Origin | Value shape | Example |
+|---|---|---|
+| `data/eligibility/overrides.csv` (curated) | domain | `rustfoundation.org`, `react.foundation`, `sqlite.org` |
+| `funding/host-by-repo.csv` (scraped rosters, always nonprofit) | roster **code** | `apache`, `psf`, `lf`, `lf/cncf`, `lf/openjs`, `fsf/gnu`, `numfocus`, `sfc`, `gnome`, `xorg` |
+| `data/eligibility/gitlab-hosts.csv` (curated) | domain | `debian.org`, `freedesktop.org`, `kde.org`, `inria.fr` |
 
-| Repo | oc_avg | ships | host_score | `score` | Reading |
-|---|---:|---:|---:|---:|---|
-| facebook/watchman | 0 | 0 | 0 | **1** | company-owned (meta.com) — floors at 1 |
-| vuejs/core | $132,860 | 0 | 1 | 13 | OC-funded, no institutional backer |
-| axios/axios | $32,031 | 20 | 1 | 16 | funded both channels, no backer |
-| zloirock/core-js | $34,530 | 0 | 1 | 26 | OC-funded only |
-| rust-lang/rust | 0 | 0 | 0.5 | 79 | nonprofit foundation host only |
-| acornjs/acorn | 0 | 0 | 1 | **100** | no funding, no backer |
+A roster host is nonprofit by definition — `build_funding` hard-codes
+`host_type = "nonprofit"` for a scraped match — so a roster-matched repo with
+no company `owner` drops from backing 100 → 50. `fsf/gnu` covers every GNU
+package (the FSF holds the copyright assignments); `sfc` covers Software
+Freedom Conservancy members, including Sourceware-hosted libs like `libffi`.
+A curated `overrides.csv` `host_type` outranks it.
 
-Note the third axis lifts *funded-but-unbacked* repos (vuejs, axios sit well
-above the two-axis geometric mean of their channel percentiles): "no
-institutional backer" (`host_score = 1` → backing 100) is a
-risk voice, not a no-op. (Intent/nonprofit coverage → the preview pipeline sheet.)
+`match_repos` joins a roster to a repo three ways: exact `owner/name` slug; a
+curated foundation org prefix (`autotools-mirror/*`, `gcc-mirror/*`,
+`coreutils/*` → GNU; `GNOME/*` → GNOME); or an apex/suffix homepage domain via
+`DOMAIN_SUFFIX_HOST` (`*.gnu.org` → GNU, `sfconservancy.org` → SFC,
+`gnome.org` → GNOME, `x.org` → X.Org). Reference-only subdomains
+(`peps.python.org`, docs pages) are excluded, so a repo that merely links to a
+foundation is not miscredited.
+
+`DOMAIN_SUFFIX_HOST` deliberately omits `freedesktop.org`: as a *homepage
+domain* it is a broad umbrella (wayland, dbus and pipewire are not X.Org
+projects) and would over-attribute. Hosting **on** `gitlab.freedesktop.org` is
+different evidence — the instance is fd.o's own — so `gitlab-hosts.csv` maps it
+to `host=freedesktop.org, nonprofit`. The two rules do not conflict: one reads
+a declared homepage, the other reads the repo's actual host.
+
+### The declared-channel cap
+
+An unbacked, unfunded repo scores 100 — **unless it declares a funding channel
+whose dollars we cannot measure**, which caps the score at
+`DECLARED_FUNDING_CAP` (79). A project that has set up *a way* to be funded is
+not maximally unfunded.
+
+`_declares_unmeasured_channel` fires on: `has_npm_funding`, `has_pypi_funding`,
+`has_funding_json` (repo or owner), a curated `paypal` handle, or a funding
+link to any platform outside `MEASURED_PLATFORMS = {github, open_collective}`.
+Those two are excluded because their real dollars already feed the score. So a
+Liberapay / Ko-fi / Tidelift link caps, but a GitHub-Sponsors-only repo with 0
+sponsors keeps its measured score.
+
+`bf_maintainer_fundable` is intent-only: it is not a channel and never caps,
+because a personal Sponsors listing funds the maintainer's whole portfolio.
+
+### Worked examples
+
+Illustrative inputs, not measurements — they show how the three axes combine.
+
+| `gh_sponsorships_p` | `oc_avg_funding_p` | `host_score` | `score` | Reading |
+|---:|---:|---:|---:|---|
+| 100 | 100 | 0 (company owner) | **1** | company-owned — floors at 1 |
+| 100 | 100 | 0.5 (nonprofit host) | 79 | foundation-hosted, no measured dollars |
+| 100 | 100 | 1 (none) | **100** | no funding, no backer |
+| 100 | 20 | 1 (none) | 58 | OC-funded, no institutional backer |
+| 60 | 20 | 1 (none) | 49 | funded on both channels, no backer |
+| 100 | 100 | 1 (none) + Liberapay link | 79 | unmeasured declared channel caps at 79 |
+
+The third axis lifts funded-but-unbacked repos above the two-axis mean of their
+channel percentiles: "no institutional backer" (`host_score = 1` → backing 100)
+is a risk voice, not a no-op.
 
 ## Output
 
-### `data/eligibility/funding.csv` (per-dimension build)
+### `data/eligibility/funding.csv`
 
-One row per top repo (archived included). No `fetched_at` — per-signal
+One row per top repo, archived included. No `fetched_at` — per-signal
 timestamps stay in each source file.
 
 | Column | Description |
 |---|---|
 | `repo`, `repo_id` | identity |
-| `gh_sponsors_enabled` | the owner has an active GitHub Sponsors listing (set up to receive) |
+| `gh_sponsors_enabled` | the owner has an active GitHub Sponsors listing |
 | `gh_sponsorships_in` | inbound GitHub Sponsors count (owner only) |
 | `gh_sponsorships_out` | outbound sponsoring count (owner) |
 | `gh_sponsorships` | `in + out` |
 | `gh_sponsorships_p` | risk percentile of `gh_sponsorships` |
 | `gh_stars`, `gh_forks` | GitHub stars / forks (informational, not scored) |
 | `has_funding_links` | repo declares ≥1 funding link (GitHub's resolved `fundingLinks`) |
-| `has_funding_yml` | a FUNDING.yml file exists for the repo or its owner (even if it resolves to no links) |
-| `funding_link_platforms` | declared platform keys (comma-sep) |
-| `has_funding_json` | repo (or its owner, via an org-level manifest) registered in the FLOSS Fund directory (incl. redirect-resolved URL) — a declared channel (caps `score` at 79) |
-| `has_npm_funding`, `npm_funding_url` | npm package.json `funding` field — a declared channel (caps `score` at 79) |
-| `has_pypi_funding`, `pypi_funding_platforms` | PyPI `project_urls` funding link — a declared channel (caps `score` at 79) |
-| `paypal` | curated PayPal.me URL from `overrides.csv` — a declared channel (feeds `intent` + `channels_count`, caps `score` at 79); empty when none |
-| `bf_maintainer_fundable` | a bus-factor maintainer (≥50%-of-commits set) has a personal GitHub Sponsors listing (∪ curated overrides); intent-only — not a channel, no cap. Bus-factor membership comes from the `bf-contributors` step (90-day TTL, see above) |
+| `has_funding_yml` | a FUNDING.yml file exists for the repo or its owner, even if it resolves to no links |
+| `funding_link_platforms` | declared platform keys (comma-separated) |
+| `has_funding_json` | repo, or its owner via an org-level manifest, is in the FLOSS Fund directory — a declared channel (caps `score` at 79) |
+| `has_npm_funding`, `npm_funding_url` | npm package.json `funding` field — a declared channel (caps at 79) |
+| `has_pypi_funding`, `pypi_funding_platforms` | PyPI `project_urls` funding link — a declared channel (caps at 79) |
+| `paypal` | curated PayPal.me URL from `overrides.csv` — a declared channel (feeds `intent` + `channels_count`, caps at 79); empty when none |
+| `bf_maintainer_fundable` | a bus factor maintainer has a personal GitHub Sponsors listing (∪ curated overrides); intent-only, no cap |
 | `channels_count` | distinct funding platforms (links ∪ funding.json repo+org channels ∪ npm ∪ pypi ∪ paypal) |
-| `oc_slug` | attributed Open Collective slug (override / reverse-map), empty when none |
+| `oc_slug` | attributed Open Collective slug (override / reverse-map); empty when none |
 | `oc_avg_funding` | mean OC gross annual budget (`0` if none) |
 | `oc_avg_funding_p` | risk percentile of `oc_avg_funding` |
-| `host` | legally-connected steward **domain** (e.g. `apache.org`, `react.foundation`) or empty |
+| `host` | legally-connected steward — a roster code from a scraped roster, a domain from a curated file, or empty |
 | `host_type` | `company` / `nonprofit` / empty |
-| `owner` | owning-entity **domain** (e.g. `meta.com`), from `overrides.csv` |
+| `owner` | owning-entity domain (e.g. `meta.com`), from `overrides.csv` |
 | `owner_type` | `company` / `nonprofit` / empty |
-| `host_score` | combined backing = `min(type(host), type(owner))` ∈ {`0` company, `0.5` nonprofit, `1` none} — the third score axis (×100) |
-| `score` | **funding-risk score** (geom-mean of the two `_p` and `host_score`×100, int 1–100) |
-| `intent`, `nonprofit` | the two boolean eligibility flags (see below) |
+| `host_score` | `min(type(host), type(owner))` ∈ {`0` company, `0.5` nonprofit, `1` none} — the third score axis (×100) |
+| `score` | funding-risk score, int 1–100 |
+| `intent`, `nonprofit` | the two boolean eligibility flags |
 
-### `data/eligibility/eligibility.csv` (rollup)
+### `intent` and `nonprofit` → `data/eligibility/eligibility.csv`
 
-The funding `score` does **not** contribute to any aggregate — it feeds
-neither the eligibility rollup nor the `risk.csv` `score` (the geometric mean
-of the four scored risk dimensions: `concentration`, `complexity`, `security`,
-`workload`).
-
-Instead, `src/eligibility/build_eligibility.py` joins the two boolean flag
-columns from `funding.csv` into `data/eligibility/eligibility.csv`, where they
-are two of the four checks behind
+`src/eligibility/build_eligibility.py` joins only these two boolean columns.
+They are two of the four checks behind
 `eligible = oss AND intent AND nonprofit AND active`
-(see [eligibility.md](../eligibility.md)):
+(see [eligibility.md](../eligibility.md)). The funding `score` contributes to no
+aggregate — neither the eligibility rollup nor `risk.csv`'s `risk_score` (the
+geometric mean of `concentration`, `complexity`, `security`, `workload`).
 
-| `eligibility.csv` column | Source | Default |
-|---|---|---|
-| `intent` | `true` when the repo has ≥1 funding signal (see below) | `false` |
-| `nonprofit` | `false` only when `host_type`/`owner_type == company` | `true` |
+**`intent`** (`bool`, default `false`) is true on any one of: `gh_sponsors_enabled`,
+`has_funding_links`, `has_funding_yml`, `has_funding_json`, `has_npm_funding`,
+`has_pypi_funding`, `bf_maintainer_fundable`, a non-empty `paypal`, `oc_slug`,
+`host`, or `owner`. The inbound sponsor count is not tested separately — any
+count implies the listing is enabled. **Outbound sponsoring is not intent**:
+funding others is not a channel for this repo.
 
-### `intent` and `nonprofit` flags
+`intent` then **propagates at the owner level** (`_propagate_owner_intent`).
+Once any repo an owner has in scope declares a channel from
+`DECLARED_CHANNEL_COLS` (`gh_sponsors_enabled`, `has_funding_links`,
+`has_funding_yml`, `has_funding_json`, `has_npm_funding`, `has_pypi_funding`) or
+carries an `oc_slug`, every repo that owner has is set `intent=true`. Curated
+host/owner backing does not propagate. This mirrors GitHub's own semantics: an
+org's `.github/FUNDING.yml` and a personal Sponsors listing already apply to all
+of an owner's repos, so `serde-rs/json` counts as fundable while sibling
+`serde-rs/serde` declares `github: dtolnay`. Propagation only *adds* intent.
 
-**`intent`** (`bool`, default `false`) — `true` when the repo shows at least
-one funding signal: the owner's GitHub Sponsors listing being enabled
-(`gh_sponsors_enabled` — any inbound count implies it; **outbound sponsoring is
-NOT intent**, funding others is not a channel for this repo), a resolved
-funding link (`has_funding_links`), a FUNDING.yml file present for the repo or
-owner even when it resolves to no links (`has_funding_yml`),
-a `funding.json` (FLOSS Fund, repo- or org-level), an npm `funding` field, a PyPI project-URLs
-funding entry, a bus-factor maintainer who is personally fundable on GitHub
-Sponsors (`bf_maintainer_fundable`), an Open Collective slug, a curated `paypal`
-PayPal.me handle, or an institutional host or owner. "Intent" means the project
-is actively seeking or accepting support.
-
-`intent` then **propagates at the owner level** (`_propagate_owner_intent`): once
-ANY repo an owner has in scope declares a *self-declared* channel (Sponsors
-enabled, funding links or the FUNDING.yml file, a FLOSS manifest, an npm/PyPI
-funding field, or an Open Collective — not the institutional
-host/owner backing), every repo the owner has is set `intent=true`. This mirrors
-GitHub's own semantics — an org's `.github/FUNDING.yml` and a personal account's
-Sponsors listing already apply to all of an owner's repos — so a repo that merely
-omits its own `FUNDING.yml` (e.g. `serde-rs/json` while sibling `serde-rs/serde`
-declares `github: dtolnay`) is still counted fundable. Propagation only *adds*
-intent; `nonprofit` is untouched, so a company-owned org stays ineligible.
-
-**`nonprofit`** (`bool`, default `true`) — `false` only when a corporate entity
-(Meta, Google, Microsoft, AWS, …) is the project's host or owner, as determined by
-`host_type` / `owner_type == "company"` in `data/eligibility/funding.csv`.
-Community-run and foundation-backed projects are `nonprofit=true`.
-Corporate-backed repos remain in `eligibility.csv` flagged `nonprofit=false` —
-already-resourced projects become ineligible without being hidden.
+**`nonprofit`** (`bool`, default `true`) is false only when `host_type` or
+`owner_type == "company"`. Propagation never touches it, so a company-owned org
+stays ineligible. Corporate-backed repos keep their `eligibility.csv` row
+flagged `nonprofit=false` — ineligible, but not hidden.
 
 ## Coverage
 
-See the preview pipeline sheet → Eligibility → Intent and nonprofit
-for current per-channel coverage over the top repos and the score distribution.
+See the preview pipeline sheet → Eligibility → Intent and nonprofit.
 
 ## Limitations
 
-- **Still GitHub/OC-centric for $ signal.** The two *scored axes* are inbound/
-  outbound GitHub Sponsors and OpenCollective. **Institutional backing is now
-  folded in** (the `host_score` factor — scraped foundations plus curated
-  legally-connected company/foundation overrides), but a repo with no `host`/`owner`
-  override and no scraped foundation host still shows little off-platform signal
-  (corporate payroll, private grants, VC) — except via
-  the outbound-sponsoring proxy. `astral-sh/ruff` was the canonical case —
-  VC-backed yet `gh_sponsorships_in = 0` — until a curated owner override
-  (`astral.sh`, company) pinned it to `score` 1 / `nonprofit=false`; corporate
-  backing that nobody has curated yet still goes unseen.
-- **funding.json is still negligible** in this cohort (coverage →
-  the preview pipeline sheet) — the structured-manifest
-  ecosystem hasn't reached it. `has_funding_json` does feed `intent` and the
-  declared-channel score cap, but carries no dollar signal.
-- **`score` is a percentile, not a class.** It's a 1–100 risk number, not a
-  class tier. It lives in `funding.csv` and feeds no aggregate — the risk
-  `score` uses its four scored dimensions only (concentration, complexity,
-  security, workload), and the eligibility rollup consumes just the
-  `intent`/`nonprofit` booleans.
-- **OC is the only $ amount.** GitHub Sponsors and Patreon/Tidelift amounts
-  aren't public, so dollar figures exist only for the repos with an attributed
-  Open Collective (coverage → the preview pipeline sheet);
-  the sponsorship axis is a *count*, not a *sum*.
+- **Off-platform money is invisible unless curated.** The two scored channel
+  axes are GitHub Sponsors and OpenCollective; `host_score` adds institutional
+  backing. A repo with no curated override and no roster host still shows no
+  corporate payroll, grant or VC signal, except through the outbound-sponsoring
+  proxy. `astral-sh/ruff` is the canonical case: VC-backed with
+  `gh_sponsorships_in=0`, corrected only by a curated `astral.sh` owner
+  override.
+- **funding.json carries no dollars.** `has_funding_json` feeds `intent` and the
+  declared-channel cap only.
+- **`score` is a percentile, not a class.** It lives in `funding.csv` and feeds
+  no aggregate.
+- **OC is the only dollar amount.** GitHub Sponsors and Patreon/Tidelift amounts
+  are not public, so dollar figures exist only for repos with an attributed Open
+  Collective. The sponsorship axis is a *count*, not a *sum*.

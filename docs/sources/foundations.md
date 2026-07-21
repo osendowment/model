@@ -13,17 +13,22 @@ coverage numbers live in the preview pipeline sheet.
 
 ## Rosters
 
-| Host slug | Roster file | Source | Method |
-|-----------|-------------|--------|--------|
+The **Host** column is the `host` value `match_repos.py` emits. Three rosters
+carry a `parent/child` slug because their foundation has a parent
+(`PARENT_FOUNDATION` in `match_repos.py`): CNCF and OpenJS live under the
+Linux Foundation, GNU under the FSF. On overlap the child wins over `lf`.
+
+| Host | Roster file | Source | Method |
+|------|-------------|--------|--------|
 | `apache` | `apache-software-foundation.csv` | [projects.apache.org](https://projects.apache.org/json/foundation/projects.json) | JSON fetch |
-| `cncf` | `cloud-native-computing-foundation.csv` | `cncf/landscape` `landscape.yml` | YAML fetch; keeps only entries with `maturity` set (real CNCF projects, not landscape-only vendors) |
+| `lf/cncf` | `cloud-native-computing-foundation.csv` | `cncf/landscape` `landscape.yml` | YAML fetch; keeps only entries with `maturity` set (real CNCF projects, not landscape-only vendors) |
 | `eclipse` | `eclipse-foundation.csv` | [projects.eclipse.org/api/projects](https://projects.eclipse.org/api/projects) | paginated JSON |
 | `fsf` | `free-software-foundation.csv` | — | **hand-curated** list in `fsf.py` (no network) |
 | `gnome` | `gnome.csv` | gitlab.gnome.org group API | paginated JSON; `github_repo` = the `GNOME/<name>` GitHub mirror slug |
-| `gnu` | `gnu-project.csv` | [gnu.org/manual/blurbs.html](https://www.gnu.org/manual/blurbs.html) | HTML scrape + curated dict of verified GitHub mirrors |
+| `fsf/gnu` | `gnu-project.csv` | [gnu.org/manual/blurbs.html](https://www.gnu.org/manual/blurbs.html) | HTML scrape + curated dict of verified GitHub mirrors |
 | `lf` | `linux-foundation.csv` | `jmertic/lf-landscape` `landscape.yml` | YAML fetch; skips the "LF Members" category (dues-paying companies, not hosted projects) |
 | `numfocus` | `numfocus.csv` | numfocus.org listing + per-project pages | two-step HTML scrape |
-| `openjs` | `openjs-foundation.csv` | `openjs-foundation/cross-project-council` README | markdown-table parse, tagged by stage section |
+| `lf/openjs` | `openjs-foundation.csv` | `openjs-foundation/cross-project-council` README | markdown-table parse, tagged by stage section |
 | `psf` | `python-software-foundation.csv` | GitHub orgs `pypa` + `python` | GitHub API (token revolver); forks skipped |
 | `sfc` | `software-freedom-conservancy.csv` | sfconservancy.org/projects/current | HTML scrape + curated GitHub-slug-by-domain overlay |
 | `xorg` | `x-org-foundation.csv` | gitlab.freedesktop.org `xorg` group API | paginated JSON; `github_repo` = `gitlab-freedesktop-mirrors/<name>` mirror slug |
@@ -41,15 +46,19 @@ uv run python -m src.sources.funding.<slug>   # e.g. …funding.apache
 
 ## Schema
 
-Columns shared by every roster (per `src/sources/funding/_common.py`):
+Columns every roster carries (per `src/sources/funding/_common.py`):
 
 | Column | Meaning | Example |
 |--------|---------|---------|
 | `name` | Project name as the foundation lists it | `Apache Accumulo` |
-| `domain` | Apex domain of the project homepage (www-stripped); a match key | `arviz.org` |
 | `github_repo` | `owner/name` GitHub slug, best-effort; blank when no authoritative repo/mirror exists | `aeraki-mesh/aeraki` |
 | `ecosystem`, `package` | Package-registry URL (npm/pypi/crates/Homebrew→`cpp`) detected on the project's pages | `pypi`, `abi3audit` |
 | `fetched_at` | UTC ISO stamp of the scrape, set by `write_projects` | `2026-06-29T23:07:14+00:00` |
+
+`domain` — apex domain of the project homepage (www-stripped), the third
+match key — appears on **most** rosters, not all. The `psf` roster derives its
+projects from GitHub org listings and writes a `homepage` column but no
+`domain` column, so PSF projects match by slug or org prefix only.
 
 Per-roster extras carried through from each source:
 

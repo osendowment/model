@@ -8,11 +8,12 @@ the license section of [eligibility.md](../eligibility.md), counts in
 the preview pipeline sheet.
 
 Two review bodies are unified: OSI's formal approvals and the FSF's
-free-software list (as carried by SPDX's `isFsfLibre` flag). FSF-libre
-CONTENT licenses (CC-BY-*, CC0, GFDL, OFL fonts, ODbL data) are free for
-documents/data but not software OSS, so they are deliberately excluded
-(`CONTENT_LICENSE_PREFIXES` in `src/sources/osi/fetch_licenses.py`). Running
-the builder prints the OSI-vs-FSF comparison (`--compare` for report-only).
+free-software list (SPDX's `isFsfLibre` flag). FSF-libre **content** licenses
+are free for documents, data, art, and fonts but are not software OSS, so
+`CONTENT_LICENSE_PREFIXES` in `src/sources/osi/fetch_licenses.py` excludes
+every id starting with `cc-by`, `cc0`, `gfdl`, `ofl`, `fal` (Free Art
+License), or `odbl`. The builder prints the OSI-vs-FSF comparison;
+`--compare` reports without writing.
 
 ## Data Source
 
@@ -24,21 +25,28 @@ both approval flags per license.
 
 ## Curated extras
 
-`EXTRAS` in `src/sources/osi/fetch_licenses.py` is the source of truth for the
-curated list — licenses universally treated as software OSS that OSI never
-formally reviewed (usually nobody filed the paperwork). Each entry carries an
-evidence comment in the script (project, why OSI omits it, source URLs); new
-entries loosen eligibility, so they require comparable evidence. There is no
-separate extras data file — the fetcher merges both passes into one CSV and
-the `source` column records which rule admitted each row.
+`EXTRAS` in `src/sources/osi/fetch_licenses.py` holds the curated list —
+licenses universally treated as software OSS that OSI never formally reviewed
+(usually nobody filed the paperwork). Read that dict for the authoritative
+membership; each entry carries an evidence comment (project, why OSI omits it,
+source URLs). New entries loosen eligibility, so they require comparable
+evidence. There is no separate extras data file: the fetcher merges both
+passes into one CSV and the `source` column records which rule admitted each
+row.
+
+The 10 current entries:
 
 | `spdx_id` | Project | License family |
 |-----------|---------|----------------|
 | `blessing` | SQLite | public-domain dedication |
-| `curl` | curl | MIT/X11 derivative |
+| `bzip2-1.0.6` | bzip2 / libbzip2 | BSD-style permissive |
+| `curl` | curl | MIT/X11 derivative (OSI submission filed 2026-02) |
 | `libpng-2.0` | libpng | zlib/MIT-style permissive |
+| `libtiff` | libtiff | HPND/MIT-family permissive |
 | `mit-cmu` | Pillow | MIT variant (CMU) |
+| `mit-open-group` | X.Org core libs | MIT/X11-family permissive |
 | `psf-2.0` | CPython / PSF tooling | ≡ OSI-approved `python-2.0` |
+| `tcp-wrappers` | TCP Wrappers | BSD-style permissive |
 | `x11-distribute-modifications-variant` | ncurses | MIT/X11-family permissive |
 
 ## Raw Data

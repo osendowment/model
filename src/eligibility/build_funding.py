@@ -648,13 +648,13 @@ def build() -> list[dict]:
         # collective claiming github.com/facebook). Otherwise auto-map: a repo-level
         # collective → its FULL avg budget; else the org's collective split equally
         # across the org's class-A repos.
-        # A repo-level reverse-map match (the collective declares THIS owner/repo)
-        # sets the slug when the collective is REAL (fetched, status ok) even at $0
-        # raised — a real OC channel is itself a sustainability-intent signal;
-        # `oc_amt` still carries the (possibly $0) budget. Org-level matches stay
-        # guarded by `_avg(...) > 0`: an org-only $0 collective is usually junk
-        # (e.g. `for-the-mage` claiming github.com/facebook), so we don't spread its
-        # slug across the org's repos.
+        # A reverse-map match sets the slug when the collective is REAL (fetched,
+        # status ok) even at $0 raised — a real OC channel is itself a
+        # sustainability-intent signal; `oc_amt` still carries the (possibly $0)
+        # budget. Org-level matches apply the SAME `_real_oc` test, with no dollar
+        # threshold: a junk org-only collective at $0 (e.g. `for-the-mage` claiming
+        # github.com/facebook) does spread its slug across the org's class-A repos.
+        # Suppress those with an empty `oc_slug` in the curated overrides.
         if str(entry.repo_id) in overrides_by_id:
             s = normalize_oc_slug(ov.get("oc_slug"))
             oc_slug, oc_amt = (s, _avg(s)) if s else ("", 0.0)

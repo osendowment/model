@@ -1,68 +1,78 @@
 # Debian
 
-Package install counts, dependencies, and metadata from the Debian Linux distribution.
-Used as one of two inputs (alongside Homebrew) for the C/C++ ecosystem pipeline.
+Package install counts, dependencies, and metadata from the Debian Linux
+distribution. One of the two inputs to the [C/C++ pipeline](cpp.md),
+alongside [Homebrew](homebrew.md).
 
 ## Data Sources
 
-**Package popularity (popcon)**: Historical install statistics from [popcon.debian.org](https://popcon.debian.org), fetched via Wayback Machine snapshots. One snapshot per year.
+| Signal | Source | Notes |
+|---|---|---|
+| Package popularity | [popcon.debian.org](https://popcon.debian.org) `by_inst.gz`, via the Wayback CDX API | One snapshot per year — the capture closest to Dec 31 inside that calendar year |
+| Package index | [deb.debian.org](https://deb.debian.org/debian/dists/stable/main/binary-amd64/Packages.xz) | Latest dependency edges, `Homepage`, `Vcs-Browser`, `Section` |
+| C/C++ classification | [UDD](https://udd-mirror.debian.net) — the Debian Package Database Postgres mirror | Public read access: `host=udd-mirror.debian.net user=udd-mirror password=udd-mirror dbname=udd` |
 
-**Package index**: [deb.debian.org](https://deb.debian.org/debian/dists/stable/main/binary-amd64/Packages.xz) -- latest dependency edges, homepage, and VCS metadata.
+The C/C++ set is the union of three UDD signals, and the `via` column records
+which one matched:
 
-**C/C++ classification**: [UDD (Debian Package Database)](https://udd-mirror.debian.net) -- PostgreSQL mirror, public access: `host=udd-mirror.debian.net user=udd-mirror password=udd-mirror`. Union of three signals: binaries directly debtagged `implemented-in::c`/`implemented-in::c++`, binaries whose *source* package is tagged, and binaries in the library sections (`libs`, `libdevel`, `oldlibs`) of current stable.
+1. Binaries debtagged `implemented-in::c` or `implemented-in::c++`.
+2. Binaries whose *source* package carries that tag.
+3. Binaries in the `libs`, `libdevel`, or `oldlibs` sections of current stable.
 
-No authentication required. Wayback snapshots may be sparse for some years.
+No authentication required.
 
 ## Raw Data
 
-In `data/sources/debian/raw/` (`package` = binary package name throughout):
-- `downloads.csv` -- package, year, downloads (from popcon)
-- `dependencies.csv` -- package, dep_name, dep_version, fetched_at. **Runtime only**: combines `Depends` + `Pre-Depends` from each binary's stanza. `Build-Depends`, `Recommends`, `Suggests` are intentionally not collected.
-- `package-metadata.csv` -- package, source, homepage, vcs_browser, section
-- `cpp-packages.csv` -- package, tag, via (C/C++ binaries from the UDD signal union; `via` records which signal matched)
-- `aliases.csv` -- t64 version renames (current <-> old)
+In `data/sources/debian/raw/`. `package` means the binary package name
+throughout.
+
+| File | Schema | Notes |
+|---|---|---|
+| `downloads.csv` | `package, year, downloads` | From popcon |
+| `dependencies.csv` | `package, dep_name, dep_version, fetched_at` | **Runtime only** — `Depends` + `Pre-Depends`. `Build-Depends`, `Recommends`, and `Suggests` are never collected |
+| `package-metadata.csv` | `package, source, homepage, vcs_browser, section` | |
+| `cpp-packages.csv` | `package, tag, via` | C/C++ binaries from the UDD signal union |
+| `aliases.csv` | `current, old` | t64 version renames |
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `src/sources/debian/fetch_debian_data.py` | Multi-step: packages, popcon, index |
-| `src/sources/debian/process_data.py` | Build outputs (source-level aggregation) |
+| `src/sources/debian/fetch_debian_data.py` | Three steps: `packages` (UDD), `popcon` (Wayback), `index` (`Packages.xz`) |
+| `src/sources/debian/process_data.py` | Build the outputs, aggregated at source-package level |
 
 ```bash
-uv run src/sources/debian/fetch_debian_data.py [--step packages|popcon|index|all] [--years 2023 2024 2025] [--limit N]
+uv run python -m src.sources.debian.fetch_debian_data [--step packages|popcon|index|all] [--years 2023 2024 2025] [--limit N] [--refresh] [--offline]
 uv run python -m src.sources.debian.process_data
 ```
 
+Each fetch step carries a 7-day output TTL. A warm run skips it; `--refresh`
+forces the refetch and `--offline` blocks the network entirely.
+
 ## Key Design
 
-Aggregation is at **source package** level (not binary):
-- Multiple binaries per source (e.g. ffmpeg -> libavcodec61, libavformat61)
-- Downloads: MAX across binaries (avoid double-counting co-installed packages)
-- Dependencies: binary-to-binary edges translated to source-to-source, deduplicated
-- is_cpp: any binary flagged C/C++ -> entire source flagged
+Aggregation happens at **source package** level, not binary level. One source
+emits many binaries (ffmpeg → libavcodec61, libavformat61), and binaries get
+renamed at every SONAME bump, so the source is the stable project unit.
+
+| Field | Rule |
+|---|---|
+| Downloads | MAX across the source's binaries. SUM would double-count a machine holding `libfoo.so.5` and `libfoo.so.6` side by side |
+| Dependencies | Binary→binary edges translated to source→source, self-loops dropped, then deduplicated |
+| `is_cpp` | Any binary flagged C/C++ flags the whole source |
+| `github` | First non-empty `github.com` URL across the binaries (`Homepage` or `Vcs-Browser`) |
 
 ## Outputs
 
-In `data/sources/debian/`:
-- `top-packages.csv`, `dependency-tree.csv`, `github-repos.csv`, `results.csv`
+In `data/sources/debian/`: `top-packages.csv`, `dependency-tree.csv`,
+`github-repos.csv`, `git.csv`, `results.csv` — all keyed by source package.
 
 ## Limitations
 
-- **Popcon is opt-in** -- only ~250K Debian machines participate, so numbers are a
-  sample of installed base, not total downloads.
-- **Sparse Wayback coverage** -- only 11 snapshots available across 2021--2025, with
-  some years having only 1 snapshot (2023: Jul 2 only). Each year picks the snapshot
-  closest to Dec 31, but this is a rough proxy.
-- **Not comparable to package-manager downloads** -- popcon measures "machines with
-  package installed", not download events.
-
-Available Wayback snapshots for `popcon.debian.org/by_inst.gz` (2021--2025):
-
-```
-2021: Sep 28, Oct 22
-2022: Sep 04, Sep 21, Sep 29, Dec 25
-2023: Jul 02
-2024: Jan 06, Dec 31
-2025: Sep 15, Nov 17
-```
+- **Popcon is opt-in.** Only participating machines report, so the numbers
+  sample the installed base rather than count it.
+- **Wayback coverage is uneven.** Some years offer several usable captures of
+  `by_inst.gz` and some offer one. Each year takes the capture closest to
+  Dec 31, which makes the year label a rough proxy.
+- **Not comparable to package-manager downloads.** Popcon measures "machines
+  with the package installed", not download events.
