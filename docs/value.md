@@ -24,14 +24,16 @@ Value runs first. Risk and Eligibility both read their working set from
 
 ```mermaid
 graph LR
-    reg["npm · PyPI · crates<br/>Debian + Homebrew"] --> top["top packages<br/>95% cumulative downloads"]
+    reg["npm · PyPI · crates<br/>Debian + Homebrew"] --> dl["annual downloads<br/>per package"]
+    dl --> top["top packages<br/>95% cumulative downloads"]
     top --> tree["dependency tree<br/>transitive deps"]
-    tree --> pr["PageRank<br/>download-weighted, α = 0.85"]
+    tree --> pr["PageRank<br/>α = 0.85"]
+    dl -->|"personalization"| pr
     pr --> cls["class A / B / C<br/>cumulative PR share"]
     cls --> csv["value.csv"]
 
-    pr --> pct["top_eco_pct · 10%"]
-    pr --> mass["pr_score · 10%"]
+    pr --> pct["top_eco_pct · 10%<br/>position in top eco"]
+    pr --> mass["pr_score · 10%<br/>cross-eco mass"]
     ossf["OpenSSF<br/>criticality score"] --> ocrit["openssf_crit · 60%"]
     ems["ecosyste.ms<br/>critical flag"] --> ecrit["eco_crit · 20%"]
 

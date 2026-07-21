@@ -31,25 +31,48 @@ Each dimension draws on a different kind of evidence, and only `workload` mixes 
 ```mermaid
 graph LR
     clone["git clone<br/>commit log + tree"]
-    host["GitHub / GitLab API<br/>issue counts"]
     sec["OpenSSF Scorecard · OSV<br/>deps.dev (fallback)"]
+    host["GitHub / GitLab API<br/>issue counts"]
 
-    clone --> concentration["concentration"]
-    clone --> complexity["complexity"]
-    sec --> security["security"]
-    clone --> workload["workload"]
-    host --> workload
-    sec --> workload
+    clone --> bf["bus factor 5y"]
+    clone --> hhi["HHI 5y"]
+    bf --> conc["concentration<br/>√(hhi / bf)"]
+    hhi --> conc
 
-    concentration --> risk["risk_score<br/>geometric mean"]
-    complexity --> risk
-    security --> risk
-    workload --> risk
+    clone --> loc["loc_eoy · scc"]
+    clone --> cyc["cyclomatic_max · lizard"]
+    loc --> cx["complexity<br/>geometric mean"]
+    cyc --> cx
+
+    sec --> ossf["openssf_score<br/>inverted"]
+    sec --> cve["cve_count_5y"]
+    ossf --> secu["security<br/>worst-of"]
+    cve --> secu
+
+    clone --> lpa["loc_eoy / AC"]
+    sec --> cpa["cve_count_5y / AC"]
+    host --> npa["net new issues 5y / AC"]
+    lpa --> wl["workload<br/>geometric mean"]
+    cpa --> wl
+    npa --> wl
+
+    conc --> risk["risk_score<br/>geometric mean"]
+    cx --> risk
+    secu --> risk
+    wl --> risk
 ```
 
-The diagram shows where each *measurement* comes from. `complexity` and
-`security` also read the host Commits API for their year anchor — see
-[sources/git.md](sources/git.md#sha-anchoring).
+Only the metrics that **score** appear above. Each build collects more —
+`scc_complexity_eoy`, `cognitive_max`, `ossfuzz_enrolled`,
+`bestpractices_badge_id`, `issue_close_ratio`, `issue_trend_score` — and each
+lands in its dimension CSV as context, outside the score.
+
+Two things the diagram compresses. `AC` is `active_contributors_git_5y`, which
+the clone also supplies, so every workload ratio depends on it. And `workload`
+reuses the same `loc_eoy` and `cve_count_5y` that `complexity` and `security`
+score — per contributor rather than absolute. `complexity` and `security` also
+read the host Commits API for their year anchor, which is not a measurement —
+see [sources/git.md](sources/git.md#sha-anchoring).
 
 ### Concentration
 

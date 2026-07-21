@@ -50,22 +50,37 @@ Four independent checks, each one boolean, each built from its own signals.
 
 ```mermaid
 graph LR
-    lic["SPDX · OSI set<br/>registry · host API"]
-    fund["Sponsors · FUNDING.yml<br/>funding.json · OpenCollective"]
-    inst["institutional host<br/>owner type"]
-    state["eol verdict<br/>archived flag"]
+    osi["OSI ∪ FSF-libre<br/>∪ curated extras"]
+    reg["registry · host API<br/>license strings"]
+    gh["GitHub / GitLab<br/>Sponsors · FUNDING.yml"]
+    ff["funding.json · npm/PyPI<br/>funding fields · PayPal"]
+    oc["Open Collective"]
+    ros["foundation rosters<br/>gitlab-hosts · overrides"]
+    st["eol verdict<br/>archived flag"]
 
+    reg --> lic["license (SPDX)<br/>4-source precedence"]
     lic --> oss["oss"]
-    fund --> intent["intent"]
-    inst --> intent
-    inst --> nonprofit["nonprofit"]
-    state --> active["active"]
+    osi --> oss
 
-    oss --> eligible["eligible<br/>plain AND"]
-    intent --> eligible
-    nonprofit --> eligible
-    active --> eligible
+    gh --> intent["intent<br/>OR of any signal"]
+    ff --> intent
+    oc --> intent
+    ros --> host["institutional<br/>host / owner"]
+    host --> intent
+    host --> nonprofit["nonprofit<br/>False iff company"]
+
+    st --> active["active<br/>NOT eol AND NOT archived"]
+
+    oss --> elig["eligible<br/>plain AND"]
+    intent --> elig
+    nonprofit --> elig
+    active --> elig
 ```
+
+One source feeds two checks: an institutional host or owner both declares
+funding intent and decides the `nonprofit` exclusion. Nothing else is shared,
+and the four checks never trade off — each one alone can make a repo
+ineligible.
 
 ### `oss` — an open-source license
 
