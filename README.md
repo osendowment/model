@@ -19,8 +19,8 @@ It collects data on open-source software from [20+ data sources](docs/data-sourc
 
 Value narrows the open-source universe to a core set of projects. Risk and Eligibility then score and flag that core. The fourth step is human.
 
-| VALUE | RISK | ELIGIBILITY | DD + GRANTS |
-|---|---|---|---|
+| VALUE | RISK | ELIGIBILITY | DUE DILIGENCE |
+|:---|:---|:---|:---|
 | Downloads<br>Dependencies<br>Dependents<br>Criticality | Concentration<br>Complexity<br>Security<br>Workload | Open source<br>Funding intent<br>Nonprofit<br>Active | Double-check eligibility<br>Contact project leaders<br>Distribute grants |
 | **Defines the "core" projects** | **Finds the riskiest repos within the core** | **Flags ineligible repos within the core** | **Manual checks and grant distribution** |
 
