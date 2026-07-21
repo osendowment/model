@@ -56,7 +56,7 @@ Most package managers store clean historical data. The C/C++ ecosystem does not,
 | **[Value](docs/value.md)** | How important is this project? | `value_score` (0–100) |
 | **[Risk](docs/risk.md)** | How likely is it to fail? | `risk_score` (0–100, higher = riskier) |
 | **[Eligibility](docs/eligibility.md)** | Can we actually fund it? | `eligible` (boolean) |
-| **[Preview](data/preview/preview.xlsx)** | Publish the result | [`data/preview/preview.xlsx`](data/preview/preview.xlsx) |
+| **[Preview](https://github.com/osendowment/model/raw/main/data/preview/preview.xlsx)** | Publish the result | [`data/preview/preview.xlsx`](https://github.com/osendowment/model/raw/main/data/preview/preview.xlsx) |
 | **Health** | Did the run stay consistent? | pass, or an aborted run |
 
 
@@ -114,7 +114,7 @@ The `health` check runs last to ensure pipeline data consistency, and aborts on 
 - `data/sources/<source>/` — raw + intermediate fetched data; `data/{value,risk,eligibility}/` — stage outputs; `data/preview/` — the published deliverables (`preview.xlsx`, `repos.csv`, `data.csv`).
 - `docs/` — one page per stage ([value](docs/value.md), [risk](docs/risk.md), [eligibility](docs/eligibility.md)) plus [`docs/data-sources.md`](docs/data-sources.md), with [`docs/sources/`](docs/sources/) (one page per data source) and [`docs/components/`](docs/components/) (cross-cutting components) beneath.
 
-**Every count lives in one place.** Funnel, coverage, and distribution figures are on the `pipeline` sheet of [`preview.xlsx`](data/preview/preview.xlsx), regenerated from the live CSVs on every build. The methodology pages describe *how* a metric is built and never restate *how many* — so there is no stats document to drift.
+**Every count lives in one place.** Funnel, coverage, and distribution figures are on the `pipeline` sheet of [`preview.xlsx`](https://github.com/osendowment/model/raw/main/data/preview/preview.xlsx), regenerated from the live CSVs on every build. The methodology pages describe *how* a metric is built and never restate *how many* — so there is no stats document to drift.
 
 ## Auditability
 
