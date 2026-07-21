@@ -53,7 +53,6 @@
 "cups","OpenPrinting/cups"
 "cyrus-sasl","cyrusimap/cyrus-sasl"
 "dctrl-tools","ajkaijanaho/dctrl-tools"
-"docbook","docbook/docbook"
 "docbook-xsl","docbook/xslt10-stylesheets"
 "docker-completion","docker/cli"
 "dosfstools","dosfstools/dosfstools"

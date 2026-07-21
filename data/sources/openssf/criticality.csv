@@ -940,20 +940,20 @@ jonschlinkert/map-cache,gh/32450614,0.15740,JavaScript,MIT License,20,2015-03-18
 andrewrk/node-pend,gh/11836813,0.13827,JavaScript,MIT License,15,2013-08-02T06:40:47Z,2014-11-23T21:52:09Z,157,141,1,1,0,0,0,0,0,0,False,2026-06-29T11:42:28+00:00,ok,
 jensyt/imurmurhash-js,gh/11802843,0.11461,JavaScript,MIT License,104,2013-07-31T22:33:22Z,2013-08-24T20:45:09Z,157,156,1,0,0,0,0,1,0,0,False,2026-06-29T13:17:08+00:00,ok,
 bzip2/bzip2,,,,,,,,,,,,,,,,,,False,2026-07-13T16:57:32+00:00,error,unresolvable-contributor
-cpython-team/python3-defaults,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:11+00:00,error,unresolvable-contributor
-debian/ca-certificates,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:14+00:00,error,unresolvable-contributor
-debian/gdbm,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:17+00:00,error,unresolvable-contributor
-debian/giflib,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:20+00:00,error,unresolvable-contributor
-holmgren/nettle,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:42+00:00,error,unresolvable-contributor
-libtiff/libtiff,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:45+00:00,error,unresolvable-contributor
-md/tcp-wrappers,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:48+00:00,error,unresolvable-contributor
-mpfr/mpfr,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:51+00:00,error,unresolvable-contributor
-multimedia-team/aom,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:53+00:00,error,unresolvable-contributor
-pixman/pixman,,,,,,,,,,,,,,,,,,False,2026-07-13T20:06:56+00:00,error,unresolvable-contributor
-takluyver/jeepney,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:22+00:00,error,unresolvable-contributor
-xorg/lib/libx11,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:25+00:00,error,unresolvable-contributor
-xorg/lib/libxau,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:27+00:00,error,unresolvable-contributor
-xorg/lib/libxdmcp,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:30+00:00,error,unresolvable-contributor
-xorg/lib/libxext,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:33+00:00,error,unresolvable-contributor
-xorg/lib/libxrender,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:36+00:00,error,unresolvable-contributor
-xorg/proto/xorgproto,,,,,,,,,,,,,,,,,,False,2026-07-13T20:07:38+00:00,error,unresolvable-contributor
+cpython-team/python3-defaults,,,,,,,,,,,,,,,,,,False,2026-07-21T22:23:44+00:00,error,unresolvable-contributor
+debian/ca-certificates,,,,,,,,,,,,,,,,,,False,2026-07-21T22:23:47+00:00,error,unresolvable-contributor
+debian/gdbm,,,,,,,,,,,,,,,,,,False,2026-07-21T22:23:50+00:00,error,unresolvable-contributor
+debian/giflib,,,,,,,,,,,,,,,,,,False,2026-07-21T22:23:53+00:00,error,unresolvable-contributor
+holmgren/nettle,,,,,,,,,,,,,,,,,,False,2026-07-21T22:23:56+00:00,error,unresolvable-contributor
+libtiff/libtiff,,,,,,,,,,,,,,,,,,False,2026-07-21T22:23:58+00:00,error,unresolvable-contributor
+md/tcp-wrappers,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:01+00:00,error,unresolvable-contributor
+mpfr/mpfr,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:04+00:00,error,unresolvable-contributor
+multimedia-team/aom,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:06+00:00,error,unresolvable-contributor
+pixman/pixman,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:09+00:00,error,unresolvable-contributor
+takluyver/jeepney,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:12+00:00,error,unresolvable-contributor
+xorg/lib/libx11,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:15+00:00,error,unresolvable-contributor
+xorg/lib/libxau,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:17+00:00,error,unresolvable-contributor
+xorg/lib/libxdmcp,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:20+00:00,error,unresolvable-contributor
+xorg/lib/libxext,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:23+00:00,error,unresolvable-contributor
+xorg/lib/libxrender,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:26+00:00,error,unresolvable-contributor
+xorg/proto/xorgproto,,,,,,,,,,,,,,,,,,False,2026-07-21T22:24:28+00:00,error,unresolvable-contributor
