@@ -3,9 +3,9 @@
 C/C++ has **no single package registry**, so this ecosystem is *assembled*: it
 unifies Debian and Homebrew C/C++ packages — joined at the
 [Repology](repology.md) canonical-project level — and uses
-[OSS-Fuzz](ossfuzz.md) as a security signal. There is no
-`sources/cpp.md`; this component page is the cpp pipeline's home, and the
-underlying sources are documented separately:
+[OSS-Fuzz](ossfuzz.md) as a security signal. cpp has no registry of its own,
+so this page is the pipeline's home and the underlying sources are documented
+separately:
 [debian](debian.md), [homebrew](homebrew.md),
 [repology](repology.md), [ossfuzz](ossfuzz.md).
 
@@ -107,11 +107,11 @@ In `data/sources/cpp/`:
 | File | Description |
 |---|---|
 | `raw/packages.csv` | Per-project join: `project, github_repo, debian_sources, homebrew_formulas, debian_avg_downloads, homebrew_avg_downloads, downloads_score, is_cpp, is_oss_fuzz` |
-| `top-packages.csv` | Top C/C++ projects by download mass, with each ecosystem's average and share |
-| `dependency-tree.csv` | Runtime project→project edges (`type` = `"declared"`) |
-| `github-repos.csv` | Project → GitHub repo mappings |
+| `top-packages.csv` | Top C/C++ projects by download mass — `package, debian_avg_downloads, debian_share, homebrew_avg_downloads, homebrew_share`. cpp keeps no per-year download columns |
+| `dependency-tree.csv` | Runtime project→project edges — `package, dependency, type`; `type` is always `declared` |
+| `github-repos.csv` | Project → GitHub repo mappings — `package, github_repo` |
 | `git.csv` | Project → upstream git URL per host; written by the value stage |
-| `results.csv` | Every dep-tree project with `pagerank`, `value_class`, `repo_id`, `canonical_url`, `license` |
+| `results.csv` | Every dep-tree project with `pagerank`, `value_class`, `repo_id`, `canonical_url`, `license`. `debian_avg_downloads`, `homebrew_avg_downloads` and the blended `downloads_score` take the place of the other ecosystems' `avg_downloads`, per-year columns and `top` |
 | `eol.csv` | `package, is_eol, eol_method, eol_reason, source, eol_checked_at` |
 
 ```bash

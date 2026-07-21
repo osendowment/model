@@ -48,8 +48,22 @@ Key = `(repo, commit_sha, metric)`; upserts replace by key, so snapshots at
 older SHAs survive as a time-series. Writers hold an `fcntl` lock on a `.lock`
 sidecar and write atomically (temp file + rename), so concurrent fetchers
 can't lose each other's rows. A blank `git_url` is resolved host-agnostically
-from `value.csv`. `latest_sha_per_repo` + `project_to_wide` are the read side
-the risk builders use.
+from `value.csv`.
+
+| Function | Side | Does |
+|---|---|---|
+| `upsert_snapshot` / `upsert_rows` | write | replace rows by key, preserving older snapshots |
+| `read` | read | load the long file as rows |
+| `latest_sha_per_repo` | read | pick each repo's newest pinned sha |
+| `project_to_wide` | read | pivot `metric`/`value` pairs into columns |
+
+Two writer rules keep the files diff-stable: a row with an empty `value` or an
+empty `commit_sha` is dropped, and floats are written in shortest round-trip
+form (`42`, not `42.0`; `8.5`, not `8.500000000001`).
+
+`SNAPSHOT_WALKBACK_YEARS = 30` is a fixed cheap range — wide enough to reach
+the oldest dormant-repo fallback year, cheap because the walk stops at the
+first year with a usable sha.
 
 ## Raw Data (`data/sources/git/`)
 

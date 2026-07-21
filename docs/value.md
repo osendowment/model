@@ -20,12 +20,38 @@ Value runs first. Risk and Eligibility both read their working set from
 | `data/value/value.csv` | The unified per-repo table — one row per repo on any host, plus one row per orphan package, so nothing is dropped. Classes A, B and C are all kept. See [Unified output](#unified-output). |
 | `data/value/validation.csv` | The audit trail behind every `git_valid` verdict — see [components/validation.md](components/validation.md). |
 | `data/value/stats.csv` | The per-ecosystem matrix of downloads per year, which the 95% download cutoff reads. |
-| `data/sources/{eco}/*.csv` | The package-level tables each ecosystem builds — see [Per-ecosystem output files](#per-ecosystem-output-files). |
+| `data/sources/{eco}/*.csv` | The package-level tables each ecosystem builds — see [Ecosystems](#ecosystems). |
+
+```mermaid
+graph LR
+    reg["npm · PyPI · crates<br/>Debian + Homebrew"] --> top["top packages<br/>95% cumulative downloads"]
+    top --> tree["dependency tree<br/>transitive deps"]
+    tree --> pr["PageRank<br/>download-weighted, α = 0.85"]
+    pr --> cls["class A / B / C<br/>cumulative PR share"]
+    cls --> csv["value.csv"]
+
+    pr --> pct["top_eco_pct · 10%"]
+    pr --> mass["pr_score · 10%"]
+    ossf["OpenSSF<br/>criticality score"] --> ocrit["openssf_crit · 60%"]
+    ems["ecosyste.ms<br/>critical flag"] --> ecrit["eco_crit · 20%"]
+
+    pct --> score["value_score<br/>pro-rata blend"]
+    mass --> score
+    ocrit --> score
+    ecrit --> score
+    score --> csv
+```
+
+**PageRank share alone sets the class.** No criticality source touches the class
+cut. OpenSSF and ecosyste.ms feed only `value_score`, and `value_score` never
+feeds the class. The two criticality fetches even run *after* the cut, over the
+class-A scope it has just decided. A class-A repo can therefore score low.
 
 ### Top-repo scope — the "core"
 
-Risk and Eligibility read the same set directly from `value.csv`. A row is a
-top repo when these filters pass:
+Risk (`src.risk.run_risk_pipeline`) and Eligibility
+(`src.eligibility.run_eligibility_pipeline`) read the same set directly from
+`value.csv`. A row is a top repo when these filters pass:
 
 | Filter | Required value | Defined in |
 |---|---|---|
@@ -36,19 +62,9 @@ top repo when these filters pass:
 `risk_input.value_classes` records the same class scope. Archived repos stay in
 and surface in eligibility as `active=False`.
 
-**This class-A set is the "core".** *Core* is the plain-language name for it:
-the projects the ecosystem actually runs on. Risk and Eligibility operate only
-inside the core. The docs otherwise use the precise terms — **class-A** and
-**top-repo set** — because those name the exact filter.
-
-### What reads it next
-
-| Stage | Runner | Input | Output | Page |
-|---|---|---|---|---|
-| Risk | `src.risk.run_risk_pipeline` | the top-repo set | `data/risk/risk.csv` | [risk.md](risk.md) |
-| Eligibility | `src.eligibility.run_eligibility_pipeline` | the same top-repo set | `data/eligibility/eligibility.csv` | [eligibility.md](eligibility.md) |
-
-Value's own runner is `src.value.run_value_pipeline`.
+**This class-A set is the "core"** — the projects the ecosystem actually runs
+on. The docs otherwise use the precise terms **class-A** and **top-repo set**,
+because those name the exact filter.
 
 <a id="components"></a>
 
@@ -66,13 +82,11 @@ repo missing some still lands on the same 0–100 scale. The weights sit in
 | `top_eco_pct` | 10% | `centrality_weight` | PageRank **position** in the repo's strongest ecosystem | any host with a PageRank signal |
 | `pr_score` | 10% | `pr_score_weight` | Cross-ecosystem dependency **mass** | any host with a PageRank signal |
 
-A row needs at least `min_components` (2) present, or `value_score` stays
-blank. `src.value.apply_criticality` stamps the column.
-
-The weights are criticality-dominant on purpose. A foundational-but-quiet
-micro-dep must not outrank a genuinely critical project. The two
-PageRank-family factors split the 0.2 centrality weight between position and
-mass.
+A row needs at least `min_components` (2) present, or `value_score` stays blank.
+`src.value.apply_criticality` stamps the column. The weights are
+criticality-dominant on purpose: a foundational-but-quiet micro-dep must not
+outrank a genuinely critical project. The two PageRank-family factors split the
+0.2 centrality weight between position and mass.
 
 **A missing component costs nothing but its weight.** Take a GitLab class-A
 repo: it carries no `openssf_crit`, and ecosyste.ms may state no flag either.
@@ -80,43 +94,13 @@ With `top_eco_pct` = 80 and `pr_score` = 60, the blend is
 `(0.1 × 80 + 0.1 × 60) / 0.2` = **70**. Two components clear the floor, so the
 repo scores.
 
-### `openssf_crit` — 60%, GitHub only
-
-The OpenSSF Criticality Score ·100 (0–100, two decimals); the source CSV keeps
-the raw 0–1 value. `src.value.apply_criticality` joins it from
-`data/sources/openssf/criticality.csv`.
-
-| Row in `value.csv` | Value of `openssf_crit` |
-|---|---|
-| Valid class-A GitHub repo, archived included | A number. This is the fetch scope, and `scripts/pipeline_health.py` gates on it. |
-| Repo on any non-GitHub host | Empty — the tool is GitHub-only. |
-| Class B or C repo | Empty — outside the fetch scope. |
-| Unresolved or invalid repo | Empty. |
-
-### `eco_crit` — 20%, GitHub and GitLab
-
-The ecosyste.ms critical flag, joined from
-`data/sources/ecosystems/criticality.csv` by `src.value.apply_criticality`.
-
-| Value of `eco_crit` | Meaning |
-|---|---|
-| `100` | The repo's canonical package is on the critical list. |
-| `0` | The registry states `critical=false` — **explicitly** not on the list. |
-| blank | Unknown: the fetch did not resolve, the registry omitted the flag (common for spack/debian cpp packages), or the repo sat outside the class-A scope. |
-
-A blank flag is never a real 0. The blend drops a blank component; it never
-scores it as zero.
-
-### `top_eco_pct` — 10%
-
-The repo's PageRank **position** inside `top_eco`: `100 − cumulative-PR
-percentile`. The range is 0–100 and **higher = better**; the tail sits near 0.
-[Value Classes](#value-classes) explains the percentile.
-
-### `pr_score` — 10%
-
-Cross-ecosystem dependency **mass**, complementing `top_eco_pct`'s position.
-The range is 0–100 (two decimals) and **higher = better**. Four steps build it:
+The [column table](#valuecsv-columns) defines all four columns. Four facts it
+does not carry: `openssf_crit` is fetched for exactly the valid class-A GitHub
+repos, archived included, and `scripts/pipeline_health.py` gates on that
+coverage. A blank `eco_crit` is never a real 0 — the registry often omits the
+flag for spack/debian cpp packages, and the blend drops a blank component rather
+than scoring it zero. `top_eco_pct` reads the percentile of
+[Value Classes](#value-classes). `pr_score` takes four steps:
 
 | Step | Operation |
 |---|---|
@@ -126,17 +110,13 @@ The range is 0–100 (two decimals) and **higher = better**. Four steps build it
 | 4 | Rescale the column so the highest-mass repo = 100. |
 
 The p = 2 norm gives a real second-ecosystem footprint about +41% (√2), gives a
-token listing almost nothing, and lets an extra ecosystem never lower the
-score. `pr_score` is blank only for groups with no PageRank signal.
+token listing almost nothing, and lets an extra ecosystem never lower the score.
 
 ## From downloads to a value class
 
-Select the top packages, expand their dependency tree, run download-weighted
-PageRank over that graph, then classify each node A/B/C.
-
-Both cuts use **cumulative share**, never a fixed package count. Downloads and
-PageRank follow a power law: a small head of packages carries almost all the
-mass. A share cutoff tracks that head as the ecosystem grows.
+Both cuts below use **cumulative share**, never a fixed package count. Downloads
+and PageRank follow a power law: a small head carries almost all the mass, and a
+share cutoff tracks that head as the ecosystem grows.
 
 ### Top Package Selection
 
@@ -147,14 +127,12 @@ that cutoff is "top".
 
 ### PageRank
 
-Nodes are packages; a directed edge A→B means "A depends on B". Rank flows
-along that edge from the dependent to its dependency. A package therefore
-scores high by being **depended on**; declaring many dependencies never raises
-its own score. Personalized PageRank (alpha = 0.85) sets each node's restart
-probability to its share of the ecosystem's average annual downloads, so a
-package that is both widely depended on **and** widely downloaded ranks
-highest. One number therefore carries three signals: **downloads**,
-**dependencies** and **dependents**.
+Nodes are packages; a directed edge A→B means "A depends on B". Rank flows from
+the dependent to its dependency, so a package scores high by being **depended
+on**; declaring many dependencies never raises its own score. Personalized
+PageRank (alpha = 0.85) sets each node's restart probability to its share of the
+ecosystem's average annual downloads. One number therefore carries three
+signals: **downloads**, **dependencies** and **dependents**.
 
 ### Value Classes
 
@@ -181,15 +159,15 @@ Packages sorted by PageRank descending; cumulative PageRank share sets the class
 
 Ranking inside an ecosystem avoids comparing PageRank magnitudes across
 ecosystems, since each ecosystem's PR mass sums to 1 in its own graph. A
-repo-level PageRank was skipped: with no cross-ecosystem deps in our data, the
-repo graph stays four disconnected subgraphs.
+repo-level PageRank was skipped: with no cross-ecosystem deps in our data, that
+graph stays four disconnected subgraphs.
 
 ### Funnel columns
 
 The preview pipeline sheet → Value holds the per-ecosystem funnel counts and
 repo-coverage percentages. Its columns mean:
 
-| Column on that sheet | What it counts |
+| Column | What it counts |
 |---|---|
 | *Top packages* | Packages covering 95% of cumulative downloads. |
 | *After dep tree* | `\|top ∪ transitive deps\|` — the universe analyzed for PageRank. |
@@ -209,30 +187,33 @@ ecosystem covers the fetch, the process and the scoring.
 | Rust | crates.io | [crates](sources/crates.md) |
 | C / C++ | Debian + Homebrew + Repology + OSS-Fuzz | [cpp](sources/cpp.md) |
 
-C/C++ has no single registry. The pipeline unifies it from Debian and Homebrew,
-joined via Repology. Its install proxies come from Wayback snapshots and carry
-snapshot caveats — see [debian](sources/debian.md) and
-[homebrew](sources/homebrew.md).
+Every ecosystem writes `top-packages.csv`, `dependency-tree.csv`,
+`github-repos.csv` and `results.csv` to `data/sources/{eco}/`. The
+cross-ecosystem steps add `git.csv` (the per-platform URL table from
+`build_git_urls`), and `check_eol.py` adds `eol.csv`, an Eligibility input.
+Each page above carries the schemas, including where cpp differs.
+
+C/C++ has no single registry, so the pipeline unifies it from Debian and
+Homebrew, joined via Repology. Its install proxies come from Wayback snapshots
+and carry snapshot caveats — see [debian](sources/debian.md) and
+[homebrew](sources/homebrew.md). Every other source has its own page under
+[`docs/sources/`](sources/); [`docs/data-sources.md`](data-sources.md) is the
+source × stage matrix.
 
 ## Running it
 
-Run the model only through `scripts/run-pipeline.sh`. Its stages execute in
-order — **value → risk → eligibility → preview → health**. Never invoke a stage
-runner by hand: a skipped preview stage leaves `data/preview/preview.xlsx`
-stale, and `health` aborts the run on a red check.
-
-**Three stages score; two do not.** Value, Risk and Eligibility compute every
-number. `preview` (`src.run_preview_pipeline`) rebuilds the deliverables in
-`data/preview/`, and `health` (`scripts/pipeline_health.py`) audits each stage
-CSV against its builder. Neither changes a score.
+Run the model only through `scripts/run-pipeline.sh`, which executes the stages
+in order — **value → risk → eligibility → preview → health**. Value, Risk and
+Eligibility compute every number; `preview` rebuilds `data/preview/` and
+`health` audits each stage CSV, and neither changes a score.
 
 ```bash
-scripts/run-pipeline.sh                       # every stage
-scripts/run-pipeline.sh --from-stage value    # value → … → health
-scripts/run-pipeline.sh --stage value         # value alone (later stages left stale)
+scripts/run-pipeline.sh                              # every stage
+scripts/run-pipeline.sh --from-stage value           # value → … → health
+scripts/run-pipeline.sh --stage value                # value alone (later stages left stale)
 scripts/run-pipeline.sh --stage value --only unify   # one step of it
-scripts/run-pipeline.sh --stage value --list  # its steps
-scripts/run-pipeline.sh --stage value --offline   # pure-cache run, no network
+scripts/run-pipeline.sh --stage value --list         # its steps
+scripts/run-pipeline.sh --stage value --offline      # pure-cache run, no network
 ```
 
 Steps run in this order (`src/value/run_value_pipeline.py`); steps sharing a
@@ -255,8 +236,6 @@ Steps run in this order (`src/value/run_value_pipeline.py`); steps sharing a
 `eco-fetch` and `canonical` run concurrently because each reads the previous
 run's `value.csv` and writes its own file.
 
-### Rebuilding the rollup only
-
 ```bash
 uv run python -m src.value.run_value_pipeline --rollup
 ```
@@ -270,23 +249,22 @@ the later stages stale — follow it with
 
 ## Unified output
 
-`data/value/value.csv` is the canonical per-repo table. The rollup chain builds
-it — `eco-fetch` → `canonical` → `resolve` → `unify` → `validation` →
-`openssf-crit` → `eco-crit` → `criticality`:
+`data/value/value.csv` is the canonical per-repo table. Three steps of the
+rollup chain shape it:
 
-- `resolve` (`apply_ecosystems_authority`) re-resolves each package's repo
-  identity under `override > github-canonical > ecosyste.ms > prior registry
-  data`, and stamps `canonical_url`.
-- `unify` (`src/value/unify_value_data.py`) reads each ecosystem's `results.csv`
-  and `eol.csv`, groups packages by repo, and computes every per-ecosystem and
-  cross-ecosystem aggregate in one pass, sorted by `top_eco_pct` desc. It
-  writes the per-repo table directly — there is no separate aggregation step.
-- `criticality` (`src.value.apply_criticality`) stamps `openssf_crit`,
-  `eco_crit` and `value_score`, then re-sorts the shipped file by `value_score`
-  desc. Unscored rows (below the 2-component floor, mostly class B/C) sink to
-  the end in `top_eco_pct`-desc order.
+- `resolve` picks each package's repo identity under
+  `override > github-canonical > ecosyste.ms > prior registry data`.
+- `unify` computes every per-ecosystem and cross-ecosystem aggregate in one
+  pass, and writes the per-repo table directly.
+- `criticality` sorts the shipped file by `value_score` desc. Unscored rows
+  (below the 2-component floor, mostly class B/C) sink to the end in
+  `top_eco_pct`-desc order.
 
 ### value.csv columns
+
+The identity columns (`repo` … `git_valid`) and the two criticality columns hold
+the most recent fetch. Every download-derived column (`ecosystems` … `class`)
+covers the 5-year window 2021–2025.
 
 | Column | Description |
 |--------|-------------|
@@ -307,6 +285,12 @@ it — `eco-fetch` → `canonical` → `resolve` → `unify` → `validation` �
 | `openssf_crit` | OpenSSF criticality score ·100 (0–100, two decimals; the source CSV keeps the raw 0–1 value), joined from `data/sources/openssf/criticality.csv`. GitHub-only — see [the four components](#components) for the exact fetch scope. |
 | `eco_crit` | ecosyste.ms critical flag: `100` on the critical list, `0` explicitly not on it, blank unknown. Covers GitHub **and** GitLab; joined from `data/sources/ecosystems/criticality.csv`. See [the four components](#components). |
 | `value_score` | 0–100 **pro-rata blend** of up to four components — `openssf_crit` (0.6), `eco_crit` (0.2), `top_eco_pct` (0.1), `pr_score` (0.1). Blank unless at least `min_components` (2) are present. Stamped by `src.value.apply_criticality`. See [the four components](#components). |
+
+`unify` groups package rows by `repo_id` / `git_url`, so the package-level rows
+stay in `data/sources/{eco}/results.csv`. EOL is deliberately absent: the
+per-ecosystem `check_eol.py` writes `data/sources/{eco}/eol.csv`, an advisory
+input to the manual `eol` column of `data/eligibility/overrides.csv`, which
+`src.eligibility.build_active` consumes (see [eligibility.md](eligibility.md)).
 
 ### Manual overrides
 
@@ -332,263 +316,31 @@ Three encodings matter. Set the fields as this table shows:
 | Self-hosted project, reached through its mirror | the GitHub/GitLab **mirror** | the upstream it copies | blank | `gnutools/glibc` ← `sourceware.org` |
 | No git upstream | **blank** | the real source URL | blank | Info-ZIP unzip, GraphicsMagick (hg) |
 
-**Repo / URL correction.** A non-GitHub `git_url` on a `repo` row is the live
-upstream a GitHub mirror syncs from, and is preserved as `canonical_url`
-(`torvalds/linux` → `git.kernel.org`; `gcc-mirror/gcc` → `gcc.gnu.org`).
+The mirror encoding is how a project on a self-hosted git server enters the risk
+scope at all, because the [risk stage](risk.md#scope) scores only GitHub and
+GitLab. The mirror must be *verified* — identical HEAD sha, full ref set, in
+sync now — and the `reason` field records that evidence. A row carrying a
+`canonical_url` scores no issue backlog, because the mirror's tracker is not the
+project's (see [components/workload.md](components/workload.md)).
 
-**Self-hosted project, reached through its mirror.** This is how a project on a
-self-hosted git server enters the risk scope at all (`gnutools/glibc` ←
-`sourceware.org`, `qt/qt5` ← `code.qt.io`, `1g4-mirror/libunistring` ←
-`git.savannah.gnu.org`), because the [risk stage](risk.md#scope) scores only
-GitHub and GitLab. The mirror must be *verified* — identical HEAD sha, full ref
-set, in sync now — and the `reason` field records that evidence. A row carrying
-a `canonical_url` scores no issue backlog, because the mirror's tracker is not
-the project's (see [components/workload.md](components/workload.md)).
+With no git upstream, validity is derived: no `git_url` ⇒ nothing to validate ⇒
+`git_valid` = `False`. Never map such a package to a fork or a personal mirror
+instead — that credits the wrong maintainers.
 
-**No git upstream.** The package resolves to no repo, so validity is derived:
-no `git_url` ⇒ nothing to validate ⇒ `git_valid` = `False`. A non-git URL must
-never go in `git_url`. The alternative — mapping the package to a fork or a
-personal mirror — credits the wrong maintainers: IJG's libjpeg was crediting
-`mozilla/mozjpeg`, Info-ZIP's unzip was crediting zlib's author. Info-ZIP
-unzip, GraphicsMagick (hg), Berkeley DB (Oracle tarball) and R (svn) use this
-encoding.
-
-The `resolve` step applies overrides to each `results.csv`
-(`apply_ecosystems_authority` rewrites `git` / `github_repo` and stamps
-`canonical_url`), `unify` forces the group's identity, and `build_validation`
-applies the `valid` pin.
-
-### What value.csv does not hold
-
-`unify` groups package rows by `repo_id` / `git_url`, so the package-level rows
-stay in `data/sources/{eco}/results.csv`. Per-class × per-ecosystem counts and
-the GitHub-group / orphan split are on the preview pipeline sheet → Value.
-
-EOL is deliberately absent: it feeds Eligibility, not the value table. The
-per-ecosystem `check_eol.py` writes `data/sources/{eco}/eol.csv`, an advisory
-input to the manual `eol` column of `data/eligibility/overrides.csv`, which
-`src.eligibility.build_active` consumes (see [eligibility.md](eligibility.md)).
-
-## Per-ecosystem output files
-
-Every ecosystem pipeline writes four files to `data/sources/{ecosystem}/`. The
-cross-ecosystem steps add `git.csv` (the per-platform URL table from
-`build_git_urls`), and `check_eol.py` adds `eol.csv`, an Eligibility input.
-
-### top-packages.csv
-
-Packages covering 95% of ecosystem downloads.
-
-| Column | Description |
-|--------|-------------|
-| `package` | Package name |
-| `avg_downloads` | Average annual downloads (2021--2025) |
-| `avg_downloads_share` | Fraction of ecosystem-wide total downloads |
-| `2021`--`2025` | Downloads per year |
-
-cpp differs: no per-year columns, and `debian_avg_downloads`, `debian_share`,
-`homebrew_avg_downloads`, `homebrew_share` replace the two download columns.
-
-### dependency-tree.csv
-
-Transitive dependency edges from top packages.
-
-| Column | Description |
-|--------|-------------|
-| `package` | Dependent package |
-| `dependency` | Dependency package |
-| `type` | `declared` (npm/pypi/cpp), `normal`/`build`/`dev` (crates) |
-
-### github-repos.csv
-
-Package-to-GitHub-repo mappings for all dep-tree packages.
-
-| Column | Description |
-|--------|-------------|
-| `package` | Package name |
-| `github_repo` | `owner/repo` slug |
-
-### results.csv
-
-All dep-tree packages with downloads, PageRank, and value class.
-
-| Column | Description |
-|--------|-------------|
-| `package` | Package name |
-| `github_repo` | Bare GitHub `owner/repo` slug (empty if the repo isn't on GitHub) |
-| `git` | Canonical git clone URL across hosts (GitHub wins, else GitLab / Codeberg / … / custom) |
-| `eco_guess` | Provenance of the repo identity after `resolve`: `eco` (ecosyste.ms), `native` (registry metadata), `override`, or empty |
-| `avg_downloads` | Average annual downloads |
-| `2021`--`2025` | Downloads per year |
-| `top` | `True` if the package is in the 95% cumulative set |
-| `pagerank` | Download-weighted PageRank score |
-| `value_class` | A/B/C (see [Value Classes](#value-classes)) |
-| `repo_id` | Namespaced repo id (`gh/<id>` / `gl/…`), stamped by `resolve` |
-| `canonical_url` | A GitHub mirror's non-GitHub upstream, or — for a `canonical_url`-only override — the source location of a project with no git upstream (see [Manual overrides](#manual-overrides)) |
-| `license` | Registry-reported license (stamped by the per-eco `fetch_licenses.py`) |
-
-cpp differs: `debian_avg_downloads`, `homebrew_avg_downloads` and the blended
-`downloads_score` replace `avg_downloads`, the per-year columns and `top`.
-
-## Value data sources
-
-Source-specific details live in [`docs/sources/`](sources/), one page per source.
-
-| Source | Fields extracted for Value |
-|---|---|
-| **npm registry** (`registry.npmjs.org`) | `downloads`; `dependencies` from each package's manifest |
-| **nice-registry** ([all-the-package-repos](https://github.com/nice-registry/all-the-package-repos)) | `package → repo_url` mapping |
-| **BigQuery PyPI dataset** | per-package annual downloads (5 years) |
-| **PyPI JSON API** (`pypi.org/pypi/<n>/json`) | `requires_dist`, `project_urls` |
-| **crates.io DB dump** (`static.crates.io/db-dump.tar.gz`) | crates, dependencies, `repository`, `homepage`, `description` |
-| **crates.io archives** | monthly per-version download counts |
-| **Debian UDD** (`udd.debian.org`) | C/C++ source list (debtags + section heuristics) |
-| **Debian popcon** (via Wayback Machine) | install-base counts (proxy for downloads) |
-| **Debian `Packages.xz`** | binary→source mapping, deps, `homepage`, `vcs_browser`, `section` |
-| **Homebrew formula API** (`formulae.brew.sh`) | formula list, deps, `homepage`, `source_url`, `desc`, `license`, `language` |
-| **Homebrew analytics** (via Wayback Machine) | 365-day install counts (proxy for downloads) |
-| **Repology** (`repology.org`) | cross-ecosystem name canonicalization; upstream Git URLs |
-| **OSS-Fuzz** | C/C++ security-critical project whitelist; `main_repo` URL from `project.yaml` |
-
-## Dataflow and metric lineage
-
-```
-                Value pipeline                    Risk             Eligibility
-                ───────────────                   ────             ───────────
-ecosystem ──► top packages ──► dep tree ──► PageRank ──► A/B/C
-registries     (95% cum dl)    (BFS)       ↓
-                                      value.csv
-                                            │
-                                            ├─► top-repo set ──► contributors + scc
-                                            │   (gh+gl, class-A,        │
-                                            │    archived included)  risk.csv
-                                            │
-                                            └─► top-repo set ───► licenses · funding
-                                                (same set)         · EOL/archived
-                                                                         │
-                                                                  eligibility.csv
-                                                                  (oss · intent ·
-                                                                   nonprofit · active
-                                                                   → eligible)
-```
-
-Each leaf below is one metric, with its source and the period it covers.
-Per-language lineage lives on the ecosystem pages — [npm](sources/npm.md),
-[pypi](sources/pypi.md), [crates](sources/crates.md), [cpp](sources/cpp.md).
-The cross-ecosystem rollup is here.
-
-> `[2021–2025]` is the 5-year window; `[most recent]` is the latest pull of
-> that source.
-
-```
-Value
-│
-├── Per-language value pipelines      → sources/{npm,pypi,crates,cpp}.md
-│       downloads → top (95% cum-dl) → dep tree → DL-weighted PageRank (α=0.85) → value_class
-│       (per-language metric lineage + sources live on each ecosystem page)
-│
-└── Cross-ecosystem rollup → value/value.csv
-    ├── repo                      ← per-eco package→repo union (any host) [most recent]
-    ├── platform                  ← host class of git_url                 [most recent]
-    │                                (github/gitlab/codeberg/bitbucket
-    │                                 /sourcehut/custom, empty for orphans)
-    ├── repo_id                   ← `gh/<numeric>` (GitHub Repos API) or  [most recent]
-    │                                `gl/<nickname>-<id>` (GitLab project API;
-    │                                 bare `gl/<id>` for gitlab.com);
-    │                                 empty for other platforms
-    ├── git_url                   ← per-eco git.csv union                  [most recent]
-    │                                (git clone URLs only — never tarball/hg/svn)
-    ├── canonical_url             ← GitHub Repos API + overrides.csv       [most recent]
-    │                                (two meanings — see the column table)
-    ├── git_valid                 ← build_validation (strictly True/False) [most recent]
-    │                                (GitHub API + git ls-remote caches
-    │                                 → value/validation.csv)
-    ├── ecosystems                ← derived (eco set per repo)             [2021–2025]
-    ├── packages                  ← derived (package count per repo)       [2021–2025]
-    ├── top_eco                   ← derived (best percentile eco)          [2021–2025]
-    ├── top_eco_pkg               ← derived (highest-PR pkg in top_eco)    [2021–2025]
-    ├── top_eco_pct               ← derived (100 − pr_cum_pct, 0–100)      [2021–2025]
-    ├── pr_score                  ← derived (per-eco ln PR-mass min-max    [2021–2025]
-    │                                → p2-norm across ecos → max = 100)
-    ├── class_{npm,pypi,crates,cpp}
-    │                              ← derived (per-eco cum-PR share)        [2021–2025]
-    ├── class                     ← derived (strongest across ecos)        [2021–2025]
-    ├── openssf_crit              ← openssf/criticality.csv (github-only)  [most recent]
-    ├── eco_crit                  ← ecosystems/criticality.csv (gh + gl)   [most recent]
-    └── value_score               ← derived 0–100 blend (apply_criticality)
-```
+`resolve` applies overrides to each `results.csv`, `unify` forces the group's
+identity, and `build_validation` applies the `valid` pin.
 
 ## Current Limitations
 
 Known scope choices and gaps. Add new entries here, so caveats stay out of code
 comments and source-doc footnotes.
 
-### cpp dependency tree is runtime-only
-
-Build-time tooling (cmake, pkgconf, autoconf, gettext, …), Debian
-`Recommends`/`Suggests`, and Homebrew `build` deps do **not** propagate
-PageRank. The cpp pipeline drops them at two points:
-
-- Debian: `fetch_debian_data.py` stores only `Depends` + `Pre-Depends`.
-- Homebrew: raw deps carry `runtime` and `build`;
-  `src/sources/cpp/process_data.py` keeps `runtime` only.
-
-PageRank therefore reflects who *runs* with whom, not who *builds* whom, and
-undervalues build infrastructure such as cmake and pkgconf. To fix later: keep
-the source-side type in the cpp edge schema and add a build-aware PR overlay.
-
-### Project identity is GitHub/GitLab-only downstream
-
-Risk, eligibility, EOL and contributor metrics key off the hosts in
-`settings.json → top_repos.platforms` — currently **GitHub and GitLab**. GitLab
-repos are first-class: they carry a `gl/…` `repo_id` from the GitLab project
-API on any GitLab host and are scored alongside GitHub repos (glib on
-gitlab.gnome.org, mpfr on gitlab.inria.fr, pixman on gitlab.freedesktop.org).
-
-A project hosted on its own git server enters the scope through a **verified
-mirror** declared in [`overrides.csv`](#manual-overrides), with the upstream
-recorded in `canonical_url`. gcc (`gcc-mirror/gcc` ← gcc.gnu.org), glibc
-(`gnutools/glibc` ← sourceware.org), qt (`qt/qt5` ← code.qt.io) and
-libunistring (`1g4-mirror/libunistring` ← git.savannah.gnu.org) all reach risk
-and eligibility this way.
-
-Every other host keeps a full `(platform, repo, repo_id, git_url)` identity in
-`value.csv` — codeberg, bitbucket, sourcehut and `custom` (savannah,
-sourceware, kernel.org, project-owned servers) — but those rows stay out of the
-top-repo scope, and a `custom` row carries no `repo_id` at all. A class-A
-project on such a host needs a verified-mirror override before risk or
-eligibility can score it.
-
-A GitLab host counts as GitLab only when `HOST_NICKNAMES`
-(`src/sources/gitlab/gitlab_client.py`) registers it or it matches the
-`gitlab.*` heuristic; that registry also assigns the `gl/<nickname>-<id>`
-prefix. Add a new GitLab instance there before expecting its repos to be
-scored.
-
-To fully fix: per-host adapters for license/EOL/contributor checks against
-codeberg, savannah, sourceware, and the rest.
-
-### Some projects have no git upstream at all
-
-IJG libjpeg, Info-ZIP unzip, GraphicsMagick, Berkeley DB and R publish only
-tarballs, Mercurial or Subversion. They carry no `repo` / `repo_id` /
-`git_url`, so `git_valid` is `False` and they sit outside the top-repo scope:
-**unfundable via a repo**, which is the honest answer. A `canonical_url`-only
-row in [`overrides.csv`](#manual-overrides) records where their source lives.
-
-### No package-level quality gate before results.csv
-
-`results.csv` admits the whole top-95%-cumulative-download set plus its
-transitive deps — no license check, no age cutoff, no popularity floor, no
-archive/EOL gate. Quality filtering happens downstream: the per-ecosystem
-`check_eol.py` / `fetch_licenses.py` signals feed the Eligibility checks on the
-top-repo set. This keeps value scoring independent of signal quality, but it means
-the raw value class distribution overstates how many projects we would fund.
-
-### Wayback-derived install stats have gaps
-
-Homebrew and Debian popcon both arrive via Wayback Machine snapshots, which
-sometimes truncate (1 MB cap) or miss a year. `ecosystem_avg_downloads` in
-`src/common/params.py` averages only over populated years, so a missing year
-does not deflate the average. Year-over-year trend lines stay noisy, and a few
-packages get their `avg_downloads` from fewer than 5 years of data.
+| Limitation | What it means, and how to fix it |
+|---|---|
+| **cpp dependency tree is runtime-only** | Build-time tooling (cmake, pkgconf, autoconf, gettext, …), Debian `Recommends`/`Suggests` and Homebrew `build` deps do **not** propagate PageRank — see [cpp](sources/cpp.md) for the two filters that drop them. PageRank therefore reflects who *runs* with whom, not who *builds* whom, and undervalues build infrastructure. Fix: keep the source-side type in the cpp edge schema and add a build-aware PR overlay. |
+| **Project identity is GitHub/GitLab-only downstream** | Risk, eligibility, EOL and contributor metrics key off `settings.json → top_repos.platforms`. Every other host keeps a full `(platform, repo, repo_id, git_url)` identity in `value.csv` — codeberg, bitbucket, sourcehut and `custom` (savannah, sourceware, kernel.org) — but stays out of the top-repo scope, and a `custom` row carries no `repo_id` at all. Fix: per-host adapters for the license, EOL and contributor checks. |
+| **A self-hosted project needs a verified mirror** | A class-A project on its own git server reaches Risk and Eligibility only through a mirror declared in [`overrides.csv`](#manual-overrides), with the upstream in `canonical_url`: gcc (`gcc-mirror/gcc` ← gcc.gnu.org), glibc (`gnutools/glibc` ← sourceware.org), qt (`qt/qt5` ← code.qt.io), libunistring (`1g4-mirror/libunistring` ← git.savannah.gnu.org). |
+| **A GitLab instance must be registered** | A host counts as GitLab only when `HOST_NICKNAMES` (`src/sources/gitlab/gitlab_client.py`) registers it or it matches the `gitlab.*` heuristic; that registry also assigns the `gl/<nickname>-<id>` prefix. Add a new instance there before expecting its repos to be scored. Registered instances are first-class (glib on gitlab.gnome.org, mpfr on gitlab.inria.fr, pixman on gitlab.freedesktop.org). |
+| **Some projects have no git upstream at all** | IJG libjpeg, Info-ZIP unzip, GraphicsMagick, Berkeley DB and R publish only tarballs, Mercurial or Subversion. They carry no `repo` / `repo_id` / `git_url`, so `git_valid` is `False` and they sit outside the top-repo scope: **unfundable via a repo**, which is the honest answer. |
+| **No package-level quality gate before `results.csv`** | The file admits the whole top-95%-cumulative-download set plus its transitive deps — no license check, no age cutoff, no popularity floor, no archive/EOL gate. Quality filtering happens downstream in Eligibility. Value scoring therefore stays independent of signal quality, but the raw class distribution overstates how many projects we would fund. |
+| **Wayback-derived install stats have gaps** | Homebrew and Debian popcon both arrive via Wayback Machine snapshots, which sometimes truncate (1 MB cap) or miss a year. `ecosystem_avg_downloads` in `src/common/params.py` averages only over populated years, so a missing year does not deflate the average. Year-over-year trend lines stay noisy, and a few packages get `avg_downloads` from fewer than 5 years of data. |

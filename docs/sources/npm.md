@@ -112,9 +112,9 @@ In `data/sources/npm/`:
 
 | File | Description |
 |------|-------------|
-| `top-packages.csv` | Packages covering 95% of downloads (+ `avg_downloads_share`) |
-| `dependency-tree.csv` | Transitive runtime dep edges from the top packages |
-| `github-repos.csv` | Package → GitHub repo mappings |
+| `top-packages.csv` | Packages covering 95% of downloads — `package, avg_downloads, avg_downloads_share, 2021`–`2025` |
+| `dependency-tree.csv` | Transitive runtime dep edges from the top packages — `package, dependency, type`; `type` is always `declared` |
+| `github-repos.csv` | Package → GitHub repo mappings — `package, github_repo` |
 | `git.csv` | Package → upstream git URL per host (`github`, `gitlab`, `bitbucket`, `sourcehut`, `codeberg`, `custom`, `eco_guess`); written by the value stage |
 | `results.csv` | One row per dep-tree package — schema below |
 | `eol.csv` | `package, is_eol, eol_method, eol_reason, source, eol_checked_at` |

@@ -106,9 +106,9 @@ In `data/sources/crates/`:
 
 | File | Description |
 |------|-------------|
-| `top-packages.csv` | Crates covering 95% of downloads (+ `avg_downloads_share`) |
-| `dependency-tree.csv` | Transitive dep edges from the top crates (`package, dependency, type`) |
-| `github-repos.csv` | Package → GitHub repo mappings |
+| `top-packages.csv` | Crates covering 95% of downloads — `package, avg_downloads, avg_downloads_share, 2021`–`2025` |
+| `dependency-tree.csv` | Transitive dep edges from the top crates — `package, dependency, type`; `type` is `normal` / `build` / `dev` |
+| `github-repos.csv` | Package → GitHub repo mappings — `package, github_repo` |
 | `git.csv` | Package → upstream git URL per host (`github`, `gitlab`, `bitbucket`, `sourcehut`, `codeberg`, `custom`, `eco_guess`); written by the value stage |
 | `results.csv` | One row per dep-tree crate — see the schema below |
 | `eol.csv` | `package, is_eol, eol_method, eol_reason, source, eol_checked_at` |

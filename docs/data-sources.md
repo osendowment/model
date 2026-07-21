@@ -1,4 +1,4 @@
-# Data Sources
+[# Data Sources
 
 Every external source the pipeline consumes, and what each stage takes from
 it. Details per source live in [docs/sources/](sources/); counts and coverage
