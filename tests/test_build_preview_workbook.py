@@ -1,4 +1,4 @@
-"""Tests for src/preview/build_preview_workbook.py — repos/people/stats -> preview.xlsx."""
+"""Tests for src/preview/build_preview_workbook.py — repos -> preview.xlsx."""
 import csv
 
 from openpyxl import load_workbook
@@ -48,22 +48,19 @@ def test_cell_value_coerces_numbers_and_keeps_ids_as_text():
     assert bpw._cell_value("True") == "True"
 
 
-def test_build_writes_two_named_sheets_with_styled_filtered_headers(tmp_path, monkeypatch):
+def test_build_writes_the_three_named_sheets_with_styled_filtered_headers(tmp_path, monkeypatch):
     repos_csv = tmp_path / "repos.csv"
-    people_csv = tmp_path / "people.csv"
     out = tmp_path / "preview.xlsx"
     _write_csv(repos_csv, ["repo", "risk_score", "repo_id"],
                [["a/keep", "88.00", "gh/1"], ["b/drop", "77.00", "gh/2"]])
-    _write_csv(people_csv, ["person_id", "platform", "login"],
-               [["github/1", "github", "octocat"]])
-    monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv), ("people", people_csv)])
+    monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv)])
     _patch_stats_md(monkeypatch)
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
 
     bpw.build()
 
     wb = load_workbook(out)
-    assert wb.sheetnames == ["repos", "people", "components", "stats"]
+    assert wb.sheetnames == bpw.SHEET_ORDER == ["repos", "components", "pipeline"]
 
     ws = wb["repos"]
     assert ws.max_row == 3          # header + 2 data rows
@@ -81,11 +78,10 @@ def test_build_writes_two_named_sheets_with_styled_filtered_headers(tmp_path, mo
     assert ws.auto_filter.ref == "A1:B3"
     assert ws.freeze_panes == "A2"
 
-    ws_people = wb["people"]
-    assert ws_people.max_row == 2
-    assert ws_people.cell(row=2, column=3).value == "octocat"
-    # id column stays text (people sheet keeps its ids).
-    assert ws_people.cell(row=2, column=1).value == "github/1"
+    # a name in SHEETS that is not in SHEET_ORDER is never written
+    monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv), ("people", repos_csv)])
+    bpw.build()
+    assert load_workbook(out).sheetnames == ["repos", "components", "pipeline"]
 
 
 def test_components_sheet_renders_methodology_tables(tmp_path, monkeypatch):
@@ -133,15 +129,15 @@ def test_build_skips_missing_csv_without_error(tmp_path, monkeypatch):
     missing_csv = tmp_path / "does-not-exist.csv"
     out = tmp_path / "preview.xlsx"
     _write_csv(repos_csv, ["repo"], [["a/b"]])
-    monkeypatch.setattr(bpw, "SHEETS", [("repos", repos_csv), ("people", missing_csv)])
+    monkeypatch.setattr(bpw, "SHEETS", [("repos", missing_csv)])
     _patch_stats_md(monkeypatch)
     monkeypatch.setattr(bpw, "OUTPUT_FILE", out)
 
     bpw.build()
 
     wb = load_workbook(out)
-    assert wb.sheetnames == ["repos", "people", "components", "stats"]
-    assert wb["people"].max_row == 1   # empty sheet, no header written
+    assert wb.sheetnames == ["repos", "components", "pipeline"]
+    assert wb["repos"].max_row == 1    # empty sheet, no header written
 
 
 def test_repo_url_per_platform():
@@ -234,7 +230,7 @@ def test_repos_sheet_hyperlinks_and_reviewed_decoration(tmp_path, monkeypatch):
 
 
 def test_stats_sheet_renders_markdown_tables(tmp_path, monkeypatch):
-    """Every the preview stats sheet table lands as a stacked block: bold section heading,
+    """Every preview pipeline-sheet table lands as a stacked block: bold section heading,
     styled header row, markdown dressing stripped, counts as real numbers."""
     repos_csv = tmp_path / "repos.csv"
     out = tmp_path / "preview.xlsx"
@@ -245,7 +241,7 @@ def test_stats_sheet_renders_markdown_tables(tmp_path, monkeypatch):
 
     bpw.build()
 
-    ws = load_workbook(out)["stats"]
+    ws = load_workbook(out)["pipeline"]
     assert ws.sheet_view.showGridLines is False
     got = [[c.value for c in row] for row in ws.iter_rows()]
     # column A is an empty gutter — every block starts at column B; row 1 blank

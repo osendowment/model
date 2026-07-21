@@ -11,21 +11,18 @@ def _write(path, header, rows):
         w.writerows(rows)
 
 
-def _patch(monkeypatch, elig, val, risk, repos=None):
+def _patch(monkeypatch, elig, val, risk):
     monkeypatch.setattr(br, "ELIGIBILITY_FILE", elig)
     monkeypatch.setattr(br, "VALUE_FILE", val)
     monkeypatch.setattr(br, "RISK_FILE", risk)
-    if repos is not None:
-        monkeypatch.setattr(br, "GITHUB_REPOS_FILE", repos)
 
 
 def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
-    """Every eligibility row survives (ineligible NOT dropped); value/risk/
-    language all join on the stable `repo_id`."""
+    """Every eligibility row survives (ineligible NOT dropped); value and risk
+    both join on the stable `repo_id`."""
     elig = tmp_path / "eligibility.csv"
     val = tmp_path / "value.csv"
     risk = tmp_path / "risk.csv"
-    repos = tmp_path / "repos.csv"
     _write(elig, ["repo", "repo_id", "oss", "intent", "nonprofit", "active", "eligible"],
            [["a/keep", "gh/1", "True", "True", "True", "True", "True"],
             ["b/drop", "gh/2", "True", "False", "True", "True", "False"]])
@@ -37,14 +34,12 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
                   "workload", "risk_score"],
            [["a/keep", "gh/1", "10", "20", "30", "40", "80"],
             ["b/drop", "gh/2", "1", "2", "3", "4", "20"]])
-    _write(repos, ["repo_id", "language"], [["gh/1", "TypeScript"], ["gh/2", "Python"]])
-    _patch(monkeypatch, elig, val, risk, repos)
+    _patch(monkeypatch, elig, val, risk)
 
     rows = br.build()
     assert {r["repo"] for r in rows} == {"a/keep", "b/drop"}   # nothing dropped
     keep = next(r for r in rows if r["repo"] == "a/keep")
     assert keep["repo_id"] == "gh/1"
-    assert keep["language"] == "typescript"        # lowercased
     assert keep["platform"] == "github"
     assert keep["ecosystem"] == "npm"
     assert keep["top_eco_pkg"] == "left-pad"   # verbatim pass-through
@@ -57,7 +52,7 @@ def test_includes_every_top_repo_and_joins_on_repo_id(tmp_path, monkeypatch):
     assert keep["risk_score"] == "80.00"
     assert keep["eligible"] == "True"
     assert list(keep.keys()) == br.FIELDS
-    assert br.FIELDS.index("platform") == br.FIELDS.index("language") + 1
+    assert br.FIELDS.index("platform") == br.FIELDS.index("repo") + 1
     assert br.FIELDS.index("top_eco_pkg") == br.FIELDS.index("ecosystem") + 1
     assert br.FIELDS.index("top_eco_pct") == br.FIELDS.index("top_eco_pkg") + 1
     assert br.FIELDS.index("pr_score") == br.FIELDS.index("top_eco_pct") + 1
@@ -147,22 +142,24 @@ def test_score_columns_rounded_to_two_decimals(tmp_path, monkeypatch):
     assert row["score"] == "75.32"  # sqrt of the FULL-precision product, then 2dp
 
 
-def test_missing_language_row_leaves_blank(tmp_path, monkeypatch):
-    """A repo absent from github/repos.csv (e.g. GitLab) keeps a blank language
-    rather than dropping the row."""
+def test_gitlab_repo_without_github_metadata_still_produces_a_row(tmp_path, monkeypatch):
+    """A repo with no GitHub-side metadata (e.g. a GitLab repo) still gets a
+    row; sparse inputs leave blanks rather than dropping it."""
     elig = tmp_path / "eligibility.csv"
     val = tmp_path / "value.csv"
     risk = tmp_path / "risk.csv"
-    repos = tmp_path / "repos.csv"
     _write(elig, ["repo", "repo_id", "eligible"], [["gl/thing", "gl/x-1", "True"]])
     _write(val, ["repo", "repo_id", "top_eco", "value_score"],
            [["gl/thing", "gl/x-1", "npm", "5"]])
     _write(risk, ["repo", "repo_id", "risk_score"], [["gl/thing", "gl/x-1", "5"]])
-    _write(repos, ["repo_id", "language"], [])
-    _patch(monkeypatch, elig, val, risk, repos)
+    _patch(monkeypatch, elig, val, risk)
 
     rows = br.build()
-    assert rows[0]["language"] == ""
+    assert len(rows) == 1
+    assert rows[0]["repo_id"] == "gl/x-1"
+    # value.csv carries no `platform` column here, so it falls back to the
+    # repo_id prefix rather than blanking the field or dropping the row.
+    assert rows[0]["platform"] == "gitlab"
 
 
 def test_priority_breaks_2dp_score_ties_on_full_precision(tmp_path, monkeypatch):
