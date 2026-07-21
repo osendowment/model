@@ -243,8 +243,8 @@ Two columns turn that table into a queue:
 | `priority` | a dense rank (1, 2, 3 …) by `score` descending over eligible scored rows only. It is blank for an ineligible row and for any row with no `score`. The rank runs on the full-precision product, not on the displayed 2-decimal `score`. |
 
 `priority` is the grant-selection queue. Everything after it is **manual and
-outside the model**: verify each project's eligibility by hand, contact the
-project leaders, then put the shortlist to the OSE board for final approval.
+outside the model**: check each project's eligibility by hand, contact the
+projects, then put the shortlist to the OSE board for final approval.
 The model contacts nobody, approves nothing and moves no money.
 
 Read `eligible` as *provisional*. It is the model's verdict from the signals it

@@ -21,7 +21,7 @@ Value narrows the open-source universe to a core set of projects. Risk and Eligi
 
 | VALUE | RISK | ELIGIBILITY | DUE DILIGENCE |
 |:---|:---|:---|:---|
-| Downloads<br>Dependencies<br>Dependents<br>Criticality | Concentration<br>Complexity<br>Security<br>Workload | Open source<br>Funding intent<br>Nonprofit<br>Active | Double-check eligibility<br>Contact project leaders<br>Final board approval |
+| Downloads<br>Dependencies<br>Dependents<br>Criticality | Concentration<br>Complexity<br>Security<br>Workload | Open source<br>Funding intent<br>Nonprofit<br>Active | Check eligibility<br>Contact projects<br>Final board approval |
 | **Defines the "core" projects** | **Finds the riskiest repos within the core** | **Flags ineligible repos within the core** | **Manual checks and board approval** |
 
 Downloads, dependencies and dependents combine into a weighted PageRank. Its cumulative share defines the core — a power-law distribution, where a small head of projects carries almost all the dependency mass. Criticality then ranks projects *within* the core; it does not decide who is in it.
