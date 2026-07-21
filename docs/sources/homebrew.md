@@ -48,7 +48,13 @@ join reads Homebrew's result.
 ## Outputs
 
 In `data/sources/homebrew/`: `top-packages.csv`, `dependency-tree.csv`,
-`github-repos.csv`, `git.csv`, `results.csv`.
+`github-repos.csv`, `results.csv` — all written by `process_data.py`.
+
+`data/sources/homebrew/git.csv` sits alongside them but the **value stage**
+writes it (`src.value.build_git_urls`), not `process_data.py`. It re-reads
+`raw/formulas.csv` and classifies each formula's `homepage` / `source_url` by
+host — `github`, `gitlab`, `bitbucket`, `sourcehut`, `codeberg`, `custom` — so
+a formula whose upstream lives on GitLab still reaches Risk and Eligibility.
 
 `results.csv` columns: `package`, `github_repo`, `git`, `eco_guess`,
 `language`, `avg_downloads`, `2021`–`2025`, `top`, `is_cpp`, `is_oss_fuzz`,

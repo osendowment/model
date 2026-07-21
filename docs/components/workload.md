@@ -37,7 +37,7 @@ Workload  → data/risk/workload.csv  (the top risk repos)
 │   ├── net_new_issues_5y       ← derived (opened_5y − closed_5y)                  [2021–2025]
 │   ├── issue_close_ratio       ← derived (closed_5y / opened_5y)                  [2021–2025]
 │   ├── slope_opened, slope_closed ← derived (OLS slope of yearly counts)          [2021–2025]
-│   ├── issue_trend_score       ← derived (vol-normalised slope_closed − slope_opened) [2021–2025]
+│   ├── issue_trend_score       ← derived (vol-normalized slope_closed − slope_opened) [2021–2025]
 │   ├── issue_close_ratio_p     ← derived (percentile, info-only)                  [2021–2025]
 │   └── issue_trend_score_p     ← derived (percentile, info-only)                  [2021–2025]
 │

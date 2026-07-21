@@ -1,7 +1,18 @@
 # OSS-Fuzz
 
-Google's continuous fuzzing service for open-source projects. Used as a signal
-in the C/C++ pipeline to identify projects with active fuzz testing.
+Google's continuous fuzzing service for open-source projects. The index of
+enrolled projects reaches the model in three places, none of which is a score:
+
+- the value stage reads `main_repo` as a repo-URL source for C/C++ packages
+  that publish a git URL nowhere else (`ossfuzz_main_repos` in
+  `src/value/build_git_urls.py`);
+- the C/C++ ecosystem build flags enrolled packages while it merges the Debian
+  and Homebrew corpora;
+- `src/risk/build_security.py` carries enrollment as the `ossfuzz_enrolled`
+  column of `data/risk/security.csv`, for every risk-scope repo. The column is
+  collected and surfaced, never scored — the security score is the worst-of an
+  inverted OpenSSF Scorecard and an OSV CVE score
+  ([security](../components/security.md)).
 
 ## Data Source
 

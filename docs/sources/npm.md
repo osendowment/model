@@ -40,14 +40,14 @@ In `data/sources/npm/raw/`:
 | `dependencies.csv` | `package, dep_name, dep_version, fetched_at` | Edges re-fetched after 365 days — `/latest` deps drift with releases |
 | `licenses.csv` | `package, license, fetched_at` | Lowercase SPDX cache, 90-day TTL. `fetch_licenses.py` joins it into `results.csv` |
 | `npm-stats.csv` | `year, downloads` | Ecosystem-wide totals — the 95% denominator |
-| `top-packages.csv` | — | **Stale artefact.** Nothing in `src/`, `scripts/`, or `tests/` reads or writes it; the live file is `data/sources/npm/top-packages.csv` |
+| `top-packages.csv` | — | **Stale artifact.** Nothing in `src/`, `scripts/`, or `tests/` reads or writes it; the live file is `data/sources/npm/top-packages.csv` |
 
 In `data/sources/npm/nice-registry/`:
 
 | File | Schema | Notes |
 |---|---|---|
 | `packages.csv` | `package, repo_url` | Non-null entries of `packages.json` |
-| `metadata.csv` | `package, github_repo, repo_url` | **Stale artefact.** No reader or writer anywhere in the repo |
+| `metadata.csv` | `package, github_repo, repo_url` | **Stale artifact.** No reader or writer anywhere in the repo |
 
 ## Scripts
 
@@ -64,7 +64,7 @@ In `data/sources/npm/nice-registry/`:
 ```bash
 uv run python -m src.sources.npm.fetch_nice_registry
 uv run python -m src.sources.npm.fetch_npm_stats
-uv run src/sources/npm/fetch_npm_data.py [--max-rounds 20] [--concurrency 3] [--limit 50]
+uv run python -m src.sources.npm.fetch_npm_data [--max-rounds 20] [--concurrency 3] [--limit 50]
 uv run python -m src.sources.npm.process_data [--ignore-gaps] [--concurrency 5]
 uv run python -m src.sources.npm.fetch_licenses [--force] [--apply-only] [--limit 100]
 uv run python -m src.sources.npm.check_eol [--refresh] [--limit 100] [--concurrency 50]
@@ -131,7 +131,7 @@ In `data/sources/npm/`:
 | `top` | `True` if in the 95% cumulative set |
 | `pagerank` | Download-weighted PageRank score |
 | `value_class` | A/B/C |
-| `repo_id` | Host-namespaced repo id — `gh/<numeric id>` on GitHub, `gl/<host>-<numeric id>` on GitLab (`to_repo_id` in `src/common/repos.py`) |
+| `repo_id` | Host-namespaced repo id — `gh/<numeric id>` on GitHub, `gl/<nickname>-<numeric id>` on a custom GitLab host, bare `gl/<numeric id>` on gitlab.com (`to_repo_id` in `src/common/repos.py`) |
 | `canonical_url` | Upstream clone URL, set when the hosted repo is a mirror |
 | `license` | SPDX license (filled by `fetch_licenses.py`) |
 

@@ -26,19 +26,19 @@ In `data/sources/github/` — one row per repo unless stated otherwise:
 | File | Key columns | Written by | Read by |
 |------|-------------|------------|---------|
 | `repos.csv` | `repo, valid, repo_id, owner_login, owner_id, owner_type, description, homepage, canonical_url, default_branch, license, language, topics, stars, forks, open_issues, has_issues, archived, created_at, pushed_at, fetched_at` (32 cols) | `fetch_repo_owner_data.py`; `resolve_licenses.py` rewrites `license` in place | `src/common/repos.py` (the slug → `repo_id` map), `src/value/build_git_urls.py` + `build_validation.py` + `apply_ecosystems_authority.py`, `src/risk/build_workload.py`, `src/eligibility/build_{active,funding,licenses}.py`, `src/sources/funding/match_repos.py` |
-| `users.csv` | `login, user_id, type, name, blog, company, location, email, bio, twitter_username, public_repos, followers, created_at, fetched_at` — keyed by owner login | `fetch_repo_owner_data.py` | `src/build_people.py` |
+| `users.csv` | `login, user_id, type, name, blog, company, location, email, bio, twitter_username, public_repos, followers, created_at, fetched_at` — keyed by owner login | `fetch_repo_owner_data.py` | no current reader — retained as the owner-profile cache |
 | `issues.csv` | `repo, repo_id, year, metric, value, fetched_at` — long, per (repo, year) | `fetch_issue_metrics.py` | `src/risk/build_workload.py` |
-| `funding-yml.csv` | `repo, repo_id, has_funding_links, has_funding_yml, funding_link_platforms, ` + one handle column per `FUNDING_PLATFORMS` entry (`github` … `custom`), `fetched_at` | `fetch_funding_yml.py` | `src/eligibility/build_funding.py`, `src/build_people.py`, `src/sources/opencollective/fetch_budgets.py` |
+| `funding-yml.csv` | `repo, repo_id, has_funding_links, has_funding_yml, funding_link_platforms, ` + one handle column per `FUNDING_PLATFORMS` entry (`github` … `custom`), `fetched_at` | `fetch_funding_yml.py` | `src/eligibility/build_funding.py`, `src/sources/opencollective/fetch_budgets.py` |
 | `sponsors.csv` | `repo, repo_id, gh_sponsorships_in, gh_sponsors_enabled, sponsors_status, fetched_at` — inbound sponsorships of the repo owner | `fetch_sponsors.py` | `src/eligibility/build_funding.py` |
 | `sponsorships.csv` | `login, sponsoring_count, sponsoring_status, fetched_at` — outbound sponsoring, keyed by owner login | `fetch_sponsorships.py` | `src/eligibility/build_funding.py` |
 | `maintainer-sponsors.csv` | `user_id, login, has_sponsors_listing, status, fetched_at` — keyed by maintainer login | `fetch_maintainer_sponsors.py` | `src/eligibility/build_funding.py` |
 | `canonical-repos.csv` | `repo, canonical_repo, repo_id, status, fetched_at` | `fetch_canonical.py` | `src/value/apply_ecosystems_authority.py` |
-| `contributor-commits.csv` | `repo, repo_id, git_url, login, contributions, account_type` — long, the GitHub-API contributor method (login-keyed), distinct from the git-clone file of the same name under `data/sources/git/` | `fetch_contributors_metrics.py`, via `batch_runner.batch_update` | `bf_contributors.load_bf_contributors` → `src/eligibility/build_funding.py`; `key_contributors.load_key_contributors` → `src/build_people.py` |
+| `contributor-commits.csv` | `repo, repo_id, git_url, login, contributions, account_type` — long, the GitHub-API contributor method (login-keyed), distinct from the git-clone file of the same name under `data/sources/git/` | `fetch_contributors_metrics.py`, via `batch_runner.batch_update` | `bf_contributors.load_bf_contributors` → `src/eligibility/build_funding.py` |
 | `contributor-commits.status.csv` | `repo, repo_id, git_url, status, n_contributors, fetched_at` — status ∈ `ok` / `empty` / `error`, so a repo with no rows is never confused with a failed fetch | `batch_runner.py` | the TTL gate of `fetch_contributors_metrics.py` |
 | `search/top-repos.csv` | `repo, repo_id, user_name, user_id, user_type, license, language, topics, stars, forks, open_issues, archived, created_at, pushed_at, fetched_at` | `fetch_top_repos.py` | `fetch_top_repos.py` only — the search corpus is a self-upserted cache. Downstream stages read the wider `repos.csv` instead |
 | `search/repo-counts.csv` | `language, min_stars, date_from, date_to, count, fetched_at` — cached search-API counts, so a repeat run skips range-building | `fetch_top_repos.py` | `fetch_top_repos.py` |
 
-Three files in the folder are **stale artefacts** — no module in `src/`,
+Three files in the folder are **stale artifacts** — no module in `src/`,
 `scripts/`, or `tests/` reads or writes them. Treat them as unused:
 `github-users.csv`, `repo-contrib-metrics.csv`, `repo-git-metrics.csv`.
 
@@ -71,7 +71,6 @@ Every module in `src/sources/github/`:
 | `fetch_churn.py` | Bare clone + `git log --numstat` → 2021–2025 lines added/deleted → `data/sources/git/churn.csv` |
 | `fetch_contributors_metrics.py` | Fetch `/repos/{repo}/contributors` → `contributor-commits.csv` + status sidecar. Lifetime aggregates only: `/stats/contributors` answers HTTP 202 "computing" indefinitely for most repos |
 | `bf_contributors.py` | Read side of that file: the bus-factor maintainer set that cumulatively wrote ≥50% of a repo |
-| `key_contributors.py` | Thin loader over `bf_contributors`, pinned to the `key_contributors.cum_share` setting, for `src/build_people.py` |
 | `fetch_funding_yml.py` | Declared funding channels per repo via GraphQL: resolved `fundingLinks` + the raw FUNDING.yml → `funding-yml.csv` |
 | `fetch_sponsors.py` | Inbound GitHub Sponsors counts for each repo owner → `sponsors.csv` |
 | `fetch_sponsorships.py` | Outbound `sponsorshipsAsSponsor` counts per owner account → `sponsorships.csv` |

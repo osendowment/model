@@ -39,10 +39,12 @@ Currently, the model aggregates data on packages from four ecosystems:
 
 The most valuable packages (based on downloads and dependency graph) are linked with corresponding repos, which are later used to collect risk and eligibility data points for scoring.
 
-The model currently resolves only repos hosted on:
+The model resolves repo identity on any host, but only scores repos hosted on:
 
 * GitHub
 * GitLab, including custom hosts
+
+A package whose upstream lives on Codeberg, Bitbucket, SourceHut or a self-hosted server keeps its row and its resolved identity, but carries no scores. A self-hosted project enters scoring through a verified mirror instead.
 
 Most package managers store clean historical data. The C/C++ ecosystem does not, so the model has to use approximations.
 
@@ -55,18 +57,19 @@ Most package managers store clean historical data. The C/C++ ecosystem does not,
 | **[Risk](docs/risk.md)** | How likely is it to fail? | `risk_score` (0–100, higher = riskier) |
 | **[Eligibility](docs/eligibility.md)** | Can we actually fund it? | `eligible` (boolean) |
 | **[Preview](data/preview/preview.xlsx)** | Publish the result | [`data/preview/preview.xlsx`](data/preview/preview.xlsx) |
+| **Health** | Did the run stay consistent? | pass, or an aborted run |
 
 
-**All three scoring stages are automated.**
+**All three scoring stages are automated.** Preview and Health score nothing — Preview rebuilds the deliverables, Health audits them.
 
-The final `score` is `sqrt(value_score × risk_score)` — an unnormalized geometric mean on the same 0–100 scale as its inputs, so **both** dimensions must be high. `eligible` is used to flag ineligible projects in the preview results. `priority` is a dense rank by `score` descending over potentially eligible projects only.
+The final `score` is `sqrt(value_score × risk_score)` — an unnormalized geometric mean on the same 0–100 scale as its inputs, so **both** dimensions must be high. `eligible` is used to flag ineligible projects in the preview results. `priority` is a dense rank by `score` descending over eligible projects only.
 
 ### Running it
 
 `scripts/run-pipeline.sh` is the **only** supported entry point — for the whole pipeline, one stage, or a resume from the middle. Never invoke the stage runners by hand: the preview stage is the one everyone forgets, which silently leaves `preview.xlsx` stale.
 
 ```bash
-scripts/run-pipeline.sh                    # every stage (TTL-cached, ~90s warm)
+scripts/run-pipeline.sh                    # every stage (TTL-cached, ~2 min warm)
 scripts/run-pipeline.sh --offline          # pure-cache run, no network
 scripts/run-pipeline.sh --stage risk       # one stage
 scripts/run-pipeline.sh --from-stage risk  # that stage through to the end
@@ -82,7 +85,7 @@ The `health` check runs last to ensure pipeline data consistency, and aborts on 
 | Component | Weight | What it measures |
 |---|---|---|
 | `openssf_crit` | 60% | OpenSSF Criticality Score: commit cadence, contributor count, org diversity, dependents, issue activity. GitHub-only. |
-| `eco_crit` | 20% | Whether ecosyste.ms lists the package as critical infrastructure. Covers GitHub **and** GitLab, so it is the importance signal GitLab repos still get. |
+| `eco_crit` | 20% | Whether ecosyste.ms lists the package as critical infrastructure. Covers GitHub **and** GitLab, so it is the one criticality signal a GitLab repo can carry. |
 | `top_eco_pct` | 10% | Weighted PageRank *position* within the repo's strongest ecosystem. Downloads pick the top packages (95% of cumulative downloads), their dependency tree is fetched, and a download-personalized PageRank (α = 0.85) ranks every node. |
 | `pr_score` | 10% | Cross-ecosystem dependency *mass*, complementing `top_eco_pct`'s position. |
 
@@ -106,17 +109,17 @@ The `health` check runs last to ensure pipeline data consistency, and aborts on 
 
 ## Layout
 
-`src/`, `data/`, and `docs/` all mirror the pipeline:
+`src/`, `data/`, and `docs/` all mirror the three scoring stages:
 
-- `src/sources/<source>/` — everything that fetches or processes one external source; `src/{value,risk,eligibility}/` — the stage builders and their runners; `src/common/` — shared infrastructure.
-- `data/sources/<source>/` — raw + intermediate fetched data; `data/{value,risk,eligibility}/` — stage outputs; `data/preview/` — the published workbook.
+- `src/sources/<source>/` — everything that fetches or processes one external source; `src/{value,risk,eligibility}/` — the stage builders and their runners; `src/common/` — shared infrastructure. The preview builders sit at the `src/` root, and `scripts/pipeline_health.py` runs the health check.
+- `data/sources/<source>/` — raw + intermediate fetched data; `data/{value,risk,eligibility}/` — stage outputs; `data/preview/` — the published deliverables (`preview.xlsx`, `repos.csv`, `data.csv`, and the board report).
 - `docs/` — one page per stage ([value](docs/value.md), [risk](docs/risk.md), [eligibility](docs/eligibility.md)) plus [`docs/data-sources.md`](docs/data-sources.md), with [`docs/sources/`](docs/sources/) (one page per data source) and [`docs/components/`](docs/components/) (cross-cutting components) beneath.
 
 **Every count lives in one place.** Funnel, coverage, and distribution figures are on the `pipeline` sheet of [`preview.xlsx`](data/preview/preview.xlsx), regenerated from the live CSVs on every build. The methodology pages describe *how* a metric is built and never restate *how many* — so there is no stats document to drift.
 
 ## Auditability
 
-The model must be traceable end to end: every metric in an output CSV traces back to the fetch that produced it. Every fetch records a date and a success flag, so a `False`/`0` can never silently stand in for a network error. Repo-keyed source files carry a stable `repo_id` (`gh/<numeric>` or `gl/<nickname>-<id>`), because slugs drift on renames and every downstream join is by id. `scripts/pipeline_health.py` enforces this, and it is the last stage of every run.
+The model must be traceable end to end: every metric in an output CSV traces back to the fetch that produced it. Every fetch records a date and a success flag, so a `False`/`0` can never silently stand in for a network error. Repo-keyed source files carry a stable `repo_id` (`gh/<numeric>`, or `gl/<id>` on gitlab.com and `gl/<nickname>-<id>` on a self-hosted instance), because slugs drift on renames and every downstream join is by id. `scripts/pipeline_health.py` enforces this, and it is the last stage of every run.
 
 ## Roadmap
 

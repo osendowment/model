@@ -115,7 +115,7 @@ In `data/sources/gitlab/`:
   fetched_at`), upserted by `(repo, repo_id, year)` so a GitHub mirror sharing a slug keeps
   its own `gh/…` row.
 - **`commits-years.csv`** (`repo_id, git_url, project, year, first_sha, last_sha, commits,
-  fetched_at`) — a **stale artefact**, not a live output. No module in `src/` writes or reads
+  fetched_at`) — a **stale artifact**, not a live output. No module in `src/` writes or reads
   it; `commits_years.py` writes the shared `data/sources/git/commits-years.csv` instead. Treat
   it as unused and expect it to be deleted.
 

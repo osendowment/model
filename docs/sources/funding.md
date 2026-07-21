@@ -75,8 +75,8 @@ uv run python -m src.sources.funding.apache        # any scraper; --ttl N / --fo
 uv run python -m src.sources.funding.match_repos   # rebuild host-by-repo.csv
 ```
 
-All 12 scrapers + the matcher run as fetch steps of
-`uv run python -m src.eligibility.run_eligibility_pipeline`.
+All 12 scrapers + the matcher run as fetch steps of the eligibility stage
+(`scripts/run-pipeline.sh --stage eligibility`).
 
 ## Auditability
 
@@ -99,6 +99,10 @@ over the scraped value. See [components/funding.md](../components/funding.md).
 
 - Institutional hosts outside these rosters (e.g. Xiph.Org) are curated in
   `data/eligibility/overrides.csv`, not here.
+- `match_repos.py` reads `github/repos.csv`, so roster matching is GitHub-side.
+  A GitLab-hosted repo picks up institutional backing from the instance it
+  lives on, through the curated `data/eligibility/gitlab-hosts.csv`
+  ([gitlab.md](gitlab.md)).
 - Rosters may contain duplicate project rows; harmless — the matcher indexes
   into sets. Non-matching metadata columns (category, language, description)
   are informational only.

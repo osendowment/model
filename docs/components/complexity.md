@@ -97,7 +97,7 @@ guard drops all six lizard columns to **MISSING** rather than keep a
 score-deflating `0`. A genuinely function-free repo (a pure data or config
 module) has near-zero scc complexity too, so the threshold spares it.
 
-The guard applies to **GitHub repos only**. The off-mainline artefact comes from
+The guard applies to **GitHub repos only**. The off-mainline artifact comes from
 `corrected_clone_sha`, which is GitHub-specific: a `gl/…` repo sparse-clones the
 exact pinned sha scc measured, so a lizard zero there is a genuine
 function-free repo and is kept.

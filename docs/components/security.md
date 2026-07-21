@@ -3,7 +3,7 @@
 How exposed is a project to security failures? The security component reads two
 independent signals: the project's **OpenSSF Scorecard** (lower score → more
 risk) and its **count of distinct CVEs over 2021–2025** (more CVEs → more risk).
-It distils them into one **security-risk score** (`score`, 0–100), which feeds
+It distills them into one **security-risk score** (`score`, 0–100), which feeds
 `data/risk/risk.csv` as the column `security`. It also carries two
 informational signals — OSS-Fuzz enrollment and the OpenSSF Best Practices badge
 — that do **not** enter the score.

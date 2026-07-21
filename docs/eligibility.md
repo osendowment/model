@@ -145,7 +145,7 @@ OSE supports only projects that still have work ahead of them.
 | Signal | Source | Meaning |
 |---|---|---|
 | `eol` | `data/eligibility/overrides.csv` `eol` | the manual end-of-life verdict — `True` = project declared end-of-life; an explicit `False` pins a repo alive; empty = no verdict → alive |
-| `archived` | `data/sources/github/repos.csv` | the GitHub `archived` flag |
+| `archived` | `data/sources/github/repos.csv` · `data/sources/gitlab/repos.csv` | the host's `archived` flag, joined onto the scope by `load_top_repos` — GitHub rows from the Repos API, `gl/` rows from the GitLab project API |
 
 The per-ecosystem registry EOL signals (`data/sources/<eco>/eol.csv`, from
 `src.sources.<eco>.check_eol`) flag *packages* — deprecations, yanks,
@@ -173,7 +173,7 @@ coverage; they never change the verdict.
 
 | Column | Counts |
 |---|---|
-| `value_comps` | how many value components (`openssf_crit`, `eco_crit`, `top_eco_pct`) carry a real (non-empty, **non-zero**) value |
+| `value_comps` | how many of `openssf_crit`, `eco_crit` and `top_eco_pct` carry a real (non-empty, **non-zero**) value. `pr_score`, the fourth [`value_score` component](value.md#components), is not counted |
 | `risk_comps` | the same count over the risk components (`concentration`, `complexity`, `security`, `workload`) |
 | `complete` | `value_comps ≥ 2 AND risk_comps = 4` — a repo with full coverage |
 
@@ -189,7 +189,7 @@ per-repo row always wins. Three builders share the file:
 | Column | Used by | Meaning |
 |---|---|---|
 | `repo` | all | lowercased `owner/name` key (or `owner/*` org glob) |
-| `repo_id` | all | stable GitHub id — the actual join key (rename-proof) |
+| `repo_id` | all | host-namespaced repo id — `gh/<numeric>` or `gl/<nickname>-<id>`, the actual join key (rename-proof) |
 | `host`, `host_type` | build_funding | legally-stewarding foundation or company, as a **domain** (`rustfoundation.org`), plus `company`/`nonprofit`. Scraped rosters instead emit a roster code (`apache`, `fsf/gnu`) — see [components/funding.md](components/funding.md) |
 | `gh_user` | — | GitHub login (informational; no builder reads it) |
 | `owner`, `owner_type` | build_funding | entity owning the GitHub org |
@@ -214,8 +214,8 @@ scripts/run-pipeline.sh --from-stage eligibility   # eligibility → preview →
 ```
 
 Per-step flags pass through to the stage runner
-(`src.eligibility.run_eligibility_pipeline`), so `--list`, `--from <step>` and
-`--skip-fetch` compose with stage selection.
+(`src.eligibility.run_eligibility_pipeline`), so `--list`, `--from <step>`, `--only <step>`,
+`--offline` and `--refresh` compose with stage selection.
 
 Every fetcher is incremental / TTL-gated. The stage fetches repo state (the
 GitHub repo-owner and GitLab project refreshes — the archived flag plus both

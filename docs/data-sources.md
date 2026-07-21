@@ -1,11 +1,11 @@
-[# Data Sources
+# Data Sources
 
 Every external source the pipeline consumes, and what each stage takes from
 it. Details per source live in [docs/sources/](sources/); counts and coverage
 live in the preview pipeline sheet.
 
 Value defines the core (class-A repos). Risk and Eligibility score that same
-core. See [docs/value.md](value.md#pipeline-overview).
+core. See [docs/value.md](value.md#top-repo-scope--the-core).
 
 | Source | Value | Risk | Eligibility |
 |--------|-------|------|-------------|
@@ -26,10 +26,11 @@ core. See [docs/value.md](value.md#pipeline-overview).
 | <img src="https://www.google.com/s2/favicons?domain=repology.org&sz=16" width="16"> [repology](sources/repology.md) | Debian↔Homebrew name unification, upstream URLs | — | formula lookup for cpp EOL |
 | <img src="https://www.google.com/s2/favicons?domain=opensource.org&sz=16" width="16"> [osi](sources/osi.md) | — | — | OSS-approved license set → `oss` |
 | <img src="https://www.google.com/s2/favicons?domain=spdx.org&sz=16" width="16"> [spdx](sources/spdx.md) | — | — | license id catalogue + FSF-libre flag → `oss` |
-| <img src="https://www.google.com/s2/favicons?domain=endoflife.date&sz=16" width="16"> [endoflife](sources/endoflife.md) | — | — | product EOL cycles → `eol` → `active` |
+| <img src="https://www.google.com/s2/favicons?domain=endoflife.date&sz=16" width="16"> [endoflife](sources/endoflife.md) | — | — | product EOL cycles → cpp `eol.csv`, advisory to the curated `eol` verdict |
 | <img src="https://www.google.com/s2/favicons?domain=apache.org&sz=16" width="16"> [funding](sources/funding.md) ([foundation rosters](sources/foundations.md)) | — | — | foundation backing → `nonprofit`, `intent` |
 | <img src="https://www.google.com/s2/favicons?domain=floss.fund&sz=16" width="16"> [floss-fund](sources/floss-fund.md) | — | — | `funding.json` manifests → `intent` |
 | <img src="https://www.google.com/s2/favicons?domain=opencollective.com&sz=16" width="16"> [opencollective](sources/opencollective.md) | — | — | OC presence + budgets → `intent`, funding score |
 
-One `data/sources/` folder is not a pipeline input: `ossinsight/` is a legacy
-cache, and no builder reads it. The pipeline accepts no LLM-generated data.
+Two `data/sources/` folders are not pipeline inputs: `ossinsight/` is a legacy
+cache, and `llms/` is empty. No builder reads either one. The pipeline accepts
+no LLM-generated data.

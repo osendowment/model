@@ -57,6 +57,7 @@ How `src/eligibility/build_funding.py` matches each manifest shape:
 |-------|-------------|-------|
 | Repo-level: `project_repository` (resolved redirect preferred) names a GitHub repo | `export_repo_slug` | id-first on the stamped `repo_id` (rename-proof); blank-id rows fall back to canonical slug |
 | Org-level: URL is a GitHub org page (`github.com/<org>`) | `github_org_page` | fundability + channels apply to every in-scope repo the org owns |
+| Repo-level on any other host (GitLab instances, custom hosts) | `export_repo_url` | normalized repository URL — the join key for GitLab top repos |
 
 ## Auditability
 
@@ -71,5 +72,6 @@ How `src/eligibility/build_funding.py` matches each manifest shape:
 | Caveat | Detail |
 |--------|--------|
 | Self-registered directory | presence = *declared* funding intent, not funding received |
-| GitHub-only matching | only non-GitHub http(s) repo URLs get a redirect probe; projects hosted elsewhere (e.g. GitLab) keep a blank `repo_id` |
+| `repo_id` is GitHub-only | only a GitHub repo resolves to a stamped `gh/<id>`; a manifest hosted elsewhere (e.g. GitLab) keeps a blank `repo_id` and matches on its normalized repository URL instead |
+| Redirect probe | only non-GitHub http(s) repo URLs are probed, to catch vanity URLs that land on GitHub |
 | `status` unfiltered | carried through as-is; loaders in `directory.py` / `build_funding.py` do not filter on it |

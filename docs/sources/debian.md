@@ -65,7 +65,16 @@ renamed at every SONAME bump, so the source is the stable project unit.
 ## Outputs
 
 In `data/sources/debian/`: `top-packages.csv`, `dependency-tree.csv`,
-`github-repos.csv`, `git.csv`, `results.csv` — all keyed by source package.
+`github-repos.csv`, `results.csv` — all keyed by source package, all written
+by `process_data.py`.
+
+`data/sources/debian/git.csv` sits alongside them but the **value stage**
+writes it (`src.value.build_git_urls`), not `process_data.py`. It re-reads
+`raw/package-metadata.csv` and classifies every `Vcs-Browser` / `Homepage` URL
+by host — `github`, `gitlab`, `bitbucket`, `sourcehut`, `codeberg`, `custom` —
+so a Debian source whose upstream lives on salsa.debian.org or another GitLab
+instance still reaches Risk and Eligibility. The `github` field in the Key
+Design table above records only the GitHub subset.
 
 ## Limitations
 

@@ -31,7 +31,7 @@ failed git step **raises** — it must never be recorded as a genuine 0-LOC repo
 
 All sha-pinned analyses (scc, lizard) key off `commits-years.csv`:
 
-| Step | Module | behavior |
+| Step | Module | Behavior |
 |------|--------|-----------|
 | Per-year SHAs | `commits_years.py` | GitHub Commits API, per (repo, year): newest + oldest commit in the year on the default branch (2 calls: `per_page=1`, then `&page={count}` from the Link header) → `first_sha`, `last_sha`, `commits`. Inactive years stored with empty SHAs, `commits=0` |
 | Snapshot pick | `resolve_snapshot_sha` | target year's `last_sha`, cascading back through earlier years (`SNAPSHOT_WALKBACK_YEARS = 30`); no usable sha → no row |
@@ -108,7 +108,7 @@ uv run python -m src.sources.git.contributors --inspect curl/curl
 
 ## Auditability & caveats
 
-| Concern | behavior |
+| Concern | Behavior |
 |---------|-----------|
 | Fetch dates | every file carries `fetched_at` / `checked_at` |
 | Failure vs zero | `contributor-commits.status.csv` records `timeout` / `clone_failed` explicitly; a failed sparse clone raises instead of writing a fake 0-LOC snapshot |

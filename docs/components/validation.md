@@ -91,12 +91,15 @@ top_repos`; `git_valid` only records that the URL resolves.
 
 ## Refreshing
 
+`scripts/run-pipeline.sh` is the only supported entry point. Run the
+`validation` step alone to rebuild `validation.csv` and re-join `git_valid`
+onto `value.csv`. The step refreshes stale `ls-remote` entries first — its only
+network I/O.
+
 ```bash
-# Rebuild validation.csv and re-join git_valid onto value.csv.
-# Refreshes stale ls-remote entries first (the step's only network I/O).
-uv run python -m src.value.build_validation
-uv run python -m src.value.build_validation --offline   # cache only, no network
-uv run python -m src.value.build_validation --refresh   # force re-check all URLs
+scripts/run-pipeline.sh --stage value --only validation
+scripts/run-pipeline.sh --stage value --only validation --offline  # cache only
+scripts/run-pipeline.sh --stage value --only validation --refresh  # re-check URLs
 ```
 
 The `resolve` step refreshes the GitHub cache

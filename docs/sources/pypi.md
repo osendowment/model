@@ -46,7 +46,7 @@ the value-stage git-URL builder classifies those by host.
 | `raw/package-github-mapping.csv` | `package, github_url` | Manual, static |
 | `raw/package-urls.csv` | `package, url` | All project URLs; responses cached in `raw/api-cache/` |
 | `raw/licenses.csv` | `package, license, fetched_at` | Lowercase SPDX cache, 90-day TTL |
-| `raw/package-dependencies-full-manual.csv` | — | **Stale artefact.** No reader or writer anywhere in the repo |
+| `raw/package-dependencies-full-manual.csv` | — | **Stale artifact.** No reader or writer anywhere in the repo |
 
 ## Scripts
 
@@ -60,7 +60,7 @@ the value-stage git-URL builder classifies those by host.
 | `src/sources/pypi/fetch_funding.py` | Extract funding URLs from `project_urls` → `funding.csv` |
 
 ```bash
-uv run src/sources/pypi/fetch_pypi_data.py [--max-rounds 20] [--concurrency 20] [--limit 50]
+uv run python -m src.sources.pypi.fetch_pypi_data [--max-rounds 20] [--concurrency 20] [--limit 50]
 uv run python -m src.sources.pypi.fetch_pypi_urls [--refresh] [--limit 50]
 uv run python -m src.sources.pypi.process_data [--min-avg N] [--alpha F]
 uv run python -m src.sources.pypi.fetch_licenses [--force] [--apply-only] [--limit 100]
@@ -123,9 +123,10 @@ Columns: `package`, `github_repo`, `git`, `eco_guess`, `avg_downloads`,
 `2021`–`2025`, `top`, `pagerank`, `value_class`, `repo_id`, `canonical_url`,
 `license`.
 
-`repo_id` is host-namespaced — `gh/<numeric id>` or `gl/<host>-<numeric id>`
-(`to_repo_id` in `src/common/repos.py`). `canonical_url` holds the upstream
-clone URL when the hosted repo is a mirror. The value rollup's ecosyste.ms
+`repo_id` is host-namespaced — `gh/<numeric id>` on GitHub,
+`gl/<nickname>-<numeric id>` on a custom GitLab host, bare `gl/<numeric id>`
+on gitlab.com (`to_repo_id` in `src/common/repos.py`). `canonical_url` holds
+the upstream clone URL when the hosted repo is a mirror. The value rollup's ecosyste.ms
 authority pass (`src.value.apply_ecosystems_authority`) rewrites the git URL
 and slug; `fetch_licenses.py` fills `license`.
 

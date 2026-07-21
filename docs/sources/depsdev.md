@@ -18,7 +18,7 @@ One fetcher covers every valid class-A repo (archived included,
 
 | Column | Description | Example |
 |--------|-------------|---------|
-| `repo` | GitHub slug | `ajv-validator/ajv` |
+| `repo` | repo slug, as `value.csv` keys it | `ajv-validator/ajv` |
 | `repo_id` | stable id from `value.csv` (never invented) | `gh/35914020` |
 | `depsdev_scorecard_overall` | mirrored Scorecard 0–10 (convenience copy; sha-pinned copy in the long file) | `5.3` |
 | `depsdev_scorecard_date` | mirror's scan date | `2026-04-20` |
@@ -64,7 +64,8 @@ uv run python -m src.sources.depsdev.fetch --force          # ignore TTL
 
 `src.risk.build_security` uses the long file as the **fallback** Scorecard
 source when the local openssf row is missing (`openssf_score_source =
-"depsdev"`) and takes `bestpractices_badge_id` from the wide file — see
+"depsdev"`) and takes `bestpractices_badge_id` from the wide file. The badge is
+collected and surfaced only — it never enters the security score — see
 [components/security.md](../components/security.md) and [risk.md](../risk.md).
 Coverage counts live in the preview pipeline sheet.
 
@@ -72,5 +73,6 @@ Coverage counts live in the preview pipeline sheet.
 
 | Caveat | Detail |
 |--------|--------|
+| GitLab repos | the scope is every top repo, but both endpoints are queried by GitHub URL only, so a GitLab repo gets a row with `fetched_at` and every value blank |
 | 404 vs transport failure | not distinguished — both leave fields blank; `fetched_at` proves the repo was processed, but "not indexed / not enrolled" and "failed after retries" look identical |
 | Wide scorecard columns | convenience copy only; the sha-pinned long file is the source of truth for the security build |

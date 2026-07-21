@@ -117,9 +117,10 @@ In `data/sources/crates/`:
 `avg_downloads`, `2021`–`2025`, `top`, `pagerank`, `value_class`, `repo_id`,
 `canonical_url`, `license`.
 
-`repo_id` is host-namespaced — `gh/<numeric id>` or `gl/<host>-<numeric id>`
-(`to_repo_id` in `src/common/repos.py`). `canonical_url` holds the upstream
-clone URL when the hosted repo is a mirror. The value rollup's ecosyste.ms
+`repo_id` is host-namespaced — `gh/<numeric id>` on GitHub,
+`gl/<nickname>-<numeric id>` on a custom GitLab host, bare `gl/<numeric id>`
+on gitlab.com (`to_repo_id` in `src/common/repos.py`). `canonical_url` holds
+the upstream clone URL when the hosted repo is a mirror. The value rollup's ecosyste.ms
 authority pass (`src.value.apply_ecosystems_authority`) rewrites the git URL
 and slug; `fetch_licenses.py` fills `license`.
 

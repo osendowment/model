@@ -75,7 +75,7 @@ signals), owner `login` (outbound sponsoring, FLOSS org manifests) or `slug`
 
 Run via `scripts/run-pipeline.sh --stage eligibility`
 (`src/eligibility/run_eligibility_pipeline.py`). Fetchers are incremental; pass
-`--skip-fetch` to rebuild from existing data. Steps in `[…]` share a parallel
+`--offline` to rebuild from existing data. Steps in `[…]` share a parallel
 group; everything else is serial.
 
 ```

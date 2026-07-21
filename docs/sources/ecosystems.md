@@ -4,8 +4,9 @@
 repositories. The model runs four connectors against it, all under `src/sources/ecosystems/`.
 
 The criticality connector's `critical` flag feeds the **Value** stage as `value.csv`'s
-`eco_crit` column — the 0.2-weight component of `value_score`, and the only importance signal
-GitLab class-A repos carry (see [value.md](../value.md); applied by
+`eco_crit` column — the 0.2-weight component of `value_score`. It covers GitHub **and** GitLab,
+so it is the criticality signal a GitLab repo still gets where the GitHub-only `openssf_crit`
+is blank (see [value.md](../value.md); applied by
 `src.value.apply_criticality`). Coverage counts live in the preview pipeline sheet — this page
 describes **how** the data is fetched, not **how many**.
 

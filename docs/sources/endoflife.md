@@ -1,7 +1,9 @@
 # endoflife.date
 
-Per-product release-cycle EOL dates. The Eligibility stage uses them to mark a
-cpp package end-of-life, which clears its `active` flag.
+Per-product release-cycle EOL dates. They mark a cpp **package** end-of-life
+in `data/sources/cpp/eol.csv`. That file is advisory. A curator reads it and
+sets the per-repo `eol` verdict in `data/eligibility/overrides.csv`, and that
+verdict clears the repo's `active` flag (`active = NOT eol AND NOT archived`).
 
 Small but reliable: it covers well-known products only, and a maintainer
 publishes each cycle's EOL date.
