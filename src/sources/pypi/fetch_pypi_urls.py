@@ -10,11 +10,14 @@ the full set of URLs (`info.project_urls` + `info.home_page`) to
 `data/sources/pypi/raw/package-urls.csv` -- to be classified by `build_git.py` by
 host (github / gitlab / bitbucket / sourcehut / codeberg / custom).
 
-Per-package responses are cached to `data/sources/pypi/raw/api-cache/<name>.json`.
+Two gates keep a warm re-run at zero network calls. The whole output file is
+TTL-gated on its mtime — it is a complete snapshot, rewritten wholesale from
+every package in results.csv. Inside a run, per-package responses are cached to
+`data/sources/pypi/raw/api-cache/<name>.json` and reused.
 
 Usage:
     uv run -m src.sources.pypi.fetch_pypi_urls               # all packages in results.csv
-    uv run -m src.sources.pypi.fetch_pypi_urls --refresh     # bypass cache
+    uv run -m src.sources.pypi.fetch_pypi_urls --refresh     # ignore the TTL, bypass cache
     uv run -m src.sources.pypi.fetch_pypi_urls --limit 50    # smoke test
 """
 
@@ -22,6 +25,7 @@ import argparse
 import asyncio
 import csv
 import json
+import time
 from pathlib import Path
 
 import aiohttp
@@ -35,6 +39,9 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
+from src.common.freshness import file_is_fresh
+from src.common.params import fetch_ttl_days
+
 console = Console()
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
@@ -46,6 +53,11 @@ API_URL = "https://pypi.org/pypi/{name}/json"
 HEADERS = {"User-Agent": "ose-model fetch_pypi_urls.py"}
 CONCURRENCY = 10
 TIMEOUT = 20
+
+# Whole-file TTL: 365 days, declared in settings.json. A package's declared
+# project URLs move slowly, and the file is regenerated wholesale, so the cached
+# snapshot stays usable for the whole window. --refresh overrides it.
+TTL_DAYS = fetch_ttl_days("sources/pypi/fetch_pypi_urls")
 
 
 def load_targets() -> list[str]:
@@ -107,14 +119,24 @@ def extract_urls(data: dict) -> list[str]:
 
 
 async def main_async(args: argparse.Namespace) -> None:
+    console.rule("[bold white]fetch_pypi_urls.py[/bold white]")
+    console.print(f"  Cache   : [cyan]{CACHE_DIR}[/cyan]")
+    console.print(f"  Output  : [cyan]{OUTPUT}[/cyan]")
+
+    # ── TTL gate: a warm run makes ZERO network calls ─────────────────────────
+    # The output is a complete snapshot of every package in results.csv, so a
+    # fresh file needs no work — not even the per-package cache walk below.
+    if not args.refresh and file_is_fresh(OUTPUT, TTL_DAYS):
+        age_days = (time.time() - OUTPUT.stat().st_mtime) / 86400
+        console.print(f"  [dim]output fresh ({age_days:.1f}d < {TTL_DAYS}d) — "
+                      f"skipping; --refresh to force[/dim]")
+        return
+
     targets = load_targets()
     if args.limit:
         targets = targets[: args.limit]
 
-    console.rule("[bold white]fetch_pypi_urls.py[/bold white]")
     console.print(f"  Targets : [cyan]{len(targets):,}[/cyan]")
-    console.print(f"  Cache   : [cyan]{CACHE_DIR}[/cyan]")
-    console.print(f"  Output  : [cyan]{OUTPUT}[/cyan]")
     console.print()
 
     sem = asyncio.Semaphore(CONCURRENCY)
@@ -162,7 +184,9 @@ async def main_async(args: argparse.Namespace) -> None:
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--limit", type=int, help="Process at most N packages")
-    p.add_argument("--refresh", action="store_true", help="Bypass cache, re-fetch")
+    p.add_argument("--refresh", action="store_true",
+                   help=f"Force refetch: bypass the per-package cache and the "
+                        f"{TTL_DAYS}-day output TTL")
     asyncio.run(main_async(p.parse_args()))
 
 

@@ -42,6 +42,7 @@ csv.field_size_limit(sys.maxsize)
 from rich.console import Console
 
 from src.common.eol_common import display_summary, now_iso, write_eol
+from src.common.params import fetch_ttl_days
 
 logging.basicConfig(level="INFO")
 log = logging.getLogger(__name__)
@@ -54,6 +55,15 @@ DUMP_DIR = DATA_DIR / "sources" / "crates" / "db-dump"  # slim extracts (gitigno
 OUTPUT_FILE = DATA_DIR / "sources" / "crates" / "eol.csv"
 
 EOL_METHOD = "crates_yanked"
+
+# Cache TTL in days, from settings.json — the one place every fetcher's TTL is
+# declared. It governs the crates.io db-dump extracts this module reads
+# (DUMP_DIR). This module does no network I/O and holds no cache of its own:
+# the dump is a whole-file vendor snapshot with no per-row fetch date, and
+# `src.sources.crates.fetch_db_dump` owns its download. So nothing ages out
+# row by row here — every eol.csv row is recomputed from whatever dump is on
+# disk. The TTL is declared so the policy is explicit rather than implied.
+TTL_DAYS = fetch_ttl_days("sources/crates/check_eol")
 
 
 def load_yank_index() -> dict[str, bool]:

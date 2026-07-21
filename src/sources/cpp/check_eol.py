@@ -28,6 +28,10 @@ Reads:
 Writes:
     data/sources/cpp/eol.csv
 
+Both caches are whole-file JSON blobs with no per-row fetch date, so they hold
+until `--refresh` replaces them (see TTL_DAYS below). Every eol.csv row is
+recomputed from them on each run.
+
 Usage:
     uv run python -m src.sources.cpp.check_eol
     uv run python -m src.sources.cpp.check_eol --refresh   # refetch caches
@@ -46,6 +50,7 @@ import requests
 from rich.console import Console
 
 from src.common.eol_common import display_summary, now_iso, write_eol
+from src.common.params import fetch_ttl_days
 
 logging.basicConfig(level="INFO")
 log = logging.getLogger(__name__)
@@ -61,6 +66,16 @@ ENDOFLIFE_DIR = DATA_DIR / "sources" / "endoflife"
 
 HOMEBREW_API = "https://formulae.brew.sh/api/formula.json"
 ENDOFLIFE_API = "https://endoflife.date/api/{product}.json"
+
+# Cache TTL in days, from settings.json — the one place every fetcher's TTL is
+# declared. It governs the two blob caches this module downloads: the Homebrew
+# formula API dump (HOMEBREW_CACHE) and the endoflife.date per-product JSON
+# files (ENDOFLIFE_DIR). Both are whole-file JSON blobs, not row tables: they
+# carry no per-row fetch date to compare a TTL against, so nothing ages out
+# automatically and the fetch logic below is unchanged — a cache file that
+# exists is used, and `--refresh` is the way to refetch it. The output
+# (eol.csv) is not a cache: every row is recomputed from these blobs each run.
+TTL_DAYS = fetch_ttl_days("sources/cpp/check_eol")
 
 # Curated cpp_package → endoflife.date product slug.
 # Only entries verified to exist on endoflife.date (`/api/all.json`). bash,

@@ -19,6 +19,10 @@ Per (repo, year) we issue **two** GitHub API calls:
 Inactive years (no commits) get empty SHAs and commits=0 — still
 recorded, so we don't keep refetching them.
 
+Cache policy: a (repo, year) row missing from ``commits-years.csv`` is always
+fetched. A row already in the file is re-fetched only once its ``fetched_at``
+is older than ``TTL_DAYS`` (declared in settings.json), or on ``--force``.
+
 Usage:
 
     uv run python -m src.sources.git.commits_years                 # all risk-scope repos
@@ -49,6 +53,8 @@ from rich.progress import (
     TextColumn,
 )
 
+from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
 from src.common.repos import load_default_branches, load_top_repos
 from src.sources.github.display import _ETAColumn
 from src.sources.github.github_client import GITHUB_API, get_revolver
@@ -63,6 +69,24 @@ DEFAULT_CONCURRENCY = 32
 FLUSH_EVERY = 500
 
 SHA_FIELDS = ["repo", "repo_id", "git_url", "year", "first_sha", "last_sha", "commits", "fetched_at"]
+
+# Cache TTL (days) for commits-years.csv, from settings.json. It gates ONLY the
+# rows already in the file: a cached (repo, year) row is re-fetched once its
+# `fetched_at` is older than this. A missing row is always fetched, whatever the
+# TTL says.
+TTL_DAYS = fetch_ttl_days("sources/git/commits_years")
+
+
+def row_needs_refetch(row: dict) -> bool:
+    """True when a CACHED (repo, year) row has aged past `TTL_DAYS`.
+
+    A row with no `fetched_at` counts as fresh, not stale: undated rows predate
+    the stamp, and a missing stamp is no evidence that the SHAs moved. Treating
+    it as stale would refetch the whole file the first time this gate runs.
+    """
+    if not (row.get("fetched_at") or "").strip():
+        return False
+    return not row_is_fresh(row, TTL_DAYS)
 
 
 # ────────────────────────────── CSV I/O ────────────────────────────────
@@ -387,7 +411,8 @@ def main() -> None:
     parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                         help=f"Parallel requests (default: {DEFAULT_CONCURRENCY})")
     parser.add_argument("--force", action="store_true",
-                        help="Re-fetch all (repo, year) SHAs even if already cached.")
+                        help="Re-fetch all (repo, year) SHAs, ignoring the "
+                             f"{TTL_DAYS}-day cache TTL.")
     parser.add_argument("--backfill", action="store_true",
                         help="Rewrite commits-years.csv to add repo_id + git_url, then exit.")
     parser.add_argument("-v", "--verbose", action="store_true")
@@ -423,17 +448,20 @@ def main() -> None:
     default_branches = load_default_branches()
 
     sha_data = {} if args.force else load_sha_data(args.sha_file)
+    # Fetch a (repo, year) pair when it is missing from the cache, or when its
+    # cached row has aged past TTL_DAYS. Missing always wins over the TTL.
     pairs_to_fetch: list[tuple[str, int]] = []
     for year in years:
         yr = str(year)
         for r in repos_all:
-            if args.force or (r, yr) not in sha_data:
+            cached = sha_data.get((r, yr))
+            if args.force or cached is None or row_needs_refetch(cached):
                 pairs_to_fetch.append((r, year))
 
     if not pairs_to_fetch:
         console.print(
             f"[dim]All {len(repos_all)} repos × {len(years)} years already "
-            f"cached in {args.sha_file}.[/dim]"
+            f"cached in {args.sha_file} (TTL {TTL_DAYS}d).[/dim]"
         )
         return
 

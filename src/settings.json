@@ -43,6 +43,7 @@
     "sources/npm/fetch_npm_data.deps": 365,
     "sources/npm/fetch_npm_data.downloads_status": 365,
     "sources/npm/fetch_npm_stats": 365,
+    "sources/opencollective/fetch_budgets": 365,
     "sources/openssf/criticality": 365,
     "sources/osi/fetch_licenses": 365,
     "sources/ossfuzz/fetch_ossfuzz_data": 365,

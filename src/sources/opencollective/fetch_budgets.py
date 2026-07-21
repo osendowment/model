@@ -13,6 +13,10 @@ Writes data/sources/opencollective/budgets.csv:
 "error" (request failed — distinguishes a real 0 from a fetch failure).
 Amounts are major currency units (USD etc.); a year with no data is blank.
 
+A slug is re-queried when it has no row yet, when its row's `fetched_at` is
+older than `TTL_DAYS`, or when its `oc_status` is "error" (a failed fetch is
+never cached). `--force` re-queries every slug.
+
 The API works unauthenticated but rate-limits hard (HTTP 429); set
 `OPENCOLLECTIVE_PERSONAL_TOKEN` (in `.env`) to lift the limit — it is sent as
 the `Personal-Token` header and loaded via python-dotenv. The default
@@ -45,7 +49,8 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
-from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
+from src.common.freshness import FUNDING_TTL_DAYS, row_is_fresh
 from src.common.funding_platforms import normalize_oc_slug
 from src.common.repos import load_top_repos
 from src.sources.floss_fund.directory import export_repo_slug, normalize_repo_url
@@ -63,6 +68,14 @@ API_URL = "https://api.opencollective.com/graphql/v2"
 USER_AGENT = "Mozilla/5.0 (research; endowment.dev funding model)"
 YEARS = list(range(2021, 2026))  # 2021..2025
 FIELDS = ["slug"] + [f"raised_{y}" for y in YEARS] + ["currency", "oc_status", "fetched_at"]
+
+# Cache TTL for budgets.csv. Open Collective budgets are part of the
+# funding-discovery layer, so they share that layer's single TTL: settings.json
+# holds it under `fetch_ttl_days["common/freshness"]` and `FUNDING_TTL_DAYS`
+# reads it — there is no per-module key for this fetcher. Named here, and passed
+# explicitly to `row_is_fresh` below, so the policy is visible at the call site
+# instead of riding on that function's default argument.
+TTL_DAYS = fetch_ttl_days("sources/opencollective/fetch_budgets")
 
 
 def _money(cents) -> str:
@@ -239,11 +252,12 @@ async def fetch_one(session: aiohttp.ClientSession, query: str, slug: str,
 async def batch(slugs: list[str], force: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
     fresh = set() if force else {s for s, row in existing.items()
-                                 if row_is_fresh(row, status_key="oc_status")}
+                                 if row_is_fresh(row, TTL_DAYS, status_key="oc_status")}
     to_fetch = [s for s in slugs if s not in fresh]
     if limit and limit < len(to_fetch):
         to_fetch = to_fetch[:limit]
-    console.print(f"[bold]opencollective[/bold]: {len(slugs)} slugs, {len(to_fetch)} to fetch")
+    console.print(f"[bold]opencollective[/bold]: {len(slugs)} slugs, "
+                  f"{len(to_fetch)} to fetch (TTL={TTL_DAYS}d)")
     if not to_fetch:
         console.print("[dim]Nothing to fetch.[/dim]")
         return
@@ -281,7 +295,8 @@ def main() -> None:
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--concurrency", type=int, default=2,
                    help="keep low — the unauthenticated OC API rate-limits hard")
-    p.add_argument("--force", action="store_true")
+    p.add_argument("--force", action="store_true",
+                   help=f"Ignore the {TTL_DAYS}-day cache TTL: re-query every slug")
     p.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args()
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)

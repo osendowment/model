@@ -15,6 +15,11 @@ preserved verbatim (a GitHub mirror that shares a slug with a GitLab repo keeps
 its own gh/… row — the two are distinct by repo_id), and re-running only
 rewrites the GitLab (repo_id, year) cells it fetched.
 
+A (repo_id, year) pair is fetched when it has no row yet, or when its row's
+`fetched_at` is older than the cache TTL (`TTL_DAYS`, from settings.json
+`fetch_ttl_days`). `--force` re-fetches every GitLab pair. A row with a blank
+`fetched_at` is kept as-is — an unknown date is not an expired one.
+
 Usage:
     uv run python -m src.sources.gitlab.commits_years --limit 3
     uv run python -m src.sources.gitlab.commits_years --force
@@ -33,6 +38,8 @@ from pathlib import Path
 import aiohttp
 from rich.console import Console
 
+from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
 from src.sources.gitlab.gitlab_client import GitLabLimiter, api_base, clone_url, encode_project_path
 
 log = logging.getLogger(__name__)
@@ -45,6 +52,13 @@ COMMITS_OUT = REPO / "data" / "sources" / "git" / "commits-years.csv"
 
 YEARS = list(range(2021, dt.datetime.now(dt.UTC).year + 1))
 MAX_CONCURRENT = 8
+
+# Cache TTL for this module's GitLab rows in the shared commits-years.csv: how
+# old a pair's `fetched_at` may get before that (repo_id, year) is re-anchored.
+# A COMPLETE year's SHA anchor is immutable, so the window is long and a warm
+# re-run stays zero-network; the value lives in settings.json so every
+# fetcher's policy is reviewable in one place.
+TTL_DAYS = fetch_ttl_days("sources/gitlab/commits_years")
 
 # Statuses worth retrying. Some instances (notably gitlab.gnome.org) throttle
 # unauthenticated API traffic and answer a tripped throttle with **500**, not
@@ -190,28 +204,50 @@ def _atomic_write(path: Path, rows: list[dict]) -> None:
     os.replace(tmp, path)
 
 
+def _load_existing_dates() -> dict[tuple[str, str], str]:
+    """{(repo_id, year_str): fetched_at} already anchored in COMMITS_OUT.
+
+    The date is what the TTL gate compares against. A row written without one
+    maps to "" and is never treated as stale (date unknown ≠ expired).
+    """
+    if not COMMITS_OUT.exists():
+        return {}
+    with open(COMMITS_OUT, encoding="utf-8") as f:
+        return {(r["repo_id"], r["year"]): (r.get("fetched_at") or "").strip()
+                for r in csv.DictReader(f) if r.get("repo_id")}
+
+
 def _load_existing_pairs() -> set[tuple[str, str]]:
     """{(repo_id, year_str)} already anchored in COMMITS_OUT."""
-    if not COMMITS_OUT.exists():
-        return set()
-    with open(COMMITS_OUT, encoding="utf-8") as f:
-        return {(r["repo_id"], r["year"]) for r in csv.DictReader(f) if r.get("repo_id")}
+    return set(_load_existing_dates())
+
+
+def _pair_is_stale(fetched_at: str) -> bool:
+    """True when an anchored pair is past TTL_DAYS. A blank date is not stale."""
+    if not fetched_at:
+        return False
+    return not row_is_fresh({"fetched_at": fetched_at}, TTL_DAYS)
 
 
 def _pairs_to_fetch(projects: list[dict], existing_pairs: set[tuple[str, str]],
-                    force: bool) -> list[tuple[dict, int]]:
+                    force: bool,
+                    pair_dates: dict[tuple[str, str], str] | None = None,
+                    ) -> list[tuple[dict, int]]:
     """(project, year) pairs still needing a fetch.
 
-    A pair is skipped only if (repo_id, str(year)) already exists — so a
-    newly-added YEAR (e.g. a new calendar year rolling in) is still picked
-    up for repos that were already anchored in prior years, instead of the
-    whole repo being permanently skipped once it has any row at all.
-    Mirrors src/sources/git/commits_years.py's per-(repo, year) worklist.
+    A pair is skipped only if (repo_id, str(year)) already exists AND its
+    recorded date is within TTL_DAYS — so a newly-added YEAR (e.g. a new
+    calendar year rolling in) is still picked up for repos that were already
+    anchored in prior years, instead of the whole repo being permanently
+    skipped once it has any row at all. Mirrors src/sources/git/commits_years.py's
+    per-(repo, year) worklist. Omit `pair_dates` to gate on presence alone.
     """
+    dates = pair_dates or {}
     out = []
     for proj in projects:
         for year in YEARS:
-            if force or (proj["repo_id"], str(year)) not in existing_pairs:
+            key = (proj["repo_id"], str(year))
+            if force or key not in existing_pairs or _pair_is_stale(dates.get(key, "")):
                 out.append((proj, year))
     return out
 
@@ -240,12 +276,15 @@ def fetch_and_persist(limit: int | None = None, force: bool = False,
     projects = _load_valid_projects()
     if limit:
         projects = projects[:limit]
-    existing_pairs: set[tuple[str, str]] = set() if force else _load_existing_pairs()
-    pairs = _pairs_to_fetch(projects, existing_pairs, force)
+    # One read serves both gates: which pairs exist, and how old each one is.
+    pair_dates: dict[tuple[str, str], str] = {} if force else _load_existing_dates()
+    existing_pairs: set[tuple[str, str]] = set(pair_dates)
+    pairs = _pairs_to_fetch(projects, existing_pairs, force, pair_dates)
     if not quiet:
         console.rule("[bold cyan]gitlab/commits_years")
         console.print(f"  projects: [bold]{len(projects)}[/bold] · "
-                      f"pairs to fetch: [bold]{len(pairs)}[/bold]")
+                      f"pairs to fetch: [bold]{len(pairs)}[/bold] · "
+                      f"[dim]TTL={TTL_DAYS}d[/dim]")
     t0 = time.monotonic()
     new_rows = asyncio.run(_fetch_all(pairs)) if pairs else []
     # Merge into the shared file keyed on (repo, repo_id, year). We ALWAYS read
@@ -281,7 +320,9 @@ def fetch_and_persist(limit: int | None = None, force: bool = False,
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("--limit", type=int, default=None)
-    p.add_argument("--force", action="store_true")
+    p.add_argument("--force", action="store_true",
+                   help=f"Ignore the {TTL_DAYS}-day cache TTL: re-anchor every "
+                        f"GitLab (repo_id, year) pair.")
     args = p.parse_args()
     fetch_and_persist(limit=args.limit, force=args.force)
 

@@ -27,8 +27,13 @@ deferred to the builder so it can apply globally-consistent rules. The helper
 
 Modes:
     collect (default)  batch every A/B-class repo → two CSV files
-                       (resumable: re-running skips status=ok rows)
+                       (resumable: re-running skips status=ok rows that are
+                       still inside `TTL_DAYS`, declared in settings.json)
     --inspect REPO     dump one repo's merged contributor list (verify merges)
+
+Cache policy: a repo with no status=ok sidecar row is always collected. A repo
+that already has one is re-collected only once that row's `fetched_at` is older
+than `TTL_DAYS`, or on `--force`.
 
 Usage:
     uv run python -m src.sources.git.contributors                       # collect all
@@ -56,6 +61,8 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
 from src.common.repos import git_url_for, load_git_urls, load_repo_ids, load_top_repos
 from src.sources.git.clone import bare_treeless_clone
 from src.sources.git.disk import (
@@ -103,6 +110,28 @@ STATUS_FIELDS = [
     "distinct_authors", "commits_total",
     "clone_seconds", "error", "fetched_at",
 ]
+
+# Cache TTL (days) for the contributor-commits pair (long CSV + status sidecar),
+# from settings.json. It gates ONLY repos already collected: a status=ok sidecar
+# row is re-collected once its `fetched_at` ages past this. A repo with no ok row
+# — never collected, or last run failed — is always collected, whatever the TTL.
+TTL_DAYS = fetch_ttl_days("sources/git/contributors")
+
+
+def status_is_current(row: dict) -> bool:
+    """True when a repo's cached collection still counts as done.
+
+    Done means the sidecar says `status=ok` AND that row's `fetched_at` is
+    inside `TTL_DAYS`. An ok row with no `fetched_at` counts as current: the
+    stamp postdates some rows, and a missing stamp is no evidence of staleness —
+    treating it as stale would re-clone those repos the first time this runs.
+    Any non-ok status stays a re-collect, exactly as before the TTL existed.
+    """
+    if (row.get("status") or "").strip() != "ok":
+        return False
+    if not (row.get("fetched_at") or "").strip():
+        return True
+    return row_is_fresh(row, TTL_DAYS)
 
 
 # ── identity model ──────────────────────────────────────────────────────────
@@ -522,22 +551,25 @@ async def run_batch(
 ) -> tuple[dict[str, list[dict]], dict[str, dict]]:
     """Clone + bucket every target concurrently, writing CSVs as it goes.
 
-    Resumable: existing `status=ok` rows are kept and skipped unless `force`.
-    Both files are rewritten every ~25 completions. Returns (long_by_repo,
-    status_by_repo) covering all known repos (fetched + previously collected).
+    Resumable: existing `status=ok` rows are kept and skipped while they stay
+    inside `TTL_DAYS`, unless `force`. Both files are rewritten every ~25
+    completions. Returns (long_by_repo, status_by_repo) covering all known repos
+    (fetched + previously collected).
     """
     # Load existing data so non-targeted repos survive.
     status_by_repo = _load_status(status_path)
     long_by_repo = _load_long(output_path)
 
+    # Collect a repo when it has no status=ok row at all, or when that row has
+    # aged past TTL_DAYS. Never-collected always wins over the TTL.
     to_fetch = [
         (repo, rid) for repo, rid in targets
-        if force or status_by_repo.get(repo, {}).get("status") != "ok"
+        if force or not status_is_current(status_by_repo.get(repo, {}))
     ]
     skipped = len(targets) - len(to_fetch)
     console.print(
         f"[bold]Collecting[/bold] {len(targets)} repo(s) · "
-        f"{len(to_fetch)} to fetch · {skipped} already ok · "
+        f"{len(to_fetch)} to fetch · {skipped} already ok within {TTL_DAYS}d · "
         f"concurrency {concurrency}\n"
     )
     if not to_fetch:
@@ -696,7 +728,8 @@ def main() -> int:
     parser.add_argument("--concurrency", type=int, default=8,
                         help="parallel clone+log workers (default: 8)")
     parser.add_argument("--force", action="store_true",
-                        help="re-collect every repo, ignoring existing ok rows")
+                        help="re-collect every repo, ignoring existing ok rows "
+                             f"and the {TTL_DAYS}-day cache TTL")
     parser.add_argument("--max-disk-gb", type=float, default=2.0,
                         help="abort if free temp disk drops below this (default: 2.0)")
     parser.add_argument("--timeout", type=int, default=300,

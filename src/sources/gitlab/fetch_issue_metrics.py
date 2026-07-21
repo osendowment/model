@@ -16,8 +16,11 @@ inside the window necessarily has `updated_at` inside it (both events bump
 skipped. Counts are exact (enumerated), so a 0 is a measured zero.
 
 Scope: top repos (valid class-A, archived included) with a `gl/…` repo_id,
-resolved to (host, project_id) via data/sources/gitlab/repos.csv. Only repos
-with missing (repo, year, metric) cells are scanned unless --force.
+resolved to (host, project_id) via data/sources/gitlab/repos.csv. A repo is
+scanned when any of its (repo, year, metric) cells is missing, or when a cell's
+`fetched_at` is older than the cache TTL (`TTL_DAYS`, from settings.json
+`fetch_ttl_days`); --force rescans every repo. A cell with a blank `fetched_at`
+is kept as-is — an unknown date is not an expired one.
 
 Output (long format, same schema/contract as the GitHub fetcher):
     data/sources/gitlab/issues.csv — repo, repo_id, year, metric, value, fetched_at
@@ -41,7 +44,8 @@ from pathlib import Path
 import aiohttp
 from rich.console import Console
 
-from src.common.params import YEARS
+from src.common.freshness import row_is_fresh
+from src.common.params import YEARS, fetch_ttl_days
 from src.common.repos import load_top_repos
 from src.sources.gitlab.gitlab_client import GitLabLimiter, api_base, load_token_map
 
@@ -56,9 +60,26 @@ METRICS = ("opened_issues", "closed_issues")
 PER_PAGE = 100
 MAX_PAGES = 1000  # 100k issues — runaway guard, logged loudly if ever hit
 
+# Cache TTL for issues.csv: how old a cell's `fetched_at` may get before its
+# repo is rescanned. Issue counts for a CLOSED year never change, so the window
+# is long and a warm re-run stays zero-network; the value lives in settings.json
+# so every fetcher's policy is reviewable in one place.
+TTL_DAYS = fetch_ttl_days("sources/gitlab/fetch_issue_metrics")
+
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def cell_is_stale(row: dict) -> bool:
+    """True when an existing issues.csv cell is past TTL_DAYS.
+
+    A BLANK `fetched_at` is never stale: "date unknown" is not "expired", and
+    reading it as expired would rescan rows the presence-only gate kept.
+    """
+    if not (row.get("fetched_at") or "").strip():
+        return False
+    return not row_is_fresh(row, TTL_DAYS)
 
 
 def load_gitlab_targets() -> list[dict]:
@@ -175,7 +196,8 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--force", action="store_true",
-                   help="Re-scan repos even if all their cells are present")
+                   help=f"Ignore the {TTL_DAYS}-day cache TTL: re-scan repos even "
+                        f"if all their cells are present and fresh")
     args = p.parse_args()
 
     console.rule("[bold]gitlab/fetch_issue_metrics")
@@ -183,12 +205,15 @@ def main() -> None:
     if not args.force:
         existing = load_existing()
         def complete(t: dict) -> bool:
-            return all((t["repo"], y, m) in existing for y in YEARS for m in METRICS)
+            """Every window cell present AND still inside the TTL."""
+            cells = [existing.get((t["repo"], y, m)) for y in YEARS for m in METRICS]
+            return all(c is not None and not cell_is_stale(c) for c in cells)
         skipped = [t for t in targets if complete(t)]
         targets = [t for t in targets if not complete(t)]
         if skipped:
-            console.print(f"  [dim]{len(skipped)} repo(s) already complete — "
-                          f"scanning {len(targets)}; --force to rescan[/dim]")
+            console.print(f"  [dim]{len(skipped)} repo(s) already complete and fresh "
+                          f"(TTL={TTL_DAYS}d) — scanning {len(targets)}; "
+                          f"--force to rescan[/dim]")
     if args.limit:
         targets = targets[:args.limit]
     if not targets:

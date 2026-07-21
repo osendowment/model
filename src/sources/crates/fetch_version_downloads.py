@@ -3,7 +3,10 @@ Download and aggregate daily crates.io download archives for a given year,
 writing one file per month into data/sources/crates/version-downloads/.
 
 Each monthly file is written atomically only after all daily files for that
-month are successfully fetched. Already-complete months are skipped on re-run.
+month are successfully fetched. Two gates keep a warm re-run cheap: the whole
+output directory is TTL-gated on its newest monthly file (checked BEFORE the
+archive index request, so a fresh run is zero-network), and inside a run every
+month that already has a file is skipped.
 
 Output: data/sources/crates/version-downloads/YYYY-MM.csv
 Schema: version_id, downloads  (total for that month)
@@ -12,6 +15,7 @@ Run:
     uv run src/sources/crates/fetch_version_downloads.py --years 2025
     uv run src/sources/crates/fetch_version_downloads.py --years 2021 2022 2023 2024 2025
     uv run src/sources/crates/fetch_version_downloads.py --years 2025 --concurrency 128
+    uv run src/sources/crates/fetch_version_downloads.py --refresh   # ignore the TTL
 """
 
 import argparse
@@ -26,46 +30,36 @@ import httpx
 from rich.console import Console
 from rich.table import Table
 
+from src.common.freshness import file_is_fresh
 from src.common.params import YEARS as MODEL_YEARS
+from src.common.params import fetch_ttl_days
 
 ARCHIVE_INDEX = "https://static.crates.io/archive/version-downloads/index.json"
 ARCHIVE_BASE  = "https://static.crates.io/archive/version-downloads"
 OUT_DIR       = "data/sources/crates/version-downloads"
 CONCURRENCY   = 64
 
+# Whole-file TTL: 365 days, declared in settings.json. A month's archive is
+# immutable once the month closes, so a complete directory stays valid for the
+# whole window. The gate reads the newest monthly file. --refresh overrides it,
+# and is also how you pick up a year the directory has no file for yet.
+TTL_DAYS = fetch_ttl_days("sources/crates/fetch_version_downloads")
+
 console = Console()
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--years", type=int, nargs="+", default=MODEL_YEARS, metavar="YEAR",
-                     help=f"Years to fetch (default: the model's configured YEARS, {MODEL_YEARS})")
-parser.add_argument("--concurrency", type=int, default=CONCURRENCY)
-args = parser.parse_args()
 
-os.makedirs(OUT_DIR, exist_ok=True)
-years_str = " ".join(str(y) for y in sorted(args.years))
-console.rule(f"[bold]crates.io downloads — {years_str}")
+def newest_csv(directory: str) -> str | None:
+    """Path of the most recently written .csv in `directory`, None if empty.
 
-# ── Fetch archive index ────────────────────────────────────────────────────────
+    The output here is a DIRECTORY of monthly files, but the whole-file TTL
+    gate needs one mtime: the newest month dates the last successful write.
+    """
+    if not os.path.isdir(directory):
+        return None
+    files = [e.path for e in os.scandir(directory)
+             if e.is_file() and e.name.endswith(".csv")]
+    return max(files, key=os.path.getmtime) if files else None
 
-with httpx.Client(follow_redirects=True) as client:
-    index = client.get(ARCHIVE_INDEX).json()
-
-# Build: month_str -> list of daily filenames for that month (used to validate completeness later)
-by_month: dict[str, list[str]] = defaultdict(list)
-year_prefixes = {str(y) for y in args.years}
-for entry in index:
-    name = entry["name"]          # e.g. "2025-03-15.csv"
-    if name[:4] in year_prefixes:
-        month = name[:7]          # "2025-03"
-        by_month[month].append(name)
-
-months = sorted(by_month)
-if not months:
-    console.print(f"[red]No archive entries found for {years_str}[/red]")
-    raise SystemExit(1)
-
-console.print(f"Months     : {months[0]} → {months[-1]}  ({len(months)} months)")
-console.print(f"Concurrency: {args.concurrency}\n")
 
 # ── Async fetch helpers ────────────────────────────────────────────────────────
 
@@ -145,7 +139,9 @@ async def fetch_month(
 
 # ── Process months ─────────────────────────────────────────────────────────────
 
-async def run() -> None:
+async def run(args: argparse.Namespace, months: list[str],
+              by_month: dict[str, list[str]], index: list[dict]) -> None:
+    years_str = " ".join(str(y) for y in sorted(args.years))
     sem    = asyncio.Semaphore(args.concurrency)
     limits = httpx.Limits(
         max_connections=args.concurrency,
@@ -292,4 +288,54 @@ async def run() -> None:
     )
 
 
-asyncio.run(run())
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--years", type=int, nargs="+", default=MODEL_YEARS, metavar="YEAR",
+                        help=f"Years to fetch (default: the model's configured YEARS, {MODEL_YEARS})")
+    parser.add_argument("--concurrency", type=int, default=CONCURRENCY)
+    parser.add_argument("--refresh", action="store_true",
+                        help=f"Force refetch, ignoring the {TTL_DAYS}-day output TTL")
+    args = parser.parse_args()
+
+    years_str = " ".join(str(y) for y in sorted(args.years))
+    console.rule(f"[bold]crates.io downloads — {years_str}")
+
+    # ── TTL gate: a warm run makes ZERO network calls ──────────────────────────
+    # Checked before the archive index request, so a fresh directory costs
+    # nothing. The per-month skip below still guards an out-of-TTL run.
+    newest = newest_csv(OUT_DIR)
+    if not args.refresh and newest and file_is_fresh(newest, TTL_DAYS):
+        age_days = (time.time() - os.path.getmtime(newest)) / 86400
+        console.print(f"  [dim]output fresh ({age_days:.1f}d < {TTL_DAYS}d) — "
+                      f"skipping; --refresh to force[/dim]")
+        return
+
+    os.makedirs(OUT_DIR, exist_ok=True)
+
+    # ── Fetch archive index ────────────────────────────────────────────────────
+
+    with httpx.Client(follow_redirects=True) as client:
+        index = client.get(ARCHIVE_INDEX).json()
+
+    # Build: month_str -> list of daily filenames for that month (used to validate completeness later)
+    by_month: dict[str, list[str]] = defaultdict(list)
+    year_prefixes = {str(y) for y in args.years}
+    for entry in index:
+        name = entry["name"]          # e.g. "2025-03-15.csv"
+        if name[:4] in year_prefixes:
+            month = name[:7]          # "2025-03"
+            by_month[month].append(name)
+
+    months = sorted(by_month)
+    if not months:
+        console.print(f"[red]No archive entries found for {years_str}[/red]")
+        raise SystemExit(1)
+
+    console.print(f"Months     : {months[0]} → {months[-1]}  ({len(months)} months)")
+    console.print(f"Concurrency: {args.concurrency}\n")
+
+    asyncio.run(run(args, months, by_month, index))
+
+
+if __name__ == "__main__":
+    main()

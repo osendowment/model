@@ -34,10 +34,22 @@ from urllib.parse import urlparse
 from rich.console import Console
 from rich.table import Table
 
+from src.common.params import fetch_ttl_days
 from src.common.repos import canonical_repo_map
 from src.sources.funding._common import DATA_DIR, out_path
 
 console = Console()
+
+# Cache TTL (days) for the foundation host signal in host-by-repo.csv, from
+# settings.json. It is DECLARED, not enforced as an age gate, because this module
+# has no per-row fetch date to compare against — and no fetch to gate. It calls
+# no API and reuses no cached row: `classify()` re-derives every row from the
+# local foundation rosters on each run, so no row can age out here. The one date
+# column, `host_checked`, is the matched roster's `fetched_at` copied through
+# (blank for an unmatched repo), which keeps the signal's age auditable. The TTL
+# that actually governs that age sits on the roster scrapers themselves
+# (`src.sources.funding.<foundation>`, gated by `file_is_fresh`).
+TTL_DAYS = fetch_ttl_days("sources/funding/match_repos")
 
 # Classify the full set of fetched repos (github/repos.csv) — a superset of the
 # risk/eligibility scope. The narrower search/top-repos.csv omits repos that

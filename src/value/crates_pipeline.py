@@ -2,8 +2,8 @@
 from src.common.pipeline_runner import Step, build_parser, run_pipeline
 
 STEPS = [
-    Step("fetch-db-dump",   "src.sources.crates.fetch_db_dump",           fetch=True),
-    Step("fetch-downloads", "src.sources.crates.fetch_version_downloads", fetch=True),
+    Step("fetch-db-dump",   "src.sources.crates.fetch_db_dump",           fetch=True, net=True),
+    Step("fetch-downloads", "src.sources.crates.fetch_version_downloads", fetch=True, net=True),
     Step("process",         "src.sources.crates.process_data"),
 ]
 

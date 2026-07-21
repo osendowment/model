@@ -2,9 +2,15 @@
 Fetch PyPI dependency data iteratively, starting from top packages.
 
 Each round:
-  1. Find packages in the dep tree whose deps haven't been fetched → fetch from PyPI JSON API
+  1. Find packages in the dep tree whose deps are missing, or cached past the
+     TTL → fetch from PyPI JSON API
   2. Discover new packages from those deps → add to tree
   Repeats until no gaps remain.
+
+The dep cache is per-row TTL-gated on `fetched_at` (`TTL_DAYS`, from
+settings.json). A package never fetched is always fetched; a cached one is
+re-fetched only once its rows pass the TTL. Rows written before the
+`fetched_at` column existed carry no date and stay cached.
 
 State is persisted every SAVE_INTERVAL packages — safe to interrupt and resume.
 
@@ -32,6 +38,9 @@ from rich.console import Console
 from rich.table import Table
 from tqdm import tqdm
 
+from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
+
 PYPI_JSON     = "https://pypi.org/pypi"
 TOP_PACKAGES  = "data/sources/pypi/top-packages.csv"
 RAW_DEPS      = "data/sources/pypi/raw/package-dependencies.csv"
@@ -41,6 +50,10 @@ RETRY_BACKOFF = [2, 5, 15, 30]
 RATE_PER_SEC  = 50.0
 SAVE_INTERVAL = 200
 USER_AGENT    = "osendowment-model/1.0 (research; +https://endowment.dev)"
+# Cache TTL in days for RAW_DEPS, from settings.json — the one place every
+# fetcher's TTL is declared. Gates re-fetching of packages ALREADY in the
+# cache; a package missing from it is fetched whatever the TTL says.
+TTL_DAYS      = fetch_ttl_days("sources/pypi/fetch_pypi_data")
 
 # PEP 508: extract package name before any version specifier, extras, or markers
 # Handles: "numpy", "numpy>=1.20", "numpy[extra]>=1.20", "numpy (>=1.20)", etc.
@@ -94,6 +107,22 @@ def load_raw_deps() -> dict[str, list[tuple[str, str, str]]]:
 def fetched_packages(deps: dict[str, list]) -> set[str]:
     """Packages whose deps have been fetched (appear as keys in deps dict)."""
     return set(deps.keys())
+
+
+def stale_packages(deps: dict[str, list]) -> set[str]:
+    """Cached packages whose newest `fetched_at` has passed TTL_DAYS.
+
+    One row inside the window keeps the package fresh. Rows with no timestamp
+    (written before the column existed) are undatable rather than stale, so
+    they keep the cached deps they have always had — only a row that records
+    WHEN it was fetched can age out.
+    """
+    stale: set[str] = set()
+    for pkg, rows in deps.items():
+        dated = [ts for _, _, ts in rows if (ts or "").strip()]
+        if dated and not any(row_is_fresh({"fetched_at": ts}, TTL_DAYS) for ts in dated):
+            stale.add(pkg)
+    return stale
 
 
 def all_dep_names(deps: dict[str, list]) -> set[str]:
@@ -246,6 +275,7 @@ def main() -> None:
     console.print(f"  Max rounds  : {args.max_rounds}")
     console.print(f"  Concurrency : {args.concurrency}")
     console.print(f"  Rate limit  : {RATE_PER_SEC:.0f} req/s")
+    console.print(f"  Cache TTL   : {TTL_DAYS} days ({RAW_DEPS})")
     if args.limit:
         console.print(f"  Limit       : [yellow]{args.limit}[/yellow] (test mode)")
     console.print()
@@ -260,18 +290,20 @@ def main() -> None:
         console.rule(f"[bold]Round {round_num}")
 
         raw_deps = load_raw_deps()
-        already_fetched = fetched_packages(raw_deps)
+        # A cached package counts as fetched until its rows pass the TTL; once
+        # they do it drops back into `need_fetch` beside the never-seen ones.
+        fresh_fetched = fetched_packages(raw_deps) - stale_packages(raw_deps)
         known_deps = all_dep_names(raw_deps)
 
         # Universe = top packages + everything reachable via deps
         universe = top_pkgs | known_deps
-        need_fetch = sorted(universe - already_fetched)
+        need_fetch = sorted(universe - fresh_fetched)
 
         tbl = Table(show_header=False, box=None, padding=(0, 2))
         tbl.add_column(style="dim")
         tbl.add_column(justify="right")
         tbl.add_row("Universe (top + deps)", f"{len(universe):,}")
-        tbl.add_row("Already fetched", f"[green]{len(already_fetched):,}[/green]")
+        tbl.add_row(f"Cached & fresh (< {TTL_DAYS}d)", f"[green]{len(fresh_fetched):,}[/green]")
         tbl.add_row("Need fetch",
                      f"[yellow]{len(need_fetch):,}[/yellow]" if need_fetch else "[green]0[/green]")
         console.print(tbl)

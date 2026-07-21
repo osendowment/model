@@ -5,8 +5,11 @@ Uses /search/issues with `is:issue created:Y-01-01..Y-12-31` and
 Excludes pull requests via `is:issue`.
 
 Filtered to repos with value_class A or B in data/value/value.csv that have a
-non-empty github_repo. Only fetches missing (repo, year, state) cells unless
-`--force` is given.
+non-empty github_repo. Fetches a (repo, year, state) cell when it has no value
+yet, or when its recorded `fetched_at` is older than the cache TTL
+(`TTL_DAYS`, from settings.json `fetch_ttl_days`). `--force` re-fetches every
+cell in range. A cell with a blank `fetched_at` (written before date-tracking
+existed) is kept as-is: an unknown date is not an expired one.
 
 Search API rate limit: 30 requests/min/token. Multiple tokens are rotated.
 
@@ -39,6 +42,8 @@ import aiohttp
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
+from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
 from src.common.repos import (
     VALUE_FILE,
     load_github_top_slugs,
@@ -61,6 +66,11 @@ STATE_METRICS = {"opened": "opened_issues", "closed": "closed_issues"}
 # fetched. Rows written before date-tracking existed carry a blank (honest
 # "date unknown" — never invented); they fill in as cells are re-fetched.
 LONG_FIELDS = ["repo", "repo_id", "year", "metric", "value", "fetched_at"]
+# Cache TTL for issues.csv: how old a cell's `fetched_at` may get before the
+# cell is re-fetched. Issue counts for a CLOSED year never change, so the
+# window is long and a warm re-run stays zero-network; the value lives in
+# settings.json so every fetcher's policy is reviewable in one place.
+TTL_DAYS = fetch_ttl_days("sources/github/fetch_issue_metrics")
 DEFAULT_YEARS = (2021, 2025)
 SEARCH_LIMIT_PER_MIN = 30  # GitHub search-API authenticated quota per token
 # 5% safety margin — stays just under 30/min/token so we never get a 429 from
@@ -199,14 +209,32 @@ def _load_extra_rows(path: str) -> list[dict[str, str]]:
     return out
 
 
+def _cell_is_stale(fetched_at: str) -> bool:
+    """True when a cell that already has a value is past TTL_DAYS.
+
+    A BLANK `fetched_at` is never stale. Cells written before date-tracking
+    existed carry a blank date (see LONG_FIELDS), and "date unknown" is not
+    "expired" — reading it as expired would re-fetch the whole historical
+    file, which the missing-only worklist never did.
+    """
+    if not fetched_at:
+        return False
+    return not row_is_fresh({"fetched_at": fetched_at}, TTL_DAYS)
+
+
 def find_missing(
     repos: list[str],
     years: list[int],
     rows_by_state: dict[str, dict[str, dict[str, str]]],
     *,
+    cell_dates: dict[tuple[str, str, str], str] | None = None,
     force: bool = False,
 ) -> list[tuple[str, str, int]]:
-    """Return list of (repo, state, year) cells that have no value yet.
+    """Return list of (repo, state, year) cells that need a fetch.
+
+    A cell needs a fetch when it has no value yet, or when `cell_dates` records
+    a `fetched_at` for it that is older than TTL_DAYS. Omit `cell_dates` to ask
+    the pure presence question ("which cells have no value at all").
 
     Cells are grouped by repo, then state, then year so that the asyncio
     scheduler dispatches one repo's cells contiguously. With the per-repo
@@ -216,12 +244,14 @@ def find_missing(
 
     If `force` is True, every cell is treated as missing (re-fetch all).
     """
+    dates = cell_dates or {}
     missing: list[tuple[str, str, int]] = []
     for repo in repos:
         for state in STATE_METRICS:
             row = rows_by_state[state].get(repo, {})
             for y in years:
-                if force or not row.get(str(y)):
+                if (force or not row.get(str(y))
+                        or _cell_is_stale(dates.get((state, repo, str(y)), ""))):
                     missing.append((repo, state, y))
     return missing
 
@@ -486,8 +516,9 @@ def main() -> None:
     parser.add_argument("--limit", type=int,
                         help="Process only N random risk-scope repos (for testing)")
     parser.add_argument("--force", action="store_true",
-                        help="Re-fetch all (repo, year, state) cells in range, "
-                             "overwriting existing values.")
+                        help=f"Ignore the {TTL_DAYS}-day cache TTL: re-fetch all "
+                             f"(repo, year, state) cells in range, overwriting "
+                             f"existing values.")
     parser.add_argument("--concurrency", type=int, default=4,
                         help="Concurrent in-flight requests (default: 4)")
     parser.add_argument("-v", "--verbose", action="store_true")
@@ -550,7 +581,8 @@ def main() -> None:
         # In force mode every cell is "missing"; candidate repos = all repos.
         incomplete = sorted(all_repos)
     else:
-        incomplete = sorted({r for r, _, _ in find_missing(all_repos, years_int, rows_by_state)})
+        incomplete = sorted({r for r, _, _ in find_missing(
+            all_repos, years_int, rows_by_state, cell_dates=cell_dates)})
     complete_count = len(all_repos) - len(incomplete)
 
     # --limit applies only to incomplete repos so every run makes progress.
@@ -559,14 +591,18 @@ def main() -> None:
     else:
         repos = incomplete
 
-    missing = find_missing(repos, years_int, rows_by_state, force=args.force)
+    missing = find_missing(repos, years_int, rows_by_state,
+                           cell_dates=cell_dates, force=args.force)
 
     total_cells = len(all_repos) * len(years_int) * 2
+    # Presence-only (no cell_dates): the banner's "filled" counts cells that
+    # HOLD a value, whether or not the TTL has since expired them.
     filled_cells = total_cells - len(find_missing(all_repos, years_int, rows_by_state))
 
     revolver = get_revolver()
     mode = " [yellow](--force)[/]" if args.force else ""
-    console.print(f"[bold]Issue counts {year_start}–{year_end}[/bold]{mode}")
+    console.print(f"[bold]Issue counts {year_start}–{year_end}[/bold]{mode} "
+                  f"[dim]TTL={TTL_DAYS}d[/dim]")
     console.print(f"[dim]Repos:  {len(all_repos):,} risk-scope | "
                   f"{complete_count:,} complete | {len(incomplete):,} incomplete | "
                   f"this run: {len(repos):,}[/dim]")

@@ -24,6 +24,12 @@ with `status=none` (HTTP 200, no upstream git link) or `not_found` (HTTP 4xx)
 / timeout) are recorded for audit but always retried, so a transient failure
 is never mistaken for "checked, nothing there".
 
+The skip lasts for `TTL_DAYS` (declared in settings.json — upstream VCS links
+move rarely, so the window is long). A settled project is re-fetched once its
+newest `fetched_at` passes the TTL; a project missing from the cache is always
+fetched. Rows written before the `fetched_at` column existed carry no date and
+keep their original cache-forever treatment. `--refresh` ignores the TTL.
+
 Usage:
     uv run -m src.sources.cpp.fetch_repology_urls
     uv run -m src.sources.cpp.fetch_repology_urls --classes A,B   # only A/B-class cpp projects
@@ -49,6 +55,8 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
+from src.common.freshness import row_is_fresh
+from src.common.params import fetch_ttl_days
 from src.value.build_git_urls import classify
 
 console = Console()
@@ -60,6 +68,9 @@ FIELDNAMES = ["project", "candidate_url", "platform", "status", "fetched_at"]
 # A project with any of these statuses has been definitively checked — re-runs
 # skip it. 'error' is intentionally absent: transient failures must be retried.
 DONE_STATUSES = frozenset({"ok", "none", "not_found"})
+# How long that skip lasts. Cache TTL in days for project-urls.csv, from
+# settings.json — the one place every fetcher's TTL is declared.
+TTL_DAYS = fetch_ttl_days("sources/cpp/fetch_repology_urls")
 
 INFO_URL = "https://repology.org/project/{name}/information"
 HREF_RE = re.compile(r'href="([^"]+)"')
@@ -122,6 +133,20 @@ def load_cache(path: Path) -> tuple[dict[str, list[dict]], set[str]]:
     return rows_by_project, done
 
 
+def cache_is_fresh(rows: list[dict]) -> bool:
+    """True if a settled project's cached rows are still inside the TTL.
+
+    One dated row inside the window keeps the whole project fresh. Rows with no
+    `fetched_at` (written before the column existed) are undatable rather than
+    stale, so they keep the cache-forever treatment they have always had — only
+    a row that records WHEN it was fetched can age out.
+    """
+    dated = [r for r in rows if (r.get("fetched_at") or "").strip()]
+    if not dated:
+        return True
+    return any(row_is_fresh(r, TTL_DAYS) for r in dated)
+
+
 async def fetch_one(session: aiohttp.ClientSession, project: str) -> tuple[str, str]:
     """Fetch `project`'s Repology information page. Returns (html, fetch_status).
 
@@ -182,16 +207,21 @@ async def main_async(args: argparse.Namespace) -> None:
     targets = load_cpp_targets(classes)
     if args.limit:
         targets = targets[: args.limit]
-    to_fetch = list(targets) if args.refresh else [t for t in targets if t not in done]
+    # Fetch a target when it has never been settled, or when what we cached for
+    # it has aged past the TTL. `--refresh` fetches every target regardless.
+    to_fetch = list(targets) if args.refresh else [
+        t for t in targets
+        if t not in done or not cache_is_fresh(rows_by_project[t])
+    ]
     fetch_set = set(to_fetch)
 
     console.rule("[bold white]fetch_repology_urls.py[/bold white]")
     console.print(f"  Targets   : [cyan]{len(targets):,}[/cyan] cpp projects "
                   f"(classes={','.join(classes)}) without git URL")
     console.print(f"  Cached    : [cyan]{len(targets) - len(to_fetch):,}[/cyan] skipped "
-                  f"(already checked){' — ignored (--refresh)' if args.refresh else ''}")
+                  f"(checked, still fresh){' — ignored (--refresh)' if args.refresh else ''}")
     console.print(f"  Fetching  : [cyan]{len(to_fetch):,}[/cyan] this run")
-    console.print(f"  Cache     : [cyan]{CACHE}[/cyan]")
+    console.print(f"  Cache     : [cyan]{CACHE}[/cyan]  TTL=[cyan]{TTL_DAYS}d[/cyan]")
     console.print()
 
     sem = asyncio.Semaphore(CONCURRENCY)
@@ -258,7 +288,7 @@ def main() -> None:
     p.add_argument("--limit", type=int, default=0,
                    help="Only process the first N targets (0 = all). For testing.")
     p.add_argument("--refresh", action="store_true",
-                   help="Re-fetch even projects already cached")
+                   help=f"Re-fetch every target, ignoring the {TTL_DAYS}-day cache TTL")
     asyncio.run(main_async(p.parse_args()))
 
 

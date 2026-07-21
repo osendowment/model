@@ -33,13 +33,25 @@ from rich.progress import Progress
 from src.sources.git.commits_years import (
     DEFAULT_YEARS, load_sha_data, write_sha_data, SHA_FILE,
 )
-from src.common.params import LAST_COMPLETE_YEAR
+from src.common.params import LAST_COMPLETE_YEAR, fetch_ttl_days
 from src.common.repos import load_top_repos
 
 console = Console()
 log = logging.getLogger(__name__)
 
 GITHUB_API = "https://api.github.com"
+
+# Cache TTL (days) for this module's rows in commits-years.csv, from
+# settings.json. It is DECLARED, not enforced as an age gate, because this cache
+# is SHA-anchored and has no per-row date of its own to compare against: a repo
+# is skipped only while it already holds a real `last_sha` in a window year, and
+# that row belongs to `src.sources.git.commits_years`, which applies its own TTL
+# to it. So nothing ages out here — the window rows refresh upstream, and every
+# dormant repo (the only kind this module writes) is re-resolved on EVERY run.
+# An age gate would also be wrong, not just redundant: it would promote ACTIVE
+# repos to candidates and overwrite their real per-year rows with the
+# single-commit snapshot row below (commits="1").
+TTL_DAYS = fetch_ttl_days("sources/git/resolve_head")
 
 
 def _tokens() -> list[str]:
