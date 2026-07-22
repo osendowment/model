@@ -21,7 +21,7 @@ downloaded as a tarball. Each project carries a `project.yaml` with language,
 repo URL, and homepage. No authentication, one request per run.
 
 **Freshness**: the whole index arrives in one download, so the TTL is
-whole-file — `TTL_DAYS = 30` on `projects.csv` (`file_is_fresh`). A re-run
+whole-file — `TTL_DAYS` (365, from settings.json) on `projects.csv` (`file_is_fresh`). A re-run
 inside the window downloads nothing. `--refresh` ignores the TTL
 never touches the network.
 

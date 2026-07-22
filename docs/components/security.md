@@ -225,9 +225,10 @@ See the preview pipeline sheet → Risk → Security for current per-signal cove
 - **CVE axis is coarse for the majority.** Most repos have zero CVEs and share
   the neutral `cve_score = 50`, so their `score` tracks the OpenSSF axis. The CVE
   axis re-ranks only the minority that carry CVEs.
-- **Snapshot pinning, not live.** The Scorecard signals are pinned to the repo's
-  latest in-window commit (year priority 2025→2021), never re-run live, so they
-  reflect the snapshot sha rather than `HEAD`.
+- **Scanned at HEAD, stamped with a sha.** The Scorecard CLI is invoked with
+  `--repo` and no commit, so it scans whatever `HEAD` is at scan time; the row
+  is then stamped with the sha the scan reported. The sha records what was
+  scanned — it does not pin the scan to a chosen snapshot.
 - **`score` is not a class.** It is a 0–100 risk score — the worst-of a
   percentile and a neutral-anchored CVE score. The risk pipeline has no A–D class
   tier, so `security` enters `risk.csv` as a score, not a `security_class`

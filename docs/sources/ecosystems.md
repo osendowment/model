@@ -17,11 +17,12 @@ repo URL, queries `packages.ecosyste.ms/api/v1/registries/{registry}/packages/{n
 `data/sources/ecosystems/{eco}/packages.csv` (`package, registry_hit, repository_url, homepage,
 fetched_at`). Used by the Value stage to fill missing `github_repo` / `git_url`.
 
-## Candidates connector (class-A audit fetch)
+## Candidates connector (audit fetch)
 
 `src/sources/ecosystems/candidates.py` — unlike `packages.py` (which only backfills packages
 missing both a `github_repo` and a `git` URL), this fetches ecosyste.ms data for **every
-class-A candidate** package, to obtain an *independent* repository identity that
+package in scope** — `--scope` defaults to `top` (every `results.csv` package,
+A/B/C), and the value runner passes no override, so the default applies — to obtain an *independent* repository identity that
 `src/value/audit_ecosystems.py` compares against ours (that audit writes
 `data/sources/ecosystems/audit.csv`). It shares the raw-JSON cache with `packages.py`
 (`data/sources/ecosystems/{eco}/raw/{package}.json`) and writes the consolidated

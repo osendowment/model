@@ -93,7 +93,7 @@ the OSS-approved set. Four sources compete, in strict priority order:
 | # | Source | Where it comes from |
 |---|---|---|
 | 1 | manual assertion | `data/eligibility/overrides.csv` `license` — fixes a repo whose LICENSE detection fails upstream |
-| 2 | registry license (primary) | each ecosystem's `results.csv` `license` column (npm / PyPI / crates / Homebrew); most common value across the repo's packages, ties alphabetical |
+| 2 | registry license (primary) | each ecosystem's `results.csv` `license` column (npm / PyPI / crates / cpp — cpp joins Homebrew's, so Homebrew is not read directly); most common value across the repo's packages, ties alphabetical. Each fetcher also writes a durable `raw/licenses.csv` cache, which `build_licenses` falls back to when a value rebuild has stripped the `license` column |
 | 3 | GitHub license (fallback) | `data/sources/github/repos.csv` (GitHub Licensee detection) |
 | 4 | GitLab license (fallback) | `data/sources/gitlab/repos.csv`, keyed by the `gl/` `repo_id` |
 
@@ -173,7 +173,7 @@ coverage; they never change the verdict.
 
 | Column | Counts |
 |---|---|
-| `value_comps` | how many of `openssf_crit`, `eco_crit` and `top_eco_pct` carry a real (non-empty, **non-zero**) value. `pr_score`, the fourth [`value_score` component](value.md#components), is not counted |
+| `value_comps` | how many of `openssf_crit`, `eco_crit` and `top_eco_pct` carry a real (non-empty, **non-zero**) value. `pr_score`, the fourth [`value_score` component](value.md#the-four-value_score-components), is not counted |
 | `risk_comps` | the same count over the risk components (`concentration`, `complexity`, `security`, `workload`) |
 | `complete` | `value_comps ≥ 2 AND risk_comps = 4` — a repo with full coverage |
 
@@ -235,12 +235,13 @@ then verifies each stage CSV matches its builder's current output, and
 
 The pipeline ends at a **ranked shortlist**, never at a funding decision.
 `src.preview.build_results` writes `data/preview/repos.csv` with one row per top repo.
-Two columns turn that table into a queue:
+Three columns turn that table into a queue:
 
 | Column | Meaning |
 |---|---|
 | `score` | `sqrt(value_score × risk_score)`, the geometric mean of the value and risk scores, on the same absolute 0–100 scale as its inputs. It is computed for every row carrying both inputs, eligible or not. |
-| `priority` | a dense rank (1, 2, 3 …) by `score` descending over eligible scored rows only. It is blank for an ineligible row and for any row with no `score`. The rank runs on the full-precision product, not on the displayed 2-decimal `score`. |
+| `priority` | a sequential rank (1, 2, 3 …) by `score` descending over eligible scored rows only. It is blank for an ineligible row and for any row with no `score`. The rank runs on the full-precision product, not on the displayed 2-decimal `score`, so near-ties keep a stable order. |
+| `eco_priority` | the same rank restarted within each ecosystem, so npm rank 1 and PyPI rank 1 both exist. Same rows and same order as `priority` — only the grouping differs, so a row blank in one is blank in the other. |
 
 `priority` is the grant-selection queue. Everything after it is **manual and
 outside the model**: check each project's eligibility by hand, contact the

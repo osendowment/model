@@ -93,8 +93,9 @@ repo missing some still lands on the same 0–100 scale. The weights sit in
 A row needs at least `min_components` (2) present, or `value_score` stays blank.
 `src.value.apply_criticality` stamps the column. The weights are
 criticality-dominant on purpose: a foundational-but-quiet micro-dep must not
-outrank a genuinely critical project. The two PageRank-family factors split the
-0.2 centrality weight between position and mass.
+outrank a genuinely critical project. The two PageRank-family factors take
+0.1 each, splitting between position and mass what was once a single 0.2
+centrality weight.
 
 **A missing component costs nothing but its weight.** Take a GitLab class-A
 repo: it carries no `openssf_crit`, and ecosyste.ms may state no flag either.
@@ -285,13 +286,13 @@ covers the 5-year window 2021–2025.
 | `packages` | Total package count in the repo |
 | `top_eco` | Ecosystem where the repo ranks highest (max PR percentile): `npm` / `pypi` / `crates` / `cpp` |
 | `top_eco_pkg` | Highest-PR package in `top_eco` (e.g. `@babel/helper-plugin-utils` for babel/babel) |
-| `top_eco_pct` | The repo's PageRank **position** inside `top_eco`: `100 − cumulative-PR percentile`. 0–100, **higher = better**. A `value_score` component (weight `centrality_weight`) — see [the four components](#components). |
-| `pr_score` | Cross-ecosystem dependency **mass**, 0–100 (two decimals), **higher = better**. Blank only for groups with no PageRank signal. A `value_score` component (weight `pr_score_weight`) — see [the four components](#components). |
+| `top_eco_pct` | The repo's PageRank **position** inside `top_eco`: `100 − cumulative-PR percentile`. 0–100, **higher = better**. A `value_score` component (weight `centrality_weight`) — see [the four components](#the-four-value_score-components). |
+| `pr_score` | Cross-ecosystem dependency **mass**, 0–100 (two decimals), **higher = better**. Blank only for groups with no PageRank signal. A `value_score` component (weight `pr_score_weight`) — see [the four components](#the-four-value_score-components). |
 | `class` | Strongest of the per-ecosystem classes (A < B < C) |
 | `class_npm`, `class_pypi`, `class_crates`, `class_cpp` | A/B/C from per-ecosystem cumulative PR share; empty if the repo has no package in that ecosystem |
-| `openssf_crit` | OpenSSF criticality score ·100 (0–100, two decimals; the source CSV keeps the raw 0–1 value), joined from `data/sources/openssf/criticality.csv`. GitHub-only — see [the four components](#components) for the exact fetch scope. |
-| `eco_crit` | ecosyste.ms critical flag: `100` on the critical list, `0` explicitly not on it, blank unknown. Covers GitHub **and** GitLab; joined from `data/sources/ecosystems/criticality.csv`. See [the four components](#components). |
-| `value_score` | 0–100 **pro-rata blend** of up to four components — `openssf_crit` (0.6), `eco_crit` (0.2), `top_eco_pct` (0.1), `pr_score` (0.1). Blank unless at least `min_components` (2) are present. Stamped by `src.value.apply_criticality`. See [the four components](#components). |
+| `openssf_crit` | OpenSSF criticality score ·100 (0–100, two decimals; the source CSV keeps the raw 0–1 value), joined from `data/sources/openssf/criticality.csv`. GitHub-only — see [the four components](#the-four-value_score-components) for the exact fetch scope. |
+| `eco_crit` | ecosyste.ms critical flag: `100` on the critical list, `0` explicitly not on it, blank unknown. Covers GitHub **and** GitLab; joined from `data/sources/ecosystems/criticality.csv`. See [the four components](#the-four-value_score-components). |
+| `value_score` | 0–100 **pro-rata blend** of up to four components — `openssf_crit` (0.6), `eco_crit` (0.2), `top_eco_pct` (0.1), `pr_score` (0.1). Blank unless at least `min_components` (2) are present. Stamped by `src.value.apply_criticality`. See [the four components](#the-four-value_score-components). |
 
 `unify` groups package rows by `repo_id` / `git_url`, so the package-level rows
 stay in `data/sources/{eco}/results.csv`. EOL is deliberately absent: the

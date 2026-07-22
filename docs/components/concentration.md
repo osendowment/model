@@ -158,10 +158,17 @@ Over the merged, bot-free per-contributor commit counts:
 | **bus factor** (`bf_commits_*`) | fewest contributors whose combined commits reach `bus_factor_threshold` (0.5 = the people covering 50% of commits). Low = concentrated. |
 | **HHI** (`hhi_commits_*`) | Herfindahl–Hirschman index of commit shares, scaled to 0–10000. High = concentrated. |
 
-Both are **undefined** (blank, not `0`) for a repo with no positive-commit
-contributor. A real `0` would rank as both a maximum-concentration bus factor
-and a minimum-concentration HHI, so the blank keeps such repos out of both
-percentile rankings.
+A real `0` would read as both a maximum-concentration bus factor and a
+minimum-concentration HHI, so `0` is never written. The two windows then
+differ:
+
+- `*_git_full` is left **blank** when the repo has no positive-commit
+  contributor at all, keeping it out of the percentile rankings.
+- `*_git_5y` is **imputed** to the maximum-concentration pair
+  (`bf = 1`, `hhi = 10000`) when the window holds no human commits, because
+  the scored dimension must not go blank for a dormant repo. Those repos score
+  100 — the top of the scale — rather than dropping out. A clone or log failure
+  is the only thing that leaves the window metrics blank.
 
 ### The percentiles (`_p`)
 

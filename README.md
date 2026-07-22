@@ -62,7 +62,7 @@ Most package managers store clean historical data. The C/C++ ecosystem does not,
 
 **All three scoring stages are automated.** Preview and Health score nothing — Preview rebuilds the deliverables, Health audits them.
 
-The final `score` is `sqrt(value_score × risk_score)` — an unnormalized geometric mean on the same 0–100 scale as its inputs, so **both** dimensions must be high. `eligible` is used to flag ineligible projects in the preview results. `priority` is a dense rank by `score` descending over eligible projects only.
+The final `score` is `sqrt(value_score × risk_score)` — an unnormalized geometric mean on the same 0–100 scale as its inputs, so **both** dimensions must be high. `eligible` is used to flag ineligible projects in the preview results. `priority` is a sequential rank by `score` descending over eligible projects only.
 
 ### Running it
 

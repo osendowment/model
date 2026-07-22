@@ -31,7 +31,7 @@ secondary rate limit dictates the fetcher design: one repo per invocation,
 throttled, with per-repo backoff-retry. The `depsdev_enabled` column records
 the mode per row.
 
-**Scope**: every valid class-A GitHub repo, **archived included** (`load_top_slugs()`, which includes archived by default) — the `value.csv` `openssf_crit` column is gated non-empty over exactly this set. TTL 365 days; error rows always retry. An idempotent healing pass runs per invocation: it backfills `repo_id`s that were unresolvable at fetch time and drops rows superseded by a repo rename (old-slug row vs new-slug row for the same id).
+**Scope**: every valid class-A repo, **archived included** (`load_top_slugs()`, which includes archived by default). That set is NOT host-filtered, so the 25 class-A GitLab repos are queried too and a few return a score scraped from a same-named GitHub repo. Those never reach the model: `apply_criticality` joins only rows whose `platform` is `github`, so `value.csv` `openssf_crit` is blank for every GitLab repo. TTL 365 days; error rows always retry. An idempotent healing pass runs per invocation: it backfills `repo_id`s that were unresolvable at fetch time and drops rows superseded by a repo rename (old-slug row vs new-slug row for the same id).
 
 ### Raw Data
 

@@ -4,7 +4,7 @@ How well-resourced is a project? This component of the
 [Eligibility stage](../eligibility.md) collects every public signal that a repo
 receives or gives financial support, then emits:
 
-1. a **funding-risk score** (`score`, 1–100, higher = more at-risk) in
+1. a **funding-risk score** (`score`, 0–100, higher = more at-risk) in
    `data/eligibility/funding.csv` — informational, fed into no aggregate, and
 2. two booleans — **`intent`** and **`nonprofit`** — which
    `src/eligibility/build_eligibility.py` joins into
@@ -368,7 +368,7 @@ timestamps stay in each source file.
 | `owner` | owning-entity domain (e.g. `meta.com`), from `overrides.csv` |
 | `owner_type` | `company` / `nonprofit` / empty |
 | `host_score` | `min(type(host), type(owner))` ∈ {`0` company, `0.5` nonprofit, `1` none} — the third score axis (×100) |
-| `score` | funding-risk score, int 1–100 |
+| `score` | funding-risk score, int 0–100 |
 | `intent`, `nonprofit` | the two boolean eligibility flags |
 
 ### `intent` and `nonprofit` → `data/eligibility/eligibility.csv`

@@ -158,7 +158,8 @@ geometric mean balances *size* (LOC) against *per-function intricacy*
 (cyclomatic-max): a huge-but-flat repo and a small-but-gnarly repo both surface,
 while a repo that is small **and** simple scores low on both and stays low.
 
-`add_percentiles` floors the result at 1, so the range is 1–100, higher =
+`add_percentiles` floors the result at 1, so a scored repo never lands on
+0 — the scale is 0–100, higher =
 riskier. A code-free tree lands on exactly `1.00`; that is the lowest-risk tier,
 not "no risk".
 
@@ -228,4 +229,4 @@ never has `cyclomatic_max` without `cognitive_max`.
   common off-mainline lizard zero. A partially-wrong off-mainline tree that
   still has *some* functions passes the guard and mis-measures slightly.
 - **`score` is a percentile, not a class.** The risk pipeline has no A–D class
-  tiers; `complexity` enters `risk.csv` as a 1–100 score.
+  tiers; `complexity` enters `risk.csv` as a 0–100 score.

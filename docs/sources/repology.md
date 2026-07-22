@@ -62,7 +62,7 @@ uv run python -m src.sources.repology.fetch_repology_data --refresh        # ign
 
 | Aspect | Behavior |
 |---|---|
-| TTL | 30 days, gating the whole file — a warm re-run makes zero network calls |
+| TTL | 365 days (`fetch_ttl_days` in settings.json), gating the whole file — a warm re-run makes zero network calls |
 | `--refresh` | Refetch past the TTL. The pipeline runner propagates it |
 | Pipeline step | `repology` in `src.value.run_value_pipeline` (`net=True`) |
 

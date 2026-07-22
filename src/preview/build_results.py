@@ -33,7 +33,7 @@ Columns:
                       eligibility.
     oss, intent, nonprofit, active                        (eligibility.csv components)
     eligible          oss AND intent AND nonprofit AND active
-    priority          dense rank (1, 2, 3, …) by score desc, among eligible
+    priority          sequential rank (1, 2, 3, …) by score desc, among eligible
                       rows only — blank for ineligible rows and any row
                       missing a score.
     repo_id           stable platform-qualified id (`gh/<n>` / `gl/<nickname>-<n>`)
@@ -158,7 +158,7 @@ def build() -> list[dict]:
         if raw is not None:
             row["score"] = f"{math.sqrt(raw):.2f}"
 
-    # priority: dense 1,2,3… rank by score desc, eligible + scored rows only.
+    # priority: sequential 1,2,3… rank by score desc, eligible + scored rows only.
     # Ranked on the full-precision value*risk product, NOT the displayed 2dp
     # score — rounding creates dozens of ties whose order would then hinge on
     # the repo-name tie-break, so a rename could silently reorder neighbors.
@@ -169,7 +169,7 @@ def build() -> list[dict]:
     for i, row in enumerate(ranked, start=1):
         row["priority"] = str(i)
 
-    # eco_priority: the same dense rank, restarted within each ecosystem, so a
+    # eco_priority: the same rank, restarted within each ecosystem, so a
     # reviewer can pick the top N of npm without npm's rows being interleaved
     # with pypi's. Same population and same ordering key as `priority` — only
     # the grouping differs — so a row blank in one is blank in the other.

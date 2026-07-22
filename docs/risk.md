@@ -6,8 +6,9 @@ vulnerability, or a backlog that outgrows the contributors. Four dimensions
 measure those failure modes separately, and their geometric mean is the repo's
 `risk_score`, from 0–100, where higher means riskier.
 
-Every measurement covers the last 5 years, so a score describes where a project
-is heading rather than what it once was. Risk scores only the core — the
+Most measurements cover the last 5 years, so a score describes where a project
+is heading rather than what it once was. Two do not: complexity reads one
+year-pinned end-of-year snapshot, and the Scorecard is a scan of current HEAD. Risk scores only the core — the
 class-A repos [Value](value.md) selected — and it writes one row per repo to
 `data/risk/risk.csv`. The [README](../README.md#what-each-score-is-made-of)
 summarizes all three stages in one table.
@@ -19,7 +20,7 @@ summarizes all three stages in one table.
 
 ## The four dimensions
 
-Each dimension takes a designated subset of its metrics and emits one **1–100
+Each dimension takes a designated subset of its metrics and emits one **0–100
 `score`** (higher = riskier). The composition differs per dimension:
 
 | Dimension | Question it answers | Dimension `score` | Deep detail |
@@ -265,7 +266,7 @@ as a time-series. `src/sources/git/long_format.py` is the only writer and reader
 ## Output: risk.csv
 
 One row per risk-scope repo, ranked by `risk_score` descending. Each dimension
-column is a **1–100 risk score** (higher = riskier, floored at 1); the raw
+column is a **0–100 risk score** (higher = riskier); the raw
 metrics and `*_p` columns behind it stay in the per-dimension CSV, documented on
 the pages linked from [The four dimensions](#the-four-dimensions).
 
@@ -273,11 +274,11 @@ the pages linked from [The four dimensions](#the-four-dimensions).
 |--------|-------------|
 | `repo` | Host project path (`owner/name` on GitHub, `namespace/project` on GitLab) |
 | `repo_id` | Host-namespaced repo id — `gh/<github-numeric-id>` (e.g. `gh/3611422`), or `gl/<host-nickname>-<project-id>` for GitLab (e.g. `gl/gnome-1665`; bare `gl/<project-id>` for gitlab.com). The join key for every stage |
-| `concentration` | Contributor-concentration risk score (1–100) |
-| `complexity` | Codebase-complexity risk score (1–100) |
-| `security` | Security risk score (1–100) |
-| `workload` | Per-contributor workload risk score (1–100) |
-| `risk_score` | Overall risk score (1–100) — geometric mean of the four dimensions; blank when any dimension score is missing |
+| `concentration` | Contributor-concentration risk score (0–100) |
+| `complexity` | Codebase-complexity risk score (0–100) |
+| `security` | Security risk score (0–100) |
+| `workload` | Per-contributor workload risk score (0–100) |
+| `risk_score` | Overall risk score (0–100) — geometric mean of the four dimensions; blank when any dimension score is missing |
 
 ## Known gaps and limitations
 
