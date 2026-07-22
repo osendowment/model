@@ -36,6 +36,7 @@ from rich.table import Table
 sys.path.insert(0, os.path.dirname(__file__))
 from fetch_npm_data import fetch_and_save_deps, fetch_and_save_downloads, load_fetched_dep_packages  # noqa: E402
 
+from src.common.tables import merge_preserved_columns
 from src.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
 console = Console()
@@ -312,7 +313,10 @@ def step_results(
         r["value_class"] = assign_value_class(share)
 
     fields = ["package", "github_repo", "avg_downloads"] + [str(y) for y in YEARS] + ["top", "pagerank", "value_class"]
-    atomic_write(OUT_RESULTS, rows, fields)
+    # Keep the enrichment later value-stage steps add in place (repo_id,
+    # canonical_url, license) — a rebuild must not drop them.
+    rows, _cols = merge_preserved_columns(OUT_RESULTS, list(fields), rows)
+    atomic_write(OUT_RESULTS, rows, _cols)
 
     tbl = Table(show_header=False, box=None, padding=(0, 2))
     tbl.add_column(style="dim")

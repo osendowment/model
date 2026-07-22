@@ -57,6 +57,7 @@ import networkx as nx
 from rich.console import Console
 from rich.table import Table
 
+from src.common.tables import merge_preserved_columns
 from src.common.params import (
     TOP_THRESHOLD_PCT, PAGERANK_ALPHA,
     DOWNLOADS_SCORE_DEBIAN_WEIGHT, DOWNLOADS_SCORE_HOMEBREW_WEIGHT,
@@ -644,7 +645,10 @@ def step_results(
         share = cum / total_pr if total_pr > 0 else 1.0
         r["value_class"] = assign_value_class(share)
 
-    atomic_write(OUT_RESULTS, out_rows, RESULTS_FIELDS)
+    # Keep the enrichment later value-stage steps add in place (repo_id,
+    # canonical_url, license) — a rebuild must not drop them.
+    out_rows, _cols = merge_preserved_columns(OUT_RESULTS, list(RESULTS_FIELDS), out_rows)
+    atomic_write(OUT_RESULTS, out_rows, _cols)
 
     tbl = Table(show_header=False, box=None, padding=(0, 2))
     tbl.add_column(style="dim"); tbl.add_column(justify="right")

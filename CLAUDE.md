@@ -50,6 +50,14 @@ Two things the script does not cover:
 - A red `pipeline_health` check is never noise: it catches stale builds and
   override rows orphaned by a repo-identity change.
 
+**Never run a `process` step on its own.** `src.sources.<eco>.process_data`
+rebuilds `results.csv` and recomputes `github_repo` from raw registry data,
+discarding the rename and authority refinements `resolve` applied — 336 crates
+rows on the last check. The columns `process` does not own (`git`, `eco_guess`,
+`repo_id`, `canonical_url`, `license`) are preserved automatically, so the file
+is no longer left structurally short, but the refinements still need the rest
+of the stage. Run the stage (`--stage value`), never the step.
+
 ## Code Organization
 
 `src/` is organized by **role**, mirroring the three-stage Value → Risk →

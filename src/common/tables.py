@@ -75,3 +75,46 @@ def load_column_by_id(path: Path | str, column: str) -> dict[str, str]:
         rid: (row.get(column) or "").strip()
         for rid, row in load_rows_by_id(path).items()
     }
+
+
+def merge_preserved_columns(
+    path: Path | str,
+    fieldnames: list[str],
+    rows: list[dict],
+    key: str = "package",
+) -> tuple[list[dict], list[str]]:
+    """Carry columns an existing CSV has but this writer does not produce.
+
+    A `process_data` step rebuilds `results.csv` from raw data and knows only
+    its own columns. Later value-stage steps then enrich the same file in
+    place — `git` and `eco_guess` from build_git_urls, `repo_id` and
+    `canonical_url` from apply_ecosystems_authority, `license` from the
+    per-ecosystem fetch_licenses. Rewriting with a fixed column list silently
+    dropped every one of them, so re-running a single `process` step outside
+    the full pipeline left `results.csv` short of the columns its consumers
+    require, and `build_licenses` fell back to weaker sources.
+
+    Columns already present in `fieldnames` are NOT touched: the freshly
+    computed value always wins. Only genuinely extra columns are carried, and
+    only onto rows whose `key` still exists — a package that left the set
+    takes its enrichment with it.
+
+    Returns `(rows, fieldnames)` with the preserved columns appended.
+    """
+    p = Path(path)
+    if not p.is_file():
+        return rows, fieldnames
+    with p.open(encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        existing_cols = [c for c in (reader.fieldnames or []) if c not in fieldnames]
+        if not existing_cols:
+            return rows, fieldnames
+        preserved = {
+            r[key]: {c: r.get(c, "") for c in existing_cols}
+            for r in reader if r.get(key)
+        }
+    for row in rows:
+        extra = preserved.get(row.get(key), {})
+        for c in existing_cols:
+            row.setdefault(c, extra.get(c, ""))
+    return rows, fieldnames + existing_cols

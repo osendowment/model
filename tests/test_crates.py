@@ -311,3 +311,44 @@ def test_top_packages_avg_downloads_numeric():
     _, rows = _read_csv(TOP_CSV)
     for r in rows:
         assert int(r["avg_downloads"]) >= 0
+
+
+def test_process_run_preserves_downstream_enrichment(tmp_path):
+    """A `process` rebuild must not drop the columns later steps added.
+
+    process_data writes results.csv from raw data with its own fixed column
+    list. Later value-stage steps enrich the SAME file in place — git and
+    eco_guess from build_git_urls, repo_id and canonical_url from
+    apply_ecosystems_authority, license from fetch_licenses. Rewriting with a
+    fixed list silently dropped every one, so re-running one `process` step
+    outside the full pipeline left results.csv short of the columns
+    build_licenses and the risk builders require.
+    """
+    import csv
+    from src.common.tables import merge_preserved_columns
+
+    enriched = tmp_path / "results.csv"
+    with enriched.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["package", "pagerank", "repo_id", "license"])
+        w.writeheader()
+        w.writerow({"package": "serde", "pagerank": "0.1",
+                    "repo_id": "gh/1", "license": "mit"})
+        w.writerow({"package": "gone", "pagerank": "0.2",
+                    "repo_id": "gh/2", "license": "apache-2.0"})
+
+    # what a rebuild produces: its own columns only, and `gone` has left the set
+    fresh = [{"package": "serde", "pagerank": "0.9"},
+             {"package": "newcomer", "pagerank": "0.3"}]
+    rows, cols = merge_preserved_columns(enriched, ["package", "pagerank"], fresh)
+
+    assert cols == ["package", "pagerank", "repo_id", "license"]
+    by_pkg = {r["package"]: r for r in rows}
+    # enrichment carried over
+    assert by_pkg["serde"]["repo_id"] == "gh/1"
+    assert by_pkg["serde"]["license"] == "mit"
+    # the freshly computed value wins over the stale one
+    assert by_pkg["serde"]["pagerank"] == "0.9"
+    # a package new to the set simply has no enrichment yet
+    assert by_pkg["newcomer"]["repo_id"] == ""
+    # a package that left takes its enrichment with it
+    assert "gone" not in by_pkg

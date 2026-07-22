@@ -37,6 +37,7 @@ import networkx as nx
 from rich.console import Console
 from rich.table import Table
 
+from src.common.tables import merge_preserved_columns
 from src.common.params import TOP_THRESHOLD_PCT, PAGERANK_ALPHA, YEARS, assign_value_class, ecosystem_avg_downloads
 
 BQ_CSV      = "data/sources/pypi/bigquery/bq-package-downloads.csv"
@@ -316,7 +317,11 @@ for r in result_rows:
     share = cum / total_pr if total_pr > 0 else 1.0
     r["value_class"] = assign_value_class(share)
 
-write_csv(RESULTS_CSV, ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank", "value_class"], result_rows)
+_res_cols = ["package", "github_repo", "avg_downloads"] + YEAR_COLS + ["top", "pagerank", "value_class"]
+# Keep the enrichment later value-stage steps add in place (git, eco_guess,
+# repo_id, canonical_url, license) — a rebuild must not drop them.
+result_rows, _res_cols = merge_preserved_columns(RESULTS_CSV, _res_cols, result_rows)
+write_csv(RESULTS_CSV, _res_cols, result_rows)
 
 table = Table(title="Top 15 by PageRank", show_header=True, header_style="bold dim")
 table.add_column("Package", style="bold")

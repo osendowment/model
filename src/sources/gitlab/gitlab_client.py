@@ -42,12 +42,6 @@ HOST_NICKNAMES: dict[str, str] = {
     "gitlab.kitware.com": "kitware",
     "gitlab.xfce.org": "xfce",
     "gitlab.ibr.cs.tu-bs.de": "tubs",
-    "gitlab.zapb.de": "zapb",                    # libjaylink
-    "gitlab.archlinux.org": "archlinux",
-    "gitlab.alpinelinux.org": "alpinelinux",
-    "gitlab.linphone.org": "linphone",
-    "gitlab.onelab.info": "onelab",
-    "gitlab.raptorengineering.com": "raptorengineering",
 }
 
 # GitLab instances known to appear in the data. `is_gitlab_host` also treats
