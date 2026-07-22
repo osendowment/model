@@ -216,7 +216,11 @@ def build_dep_tree(top_sources: set[str], edges: list[tuple[str, str]]) -> list[
     for pkg, dep in edges:
         adj[pkg].append(dep)
     visited = set(top_sources)
-    queue = deque(top_sources)
+    # Seed the BFS from a SORTED list: `top` is a set, and Python's per-process
+    # string hash randomizes set iteration, so an unsorted seed emitted the
+    # same edges in a different order every run — rewriting the whole
+    # dependency-tree.csv for no change in content.
+    queue = deque(sorted(top_sources))
     result: list[tuple[str, str]] = []
     while queue:
         pkg = queue.popleft()
