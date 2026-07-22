@@ -376,7 +376,7 @@ def combine(
             "debian_avg_downloads":   d_avg,
             "homebrew_avg_downloads": h_avg,
             # Weighted combined signal — drives both sorting and PageRank
-            # personalization. Weights configurable via data/params.json.
+            # personalization. Weights configurable via src/settings.json.
             "downloads_score":        int(
                 DOWNLOADS_SCORE_DEBIAN_WEIGHT   * d_avg +
                 DOWNLOADS_SCORE_HOMEBREW_WEIGHT * h_avg
@@ -599,7 +599,7 @@ def step_results(
     """PageRank over the combined dep graph, with install-weighted
     personalization (downloads_score) anchoring scores to real-world usage.
     Assigns A/B/C/D value classes via cumulative PR share cutoffs from
-    data/params.json."""
+    src/settings.json."""
     console.rule("[bold cyan]Step 4 — results.csv (pagerank)")
     t0 = time.perf_counter()
 
@@ -710,7 +710,8 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--top-share", type=float, default=TOP_THRESHOLD_PCT,
                    help="Cumulative-download share cap for top-packages. "
-                        f"Default {TOP_THRESHOLD_PCT}% from data/params.json.")
+                        # argparse %-formats help strings, so a literal % is %%
+                        f"Default {TOP_THRESHOLD_PCT}%% from src/settings.json.")
     args = p.parse_args()
 
     console.rule("[bold white]cpp — process_data.py")
