@@ -41,7 +41,8 @@ csv.field_size_limit(sys.maxsize)
 
 from rich.console import Console
 
-from src.common.eol_common import display_summary, now_iso, write_eol
+from src.common.eol_common import (EOL_TTL_DAYS, display_summary, load_fresh_eol,
+                                   now_iso, write_eol)
 from src.common.params import fetch_ttl_days
 
 logging.basicConfig(level="INFO")
@@ -139,6 +140,8 @@ def build_rows(packages: list[str], yank_idx: dict[str, bool]) -> list[dict]:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--limit", type=int, default=None, help="limit packages")
+    p.add_argument("--refresh", action="store_true",
+                   help=f"Re-check every crate, ignoring the {EOL_TTL_DAYS}-day TTL")
     args = p.parse_args()
 
     started = datetime.now()
@@ -148,8 +151,18 @@ def main() -> None:
     pkgs = load_packages(args.limit)
     log.info("loaded %d crates from results.csv", len(pkgs))
 
-    yank_idx = load_yank_index()
-    rows = build_rows(pkgs, yank_idx)
+    # Without this gate every row was re-derived and re-stamped on every run,
+    # so eol.csv never settled even with unchanged inputs. A fresh verdict is
+    # reused verbatim, timestamp included.
+    fresh = {} if args.refresh else load_fresh_eol(OUTPUT_FILE)
+    to_check = [p_ for p_ in pkgs if p_ not in fresh]
+    if fresh:
+        console.print(f"  [dim]{len(pkgs) - len(to_check):,} fresh (< {EOL_TTL_DAYS}d) — "
+                      f"checking {len(to_check):,}; --refresh to force[/dim]")
+
+    yank_idx = load_yank_index() if to_check else {}
+    rows = [fresh[p_] for p_ in pkgs if p_ in fresh]
+    rows += build_rows(to_check, yank_idx)
     write_eol(OUTPUT_FILE, rows)
 
     display_summary(console, "crates", rows)

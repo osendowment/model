@@ -49,7 +49,8 @@ from pathlib import Path
 import requests
 from rich.console import Console
 
-from src.common.eol_common import display_summary, now_iso, write_eol
+from src.common.eol_common import (EOL_TTL_DAYS, display_summary, load_fresh_eol,
+                                   now_iso, write_eol)
 from src.common.params import fetch_ttl_days
 
 logging.basicConfig(level="INFO")
@@ -305,7 +306,17 @@ def main() -> None:
     pkgs = load_packages(args.limit)
     log.info("loaded %d cpp packages from results.csv", len(pkgs))
 
-    rows = build_rows(pkgs, args.refresh)
+    # Without this gate every row was re-derived and re-stamped on every run,
+    # so eol.csv never settled even with unchanged inputs. A fresh verdict is
+    # reused verbatim, timestamp included; --refresh re-checks everything.
+    fresh = {} if args.refresh else load_fresh_eol(OUTPUT_FILE)
+    to_check = [p_ for p_ in pkgs if p_ not in fresh]
+    if fresh:
+        console.print(f"  [dim]{len(pkgs) - len(to_check):,} fresh (< {EOL_TTL_DAYS}d) — "
+                      f"checking {len(to_check):,}; --refresh to force[/dim]")
+
+    rows = [fresh[p_] for p_ in pkgs if p_ in fresh]
+    rows += build_rows(to_check, args.refresh) if to_check else []
     write_eol(OUTPUT_FILE, rows)
 
     display_summary(console, "cpp", rows)

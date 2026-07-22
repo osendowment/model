@@ -57,8 +57,9 @@
   },
   "fetch_retry_days": {
     "comment": "Back-off windows, NOT cache TTLs. These govern how soon a FAILED or empty result is retried, so they stay short — stretching them to a year would leave a transient failure unretried for a year.",
-    "sources/openssf/scorecard.scan_error": 7,
-    "common/freshness.funding_empty_recheck": 30
+    "common/freshness.funding_empty_recheck": 30,
+    "sources/github/fetch_canonical.not_found": 30,
+    "sources/openssf/scorecard.scan_error": 7
   },
   "pagerank": {
     "alpha": 0.85,
