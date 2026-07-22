@@ -31,15 +31,24 @@ downloaded and slimmed inside the gitignored `tmp/`, and never committed.
 
 In `data/sources/crates/`:
 - `version-downloads/YYYY-MM.csv` — monthly per-version download totals
+- `raw/licenses.csv` — `package, license, fetched_at`. The durable licence
+  cache `fetch_licenses` writes before enriching `results.csv`, so a value
+  rebuild cannot wipe the licences. While it is fresh the 560 MB db-dump is
+  never opened.
+- `download-cache/crate-annual.csv` — `crate_id, year, downloads`, the
+  per-crate annual aggregate. Gitignored and regenerable: `process_data` used
+  to re-read all 549 MB of monthly CSVs every run to rebuild it (~8 s). Keyed
+  on the newest mtime across the monthly files and the db-dump extracts, so it
+  is recomputed the moment either moves; `--refresh` forces it.
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `src/sources/crates/fetch_db_dump.py` | Download the dump, write the slim extracts, delete the scratch copies. Skips when all four extracts exist |
-| `src/sources/crates/fetch_version_downloads.py` | Download the monthly archives. Skips complete months |
-| `src/sources/crates/process_data.py` | Build the outputs (~20 s) |
-| `src/sources/crates/fetch_licenses.py` | Join the dump's default-version `license` into `results.csv` |
+| `src/sources/crates/fetch_db_dump.py` | Download the dump, write the slim extracts, delete the scratch copies. Skips when the extracts are complete AND inside the TTL |
+| `src/sources/crates/fetch_version_downloads.py` | Download the monthly archives. Skips complete months, and the whole step when the directory is inside the TTL |
+| `src/sources/crates/process_data.py` | Build the outputs (~5 s warm, ~12 s when the annual aggregate is recomputed) |
+| `src/sources/crates/fetch_licenses.py` | Derive licences → `raw/licenses.csv`, then apply that cache to `results.csv` |
 | `src/sources/crates/check_eol.py` | Flag crates whose default version is yanked → `eol.csv` |
 
 ```bash

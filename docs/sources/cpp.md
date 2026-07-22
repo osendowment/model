@@ -94,7 +94,8 @@ C / C++ (Debian + Homebrew + Repology)
   at the mirror and `canonical_url` records the upstream. `gnutools/glibc`
   (canonical sourceware.org) and `gcc-mirror/gcc` (canonical gcc.gnu.org)
   reach both stages that way. The eligibility stage also consumes cpp's
-  per-ecosystem signals: `fetch_licenses.py` fills the `license` column of
+  per-ecosystem signals: `fetch_licenses.py` derives licences into the durable
+  `raw/licenses.csv` cache (`package, license, fetched_at`) and fills the `license` column of
   `results.csv` (the registry-first input to the stage's license check), and
   `check_eol.py` → `data/sources/cpp/eol.csv` produces advisory package-level
   EOL signals that inform the manual `eol` override in

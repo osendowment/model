@@ -31,7 +31,7 @@ In `data/sources/homebrew/raw/`:
 |--------|---------|
 | `src/sources/homebrew/fetch_homebrew_data.py` | Two steps: `formulas` (formula.json) and `analytics` (Wayback install counts) |
 | `src/sources/homebrew/process_data.py` | Build the outputs |
-| `src/sources/homebrew/fetch_licenses.py` | Join the `license` column of `raw/formulas.csv` into `results.csv`, lower-cased |
+| `src/sources/homebrew/fetch_licenses.py` | Derive lower-cased SPDX from `raw/formulas.csv` → `raw/licenses.csv` (`package, license, fetched_at`, the durable cache), then apply it to `results.csv`. The cache is what survives a value-stage rebuild |
 
 ```bash
 uv run python -m src.sources.homebrew.fetch_homebrew_data [--step formulas|analytics|all] [--years 2023 2024 2025] [--limit N] [--refresh]
