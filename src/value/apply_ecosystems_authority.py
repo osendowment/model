@@ -260,10 +260,22 @@ def _resolve_github(rows: list[dict], repos_file: str | None = None,
 def _load_gitlab_repo_ids(path=None) -> dict[str, str]:
     """`{project_key: repo_id}` from gitlab/repos.csv, valid rows only.
 
-    `project_key = "{host}/{path}".lower()` (the fetcher's upsert key); `repo_id`
-    is the `gl/{nickname}-{id}` / `gl/{id}` form. Only rows that resolved to a real
-    project (`valid == True`) with a `gl/` id are returned — so an unresolved /
-    404 GitLab URL never gets an id (the validator half of the resolver).
+    Indexed under BOTH the path that was queried (`project`) and the path the
+    project actually lives at (`host` + `path_with_namespace`), because GitLab
+    follows a rename transparently: asking for
+    `invent.kde.org/frameworks/kactivities` returns the project now at
+    `invent.kde.org/plasma/plasma-activities`, under the same immutable id.
+
+    Indexing one name only made the lookup rename-dependent. The row was
+    persisted under the resolved path while callers looked it up by the path in
+    the clone URL, so three KDE frameworks missed, re-fetched, re-persisted, and
+    never got a repo_id in results.csv — every run, forever. The id is the
+    stable identity here; a path is just one of its aliases, so every known
+    alias maps to it.
+
+    Only rows that resolved to a real project (`valid == True`) with a `gl/` id
+    are returned — an unresolved / 404 GitLab URL never gets an id (the
+    validator half of the resolver).
     """
     path = path or _GITLAB_PROJECTS_FILE
     out: dict[str, str] = {}
@@ -272,9 +284,17 @@ def _load_gitlab_repo_ids(path=None) -> dict[str, str]:
     with open(path, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             rid = (r.get("repo_id") or "").strip()
-            key = (r.get("project") or "").strip().lower()
-            if key and rid.startswith("gl/") and (r.get("valid") or "").strip().lower() == "true":
-                out[key] = rid
+            if not rid.startswith("gl/") or (r.get("valid") or "").strip().lower() != "true":
+                continue
+            host = (r.get("host") or "").strip().lower()
+            resolved = (r.get("path_with_namespace") or "").strip().lower()
+            keys = [(r.get("project") or "").strip().lower(),
+                    f"{host}/{resolved}" if host and resolved else ""]
+            # every path this id has been queried under (see _dedupe_by_id)
+            keys += [a for a in (r.get("aliases") or "").strip().lower().split("|") if a]
+            for key in keys:
+                if key:
+                    out[key] = rid
     return out
 
 

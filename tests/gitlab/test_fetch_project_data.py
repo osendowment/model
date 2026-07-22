@@ -338,3 +338,46 @@ class TestDedupeByRepoId:
         assert n == 1   # both paths share gl/1 → collapsed to the fresh Rust row
         row = next(csv.DictReader(open(out)))
         assert row["language"] == "Rust"
+
+
+class TestRenameAliases:
+    """A renamed project keeps every path it has been queried under.
+
+    GitLab follows a rename transparently: asking for
+    invent.kde.org/frameworks/kactivities returns the project now at
+    invent.kde.org/plasma/plasma-activities, under the same immutable id. Two
+    callers reach it by different paths — the value resolver by the clone URL,
+    the eligibility scope by the current path — so collapsing to one row per
+    repo_id must not discard the other name. It used to: whichever caller wrote
+    last won, the other missed on every run, re-fetched, and flipped the row
+    back, so the three affected repos never got a repo_id in results.csv.
+    """
+
+    def test_dedupe_keeps_the_other_path_as_an_alias(self):
+        rows = [
+            {"project": "invent.kde.org/frameworks/kactivities", "repo_id": "gl/kde-2742",
+             "fetched_at": _iso_days_ago(3)},
+            {"project": "invent.kde.org/plasma/plasma-activities", "repo_id": "gl/kde-2742",
+             "fetched_at": _iso_days_ago(1)},
+        ]
+        out = _dedupe_by_id(rows, "repo_id")
+        assert len(out) == 1, "one row per stable id"
+        row = out[0]
+        assert row["project"] == "invent.kde.org/plasma/plasma-activities"  # freshest wins
+        assert row["aliases"] == "invent.kde.org/frameworks/kactivities"
+
+    def test_alias_is_carried_through_a_later_dedupe(self):
+        """An alias already on the row survives the next collapse."""
+        rows = [
+            {"project": "invent.kde.org/plasma/plasma-activities", "repo_id": "gl/kde-2742",
+             "aliases": "invent.kde.org/frameworks/kactivities", "fetched_at": _iso_days_ago(2)},
+            {"project": "invent.kde.org/plasma/plasma-activities", "repo_id": "gl/kde-2742",
+             "fetched_at": _iso_days_ago(1)},
+        ]
+        row = _dedupe_by_id(rows, "repo_id")[0]
+        assert row["aliases"] == "invent.kde.org/frameworks/kactivities"
+
+    def test_a_row_without_an_id_is_never_collapsed(self):
+        """404 rows carry no repo_id and must keep their own project key."""
+        rows = [{"project": "invent.kde.org/gone/away", "repo_id": "", "fetched_at": _iso_days_ago(1)}]
+        assert _dedupe_by_id(rows, "repo_id") == rows

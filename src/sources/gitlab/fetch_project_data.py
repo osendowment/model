@@ -56,7 +56,7 @@ PROJECT_FIELDS = [
     "name", "path_with_namespace", "description", "homepage",
     "default_branch", "license", "language", "topics",
     "stars", "forks", "open_issues", "archived", "visibility",
-    "created_at", "last_activity_at", "fetched_at",
+    "created_at", "last_activity_at", "fetched_at", "aliases",
 ]
 
 NAMESPACE_FIELDS = [
@@ -297,9 +297,20 @@ def _filter_stale(items: list[dict], existing: dict[str, dict], key: str,
     GitHub fetcher — `row_is_fresh` handles the timestamp; missing rows always
     fetch.
     """
+    # A renamed project is stored under ONE path but may be queried by another
+    # (see _dedupe_by_id). Without the alias index the other caller's key looked
+    # missing on every run, so it re-fetched forever and the row flipped between
+    # the two names. Resolve the query through the aliases before deciding.
+    by_alias: dict[str, dict] = {}
+    for row in existing.values():
+        for a in (row.get("aliases") or "").strip().lower().split("|"):
+            if a:
+                by_alias.setdefault(a, row)
+
     to_fetch, fresh, missing = [], 0, 0
     for it in items:
-        row = existing.get(it[key].lower())
+        k = it[key].lower()
+        row = existing.get(k) or by_alias.get(k)
         if row and not force and row_is_fresh(row, ttl_days=TTL_DAYS):
             fresh += 1
         else:
@@ -362,13 +373,29 @@ def _dedupe_by_id(rows: list[dict], id_field: str) -> list[dict]:
     which carry no `repo_id`) are kept as-is, keyed by their own `project`."""
     best: dict[str, dict] = {}
     passthrough: list[dict] = []
+    # Every path this id has been queried under, so collapsing to one row does
+    # not lose the others. Two callers reach the same renamed project by
+    # different paths — the value resolver by the clone URL
+    # (invent.kde.org/frameworks/kactivities), the eligibility scope by the
+    # current one (invent.kde.org/plasma/plasma-activities). Whichever wrote
+    # last used to win, and the other then missed on every run, re-fetched, and
+    # flipped the row back. The id is the identity; a path is one of its names.
+    aliases: dict[str, set[str]] = {}
     for r in rows:
         rid = (r.get(id_field) or "").strip()
         if not rid:
             passthrough.append(r)
             continue
+        for name in ((r.get("project") or "").strip().lower(),
+                     (r.get("aliases") or "").strip().lower()):
+            for part in name.split("|"):
+                if part:
+                    aliases.setdefault(rid, set()).add(part)
         if rid not in best or _fresher(r, best[rid]):
             best[rid] = r
+    for rid, row in best.items():
+        names = aliases.get(rid, set()) - {(row.get("project") or "").strip().lower()}
+        row["aliases"] = "|".join(sorted(names))
     return list(best.values()) + passthrough
 
 
