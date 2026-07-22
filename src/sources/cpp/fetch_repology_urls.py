@@ -179,6 +179,14 @@ def extract_git_urls(html: str) -> list[tuple[str, str]]:
     out: list[tuple[str, str]] = []
     for href in HREF_RE.findall(combined):
         platform, canon = classify(href)
+        # Repology pages occasionally carry a truncated host with no TLD, e.g.
+        # "https://gitlab.gnome/gnome/libgweather.git". Such a host is never
+        # real, and it would demand its own GitLab nickname — one that would
+        # collide with the valid host it was truncated from. Drop it; the
+        # well-formed URL is always present alongside.
+        host = re.sub(r"^\w+://", "", canon).split("/", 1)[0]
+        if host and "." not in host.rstrip("."):
+            continue
         if platform and canon not in seen:
             seen.add(canon)
             out.append((canon, platform))

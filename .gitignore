@@ -44,3 +44,7 @@ data/preview/board-preview-report.pdf
 
 # Logo assets for reports/decks — fetched from upstream brand pages, not a pipeline output
 logos/
+
+# crates per-crate annual download aggregate — regenerable from the monthly
+# CSVs + db-dump extracts in seconds; never commit
+data/sources/crates/download-cache/

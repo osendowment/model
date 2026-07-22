@@ -31,6 +31,7 @@ from src.sources.github.github_client import (
 )
 from src.sources.github.models import THRESHOLD
 from src.common.params import fetch_ttl_days
+from src.common.lfs import is_lfs_pointer
 from src.common.repos import git_url_for, load_git_urls
 
 log = logging.getLogger(__name__)
@@ -118,6 +119,17 @@ def _upsert_contributor_commits(
 
     repo_ids = _load_repo_id_map()
     fetched_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+
+    # An unmaterialised LFS pointer parses as CSV and yields no `repo` rows, so
+    # the rewrite below would silently replace real data with a bare header —
+    # that is exactly how 74k contributor rows were once lost. A pointer is
+    # missing data, not empty data, so refuse rather than proceed.
+    for path in (GH_CONTRIB_FILE, GH_CONTRIB_STATUS_FILE):
+        if os.path.exists(path) and is_lfs_pointer(path):
+            raise SystemExit(
+                f"batch_update: {path} is an unmaterialised Git LFS pointer.\n"
+                f"Run `git lfs checkout {path}` (or `git lfs pull`) before fetching — "
+                f"continuing would overwrite the real data with an empty file.")
 
     # Load existing long rows (keyed by repo for replacement)
     existing_contribs: dict[str, list[dict]] = {}

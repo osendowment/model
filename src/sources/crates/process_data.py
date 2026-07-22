@@ -51,6 +51,13 @@ DEPS_CSV    = f"{DATA_DIR}/dependency-tree.csv"
 GITHUB_CSV  = f"{DATA_DIR}/github-repos.csv"
 RESULTS_CSV = f"{DATA_DIR}/results.csv"
 
+# Per-crate annual download totals, cached. Step 2 re-reads 549 MB of monthly
+# CSVs on every run to produce this, ~8s of a ~12s step, yet the inputs are
+# immutable: a closed month's file never changes, and the version→crate map
+# comes from the db-dump extracts. The cache is therefore keyed on the mtime of
+# both, and recomputed the moment either moves. Regenerable, so gitignored.
+ANNUAL_CACHE = f"{DATA_DIR}/download-cache/crate-annual.csv"
+
 KIND_MAP  = {"0": "normal", "1": "build", "2": "dev"}
 YEAR_COLS = [str(y) for y in YEARS]
 
@@ -59,6 +66,8 @@ console = Console()
 parser = argparse.ArgumentParser()
 parser.add_argument("--min-avg", type=int,   default=None)
 parser.add_argument("--alpha",   type=float, default=PAGERANK_ALPHA)
+parser.add_argument("--refresh", action="store_true",
+                    help="Recompute the annual download aggregate, ignoring its cache")
 args = parser.parse_args()
 
 t_total = time.perf_counter()
@@ -159,7 +168,52 @@ console.rule("[bold]Step 2[/bold] — aggregate downloads")
 # Initialized to 0 for all years so every crate has a complete record even with no downloads.
 crate_annual: dict[int, dict[int, int]] = defaultdict(lambda: {y: 0 for y in YEARS})
 
-for year in YEARS:
+
+def _newest(*globs: str) -> float:
+    """Newest mtime across every file matching the globs (0.0 if none)."""
+    newest = 0.0
+    for g in globs:
+        for f in glob.glob(g):
+            newest = max(newest, os.path.getmtime(f))
+    return newest
+
+
+def _load_annual_cache() -> bool:
+    """Populate `crate_annual` from the cache. False when it is absent or stale.
+
+    Stale means any monthly download file or any db-dump extract is newer than
+    the cache — those are the only two inputs, so a cache newer than both is
+    byte-identical to what a recompute would produce.
+    """
+    if args.refresh or not os.path.exists(ANNUAL_CACHE):
+        return False
+    if os.path.getmtime(ANNUAL_CACHE) <= _newest(f"{MONTHLY_DIR}/*.csv", f"{DUMP_DIR}/*.csv"):
+        return False
+    with open(ANNUAL_CACHE, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            crate_annual[int(row["crate_id"])][int(row["year"])] = int(row["downloads"])
+    return True
+
+
+def _write_annual_cache() -> None:
+    os.makedirs(os.path.dirname(ANNUAL_CACHE), exist_ok=True)
+    tmp = ANNUAL_CACHE + ".tmp"
+    with open(tmp, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["crate_id", "year", "downloads"])
+        for cid, per_year in crate_annual.items():
+            for year, dl in per_year.items():
+                if dl:                      # zeros are the default; storing them
+                    w.writerow([cid, year, dl])   # would triple the file for nothing
+    os.replace(tmp, ANNUAL_CACHE)
+
+
+_cached = _load_annual_cache()
+if _cached:
+    console.print(f"  [dim]annual totals loaded from {ANNUAL_CACHE} "
+                  f"(inputs unchanged; --refresh to recompute)[/dim]")
+
+for year in ([] if _cached else YEARS):
     t = time.perf_counter()
     monthly_files = sorted(glob.glob(f"{MONTHLY_DIR}/{year}-*.csv"))
     if not monthly_files:
@@ -175,6 +229,9 @@ for year in YEARS:
         if cid is not None:
             crate_annual[cid][year] += dl
     console.print(f"  {year}: {len(monthly_files)} months, {len(year_totals):,} versions  ({time.perf_counter()-t:.1f}s)")
+
+if not _cached:
+    _write_annual_cache()
 
 
 # ── Step 3: top-packages.csv ──────────────────────────────────────────────────
