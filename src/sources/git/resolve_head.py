@@ -33,6 +33,7 @@ from rich.progress import Progress
 from src.sources.git.commits_years import (
     DEFAULT_YEARS, load_sha_data, write_sha_data, SHA_FILE,
 )
+from src.common.freshness import row_is_fresh
 from src.common.params import LAST_COMPLETE_YEAR, fetch_ttl_days
 from src.common.repos import load_top_repos
 
@@ -129,17 +130,24 @@ async def main_async(args):
         del sha_data[k]
 
     # "Done" = the repo has a real sha in a settings window year (active repo).
-    # Dormant repos have only a dated pre-window fallback row (if any), so they
-    # remain candidates and are (re)resolved into a dated snapshot capped at
-    # the last complete year — cheap (~tens of repos) and idempotent in result
-    # (the same pre-window commit resolves each run).
     window = {str(y) for y in DEFAULT_YEARS}
     have_window: set[str] = set()
+    # A dormant repo's fallback lands under its REAL year, which is outside the
+    # window, so have_window never covered it and all ~69 of them re-resolved on
+    # EVERY run. The result was idempotent, so nothing broke — but the API calls
+    # and the fetched_at rewrite were pure waste, and commits-years.csv could
+    # never settle. A fallback row inside its TTL is done too.
+    have_fresh_fallback: set[str] = set()
     for (repo, year), row in sha_data.items():
-        if year in window and (row.get("last_sha") or "").strip():
+        if not (row.get("last_sha") or "").strip():
+            continue
+        if year in window:
             have_window.add(repo)
+        elif row_is_fresh(row, ttl_days=TTL_DAYS):
+            have_fresh_fallback.add(repo)
 
-    candidates = sorted(eligible if args.force else eligible - have_window)
+    candidates = sorted(eligible if args.force
+                        else eligible - have_window - have_fresh_fallback)
 
     if not candidates:
         console.print("[green]All risk-scope repos already have a dated snapshot sha — nothing to resolve.[/green]")

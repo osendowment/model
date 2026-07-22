@@ -48,7 +48,7 @@ from rich.progress import (
 )
 
 from src.common.freshness import row_is_fresh
-from src.common.params import fetch_retry_days, fetch_ttl_days
+from src.common.params import fetch_ttl_days
 from src.common.repos import to_repo_id
 from src.sources.github.github_client import _AsyncRateLimiter, _Deferred, _graphql
 
@@ -66,9 +66,6 @@ BATCH_SIZE = 50
 # that failed to resolve (`not_found`) are never fresh and are retried every run
 # — see `batch()`.
 TTL_DAYS = fetch_ttl_days("sources/github/fetch_canonical")
-# A 404 is definitive but not permanent — a repo can be renamed back or
-# un-privated — so it gets a short recheck window rather than the full TTL.
-NOT_FOUND_RECHECK_DAYS = fetch_retry_days("sources/github/fetch_canonical.not_found")
 
 
 def load_value_repos() -> list[str]:
@@ -162,18 +159,15 @@ def _write(rows: dict[str, dict]) -> None:
 async def batch(repos: list[str], refresh: bool, limit: int | None, concurrency: int) -> None:
     existing = _load_existing()
     # `not_found` used to be "never fresh", so all 64 of them were re-queried on
-    # EVERY run — 64 API calls whose only effect was to re-stamp fetched_at, and
-    # a cache file that could never settle. A 404 is a definitive answer, not a
-    # transient failure: it deserves a window, just a shorter one than `ok`,
-    # because a deleted repo can be renamed back or un-privated. `error` stays
-    # never-fresh — that one really is transient.
-    def _fresh(row: dict) -> bool:
-        status = (row.get("status") or "").strip().lower()
-        ttl = NOT_FOUND_RECHECK_DAYS if status == "not_found" else TTL_DAYS
-        return row_is_fresh(row, ttl_days=ttl, status_key="status",
-                            error_values=("error",))
-
-    fresh = set() if refresh else {r for r, row in existing.items() if _fresh(row)}
+    # EVERY run — 64 API calls whose only effect was to re-stamp fetched_at. A
+    # 404 is a definitive answer, so it is cached for the ordinary TTL exactly
+    # like `ok`; --refresh re-checks it. `error` stays never-fresh — that one
+    # really is transient.
+    fresh = set() if refresh else {
+        r for r, row in existing.items()
+        if row_is_fresh(row, ttl_days=TTL_DAYS, status_key="status",
+                        error_values=("error",))
+    }
     to_fetch = [r for r in repos if r not in fresh]
     if limit and limit < len(to_fetch):
         to_fetch = to_fetch[:limit]
