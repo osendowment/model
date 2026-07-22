@@ -414,7 +414,8 @@ for cid in universe_cids:
         "top":           name in top_package_names,
         "pagerank":      round(pr.get(name, 0.0), 8),
     })
-result_rows.sort(key=lambda r: r["pagerank"], reverse=True)
+# Name tie-break — see npm/process_data.py for why.
+result_rows.sort(key=lambda r: (-r["pagerank"], r["package"]))
 
 # Assign value classes by cumulative pagerank share
 total_pr = sum(r["pagerank"] for r in result_rows)

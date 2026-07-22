@@ -349,7 +349,8 @@ def step_results(
             "is_oss_fuzz":   str(slug.lower() in ossfuzz_slugs) if slug else "False",
             "pagerank":      f"{pr.get(src, 0.0):.8f}",
         })
-    rows.sort(key=lambda r: float(r["pagerank"]), reverse=True)
+    # Name tie-break — see npm/process_data.py for why.
+    rows.sort(key=lambda r: (-float(r["pagerank"]), r["package"]))
 
     total_pr = sum(float(r["pagerank"]) for r in rows)
     cum = 0.0

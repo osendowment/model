@@ -449,7 +449,8 @@ def step_packages(rows: list[dict]) -> None:
     that wants the full join, not just the top slice or the BFS-reachable set."""
     console.rule("[bold cyan]Step 0 — raw/packages.csv")
     t0 = time.perf_counter()
-    rows.sort(key=lambda r: r["downloads_score"], reverse=True)
+    # Name tie-break — see npm/process_data.py for why.
+    rows.sort(key=lambda r: (-r["downloads_score"], r["project"]))
     atomic_write(OUT_RAW_PACKAGES, rows, RAW_FIELDS)
 
     n_both = sum(1 for r in rows if r["debian_sources"] and r["homebrew_formulas"])
@@ -636,7 +637,8 @@ def step_results(
             "downloads_score":        scores.get(n, 0),
             "pagerank":               f"{pr.get(n, 0.0):.8f}",
         })
-    out_rows.sort(key=lambda r: float(r["pagerank"]), reverse=True)
+    # Name tie-break — see npm/process_data.py for why.
+    out_rows.sort(key=lambda r: (-float(r["pagerank"]), r["package"]))
 
     total_pr = sum(float(r["pagerank"]) for r in out_rows)
     cum = 0.0

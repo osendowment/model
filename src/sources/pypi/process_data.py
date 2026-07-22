@@ -145,7 +145,9 @@ if args.min_avg is not None:
     console.print(f"  Using --min-avg override: {min_avg_cutoff:,}")
 else:
     # Compute cutoff from cumulative download share of ecosystem total
-    sorted_pkgs = sorted(pkg_downloads.values(), key=lambda d: d["avg_downloads"], reverse=True)
+    # Name tie-break — see npm/process_data.py for why.
+    sorted_pkgs = sorted(pkg_downloads.values(),
+                         key=lambda d: (-d["avg_downloads"], d["package"]))
     eco_total = ecosystem_avg_downloads("pypi")
     cum_downloads = 0
     min_avg_cutoff = 0
@@ -166,7 +168,8 @@ for name_lower, data in pkg_downloads.items():
         })
         top_pkg_names_lower.add(name_lower)
 
-top_rows.sort(key=lambda r: r["avg_downloads"], reverse=True)
+# Name tie-break — see npm/process_data.py for why.
+top_rows.sort(key=lambda r: (-r["avg_downloads"], r["package"]))
 
 # Add avg_downloads_share (fraction of ecosystem total)
 eco_total = ecosystem_avg_downloads("pypi")
@@ -307,7 +310,8 @@ for pkg_lower in universe:
         "top":           pkg_lower in top_pkg_names_lower,
         "pagerank":      round(pr.get(name, 0.0), 8),
     })
-result_rows.sort(key=lambda r: r["pagerank"], reverse=True)
+# Name tie-break — see npm/process_data.py for why.
+result_rows.sort(key=lambda r: (-r["pagerank"], r["package"]))
 
 # Assign value classes by cumulative pagerank share
 total_pr = sum(r["pagerank"] for r in result_rows)

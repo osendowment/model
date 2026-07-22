@@ -302,7 +302,11 @@ def step_results(
             "top":           str(pkg in top_packages),
             "pagerank":      f"{pr.get(pkg, 0.0):.8f}",
         })
-    rows.sort(key=lambda r: float(r["pagerank"]), reverse=True)
+    # Tie-break on the package name: equal-pagerank rows would otherwise keep
+    # the order of the set they were built from, which Python's per-process
+    # string hash randomizes — two packages tied at a class cutoff then swap
+    # value_class between otherwise identical runs.
+    rows.sort(key=lambda r: (-float(r["pagerank"]), r["package"]))
 
     # Assign value classes by cumulative pagerank share
     total_pr = sum(float(r["pagerank"]) for r in rows)
