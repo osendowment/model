@@ -59,7 +59,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.common.params import fetch_ttl_days
-from src.common.repos import VALUE_FILE, load_repo_ids, load_top_slugs
+from src.common.repos import VALUE_FILE, load_github_top_slugs, load_repo_ids
 from src.sources.openssf.scorecard import _github_tokens
 
 log = logging.getLogger(__name__)
@@ -442,11 +442,19 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     args = build_parser().parse_args()
 
-    # Archived repos are IN scope (load_top_slugs includes them by default):
+    # GitHub-only, via load_github_top_slugs. The criticality tool scores a
+    # GitHub URL, so a GitLab slug like `gnome/glib` either resolves to an
+    # unrelated GitHub repo of the same name or fails outright — 17 of the 25
+    # class-A GitLab repos failed `unresolvable-contributor` on EVERY run, and
+    # because an error row never caches as fresh they were retried forever,
+    # costing ~45s a run. apply_criticality already discards non-GitHub rows,
+    # so nothing downstream loses a value.
+    #
+    # Archived repos stay IN scope (the loader includes them by default):
     # value.csv's `criticality` column must be non-empty for every valid
     # class-A GitHub repo, archived included — the tool scores them fine.
     scope = [r.lower()
-             for r in (args.repos or load_top_slugs())]
+             for r in (args.repos or load_github_top_slugs())]
     scope = list(dict.fromkeys(scope))  # dedupe, preserve order
     if not scope:
         raise SystemExit("No repos — pass slugs or populate data/value/value.csv")
