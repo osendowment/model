@@ -623,7 +623,7 @@ gh/23357588,https://github.com/protocolbuffers/protobuf,A,True,pypi,protobuf,pyp
 gh/1362490,https://github.com/psf/requests,A,True,pypi,requests,pypi.org,True,,True,pypi.org,0.025708889773364368,679836,32025,2026-07-06T17:11:17Z
 gh/7730829,https://github.com/psycopg/psycopg2,A,True,pypi,psycopg2-binary,pypi.org,True,,True,pypi.org,0.8383971592441036,103063,1509,2026-07-06T17:14:41Z
 gh/2317381,https://github.com/pvorb/clone,A,True,npm,clone,npmjs.org,True,,True,npmjs.org,0.8779981673605687,1981870,4346,2026-07-06T17:14:41Z
-gh/1045976,https://github.com/py4j/py4j,A,True,pypi,py4j,pypi.org,True,,True,,0.18589269763594377,4265,105,2026-07-05T19:05:43Z
+gh/1045976,https://github.com/py4j/py4j,A,True,pypi,py4j,pypi.org,True,,True,pypi.org,0.18589269763594377,4265,105,2026-07-24T18:35:02Z
 gh/512723255,https://github.com/pyasn1/pyasn1,A,True,pypi,pyasn1,pypi.org,True,,True,pypi.org,4.407377992823521,94117,553,2026-07-06T17:14:41Z
 gh/512723354,https://github.com/pyasn1/pyasn1-modules,A,True,pypi,pyasn1-modules,pypi.org,True,,True,pypi.org,7.139276152605035,69924,338,2026-07-06T17:14:41Z
 gh/9993757,https://github.com/pyca/bcrypt,A,True,pypi,bcrypt,pypi.org,True,,True,pypi.org,1.2597050294658725,45354,494,2026-07-06T17:14:41Z

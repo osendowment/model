@@ -627,6 +627,7 @@ protocolbuffers/protobuf,gh/23357588,bsd-3-clause,registry,True
 psf/requests,gh/1362490,apache-2.0,registry,True
 psycopg/psycopg2,gh/7730829,lgpl-2.1,registry,True
 pvorb/clone,gh/2317381,mit,registry,True
+py4j/py4j,gh/1045976,bsd-3-clause,registry,True
 pyasn1/pyasn1,gh/512723255,bsd-2-clause,registry,True
 pyasn1/pyasn1-modules,gh/512723354,bsd-3-clause,registry,True
 pyca/bcrypt,gh/9993757,apache-2.0,registry,True

@@ -627,6 +627,7 @@ protocolbuffers/protobuf,gh/23357588,True,True,False,True,False,3,4,True
 psf/requests,gh/1362490,True,True,True,True,True,3,4,True
 psycopg/psycopg2,gh/7730829,True,True,True,True,True,3,4,True
 pvorb/clone,gh/2317381,True,True,True,True,True,3,4,True
+py4j/py4j,gh/1045976,True,False,True,True,False,3,4,True
 pyasn1/pyasn1,gh/512723255,True,True,True,True,True,3,4,True
 pyasn1/pyasn1-modules,gh/512723354,True,True,True,True,True,3,4,True
 pyca/bcrypt,gh/9993757,True,False,True,True,False,3,4,True

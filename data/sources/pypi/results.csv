@@ -147,7 +147,7 @@
 "paramiko","paramiko/paramiko","589663134","197123591","343455102","487326434","747639949","1172770592","True","0.00120117","A","https://github.com/paramiko/paramiko.git","eco","gh/119609","","lgpl-2.1"
 "dill","uqfoundation/dill","542967206","108848121","220450103","361735251","825853221","1197949334","True","0.0011991","A","https://github.com/uqfoundation/dill.git","eco","gh/11031844","","bsd-3-clause"
 "opentelemetry-semantic-conventions","open-telemetry/opentelemetry-python","416330130","4284178","20491658","83750237","418168322","1554956257","True","0.00119527","A","https://github.com/open-telemetry/opentelemetry-python.git","eco","gh/185478926","","apache-2.0"
-"py4j","","508348776","171898191","326665184","381192480","676551176","985436847","True","0.00119069","A","","","","","bsd-3-clause"
+"py4j","py4j/py4j","508348776","171898191","326665184","381192480","676551176","985436847","True","0.00119069","A","https://github.com/py4j/py4j.git","override","gh/1045976","","bsd-3-clause"
 "wmi","tjguk/wmi","5484189","1499104","1556421","3336830","8905814","12122776","False","0.00118001","A","https://github.com/tjguk/wmi.git","override","gh/23124645","",""
 "joblib","joblib/joblib","564291055","325413658","285144911","387039841","657124679","1166732188","True","0.00117075","A","https://github.com/joblib/joblib.git","eco","gh/654608","","bsd-3-clause"
 "google-resumable-media","googleapis/google-cloud-python","659974576","279961610","463312974","504436529","814896492","1237265273","True","0.00116356","A","https://github.com/googleapis/google-cloud-python.git","eco","gh/16316451","","apache-2.0"

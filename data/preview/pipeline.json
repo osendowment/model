@@ -2,16 +2,16 @@
   "version": 1,
   "value": {
     "rows": 12080,
-    "github": 10620,
-    "git": 11567,
-    "valid": 11459,
-    "orphan": 1460,
+    "github": 10621,
+    "git": 11568,
+    "valid": 11460,
+    "orphan": 1459,
     "git_urls": {
       "github": {
-        "A": 921,
+        "A": 922,
         "B": 2770,
         "C": 6929,
-        "total": 10620
+        "total": 10621
       },
       "gitlab": {
         "A": 25,
@@ -26,10 +26,10 @@
         "total": 106
       },
       "valid": {
-        "A": 946,
+        "A": 947,
         "B": 3016,
         "C": 7497,
-        "total": 11459
+        "total": 11460
       },
       "invalid": {
         "A": 0,
@@ -38,10 +38,10 @@
         "total": 108
       },
       "all": {
-        "A": 946,
+        "A": 947,
         "B": 3038,
         "C": 7583,
-        "total": 11567
+        "total": 11568
       },
       "by_eco": {
         "npm": {
@@ -52,11 +52,11 @@
           "ghgl": 4303
         },
         "pypi": {
-          "A": 160,
+          "A": 161,
           "B": 596,
           "C": 1543,
-          "total": 2299,
-          "ghgl": 2285
+          "total": 2300,
+          "ghgl": 2286
         },
         "crates": {
           "A": 132,
@@ -104,7 +104,7 @@
       "C": 9463
     },
     "ght_class": {
-      "A": 3361,
+      "A": 3362,
       "B": 4366,
       "C": 8359
     },
@@ -134,10 +134,10 @@
     "by_class": {
       "A": {
         "repos": 952,
-        "github": 921,
-        "active": 900,
-        "git": 946,
-        "valid": 946
+        "github": 922,
+        "active": 901,
+        "git": 947,
+        "valid": 947
       },
       "B": {
         "repos": 3131,
@@ -166,8 +166,8 @@
         "top": 2460,
         "deps": 3139,
         "results": 3139,
-        "github": 2898,
-        "git": 2927
+        "github": 2899,
+        "git": 2928
       },
       "crates": {
         "top": 3719,
@@ -186,19 +186,19 @@
     }
   },
   "risk": {
-    "scope": 946,
+    "scope": 947,
     "distribution": [
       {
         "label": "Concentration",
         "column": "score",
         "is_component": true,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
           1.0,
-          41.155,
+          40.905,
           74.54,
-          95.05,
+          94.97,
           100.0
         ]
       },
@@ -207,7 +207,7 @@
         "column": "bf_commits_git_5y",
         "is_component": false,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
           1.0,
           1.0,
@@ -221,12 +221,12 @@
         "column": "hhi_commits_git_5y",
         "is_component": false,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
           19.0,
-          3058.75,
+          3052.0,
           5556.0,
-          9034.75,
+          9019.5,
           10000.0
         ]
       },
@@ -235,12 +235,12 @@
         "column": "score",
         "is_component": true,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
           1.0,
-          25.45,
-          49.095,
-          72.96000000000001,
+          25.415,
+          49.2,
+          72.94,
           99.68
         ]
       },
@@ -249,12 +249,12 @@
         "column": "loc_eoy",
         "is_component": false,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
           0.0,
-          370.75,
-          2751.0,
-          21772.75,
+          373.5,
+          2793.0,
+          21912.0,
           36990782.0
         ]
       },
@@ -263,11 +263,11 @@
         "column": "cyclomatic_max",
         "is_component": false,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
           0.0,
           7.0,
-          18.5,
+          19.0,
           49.0,
           12556.0
         ]
@@ -277,12 +277,12 @@
         "column": "score",
         "is_component": true,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
           50.0,
           50.0,
-          72.2,
-          84.46,
+          72.12,
+          84.48,
           100.0
         ]
       },
@@ -291,12 +291,12 @@
         "column": "openssf_score",
         "is_component": false,
         "fmt": "f1",
-        "scored": 946,
+        "scored": 947,
         "q": [
           1.8,
           3.8,
           4.4,
-          6.074999999999999,
+          6.05,
           9.6
         ]
       },
@@ -305,7 +305,7 @@
         "column": "cve_count_5y",
         "is_component": false,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
           0.0,
           0.0,
@@ -319,12 +319,12 @@
         "column": "score",
         "is_component": true,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
           1.66,
-          37.825,
-          55.235,
-          70.475,
+          37.82,
+          55.28,
+          70.505,
           97.11
         ]
       },
@@ -333,12 +333,12 @@
         "column": "loc_per_ac",
         "is_component": false,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
           0.0,
-          107.94630000000001,
+          108.49260000000001,
           302.3333,
-          822.850925,
+          826.0343,
           353301.0
         ]
       },
@@ -347,7 +347,7 @@
         "column": "cve_per_ac",
         "is_component": false,
         "fmt": "f2",
-        "scored": 946,
+        "scored": 947,
         "q": [
           0.0,
           0.0,
@@ -361,7 +361,7 @@
         "column": "nni_per_ac",
         "is_component": false,
         "fmt": "f2",
-        "scored": 912,
+        "scored": 913,
         "q": [
           -9.9333,
           0.0,
@@ -375,12 +375,12 @@
         "column": "risk_score",
         "is_component": true,
         "fmt": "int",
-        "scored": 946,
+        "scored": 947,
         "q": [
-          11.16,
-          43.93,
-          53.644999999999996,
-          64.89750000000001,
+          11.15,
+          43.925,
+          53.63,
+          64.855,
           94.43
         ]
       }
@@ -389,39 +389,39 @@
       "concentration": [
         [
           "bus factor / HHI (git 5y) computed",
-          946
+          947
         ],
         [
           "bus factor / HHI (git full) computed",
-          946
+          947
         ],
         [
           "Concentration score",
-          946
+          947
         ]
       ],
       "complexity": [
         [
           "lines of code (scc)",
-          946
+          947
         ],
         [
           "cyclomatic max (lizard)",
-          946
+          947
         ],
         [
           "cognitive max (lizard)",
-          946
+          947
         ],
         [
           "Complexity score",
-          946
+          947
         ]
       ],
       "security": [
         [
           "OpenSSF score present",
-          946
+          947
         ],
         [
           "CVE count 5y > 0",
@@ -433,63 +433,63 @@
         ],
         [
           "CII Best Practices badge",
-          31
+          32
         ],
         [
           "Security score",
-          946
+          947
         ]
       ],
       "workload": [
         [
           "issues data present",
-          912
+          913
         ],
         [
           "per-AC ratios (loc/cve/nni) computed",
-          946
+          947
         ],
         [
           "`issue_close_ratio` computed",
-          852
+          853
         ],
         [
           "`issue_trend_score` computed",
-          643
+          644
         ],
         [
           "Workload score",
-          946
+          947
         ]
       ]
     },
     "platform": {
-      "github": 921,
+      "github": 922,
       "gitlab": 25
     },
-    "overall_scored": 946,
+    "overall_scored": 947,
     "overall_gap": 0,
-    "bf1_pct": 73.78435517970402
+    "bf1_pct": 73.7064413938754
   },
   "eligibility": {
-    "scope": 946,
+    "scope": 947,
     "licenses": {
-      "resolved": 946,
+      "resolved": 947,
       "override": 22,
-      "registry": 900,
+      "registry": 901,
       "github": 9,
       "gitlab": 15,
-      "oss_true": 942,
+      "oss_true": 943,
       "oss_false": 4,
       "oss_unknown": 0
     },
     "active": {
       "eol": 1,
       "archived": 21,
-      "active": 925
+      "active": 926
     },
     "intent_count": 738,
-    "nonprofit_count": 886,
+    "nonprofit_count": 887,
     "intent_signals": {
       "gh_sponsors": 376,
       "funding_yml": 391,
@@ -500,19 +500,19 @@
       "institutional_host": 91
     },
     "platform": {
-      "github": 921,
+      "github": 922,
       "gitlab": 25
     },
     "rollup": {
-      "oss": 942,
+      "oss": 943,
       "intent": 738,
-      "nonprofit": 886,
-      "active": 925,
+      "nonprofit": 887,
+      "active": 926,
       "eligible": 667
     },
     "sole": {
       "oss": 1,
-      "intent": 195,
+      "intent": 196,
       "nonprofit": 59,
       "active": 10
     },
@@ -521,8 +521,8 @@
         [
           "License from package registry",
           {
-            "count": 900,
-            "yes": 896,
+            "count": 901,
+            "yes": 897,
             "no": 4,
             "solo": 1
           }
@@ -644,8 +644,8 @@
         [
           "Community / independent",
           {
-            "count": 886,
-            "yes": 886,
+            "count": 887,
+            "yes": 887,
             "no": 0,
             "solo": 0
           }
@@ -679,7 +679,7 @@
     },
     {
       "stage": "valid repos",
-      "count": 11459,
+      "count": 11460,
       "denom": 12080,
       "denom_label": "repos",
       "comment": "upstream resolves \u2014 GitHub/GitLab API or git ls-remote"
@@ -687,49 +687,49 @@
     {
       "stage": "class-A repos",
       "count": 952,
-      "denom": 11459,
+      "denom": 11460,
       "denom_label": "valid",
       "comment": "strongest class = A (\u226475% cumulative PageRank share)"
     },
     {
       "stage": "top repos",
-      "count": 946,
+      "count": 947,
       "denom": 952,
       "denom_label": "class A",
       "comment": "valid class-A on GitHub+GitLab, archived included \u2014 the risk/eligibility scope"
     },
     {
       "stage": "value_score present",
-      "count": 946,
-      "denom": 946,
+      "count": 947,
+      "denom": 947,
       "denom_label": "top repos",
       "comment": "\u22652 value components (openssf_crit / eco_crit / top_eco_pct)"
     },
     {
       "stage": "risk_score present",
-      "count": 946,
-      "denom": 946,
+      "count": 947,
+      "denom": 947,
       "denom_label": "top repos",
       "comment": "all four risk dimensions scored"
     },
     {
       "stage": "fully scored",
-      "count": 946,
-      "denom": 946,
+      "count": 947,
+      "denom": 947,
       "denom_label": "top repos",
       "comment": "value_score \u00d7 risk_score \u2192 preview `score`"
     },
     {
       "stage": "eligible",
       "count": 667,
-      "denom": 946,
+      "denom": 947,
       "denom_label": "top repos",
       "comment": "oss AND intent AND nonprofit AND active"
     },
     {
       "stage": "priority-ranked",
       "count": 667,
-      "denom": 946,
+      "denom": 947,
       "denom_label": "top repos",
       "comment": "eligible AND fully scored \u2192 preview `priority`"
     }
