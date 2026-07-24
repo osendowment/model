@@ -128,3 +128,6 @@ The model must be traceable end to end: every metric in an output CSV traces bac
 
 * **More ecosystems:** Go, Java, etc.
 
+* **Add focus on people:** In future model versions, we will likely add the next stage in the data pipeline, focusing its results not on eligible repos, but on key maintainers behind them.
+
+
