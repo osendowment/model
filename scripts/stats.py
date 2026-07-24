@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 from collections import Counter
 import sys
 from pathlib import Path
@@ -909,47 +908,16 @@ def markdown(v: dict, r: dict, e: dict) -> str:
     return "\n".join(out)
 
 
-def pipeline_json(v: dict, r: dict, e: dict) -> dict:
-    """The same numbers as the pipeline sheet, as a machine-readable payload.
-
-    The dashboard (app.endowment.dev/model) reads this instead of the xlsx —
-    the top-of-funnel counts (`tracked`, ~3.8M packages) come from multi-100MB
-    git-LFS source files a Worker cannot open, so they must be pre-computed
-    here. Regenerated on every build alongside preview.xlsx, so it never
-    drifts from the sheet.
-    """
-    funnel = [
-        {"stage": stage, "count": count, "denom": denom,
-         "denom_label": denom_label, "comment": comment}
-        for stage, count, denom, denom_label, comment in funnel_stats(v, r, e)
-    ]
-    return {"version": 1, "value": v, "risk": r,
-            "eligibility": e, "funnel": funnel}
-
-
-DEFAULT_JSON_PATH = ROOT / "data" / "preview" / "pipeline.json"
-
-
 def main() -> int:
     ap = argparse.ArgumentParser(description="Compute the pipeline statistics.")
     ap.add_argument("--markdown", action="store_true",
                     help="emit the stats tables as markdown (the preview "
                          "workbook's pipeline sheet builds from this renderer)")
-    ap.add_argument("--json", nargs="?", const=str(DEFAULT_JSON_PATH),
-                    metavar="PATH", default=None,
-                    help="write the pipeline numbers as JSON for the dashboard "
-                         f"(default: {DEFAULT_JSON_PATH.relative_to(ROOT)})")
     args = ap.parse_args()
 
     v, r, e = value_stats(), risk_stats(), eligibility_stats()
     if args.markdown:
         print(markdown(v, r, e))
-        return 0
-    if args.json is not None:
-        out = Path(args.json)
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(json.dumps(pipeline_json(v, r, e), indent=2) + "\n")
-        console.print(f"wrote {out}")
         return 0
     dashboard(v, r, e)
     return 0
