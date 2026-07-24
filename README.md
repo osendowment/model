@@ -122,12 +122,11 @@ The model must be traceable end to end: every metric in an output CSV traces bac
 
 ## Roadmap
 
+* **Focus on people:** In future model versions, we will likely add the next stage in the data pipeline, focusing its results not on eligible repos, but on key maintainers behind them.
+
 * **Cross-ecosystem dependencies:** It is important to trace dependencies across ecosystem boundaries, not just within them. For instance, Pandas [Python] depends on NumPy [Python], which depends on OpenBLAS [C] ([details](https://codeberg.org/vladh/bindep)). This cross-ecosystem view naturally elevates low-level infrastructure libraries in C/C++, Fortran, and similar languages.
 
 * **More value and risk metrics:** We will learn from the first grant distributions and update the model accordingly.
 
 * **More ecosystems:** Go, Java, etc.
-
-* **Add focus on people:** In future model versions, we will likely add the next stage in the data pipeline, focusing its results not on eligible repos, but on key maintainers behind them.
-
 
