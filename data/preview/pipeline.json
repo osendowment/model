@@ -2,16 +2,16 @@
   "version": 1,
   "value": {
     "rows": 12080,
-    "github": 10621,
-    "git": 11568,
-    "valid": 11460,
-    "orphan": 1459,
+    "github": 10622,
+    "git": 11569,
+    "valid": 11461,
+    "orphan": 1458,
     "git_urls": {
       "github": {
         "A": 922,
-        "B": 2770,
+        "B": 2771,
         "C": 6929,
-        "total": 10621
+        "total": 10622
       },
       "gitlab": {
         "A": 25,
@@ -27,9 +27,9 @@
       },
       "valid": {
         "A": 947,
-        "B": 3016,
+        "B": 3017,
         "C": 7497,
-        "total": 11460
+        "total": 11461
       },
       "invalid": {
         "A": 0,
@@ -39,9 +39,9 @@
       },
       "all": {
         "A": 947,
-        "B": 3038,
+        "B": 3039,
         "C": 7583,
-        "total": 11568
+        "total": 11569
       },
       "by_eco": {
         "npm": {
@@ -67,10 +67,10 @@
         },
         "cpp": {
           "A": 86,
-          "B": 535,
+          "B": 536,
           "C": 844,
-          "total": 1465,
-          "ghgl": 1404
+          "total": 1466,
+          "ghgl": 1405
         }
       }
     },
@@ -105,7 +105,7 @@
     },
     "ght_class": {
       "A": 3362,
-      "B": 4366,
+      "B": 4367,
       "C": 8359
     },
     "classes": {
@@ -141,10 +141,10 @@
       },
       "B": {
         "repos": 3131,
-        "github": 2770,
-        "active": 2649,
-        "git": 3038,
-        "valid": 3016
+        "github": 2771,
+        "active": 2650,
+        "git": 3039,
+        "valid": 3017
       },
       "C": {
         "repos": 7997,
@@ -180,8 +180,8 @@
         "top": 1334,
         "deps": 1649,
         "results": 1649,
-        "github": 662,
-        "git": 1485
+        "github": 663,
+        "git": 1486
       }
     }
   },
@@ -679,7 +679,7 @@
     },
     {
       "stage": "valid repos",
-      "count": 11460,
+      "count": 11461,
       "denom": 12080,
       "denom_label": "repos",
       "comment": "upstream resolves \u2014 GitHub/GitLab API or git ls-remote"
@@ -687,7 +687,7 @@
     {
       "stage": "class-A repos",
       "count": 952,
-      "denom": 11460,
+      "denom": 11461,
       "denom_label": "valid",
       "comment": "strongest class = A (\u226475% cumulative PageRank share)"
     },

@@ -1455,7 +1455,7 @@
 "mhart/aws4","github","gh/7323216","https://github.com/mhart/aws4.git","","True","npm","1","npm","aws4","20.0827","54.80","B","B","","","","","","37.44"
 "jonschlinkert/repeat-string","github","gh/18191306","https://github.com/jonschlinkert/repeat-string.git","","True","npm","1","npm","repeat-string","20.058","54.80","B","B","","","","","","37.43"
 "colin-kiegel/rust-derive-builder","github","gh/65087808","https://github.com/colin-kiegel/rust-derive-builder.git","","True","crates","3","crates","derive_builder_core","13.5227","61.34","B","","","B","","","","37.43"
-"","","","","","False","cpp","1","cpp","gnupg","22.1761","52.66","B","","","","B","","","37.42"
+"gpg/gnupg","github","gh/42075878","https://github.com/gpg/gnupg.git","https://git.gnupg.org/gnupg.git","True","cpp","1","cpp","gnupg","22.1761","52.66","B","","","","B","","","37.42"
 "jonschlinkert/shallow-clone","github","gh/40506060","https://github.com/jonschlinkert/shallow-clone.git","","True","npm","1","npm","shallow-clone","20.0334","54.80","B","B","","","","","","37.42"
 "jonschlinkert/global-modules","github","gh/31769883","https://github.com/jonschlinkert/global-modules.git","","True","npm","1","npm","global-modules","20.0087","54.79","B","B","","","","","","37.40"
 "smithay/wayland-rs","github","gh/34106838","https://github.com/smithay/wayland-rs.git","","True","crates","13","crates","wayland-client","13.4769","61.33","B","","","B","","","","37.40"

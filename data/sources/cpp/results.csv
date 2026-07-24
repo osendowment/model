@@ -113,7 +113,7 @@
 "oniguruma","kkos/oniguruma","79218","696339","806452","0.00092145","B","https://github.com/kkos/oniguruma.git","eco","gh/38999874","","bsd-2-clause"
 "openjdk","openjdk/jdk26u","0","1196957","1196957","0.00091709","B","https://github.com/openjdk/jdk26u.git","native","gh/1113933330","","gpl-2.0-only with classpath-exception-2.0"
 "tcltk","","0","504348","504348","0.00089680","B","","","","",""
-"gnupg","","228528","759991","1077644","0.00089061","B","","native","","","gpl-3.0-or-later"
+"gnupg","gpg/gnupg","228528","759991","1077644","0.00089061","B","https://github.com/gpg/gnupg.git","override","gh/42075878","https://git.gnupg.org/gnupg.git","gpl-3.0-or-later"
 "gtk","","128198","168928","347123","0.00088701","B","https://gitlab.gnome.org/gnome/gtk.git","override","gl/gnome-665","",""
 "ruby-build","rbenv/ruby-build","0","846438","846438","0.00087936","B","https://github.com/rbenv/ruby-build.git","native","gh/2142701","","mit"
 "libarchive","libarchive/libarchive","117632","696702","860210","0.00087602","B","https://github.com/libarchive/libarchive.git","native","gh/3219804","","bsd-2-clause"
