@@ -1,0 +1,737 @@
+{
+  "version": 1,
+  "value": {
+    "rows": 12080,
+    "github": 10620,
+    "git": 11567,
+    "valid": 11459,
+    "orphan": 1460,
+    "git_urls": {
+      "github": {
+        "A": 921,
+        "B": 2770,
+        "C": 6929,
+        "total": 10620
+      },
+      "gitlab": {
+        "A": 25,
+        "B": 226,
+        "C": 590,
+        "total": 841
+      },
+      "others": {
+        "A": 0,
+        "B": 42,
+        "C": 64,
+        "total": 106
+      },
+      "valid": {
+        "A": 946,
+        "B": 3016,
+        "C": 7497,
+        "total": 11459
+      },
+      "invalid": {
+        "A": 0,
+        "B": 22,
+        "C": 86,
+        "total": 108
+      },
+      "all": {
+        "A": 946,
+        "B": 3038,
+        "C": 7583,
+        "total": 11567
+      },
+      "by_eco": {
+        "npm": {
+          "A": 570,
+          "B": 1396,
+          "C": 2340,
+          "total": 4306,
+          "ghgl": 4303
+        },
+        "pypi": {
+          "A": 160,
+          "B": 596,
+          "C": 1543,
+          "total": 2299,
+          "ghgl": 2285
+        },
+        "crates": {
+          "A": 132,
+          "B": 521,
+          "C": 2906,
+          "total": 3559,
+          "ghgl": 3531
+        },
+        "cpp": {
+          "A": 86,
+          "B": 535,
+          "C": 844,
+          "total": 1465,
+          "ghgl": 1404
+        }
+      }
+    },
+    "avg_dl": {
+      "npm": 2726852034223.2,
+      "pypi": 402077634104.0,
+      "crates": 41771787488.0,
+      "debian": 181885347.6,
+      "homebrew": 202241754.6,
+      "cpp": 384127102.2
+    },
+    "tracked": {
+      "npm": 2592690,
+      "pypi": 849544,
+      "crates": 295086,
+      "debian": 22452,
+      "homebrew": 8508,
+      "cpp": 30315
+    },
+    "top_pkgs": {
+      "npm": 5735,
+      "pypi": 2460,
+      "crates": 3719,
+      "debian": 1631,
+      "homebrew": 1145,
+      "cpp": 1334
+    },
+    "pkg_class": {
+      "A": 3392,
+      "B": 4732,
+      "C": 9463
+    },
+    "ght_class": {
+      "A": 3361,
+      "B": 4366,
+      "C": 8359
+    },
+    "classes": {
+      "A": {
+        "npm": 570,
+        "pypi": 164,
+        "crates": 132,
+        "cpp": 88,
+        "strongest": 952
+      },
+      "B": {
+        "npm": 1403,
+        "pypi": 636,
+        "crates": 528,
+        "cpp": 574,
+        "strongest": 3131
+      },
+      "C": {
+        "npm": 2387,
+        "pypi": 1711,
+        "crates": 2982,
+        "cpp": 967,
+        "strongest": 7997
+      }
+    },
+    "by_class": {
+      "A": {
+        "repos": 952,
+        "github": 921,
+        "active": 900,
+        "git": 946,
+        "valid": 946
+      },
+      "B": {
+        "repos": 3131,
+        "github": 2770,
+        "active": 2649,
+        "git": 3038,
+        "valid": 3016
+      },
+      "C": {
+        "repos": 7997,
+        "github": 6929,
+        "active": 6581,
+        "git": 7583,
+        "valid": 7497
+      }
+    },
+    "funnel": {
+      "npm": {
+        "top": 5735,
+        "deps": 6313,
+        "results": 6313,
+        "github": 6250,
+        "git": 6259
+      },
+      "pypi": {
+        "top": 2460,
+        "deps": 3139,
+        "results": 3139,
+        "github": 2898,
+        "git": 2927
+      },
+      "crates": {
+        "top": 3719,
+        "deps": 6486,
+        "results": 6486,
+        "github": 6276,
+        "git": 6403
+      },
+      "cpp": {
+        "top": 1334,
+        "deps": 1649,
+        "results": 1649,
+        "github": 662,
+        "git": 1485
+      }
+    }
+  },
+  "risk": {
+    "scope": 946,
+    "distribution": [
+      {
+        "label": "Concentration",
+        "column": "score",
+        "is_component": true,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          1.0,
+          41.155,
+          74.54,
+          95.05,
+          100.0
+        ]
+      },
+      {
+        "label": "Bus Factor (5 years, git contributors)",
+        "column": "bf_commits_git_5y",
+        "is_component": false,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          1.0,
+          1.0,
+          1.0,
+          2.0,
+          280.0
+        ]
+      },
+      {
+        "label": "HHI (5 years, git contributors)",
+        "column": "hhi_commits_git_5y",
+        "is_component": false,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          19.0,
+          3058.75,
+          5556.0,
+          9034.75,
+          10000.0
+        ]
+      },
+      {
+        "label": "Complexity",
+        "column": "score",
+        "is_component": true,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          1.0,
+          25.45,
+          49.095,
+          72.96000000000001,
+          99.68
+        ]
+      },
+      {
+        "label": "Lines of Code (last year snapshot)",
+        "column": "loc_eoy",
+        "is_component": false,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          0.0,
+          370.75,
+          2751.0,
+          21772.75,
+          36990782.0
+        ]
+      },
+      {
+        "label": "Cyclomatic Complexity (last year snapshot)",
+        "column": "cyclomatic_max",
+        "is_component": false,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          0.0,
+          7.0,
+          18.5,
+          49.0,
+          12556.0
+        ]
+      },
+      {
+        "label": "Security",
+        "column": "score",
+        "is_component": true,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          50.0,
+          50.0,
+          72.2,
+          84.46,
+          100.0
+        ]
+      },
+      {
+        "label": "OpenSSF Security Score (most recent data)",
+        "column": "openssf_score",
+        "is_component": false,
+        "fmt": "f1",
+        "scored": 946,
+        "q": [
+          1.8,
+          3.8,
+          4.4,
+          6.074999999999999,
+          9.6
+        ]
+      },
+      {
+        "label": "CVE count (5 years)",
+        "column": "cve_count_5y",
+        "is_component": false,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          10602.0
+        ]
+      },
+      {
+        "label": "Workload",
+        "column": "score",
+        "is_component": true,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          1.66,
+          37.825,
+          55.235,
+          70.475,
+          97.11
+        ]
+      },
+      {
+        "label": "LOCs / active contributors (5 years)",
+        "column": "loc_per_ac",
+        "is_component": false,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          0.0,
+          107.94630000000001,
+          302.3333,
+          822.850925,
+          353301.0
+        ]
+      },
+      {
+        "label": "CVE / active contributors (5 years)",
+        "column": "cve_per_ac",
+        "is_component": false,
+        "fmt": "f2",
+        "scored": 946,
+        "q": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          14.0
+        ]
+      },
+      {
+        "label": "Net new issues / active contributors (5 years)",
+        "column": "nni_per_ac",
+        "is_component": false,
+        "fmt": "f2",
+        "scored": 912,
+        "q": [
+          -9.9333,
+          0.0,
+          0.3333,
+          1.0,
+          315.0
+        ]
+      },
+      {
+        "label": "Risk Score",
+        "column": "risk_score",
+        "is_component": true,
+        "fmt": "int",
+        "scored": 946,
+        "q": [
+          11.16,
+          43.93,
+          53.644999999999996,
+          64.89750000000001,
+          94.43
+        ]
+      }
+    ],
+    "funnels": {
+      "concentration": [
+        [
+          "bus factor / HHI (git 5y) computed",
+          946
+        ],
+        [
+          "bus factor / HHI (git full) computed",
+          946
+        ],
+        [
+          "Concentration score",
+          946
+        ]
+      ],
+      "complexity": [
+        [
+          "lines of code (scc)",
+          946
+        ],
+        [
+          "cyclomatic max (lizard)",
+          946
+        ],
+        [
+          "cognitive max (lizard)",
+          946
+        ],
+        [
+          "Complexity score",
+          946
+        ]
+      ],
+      "security": [
+        [
+          "OpenSSF score present",
+          946
+        ],
+        [
+          "CVE count 5y > 0",
+          209
+        ],
+        [
+          "OSS-Fuzz enrolled",
+          135
+        ],
+        [
+          "CII Best Practices badge",
+          31
+        ],
+        [
+          "Security score",
+          946
+        ]
+      ],
+      "workload": [
+        [
+          "issues data present",
+          912
+        ],
+        [
+          "per-AC ratios (loc/cve/nni) computed",
+          946
+        ],
+        [
+          "`issue_close_ratio` computed",
+          852
+        ],
+        [
+          "`issue_trend_score` computed",
+          643
+        ],
+        [
+          "Workload score",
+          946
+        ]
+      ]
+    },
+    "platform": {
+      "github": 921,
+      "gitlab": 25
+    },
+    "overall_scored": 946,
+    "overall_gap": 0,
+    "bf1_pct": 73.78435517970402
+  },
+  "eligibility": {
+    "scope": 946,
+    "licenses": {
+      "resolved": 946,
+      "override": 22,
+      "registry": 900,
+      "github": 9,
+      "gitlab": 15,
+      "oss_true": 942,
+      "oss_false": 4,
+      "oss_unknown": 0
+    },
+    "active": {
+      "eol": 1,
+      "archived": 21,
+      "active": 925
+    },
+    "intent_count": 738,
+    "nonprofit_count": 886,
+    "intent_signals": {
+      "gh_sponsors": 376,
+      "funding_yml": 391,
+      "funding_json": 8,
+      "pkg_funding": 215,
+      "maintainer_sponsors": 556,
+      "open_collective": 181,
+      "institutional_host": 91
+    },
+    "platform": {
+      "github": 921,
+      "gitlab": 25
+    },
+    "rollup": {
+      "oss": 942,
+      "intent": 738,
+      "nonprofit": 886,
+      "active": 925,
+      "eligible": 667
+    },
+    "sole": {
+      "oss": 1,
+      "intent": 195,
+      "nonprofit": 59,
+      "active": 10
+    },
+    "dist_subs": {
+      "oss": [
+        [
+          "License from package registry",
+          {
+            "count": 900,
+            "yes": 896,
+            "no": 4,
+            "solo": 1
+          }
+        ],
+        [
+          "License from manual override",
+          {
+            "count": 22,
+            "yes": 22,
+            "no": 0,
+            "solo": 0
+          }
+        ],
+        [
+          "License from GitLab repo",
+          {
+            "count": 15,
+            "yes": 15,
+            "no": 0,
+            "solo": 0
+          }
+        ],
+        [
+          "License from GitHub repo",
+          {
+            "count": 9,
+            "yes": 9,
+            "no": 0,
+            "solo": 0
+          }
+        ]
+      ],
+      "active": [
+        [
+          "Archived GitHub repo",
+          {
+            "count": 21,
+            "yes": 0,
+            "no": 21,
+            "solo": 9
+          }
+        ],
+        [
+          "EOL (manual override)",
+          {
+            "count": 1,
+            "yes": 0,
+            "no": 1,
+            "solo": 1
+          }
+        ]
+      ],
+      "intent": [
+        [
+          "GitHub Sponsors (maintainer)",
+          {
+            "count": 556,
+            "yes": 556,
+            "no": 0,
+            "solo": 0
+          }
+        ],
+        [
+          "FUNDING.yml",
+          {
+            "count": 391,
+            "yes": 391,
+            "no": 0,
+            "solo": 0
+          }
+        ],
+        [
+          "GitHub Sponsors (owner or repo)",
+          {
+            "count": 376,
+            "yes": 376,
+            "no": 0,
+            "solo": 0
+          }
+        ],
+        [
+          "npm / PyPI funding field",
+          {
+            "count": 215,
+            "yes": 215,
+            "no": 0,
+            "solo": 0
+          }
+        ],
+        [
+          "Open Collective",
+          {
+            "count": 181,
+            "yes": 181,
+            "no": 0,
+            "solo": 0
+          }
+        ],
+        [
+          "Institutional host / owner",
+          {
+            "count": 91,
+            "yes": 91,
+            "no": 0,
+            "solo": 0
+          }
+        ],
+        [
+          "funding.json",
+          {
+            "count": 8,
+            "yes": 8,
+            "no": 0,
+            "solo": 0
+          }
+        ]
+      ],
+      "nonprofit": [
+        [
+          "Community / independent",
+          {
+            "count": 886,
+            "yes": 886,
+            "no": 0,
+            "solo": 0
+          }
+        ],
+        [
+          "Company-backed",
+          {
+            "count": 60,
+            "yes": 0,
+            "no": 60,
+            "solo": 59
+          }
+        ]
+      ]
+    }
+  },
+  "funnel": [
+    {
+      "stage": "packages (after dep tree)",
+      "count": 17587,
+      "denom": 0,
+      "denom_label": "",
+      "comment": "package universe across the four ecosystems"
+    },
+    {
+      "stage": "distinct repos",
+      "count": 12080,
+      "denom": 17587,
+      "denom_label": "packages",
+      "comment": "package\u2192repo union (any host), incl. url-less orphans"
+    },
+    {
+      "stage": "valid repos",
+      "count": 11459,
+      "denom": 12080,
+      "denom_label": "repos",
+      "comment": "upstream resolves \u2014 GitHub/GitLab API or git ls-remote"
+    },
+    {
+      "stage": "class-A repos",
+      "count": 952,
+      "denom": 11459,
+      "denom_label": "valid",
+      "comment": "strongest class = A (\u226475% cumulative PageRank share)"
+    },
+    {
+      "stage": "top repos",
+      "count": 946,
+      "denom": 952,
+      "denom_label": "class A",
+      "comment": "valid class-A on GitHub+GitLab, archived included \u2014 the risk/eligibility scope"
+    },
+    {
+      "stage": "value_score present",
+      "count": 946,
+      "denom": 946,
+      "denom_label": "top repos",
+      "comment": "\u22652 value components (openssf_crit / eco_crit / top_eco_pct)"
+    },
+    {
+      "stage": "risk_score present",
+      "count": 946,
+      "denom": 946,
+      "denom_label": "top repos",
+      "comment": "all four risk dimensions scored"
+    },
+    {
+      "stage": "fully scored",
+      "count": 946,
+      "denom": 946,
+      "denom_label": "top repos",
+      "comment": "value_score \u00d7 risk_score \u2192 preview `score`"
+    },
+    {
+      "stage": "eligible",
+      "count": 667,
+      "denom": 946,
+      "denom_label": "top repos",
+      "comment": "oss AND intent AND nonprofit AND active"
+    },
+    {
+      "stage": "priority-ranked",
+      "count": 667,
+      "denom": 946,
+      "denom_label": "top repos",
+      "comment": "eligible AND fully scored \u2192 preview `priority`"
+    }
+  ]
+}
