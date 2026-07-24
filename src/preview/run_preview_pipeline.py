@@ -19,6 +19,8 @@ STEPS = [
     Step("data",         "src.preview.build_data"),
     # repos.csv + methodology + pipeline stats as one styled, filterable workbook.
     Step("preview-xlsx", "src.preview.build_preview_workbook"),
+    # The same pipeline stats as JSON, for the dashboard.
+    Step("pipeline-json", "src.preview.build_pipeline_json"),
 ]
 
 
