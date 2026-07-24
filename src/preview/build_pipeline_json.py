@@ -5,11 +5,13 @@ The dashboard (app.endowment.dev/model) reads this instead of the xlsx: the
 top-of-funnel counts (`tracked`, ~3.8M packages) come from multi-100MB git-LFS
 source files a Worker cannot open, so they must be pre-computed here.
 
-Same figures as the workbook's `pipeline` sheet, same generator: every count
-comes from `scripts/stats.py` reading the live CSVs. The sheet renders that
-generator's `markdown()`, this step shapes the same three stat dicts into
-JSON — one computation, two deliverables, so the dashboard and the workbook
-can never disagree.
+This step is where the pipeline's counts are computed — once. Reading them off
+the live CSVs (via `scripts/stats.py`) takes ~2s, so the three stat dicts are
+stored here verbatim and the workbook's `pipeline` sheet renders `markdown()`
+over this file instead of recomputing them. One computation, two deliverables:
+the dashboard and the sheet cannot disagree, because they are the same dict.
+
+That makes this step a dependency of `preview-xlsx`, and it runs before it.
 
 This is a step of the preview pipeline because `data/preview/` is rebuilt by
 `src.preview.run_preview_pipeline` and nowhere else. Emitting the JSON from a

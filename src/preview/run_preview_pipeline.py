@@ -17,10 +17,11 @@ STEPS = [
     Step("results",      "src.preview.build_results"),
     # The measurements those scores were computed from, same repos, same order.
     Step("data",         "src.preview.build_data"),
+    # Every pipeline count, computed once off the live CSVs. Feeds the
+    # dashboard directly and the workbook's pipeline sheet below.
+    Step("pipeline-json", "src.preview.build_pipeline_json"),
     # repos.csv + methodology + pipeline stats as one styled, filterable workbook.
     Step("preview-xlsx", "src.preview.build_preview_workbook"),
-    # The same pipeline stats as JSON, for the dashboard.
-    Step("pipeline-json", "src.preview.build_pipeline_json"),
 ]
 
 

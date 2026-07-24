@@ -17,9 +17,10 @@ config.
 
 Sheet 3, 'pipeline', renders every pipeline count/funnel/coverage table
 as stacked blocks — each under its section heading, with the same styled
-header row. The tables come straight from the generator
-(`scripts/stats.py`, its markdown renderer), computed from the live CSVs at
-build time: this sheet IS the single home of the pipeline's numbers.
+header row. The numbers come from `data/preview/pipeline.json`, which the
+preceding `pipeline-json` step computes off the live CSVs; this sheet renders
+`scripts/stats.py`'s markdown renderer over that stored payload. Sheet and
+dashboard therefore show one set of counts, not two runs of one generator.
 
 The repos sheet gets:
     - a styled header row (bold white text on a dark-blue fill) so it reads
@@ -44,6 +45,7 @@ Usage:
 """
 
 import csv
+import json
 import math
 from pathlib import Path
 
@@ -56,6 +58,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 from rich.console import Console
 
+from scripts.stats import markdown
 from src.common.params import (
     VALUE_SCORE_CENTRALITY_WEIGHT,
     VALUE_SCORE_CRIT_WEIGHT,
@@ -68,7 +71,7 @@ console = Console()
 ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = ROOT / "data"
 REPOS_CSV = DATA_DIR / "preview" / "repos.csv"
-STATS_SCRIPT = ROOT / "scripts" / "stats.py"
+PIPELINE_JSON = DATA_DIR / "preview" / "pipeline.json"
 OUTPUT_FILE = DATA_DIR / "preview" / "preview.xlsx"
 
 SHEETS = [("repos", REPOS_CSV)]
@@ -318,16 +321,24 @@ def _is_md_separator(line: str) -> bool:
 
 
 def _stats_markdown() -> str:
-    """The stats tables as markdown, straight from the generator.
+    """The stats tables as markdown, rendered from `pipeline.json`.
 
-    `scripts/stats.py` computes every count from the live CSVs; its
-    `markdown()` renderer is the one source of truth for the numbers on
-    this sheet (the preview pipeline sheet no longer exists)."""
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("_stats_gen", STATS_SCRIPT)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod.markdown(mod.value_stats(), mod.risk_stats(), mod.eligibility_stats())
+    The preceding `pipeline-json` step computes the three stat dicts once —
+    reading every count off the live CSVs takes ~2s — and stores them verbatim
+    in `data/preview/pipeline.json`. This sheet renders `markdown()` over that
+    same payload rather than recomputing it, so the sheet and the dashboard
+    cannot show different numbers: they are the same dict, not two runs of the
+    same generator. A JSON round-trip is lossless for the renderer.
+    """
+    if not PIPELINE_JSON.exists():
+        raise SystemExit(
+            f"{PIPELINE_JSON.relative_to(ROOT)} is missing — it is built by the "
+            "`pipeline-json` step, which runs before this one. Run the preview "
+            "pipeline (`uv run python -m src.preview.run_preview_pipeline`) "
+            "rather than this builder alone."
+        )
+    payload = json.loads(PIPELINE_JSON.read_text())
+    return markdown(payload["value"], payload["risk"], payload["eligibility"])
 
 
 THIN = Side(style="thin", color="000000")
@@ -690,7 +701,7 @@ def build() -> None:
 
     ws = wb.create_sheet("pipeline", SHEET_ORDER.index("pipeline"))
     n = _write_pipeline_sheet(ws, _stats_markdown())
-    console.print(f"  [cyan]pipeline[/cyan]: {n} tables ← scripts/stats.py (live CSVs)")
+    console.print(f"  [cyan]pipeline[/cyan]: {n} tables ← pipeline.json")
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     wb.save(OUTPUT_FILE)
